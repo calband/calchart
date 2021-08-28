@@ -146,63 +146,54 @@ CheckInconsistancy(SYMBOL_TYPE symbol, uint8_t cont_index,
 }
 
 // Constructor for shows 3.3 and ealier.
-Sheet::Sheet(size_t numPoints, std::istream& stream, ParseErrorHandlers const* correction)
+// intentionally a reference to Reader.
+Sheet::Sheet(Version_3_3_and_earlier, size_t numPoints, Reader& reader, ParseErrorHandlers const* correction)
     : mAnimationContinuity(MAX_NUM_SYMBOLS)
     , mPoints(numPoints)
 {
     // Read in sheet name
     // <INGL_NAME><size><string + 1>
-    std::vector<uint8_t> data = ReadCheckIDandFillData(stream, INGL_NAME);
+    std::vector<uint8_t> data = reader.ReadCheckIDandFillData(INGL_NAME);
     mName = (const char*)&data[0];
 
     // read in the duration:
     // <INGL_DURA><4><duration>
-    auto chunk = ReadCheckIDandSize(stream, INGL_DURA);
+    auto chunk = reader.ReadCheckIDandSize(INGL_DURA);
     mBeats = chunk;
 
     // Point positions
     // <INGL_DURA><size><data>
-    data = ReadCheckIDandFillData(stream, INGL_POS);
+    data = reader.ReadCheckIDandFillData(INGL_POS);
     if (data.size() != size_t(mPoints.size() * 4)) {
         throw CC_FileException("bad POS chunk");
     }
     {
-        uint8_t* d = &data[0];
+        auto reader = CalChart::Reader({data.data(), data.size()});
         for (unsigned i = 0; i < mPoints.size(); ++i) {
-            Coord c;
-            c.x = get_big_word(d);
-            d += 2;
-            c.y = get_big_word(d);
-            d += 2;
+            auto c = Coord(reader.Get<uint16_t>(), reader.Get<uint16_t>());
             for (unsigned j = 0; j <= Point::kNumRefPoints; j++) {
                 mPoints[i].SetPos(c, j);
             }
         }
     }
 
-    uint32_t name = ReadLong(stream);
+    uint32_t name = reader.Get<uint32_t>();
     // read all the reference points
     while (INGL_REFP == name) {
-        std::vector<uint8_t> data = FillData(stream);
-        if (data.size() != mPoints.size() * 4 + 2) {
+        auto size = reader.Get<uint32_t>();
+        if (size != mPoints.size() * 4 + 2) {
             throw CC_FileException("Bad REFP chunk");
         }
-        uint8_t* d = &data[0];
-        unsigned ref = get_big_word(d);
-        d += 2;
+        auto ref = reader.Get<uint16_t>();
         for (unsigned i = 0; i < mPoints.size(); i++) {
-            Coord c;
-            c.x = get_big_word(d);
-            d += 2;
-            c.y = get_big_word(d);
-            d += 2;
+            auto c = Coord(reader.Get<uint16_t>(), reader.Get<uint16_t>());
             mPoints[i].SetPos(c, ref);
         }
-        name = ReadLong(stream);
+        name = reader.Get<uint32_t>();
     }
     // Point symbols
     while (INGL_SYMB == name) {
-        std::vector<uint8_t> data = FillData(stream);
+        std::vector<uint8_t> data = reader.GetVector<uint8_t>();
         if (data.size() != mPoints.size()) {
             throw CC_FileException("Bad SYMB chunk");
         }
@@ -210,7 +201,7 @@ Sheet::Sheet(size_t numPoints, std::istream& stream, ParseErrorHandlers const* c
         for (unsigned i = 0; i < mPoints.size(); i++) {
             SetSymbol(i, (SYMBOL_TYPE)(*(d++)));
         }
-        name = ReadLong(stream);
+        name = reader.Get<uint32_t>();
     }
     std::map<SYMBOL_TYPE, uint8_t> continity_for_symbol;
     std::map<uint8_t, SYMBOL_TYPE> symbol_for_continuity;
@@ -218,7 +209,7 @@ Sheet::Sheet(size_t numPoints, std::istream& stream, ParseErrorHandlers const* c
     // Point continuity types
     while (INGL_TYPE == name) {
         has_type = true;
-        std::vector<uint8_t> data = FillData(stream);
+        std::vector<uint8_t> data = reader.GetVector<uint8_t>();
         if (data.size() != mPoints.size()) {
             throw CC_FileException("Bad TYPE chunk");
         }
@@ -227,7 +218,7 @@ Sheet::Sheet(size_t numPoints, std::istream& stream, ParseErrorHandlers const* c
             CheckInconsistancy(GetSymbol(i), *(d++), continity_for_symbol,
                 symbol_for_continuity, mName, i);
         }
-        name = ReadLong(stream);
+        name = reader.Get<uint32_t>();
     }
     // because older calchart files may omit the continuity index, need to check
     // if it isn't used
@@ -240,7 +231,7 @@ Sheet::Sheet(size_t numPoints, std::istream& stream, ParseErrorHandlers const* c
     }
     // Point labels (left or right)
     while (INGL_LABL == name) {
-        std::vector<uint8_t> data = FillData(stream);
+        std::vector<uint8_t> data = reader.GetVector<uint8_t>();
         if (data.size() != mPoints.size()) {
             throw CC_FileException("Bad SYMB chunk");
         }
@@ -250,11 +241,11 @@ Sheet::Sheet(size_t numPoints, std::istream& stream, ParseErrorHandlers const* c
                 mPoints.at(i).Flip();
             }
         }
-        name = ReadLong(stream);
+        name = reader.Get<uint32_t>();
     }
     // Continuity text
     while (INGL_CONT == name) {
-        std::vector<uint8_t> data = FillData(stream);
+        std::vector<uint8_t> data = reader.GetVector<uint8_t>();
         if (data.size() < 3) // one byte num + two nils minimum
         {
             throw CC_FileException("Bad cont chunk");
@@ -293,130 +284,115 @@ Sheet::Sheet(size_t numPoints, std::istream& stream, ParseErrorHandlers const* c
         std::string textstr(text);
         mAnimationContinuity.at(symbol_index) = Continuity{ textstr, correction };
 
-        name = ReadLong(stream);
+        name = reader.Get<uint32_t>();
     }
 }
 // -=-=-=-=-=- LEGACY CODE</end> -=-=-=-=-=-
 
-Sheet::Sheet(size_t numPoints, uint8_t const* ptr, size_t size, ParseErrorHandlers const* correction)
+Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correction)
     : mAnimationContinuity(MAX_NUM_SYMBOLS)
     , mPoints(numPoints)
 {
     // construct the parser handlers
-    auto parse_INGL_NAME = [](Sheet* sheet, uint8_t const* ptr, size_t size) {
-        auto str = (char const*)ptr;
-        if (size != (strlen(str) + 1)) {
+    auto parse_INGL_NAME = [](Sheet* sheet, Reader reader) {
+        auto str = reader.Get<std::string>();
+        if (reader.size() != 0) {
             throw CC_FileException("Description the wrong size", INGL_NAME);
         }
         sheet->mName = str;
     };
-    auto parse_INGL_DURA = [](Sheet* sheet, uint8_t const* ptr, size_t size) {
-        if (4 != size) {
+    auto parse_INGL_DURA = [](Sheet* sheet, Reader reader) {
+        if (reader.size() != 4) {
             throw CC_FileException("Incorrect size", INGL_DURA);
         }
-        sheet->mBeats = get_big_long(ptr);
+        sheet->mBeats = reader.Get<uint32_t>();
     };
-    auto parse_INGL_PNTS = [](Sheet* sheet, uint8_t const* ptr, size_t size) {
+    auto parse_INGL_PNTS = [](Sheet* sheet, Reader reader) {
         for (auto i = 0u; i < sheet->mPoints.size(); ++i) {
-            auto this_size = *ptr;
-            if (this_size > size) {
+            auto this_size = reader.Get<uint8_t>();
+            if (this_size > reader.size()) {
                 throw CC_FileException("Incorrect size", INGL_PNTS);
             }
-            sheet->mPoints[i] = Point({ ptr + 1, ptr + 1 + this_size });
-            ptr += this_size + 1;
-            size -= this_size + 1;
+            sheet->mPoints[i] = Point(reader.first(this_size));
+            reader = reader.subspan(this_size);
         }
-        if (size != 0) {
+        if (reader.size() != 0) {
             throw CC_FileException("Incorrect size", INGL_PNTS);
         }
     };
-    auto parse_INGL_ECNT = [correction](Sheet* sheet, uint8_t const* ptr, size_t size) {
-        if (size < 2) // one byte num + 1 nil minimum
+    auto parse_INGL_ECNT = [correction](Sheet* sheet, Reader reader) {
+        if (reader.size() < 2) // one byte num + 1 nil minimum
         {
             throw CC_FileException("Bad cont chunk", INGL_ECNT);
         }
-        auto d = (char const*)ptr;
-        if (d[size - 1] != '\0') {
-            throw CC_FileException("Cont chunk not NULL terminated", INGL_ECNT);
-        }
-        auto text = d + 1;
-        size_t num = strlen(text);
-        if (size < num + 2) // check for room for text string
-        {
-            throw CC_FileException("Bad cont chunk", INGL_ECNT);
-        }
-        SYMBOL_TYPE symbol_index = static_cast<SYMBOL_TYPE>(*d);
+        SYMBOL_TYPE symbol_index = static_cast<SYMBOL_TYPE>(reader.Get<uint8_t>());
         if (symbol_index >= MAX_NUM_SYMBOLS) {
             throw CC_FileException("No viable symbol for name", INGL_ECNT);
         }
-        std::string textstr(text);
-        sheet->mAnimationContinuity.at(symbol_index) = Continuity{ textstr, correction };
+        auto text = reader.Get<std::string>();
+        sheet->mAnimationContinuity.at(symbol_index) = Continuity{ text, correction };
     };
-    auto parse_INGL_CONT = [parse_INGL_ECNT](Sheet* sheet, uint8_t const* ptr, size_t size) {
-        const std::map<uint32_t, std::function<void(Sheet*, uint8_t const*, size_t)>>
+    auto parse_INGL_CONT = [parse_INGL_ECNT](Sheet* sheet, Reader reader) {
+        const std::map<uint32_t, std::function<void(Sheet*, Reader)>>
             parser = {
                 { INGL_ECNT, parse_INGL_ECNT },
             };
 
-        auto table = Parser::ParseOutLabels(ptr, ptr + size);
+        auto table = reader.ParseOutLabels();
         for (auto& i : table) {
             auto the_parser = parser.find(std::get<0>(i));
             if (the_parser != parser.end()) {
-                the_parser->second(sheet, std::get<1>(i), std::get<2>(i));
+                the_parser->second(sheet, std::get<1>(i));
             }
         }
     };
-    auto parse_INGL_EVCT = [](Sheet* sheet, uint8_t const* ptr, size_t size) {
-        auto begin = ptr;
-        auto end = ptr + size;
-        if (std::distance(begin, end) < 1) // one byte for symbol
+    auto parse_INGL_EVCT = [](Sheet* sheet, Reader reader) {
+        if (reader.size() < 1) // one byte for symbol
         {
             throw CC_FileException("Bad cont chunk", INGL_EVCT);
         }
-        SYMBOL_TYPE symbol_index = static_cast<SYMBOL_TYPE>(*begin++);
+        SYMBOL_TYPE symbol_index = static_cast<SYMBOL_TYPE>(reader.Get<uint8_t>());
         if (symbol_index >= MAX_NUM_SYMBOLS) {
             throw CC_FileException("No viable symbol for name", INGL_EVCT);
         }
-        sheet->mAnimationContinuity.at(symbol_index) = Continuity{ std::vector<uint8_t>{ begin, end } };
+        sheet->mAnimationContinuity.at(symbol_index) = Continuity{ reader };
     };
-    auto parse_INGL_VCNT = [parse_INGL_EVCT](Sheet* sheet, uint8_t const* ptr, size_t size) {
-        std::map<uint32_t, std::function<void(Sheet*, uint8_t const*, size_t)>> const
+    auto parse_INGL_VCNT = [parse_INGL_EVCT](Sheet* sheet, Reader reader) {
+        std::map<uint32_t, std::function<void(Sheet*, Reader)>> const
             parser
             = {
                   { INGL_EVCT, parse_INGL_EVCT },
               };
 
-        auto table = Parser::ParseOutLabels(ptr, ptr + size);
+        auto table = reader.ParseOutLabels();
         for (auto& i : table) {
             auto the_parser = parser.find(std::get<0>(i));
             if (the_parser != parser.end()) {
-                the_parser->second(sheet, std::get<1>(i), std::get<2>(i));
+                the_parser->second(sheet, std::get<1>(i));
             }
         }
     };
-    auto parse_INGL_PCNT = [](Sheet* sheet, uint8_t const* ptr, size_t size) {
-        auto print_name = (char const*)ptr;
-        auto print_cont = print_name + strlen(print_name) + 1;
-        if ((strlen(print_name) + 1 + strlen(print_cont) + 1) != size) {
+    auto parse_INGL_PCNT = [](Sheet* sheet, Reader reader) {
+        auto print_name = reader.Get<std::string>();
+        auto print_cont = reader.Get<std::string>();
+        if (reader.size() != 0) {
             throw CC_FileException("Bad Print cont chunk", INGL_PCNT);
         }
         sheet->mPrintableContinuity = PrintContinuity(print_name, print_cont);
     };
-    auto parse_INGL_BACK = [](Sheet* sheet, uint8_t const* ptr, size_t size) {
-        auto end_ptr = ptr + size;
-        auto num = get_big_long(ptr);
-        ptr += 4;
+    auto parse_INGL_BACK = [](Sheet* sheet, Reader reader) {
+        auto num = reader.Get<int32_t>();
         while (num--) {
-            auto [ image, new_ptr ] = CreateImageData(ptr);
+            auto [ image, new_reader ] = CreateImageData(reader);
             sheet->mBackgroundImages.push_back(image);
-            ptr = new_ptr;
+            reader = new_reader;
         }
-        if (ptr != end_ptr) {
+        if (reader.size() != 0) {
             throw CC_FileException("Bad Background chunk", INGL_BACK);
         }
     };
 
-    std::map<uint32_t, std::function<void(Sheet*, const uint8_t*, size_t)>> const
+    std::map<uint32_t, std::function<void(Sheet*, Reader)>> const
         parser
         = {
               { INGL_NAME, parse_INGL_NAME },
@@ -428,11 +404,11 @@ Sheet::Sheet(size_t numPoints, uint8_t const* ptr, size_t size, ParseErrorHandle
               { INGL_BACK, parse_INGL_BACK },
           };
 
-    auto table = Parser::ParseOutLabels(ptr, ptr + size);
+    auto table = reader.ParseOutLabels();
     for (auto& i : table) {
         auto the_parser = parser.find(std::get<0>(i));
         if (the_parser != parser.end()) {
-            the_parser->second(this, std::get<1>(i), std::get<2>(i));
+            the_parser->second(this, std::get<1>(i));
         }
     }
 }
@@ -766,12 +742,11 @@ void Sheet::sheet_round_trip_test()
         auto blank_sheet = Sheet(0);
         auto blank_sheet_data = blank_sheet.SerializeSheet();
         // need to pull out the sheet data
-        auto table = Parser::ParseOutLabels(blank_sheet_data.data(),
-            blank_sheet_data.data() + blank_sheet_data.size());
+        auto reader = Reader({blank_sheet_data.data(), blank_sheet_data.size()});
+        auto table = reader.ParseOutLabels();
         assert(table.size() == 1);
         assert(std::get<0>(table.front()) == INGL_SHET);
-        auto re_read_sheet = Sheet(0, std::get<1>(table.front()),
-            std::get<2>(table.front()));
+        auto re_read_sheet = Sheet(0, std::get<1>(table.front()));
         auto re_read_sheet_data = re_read_sheet.SerializeSheet();
         bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
         (void)is_equal;
@@ -781,12 +756,11 @@ void Sheet::sheet_round_trip_test()
         auto blank_sheet = Sheet(0, "new_sheet");
         auto blank_sheet_data = blank_sheet.SerializeSheet();
         // need to pull out the sheet data
-        auto table = Parser::ParseOutLabels(blank_sheet_data.data(),
-            blank_sheet_data.data() + blank_sheet_data.size());
+        auto reader = Reader({blank_sheet_data.data(), blank_sheet_data.size()});
+        auto table = reader.ParseOutLabels();
         assert(table.size() == 1);
         assert(std::get<0>(table.front()) == INGL_SHET);
-        auto re_read_sheet = Sheet(0, std::get<1>(table.front()),
-            std::get<2>(table.front()));
+        auto re_read_sheet = Sheet(0, std::get<1>(table.front()));
         auto re_read_sheet_data = re_read_sheet.SerializeSheet();
         bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
         (void)is_equal;
@@ -806,12 +780,11 @@ void Sheet::sheet_round_trip_test()
         };
         auto blank_sheet_data = blank_sheet.SerializeSheet();
         // need to pull out the sheet data
-        auto table = Parser::ParseOutLabels(blank_sheet_data.data(),
-            blank_sheet_data.data() + blank_sheet_data.size());
+        auto reader = Reader({blank_sheet_data.data(), blank_sheet_data.size()});
+        auto table = reader.ParseOutLabels();
         assert(table.size() == 1);
         assert(std::get<0>(table.front()) == INGL_SHET);
-        auto re_read_sheet = Sheet(1, std::get<1>(table.front()),
-            std::get<2>(table.front()));
+        auto re_read_sheet = Sheet(1, std::get<1>(table.front()));
         auto re_read_sheet_data = re_read_sheet.SerializeSheet();
         bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
         //		auto mismatch_at = std::mismatch(blank_sheet_data.begin(),

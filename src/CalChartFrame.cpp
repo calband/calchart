@@ -625,22 +625,15 @@ void CalChartFrame::OnCmdPasteSheet(wxCommandEvent&)
             if (numPoints != GetShow()->GetNumPoints()) {
                 wxMessageBox(wxString::Format("Cannot paste - number of points in pasted sheet (%i) does not match number of points in current show (%i)",
                     numPoints, GetShow()->GetNumPoints()));
+                wxTheClipboard->Close();
                 return;
             }
-            std::stringstream sheetStream;
-            sheetStream.write((char*)(clipboardObject.GetData()) + sizeof(numPoints),
-                clipboardObject.GetDataSize() - sizeof(numPoints));
+            auto reader = CalChart::Reader({ (uint8_t const*)(clipboardObject.GetData()) + sizeof(numPoints),
+                clipboardObject.GetDataSize() - sizeof(numPoints) });
+            reader.Get<uint32_t>();
+            reader.Get<uint32_t>();
 
-            CalChart::ReadLong(sheetStream);
-            CalChart::ReadLong(sheetStream);
-
-            sheetStream.unsetf(std::ios_base::skipws);
-            std::istream_iterator<uint8_t> theBegin(sheetStream);
-            std::istream_iterator<uint8_t> theEnd{};
-            std::vector<uint8_t> data(theBegin, theEnd);
-
-            CalChart::Show::Sheet_container_t sht(
-                1, CalChart::Sheet(numPoints, data.data(), data.size()));
+            CalChart::Show::Sheet_container_t sht(1, CalChart::Sheet(numPoints, reader));
             GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum());
         }
         wxTheClipboard->Close();

@@ -44,6 +44,7 @@
 namespace CalChart {
 
 class Continuity;
+class Reader;
 struct ParseErrorHandlers;
 
 // error occurred on parsing.  First arg is what went wrong, second is the values that need to be fixed.
@@ -51,8 +52,9 @@ class Sheet {
 public:
     Sheet(size_t numPoints);
     Sheet(size_t numPoints, std::string const& newname);
-    Sheet(size_t numPoints, std::istream& stream, ParseErrorHandlers const* correction = nullptr);
-    Sheet(size_t numPoints, uint8_t const* ptr, size_t size, ParseErrorHandlers const* correction = nullptr);
+    // intentionally a reference to Reader.
+    Sheet(Version_3_3_and_earlier, size_t numPoints, Reader&, ParseErrorHandlers const* correction = nullptr);
+    Sheet(size_t numPoints, Reader, ParseErrorHandlers const* correction = nullptr);
     ~Sheet();
 
 private:

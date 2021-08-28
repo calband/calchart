@@ -114,6 +114,7 @@ enum class ContType {
 };
 
 class ContToken;
+class Reader;
 struct AnimationCompile;
 
 // DrawableCont is a structure that describes the continuity for drawing
@@ -135,7 +136,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v);
 
     virtual std::vector<uint8_t> Serialize() const;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end);
+    virtual Reader Deserialize(Reader);
 
     uint32_t line, col;
 
@@ -170,7 +171,7 @@ public:
     virtual std::unique_ptr<ContPoint> clone() const;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     // we use the assumption that we've already checked that the types match before calling.
@@ -189,7 +190,7 @@ public:
     virtual std::unique_ptr<ContPoint> clone() const override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 };
 
 class ContStartPoint : public ContPoint {
@@ -203,7 +204,7 @@ public:
     virtual std::unique_ptr<ContPoint> clone() const override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     // we use the assumption that we've already checked that the types match before calling.
@@ -224,7 +225,7 @@ public:
     virtual std::unique_ptr<ContPoint> clone() const override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     // we use the assumption that we've already checked that the types match before calling.
@@ -246,7 +247,7 @@ public:
     virtual std::unique_ptr<ContPoint> clone() const override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -269,7 +270,7 @@ public:
     virtual std::unique_ptr<ContValue> clone() const = 0;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 };
 
 class ContValueUnset : public ContValue {
@@ -282,7 +283,7 @@ public:
     virtual std::unique_ptr<ContValue> clone() const override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 };
 
 class ContValueFloat : public ContValue {
@@ -297,7 +298,7 @@ public:
     virtual std::unique_ptr<ContValue> clone() const override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -321,7 +322,7 @@ public:
     virtual std::unique_ptr<ContValue> clone() const override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -347,7 +348,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -375,7 +376,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -403,7 +404,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -431,7 +432,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -459,7 +460,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -482,7 +483,7 @@ public:
     virtual std::unique_ptr<ContValue> clone() const override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     // we use the assumption that we've already checked that the types match before calling.
@@ -505,7 +506,7 @@ public:
     virtual std::unique_ptr<ContValue> clone() const override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -527,7 +528,7 @@ public:
     virtual std::unique_ptr<ContValue> clone() const override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 };
 
 class ContFuncDir : public ContValue {
@@ -544,7 +545,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -571,7 +572,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -599,7 +600,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -626,7 +627,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -654,7 +655,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -683,7 +684,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -710,7 +711,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -737,7 +738,7 @@ public:
     virtual bool IsValid() const { return true; }
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 };
 
 class ContProcUnset : public ContProcedure {
@@ -751,7 +752,7 @@ public:
     virtual bool IsValid() const override { return false; }
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 };
 
 class ContProcSet : public ContProcedure {
@@ -770,7 +771,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -795,7 +796,7 @@ public:
     virtual std::unique_ptr<ContProcedure> clone() const override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     // we use the assumption that we've already checked that the types match before calling.
@@ -821,7 +822,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -850,7 +851,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -879,7 +880,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -907,7 +908,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -936,7 +937,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -966,7 +967,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -1010,7 +1011,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -1038,7 +1039,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -1066,7 +1067,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -1094,7 +1095,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -1123,7 +1124,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -1151,7 +1152,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -1181,7 +1182,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -1219,7 +1220,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -1247,7 +1248,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -1275,7 +1276,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -1303,7 +1304,7 @@ public:
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
     virtual std::vector<uint8_t> Serialize() const override;
-    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+    virtual Reader Deserialize(Reader) override;
 
 protected:
     virtual bool is_equal(ContToken const& other) const override
@@ -1319,6 +1320,6 @@ private:
 };
 
 // this is the top level Deserialization function
-std::tuple<std::unique_ptr<ContProcedure>, uint8_t const*> DeserializeContProcedure(uint8_t const* begin, uint8_t const* end);
+std::tuple<std::unique_ptr<ContProcedure>, Reader> DeserializeContProcedure(Reader);
 
 }

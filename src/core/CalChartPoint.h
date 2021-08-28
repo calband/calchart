@@ -41,13 +41,15 @@
 
 namespace CalChart {
 
+class Reader;
+
 class Point {
 public:
     static constexpr auto kNumRefPoints = 3;
     Point();
     Point(Coord const& pos);
 
-    Point(std::vector<uint8_t> const& serialized_data);
+    Point(Reader);
     std::vector<uint8_t> Serialize() const;
 
     auto GetFlip() const { return mFlags.test(kPointLabelFlipped); }

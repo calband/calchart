@@ -292,13 +292,14 @@ void DoCounterMarch(const ContProcedure& proc, AnimationCompile& anim,
     }
 }
 
-std::tuple<std::unique_ptr<ContProcedure>, uint8_t const*> DeserializeContProcedure(uint8_t const* begin, uint8_t const* end)
+std::tuple<std::unique_ptr<ContProcedure>, Reader> DeserializeContProcedure(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContPoint is not correct");
     }
     auto v = std::unique_ptr<ContProcedure>();
-    switch (static_cast<SerializationToken>(*begin)) {
+    auto token = static_cast<SerializationToken>(reader.Peek<uint8_t>());
+    switch (token) {
     case SerializationToken::ContProcUnset:
         v = std::make_unique<ContProcUnset>();
         break;
@@ -362,17 +363,18 @@ std::tuple<std::unique_ptr<ContProcedure>, uint8_t const*> DeserializeContProced
     default:
         throw std::runtime_error("Error, did not find ContPoint");
     }
-    auto b = v->Deserialize(begin, end);
+    auto b = v->Deserialize(reader);
     return { std::move(v), b };
 }
 
-static std::tuple<std::unique_ptr<ContPoint>, uint8_t const*> DeserializeContPoint(uint8_t const* begin, uint8_t const* end)
+static std::tuple<std::unique_ptr<ContPoint>, Reader> DeserializeContPoint(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContPoint is not correct");
     }
     auto v = std::unique_ptr<ContPoint>();
-    switch (static_cast<SerializationToken>(*begin)) {
+    auto token = static_cast<SerializationToken>(reader.Peek<uint8_t>());
+    switch (token) {
     case SerializationToken::ContPoint:
         v = std::make_unique<ContPoint>();
         break;
@@ -391,17 +393,18 @@ static std::tuple<std::unique_ptr<ContPoint>, uint8_t const*> DeserializeContPoi
     default:
         throw std::runtime_error("Error, did not find ContPoint");
     }
-    auto b = v->Deserialize(begin, end);
-    return { std::move(v), b };
+    auto new_reader = v->Deserialize(reader);
+    return { std::move(v), new_reader };
 }
 
-static std::tuple<std::unique_ptr<ContValue>, uint8_t const*> DeserializeContValue(uint8_t const* begin, uint8_t const* end)
+static std::tuple<std::unique_ptr<ContValue>, Reader> DeserializeContValue(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContPoint is not correct");
     }
     auto v = std::unique_ptr<ContValue>();
-    switch (static_cast<SerializationToken>(*begin)) {
+    auto token = static_cast<SerializationToken>(reader.Peek<uint8_t>());
+    switch (token) {
     case SerializationToken::ContValueUnset:
         v = std::make_unique<ContValueUnset>();
         break;
@@ -456,17 +459,18 @@ static std::tuple<std::unique_ptr<ContValue>, uint8_t const*> DeserializeContVal
     default:
         throw std::runtime_error("Error, did not find ContValue");
     }
-    auto b = v->Deserialize(begin, end);
+    auto b = v->Deserialize(reader);
     return { std::move(v), b };
 }
 
-static std::tuple<std::unique_ptr<ContValueVar>, uint8_t const*> DeserializeContValueVar(uint8_t const* begin, uint8_t const* end)
+static std::tuple<std::unique_ptr<ContValueVar>, Reader> DeserializeContValueVar(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContPoint is not correct");
     }
     auto v = std::unique_ptr<ContValueVar>();
-    switch (static_cast<SerializationToken>(*begin)) {
+    auto token = static_cast<SerializationToken>(reader.Peek<uint8_t>());
+    switch (token) {
     case SerializationToken::ContValueVar:
         v = std::make_unique<ContValueVar>();
         break;
@@ -476,7 +480,7 @@ static std::tuple<std::unique_ptr<ContValueVar>, uint8_t const*> DeserializeCont
     default:
         throw std::runtime_error("Error, did not find ContValueVar");
     }
-    auto b = v->Deserialize(begin, end);
+    auto b = v->Deserialize(reader);
     return { std::move(v), b };
 }
 
@@ -507,20 +511,18 @@ std::vector<uint8_t> ContToken::Serialize() const
     return result;
 }
 
-uint8_t const* ContToken::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContToken::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 9) {
+    if (reader.size() < 9) {
         throw std::runtime_error("Error, size of ContToken is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContToken) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContToken) {
         throw std::runtime_error("Error, token is not SerializationToken::ContToken");
     }
-    ++begin;
-    line = Parser::get_big_long(begin);
-    begin += 4;
-    col = Parser::get_big_long(begin);
-    begin += 4;
-    return begin;
+    line = reader.Get<uint32_t>();
+    col = reader.Get<uint32_t>();
+    return reader;
 }
 
 // ContPoint
@@ -560,17 +562,16 @@ std::vector<uint8_t> ContPoint::Serialize() const
     return result;
 }
 
-uint8_t const* ContPoint::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContPoint::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContPoint is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContPoint) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContPoint) {
         throw std::runtime_error("Error, token is not SerializationToken::ContPoint");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    return begin;
+    return super::Deserialize(reader);
 }
 
 // ContPointUnset
@@ -605,17 +606,16 @@ std::vector<uint8_t> ContPointUnset::Serialize() const
     return result;
 }
 
-uint8_t const* ContPointUnset::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContPointUnset::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContPointUnset is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContPointUnset) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContPointUnset) {
         throw std::runtime_error("Error, token is not SerializationToken::ContPointUnset");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    return begin;
+    return super::Deserialize(reader);
 }
 
 // ContStartPoint
@@ -655,17 +655,16 @@ std::vector<uint8_t> ContStartPoint::Serialize() const
     return result;
 }
 
-uint8_t const* ContStartPoint::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContStartPoint::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContStartPoint is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContStartPoint) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContStartPoint) {
         throw std::runtime_error("Error, token is not SerializationToken::ContStartPoint");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    return begin;
+    return super::Deserialize(reader);
 }
 
 // ContNextPoint
@@ -705,17 +704,16 @@ std::vector<uint8_t> ContNextPoint::Serialize() const
     return result;
 }
 
-uint8_t const* ContNextPoint::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContNextPoint::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContNextPoint is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContNextPoint) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContNextPoint) {
         throw std::runtime_error("Error, token is not SerializationToken::ContNextPoint");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    return begin;
+    return super::Deserialize(reader);
 }
 
 // ContRefPoint
@@ -761,19 +759,18 @@ std::vector<uint8_t> ContRefPoint::Serialize() const
     return result;
 }
 
-uint8_t const* ContRefPoint::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContRefPoint::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 5) {
+    if (reader.size() < 5) {
         throw std::runtime_error("Error, size of ContRefPoint is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContRefPoint) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContRefPoint) {
         throw std::runtime_error("Error, token is not SerializationToken::ContRefPoint");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    refnum = Parser::get_big_long(begin);
-    begin += 4;
-    return begin;
+    reader = super::Deserialize(reader);
+    refnum = reader.Get<uint32_t>();
+    return reader;
 }
 
 // ContValue
@@ -792,17 +789,16 @@ std::vector<uint8_t> ContValue::Serialize() const
     return result;
 }
 
-uint8_t const* ContValue::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContValue::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContValue is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValue) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContValue) {
         throw std::runtime_error("Error, token is not SerializationToken::ContValue");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    return begin;
+    return super::Deserialize(reader);
 }
 
 // ContValueUnset
@@ -838,17 +834,16 @@ std::vector<uint8_t> ContValueUnset::Serialize() const
     return result;
 }
 
-uint8_t const* ContValueUnset::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContValueUnset::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContValueUnset is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueUnset) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContValueUnset) {
         throw std::runtime_error("Error, token is not SerializationToken::ContValueUnset");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    return begin;
+    return super::Deserialize(reader);
 }
 
 // ContValueFloat
@@ -889,19 +884,18 @@ std::vector<uint8_t> ContValueFloat::Serialize() const
     return result;
 }
 
-uint8_t const* ContValueFloat::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContValueFloat::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 5) {
+    if (reader.size() < 5) {
         throw std::runtime_error("Error, size of ContValueFloat is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueFloat) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContValueFloat) {
         throw std::runtime_error("Error, token is not SerializationToken::ContValueFloat");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    val = Parser::get_big_float(begin);
-    begin += 4;
-    return begin;
+    reader = super::Deserialize(reader);
+    val = reader.Get<float>();
+    return reader;
 }
 
 // ContValueDefined
@@ -977,19 +971,18 @@ std::vector<uint8_t> ContValueDefined::Serialize() const
     return result;
 }
 
-uint8_t const* ContValueDefined::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContValueDefined::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 2) {
+    if (reader.size() < 2) {
         throw std::runtime_error("Error, size of ContValueDefined is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueDefined) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContValueDefined) {
         throw std::runtime_error("Error, token is not SerializationToken::ContValueDefined");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    val = static_cast<ContDefinedValue>(*begin);
-    ++begin;
-    return begin;
+    reader = super::Deserialize(reader);
+    val = static_cast<ContDefinedValue>(reader.Get<uint8_t>());
+    return reader;
 }
 
 // ContValueAdd
@@ -1050,19 +1043,19 @@ std::vector<uint8_t> ContValueAdd::Serialize() const
     return result;
 }
 
-uint8_t const* ContValueAdd::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContValueAdd::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContValueAdd is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueAdd) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContValueAdd) {
         throw std::runtime_error("Error, token is not SerializationToken::ContValueAdd");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(val1, begin) = DeserializeContValue(begin, end);
-    std::tie(val2, begin) = DeserializeContValue(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(val1, reader) = DeserializeContValue(reader);
+    std::tie(val2, reader) = DeserializeContValue(reader);
+    return reader;
 }
 
 // ContValueSub
@@ -1123,19 +1116,19 @@ std::vector<uint8_t> ContValueSub::Serialize() const
     return result;
 }
 
-uint8_t const* ContValueSub::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContValueSub::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContValueSub is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueSub) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContValueSub) {
         throw std::runtime_error("Error, token is not SerializationToken::ContValueSub");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(val1, begin) = DeserializeContValue(begin, end);
-    std::tie(val2, begin) = DeserializeContValue(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(val1, reader) = DeserializeContValue(reader);
+    std::tie(val2, reader) = DeserializeContValue(reader);
+    return reader;
 }
 
 // ContValueMult
@@ -1196,19 +1189,19 @@ std::vector<uint8_t> ContValueMult::Serialize() const
     return result;
 }
 
-uint8_t const* ContValueMult::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContValueMult::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContValueMult is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueMult) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContValueMult) {
         throw std::runtime_error("Error, token is not SerializationToken::ContValueMult");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(val1, begin) = DeserializeContValue(begin, end);
-    std::tie(val2, begin) = DeserializeContValue(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(val1, reader) = DeserializeContValue(reader);
+    std::tie(val2, reader) = DeserializeContValue(reader);
+    return reader;
 }
 
 // ContValueDiv
@@ -1275,19 +1268,19 @@ std::vector<uint8_t> ContValueDiv::Serialize() const
     return result;
 }
 
-uint8_t const* ContValueDiv::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContValueDiv::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContValueDiv is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueDiv) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContValueDiv) {
         throw std::runtime_error("Error, token is not SerializationToken::ContValueDiv");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(val1, begin) = DeserializeContValue(begin, end);
-    std::tie(val2, begin) = DeserializeContValue(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(val1, reader) = DeserializeContValue(reader);
+    std::tie(val2, reader) = DeserializeContValue(reader);
+    return reader;
 }
 
 // ContValueNeg
@@ -1342,18 +1335,18 @@ std::vector<uint8_t> ContValueNeg::Serialize() const
     return result;
 }
 
-uint8_t const* ContValueNeg::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContValueNeg::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContValueNeg is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueNeg) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContValueNeg) {
         throw std::runtime_error("Error, token is not SerializationToken::ContValueNeg");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(val, begin) = DeserializeContValue(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(val, reader) = DeserializeContValue(reader);
+    return reader;
 }
 
 // ContValueREM
@@ -1393,17 +1386,16 @@ std::vector<uint8_t> ContValueREM::Serialize() const
     return result;
 }
 
-uint8_t const* ContValueREM::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContValueREM::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContValueREM is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueREM) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContValueREM) {
         throw std::runtime_error("Error, token is not SerializationToken::ContValueREM");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    return begin;
+    return super::Deserialize(reader);
 }
 
 // ContValueVar
@@ -1454,19 +1446,18 @@ std::vector<uint8_t> ContValueVar::Serialize() const
     return result;
 }
 
-uint8_t const* ContValueVar::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContValueVar::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContValueVar is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueVar) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContValueVar) {
         throw std::runtime_error("Error, token is not SerializationToken::ContValueVar");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    varnum = static_cast<uint8_t>(*begin);
-    ++begin;
-    return begin;
+    reader = super::Deserialize(reader);
+    varnum = reader.Get<uint8_t>();
+    return reader;
 }
 
 // ContValueVarUnset
@@ -1501,17 +1492,16 @@ std::vector<uint8_t> ContValueVarUnset::Serialize() const
     return result;
 }
 
-uint8_t const* ContValueVarUnset::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContValueVarUnset::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContValueVarUnset is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueVarUnset) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContValueVarUnset) {
         throw std::runtime_error("Error, token is not SerializationToken::ContValueVarUnset");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    return begin;
+    return super::Deserialize(reader);
 }
 
 // ContFuncDir
@@ -1573,18 +1563,18 @@ std::vector<uint8_t> ContFuncDir::Serialize() const
     return result;
 }
 
-uint8_t const* ContFuncDir::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContFuncDir::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContFuncDir is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContFuncDir) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContFuncDir) {
         throw std::runtime_error("Error, token is not SerializationToken::ContFuncDir");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    return reader;
 }
 
 // ContFuncDirFrom
@@ -1650,19 +1640,19 @@ std::vector<uint8_t> ContFuncDirFrom::Serialize() const
     return result;
 }
 
-uint8_t const* ContFuncDirFrom::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContFuncDirFrom::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContFuncDirFrom is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContFuncDirFrom) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContFuncDirFrom) {
         throw std::runtime_error("Error, token is not SerializationToken::ContFuncDirFrom");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(pnt_start, begin) = DeserializeContPoint(begin, end);
-    std::tie(pnt_end, begin) = DeserializeContPoint(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(pnt_start, reader) = DeserializeContPoint(reader);
+    std::tie(pnt_end, reader) = DeserializeContPoint(reader);
+    return reader;
 }
 
 // ContFuncDist
@@ -1721,18 +1711,18 @@ std::vector<uint8_t> ContFuncDist::Serialize() const
     return result;
 }
 
-uint8_t const* ContFuncDist::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContFuncDist::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContFuncDist is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContFuncDist) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContFuncDist) {
         throw std::runtime_error("Error, token is not SerializationToken::ContFuncDist");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    return reader;
 }
 
 // ContFuncDistFrom
@@ -1794,19 +1784,19 @@ std::vector<uint8_t> ContFuncDistFrom::Serialize() const
     return result;
 }
 
-uint8_t const* ContFuncDistFrom::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContFuncDistFrom::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContFuncDistFrom is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContFuncDistFrom) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContFuncDistFrom) {
         throw std::runtime_error("Error, token is not SerializationToken::ContFuncDistFrom");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(pnt_start, begin) = DeserializeContPoint(begin, end);
-    std::tie(pnt_end, begin) = DeserializeContPoint(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(pnt_start, reader) = DeserializeContPoint(reader);
+    std::tie(pnt_end, reader) = DeserializeContPoint(reader);
+    return reader;
 }
 
 // ContFuncEither
@@ -1887,20 +1877,20 @@ std::vector<uint8_t> ContFuncEither::Serialize() const
     return result;
 }
 
-uint8_t const* ContFuncEither::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContFuncEither::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContFuncEither is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContFuncEither) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContFuncEither) {
         throw std::runtime_error("Error, token is not SerializationToken::ContFuncEither");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(dir1, begin) = DeserializeContValue(begin, end);
-    std::tie(dir2, begin) = DeserializeContValue(begin, end);
-    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(dir1, reader) = DeserializeContValue(reader);
+    std::tie(dir2, reader) = DeserializeContValue(reader);
+    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    return reader;
 }
 
 // ContFuncOpp
@@ -1958,18 +1948,18 @@ std::vector<uint8_t> ContFuncOpp::Serialize() const
     return result;
 }
 
-uint8_t const* ContFuncOpp::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContFuncOpp::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContFuncOpp is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContFuncOpp) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContFuncOpp) {
         throw std::runtime_error("Error, token is not SerializationToken::ContFuncOpp");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(dir, begin) = DeserializeContValue(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(dir, reader) = DeserializeContValue(reader);
+    return reader;
 }
 
 // ContFuncStep
@@ -2035,20 +2025,20 @@ std::vector<uint8_t> ContFuncStep::Serialize() const
     return result;
 }
 
-uint8_t const* ContFuncStep::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContFuncStep::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContFuncStep is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContFuncStep) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContFuncStep) {
         throw std::runtime_error("Error, token is not SerializationToken::ContFuncStep");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(numbeats, begin) = DeserializeContValue(begin, end);
-    std::tie(blksize, begin) = DeserializeContValue(begin, end);
-    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(numbeats, reader) = DeserializeContValue(reader);
+    std::tie(blksize, reader) = DeserializeContValue(reader);
+    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    return reader;
 }
 
 // ContProcedure
@@ -2067,17 +2057,16 @@ std::vector<uint8_t> ContProcedure::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcedure::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcedure::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcedure is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcedure) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcedure) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcedure");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    return begin;
+    return super::Deserialize(reader);
 }
 
 // ContProcUnset
@@ -2113,17 +2102,16 @@ std::vector<uint8_t> ContProcUnset::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcUnset::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcUnset::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcUnset is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcUnset) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcUnset) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcUnset");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    return begin;
+    return super::Deserialize(reader);
 }
 
 // ContProcSet
@@ -2210,19 +2198,19 @@ std::vector<uint8_t> ContProcSet::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcSet::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcSet::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcSet is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcSet) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcSet) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcSet");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(var, begin) = DeserializeContValueVar(begin, end);
-    std::tie(val, begin) = DeserializeContValue(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(var, reader) = DeserializeContValueVar(reader);
+    std::tie(val, reader) = DeserializeContValue(reader);
+    return reader;
 }
 
 // ContProcBlam
@@ -2265,17 +2253,16 @@ std::vector<uint8_t> ContProcBlam::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcBlam::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcBlam::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcBlam is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcBlam) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcBlam) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcBlam");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    return begin;
+    return super::Deserialize(reader);
 }
 
 // ContProcCM
@@ -2352,23 +2339,23 @@ std::vector<uint8_t> ContProcCM::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcCM::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcCM::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcCM is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcCM) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcCM) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcCM");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(pnt1, begin) = DeserializeContPoint(begin, end);
-    std::tie(pnt2, begin) = DeserializeContPoint(begin, end);
-    std::tie(stps, begin) = DeserializeContValue(begin, end);
-    std::tie(dir1, begin) = DeserializeContValue(begin, end);
-    std::tie(dir2, begin) = DeserializeContValue(begin, end);
-    std::tie(numbeats, begin) = DeserializeContValue(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(pnt1, reader) = DeserializeContPoint(reader);
+    std::tie(pnt2, reader) = DeserializeContPoint(reader);
+    std::tie(stps, reader) = DeserializeContValue(reader);
+    std::tie(dir1, reader) = DeserializeContValue(reader);
+    std::tie(dir2, reader) = DeserializeContValue(reader);
+    std::tie(numbeats, reader) = DeserializeContValue(reader);
+    return reader;
 }
 
 // ContProcDMCM
@@ -2467,20 +2454,20 @@ std::vector<uint8_t> ContProcDMCM::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcDMCM::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcDMCM::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcDMCM is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcDMCM) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcDMCM) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcDMCM");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(pnt1, begin) = DeserializeContPoint(begin, end);
-    std::tie(pnt2, begin) = DeserializeContPoint(begin, end);
-    std::tie(numbeats, begin) = DeserializeContValue(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(pnt1, reader) = DeserializeContPoint(reader);
+    std::tie(pnt2, reader) = DeserializeContPoint(reader);
+    std::tie(numbeats, reader) = DeserializeContValue(reader);
+    return reader;
 }
 
 // ContProcDMHS
@@ -2569,18 +2556,18 @@ std::vector<uint8_t> ContProcDMHS::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcDMHS::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcDMHS::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcDMHS is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcDMHS) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcDMHS) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcDMHS");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    return reader;
 }
 
 // ContProcEven
@@ -2649,19 +2636,19 @@ std::vector<uint8_t> ContProcEven::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcEven::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcEven::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcEven is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcEven) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcEven) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcEven");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(stps, begin) = DeserializeContValue(begin, end);
-    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(stps, reader) = DeserializeContValue(reader);
+    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    return reader;
 }
 
 // ContProcEWNS
@@ -2735,18 +2722,18 @@ std::vector<uint8_t> ContProcEWNS::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcEWNS::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcEWNS::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcEWNS is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcEWNS) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcEWNS) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcEWNS");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    return reader;
 }
 
 // ContProcFountain
@@ -2916,28 +2903,28 @@ std::vector<uint8_t> ContProcFountain::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcFountain::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcFountain::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcFountain is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcFountain) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcFountain) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcFountain");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(dir1, begin) = DeserializeContValue(begin, end);
-    std::tie(dir2, begin) = DeserializeContValue(begin, end);
-    bool parsestepsize1 = static_cast<uint8_t>(*begin++);
+    reader = super::Deserialize(reader);
+    std::tie(dir1, reader) = DeserializeContValue(reader);
+    std::tie(dir2, reader) = DeserializeContValue(reader);
+    bool parsestepsize1 = reader.Get<uint8_t>();
     if (parsestepsize1) {
-        std::tie(stepsize1, begin) = DeserializeContValue(begin, end);
+        std::tie(stepsize1, reader) = DeserializeContValue(reader);
     }
-    bool parsestepsize2 = static_cast<uint8_t>(*begin++);
+    bool parsestepsize2 = reader.Get<uint8_t>();
     if (parsestepsize2) {
-        std::tie(stepsize2, begin) = DeserializeContValue(begin, end);
+        std::tie(stepsize2, reader) = DeserializeContValue(reader);
     }
-    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
-    return begin;
+    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    return reader;
 }
 
 // ContProcFM
@@ -3010,19 +2997,19 @@ std::vector<uint8_t> ContProcFM::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcFM::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcFM::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcFM is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcFM) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcFM) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcFM");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(stps, begin) = DeserializeContValue(begin, end);
-    std::tie(dir, begin) = DeserializeContValue(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(stps, reader) = DeserializeContValue(reader);
+    std::tie(dir, reader) = DeserializeContValue(reader);
+    return reader;
 }
 
 // ContProcFMTO
@@ -3098,18 +3085,18 @@ std::vector<uint8_t> ContProcFMTO::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcFMTO::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcFMTO::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcFMTO is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcFMTO) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcFMTO) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcFMTO");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    return reader;
 }
 
 // ContProcGrid
@@ -3177,18 +3164,18 @@ std::vector<uint8_t> ContProcGrid::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcGrid::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcGrid::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcGrid is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcGrid) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcGrid) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcGrid");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(grid, begin) = DeserializeContValue(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(grid, reader) = DeserializeContValue(reader);
+    return reader;
 }
 
 // ContProcHSCM
@@ -3272,20 +3259,20 @@ std::vector<uint8_t> ContProcHSCM::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcHSCM::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcHSCM::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcHSCM is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcHSCM) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcHSCM) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcHSCM");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(pnt1, begin) = DeserializeContPoint(begin, end);
-    std::tie(pnt2, begin) = DeserializeContPoint(begin, end);
-    std::tie(numbeats, begin) = DeserializeContValue(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(pnt1, reader) = DeserializeContPoint(reader);
+    std::tie(pnt2, reader) = DeserializeContPoint(reader);
+    std::tie(numbeats, reader) = DeserializeContValue(reader);
+    return reader;
 }
 
 // ContProcHSDM
@@ -3373,18 +3360,18 @@ std::vector<uint8_t> ContProcHSDM::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcHSDM::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcHSDM::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcHSDM is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcHSDM) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcHSDM) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcHSDM");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    return reader;
 }
 
 // ContProcMagic
@@ -3443,18 +3430,18 @@ std::vector<uint8_t> ContProcMagic::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcMagic::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcMagic::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcMagic is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcMagic) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcMagic) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcMagic");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    return reader;
 }
 
 // ContProcMarch
@@ -3558,24 +3545,24 @@ std::vector<uint8_t> ContProcMarch::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcMarch::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcMarch::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcMarch is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcMarch) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcMarch) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcMarch");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(stpsize, begin) = DeserializeContValue(begin, end);
-    std::tie(stps, begin) = DeserializeContValue(begin, end);
-    std::tie(dir, begin) = DeserializeContValue(begin, end);
-    bool parsefacedir = static_cast<uint8_t>(*begin++);
+    reader = super::Deserialize(reader);
+    std::tie(stpsize, reader) = DeserializeContValue(reader);
+    std::tie(stps, reader) = DeserializeContValue(reader);
+    std::tie(dir, reader) = DeserializeContValue(reader);
+    bool parsefacedir = reader.Get<uint8_t>();
     if (parsefacedir) {
-        std::tie(facedir, begin) = DeserializeContValue(begin, end);
+        std::tie(facedir, reader) = DeserializeContValue(reader);
     }
-    return begin;
+    return reader;
 }
 
 // ContProcMT
@@ -3641,19 +3628,19 @@ std::vector<uint8_t> ContProcMT::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcMT::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcMT::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcMT is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcMT) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcMT) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcMT");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(numbeats, begin) = DeserializeContValue(begin, end);
-    std::tie(dir, begin) = DeserializeContValue(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(numbeats, reader) = DeserializeContValue(reader);
+    std::tie(dir, reader) = DeserializeContValue(reader);
+    return reader;
 }
 
 // ContProcMTRM
@@ -3713,18 +3700,18 @@ std::vector<uint8_t> ContProcMTRM::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcMTRM::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcMTRM::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcMTRM is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcMTRM) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcMTRM) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcMTRM");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(dir, begin) = DeserializeContValue(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(dir, reader) = DeserializeContValue(reader);
+    return reader;
 }
 
 // ContProcNSEW
@@ -3798,18 +3785,18 @@ std::vector<uint8_t> ContProcNSEW::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcNSEW::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcNSEW::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcNSEW is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcNSEW) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcNSEW) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcNSEW");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    return reader;
 }
 
 // ContProcRotate
@@ -3894,20 +3881,20 @@ std::vector<uint8_t> ContProcRotate::Serialize() const
     return result;
 }
 
-uint8_t const* ContProcRotate::Deserialize(uint8_t const* begin, uint8_t const* end)
+Reader ContProcRotate::Deserialize(Reader reader)
 {
-    if (std::distance(begin, end) < 1) {
+    if (reader.size() < 1) {
         throw std::runtime_error("Error, size of ContProcRotate is not correct");
     }
-    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcRotate) {
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != SerializationToken::ContProcRotate) {
         throw std::runtime_error("Error, token is not SerializationToken::ContProcRotate");
     }
-    ++begin;
-    begin = super::Deserialize(begin, end);
-    std::tie(ang, begin) = DeserializeContValue(begin, end);
-    std::tie(stps, begin) = DeserializeContValue(begin, end);
-    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
-    return begin;
+    reader = super::Deserialize(reader);
+    std::tie(ang, reader) = DeserializeContValue(reader);
+    std::tie(stps, reader) = DeserializeContValue(reader);
+    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    return reader;
 }
 
 }

@@ -25,6 +25,8 @@
 
 namespace CalChart {
 
+class Reader;
+
 struct ImageData {
     int left, top;
     int scaled_width, scaled_height;
@@ -33,7 +35,7 @@ struct ImageData {
     std::vector<unsigned char> alpha;
 };
 
-std::pair<ImageData, uint8_t const*> CreateImageData(uint8_t const* d);
+std::pair<ImageData, Reader> CreateImageData(Reader);
 std::vector<uint8_t> Serialize(ImageData const&);
 
 }

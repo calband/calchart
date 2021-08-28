@@ -22,6 +22,7 @@
 
 #include "CalChartShowMode.h"
 #include "CalChartFileFormat.h"
+#include "ccvers.h"
 
 #include <algorithm>
 #include <cassert>
@@ -133,28 +134,23 @@ ShowMode ShowMode::CreateShowMode(CalChart::Coord size, CalChart::Coord offset, 
     };
 }
 
-ShowMode ShowMode::CreateShowMode(std::vector<uint8_t> const& data)
+ShowMode ShowMode::CreateShowMode(CalChart::Reader reader)
 {
-    auto begin = data.data();
-    auto end = data.data() + data.size();
-
     ShowModeInfo_t values;
     for (auto& i : values) {
-        if (std::distance(begin, end) < 4) {
+        if (reader.size() < 4) {
             throw std::runtime_error("Error, size of ShowMode is not correct");
         }
-        i = Parser::get_big_long(begin);
-        begin += 4;
+        i = reader.Get<uint32_t>();
     }
     YardLinesInfo_t yardlines;
     for (auto& i : yardlines) {
-        if (std::distance(begin, end) < 1) {
+        if (reader.size() < 1) {
             throw std::runtime_error("Error, yardtext does not have enough for a null terminator");
         }
-        i = (char const*)begin;
-        begin += i.size() + 1; // 1 is for the null terminator
+        i = reader.Get<std::string>();
     }
-    if (std::distance(begin, end) != 0) {
+    if (reader.size() != 0) {
         throw std::runtime_error("Error, size of ShowMode is not correct");
     }
     return ShowMode::CreateShowMode(values, yardlines);
@@ -197,7 +193,7 @@ void ShowMode_UnitTests()
 {
     auto uut1 = ShowMode::GetDefaultShowMode();
     auto data = uut1.Serialize();
-    auto uut2 = ShowMode::CreateShowMode(data);
+    auto uut2 = ShowMode::CreateShowMode(CalChart::Reader({data.data(), data.size()}));
     assert(uut1 == uut2);
 }
 

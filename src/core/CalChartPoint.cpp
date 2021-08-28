@@ -48,36 +48,25 @@ Point::Point(Coord const& p)
 // reference point ) , BigEndianInt16( x ) , BigEndianInt16( y ) }* ;
 // POINT_SYMBOL_DATA  = BigEndianInt8( which symbol type ) ;
 // POINT_LABEL_FLIP_DATA = BigEndianInt8( label flipped ) ;
-Point::Point(std::vector<uint8_t> const& serialized_data)
+Point::Point(Reader reader)
     : mSym(SYMBOL_PLAIN)
 {
-    const uint8_t* d = &serialized_data[0];
-    {
-        mPos.x = get_big_word(d);
-        d += 2;
-        mPos.y = get_big_word(d);
-        d += 2;
-    }
+    mPos.x = reader.Get<uint16_t>();
+    mPos.y = reader.Get<uint16_t>();
     // set all the reference points
     for (unsigned j = 0; j < Point::kNumRefPoints; j++) {
         mRef[j] = mPos;
     }
 
-    uint8_t num_ref = *d;
-    ++d;
+    auto num_ref = reader.Get<uint8_t>();
     for (auto i = 0; i < num_ref; ++i) {
-        uint8_t ref = *d;
-        ++d;
-        mRef[ref - 1].x = get_big_word(d);
-        d += 2;
-        mRef[ref - 1].y = get_big_word(d);
-        d += 2;
+        auto ref = reader.Get<uint8_t>();
+        mRef[ref - 1].x = reader.Get<uint16_t>();
+        mRef[ref - 1].y = reader.Get<uint16_t>();
     }
-    mSym = static_cast<SYMBOL_TYPE>(*d);
-    ++d;
-    mFlags.set(kPointLabelFlipped, (*d) > 0);
-    ++d;
-    if (static_cast<size_t>(std::distance(&serialized_data[0], d)) != serialized_data.size()) {
+    mSym = static_cast<SYMBOL_TYPE>(reader.Get<uint8_t>());
+    mFlags.set(kPointLabelFlipped, (reader.Get<uint8_t>()) > 0);
+    if (reader.size() != 0) {
         throw CC_FileException("bad POS chunk");
     }
 }
