@@ -391,16 +391,7 @@ public:
     }
 
     template <typename T>
-    std::vector<T> GetVector()
-    {
-        if (size() < 4) {
-            throw std::runtime_error(std::string("not enough data for vector size.  Need 4, currently have ") + std::to_string(size()));
-        }
-        auto size = Get<uint32_t>();
-        auto result = std::vector<T>(data.first, data.first+size);
-        subspanImpl(size);
-        return result;
-    }
+    std::vector<T> GetVector();
 
     std::vector<std::tuple<uint32_t, Reader>> ParseOutLabels()
     {
@@ -545,6 +536,18 @@ inline std::string Reader::Get<std::string>()
         throw std::runtime_error(std::string("not enough data for string.  Need " + std::to_string(result.size() + 1) + ", currently have ") + std::to_string(size()));
     }
     subspanImpl(result.size()+1); // +1 for the null terminator
+    return result;
+}
+
+template <typename T>
+inline std::vector<T> Reader::GetVector()
+{
+    if (size() < 4) {
+        throw std::runtime_error(std::string("not enough data for vector size.  Need 4, currently have ") + std::to_string(size()));
+    }
+    auto size = Get<uint32_t>();
+    auto result = std::vector<T>(data.first, data.first+size);
+    subspanImpl(size);
     return result;
 }
 
