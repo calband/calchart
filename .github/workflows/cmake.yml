@@ -80,7 +80,13 @@ jobs:
 
     - name: Pack (Windows)
       if: matrix.config.os == 'windows-latest'
-      run: pushd ${{github.workspace}}/build && cpack
+      # it seems that the cmake command provided by chocolatey conflicts with cmake.
+      # explicitly running cpack from the cmake directory.
+      run: |
+        $cmdpath = split-path -parent (get-command cmake).Path
+        $cpack_cmd = Join-Path -Path $cmdpath -ChildPath cpack
+        pushd ${{github.workspace}}/build
+        & $cpack_cmd
 
     - name: Strip (Linux)
       if: matrix.config.os == 'ubuntu-latest'
