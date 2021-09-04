@@ -13,3 +13,6 @@
 [submodule "submodules/Catch2"]
 	path = submodules/Catch2
 	url = https://github.com/catchorg/Catch2.git
+[submodule "submodules/githook-clang-format"]
+	path = submodules/githook-clang-format
+	url = https://github.com/andrewseidl/githook-clang-format.git
