@@ -151,14 +151,15 @@ int CustomListViewPanel::HeightToCell(int which) const
 
 void CustomListViewPanel::OnLeftDownMouseEvent(wxMouseEvent& event)
 {
-    m_firstPress = m_lastLocation = event.GetPosition();
-    //    printf("Mouse down @(%d, %d)\n", event.GetPosition().x, event.GetPosition().y);
+    m_firstPress = m_lastLocation = CalcUnscrolledPosition(event.GetPosition());
+    wxClientDC dc{ this };
+
     // which cell would this be?
-    auto which_cell = WhichCell(event.GetPosition());
+    auto which_cell = WhichCell(m_firstPress);
     m_selected = which_cell;
     m_dragging = true;
     if (which_cell < mCells.size()) {
-        auto mouse_click = event.GetPosition();
+        auto mouse_click = m_firstPress;
         mouse_click.y -= HeightToCell(which_cell);
         mCells.at(which_cell)->OnClick(mouse_click);
     }
@@ -167,9 +168,8 @@ void CustomListViewPanel::OnLeftDownMouseEvent(wxMouseEvent& event)
 
 void CustomListViewPanel::OnLeftDoubleClick(wxMouseEvent& event)
 {
-    //    printf("Mouse down @(%d, %d)\n", event.GetPosition().x, event.GetPosition().y);
     // which cell would this be?
-    auto which_cell = WhichCell(event.GetPosition());
+    auto which_cell = WhichCell(CalcUnscrolledPosition(event.GetPosition()));
     if (which_cell < mCells.size()) {
         OnEditEntry(which_cell);
     }
@@ -180,9 +180,8 @@ void CustomListViewPanel::OnLeftUpMouseEvent(wxMouseEvent& event)
 {
     auto starting_cell = WhichCell(m_firstPress);
     m_lastLocation = m_firstPress;
-    //    printf("Mouse up @(%d, %d)\n", event.GetPosition().x, event.GetPosition().y);
     // which cell would this be?
-    auto which_cell = WhichCell(event.GetPosition());
+    auto which_cell = WhichCell(CalcUnscrolledPosition(event.GetPosition()));
     if (starting_cell != which_cell) {
         // reorder.
         OnMoveEntry(starting_cell, which_cell);
@@ -196,7 +195,7 @@ void CustomListViewPanel::OnLeftUpMouseEvent(wxMouseEvent& event)
 void CustomListViewPanel::OnMouseMove(wxMouseEvent& event)
 {
     if (event.LeftIsDown() && event.GetPosition().y >= 0) {
-        m_lastLocation = event.GetPosition();
+        m_lastLocation = CalcUnscrolledPosition(event.GetPosition());
     }
     Refresh();
 }
