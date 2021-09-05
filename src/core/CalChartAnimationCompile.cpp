@@ -40,7 +40,7 @@ struct AnimationCompileState : public AnimationCompile {
     virtual Coord GetPointPosition() const override { return mWhichPos; }
     virtual Coord GetStartingPosition() const override { return mCurrentSheet->GetPosition(GetCurrentPoint()); }
     virtual Coord GetEndingPosition(ContToken const* token) const override;
-    virtual Coord GetReferencePointPosition(unsigned refnum) const override { return mCurrentSheet->GetPosition(GetCurrentPoint(), refnum + 1); }
+    virtual Coord GetReferencePointPosition(unsigned refnum) const override { return mCurrentSheet->GetPosition(GetCurrentPoint(), refnum); }
     virtual unsigned GetCurrentPoint() const override { return mWhichPoint; }
     virtual unsigned GetBeatsRemaining() const override { return mBeatsRem; }
 

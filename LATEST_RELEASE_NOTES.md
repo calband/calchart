@@ -2,10 +2,7 @@
 
 Bugs addressed in this release:
 
-* [#387](../../issues/387) Loading Image data doesn't work
-* [#386](../../issues/386) Better Cont composer dialog work.
-* [#379](../../issues/379) Extra v in version
-* [#125](../../issues/125) scale printing down if marchers exceed field size
+* [#399](../../issues/399) Wrong reference number used in animations
 
 Other changes:
 
