@@ -34,6 +34,7 @@
 
 #include "CalChartAnimationTypes.h"
 #include "CalChartCoord.h"
+#include "math_utils.h"
 #include <nlohmann/json.hpp>
 
 namespace CalChart {
@@ -77,11 +78,25 @@ public:
     virtual nlohmann::json toOnlineViewerJSON(Coord start) const = 0;
 
 protected:
+    friend bool operator==(AnimationCommand const& lhs, AnimationCommand const& rhs);
+    virtual bool is_equal(AnimationCommand const& other) const
+    {
+        return mNumBeats == other.mNumBeats
+            && mBeat == other.mBeat;
+    }
+
     unsigned mNumBeats;
     unsigned mBeat;
 };
 
+inline bool operator==(AnimationCommand const& lhs, AnimationCommand const& rhs)
+{
+    return (typeid(lhs) == typeid(rhs)) && lhs.is_equal(rhs);
+}
+
 class AnimationCommandMT : public AnimationCommand {
+    using super = AnimationCommand;
+
 public:
     AnimationCommandMT(unsigned beats, float direction);
     AnimationCommandMT(unsigned beats, AnimateDir direction);
@@ -95,11 +110,23 @@ public:
     nlohmann::json toOnlineViewerJSON(Coord start) const override;
 
 protected:
+    bool is_equal(AnimationCommand const& other) const override
+    {
+        auto ptr = dynamic_cast<AnimationCommandMT const*>(&other);
+        if (!ptr)
+            return false;
+        return super::is_equal(other)
+            && dir == ptr->dir
+            && IS_ZERO(realdir - ptr->realdir);
+    }
+
     AnimateDir dir;
     float realdir;
 };
 
 class AnimationCommandMove : public AnimationCommandMT {
+    using super = AnimationCommandMT;
+
 public:
     AnimationCommandMove(unsigned beats, Coord movement);
     AnimationCommandMove(unsigned beats, Coord movement, float direction);
@@ -121,10 +148,22 @@ public:
     nlohmann::json toOnlineViewerJSON(Coord start) const override;
 
 private:
+    bool is_equal(AnimationCommand const& other) const override
+    {
+        auto ptr = dynamic_cast<AnimationCommandMove const*>(&other);
+        if (!ptr)
+            return false;
+        return super::is_equal(other)
+            && mVector == ptr->mVector;
+    }
+
+private:
     Coord mVector;
 };
 
 class AnimationCommandRotate : public AnimationCommand {
+    using super = AnimationCommand;
+
 public:
     AnimationCommandRotate(unsigned beats, Coord cntr, float rad, float ang1,
         float ang2, bool backwards = false);
@@ -147,8 +186,22 @@ public:
     nlohmann::json toOnlineViewerJSON(Coord start) const override;
 
 private:
+    bool is_equal(AnimationCommand const& other) const override
+    {
+        auto ptr = dynamic_cast<AnimationCommandRotate const*>(&other);
+        if (!ptr)
+            return false;
+        return super::is_equal(other)
+            && mOrigin == ptr->mOrigin
+            && IS_ZERO(mR - ptr->mR)
+            && IS_ZERO(mAngStart - ptr->mAngStart)
+            && IS_ZERO(mAngEnd - ptr->mAngEnd)
+            && IS_ZERO(mFace - ptr->mFace);
+    }
+
     Coord mOrigin;
     float mR, mAngStart, mAngEnd;
     float mFace;
 };
+
 }
