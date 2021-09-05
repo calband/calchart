@@ -3,6 +3,7 @@
 Bugs addressed in this release:
 
 * [#399](../../issues/399) Wrong reference number used in animations
+* [#398](../../issues/398) touching the continuity composer doesn't work when it's really long and you scroll
 
 Other changes:
 
