@@ -92,4 +92,15 @@ struct DrawCommand {
     {
     }
 };
+
+inline bool operator==(DrawCommand const& lhs, DrawCommand const& rhs)
+{
+    return lhs.mType == rhs.mType
+        && lhs.x1 == rhs.x1
+        && lhs.y1 == rhs.y1
+        && lhs.x2 == rhs.x2
+        && lhs.y2 == rhs.y2
+        && lhs.yc == rhs.yc;
+}
+
 }
