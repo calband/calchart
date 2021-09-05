@@ -1,4 +1,4 @@
-## Release notes for 3.6.4
+## Release notes for 3.6.5
 
 Bugs addressed in this release:
 
