@@ -4,6 +4,8 @@ This guide is to help you get CalChart3 building.  This guide is written to help
 
 CalChart3 utilizes [CMake](https://cmake.org) to allow several different build platforms and environments.  This tutorial is helpful and may serve as a good reference if you get stuck: https://cgold.readthedocs.io/en/latest/first-step.html.
 
+It's highly recommended that you use clang-format to help keep the coding style consistent.  More information can be found [here](https://github.com/andrewseidl/githook-clang-format) for how to incorporate clang-format into your IDE.  If that's not possible, then please set up the clang-format git-hook as outlined.
+
 ## Setting up your dependencies and Packages -- estimated time: 10 minutes
 
 The CalChart3 code tries to be self contained, but it has several external dependencies.
@@ -15,7 +17,7 @@ Next, you will need to install a package manager to install `cmake`. I recommend
 First, go to https://brew.sh and follow the installation instructions.  Next, open the Terminal Applicaton and enter the following command:
 
 ```
-brew install cmake
+brew install cmake clang-format
 ```
 
 Note:
@@ -29,7 +31,7 @@ We recommend using [chocolatey](https://chocolatey.org) for the package manager 
 First, go to https://chocolatey.org/install and follow the installation instructions.  Once installed, open powershell.exe and install `cmake`, `git`, and `winbisonflex`:
 
 ```
-choco install cmake git winflexbison
+choco install cmake git winflexbison clang-format
 ```
 
 ### Linux Steps
@@ -37,7 +39,7 @@ choco install cmake git winflexbison
 We recommend using apt-get to install `git`, `cmake`, `bison`, `flex`, and the gtk:
 
 ```
-sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev git cmake bison flex
+sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev git cmake bison flex clang-format
 ```
 
 ## Getting the CalChart3 source code -- estimated time: 5 minutes
@@ -66,6 +68,13 @@ Submodule path 'submodules/wxWidgets/src/tiff': checked out '9f657ff8a7411c95ffe
 Submodule path 'submodules/wxWidgets/src/zlib': checked out '5888671274cde770edbe683b435f052de2b03681'
 ```
 
+## Setting up clang-format git-hook
+
+If you are not able to set up your IDE for clang-format, then set up a git-hook with the following command:
+
+```
+cp submodules/githook-clang-format/clang-format.hook .git/hooks/pre-commit       
+```
 
 ## Setting up your IDE -- estimated time: 10 minutes
 
