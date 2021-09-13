@@ -56,6 +56,15 @@ If you need to regenerate the help documentation, see the [README-docs.txt](READ
 
 
 # Release notes
+## Release notes for 3.6.6
+
+Bugs addressed in this release:
+
+* [#404](../../issues/404) Crash when sheet has zero beats.
+
+Other changes:
+
+
 ## Release notes for 3.6.5
 
 Bugs addressed in this release:
