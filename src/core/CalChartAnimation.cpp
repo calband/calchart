@@ -204,7 +204,7 @@ void Animation::GotoBeat(unsigned i)
 
 void Animation::GotoSheet(unsigned i)
 {
-    mCurrentSheetNumber = i;
+    mCurrentSheetNumber = mAnimSheetIndices.at(i);
     RefreshSheet();
 }
 
