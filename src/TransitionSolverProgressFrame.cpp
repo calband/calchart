@@ -24,6 +24,9 @@
 
 #include <atomic>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+
 #pragma mark -
 
 BEGIN_DECLARE_EVENT_TYPES()
@@ -255,3 +258,5 @@ void* TransitionSolverProgressFrame::TransitionSolverThread::Entry()
 
     return nullptr;
 }
+
+#pragma GCC diagnostic pop

@@ -193,7 +193,7 @@ void ShowMode_UnitTests()
 {
     auto uut1 = ShowMode::GetDefaultShowMode();
     auto data = uut1.Serialize();
-    auto uut2 = ShowMode::CreateShowMode(CalChart::Reader({data.data(), data.size()}));
+    auto uut2 = ShowMode::CreateShowMode(CalChart::Reader({ data.data(), data.size() }));
     assert(uut1 == uut2);
 }
 

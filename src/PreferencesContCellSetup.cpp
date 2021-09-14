@@ -21,6 +21,7 @@
 */
 
 #include "PreferencesContCellSetup.h"
+#include "CalChartContinuityToken.h"
 #include "ContinuityBrowserPanel.h"
 #include "PreferencesUtils.h"
 
@@ -50,7 +51,7 @@ IMPLEMENT_CLASS(ContCellSetup, PreferencePage)
 template <typename T>
 static auto do_cloning(T const& cont)
 {
-    auto copied_cont = std::vector<std::unique_ptr<CalChart::ContProcedure>>{};
+    auto copied_cont = std::vector<std::unique_ptr<CalChart::Cont::Procedure>>{};
     for (auto&& i : cont.GetParsedContinuity()) {
         copied_cont.emplace_back(i->clone());
     }
@@ -113,11 +114,11 @@ void ContCellSetup::CreateControls()
             });
         });
 
-        auto canvas = new ContinuityBrowserPanel(SYMBOL_PLAIN, mConfig, this);
+        auto canvas = new ContinuityBrowserPanel(CalChart::SYMBOL_PLAIN, mConfig, this);
         sizer->Add(canvas, 1, wxEXPAND);
         auto basic_cont = CalChart::Continuity{ "ewns np\nX = distfrom(sp r2)\nmt (24-X)w\nmarch gv dist(np) dir(np) w\nmtrm e" };
         auto clonedOut = do_cloning(basic_cont);
-        clonedOut.emplace_back(std::make_unique<CalChart::ContProcMT>(std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>()));
+        clonedOut.emplace_back(std::make_unique<CalChart::Cont::ProcMT>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()));
         canvas->DoSetContinuity(CalChart::Continuity{ std::move(clonedOut) });
     }));
 

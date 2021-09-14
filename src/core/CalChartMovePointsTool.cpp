@@ -23,8 +23,8 @@
 #include "CalChartMovePointsTool.h"
 
 #include "CalChartShapes.h"
+#include "CalChartUtils.h"
 #include "linmath.h"
-#include "math_utils.h"
 #include <cassert>
 
 namespace CalChart {
@@ -153,12 +153,13 @@ std::unique_ptr<MovePointsTool> MovePointsTool::Create(CalChart::MoveMode curr_m
     return std::make_unique<MovePointsTool_Normal>();
 }
 
-static std::map<int, CalChart::Coord> GetTransformedPoints(const Matrix& transmat, std::map<int, CalChart::Coord> const& select_list)
+template <typename T>
+static std::map<int, CalChart::Coord> GetTransformedPoints(const Matrix<T>& transmat, std::map<int, CalChart::Coord> const& select_list)
 {
     std::map<int, CalChart::Coord> result;
     for (auto i : select_list) {
         auto c = i.second;
-        Vector v(c.x, c.y, 0);
+        Vector<T> v(c.x, c.y, 0);
         v = transmat * v;
         v.Homogenize();
         c = CalChart::Coord(RoundToCoordUnits(v.GetX()), RoundToCoordUnits(v.GetY()));
@@ -286,7 +287,7 @@ std::map<int, CalChart::Coord> MovePointsTool_MoveRotate::TransformPoints(std::m
     } else {
         auto start = dynamic_cast<CalChart::Shape_1point const&>(*m_shape_list[0]).GetOrigin();
         auto r = -((CalChart::Shape_arc*)m_shape_list.back().get())->GetAngle();
-        auto m = TranslationMatrix(Vector(-start.x, -start.y, 0)) * ZRotationMatrix(r) * TranslationMatrix(Vector(start.x, start.y, 0));
+        auto m = TranslationMatrix(Vector<float>(-start.x, -start.y, 0)) * ZRotationMatrix(r) * TranslationMatrix(Vector<float>(start.x, start.y, 0));
         return GetTransformedPoints(m, select_list);
     }
 }
@@ -344,7 +345,7 @@ std::map<int, CalChart::Coord> MovePointsTool_MoveShear::TransformPoints(std::ma
             amount = -amount;
         }
         float ang = -v1.Direction() * M_PI / 180.0;
-        auto m = TranslationMatrix(Vector(-start.x, -start.y, 0)) * ZRotationMatrix(-ang) * YXShearMatrix(amount) * ZRotationMatrix(ang) * TranslationMatrix(Vector(start.x, start.y, 0));
+        auto m = TranslationMatrix(Vector<float>(-start.x, -start.y, 0)) * ZRotationMatrix(-ang) * YXShearMatrix(amount) * ZRotationMatrix(ang) * TranslationMatrix(Vector<float>(start.x, start.y, 0));
         return GetTransformedPoints(m, select_list);
     }
 }
@@ -386,7 +387,7 @@ std::map<int, CalChart::Coord> MovePointsTool_MoveReflect::TransformPoints(std::
     auto c1 = shape->GetOrigin();
     auto c2 = shape->GetPoint() - c1;
     float ang = -c2.Direction() * M_PI / 180.0;
-    auto m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) * ZRotationMatrix(-ang) * YReflectionMatrix() * ZRotationMatrix(ang) * TranslationMatrix(Vector(c1.x, c1.y, 0));
+    auto m = TranslationMatrix(Vector<float>(-c1.x, -c1.y, 0)) * ZRotationMatrix(-ang) * YReflectionMatrix<float>() * ZRotationMatrix(ang) * TranslationMatrix(Vector<float>(c1.x, c1.y, 0));
     return GetTransformedPoints(m, select_list);
 }
 
@@ -423,7 +424,7 @@ std::map<int, CalChart::Coord> MovePointsTool_MoveSize::TransformPoints(std::map
             } else {
                 sy = 1;
             }
-            auto m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) * ScaleMatrix(Vector(sx, sy, 0)) * TranslationMatrix(Vector(c1.x, c1.y, 0));
+            auto m = TranslationMatrix(Vector<float>(-c1.x, -c1.y, 0)) * ScaleMatrix(Vector<float>(sx, sy, 0)) * TranslationMatrix(Vector<float>(c1.x, c1.y, 0));
             return GetTransformedPoints(m, select_list);
         }
         return std::map<int, CalChart::Coord>{};
@@ -481,15 +482,15 @@ std::map<int, CalChart::Coord> MovePointsTool_MoveGenius::TransformPoints(std::m
         if (IS_ZERO(d)) {
             return std::map<int, CalChart::Coord>{};
         } else {
-            Matrix A = Matrix(Vector(e1.x, e2.x, 0, e3.x), Vector(e1.y, e2.y, 0, e3.y),
-                Vector(0, 0, 0, 0), Vector(1, 1, 0, 1));
-            Matrix Binv = Matrix(
-                Vector((float)s2.y - (float)s3.y, (float)s3.x - (float)s2.x, 0,
+            auto A = Matrix(Vector<float>(e1.x, e2.x, 0, e3.x), Vector<float>(e1.y, e2.y, 0, e3.y),
+                Vector<float>(0, 0, 0, 0), Vector<float>(1, 1, 0, 1));
+            auto Binv = Matrix(
+                Vector<float>((float)s2.y - (float)s3.y, (float)s3.x - (float)s2.x, 0,
                     (float)s2.x * (float)s3.y - (float)s3.x * (float)s2.y),
-                Vector((float)s3.y - (float)s1.y, (float)s1.x - (float)s3.x, 0,
+                Vector<float>((float)s3.y - (float)s1.y, (float)s1.x - (float)s3.x, 0,
                     (float)s3.x * (float)s1.y - (float)s1.x * (float)s3.y),
-                Vector(0, 0, 0, 0),
-                Vector((float)s1.y - (float)s2.y, (float)s2.x - (float)s1.x, 0,
+                Vector<float>(0, 0, 0, 0),
+                Vector<float>((float)s1.y - (float)s2.y, (float)s2.x - (float)s1.x, 0,
                     (float)s1.x * (float)s2.y - (float)s2.x * (float)s1.y));
             Binv /= d;
             Matrix m = Binv * A;

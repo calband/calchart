@@ -33,13 +33,13 @@ public:
     PointPicker(CalChartDoc const& shw, wxWindow* parent);
     ~PointPicker() = default;
 
-    SelectionList GetSelection() const { return mSelection; }
+    auto GetSelection() const { return mSelection; }
 
 private:
     CalChartDoc const& mShow;
     wxListBox* mList;
     std::vector<wxString> mCachedLabels;
-    SelectionList mSelection;
+    CalChart::SelectionList mSelection;
 
     void CreateControls();
     void RereadFromShow();

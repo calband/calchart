@@ -50,10 +50,10 @@ private:
     void OnItemActivated(wxTreeListEvent& event);
 
     // Internals
-    void UpdateErrors(std::vector<CalChart::AnimationErrors> const& errors, std::map<int, SelectionList> const& collisions);
+    void UpdateErrors(std::vector<CalChart::AnimationErrors> const& errors, std::map<int, CalChart::SelectionList> const& collisions);
 
     CalChartView* mView{};
     wxTreeListCtrl* mTreeCtrl{};
     std::vector<CalChart::AnimationErrors> mCurrentErrors{};
-    std::map<wxTreeListItem, std::tuple<int, SelectionList>> mErrorLookup{};
+    std::map<wxTreeListItem, std::tuple<int, CalChart::SelectionList>> mErrorLookup{};
 };

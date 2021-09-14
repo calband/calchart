@@ -210,7 +210,7 @@ void FieldCanvas::OnMouseLeftDown_NormalMove(CalChart::Coord pos, bool shiftDown
     }
 
     // Now add whatever we clicked to the selection.
-    auto select = SelectionList{ i };
+    auto select = CalChart::SelectionList{ i };
     if (altDown) {
         mView->ToggleSelection(select);
     } else {
@@ -232,7 +232,7 @@ void FieldCanvas::OnMouseLeftDown_Swap(CalChart::Coord pos)
     if (targetDotIndex < 0) {
         return;
     }
-    SelectionList targetDot;
+    CalChart::SelectionList targetDot;
     targetDot.insert(targetDotIndex);
     if (mView->GetSelectionList().size() != 1) {
         mView->UnselectAll();
@@ -412,7 +412,7 @@ void FieldCanvas::SetZoom(float factor)
 void FieldCanvas::SetZoomAroundCenter(float factor)
 {
     auto size = GetSize();
-    super::SetZoom(factor, { size.x/2, size.y/2 });
+    super::SetZoom(factor, { size.x / 2, size.y / 2 });
     Refresh();
 }
 
@@ -428,7 +428,7 @@ void FieldCanvas::BeginSelectDrag(CalChart::Select type, CalChart::Coord start)
 CalChart::Coord FieldCanvas::GetMoveAmount(direction dir)
 {
     auto stepsize = std::get<0>(static_cast<CalChartFrame*>(GetParent())->GridChoice());
-    stepsize = std::max(stepsize, Int2CoordUnits(1));
+    stepsize = std::max(stepsize, CalChart::Int2CoordUnits(1));
     switch (dir) {
     case direction::north:
         return { 0, static_cast<CalChart::Coord::units>(-stepsize) };
@@ -451,7 +451,7 @@ CalChart::Coord FieldCanvas::SnapToGrid(CalChart::Coord c)
     return {
         c.x = SNAPGRID(c.x, gridn, grids),
         // Adjust so 4 step grid will be on visible grid
-        c.y = SNAPGRID(c.y - Int2CoordUnits(2), gridn, grids) + Int2CoordUnits(2)
+        c.y = SNAPGRID(c.y - CalChart::Int2CoordUnits(2), gridn, grids) + CalChart::Int2CoordUnits(2)
     };
 }
 
@@ -463,7 +463,7 @@ CalChart::Coord FieldCanvas::SnapToolToGrid(CalChart::Coord c)
     return {
         c.x = SNAPGRID(c.x, gridn, grids),
         // Adjust so 4 step grid will be on visible grid
-        c.y = SNAPGRID(c.y - Int2CoordUnits(2), gridn, grids) + Int2CoordUnits(2)
+        c.y = SNAPGRID(c.y - CalChart::Int2CoordUnits(2), gridn, grids) + CalChart::Int2CoordUnits(2)
     };
 }
 

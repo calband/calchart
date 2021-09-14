@@ -56,13 +56,13 @@ private:
     std::vector<std::string> mLabels;
     std::vector<std::string> mInstruments;
     std::vector<std::string> mInstrumentChoices;
-    std::vector<SYMBOL_TYPE> mSymbols;
+    std::vector<CalChart::SYMBOL_TYPE> mSymbols;
 
     void SelectAll(wxCommandEvent&);
     void SelectAllPoints();
     void Select(wxCommandEvent&);
     void SelectNone();
-    void SelectSymbol(SYMBOL_TYPE);
+    void SelectSymbol(CalChart::SYMBOL_TYPE);
     void SelectInstrument();
     void OnCmdChoice();
 

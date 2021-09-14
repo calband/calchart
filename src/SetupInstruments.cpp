@@ -34,6 +34,26 @@ enum {
     SetupInstruments_SelectInstrument,
 };
 
+static constexpr auto kInstruments = {
+    kDefaultInstrument, // this is the same as a blank
+    "Picc",
+    "Clarinet",
+    "Alto Sax",
+    "Tenor Sax",
+    "Trumpet",
+    "Mello",
+    "Trombone",
+    "Baritone",
+    "Sousaphone",
+    "Snare",
+    "Bass Drum",
+    "Quad Drum",
+    "Cymbals",
+    "Glock",
+    "Perc",
+    "Drum Major",
+};
+
 BEGIN_EVENT_TABLE(SetupInstruments, wxDialog)
 EVT_LISTBOX(SetupInstruments_SetupInstrumentsList, SetupInstruments::Select)
 EVT_LISTBOX_DCLICK(SetupInstruments_SetupInstrumentsList, SetupInstruments::SelectAll)
@@ -129,7 +149,7 @@ void SetupInstruments::CreateControls()
         HStack(sizer, BasicSizerFlags(), [this](auto sizer) {
             auto counter = 0;
             for (auto&& i : GetSymbolsBitmap()) {
-                auto which = static_cast<SYMBOL_TYPE>(counter++);
+                auto which = static_cast<CalChart::SYMBOL_TYPE>(counter++);
                 if (std::count(mSymbols.begin(), mSymbols.end(), which)) {
                     CreateBitmapButtonWithHandler(this, sizer, BasicSizerFlags(), i, [this, which]() {
                         SelectSymbol(which);
@@ -243,7 +263,7 @@ void SetupInstruments::SelectNone()
     SelectionListChanged();
 }
 
-void SetupInstruments::SelectSymbol(SYMBOL_TYPE sym)
+void SetupInstruments::SelectSymbol(CalChart::SYMBOL_TYPE sym)
 {
     auto list = static_cast<wxListBox*>(FindWindow(SetupInstruments_SetupInstrumentsList));
     list->DeselectAll();

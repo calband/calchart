@@ -95,11 +95,11 @@ static auto CalcUserScaleAndOffset(std::pair<wxPoint, wxPoint> const& sizeAndOff
     // always choose x when the new aspect ratio is smaller than the show.
     // This will keep the whole field on in the canvas
     if (newSizeRatio < showAspectRatio) {
-        newvalue = newX / (float)CoordUnits2Int(x);
+        newvalue = newX / (float)CalChart::CoordUnits2Int(x);
     } else {
-        newvalue = newY / (float)CoordUnits2Int(y);
+        newvalue = newY / (float)CalChart::CoordUnits2Int(y);
     }
-    auto userScale = newvalue * (CoordUnits2Int(1 << 16) / 65536.0);
+    auto userScale = newvalue * (CalChart::CoordUnits2Int(1 << 16) / 65536.0);
 
     auto offsetx = sizeAndOffset.second.x + sizeAndOffset.first.x / 2;
     auto offsety = sizeAndOffset.second.y + sizeAndOffset.first.y / 2;
@@ -167,7 +167,7 @@ void AnimationCanvas::OnLeftUpMouseEvent(wxMouseEvent& event)
 
     // if mouse lifted very close to where clicked, then it is a previous beat
     // move
-    if ((std::abs(mMouseEnd.x - mMouseStart.x) < Int2CoordUnits(1) / 2) && (std::abs(mMouseEnd.y - mMouseStart.y) < Int2CoordUnits(1) / 2)) {
+    if ((std::abs(mMouseEnd.x - mMouseStart.x) < CalChart::Int2CoordUnits(1) / 2) && (std::abs(mMouseEnd.y - mMouseStart.y) < CalChart::Int2CoordUnits(1) / 2)) {
         mView->ToggleTimer();
     } else {
         mView->SelectMarchersInBox(mMouseStart, mMouseEnd, event.AltDown());
@@ -217,7 +217,7 @@ void AnimationCanvas::UpdateScaleAndOrigin()
     auto window_size = GetSize();
     auto boundingBox = mZoomOnMarchers ? mView->GetMarcherSizeAndOffset() : mView->GetShowSizeAndOffset();
     if (mZoomOnMarchers) {
-        auto amount = Int2CoordUnits(mStepsOutForMarcherZoom);
+        auto amount = CalChart::Int2CoordUnits(mStepsOutForMarcherZoom);
         boundingBox.first += wxPoint(amount, amount) * 2;
         boundingBox.second -= wxPoint(amount, amount);
     }

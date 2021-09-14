@@ -47,10 +47,13 @@
 
 namespace CalChart {
 
-class ContProcedure;
-class ContToken;
+namespace Cont {
+    class Procedure;
+    class Token;
+}
+
 class AnimationCommand;
-using AnimationVariables = std::array<std::map<unsigned, float>, NUMCONTVARS>;
+using AnimationVariables = std::array<std::map<unsigned, float>, Cont::kNumVariables>;
 using AnimationCommands = std::vector<std::shared_ptr<AnimationCommand>>;
 
 // Compile a point into the Animation Commands
@@ -64,19 +67,19 @@ Compile(
     Show::const_Sheet_iterator_t endSheet,
     unsigned pt_num,
     SYMBOL_TYPE cont_symbol,
-    std::vector<std::unique_ptr<ContProcedure>> const& proc);
+    std::vector<std::unique_ptr<Cont::Procedure>> const& proc);
 
 struct AnimationCompile {
-    virtual bool Append(std::unique_ptr<AnimationCommand> cmd, ContToken const* token) = 0;
-    virtual void RegisterError(AnimateError err, ContToken const* token) const = 0;
+    virtual bool Append(std::unique_ptr<AnimationCommand> cmd, Cont::Token const* token) = 0;
+    virtual void RegisterError(AnimateError err, Cont::Token const* token) const = 0;
 
-    virtual float GetVarValue(int varnum, ContToken const* token) const = 0;
-    virtual void SetVarValue(int varnum, float value) = 0;
+    virtual float GetVarValue(Cont::Variable varnum, Cont::Token const* token) const = 0;
+    virtual void SetVarValue(Cont::Variable varnum, float value) = 0;
 
     // helper functions to get information for building a command
     virtual Coord GetPointPosition() const = 0;
     virtual Coord GetStartingPosition() const = 0;
-    virtual Coord GetEndingPosition(ContToken const* token) const = 0;
+    virtual Coord GetEndingPosition(Cont::Token const* token) const = 0;
     virtual Coord GetReferencePointPosition(unsigned refnum) const = 0;
     virtual unsigned GetCurrentPoint() const = 0;
     virtual unsigned GetBeatsRemaining() const = 0;

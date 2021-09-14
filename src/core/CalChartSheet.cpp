@@ -168,7 +168,7 @@ Sheet::Sheet(Version_3_3_and_earlier, size_t numPoints, Reader& reader, ParseErr
         throw CC_FileException("bad POS chunk");
     }
     {
-        auto reader = CalChart::Reader({data.data(), data.size()});
+        auto reader = CalChart::Reader({ data.data(), data.size() });
         for (unsigned i = 0; i < mPoints.size(); ++i) {
             auto c = Coord(reader.Get<uint16_t>(), reader.Get<uint16_t>());
             for (unsigned j = 0; j <= Point::kNumRefPoints; j++) {
@@ -383,7 +383,7 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
     auto parse_INGL_BACK = [](Sheet* sheet, Reader reader) {
         auto num = reader.Get<int32_t>();
         while (num--) {
-            auto [ image, new_reader ] = CreateImageData(reader);
+            auto [image, new_reader] = CreateImageData(reader);
             sheet->mBackgroundImages.push_back(image);
             reader = new_reader;
         }
@@ -742,7 +742,7 @@ void Sheet::sheet_round_trip_test()
         auto blank_sheet = Sheet(0);
         auto blank_sheet_data = blank_sheet.SerializeSheet();
         // need to pull out the sheet data
-        auto reader = Reader({blank_sheet_data.data(), blank_sheet_data.size()});
+        auto reader = Reader({ blank_sheet_data.data(), blank_sheet_data.size() });
         auto table = reader.ParseOutLabels();
         assert(table.size() == 1);
         assert(std::get<0>(table.front()) == INGL_SHET);
@@ -756,7 +756,7 @@ void Sheet::sheet_round_trip_test()
         auto blank_sheet = Sheet(0, "new_sheet");
         auto blank_sheet_data = blank_sheet.SerializeSheet();
         // need to pull out the sheet data
-        auto reader = Reader({blank_sheet_data.data(), blank_sheet_data.size()});
+        auto reader = Reader({ blank_sheet_data.data(), blank_sheet_data.size() });
         auto table = reader.ParseOutLabels();
         assert(table.size() == 1);
         assert(std::get<0>(table.front()) == INGL_SHET);
@@ -780,7 +780,7 @@ void Sheet::sheet_round_trip_test()
         };
         auto blank_sheet_data = blank_sheet.SerializeSheet();
         // need to pull out the sheet data
-        auto reader = Reader({blank_sheet_data.data(), blank_sheet_data.size()});
+        auto reader = Reader({ blank_sheet_data.data(), blank_sheet_data.size() });
         auto table = reader.ParseOutLabels();
         assert(table.size() == 1);
         assert(std::get<0>(table.front()) == INGL_SHET);

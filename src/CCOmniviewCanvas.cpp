@@ -29,10 +29,10 @@
 #include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
 #include "CalChartShowMode.h"
+#include "CalChartUtils.h"
 #include "basic_ui.h"
 #include "cc_omniview_constants.h"
 #include "draw.h"
-#include "math_utils.h"
 #include "platconf.h"
 
 #include <wx/dcbuffer.h>
@@ -689,8 +689,8 @@ void CCOmniviewCanvas::OnPaint(wxPaintEvent&)
     glViewport(0, 0, ClientSize.x, ClientSize.y);
 
     CalChart::Coord fieldSize = mView ? mView->GetShowMode().FieldSize() : CalChart::Coord(160, 80);
-    float FieldEW = CoordUnits2Float(fieldSize.y);
-    float FieldNS = CoordUnits2Float(fieldSize.x);
+    float FieldEW = CalChart::CoordUnits2Float(fieldSize.y);
+    float FieldNS = CalChart::CoordUnits2Float(fieldSize.x);
 
     glClear(GL_COLOR_BUFFER_BIT);
     // set our view point:

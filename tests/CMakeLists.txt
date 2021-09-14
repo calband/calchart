@@ -11,6 +11,7 @@ add_executable(CalChartTests
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartShowTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartTextTests.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/CalChartUtilsTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PrintToPSTests.cpp
 )
 

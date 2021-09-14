@@ -1,6 +1,6 @@
 /*
- * cont.cpp
- * Classes for continuity
+ * CalChartContinuityToken.cpp
+ * Classes for ContinuityTokens
  */
 
 /*
@@ -25,61 +25,61 @@
 #include "CalChartAnimationCompile.h"
 #include "CalChartAnimationTypes.h"
 #include "CalChartSheet.h"
-#include "math_utils.h"
+#include "CalChartUtils.h"
 #include "parse.h"
 
-// for serialization we need to pre-register all of the different types that can exist in the continuity AST.
+// for serialization we need to pre-register all of the different types that can exist in the inuity AST.
 
 enum class SerializationToken {
-    ContToken,
-    ContPointUnset,
-    ContPoint,
-    ContStartPoint,
-    ContNextPoint,
-    ContRefPoint,
-    ContValue,
-    ContValueUnset,
-    ContValueFloat,
-    ContValueDefined,
-    ContValueAdd,
-    ContValueSub,
-    ContValueMult,
-    ContValueDiv,
-    ContValueNeg,
-    ContValueREM,
-    ContValueVar,
-    ContValueVarUnset,
-    ContFuncDir,
-    ContFuncDirFrom,
-    ContFuncDist,
-    ContFuncDistFrom,
-    ContFuncEither,
-    ContFuncOpp,
-    ContFuncStep,
-    ContProcedure,
-    ContProcUnset,
-    ContProcSet,
-    ContProcBlam,
-    ContProcCM,
-    ContProcDMCM,
-    ContProcDMHS,
-    ContProcEven,
-    ContProcEWNS,
-    ContProcFountain,
-    ContProcFM,
-    ContProcFMTO,
-    ContProcGrid,
-    ContProcHSCM,
-    ContProcHSDM,
-    ContProcMagic,
-    ContProcMarch,
-    ContProcMT,
-    ContProcMTRM,
-    ContProcNSEW,
-    ContProcRotate,
+    Token,
+    PointUnset,
+    Point,
+    StartPoint,
+    NextPoint,
+    RefPoint,
+    Value,
+    ValueUnset,
+    ValueFloat,
+    ValueDefined,
+    ValueAdd,
+    ValueSub,
+    ValueMult,
+    ValueDiv,
+    ValueNeg,
+    ValueREM,
+    ValueVar,
+    ValueVarUnset,
+    FuncDir,
+    FuncDirFrom,
+    FuncDist,
+    FuncDistFrom,
+    FuncEither,
+    FuncOpp,
+    FuncStep,
+    Procedure,
+    ProcUnset,
+    ProcSet,
+    ProcBlam,
+    ProcCM,
+    ProcDMCM,
+    ProcDMHS,
+    ProcEven,
+    ProcEWNS,
+    ProcFountain,
+    ProcFM,
+    ProcFMTO,
+    ProcGrid,
+    ProcHSCM,
+    ProcHSDM,
+    ProcMagic,
+    ProcMarch,
+    ProcMT,
+    ProcMTRM,
+    ProcNSEW,
+    ProcRotate,
 };
 
-const std::string s_contvar_names[] = {
+const std::string s_var_names[] = {
     "A",
     "B",
     "C",
@@ -91,92 +91,14 @@ const std::string s_contvar_names[] = {
     "DOH",
 };
 
-static_assert(sizeof(s_contvar_names) / sizeof(s_contvar_names[0]) == CalChart::NUMCONTVARS, "");
+namespace CalChart::Cont {
 
-namespace CalChart {
-
-// helper for setting the parent pointer
-template <typename P, typename T>
-void SetParentPtr_helper(P parent, T& t)
-{
-    if (t) {
-        t->SetParentPtr(parent);
-    }
-}
-
-template <typename P, typename T, typename... Ts>
-void SetParentPtr_helper(P parent, T& t, Ts&... ts)
-{
-    if (t) {
-        t->SetParentPtr(parent);
-    }
-    SetParentPtr_helper(parent, ts...);
-}
-
-// helper for some dynamic casting
-template <typename Derived, typename Base>
-std::unique_ptr<Derived>
-dynamic_unique_ptr_cast(std::unique_ptr<Base>&& p)
-{
-    if (Derived* result = dynamic_cast<Derived*>(p.get())) {
-        p.release();
-        return std::unique_ptr<Derived>(result);
-    }
-    return std::unique_ptr<Derived>(nullptr);
-}
-
-// helper function that examines each pointer to see if it shuold be replaced, and then replace it.
-// making sure to clean things up a the end.
-template <typename R, typename UP, typename T>
-void replace_helper2(R replace, UP& new_value, T& t)
-{
-    if (t.get() == replace) {
-        using Derived = typename T::element_type;
-        auto result = dynamic_cast<Derived*>(new_value.get());
-        if (!result) {
-            throw std::runtime_error("Invalid value in replace");
-        }
-        auto&& casted = dynamic_unique_ptr_cast<Derived>(std::move(new_value));
-        if (!casted) {
-            throw std::runtime_error("Invalid value in replace");
-        }
-        t = std::move(casted);
-    }
-}
-
-template <typename R, typename UP, typename T, typename... Ts>
-void replace_helper2(R replace, UP& new_value, T& t, Ts&... ts)
-{
-    if (t.get() == replace) {
-        using Derived = typename T::element_type;
-        auto result = dynamic_cast<Derived*>(new_value.get());
-        if (!result) {
-            throw std::runtime_error("Invalid value in replace");
-        }
-        auto&& casted = dynamic_unique_ptr_cast<Derived>(std::move(new_value));
-        if (!casted) {
-            throw std::runtime_error("Invalid value in replace");
-        }
-        t = std::move(casted);
-    } else {
-        replace_helper2(replace, new_value, ts...);
-    }
-}
-
-template <int N, typename P, typename R, typename UP, typename T, typename... Ts>
-void replace_helper(P parent, R replace, UP& new_value, T& t, Ts&... ts)
-{
-    static_assert(N == (sizeof...(Ts) + 1));
-    replace_helper2(replace, new_value, t, ts...);
-    SetParentPtr_helper(parent, t, ts...);
-}
-
-static const std::string ContDefinedValue_strings[] = {
+static const std::string DefinedValue_strings[] = {
     "N", "NW", "W", "SW", "S", "SE", "E", "NE",
     "HS", "MM", "SH", "JS", "GV", "M", "DM"
 };
 
-int float2int(const ContProcedure* proc, AnimationCompile& anim, float f)
+int float2int(const Procedure* proc, AnimationCompile& anim, float f)
 {
     auto v = (int)floor(f + 0.5);
     if (std::abs(f - (float)v) >= kCoordDecimal) {
@@ -185,7 +107,7 @@ int float2int(const ContProcedure* proc, AnimationCompile& anim, float f)
     return v;
 }
 
-unsigned float2unsigned(const ContProcedure* proc, AnimationCompile& anim,
+unsigned float2unsigned(const Procedure* proc, AnimationCompile& anim,
     float f)
 {
     auto v = float2int(proc, anim, f);
@@ -197,10 +119,10 @@ unsigned float2unsigned(const ContProcedure* proc, AnimationCompile& anim,
     }
 }
 
-void DoCounterMarch(const ContProcedure& proc, AnimationCompile& anim,
-    const ContPoint& pnt1, const ContPoint& pnt2,
-    const ContValue& stps, const ContValue& dir1,
-    const ContValue& dir2, const ContValue& numbeats)
+void DoCounterMarch(const Procedure& proc, AnimationCompile& anim,
+    const Point& pnt1, const Point& pnt2,
+    const Value& stps, const Value& dir1,
+    const Value& dir2, const Value& numbeats)
 {
     auto d1 = dir1.Get(anim);
     auto d2 = dir2.Get(anim);
@@ -292,621 +214,547 @@ void DoCounterMarch(const ContProcedure& proc, AnimationCompile& anim,
     }
 }
 
-std::tuple<std::unique_ptr<ContProcedure>, Reader> DeserializeContProcedure(Reader reader)
+#define CheckForToken(reader, minSize, serialToken) CheckForTokenImpl(reader, minSize, serialToken, #serialToken)
+
+template <typename T, typename U>
+auto CheckForTokenImpl(Reader reader, size_t minSize, T serialToken, U tokenName)
+{
+    using namespace std::string_literals;
+    if (reader.size() < minSize) {
+        throw std::runtime_error("Error, size of "s + tokenName + " is not correct");
+    }
+    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
+    if (token != serialToken) {
+        throw std::runtime_error("Error, token is not "s + tokenName);
+    }
+    return reader;
+}
+
+std::tuple<std::unique_ptr<Procedure>, Reader> DeserializeProcedure(Reader reader)
 {
     if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContPoint is not correct");
+        throw std::runtime_error("Error, size of Point is not correct");
     }
-    auto v = std::unique_ptr<ContProcedure>();
+    auto v = std::unique_ptr<Procedure>();
     auto token = static_cast<SerializationToken>(reader.Peek<uint8_t>());
     switch (token) {
-    case SerializationToken::ContProcUnset:
-        v = std::make_unique<ContProcUnset>();
+    case SerializationToken::ProcUnset:
+        v = std::make_unique<ProcUnset>();
         break;
-    case SerializationToken::ContProcSet:
-        v = std::make_unique<ContProcSet>();
+    case SerializationToken::ProcSet:
+        v = std::make_unique<ProcSet>();
         break;
-    case SerializationToken::ContProcBlam:
-        v = std::make_unique<ContProcBlam>();
+    case SerializationToken::ProcBlam:
+        v = std::make_unique<ProcBlam>();
         break;
-    case SerializationToken::ContProcCM:
-        v = std::make_unique<ContProcCM>();
+    case SerializationToken::ProcCM:
+        v = std::make_unique<ProcCM>();
         break;
-    case SerializationToken::ContProcDMCM:
-        v = std::make_unique<ContProcDMCM>();
+    case SerializationToken::ProcDMCM:
+        v = std::make_unique<ProcDMCM>();
         break;
-    case SerializationToken::ContProcDMHS:
-        v = std::make_unique<ContProcDMHS>();
+    case SerializationToken::ProcDMHS:
+        v = std::make_unique<ProcDMHS>();
         break;
-    case SerializationToken::ContProcEven:
-        v = std::make_unique<ContProcEven>();
+    case SerializationToken::ProcEven:
+        v = std::make_unique<ProcEven>();
         break;
-    case SerializationToken::ContProcEWNS:
-        v = std::make_unique<ContProcEWNS>();
+    case SerializationToken::ProcEWNS:
+        v = std::make_unique<ProcEWNS>();
         break;
-    case SerializationToken::ContProcFountain:
-        v = std::make_unique<ContProcFountain>();
+    case SerializationToken::ProcFountain:
+        v = std::make_unique<ProcFountain>();
         break;
-    case SerializationToken::ContProcFM:
-        v = std::make_unique<ContProcFM>();
+    case SerializationToken::ProcFM:
+        v = std::make_unique<ProcFM>();
         break;
-    case SerializationToken::ContProcFMTO:
-        v = std::make_unique<ContProcFMTO>();
+    case SerializationToken::ProcFMTO:
+        v = std::make_unique<ProcFMTO>();
         break;
-    case SerializationToken::ContProcGrid:
-        v = std::make_unique<ContProcGrid>();
+    case SerializationToken::ProcGrid:
+        v = std::make_unique<ProcGrid>();
         break;
-    case SerializationToken::ContProcHSCM:
-        v = std::make_unique<ContProcHSCM>();
+    case SerializationToken::ProcHSCM:
+        v = std::make_unique<ProcHSCM>();
         break;
-    case SerializationToken::ContProcHSDM:
-        v = std::make_unique<ContProcHSDM>();
+    case SerializationToken::ProcHSDM:
+        v = std::make_unique<ProcHSDM>();
         break;
-    case SerializationToken::ContProcMagic:
-        v = std::make_unique<ContProcMagic>();
+    case SerializationToken::ProcMagic:
+        v = std::make_unique<ProcMagic>();
         break;
-    case SerializationToken::ContProcMarch:
-        v = std::make_unique<ContProcMarch>();
+    case SerializationToken::ProcMarch:
+        v = std::make_unique<ProcMarch>();
         break;
-    case SerializationToken::ContProcMT:
-        v = std::make_unique<ContProcMT>();
+    case SerializationToken::ProcMT:
+        v = std::make_unique<ProcMT>();
         break;
-    case SerializationToken::ContProcMTRM:
-        v = std::make_unique<ContProcMTRM>();
+    case SerializationToken::ProcMTRM:
+        v = std::make_unique<ProcMTRM>();
         break;
-    case SerializationToken::ContProcNSEW:
-        v = std::make_unique<ContProcNSEW>();
+    case SerializationToken::ProcNSEW:
+        v = std::make_unique<ProcNSEW>();
         break;
-    case SerializationToken::ContProcRotate:
-        v = std::make_unique<ContProcRotate>();
+    case SerializationToken::ProcRotate:
+        v = std::make_unique<ProcRotate>();
         break;
     default:
-        throw std::runtime_error("Error, did not find ContPoint");
+        throw std::runtime_error("Error, did not find Point");
     }
     auto b = v->Deserialize(reader);
     return { std::move(v), b };
 }
 
-static std::tuple<std::unique_ptr<ContPoint>, Reader> DeserializeContPoint(Reader reader)
+static std::tuple<std::unique_ptr<Point>, Reader> DeserializePoint(Reader reader)
 {
     if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContPoint is not correct");
+        throw std::runtime_error("Error, size of Point is not correct");
     }
-    auto v = std::unique_ptr<ContPoint>();
+    auto v = std::unique_ptr<Point>();
     auto token = static_cast<SerializationToken>(reader.Peek<uint8_t>());
     switch (token) {
-    case SerializationToken::ContPoint:
-        v = std::make_unique<ContPoint>();
+    case SerializationToken::Point:
+        v = std::make_unique<Point>();
         break;
-    case SerializationToken::ContPointUnset:
-        v = std::make_unique<ContPointUnset>();
+    case SerializationToken::PointUnset:
+        v = std::make_unique<PointUnset>();
         break;
-    case SerializationToken::ContStartPoint:
-        v = std::make_unique<ContStartPoint>();
+    case SerializationToken::StartPoint:
+        v = std::make_unique<StartPoint>();
         break;
-    case SerializationToken::ContNextPoint:
-        v = std::make_unique<ContNextPoint>();
+    case SerializationToken::NextPoint:
+        v = std::make_unique<NextPoint>();
         break;
-    case SerializationToken::ContRefPoint:
-        v = std::make_unique<ContRefPoint>();
+    case SerializationToken::RefPoint:
+        v = std::make_unique<RefPoint>();
         break;
     default:
-        throw std::runtime_error("Error, did not find ContPoint");
+        throw std::runtime_error("Error, did not find Point");
     }
     auto new_reader = v->Deserialize(reader);
     return { std::move(v), new_reader };
 }
 
-static std::tuple<std::unique_ptr<ContValue>, Reader> DeserializeContValue(Reader reader)
+static std::tuple<std::unique_ptr<Value>, Reader> DeserializeValue(Reader reader)
 {
     if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContPoint is not correct");
+        throw std::runtime_error("Error, size of Point is not correct");
     }
-    auto v = std::unique_ptr<ContValue>();
+    auto v = std::unique_ptr<Value>();
     auto token = static_cast<SerializationToken>(reader.Peek<uint8_t>());
     switch (token) {
-    case SerializationToken::ContValueUnset:
-        v = std::make_unique<ContValueUnset>();
+    case SerializationToken::ValueUnset:
+        v = std::make_unique<ValueUnset>();
         break;
-    case SerializationToken::ContValueFloat:
-        v = std::make_unique<ContValueFloat>();
+    case SerializationToken::ValueFloat:
+        v = std::make_unique<ValueFloat>();
         break;
-    case SerializationToken::ContValueDefined:
-        v = std::make_unique<ContValueDefined>();
+    case SerializationToken::ValueDefined:
+        v = std::make_unique<ValueDefined>();
         break;
-    case SerializationToken::ContValueAdd:
-        v = std::make_unique<ContValueAdd>();
+    case SerializationToken::ValueAdd:
+        v = std::make_unique<ValueAdd>();
         break;
-    case SerializationToken::ContValueSub:
-        v = std::make_unique<ContValueSub>();
+    case SerializationToken::ValueSub:
+        v = std::make_unique<ValueSub>();
         break;
-    case SerializationToken::ContValueMult:
-        v = std::make_unique<ContValueMult>();
+    case SerializationToken::ValueMult:
+        v = std::make_unique<ValueMult>();
         break;
-    case SerializationToken::ContValueDiv:
-        v = std::make_unique<ContValueDiv>();
+    case SerializationToken::ValueDiv:
+        v = std::make_unique<ValueDiv>();
         break;
-    case SerializationToken::ContValueNeg:
-        v = std::make_unique<ContValueNeg>();
+    case SerializationToken::ValueNeg:
+        v = std::make_unique<ValueNeg>();
         break;
-    case SerializationToken::ContValueREM:
-        v = std::make_unique<ContValueREM>();
+    case SerializationToken::ValueREM:
+        v = std::make_unique<ValueREM>();
         break;
-    case SerializationToken::ContValueVar:
-        v = std::make_unique<ContValueVar>();
+    case SerializationToken::ValueVar:
+        v = std::make_unique<ValueVar>();
         break;
-    case SerializationToken::ContFuncDir:
-        v = std::make_unique<ContFuncDir>();
+    case SerializationToken::FuncDir:
+        v = std::make_unique<FuncDir>();
         break;
-    case SerializationToken::ContFuncDirFrom:
-        v = std::make_unique<ContFuncDirFrom>();
+    case SerializationToken::FuncDirFrom:
+        v = std::make_unique<FuncDirFrom>();
         break;
-    case SerializationToken::ContFuncDist:
-        v = std::make_unique<ContFuncDist>();
+    case SerializationToken::FuncDist:
+        v = std::make_unique<FuncDist>();
         break;
-    case SerializationToken::ContFuncDistFrom:
-        v = std::make_unique<ContFuncDistFrom>();
+    case SerializationToken::FuncDistFrom:
+        v = std::make_unique<FuncDistFrom>();
         break;
-    case SerializationToken::ContFuncEither:
-        v = std::make_unique<ContFuncEither>();
+    case SerializationToken::FuncEither:
+        v = std::make_unique<FuncEither>();
         break;
-    case SerializationToken::ContFuncOpp:
-        v = std::make_unique<ContFuncOpp>();
+    case SerializationToken::FuncOpp:
+        v = std::make_unique<FuncOpp>();
         break;
-    case SerializationToken::ContFuncStep:
-        v = std::make_unique<ContFuncStep>();
+    case SerializationToken::FuncStep:
+        v = std::make_unique<FuncStep>();
         break;
     default:
-        throw std::runtime_error("Error, did not find ContValue");
+        throw std::runtime_error("Error, did not find Value");
     }
     auto b = v->Deserialize(reader);
     return { std::move(v), b };
 }
 
-static std::tuple<std::unique_ptr<ContValueVar>, Reader> DeserializeContValueVar(Reader reader)
+static std::tuple<std::unique_ptr<ValueVar>, Reader> DeserializeValueVar(Reader reader)
 {
     if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContPoint is not correct");
+        throw std::runtime_error("Error, size of Point is not correct");
     }
-    auto v = std::unique_ptr<ContValueVar>();
+    auto v = std::unique_ptr<ValueVar>();
     auto token = static_cast<SerializationToken>(reader.Peek<uint8_t>());
     switch (token) {
-    case SerializationToken::ContValueVar:
-        v = std::make_unique<ContValueVar>();
+    case SerializationToken::ValueVar:
+        v = std::make_unique<ValueVar>();
         break;
-    case SerializationToken::ContValueVarUnset:
-        v = std::make_unique<ContValueVarUnset>();
+    case SerializationToken::ValueVarUnset:
+        v = std::make_unique<ValueVarUnset>();
         break;
     default:
-        throw std::runtime_error("Error, did not find ContValueVar");
+        throw std::runtime_error("Error, did not find ValueVar");
     }
     auto b = v->Deserialize(reader);
     return { std::move(v), b };
 }
 
-// ContToken
-ContToken::ContToken()
+// Token
+Token::Token()
     : line(yylloc.first_line)
     , col(yylloc.first_column)
 {
 }
 
-std::ostream& ContToken::Print(std::ostream& os) const
+std::ostream& Token::Print(std::ostream& os) const
 {
     os << "[CT]";
     return os;
 }
 
-void ContToken::replace(ContToken const* /*which*/, std::unique_ptr<ContToken> /*v*/)
+void Token::replace(Token const* /*which*/, std::unique_ptr<Token> /*v*/)
 {
     throw std::runtime_error("Error, replace not implemented on this class");
 }
 
-std::vector<uint8_t> ContToken::Serialize() const
+std::vector<uint8_t> Token::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContToken));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::Token));
     Parser::Append(result, static_cast<uint32_t>(line));
     Parser::Append(result, static_cast<uint32_t>(col));
     return result;
 }
 
-Reader ContToken::Deserialize(Reader reader)
+Reader Token::Deserialize(Reader reader)
 {
-    if (reader.size() < 9) {
-        throw std::runtime_error("Error, size of ContToken is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContToken) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContToken");
-    }
+    reader = CheckForToken(reader, 9, SerializationToken::Token);
     line = reader.Get<uint32_t>();
     col = reader.Get<uint32_t>();
     return reader;
 }
 
-// ContPoint
-Coord ContPoint::Get(AnimationCompile const& anim) const
+// Point
+Coord Point::Get(AnimationCompile const& anim) const
 {
     return anim.GetPointPosition();
 }
 
-std::ostream& ContPoint::Print(std::ostream& os) const
+std::ostream& Point::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CP]";
     return os << "Point:";
 }
 
-DrawableCont ContPoint::GetDrawableCont() const
+Drawable Point::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::point,
+        Type::point,
         "Point",
         "P",
         {}
     };
 }
 
-std::unique_ptr<ContPoint> ContPoint::clone() const
-{
-    return std::make_unique<ContPoint>();
-}
-
-std::vector<uint8_t> ContPoint::Serialize() const
+std::vector<uint8_t> Point::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContPoint));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::Point));
     Parser::Append(result, super::Serialize());
     return result;
 }
 
-Reader ContPoint::Deserialize(Reader reader)
+Reader Point::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContPoint is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContPoint) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContPoint");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::Point);
     return super::Deserialize(reader);
 }
 
-// ContPointUnset
-std::ostream& ContPointUnset::Print(std::ostream& os) const
+// PointUnset
+std::ostream& PointUnset::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPU]";
     return os << "Unset";
 }
 
-DrawableCont ContPointUnset::GetDrawableCont() const
+Drawable PointUnset::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::unset,
+        Type::unset,
         "unset point",
         "unset point",
         {}
     };
 }
 
-std::unique_ptr<ContPoint> ContPointUnset::clone() const
-{
-    return std::make_unique<ContPointUnset>();
-}
-
-std::vector<uint8_t> ContPointUnset::Serialize() const
+std::vector<uint8_t> PointUnset::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContPointUnset));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::PointUnset));
     Parser::Append(result, super::Serialize());
     return result;
 }
 
-Reader ContPointUnset::Deserialize(Reader reader)
+Reader PointUnset::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContPointUnset is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContPointUnset) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContPointUnset");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::PointUnset);
     return super::Deserialize(reader);
 }
 
-// ContStartPoint
-Coord ContStartPoint::Get(AnimationCompile const& anim) const
+// StartPoint
+Coord StartPoint::Get(AnimationCompile const& anim) const
 {
     return anim.GetStartingPosition();
 }
 
-std::ostream& ContStartPoint::Print(std::ostream& os) const
+std::ostream& StartPoint::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CSP]";
     return os << "Start Point";
 }
 
-DrawableCont ContStartPoint::GetDrawableCont() const
+Drawable StartPoint::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::point,
+        Type::point,
         "Start Point",
         "SP",
         {}
     };
 }
 
-std::unique_ptr<ContPoint> ContStartPoint::clone() const
-{
-    return std::make_unique<ContStartPoint>();
-}
-
-std::vector<uint8_t> ContStartPoint::Serialize() const
+std::vector<uint8_t> StartPoint::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContStartPoint));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::StartPoint));
     Parser::Append(result, super::Serialize());
     return result;
 }
 
-Reader ContStartPoint::Deserialize(Reader reader)
+Reader StartPoint::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContStartPoint is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContStartPoint) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContStartPoint");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::StartPoint);
     return super::Deserialize(reader);
 }
 
-// ContNextPoint
-Coord ContNextPoint::Get(AnimationCompile const& anim) const
+// NextPoint
+Coord NextPoint::Get(AnimationCompile const& anim) const
 {
     return anim.GetEndingPosition(this);
 }
 
-std::ostream& ContNextPoint::Print(std::ostream& os) const
+std::ostream& NextPoint::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CNP]";
     return os << "Next Point";
 }
 
-DrawableCont ContNextPoint::GetDrawableCont() const
+Drawable NextPoint::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::point,
+        Type::point,
         "Next Point",
         "NP",
         {}
     };
 }
 
-std::unique_ptr<ContPoint> ContNextPoint::clone() const
-{
-    return std::make_unique<ContNextPoint>();
-}
-
-std::vector<uint8_t> ContNextPoint::Serialize() const
+std::vector<uint8_t> NextPoint::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContNextPoint));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::NextPoint));
     Parser::Append(result, super::Serialize());
     return result;
 }
 
-Reader ContNextPoint::Deserialize(Reader reader)
+Reader NextPoint::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContNextPoint is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContNextPoint) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContNextPoint");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::NextPoint);
     return super::Deserialize(reader);
 }
 
-// ContRefPoint
-ContRefPoint::ContRefPoint(unsigned n)
+// RefPoint
+RefPoint::RefPoint(unsigned n)
     : refnum(n)
 {
 }
 
-Coord ContRefPoint::Get(AnimationCompile const& anim) const
+Coord RefPoint::Get(AnimationCompile const& anim) const
 {
     return anim.GetReferencePointPosition(refnum);
 }
 
-std::ostream& ContRefPoint::Print(std::ostream& os) const
+std::ostream& RefPoint::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CRP]";
     return os << "Ref Point " << refnum;
 }
 
-DrawableCont ContRefPoint::GetDrawableCont() const
+Drawable RefPoint::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::point,
+        Type::point,
         std::string("Ref Point ") + std::to_string(refnum),
         std::string("R") + std::to_string(refnum),
         {}
     };
 }
 
-std::unique_ptr<ContPoint> ContRefPoint::clone() const
-{
-    return std::make_unique<ContRefPoint>(refnum);
-}
-
-std::vector<uint8_t> ContRefPoint::Serialize() const
+std::vector<uint8_t> RefPoint::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContRefPoint));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::RefPoint));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, refnum);
     return result;
 }
 
-Reader ContRefPoint::Deserialize(Reader reader)
+Reader RefPoint::Deserialize(Reader reader)
 {
-    if (reader.size() < 5) {
-        throw std::runtime_error("Error, size of ContRefPoint is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContRefPoint) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContRefPoint");
-    }
+    reader = CheckForToken(reader, 5, SerializationToken::RefPoint);
     reader = super::Deserialize(reader);
     refnum = reader.Get<uint32_t>();
     return reader;
 }
 
-// ContValue
-std::ostream& ContValue::Print(std::ostream& os) const
+// Value
+std::ostream& Value::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CV]";
     return os << "Value:";
 }
 
-std::vector<uint8_t> ContValue::Serialize() const
+std::vector<uint8_t> Value::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValue));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::Value));
     Parser::Append(result, super::Serialize());
     return result;
 }
 
-Reader ContValue::Deserialize(Reader reader)
+Reader Value::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContValue is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContValue) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContValue");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::Value);
     return super::Deserialize(reader);
 }
 
-// ContValueUnset
-std::ostream& ContValueUnset::Print(std::ostream& os) const
+// ValueUnset
+std::ostream& ValueUnset::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CVU]";
     return os << "Unset";
 }
 
-DrawableCont ContValueUnset::GetDrawableCont() const
+Drawable ValueUnset::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::unset,
+        Type::unset,
         "unset value",
         "unset value",
         {}
     };
 }
 
-std::unique_ptr<ContValue> ContValueUnset::clone() const
-{
-    // we need to make a copy of the var, then dynamically cast to std::unique_ptr<ContValueVar>
-    return std::make_unique<ContValueUnset>();
-}
-
-std::vector<uint8_t> ContValueUnset::Serialize() const
+std::vector<uint8_t> ValueUnset::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueUnset));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueUnset));
     Parser::Append(result, super::Serialize());
     return result;
 }
 
-Reader ContValueUnset::Deserialize(Reader reader)
+Reader ValueUnset::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContValueUnset is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContValueUnset) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContValueUnset");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ValueUnset);
     return super::Deserialize(reader);
 }
 
-// ContValueFloat
-ContValueFloat::ContValueFloat(float v)
+// ValueFloat
+ValueFloat::ValueFloat(float v)
     : val(v)
 {
 }
 
-float ContValueFloat::Get(AnimationCompile const&) const { return val; }
+float ValueFloat::Get(AnimationCompile const&) const { return val; }
 
-std::ostream& ContValueFloat::Print(std::ostream& os) const
+std::ostream& ValueFloat::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CVF]";
     return os << val;
 }
 
-DrawableCont ContValueFloat::GetDrawableCont() const
+Drawable ValueFloat::GetDrawable() const
 {
     // to_string gives a lot of decimal points.  256 on the stack should be ok...?
     if (int(val) == val) {
-        return { this, parent_ptr, ContType::value, std::to_string(int(val)), std::to_string(int(val)), {} };
+        return { this, parent_ptr, Type::value, std::to_string(int(val)), std::to_string(int(val)), {} };
     }
-    return { this, parent_ptr, ContType::value, std::to_string(val), std::to_string(val), {} };
+    return { this, parent_ptr, Type::value, std::to_string(val), std::to_string(val), {} };
 }
 
-std::unique_ptr<ContValue> ContValueFloat::clone() const
-{
-    return std::make_unique<ContValueFloat>(val);
-}
-
-std::vector<uint8_t> ContValueFloat::Serialize() const
+std::vector<uint8_t> ValueFloat::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueFloat));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueFloat));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, val);
     return result;
 }
 
-Reader ContValueFloat::Deserialize(Reader reader)
+Reader ValueFloat::Deserialize(Reader reader)
 {
-    if (reader.size() < 5) {
-        throw std::runtime_error("Error, size of ContValueFloat is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContValueFloat) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContValueFloat");
-    }
+    reader = CheckForToken(reader, 5, SerializationToken::ValueFloat);
     reader = super::Deserialize(reader);
     val = reader.Get<float>();
     return reader;
 }
 
-// ContValueDefined
-ContValueDefined::ContValueDefined(ContDefinedValue v)
+// ValueDefined
+ValueDefined::ValueDefined(DefinedValue v)
     : val(v)
 {
 }
 
-float ContValueDefined::Get(AnimationCompile const&) const
+float ValueDefined::Get(AnimationCompile const&) const
 {
-    static const std::map<ContDefinedValue, float> mapping = {
+    static const std::map<DefinedValue, float> mapping = {
         { CC_NW, 45.0 },
         { CC_W, 90.0 },
         { CC_SW, 135.0 },
@@ -929,17 +777,17 @@ float ContValueDefined::Get(AnimationCompile const&) const
     return 0.0;
 }
 
-std::ostream& ContValueDefined::Print(std::ostream& os) const
+std::ostream& ValueDefined::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CVC]";
-    return os << "Defined:" << ContDefinedValue_strings[val];
+    return os << "Defined:" << DefinedValue_strings[val];
 }
 
-DrawableCont ContValueDefined::GetDrawableCont() const
+Drawable ValueDefined::GetDrawable() const
 {
     // to_string gives a lot of decimal points.  256 on the stack should be ok...?
-    auto type = ContType::value;
+    auto type = Type::value;
     switch (val) {
     case CC_NW:
     case CC_W:
@@ -949,277 +797,177 @@ DrawableCont ContValueDefined::GetDrawableCont() const
     case CC_E:
     case CC_NE:
     case CC_N:
-        type = ContType::direction;
+        type = Type::direction;
         break;
     default:
-        type = ContType::steptype;
+        type = Type::steptype;
     }
-    return { this, parent_ptr, type, ContDefinedValue_strings[val], ContDefinedValue_strings[val], {} };
+    return { this, parent_ptr, type, DefinedValue_strings[val], DefinedValue_strings[val], {} };
 }
 
-std::unique_ptr<ContValue> ContValueDefined::clone() const
-{
-    return std::make_unique<ContValueDefined>(val);
-}
-
-std::vector<uint8_t> ContValueDefined::Serialize() const
+std::vector<uint8_t> ValueDefined::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueDefined));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueDefined));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, static_cast<uint8_t>(val));
     return result;
 }
 
-Reader ContValueDefined::Deserialize(Reader reader)
+Reader ValueDefined::Deserialize(Reader reader)
 {
-    if (reader.size() < 2) {
-        throw std::runtime_error("Error, size of ContValueDefined is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContValueDefined) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContValueDefined");
-    }
+    reader = CheckForToken(reader, 2, SerializationToken::ValueDefined);
     reader = super::Deserialize(reader);
-    val = static_cast<ContDefinedValue>(reader.Get<uint8_t>());
+    val = static_cast<DefinedValue>(reader.Get<uint8_t>());
     return reader;
 }
 
-// ContValueAdd
-ContValueAdd::ContValueAdd(ContValue* v1, ContValue* v2)
-    : val1(v1)
-    , val2(v2)
-{
-    SetParentPtr_helper(this, val1, val2);
-}
-
-ContValueAdd::ContValueAdd(std::unique_ptr<ContValue> v1, std::unique_ptr<ContValue> v2)
-    : val1(std::move(v1))
-    , val2(std::move(v2))
-{
-    SetParentPtr_helper(this, val1, val2);
-}
-
-float ContValueAdd::Get(AnimationCompile const& anim) const
+// ValueAdd
+float ValueAdd::Get(AnimationCompile const& anim) const
 {
     return (val1->Get(anim) + val2->Get(anim));
 }
 
-std::ostream& ContValueAdd::Print(std::ostream& os) const
+std::ostream& ValueAdd::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CVA]";
     return os << *val1 << " + " << *val2;
 }
 
-DrawableCont ContValueAdd::GetDrawableCont() const
+Drawable ValueAdd::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::function,
+        Type::function,
         "( %@ + %@ )",
         "(%@+%@)",
-        { val1->GetDrawableCont(), val2->GetDrawableCont() }
+        { val1->GetDrawable(), val2->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContValue> ContValueAdd::clone() const
-{
-    return std::make_unique<ContValueAdd>(val1->clone(), val2->clone());
-}
-
-void ContValueAdd::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ValueAdd::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, val1, val2);
 }
 
-std::vector<uint8_t> ContValueAdd::Serialize() const
+std::vector<uint8_t> ValueAdd::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueAdd));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueAdd));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, val1->Serialize());
     Parser::Append(result, val2->Serialize());
     return result;
 }
 
-Reader ContValueAdd::Deserialize(Reader reader)
+Reader ValueAdd::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContValueAdd is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContValueAdd) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContValueAdd");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ValueAdd);
     reader = super::Deserialize(reader);
-    std::tie(val1, reader) = DeserializeContValue(reader);
-    std::tie(val2, reader) = DeserializeContValue(reader);
+    std::tie(val1, reader) = DeserializeValue(reader);
+    std::tie(val2, reader) = DeserializeValue(reader);
     return reader;
 }
 
-// ContValueSub
-ContValueSub::ContValueSub(ContValue* v1, ContValue* v2)
-    : val1(v1)
-    , val2(v2)
-{
-    SetParentPtr_helper(this, val1, val2);
-}
-
-ContValueSub::ContValueSub(std::unique_ptr<ContValue> v1, std::unique_ptr<ContValue> v2)
-    : val1(std::move(v1))
-    , val2(std::move(v2))
-{
-    SetParentPtr_helper(this, val1, val2);
-}
-
-float ContValueSub::Get(AnimationCompile const& anim) const
+// ValueSub
+float ValueSub::Get(AnimationCompile const& anim) const
 {
     return (val1->Get(anim) - val2->Get(anim));
 }
 
-std::ostream& ContValueSub::Print(std::ostream& os) const
+std::ostream& ValueSub::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CVS]";
     return os << *val1 << " - " << *val2;
 }
 
-DrawableCont ContValueSub::GetDrawableCont() const
+Drawable ValueSub::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::function,
+        Type::function,
         "( %@ - %@ )",
         "(%@-%@)",
-        { val1->GetDrawableCont(), val2->GetDrawableCont() }
+        { val1->GetDrawable(), val2->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContValue> ContValueSub::clone() const
-{
-    return std::make_unique<ContValueSub>(val1->clone(), val2->clone());
-}
-
-void ContValueSub::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ValueSub::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, val1, val2);
 }
 
-std::vector<uint8_t> ContValueSub::Serialize() const
+std::vector<uint8_t> ValueSub::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueSub));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueSub));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, val1->Serialize());
     Parser::Append(result, val2->Serialize());
     return result;
 }
 
-Reader ContValueSub::Deserialize(Reader reader)
+Reader ValueSub::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContValueSub is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContValueSub) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContValueSub");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ValueSub);
     reader = super::Deserialize(reader);
-    std::tie(val1, reader) = DeserializeContValue(reader);
-    std::tie(val2, reader) = DeserializeContValue(reader);
+    std::tie(val1, reader) = DeserializeValue(reader);
+    std::tie(val2, reader) = DeserializeValue(reader);
     return reader;
 }
 
-// ContValueMult
-ContValueMult::ContValueMult(ContValue* v1, ContValue* v2)
-    : val1(v1)
-    , val2(v2)
-{
-    SetParentPtr_helper(this, val1, val2);
-}
-
-ContValueMult::ContValueMult(std::unique_ptr<ContValue> v1, std::unique_ptr<ContValue> v2)
-    : val1(std::move(v1))
-    , val2(std::move(v2))
-{
-    SetParentPtr_helper(this, val1, val2);
-}
-
-float ContValueMult::Get(AnimationCompile const& anim) const
+// ValueMult
+float ValueMult::Get(AnimationCompile const& anim) const
 {
     return (val1->Get(anim) * val2->Get(anim));
 }
 
-std::ostream& ContValueMult::Print(std::ostream& os) const
+std::ostream& ValueMult::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CVM]";
     return os << *val1 << " * " << *val2;
 }
 
-DrawableCont ContValueMult::GetDrawableCont() const
+Drawable ValueMult::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::function,
+        Type::function,
         "( %@ * %@ )",
         "(%@*%@)",
-        { val1->GetDrawableCont(), val2->GetDrawableCont() }
+        { val1->GetDrawable(), val2->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContValue> ContValueMult::clone() const
-{
-    return std::make_unique<ContValueMult>(val1->clone(), val2->clone());
-}
-
-void ContValueMult::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ValueMult::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, val1, val2);
 }
 
-std::vector<uint8_t> ContValueMult::Serialize() const
+std::vector<uint8_t> ValueMult::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueMult));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueMult));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, val1->Serialize());
     Parser::Append(result, val2->Serialize());
     return result;
 }
 
-Reader ContValueMult::Deserialize(Reader reader)
+Reader ValueMult::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContValueMult is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContValueMult) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContValueMult");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ValueMult);
     reader = super::Deserialize(reader);
-    std::tie(val1, reader) = DeserializeContValue(reader);
-    std::tie(val2, reader) = DeserializeContValue(reader);
+    std::tie(val1, reader) = DeserializeValue(reader);
+    std::tie(val2, reader) = DeserializeValue(reader);
     return reader;
 }
 
-// ContValueDiv
-ContValueDiv::ContValueDiv(ContValue* v1, ContValue* v2)
-    : val1(v1)
-    , val2(v2)
-{
-    SetParentPtr_helper(this, val1, val2);
-}
-
-ContValueDiv::ContValueDiv(std::unique_ptr<ContValue> v1, std::unique_ptr<ContValue> v2)
-    : val1(std::move(v1))
-    , val2(std::move(v2))
-{
-    SetParentPtr_helper(this, val1, val2);
-}
-
-float ContValueDiv::Get(AnimationCompile const& anim) const
+// ValueDiv
+float ValueDiv::Get(AnimationCompile const& anim) const
 {
     auto f = val2->Get(anim);
     if (IS_ZERO(f)) {
@@ -1230,294 +978,215 @@ float ContValueDiv::Get(AnimationCompile const& anim) const
     }
 }
 
-std::ostream& ContValueDiv::Print(std::ostream& os) const
+std::ostream& ValueDiv::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CVD]";
     return os << *val1 << " / " << *val2;
 }
 
-DrawableCont ContValueDiv::GetDrawableCont() const
+Drawable ValueDiv::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::function,
+        Type::function,
         "( %@ / %@ )",
         "(%@/%@)",
-        { val1->GetDrawableCont(), val2->GetDrawableCont() }
+        { val1->GetDrawable(), val2->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContValue> ContValueDiv::clone() const
-{
-    return std::make_unique<ContValueDiv>(val1->clone(), val2->clone());
-}
-
-void ContValueDiv::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ValueDiv::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, val1, val2);
 }
 
-std::vector<uint8_t> ContValueDiv::Serialize() const
+std::vector<uint8_t> ValueDiv::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueDiv));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueDiv));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, val1->Serialize());
     Parser::Append(result, val2->Serialize());
     return result;
 }
 
-Reader ContValueDiv::Deserialize(Reader reader)
+Reader ValueDiv::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContValueDiv is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContValueDiv) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContValueDiv");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ValueDiv);
     reader = super::Deserialize(reader);
-    std::tie(val1, reader) = DeserializeContValue(reader);
-    std::tie(val2, reader) = DeserializeContValue(reader);
+    std::tie(val1, reader) = DeserializeValue(reader);
+    std::tie(val2, reader) = DeserializeValue(reader);
     return reader;
 }
 
-// ContValueNeg
-ContValueNeg::ContValueNeg(ContValue* v)
-    : val(v)
-{
-    SetParentPtr_helper(this, val);
-}
+// ValueNeg
+float ValueNeg::Get(AnimationCompile const& anim) const { return -val->Get(anim); }
 
-ContValueNeg::ContValueNeg(std::unique_ptr<ContValue> v)
-    : val(std::move(v))
-{
-    SetParentPtr_helper(this, val);
-}
-
-float ContValueNeg::Get(AnimationCompile const& anim) const { return -val->Get(anim); }
-
-std::ostream& ContValueNeg::Print(std::ostream& os) const
+std::ostream& ValueNeg::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CVN]";
     return os << "- " << *val;
 }
 
-DrawableCont ContValueNeg::GetDrawableCont() const
+Drawable ValueNeg::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::function,
+        Type::function,
         "-%@",
         "-%@",
-        { val->GetDrawableCont() }
+        { val->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContValue> ContValueNeg::clone() const
-{
-    return std::make_unique<ContValueNeg>(val->clone());
-}
-
-void ContValueNeg::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ValueNeg::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, val);
 }
 
-std::vector<uint8_t> ContValueNeg::Serialize() const
+std::vector<uint8_t> ValueNeg::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueNeg));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueNeg));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, val->Serialize());
     return result;
 }
 
-Reader ContValueNeg::Deserialize(Reader reader)
+Reader ValueNeg::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContValueNeg is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContValueNeg) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContValueNeg");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ValueNeg);
     reader = super::Deserialize(reader);
-    std::tie(val, reader) = DeserializeContValue(reader);
+    std::tie(val, reader) = DeserializeValue(reader);
     return reader;
 }
 
-// ContValueREM
-float ContValueREM::Get(AnimationCompile const& anim) const
+// ValueREM
+float ValueREM::Get(AnimationCompile const& anim) const
 {
     return anim.GetBeatsRemaining();
 }
 
-std::ostream& ContValueREM::Print(std::ostream& os) const
+std::ostream& ValueREM::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CVR]";
     return os << "REM";
 }
 
-DrawableCont ContValueREM::GetDrawableCont() const
+Drawable ValueREM::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::value,
+        Type::value,
         "Remaining",
         "REM",
         {}
     };
 }
 
-std::unique_ptr<ContValue> ContValueREM::clone() const
-{
-    return std::make_unique<ContValueREM>();
-}
-
-std::vector<uint8_t> ContValueREM::Serialize() const
+std::vector<uint8_t> ValueREM::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueREM));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueREM));
     Parser::Append(result, super::Serialize());
     return result;
 }
 
-Reader ContValueREM::Deserialize(Reader reader)
+Reader ValueREM::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContValueREM is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContValueREM) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContValueREM");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ValueREM);
     return super::Deserialize(reader);
 }
 
-// ContValueVar
-ContValueVar::ContValueVar(unsigned num)
+// ValueVar
+ValueVar::ValueVar(Cont::Variable num)
     : varnum(num)
 {
 }
 
-float ContValueVar::Get(AnimationCompile const& anim) const
+float ValueVar::Get(AnimationCompile const& anim) const
 {
     return anim.GetVarValue(varnum, this);
 }
 
-std::ostream& ContValueVar::Print(std::ostream& os) const
+std::ostream& ValueVar::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CVV]";
-    return os << "Var " << varnum;
+    return os << "Var " << toUType(varnum);
 }
 
-DrawableCont ContValueVar::GetDrawableCont() const
+Drawable ValueVar::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::value,
-        s_contvar_names[varnum],
-        s_contvar_names[varnum],
+        Type::value,
+        s_var_names[toUType(varnum)],
+        s_var_names[toUType(varnum)],
         {}
     };
 }
 
-std::unique_ptr<ContValue> ContValueVar::clone() const
-{
-    return std::make_unique<ContValueVar>(varnum);
-}
-
-void ContValueVar::Set(AnimationCompile& anim, float v)
+void ValueVar::Set(AnimationCompile& anim, float v)
 {
     anim.SetVarValue(varnum, v);
 }
 
-std::vector<uint8_t> ContValueVar::Serialize() const
+std::vector<uint8_t> ValueVar::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueVar));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueVar));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, static_cast<uint8_t>(varnum));
     return result;
 }
 
-Reader ContValueVar::Deserialize(Reader reader)
+Reader ValueVar::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContValueVar is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContValueVar) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContValueVar");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ValueVar);
     reader = super::Deserialize(reader);
-    varnum = reader.Get<uint8_t>();
+    varnum = static_cast<Cont::Variable>(reader.Get<uint8_t>());
     return reader;
 }
 
-// ContValueVarUnset
-std::ostream& ContValueVarUnset::Print(std::ostream& os) const
+// ValueVarUnset
+std::ostream& ValueVarUnset::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CVVU]";
     return os << "Unset";
 }
 
-DrawableCont ContValueVarUnset::GetDrawableCont() const
+Drawable ValueVarUnset::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::unset,
+        Type::unset,
         "unset value var",
         "unset value var",
         {}
     };
 }
 
-std::unique_ptr<ContValue> ContValueVarUnset::clone() const
-{
-    return std::make_unique<ContValueVarUnset>();
-}
-
-std::vector<uint8_t> ContValueVarUnset::Serialize() const
+std::vector<uint8_t> ValueVarUnset::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueVarUnset));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueVarUnset));
     Parser::Append(result, super::Serialize());
     return result;
 }
 
-Reader ContValueVarUnset::Deserialize(Reader reader)
+Reader ValueVarUnset::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContValueVarUnset is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContValueVarUnset) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContValueVarUnset");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ValueVarUnset);
     return super::Deserialize(reader);
 }
 
-// ContFuncDir
-ContFuncDir::ContFuncDir(ContPoint* p)
-    : pnt(p)
-{
-    SetParentPtr_helper(this, pnt);
-}
-
-ContFuncDir::ContFuncDir(std::unique_ptr<ContPoint> p)
-    : pnt(std::move(p))
-{
-    SetParentPtr_helper(this, pnt);
-}
-
-float ContFuncDir::Get(AnimationCompile const& anim) const
+// FuncDir
+float FuncDir::Get(AnimationCompile const& anim) const
 {
     auto c = pnt->Get(anim);
     if (c == anim.GetPointPosition()) {
@@ -1526,73 +1195,48 @@ float ContFuncDir::Get(AnimationCompile const& anim) const
     return anim.GetPointPosition().Direction(c);
 }
 
-std::ostream& ContFuncDir::Print(std::ostream& os) const
+std::ostream& FuncDir::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CFD]";
     return os << "Direction to " << *pnt;
 }
 
-DrawableCont ContFuncDir::GetDrawableCont() const
+Drawable FuncDir::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::function,
+        Type::function,
         "Direction to %@",
         "DIR %@",
-        { pnt->GetDrawableCont() }
+        { pnt->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContValue> ContFuncDir::clone() const
-{
-    return std::make_unique<ContFuncDir>(pnt->clone());
-}
-
-void ContFuncDir::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void FuncDir::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, pnt);
 }
 
-std::vector<uint8_t> ContFuncDir::Serialize() const
+std::vector<uint8_t> FuncDir::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContFuncDir));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::FuncDir));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt->Serialize());
     return result;
 }
 
-Reader ContFuncDir::Deserialize(Reader reader)
+Reader FuncDir::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContFuncDir is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContFuncDir) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContFuncDir");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::FuncDir);
     reader = super::Deserialize(reader);
-    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    std::tie(pnt, reader) = DeserializePoint(reader);
     return reader;
 }
 
-// ContFuncDirFrom
-ContFuncDirFrom::ContFuncDirFrom(ContPoint* start, ContPoint* end)
-    : pnt_start(start)
-    , pnt_end(end)
-{
-    SetParentPtr_helper(this, pnt_start, pnt_end);
-}
-
-ContFuncDirFrom::ContFuncDirFrom(std::unique_ptr<ContPoint> start, std::unique_ptr<ContPoint> end)
-    : pnt_start(std::move(start))
-    , pnt_end(std::move(end))
-{
-    SetParentPtr_helper(this, pnt_start, pnt_end);
-}
-
-float ContFuncDirFrom::Get(AnimationCompile const& anim) const
+// FuncDirFrom
+float FuncDirFrom::Get(AnimationCompile const& anim) const
 {
     auto start = pnt_start->Get(anim);
     auto end = pnt_end->Get(anim);
@@ -1602,221 +1246,146 @@ float ContFuncDirFrom::Get(AnimationCompile const& anim) const
     return start.Direction(end);
 }
 
-std::ostream& ContFuncDirFrom::Print(std::ostream& os) const
+std::ostream& FuncDirFrom::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CFDF]";
     return os << "Direction from " << *pnt_start << " to " << *pnt_end;
 }
 
-DrawableCont ContFuncDirFrom::GetDrawableCont() const
+Drawable FuncDirFrom::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::function,
+        Type::function,
         "Direction from %@ to %@",
         "DIRFROM %@ to %@",
-        { pnt_start->GetDrawableCont(), pnt_end->GetDrawableCont() }
+        { pnt_start->GetDrawable(), pnt_end->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContValue> ContFuncDirFrom::clone() const
-{
-    return std::make_unique<ContFuncDirFrom>(pnt_start->clone(), pnt_end->clone());
-}
-
-void ContFuncDirFrom::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void FuncDirFrom::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, pnt_start, pnt_end);
 }
 
-std::vector<uint8_t> ContFuncDirFrom::Serialize() const
+std::vector<uint8_t> FuncDirFrom::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContFuncDirFrom));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::FuncDirFrom));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt_start->Serialize());
     Parser::Append(result, pnt_end->Serialize());
     return result;
 }
 
-Reader ContFuncDirFrom::Deserialize(Reader reader)
+Reader FuncDirFrom::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContFuncDirFrom is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContFuncDirFrom) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContFuncDirFrom");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::FuncDirFrom);
     reader = super::Deserialize(reader);
-    std::tie(pnt_start, reader) = DeserializeContPoint(reader);
-    std::tie(pnt_end, reader) = DeserializeContPoint(reader);
+    std::tie(pnt_start, reader) = DeserializePoint(reader);
+    std::tie(pnt_end, reader) = DeserializePoint(reader);
     return reader;
 }
 
-// ContFuncDist
-ContFuncDist::ContFuncDist(ContPoint* p)
-    : pnt(p)
-{
-    SetParentPtr_helper(this, pnt);
-}
-
-ContFuncDist::ContFuncDist(std::unique_ptr<ContPoint> p)
-    : pnt(std::move(p))
-{
-    SetParentPtr_helper(this, pnt);
-}
-
-float ContFuncDist::Get(AnimationCompile const& anim) const
+// FuncDist
+float FuncDist::Get(AnimationCompile const& anim) const
 {
     auto vector = pnt->Get(anim) - anim.GetPointPosition();
     return vector.DM_Magnitude();
 }
 
-std::ostream& ContFuncDist::Print(std::ostream& os) const
+std::ostream& FuncDist::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CFd]";
     return os << "Distance to " << *pnt;
 }
 
-DrawableCont ContFuncDist::GetDrawableCont() const
+Drawable FuncDist::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::function,
+        Type::function,
         "Distance to %@",
         "DIST %@",
-        { pnt->GetDrawableCont() }
+        { pnt->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContValue> ContFuncDist::clone() const
-{
-    return std::make_unique<ContFuncDist>(pnt->clone());
-}
-
-void ContFuncDist::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void FuncDist::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, pnt);
 }
 
-std::vector<uint8_t> ContFuncDist::Serialize() const
+std::vector<uint8_t> FuncDist::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContFuncDist));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::FuncDist));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt->Serialize());
     return result;
 }
 
-Reader ContFuncDist::Deserialize(Reader reader)
+Reader FuncDist::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContFuncDist is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContFuncDist) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContFuncDist");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::FuncDist);
     reader = super::Deserialize(reader);
-    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    std::tie(pnt, reader) = DeserializePoint(reader);
     return reader;
 }
 
-// ContFuncDistFrom
-ContFuncDistFrom::ContFuncDistFrom(ContPoint* start, ContPoint* end)
-    : pnt_start(start)
-    , pnt_end(end)
-{
-    SetParentPtr_helper(this, pnt_start, pnt_end);
-}
-
-ContFuncDistFrom::ContFuncDistFrom(std::unique_ptr<ContPoint> start, std::unique_ptr<ContPoint> end)
-    : pnt_start(std::move(start))
-    , pnt_end(std::move(end))
-{
-    SetParentPtr_helper(this, pnt_start, pnt_end);
-}
-
-float ContFuncDistFrom::Get(AnimationCompile const& anim) const
+// FuncDistFrom
+float FuncDistFrom::Get(AnimationCompile const& anim) const
 {
     auto vector = pnt_end->Get(anim) - pnt_start->Get(anim);
     return vector.Magnitude();
 }
 
-std::ostream& ContFuncDistFrom::Print(std::ostream& os) const
+std::ostream& FuncDistFrom::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CFdF]";
     return os << "Distance from " << *pnt_start << " to " << *pnt_end;
 }
 
-DrawableCont ContFuncDistFrom::GetDrawableCont() const
+Drawable FuncDistFrom::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::function,
+        Type::function,
         "Distance from %@ to %@",
         "DISTFROM %@ to %@",
-        { pnt_start->GetDrawableCont(), pnt_end->GetDrawableCont() }
+        { pnt_start->GetDrawable(), pnt_end->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContValue> ContFuncDistFrom::clone() const
-{
-    return std::make_unique<ContFuncDistFrom>(pnt_start->clone(), pnt_end->clone());
-}
-
-void ContFuncDistFrom::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void FuncDistFrom::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, pnt_start, pnt_end);
 }
 
-std::vector<uint8_t> ContFuncDistFrom::Serialize() const
+std::vector<uint8_t> FuncDistFrom::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContFuncDistFrom));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::FuncDistFrom));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt_start->Serialize());
     Parser::Append(result, pnt_end->Serialize());
     return result;
 }
 
-Reader ContFuncDistFrom::Deserialize(Reader reader)
+Reader FuncDistFrom::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContFuncDistFrom is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContFuncDistFrom) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContFuncDistFrom");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::FuncDistFrom);
     reader = super::Deserialize(reader);
-    std::tie(pnt_start, reader) = DeserializeContPoint(reader);
-    std::tie(pnt_end, reader) = DeserializeContPoint(reader);
+    std::tie(pnt_start, reader) = DeserializePoint(reader);
+    std::tie(pnt_end, reader) = DeserializePoint(reader);
     return reader;
 }
 
-// ContFuncEither
-ContFuncEither::ContFuncEither(ContValue* d1, ContValue* d2, ContPoint* p)
-    : dir1(d1)
-    , dir2(d2)
-    , pnt(p)
-{
-    SetParentPtr_helper(this, dir1, dir2, pnt);
-}
-
-ContFuncEither::ContFuncEither(std::unique_ptr<ContValue> d1, std::unique_ptr<ContValue> d2, std::unique_ptr<ContPoint> p)
-    : dir1(std::move(d1))
-    , dir2(std::move(d2))
-    , pnt(std::move(p))
-{
-    SetParentPtr_helper(this, dir1, dir2, pnt);
-}
-
-float ContFuncEither::Get(AnimationCompile const& anim) const
+// FuncEither
+float FuncEither::Get(AnimationCompile const& anim) const
 {
     auto c = pnt->Get(anim);
     if (anim.GetPointPosition() == c) {
@@ -1837,7 +1406,7 @@ float ContFuncEither::Get(AnimationCompile const& anim) const
     return (std::abs(d1) > std::abs(d2)) ? dir2->Get(anim) : dir1->Get(anim);
 }
 
-std::ostream& ContFuncEither::Print(std::ostream& os) const
+std::ostream& FuncEither::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CFE]";
@@ -1845,31 +1414,26 @@ std::ostream& ContFuncEither::Print(std::ostream& os) const
               << ", depending on whichever is a shorter angle to " << *pnt;
 }
 
-DrawableCont ContFuncEither::GetDrawableCont() const
+Drawable FuncEither::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::function,
+        Type::function,
         "Either direction to %@ or %@, depending on whichever is a shorter angle to %@",
         "EITHER %@ or %@, by %@",
-        { dir1->GetDrawableCont(), dir2->GetDrawableCont(), pnt->GetDrawableCont() }
+        { dir1->GetDrawable(), dir2->GetDrawable(), pnt->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContValue> ContFuncEither::clone() const
-{
-    return std::make_unique<ContFuncEither>(dir1->clone(), dir2->clone(), pnt->clone());
-}
-
-void ContFuncEither::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void FuncEither::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, dir1, dir2, pnt);
 }
 
-std::vector<uint8_t> ContFuncEither::Serialize() const
+std::vector<uint8_t> FuncEither::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContFuncEither));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::FuncEither));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, dir1->Serialize());
     Parser::Append(result, dir2->Serialize());
@@ -1877,115 +1441,71 @@ std::vector<uint8_t> ContFuncEither::Serialize() const
     return result;
 }
 
-Reader ContFuncEither::Deserialize(Reader reader)
+Reader FuncEither::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContFuncEither is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContFuncEither) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContFuncEither");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::FuncEither);
     reader = super::Deserialize(reader);
-    std::tie(dir1, reader) = DeserializeContValue(reader);
-    std::tie(dir2, reader) = DeserializeContValue(reader);
-    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    std::tie(dir1, reader) = DeserializeValue(reader);
+    std::tie(dir2, reader) = DeserializeValue(reader);
+    std::tie(pnt, reader) = DeserializePoint(reader);
     return reader;
 }
 
-// ContFuncOpp
-ContFuncOpp::ContFuncOpp(ContValue* d)
-    : dir(d)
-{
-    SetParentPtr_helper(this, dir);
-}
-
-ContFuncOpp::ContFuncOpp(std::unique_ptr<ContValue> d)
-    : dir(std::move(d))
-{
-    SetParentPtr_helper(this, dir);
-}
-
-float ContFuncOpp::Get(AnimationCompile const& anim) const
+// FuncOpp
+float FuncOpp::Get(AnimationCompile const& anim) const
 {
     return (dir->Get(anim) + 180.0f);
 }
 
-std::ostream& ContFuncOpp::Print(std::ostream& os) const
+std::ostream& FuncOpp::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CFO]";
     return os << "opposite direction of " << *dir;
 }
 
-DrawableCont ContFuncOpp::GetDrawableCont() const
+Drawable FuncOpp::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::function,
+        Type::function,
         "opposite direction of %@",
         "OPP %@",
-        { dir->GetDrawableCont() }
+        { dir->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContValue> ContFuncOpp::clone() const
-{
-    return std::make_unique<ContFuncOpp>(dir->clone());
-}
-
-void ContFuncOpp::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void FuncOpp::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, dir);
 }
 
-std::vector<uint8_t> ContFuncOpp::Serialize() const
+std::vector<uint8_t> FuncOpp::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContFuncOpp));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::FuncOpp));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, dir->Serialize());
     return result;
 }
 
-Reader ContFuncOpp::Deserialize(Reader reader)
+Reader FuncOpp::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContFuncOpp is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContFuncOpp) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContFuncOpp");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::FuncOpp);
     reader = super::Deserialize(reader);
-    std::tie(dir, reader) = DeserializeContValue(reader);
+    std::tie(dir, reader) = DeserializeValue(reader);
     return reader;
 }
 
-// ContFuncStep
-ContFuncStep::ContFuncStep(ContValue* beats, ContValue* blocksize, ContPoint* p)
-    : numbeats(beats)
-    , blksize(blocksize)
-    , pnt(p)
-{
-    SetParentPtr_helper(this, numbeats, blksize, pnt);
-}
+// FuncStep
 
-ContFuncStep::ContFuncStep(std::unique_ptr<ContValue> beats, std::unique_ptr<ContValue> blocksize, std::unique_ptr<ContPoint> p)
-    : numbeats(std::move(beats))
-    , blksize(std::move(blocksize))
-    , pnt(std::move(p))
-{
-    SetParentPtr_helper(this, numbeats, blksize, pnt);
-}
-
-float ContFuncStep::Get(AnimationCompile const& anim) const
+float FuncStep::Get(AnimationCompile const& anim) const
 {
     auto c = pnt->Get(anim) - anim.GetPointPosition();
     return (c.DM_Magnitude() * numbeats->Get(anim) / blksize->Get(anim));
 }
 
-std::ostream& ContFuncStep::Print(std::ostream& os) const
+std::ostream& FuncStep::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CFS]";
@@ -1993,31 +1513,26 @@ std::ostream& ContFuncStep::Print(std::ostream& os) const
               << *blksize << " from point " << *pnt;
 }
 
-DrawableCont ContFuncStep::GetDrawableCont() const
+Drawable FuncStep::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::function,
+        Type::function,
         "Step drill at %@ beats for a block size of %@ from point %@",
         "STEP %@ Beats, %@ size, from %@",
-        { numbeats->GetDrawableCont(), blksize->GetDrawableCont(), pnt->GetDrawableCont() }
+        { numbeats->GetDrawable(), blksize->GetDrawable(), pnt->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContValue> ContFuncStep::clone() const
-{
-    return std::make_unique<ContFuncStep>(numbeats->clone(), blksize->clone(), pnt->clone());
-}
-
-void ContFuncStep::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void FuncStep::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, numbeats, blksize, pnt);
 }
 
-std::vector<uint8_t> ContFuncStep::Serialize() const
+std::vector<uint8_t> FuncStep::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContFuncStep));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::FuncStep));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, numbeats->Serialize());
     Parser::Append(result, blksize->Serialize());
@@ -2025,277 +1540,194 @@ std::vector<uint8_t> ContFuncStep::Serialize() const
     return result;
 }
 
-Reader ContFuncStep::Deserialize(Reader reader)
+Reader FuncStep::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContFuncStep is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContFuncStep) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContFuncStep");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::FuncStep);
     reader = super::Deserialize(reader);
-    std::tie(numbeats, reader) = DeserializeContValue(reader);
-    std::tie(blksize, reader) = DeserializeContValue(reader);
-    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    std::tie(numbeats, reader) = DeserializeValue(reader);
+    std::tie(blksize, reader) = DeserializeValue(reader);
+    std::tie(pnt, reader) = DeserializePoint(reader);
     return reader;
 }
 
-// ContProcedure
-std::ostream& ContProcedure::Print(std::ostream& os) const
+// Procedure
+std::ostream& Procedure::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPr]";
     return os << "Procedure: ";
 }
 
-std::vector<uint8_t> ContProcedure::Serialize() const
+std::vector<uint8_t> Procedure::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcedure));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::Procedure));
     Parser::Append(result, super::Serialize());
     return result;
 }
 
-Reader ContProcedure::Deserialize(Reader reader)
+Reader Procedure::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcedure is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcedure) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcedure");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::Procedure);
     return super::Deserialize(reader);
 }
 
-// ContProcUnset
-std::ostream& ContProcUnset::Print(std::ostream& os) const
+// ProcUnset
+std::ostream& ProcUnset::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPrU]";
     return os << "Unset";
 }
 
-DrawableCont ContProcUnset::GetDrawableCont() const
+Drawable ProcUnset::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::unset,
+        Type::unset,
         "unset continuity",
         "unset continuity",
         {}
     };
 }
 
-std::unique_ptr<ContProcedure> ContProcUnset::clone() const
-{
-    // we need to make a copy of the var, then dynamically cast to std::unique_ptr<ContValueVar>
-    return std::make_unique<ContProcUnset>();
-}
-
-std::vector<uint8_t> ContProcUnset::Serialize() const
+std::vector<uint8_t> ProcUnset::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcUnset));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcUnset));
     Parser::Append(result, super::Serialize());
     return result;
 }
 
-Reader ContProcUnset::Deserialize(Reader reader)
+Reader ProcUnset::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcUnset is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcUnset) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcUnset");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ProcUnset);
     return super::Deserialize(reader);
 }
 
-// ContProcSet
-ContProcSet::ContProcSet(ContValueVar* vr, ContValue* v)
-    : var(vr)
-    , val(v)
-{
-    SetParentPtr_helper(this, var, val);
-}
-
-ContProcSet::ContProcSet(std::unique_ptr<ContValueVar> vr, std::unique_ptr<ContValue> v)
-    : var(std::move(vr))
-    , val(std::move(v))
-{
-    SetParentPtr_helper(this, var, val);
-}
-
-void ContProcSet::Compile(AnimationCompile& anim)
+// ProcSet
+void ProcSet::Compile(AnimationCompile& anim)
 {
     var->Set(anim, val->Get(anim));
 }
 
-std::ostream& ContProcSet::Print(std::ostream& os) const
+std::ostream& ProcSet::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPrS]";
     return os << "Setting variable " << *var << " to " << *val;
 }
 
-DrawableCont ContProcSet::GetDrawableCont() const
+Drawable ProcSet::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::procedure,
+        Type::procedure,
         "variable %@ = %@",
         "%@ = %@",
-        { var->GetDrawableCont(), val->GetDrawableCont() }
+        { var->GetDrawable(), val->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContProcedure> ContProcSet::clone() const
+std::unique_ptr<Procedure> ProcSet::clone() const
 {
-    // we need to make a copy of the var, then dynamically cast to std::unique_ptr<ContValueVar>
+    // we need to make a copy of the var, then dynamically cast to std::unique_ptr<ValueVar>
     auto var_clone = var->clone();
-    if (ContValueVar* cast = dynamic_cast<ContValueVar*>(var_clone.get())) {
-        std::unique_ptr<ContValueVar> t(cast);
+    if (ValueVar* cast = dynamic_cast<ValueVar*>(var_clone.get())) {
+        std::unique_ptr<ValueVar> t(cast);
         var_clone.release();
-        return std::make_unique<ContProcSet>(std::move(t), val->clone());
+        return std::make_unique<ProcSet>(std::move(t), val->clone());
     }
-    throw std::runtime_error("ContProcSet var was not of type ContValueVar");
+    throw std::runtime_error("ProcSet var was not of type ValueVar");
 }
 
-//class ContProcSet::ReplaceError_NotAVar : public std::runtime_error
-//{
-//};
-//
-void ContProcSet::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ProcSet::replace(Token const* which, std::unique_ptr<Token> v)
 {
     if (var.get() == which) {
         // ProcSet is different because we Must have a ValueVar as when replacing
-        auto result = dynamic_cast<ContValueVar*>(v.get());
+        auto result = dynamic_cast<ValueVar*>(v.get());
         if (!result) {
             throw ReplaceError_NotAVar{};
         }
-        var = dynamic_unique_ptr_cast<ContValueVar>(std::move(v));
+        var = dynamic_unique_ptr_cast<ValueVar>(std::move(v));
     }
     if (val.get() == which) {
-        auto result = dynamic_cast<ContValue*>(v.get());
+        auto result = dynamic_cast<Value*>(v.get());
         if (!result) {
             throw std::runtime_error("Invalid value in replace");
         }
-        val = dynamic_unique_ptr_cast<ContValue>(std::move(v));
+        val = dynamic_unique_ptr_cast<Value>(std::move(v));
     }
     SetParentPtr_helper(this, var, val);
 }
 
-std::vector<uint8_t> ContProcSet::Serialize() const
+std::vector<uint8_t> ProcSet::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcSet));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcSet));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, var->Serialize());
     Parser::Append(result, val->Serialize());
     return result;
 }
 
-Reader ContProcSet::Deserialize(Reader reader)
+Reader ProcSet::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcSet is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcSet) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcSet");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ProcSet);
     reader = super::Deserialize(reader);
-    std::tie(var, reader) = DeserializeContValueVar(reader);
-    std::tie(val, reader) = DeserializeContValue(reader);
+    std::tie(var, reader) = DeserializeValueVar(reader);
+    std::tie(val, reader) = DeserializeValue(reader);
     return reader;
 }
 
-// ContProcBlam
-void ContProcBlam::Compile(AnimationCompile& anim)
+// ProcBlam
+void ProcBlam::Compile(AnimationCompile& anim)
 {
-    ContNextPoint np;
+    NextPoint np;
     auto c = np.Get(anim) - anim.GetPointPosition();
     anim.Append(std::make_unique<AnimationCommandMove>(anim.GetBeatsRemaining(), c),
         this);
 }
 
-std::ostream& ContProcBlam::Print(std::ostream& os) const
+std::ostream& ProcBlam::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPrB]";
     return os << "BLAM";
 }
 
-DrawableCont ContProcBlam::GetDrawableCont() const
+Drawable ProcBlam::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::procedure,
+        Type::procedure,
         "BLAM",
         "BLAM",
         {}
     };
 }
 
-std::unique_ptr<ContProcedure> ContProcBlam::clone() const
-{
-    return std::make_unique<ContProcBlam>();
-}
-
-std::vector<uint8_t> ContProcBlam::Serialize() const
+std::vector<uint8_t> ProcBlam::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcBlam));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcBlam));
     Parser::Append(result, super::Serialize());
     return result;
 }
 
-Reader ContProcBlam::Deserialize(Reader reader)
+Reader ProcBlam::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcBlam is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcBlam) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcBlam");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ProcBlam);
     return super::Deserialize(reader);
 }
 
-// ContProcCM
-ContProcCM::ContProcCM(ContPoint* p1, ContPoint* p2, ContValue* steps, ContValue* d1,
-    ContValue* d2, ContValue* beats)
-    : pnt1(p1)
-    , pnt2(p2)
-    , stps(steps)
-    , dir1(d1)
-    , dir2(d2)
-    , numbeats(beats)
-{
-    SetParentPtr_helper(this, pnt1, pnt2, stps, dir1, dir2, numbeats);
-}
-
-ContProcCM::ContProcCM(std::unique_ptr<ContPoint> p1, std::unique_ptr<ContPoint> p2, std::unique_ptr<ContValue> steps, std::unique_ptr<ContValue> d1,
-    std::unique_ptr<ContValue> d2, std::unique_ptr<ContValue> beats)
-    : pnt1(std::move(p1))
-    , pnt2(std::move(p2))
-    , stps(std::move(steps))
-    , dir1(std::move(d1))
-    , dir2(std::move(d2))
-    , numbeats(std::move(beats))
-{
-    SetParentPtr_helper(this, pnt1, pnt2, stps, dir1, dir2, numbeats);
-}
-
-void ContProcCM::Compile(AnimationCompile& anim)
+// ProcCM
+void ProcCM::Compile(AnimationCompile& anim)
 {
     DoCounterMarch(*this, anim, *pnt1, *pnt2, *stps, *dir1, *dir2, *numbeats);
 }
 
-std::ostream& ContProcCM::Print(std::ostream& os) const
+std::ostream& ProcCM::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPrCM]";
@@ -2304,31 +1736,26 @@ std::ostream& ContProcCM::Print(std::ostream& os) const
               << *dir1 << " then " << *dir2 << " for number beats " << *numbeats;
 }
 
-DrawableCont ContProcCM::GetDrawableCont() const
+Drawable ProcCM::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::procedure,
+        Type::procedure,
         "CounterMarch starting at %@ passing through %@ stepping %@ off points, first moving %@ then %@ for number beats %@",
         "COUNTERMARCH %@ %@ %@, first %@ then %@ for beats %@",
-        { pnt1->GetDrawableCont(), pnt2->GetDrawableCont(), stps->GetDrawableCont(), dir1->GetDrawableCont(), dir2->GetDrawableCont(), numbeats->GetDrawableCont() }
+        { pnt1->GetDrawable(), pnt2->GetDrawable(), stps->GetDrawable(), dir1->GetDrawable(), dir2->GetDrawable(), numbeats->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContProcedure> ContProcCM::clone() const
-{
-    return std::make_unique<ContProcCM>(pnt1->clone(), pnt2->clone(), stps->clone(), dir1->clone(), dir2->clone(), numbeats->clone());
-}
-
-void ContProcCM::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ProcCM::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, pnt1, pnt2, stps, dir1, dir2, numbeats);
 }
 
-std::vector<uint8_t> ContProcCM::Serialize() const
+std::vector<uint8_t> ProcCM::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcCM));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcCM));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt1->Serialize());
     Parser::Append(result, pnt2->Serialize());
@@ -2339,74 +1766,52 @@ std::vector<uint8_t> ContProcCM::Serialize() const
     return result;
 }
 
-Reader ContProcCM::Deserialize(Reader reader)
+Reader ProcCM::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcCM is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcCM) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcCM");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ProcCM);
     reader = super::Deserialize(reader);
-    std::tie(pnt1, reader) = DeserializeContPoint(reader);
-    std::tie(pnt2, reader) = DeserializeContPoint(reader);
-    std::tie(stps, reader) = DeserializeContValue(reader);
-    std::tie(dir1, reader) = DeserializeContValue(reader);
-    std::tie(dir2, reader) = DeserializeContValue(reader);
-    std::tie(numbeats, reader) = DeserializeContValue(reader);
+    std::tie(pnt1, reader) = DeserializePoint(reader);
+    std::tie(pnt2, reader) = DeserializePoint(reader);
+    std::tie(stps, reader) = DeserializeValue(reader);
+    std::tie(dir1, reader) = DeserializeValue(reader);
+    std::tie(dir2, reader) = DeserializeValue(reader);
+    std::tie(numbeats, reader) = DeserializeValue(reader);
     return reader;
 }
 
-// ContProcDMCM
-ContProcDMCM::ContProcDMCM(ContPoint* p1, ContPoint* p2, ContValue* beats)
-    : pnt1(p1)
-    , pnt2(p2)
-    , numbeats(beats)
+// ProcDMCM
+void ProcDMCM::Compile(AnimationCompile& anim)
 {
-    SetParentPtr_helper(this, pnt1, pnt2, numbeats);
-}
-
-ContProcDMCM::ContProcDMCM(std::unique_ptr<ContPoint> p1, std::unique_ptr<ContPoint> p2, std::unique_ptr<ContValue> beats)
-    : pnt1(std::move(p1))
-    , pnt2(std::move(p2))
-    , numbeats(std::move(beats))
-{
-    SetParentPtr_helper(this, pnt1, pnt2, numbeats);
-}
-
-void ContProcDMCM::Compile(AnimationCompile& anim)
-{
-    ContValueFloat steps(1.0);
+    ValueFloat steps(1.0);
 
     auto r1 = pnt1->Get(anim);
     auto r2 = pnt2->Get(anim);
     auto c = r2.x - r1.x;
     if (c == (r2.y - r1.y + Int2CoordUnits(2))) {
         if (c >= 0) {
-            ContValueDefined dir1(CC_SW);
-            ContValueDefined dir2(CC_W);
+            ValueDefined dir1(CC_SW);
+            ValueDefined dir2(CC_W);
             DoCounterMarch(*this, anim, *pnt1, *pnt2, steps, dir1, dir2, *numbeats);
             return;
         }
     } else if (c == (r1.y - r2.y - Int2CoordUnits(2))) {
         if (c >= 0) {
-            ContValueDefined dir1(CC_SE);
-            ContValueDefined dir2(CC_W);
+            ValueDefined dir1(CC_SE);
+            ValueDefined dir2(CC_W);
             DoCounterMarch(*this, anim, *pnt1, *pnt2, steps, dir1, dir2, *numbeats);
             return;
         }
     } else if (c == (r1.y - r2.y + Int2CoordUnits(2))) {
         if (c <= 0) {
-            ContValueDefined dir1(CC_NW);
-            ContValueDefined dir2(CC_E);
+            ValueDefined dir1(CC_NW);
+            ValueDefined dir2(CC_E);
             DoCounterMarch(*this, anim, *pnt1, *pnt2, steps, dir1, dir2, *numbeats);
             return;
         }
     } else if (c == (r2.y - r1.y - Int2CoordUnits(2))) {
         if (c <= 0) {
-            ContValueDefined dir1(CC_NE);
-            ContValueDefined dir2(CC_E);
+            ValueDefined dir1(CC_NE);
+            ValueDefined dir2(CC_E);
             DoCounterMarch(*this, anim, *pnt1, *pnt2, steps, dir1, dir2, *numbeats);
             return;
         }
@@ -2414,7 +1819,7 @@ void ContProcDMCM::Compile(AnimationCompile& anim)
     anim.RegisterError(AnimateError::INVALID_CM, this);
 }
 
-std::ostream& ContProcDMCM::Print(std::ostream& os) const
+std::ostream& ProcDMCM::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPrDC]";
@@ -2422,31 +1827,26 @@ std::ostream& ContProcDMCM::Print(std::ostream& os) const
               << " passing through " << *pnt2 << " for number beats" << *numbeats;
 }
 
-DrawableCont ContProcDMCM::GetDrawableCont() const
+Drawable ProcDMCM::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::procedure,
+        Type::procedure,
         "Diagonal march CounterMarch starting at %@ passing through %@ for number beats %@",
         "DMCM %@ %@ for beats %@",
-        { pnt1->GetDrawableCont(), pnt2->GetDrawableCont(), numbeats->GetDrawableCont() }
+        { pnt1->GetDrawable(), pnt2->GetDrawable(), numbeats->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContProcedure> ContProcDMCM::clone() const
-{
-    return std::make_unique<ContProcDMCM>(pnt1->clone(), pnt2->clone(), numbeats->clone());
-}
-
-void ContProcDMCM::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ProcDMCM::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, pnt1, pnt2, numbeats);
 }
 
-std::vector<uint8_t> ContProcDMCM::Serialize() const
+std::vector<uint8_t> ProcDMCM::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcDMCM));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcDMCM));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt1->Serialize());
     Parser::Append(result, pnt2->Serialize());
@@ -2454,36 +1854,18 @@ std::vector<uint8_t> ContProcDMCM::Serialize() const
     return result;
 }
 
-Reader ContProcDMCM::Deserialize(Reader reader)
+Reader ProcDMCM::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcDMCM is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcDMCM) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcDMCM");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ProcDMCM);
     reader = super::Deserialize(reader);
-    std::tie(pnt1, reader) = DeserializeContPoint(reader);
-    std::tie(pnt2, reader) = DeserializeContPoint(reader);
-    std::tie(numbeats, reader) = DeserializeContValue(reader);
+    std::tie(pnt1, reader) = DeserializePoint(reader);
+    std::tie(pnt2, reader) = DeserializePoint(reader);
+    std::tie(numbeats, reader) = DeserializeValue(reader);
     return reader;
 }
 
-// ContProcDMHS
-ContProcDMHS::ContProcDMHS(ContPoint* p)
-    : pnt(p)
-{
-    SetParentPtr_helper(this, pnt);
-}
-
-ContProcDMHS::ContProcDMHS(std::unique_ptr<ContPoint> p)
-    : pnt(std::move(p))
-{
-    SetParentPtr_helper(this, pnt);
-}
-
-void ContProcDMHS::Compile(AnimationCompile& anim)
+// ProcDMHS
+void ProcDMHS::Compile(AnimationCompile& anim)
 {
     short b_hs;
 
@@ -2519,73 +1901,48 @@ void ContProcDMHS::Compile(AnimationCompile& anim)
     }
 }
 
-std::ostream& ContProcDMHS::Print(std::ostream& os) const
+std::ostream& ProcDMHS::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPrDH]";
     return os << "Diagonal march then HighStep to " << *pnt;
 }
 
-DrawableCont ContProcDMHS::GetDrawableCont() const
+Drawable ProcDMHS::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::procedure,
+        Type::procedure,
         "Diagonal march then HighStep to %@",
         "DMHS %@",
-        { pnt->GetDrawableCont() }
+        { pnt->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContProcedure> ContProcDMHS::clone() const
-{
-    return std::make_unique<ContProcDMHS>(pnt->clone());
-}
-
-void ContProcDMHS::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ProcDMHS::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, pnt);
 }
 
-std::vector<uint8_t> ContProcDMHS::Serialize() const
+std::vector<uint8_t> ProcDMHS::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcDMHS));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcDMHS));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt->Serialize());
     return result;
 }
 
-Reader ContProcDMHS::Deserialize(Reader reader)
+Reader ProcDMHS::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcDMHS is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcDMHS) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcDMHS");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ProcDMHS);
     reader = super::Deserialize(reader);
-    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    std::tie(pnt, reader) = DeserializePoint(reader);
     return reader;
 }
 
-// ContProcEven
-ContProcEven::ContProcEven(ContValue* steps, ContPoint* p)
-    : stps(steps)
-    , pnt(p)
-{
-    SetParentPtr_helper(this, stps, pnt);
-}
-
-ContProcEven::ContProcEven(std::unique_ptr<ContValue> steps, std::unique_ptr<ContPoint> p)
-    : stps(std::move(steps))
-    , pnt(std::move(p))
-{
-    SetParentPtr_helper(this, stps, pnt);
-}
-
-void ContProcEven::Compile(AnimationCompile& anim)
+// ProcEven
+void ProcEven::Compile(AnimationCompile& anim)
 {
     auto c = pnt->Get(anim) - anim.GetPointPosition();
     auto steps = float2int(this, anim, stps->Get(anim));
@@ -2598,73 +1955,50 @@ void ContProcEven::Compile(AnimationCompile& anim)
     }
 }
 
-std::ostream& ContProcEven::Print(std::ostream& os) const
+std::ostream& ProcEven::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPrE]";
     return os << "Even march of step size " << *stps << " to " << *pnt;
 }
 
-DrawableCont ContProcEven::GetDrawableCont() const
+Drawable ProcEven::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::procedure,
+        Type::procedure,
         "Even march %@ to %@",
         "EVEN %@ %@",
-        { stps->GetDrawableCont(), pnt->GetDrawableCont() }
+        { stps->GetDrawable(), pnt->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContProcedure> ContProcEven::clone() const
-{
-    return std::make_unique<ContProcEven>(stps->clone(), pnt->clone());
-}
-
-void ContProcEven::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ProcEven::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, stps, pnt);
 }
 
-std::vector<uint8_t> ContProcEven::Serialize() const
+std::vector<uint8_t> ProcEven::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcEven));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcEven));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, stps->Serialize());
     Parser::Append(result, pnt->Serialize());
     return result;
 }
 
-Reader ContProcEven::Deserialize(Reader reader)
+Reader ProcEven::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcEven is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcEven) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcEven");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ProcEven);
     reader = super::Deserialize(reader);
-    std::tie(stps, reader) = DeserializeContValue(reader);
-    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    std::tie(stps, reader) = DeserializeValue(reader);
+    std::tie(pnt, reader) = DeserializePoint(reader);
     return reader;
 }
 
-// ContProcEWNS
-ContProcEWNS::ContProcEWNS(ContPoint* p)
-    : pnt(p)
-{
-    SetParentPtr_helper(this, pnt);
-}
-
-ContProcEWNS::ContProcEWNS(std::unique_ptr<ContPoint> p)
-    : pnt(std::move(p))
-{
-    SetParentPtr_helper(this, pnt);
-}
-
-void ContProcEWNS::Compile(AnimationCompile& anim)
+// ProcEWNS
+void ProcEWNS::Compile(AnimationCompile& anim)
 {
     auto c1 = pnt->Get(anim) - anim.GetPointPosition();
     if (c1.y != 0) {
@@ -2685,81 +2019,48 @@ void ContProcEWNS::Compile(AnimationCompile& anim)
     }
 }
 
-std::ostream& ContProcEWNS::Print(std::ostream& os) const
+std::ostream& ProcEWNS::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPrEWNS]";
     return os << "March EastWest/NorthSouth to " << *pnt;
 }
 
-DrawableCont ContProcEWNS::GetDrawableCont() const
+Drawable ProcEWNS::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::procedure,
+        Type::procedure,
         "EastWest/NorthSouth to %@",
         "EW/NS to %@",
-        { pnt->GetDrawableCont() }
+        { pnt->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContProcedure> ContProcEWNS::clone() const
-{
-    return std::make_unique<ContProcEWNS>(pnt->clone());
-}
-
-void ContProcEWNS::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ProcEWNS::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, pnt);
 }
 
-std::vector<uint8_t> ContProcEWNS::Serialize() const
+std::vector<uint8_t> ProcEWNS::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcEWNS));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcEWNS));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt->Serialize());
     return result;
 }
 
-Reader ContProcEWNS::Deserialize(Reader reader)
+Reader ProcEWNS::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcEWNS is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcEWNS) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcEWNS");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ProcEWNS);
     reader = super::Deserialize(reader);
-    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    std::tie(pnt, reader) = DeserializePoint(reader);
     return reader;
 }
 
-// ContProcFountain
-ContProcFountain::ContProcFountain(ContValue* d1, ContValue* d2, ContValue* s1, ContValue* s2,
-    ContPoint* p)
-    : dir1(d1)
-    , dir2(d2)
-    , stepsize1(s1)
-    , stepsize2(s2)
-    , pnt(p)
-{
-    SetParentPtr_helper(this, dir1, dir2, stepsize1, stepsize2, pnt);
-}
-
-ContProcFountain::ContProcFountain(std::unique_ptr<ContValue> d1, std::unique_ptr<ContValue> d2, std::unique_ptr<ContValue> s1, std::unique_ptr<ContValue> s2,
-    std::unique_ptr<ContPoint> p)
-    : dir1(std::move(d1))
-    , dir2(std::move(d2))
-    , stepsize1(std::move(s1))
-    , stepsize2(std::move(s2))
-    , pnt(std::move(p))
-{
-    SetParentPtr_helper(this, dir1, dir2, stepsize1, stepsize2, pnt);
-}
-
-void ContProcFountain::Compile(AnimationCompile& anim)
+// ProcFountain
+void ProcFountain::Compile(AnimationCompile& anim)
 {
     float a, b, c, d;
 
@@ -2824,7 +2125,7 @@ void ContProcFountain::Compile(AnimationCompile& anim)
     }
 }
 
-std::ostream& ContProcFountain::Print(std::ostream& os) const
+std::ostream& ProcFountain::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPrF]";
@@ -2836,58 +2137,53 @@ std::ostream& ContProcFountain::Print(std::ostream& os) const
     return os << "ending at " << *pnt;
 }
 
-DrawableCont ContProcFountain::GetDrawableCont() const
+Drawable ProcFountain::GetDrawable() const
 {
     if (stepsize1 && stepsize2) {
         return {
             this, parent_ptr,
-            ContType::procedure,
+            Type::procedure,
             "Fountain step, first going %@ then %@, first at %@, then at %@, ending at %@",
             "FOUNTAIN %@ -> %@, Step %@, then %@, ending %@",
-            { dir1->GetDrawableCont(), dir2->GetDrawableCont(), stepsize1->GetDrawableCont(), stepsize2->GetDrawableCont(), pnt->GetDrawableCont() }
+            { dir1->GetDrawable(), dir2->GetDrawable(), stepsize1->GetDrawable(), stepsize2->GetDrawable(), pnt->GetDrawable() }
         };
     }
     if (stepsize1) {
         return {
             this, parent_ptr,
-            ContType::procedure,
+            Type::procedure,
             "Fountain step, first going %@ then %@, first at %@, ending at %@",
             "FOUNTAIN %@ -> %@, Step %@ ending %@",
-            { dir1->GetDrawableCont(), dir2->GetDrawableCont(), stepsize1->GetDrawableCont(), pnt->GetDrawableCont() }
+            { dir1->GetDrawable(), dir2->GetDrawable(), stepsize1->GetDrawable(), pnt->GetDrawable() }
         };
     }
     if (stepsize2) {
         return {
             this, parent_ptr,
-            ContType::procedure,
+            Type::procedure,
             "Fountain step, first going %@ then %@, then at %@, ending at %@",
             "FOUNTAIN %@ -> %@, Step %@, ending %@",
-            { dir1->GetDrawableCont(), dir2->GetDrawableCont(), stepsize2->GetDrawableCont(), pnt->GetDrawableCont() }
+            { dir1->GetDrawable(), dir2->GetDrawable(), stepsize2->GetDrawable(), pnt->GetDrawable() }
         };
     }
     return {
         this, parent_ptr,
-        ContType::procedure,
+        Type::procedure,
         "Fountain step, first going %@ then %@, ending at %@",
         "FOUNTAIN %@ -> %@, ending %@",
-        { dir1->GetDrawableCont(), dir2->GetDrawableCont(), pnt->GetDrawableCont() }
+        { dir1->GetDrawable(), dir2->GetDrawable(), pnt->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContProcedure> ContProcFountain::clone() const
-{
-    return std::make_unique<ContProcFountain>(dir1->clone(), dir2->clone(), stepsize1 ? stepsize1->clone() : nullptr, stepsize2 ? stepsize2->clone() : nullptr, pnt->clone());
-}
-
-void ContProcFountain::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ProcFountain::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, dir1, dir2, stepsize1, stepsize2, pnt);
 }
 
-std::vector<uint8_t> ContProcFountain::Serialize() const
+std::vector<uint8_t> ProcFountain::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcFountain));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcFountain));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, dir1->Serialize());
     Parser::Append(result, dir2->Serialize());
@@ -2903,46 +2199,26 @@ std::vector<uint8_t> ContProcFountain::Serialize() const
     return result;
 }
 
-Reader ContProcFountain::Deserialize(Reader reader)
+Reader ProcFountain::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcFountain is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcFountain) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcFountain");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ProcFountain);
     reader = super::Deserialize(reader);
-    std::tie(dir1, reader) = DeserializeContValue(reader);
-    std::tie(dir2, reader) = DeserializeContValue(reader);
+    std::tie(dir1, reader) = DeserializeValue(reader);
+    std::tie(dir2, reader) = DeserializeValue(reader);
     bool parsestepsize1 = reader.Get<uint8_t>();
     if (parsestepsize1) {
-        std::tie(stepsize1, reader) = DeserializeContValue(reader);
+        std::tie(stepsize1, reader) = DeserializeValue(reader);
     }
     bool parsestepsize2 = reader.Get<uint8_t>();
     if (parsestepsize2) {
-        std::tie(stepsize2, reader) = DeserializeContValue(reader);
+        std::tie(stepsize2, reader) = DeserializeValue(reader);
     }
-    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    std::tie(pnt, reader) = DeserializePoint(reader);
     return reader;
 }
 
-// ContProcFM
-ContProcFM::ContProcFM(ContValue* steps, ContValue* d)
-    : stps(steps)
-    , dir(d)
-{
-    SetParentPtr_helper(this, stps, dir);
-}
-
-ContProcFM::ContProcFM(std::unique_ptr<ContValue> steps, std::unique_ptr<ContValue> d)
-    : stps(std::move(steps))
-    , dir(std::move(d))
-{
-    SetParentPtr_helper(this, stps, dir);
-}
-
-void ContProcFM::Compile(AnimationCompile& anim)
+// ProcFM
+void ProcFM::Compile(AnimationCompile& anim)
 {
     auto b = float2int(this, anim, stps->Get(anim));
     if (b != 0) {
@@ -2959,73 +2235,50 @@ void ContProcFM::Compile(AnimationCompile& anim)
     }
 }
 
-std::ostream& ContProcFM::Print(std::ostream& os) const
+std::ostream& ProcFM::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPrFM]";
     return os << "Forward march for steps " << *stps << " in direction " << *dir;
 }
 
-DrawableCont ContProcFM::GetDrawableCont() const
+Drawable ProcFM::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::procedure,
+        Type::procedure,
         "Forward march %@ %@",
         "FM %@ %@",
-        { stps->GetDrawableCont(), dir->GetDrawableCont() }
+        { stps->GetDrawable(), dir->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContProcedure> ContProcFM::clone() const
-{
-    return std::make_unique<ContProcFM>(stps->clone(), dir->clone());
-}
-
-void ContProcFM::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ProcFM::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, stps, dir);
 }
 
-std::vector<uint8_t> ContProcFM::Serialize() const
+std::vector<uint8_t> ProcFM::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcFM));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcFM));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, stps->Serialize());
     Parser::Append(result, dir->Serialize());
     return result;
 }
 
-Reader ContProcFM::Deserialize(Reader reader)
+Reader ProcFM::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcFM is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcFM) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcFM");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ProcFM);
     reader = super::Deserialize(reader);
-    std::tie(stps, reader) = DeserializeContValue(reader);
-    std::tie(dir, reader) = DeserializeContValue(reader);
+    std::tie(stps, reader) = DeserializeValue(reader);
+    std::tie(dir, reader) = DeserializeValue(reader);
     return reader;
 }
 
-// ContProcFMTO
-ContProcFMTO::ContProcFMTO(ContPoint* p)
-    : pnt(p)
-{
-    SetParentPtr_helper(this, pnt);
-}
-
-ContProcFMTO::ContProcFMTO(std::unique_ptr<ContPoint> p)
-    : pnt(std::move(p))
-{
-    SetParentPtr_helper(this, pnt);
-}
-
-void ContProcFMTO::Compile(AnimationCompile& anim)
+// ProcFMTO
+void ProcFMTO::Compile(AnimationCompile& anim)
 {
     auto c = pnt->Get(anim) - anim.GetPointPosition();
     if (c != 0) {
@@ -3035,30 +2288,25 @@ void ContProcFMTO::Compile(AnimationCompile& anim)
     }
 }
 
-std::ostream& ContProcFMTO::Print(std::ostream& os) const
+std::ostream& ProcFMTO::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPrFMT]";
     return os << "Forward march to " << *pnt;
 }
 
-DrawableCont ContProcFMTO::GetDrawableCont() const
+Drawable ProcFMTO::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::procedure,
+        Type::procedure,
         "Forward march to %@",
         "FMTO %@",
-        { pnt->GetDrawableCont() }
+        { pnt->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContProcedure> ContProcFMTO::clone() const
-{
-    return std::make_unique<ContProcFMTO>(pnt->clone());
-}
-
-void ContProcFMTO::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ProcFMTO::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, pnt);
 }
@@ -3076,43 +2324,25 @@ static inline Coord::units roundcoord(Coord::units a, Coord::units mod)
     return a;
 }
 
-std::vector<uint8_t> ContProcFMTO::Serialize() const
+std::vector<uint8_t> ProcFMTO::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcFMTO));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcFMTO));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt->Serialize());
     return result;
 }
 
-Reader ContProcFMTO::Deserialize(Reader reader)
+Reader ProcFMTO::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcFMTO is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcFMTO) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcFMTO");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ProcFMTO);
     reader = super::Deserialize(reader);
-    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    std::tie(pnt, reader) = DeserializePoint(reader);
     return reader;
 }
 
-// ContProcGrid
-ContProcGrid::ContProcGrid(ContValue* g)
-    : grid(g)
-{
-    SetParentPtr_helper(this, grid);
-}
-
-ContProcGrid::ContProcGrid(std::unique_ptr<ContValue> g)
-    : grid(std::move(g))
-{
-    SetParentPtr_helper(this, grid);
-}
-
-void ContProcGrid::Compile(AnimationCompile& anim)
+// ProcGrid
+void ProcGrid::Compile(AnimationCompile& anim)
 {
     auto gridc = Float2CoordUnits(grid->Get(anim));
 
@@ -3127,91 +2357,64 @@ void ContProcGrid::Compile(AnimationCompile& anim)
     }
 }
 
-std::ostream& ContProcGrid::Print(std::ostream& os) const
+std::ostream& ProcGrid::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPrG]";
     return os << "Move on Grid of " << *grid << " spacing";
 }
 
-DrawableCont ContProcGrid::GetDrawableCont() const
+Drawable ProcGrid::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::procedure,
+        Type::procedure,
         "Move on Grid of %@ spacing",
         "GRID %@",
-        { grid->GetDrawableCont() }
+        { grid->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContProcedure> ContProcGrid::clone() const
-{
-    return std::make_unique<ContProcGrid>(grid->clone());
-}
-
-void ContProcGrid::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ProcGrid::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, grid);
 }
 
-std::vector<uint8_t> ContProcGrid::Serialize() const
+std::vector<uint8_t> ProcGrid::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcGrid));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcGrid));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, grid->Serialize());
     return result;
 }
 
-Reader ContProcGrid::Deserialize(Reader reader)
+Reader ProcGrid::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcGrid is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcGrid) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcGrid");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ProcGrid);
     reader = super::Deserialize(reader);
-    std::tie(grid, reader) = DeserializeContValue(reader);
+    std::tie(grid, reader) = DeserializeValue(reader);
     return reader;
 }
 
-// ContProcHSCM
-ContProcHSCM::ContProcHSCM(ContPoint* p1, ContPoint* p2, ContValue* beats)
-    : pnt1(p1)
-    , pnt2(p2)
-    , numbeats(beats)
+// ProcHSCM
+void ProcHSCM::Compile(AnimationCompile& anim)
 {
-    SetParentPtr_helper(this, pnt1, pnt2, numbeats);
-}
-
-ContProcHSCM::ContProcHSCM(std::unique_ptr<ContPoint> p1, std::unique_ptr<ContPoint> p2, std::unique_ptr<ContValue> beats)
-    : pnt1(std::move(p1))
-    , pnt2(std::move(p2))
-    , numbeats(std::move(beats))
-{
-    SetParentPtr_helper(this, pnt1, pnt2, numbeats);
-}
-
-void ContProcHSCM::Compile(AnimationCompile& anim)
-{
-    ContValueFloat steps(1.0);
+    ValueFloat steps(1.0);
 
     auto r1 = pnt1->Get(anim);
     auto r2 = pnt2->Get(anim);
     if ((r1.y - r2.y) == Int2CoordUnits(2)) {
         if (r2.x >= r1.x) {
-            ContValueDefined dirs(CC_S);
-            ContValueDefined dirw(CC_W);
+            ValueDefined dirs(CC_S);
+            ValueDefined dirw(CC_W);
             DoCounterMarch(*this, anim, *pnt1, *pnt2, steps, dirs, dirw, *numbeats);
             return;
         }
     } else if ((r1.y - r2.y) == -Int2CoordUnits(2)) {
         if (r1.x >= r2.x) {
-            ContValueDefined dirn(CC_N);
-            ContValueDefined dire(CC_E);
+            ValueDefined dirn(CC_N);
+            ValueDefined dire(CC_E);
             DoCounterMarch(*this, anim, *pnt1, *pnt2, steps, dirn, dire, *numbeats);
             return;
         }
@@ -3219,7 +2422,7 @@ void ContProcHSCM::Compile(AnimationCompile& anim)
     anim.RegisterError(AnimateError::INVALID_CM, this);
 }
 
-std::ostream& ContProcHSCM::Print(std::ostream& os) const
+std::ostream& ProcHSCM::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPrHCM]";
@@ -3227,31 +2430,26 @@ std::ostream& ContProcHSCM::Print(std::ostream& os) const
               << " passing through " << *pnt2 << " for number beats" << *numbeats;
 }
 
-DrawableCont ContProcHSCM::GetDrawableCont() const
+Drawable ProcHSCM::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::procedure,
+        Type::procedure,
         "High Step CounterMarch starting at %@ passing through %@ for number beats %@",
         "HSCM %@ -> %@ for beats %@",
-        { pnt1->GetDrawableCont(), pnt2->GetDrawableCont(), numbeats->GetDrawableCont() }
+        { pnt1->GetDrawable(), pnt2->GetDrawable(), numbeats->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContProcedure> ContProcHSCM::clone() const
-{
-    return std::make_unique<ContProcHSCM>(pnt1->clone(), pnt2->clone(), numbeats->clone());
-}
-
-void ContProcHSCM::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ProcHSCM::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, pnt1, pnt2, numbeats);
 }
 
-std::vector<uint8_t> ContProcHSCM::Serialize() const
+std::vector<uint8_t> ProcHSCM::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcHSCM));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcHSCM));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt1->Serialize());
     Parser::Append(result, pnt2->Serialize());
@@ -3259,36 +2457,18 @@ std::vector<uint8_t> ContProcHSCM::Serialize() const
     return result;
 }
 
-Reader ContProcHSCM::Deserialize(Reader reader)
+Reader ProcHSCM::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcHSCM is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcHSCM) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcHSCM");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ProcHSCM);
     reader = super::Deserialize(reader);
-    std::tie(pnt1, reader) = DeserializeContPoint(reader);
-    std::tie(pnt2, reader) = DeserializeContPoint(reader);
-    std::tie(numbeats, reader) = DeserializeContValue(reader);
+    std::tie(pnt1, reader) = DeserializePoint(reader);
+    std::tie(pnt2, reader) = DeserializePoint(reader);
+    std::tie(numbeats, reader) = DeserializeValue(reader);
     return reader;
 }
 
-// ContProcHSDM
-ContProcHSDM::ContProcHSDM(ContPoint* p)
-    : pnt(p)
-{
-    SetParentPtr_helper(this, pnt);
-}
-
-ContProcHSDM::ContProcHSDM(std::unique_ptr<ContPoint> p)
-    : pnt(std::move(p))
-{
-    SetParentPtr_helper(this, pnt);
-}
-
-void ContProcHSDM::Compile(AnimationCompile& anim)
+// ProcHSDM
+void ProcHSDM::Compile(AnimationCompile& anim)
 {
     Coord c_hs, c_dm;
     short b;
@@ -3323,149 +2503,95 @@ void ContProcHSDM::Compile(AnimationCompile& anim)
     }
 }
 
-std::ostream& ContProcHSDM::Print(std::ostream& os) const
+std::ostream& ProcHSDM::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPrHD]";
     return os << "HighStep then Diagonal march to " << *pnt;
 }
 
-DrawableCont ContProcHSDM::GetDrawableCont() const
+Drawable ProcHSDM::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::procedure,
+        Type::procedure,
         "HighStep then Diagonal march to %@",
         "HSDM %@",
-        { pnt->GetDrawableCont() }
+        { pnt->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContProcedure> ContProcHSDM::clone() const
-{
-    return std::make_unique<ContProcHSDM>(pnt->clone());
-}
-
-void ContProcHSDM::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ProcHSDM::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, pnt);
 }
 
-std::vector<uint8_t> ContProcHSDM::Serialize() const
+std::vector<uint8_t> ProcHSDM::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcHSDM));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcHSDM));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt->Serialize());
     return result;
 }
 
-Reader ContProcHSDM::Deserialize(Reader reader)
+Reader ProcHSDM::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcHSDM is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcHSDM) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcHSDM");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ProcHSDM);
     reader = super::Deserialize(reader);
-    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    std::tie(pnt, reader) = DeserializePoint(reader);
     return reader;
 }
 
-// ContProcMagic
-ContProcMagic::ContProcMagic(ContPoint* p)
-    : pnt(p)
-{
-    SetParentPtr_helper(this, pnt);
-}
-
-ContProcMagic::ContProcMagic(std::unique_ptr<ContPoint> p)
-    : pnt(std::move(p))
-{
-    SetParentPtr_helper(this, pnt);
-}
-
-void ContProcMagic::Compile(AnimationCompile& anim)
+// ProcMagic
+void ProcMagic::Compile(AnimationCompile& anim)
 {
     auto c = pnt->Get(anim) - anim.GetPointPosition();
     anim.Append(std::make_unique<AnimationCommandMove>(0, c), this);
 }
 
-std::ostream& ContProcMagic::Print(std::ostream& os) const
+std::ostream& ProcMagic::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPrM]";
     return os << "Magic step to " << *pnt;
 }
 
-DrawableCont ContProcMagic::GetDrawableCont() const
+Drawable ProcMagic::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::procedure,
+        Type::procedure,
         "Magic step to %@",
         "MAGIC %@",
-        { pnt->GetDrawableCont() }
+        { pnt->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContProcedure> ContProcMagic::clone() const
-{
-    return std::make_unique<ContProcMagic>(pnt->clone());
-}
-
-void ContProcMagic::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ProcMagic::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, pnt);
 }
 
-std::vector<uint8_t> ContProcMagic::Serialize() const
+std::vector<uint8_t> ProcMagic::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcMagic));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcMagic));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt->Serialize());
     return result;
 }
 
-Reader ContProcMagic::Deserialize(Reader reader)
+Reader ProcMagic::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcMagic is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcMagic) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcMagic");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ProcMagic);
     reader = super::Deserialize(reader);
-    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    std::tie(pnt, reader) = DeserializePoint(reader);
     return reader;
 }
 
-// ContProcMarch
-ContProcMarch::ContProcMarch(ContValue* stepsize, ContValue* steps, ContValue* d,
-    ContValue* face)
-    : stpsize(stepsize)
-    , stps(steps)
-    , dir(d)
-    , facedir(face)
-{
-    SetParentPtr_helper(this, stpsize, stps, dir, facedir);
-}
-
-ContProcMarch::ContProcMarch(std::unique_ptr<ContValue> stepsize, std::unique_ptr<ContValue> steps, std::unique_ptr<ContValue> d,
-    std::unique_ptr<ContValue> face)
-    : stpsize(std::move(stepsize))
-    , stps(std::move(steps))
-    , dir(std::move(d))
-    , facedir(std::move(face))
-{
-    SetParentPtr_helper(this, stpsize, stps, dir, facedir);
-}
-
-void ContProcMarch::Compile(AnimationCompile& anim)
+// ProcMarch
+void ProcMarch::Compile(AnimationCompile& anim)
 {
     auto b = float2int(this, anim, stps->Get(anim));
     if (b != 0) {
@@ -3489,7 +2615,7 @@ void ContProcMarch::Compile(AnimationCompile& anim)
     }
 }
 
-std::ostream& ContProcMarch::Print(std::ostream& os) const
+std::ostream& ProcMarch::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPrm]";
@@ -3500,40 +2626,35 @@ std::ostream& ContProcMarch::Print(std::ostream& os) const
     return os;
 }
 
-DrawableCont ContProcMarch::GetDrawableCont() const
+Drawable ProcMarch::GetDrawable() const
 {
     if (facedir) {
         return {
             this, parent_ptr,
-            ContType::procedure,
+            Type::procedure,
             "March step size %@ for %@ in direction %@ facing %@",
             "MARCH %@ for %@ DIR %@ FACING %@",
-            { stpsize->GetDrawableCont(), stps->GetDrawableCont(), dir->GetDrawableCont(), facedir->GetDrawableCont() }
+            { stpsize->GetDrawable(), stps->GetDrawable(), dir->GetDrawable(), facedir->GetDrawable() }
         };
     }
     return {
         this, parent_ptr,
-        ContType::procedure,
+        Type::procedure,
         "March step size %@ for steps %@ in direction %@",
         "MARCH %@ for %@ DIR %@",
-        { stpsize->GetDrawableCont(), stps->GetDrawableCont(), dir->GetDrawableCont() }
+        { stpsize->GetDrawable(), stps->GetDrawable(), dir->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContProcedure> ContProcMarch::clone() const
-{
-    return std::make_unique<ContProcMarch>(stpsize->clone(), stps->clone(), dir->clone(), (facedir) ? facedir->clone() : nullptr);
-}
-
-void ContProcMarch::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ProcMarch::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, stpsize, stps, dir, facedir);
 }
 
-std::vector<uint8_t> ContProcMarch::Serialize() const
+std::vector<uint8_t> ProcMarch::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcMarch));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcMarch));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, stpsize->Serialize());
     Parser::Append(result, stps->Serialize());
@@ -3545,42 +2666,22 @@ std::vector<uint8_t> ContProcMarch::Serialize() const
     return result;
 }
 
-Reader ContProcMarch::Deserialize(Reader reader)
+Reader ProcMarch::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcMarch is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcMarch) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcMarch");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ProcMarch);
     reader = super::Deserialize(reader);
-    std::tie(stpsize, reader) = DeserializeContValue(reader);
-    std::tie(stps, reader) = DeserializeContValue(reader);
-    std::tie(dir, reader) = DeserializeContValue(reader);
+    std::tie(stpsize, reader) = DeserializeValue(reader);
+    std::tie(stps, reader) = DeserializeValue(reader);
+    std::tie(dir, reader) = DeserializeValue(reader);
     bool parsefacedir = reader.Get<uint8_t>();
     if (parsefacedir) {
-        std::tie(facedir, reader) = DeserializeContValue(reader);
+        std::tie(facedir, reader) = DeserializeValue(reader);
     }
     return reader;
 }
 
-// ContProcMT
-ContProcMT::ContProcMT(ContValue* beats, ContValue* d)
-    : numbeats(beats)
-    , dir(d)
-{
-    SetParentPtr_helper(this, numbeats, dir);
-}
-
-ContProcMT::ContProcMT(std::unique_ptr<ContValue> beats, std::unique_ptr<ContValue> d)
-    : numbeats(std::move(beats))
-    , dir(std::move(d))
-{
-    SetParentPtr_helper(this, numbeats, dir);
-}
-
-void ContProcMT::Compile(AnimationCompile& anim)
+// ProcMT
+void ProcMT::Compile(AnimationCompile& anim)
 {
     auto b = float2int(this, anim, numbeats->Get(anim));
     if (b != 0) {
@@ -3590,144 +2691,98 @@ void ContProcMT::Compile(AnimationCompile& anim)
     }
 }
 
-std::ostream& ContProcMT::Print(std::ostream& os) const
+std::ostream& ProcMT::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPrMT]";
     return os << "MarkTime for " << *numbeats << " facing " << *dir;
 }
 
-DrawableCont ContProcMT::GetDrawableCont() const
+Drawable ProcMT::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::procedure,
+        Type::procedure,
         "MarkTime %@ %@",
         "MT %@ %@",
-        { numbeats->GetDrawableCont(), dir->GetDrawableCont() }
+        { numbeats->GetDrawable(), dir->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContProcedure> ContProcMT::clone() const
-{
-    return std::make_unique<ContProcMT>(numbeats->clone(), dir->clone());
-}
-
-void ContProcMT::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ProcMT::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, numbeats, dir);
 }
 
-std::vector<uint8_t> ContProcMT::Serialize() const
+std::vector<uint8_t> ProcMT::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcMT));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcMT));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, numbeats->Serialize());
     Parser::Append(result, dir->Serialize());
     return result;
 }
 
-Reader ContProcMT::Deserialize(Reader reader)
+Reader ProcMT::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcMT is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcMT) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcMT");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ProcMT);
     reader = super::Deserialize(reader);
-    std::tie(numbeats, reader) = DeserializeContValue(reader);
-    std::tie(dir, reader) = DeserializeContValue(reader);
+    std::tie(numbeats, reader) = DeserializeValue(reader);
+    std::tie(dir, reader) = DeserializeValue(reader);
     return reader;
 }
 
-// ContProcMTRM
-ContProcMTRM::ContProcMTRM(ContValue* d)
-    : dir(d)
-{
-    SetParentPtr_helper(this, dir);
-}
-
-ContProcMTRM::ContProcMTRM(std::unique_ptr<ContValue> d)
-    : dir(std::move(d))
-{
-    SetParentPtr_helper(this, dir);
-}
-
-void ContProcMTRM::Compile(AnimationCompile& anim)
+// ProcMTRM
+void ProcMTRM::Compile(AnimationCompile& anim)
 {
     anim.Append(std::make_unique<AnimationCommandMT>(anim.GetBeatsRemaining(),
                     dir->Get(anim)),
         this);
 }
 
-std::ostream& ContProcMTRM::Print(std::ostream& os) const
+std::ostream& ProcMTRM::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPrMTR]";
     return os << "MarkTime for Remaining Beats facing " << *dir;
 }
 
-DrawableCont ContProcMTRM::GetDrawableCont() const
+Drawable ProcMTRM::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::procedure,
+        Type::procedure,
         "MarkTime for Remaining %@",
         "MTRM %@",
-        { dir->GetDrawableCont() }
+        { dir->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContProcedure> ContProcMTRM::clone() const
-{
-    return std::make_unique<ContProcMTRM>(dir->clone());
-}
-
-void ContProcMTRM::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ProcMTRM::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, dir);
 }
 
-std::vector<uint8_t> ContProcMTRM::Serialize() const
+std::vector<uint8_t> ProcMTRM::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcMTRM));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcMTRM));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, dir->Serialize());
     return result;
 }
 
-Reader ContProcMTRM::Deserialize(Reader reader)
+Reader ProcMTRM::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcMTRM is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcMTRM) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcMTRM");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ProcMTRM);
     reader = super::Deserialize(reader);
-    std::tie(dir, reader) = DeserializeContValue(reader);
+    std::tie(dir, reader) = DeserializeValue(reader);
     return reader;
 }
 
-// ContProcNSEW
-ContProcNSEW::ContProcNSEW(ContPoint* p)
-    : pnt(p)
-{
-    SetParentPtr_helper(this, pnt);
-}
-
-ContProcNSEW::ContProcNSEW(std::unique_ptr<ContPoint> p)
-    : pnt(std::move(p))
-{
-    SetParentPtr_helper(this, pnt);
-}
-
-void ContProcNSEW::Compile(AnimationCompile& anim)
+// ProcNSEW
+void ProcNSEW::Compile(AnimationCompile& anim)
 {
     auto c1 = pnt->Get(anim) - anim.GetPointPosition();
     if (c1.x != 0) {
@@ -3748,82 +2803,55 @@ void ContProcNSEW::Compile(AnimationCompile& anim)
     }
 }
 
-std::ostream& ContProcNSEW::Print(std::ostream& os) const
+std::ostream& ProcNSEW::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPrNSEW]";
     return os << "March NorthSouth/EastWest to " << *pnt;
 }
 
-DrawableCont ContProcNSEW::GetDrawableCont() const
+Drawable ProcNSEW::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::procedure,
+        Type::procedure,
         "NorthSouth/EastWest to %@",
         "NSEW %@",
-        { pnt->GetDrawableCont() }
+        { pnt->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContProcedure> ContProcNSEW::clone() const
-{
-    return std::make_unique<ContProcNSEW>(pnt->clone());
-}
-
-void ContProcNSEW::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ProcNSEW::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, pnt);
 }
 
-std::vector<uint8_t> ContProcNSEW::Serialize() const
+std::vector<uint8_t> ProcNSEW::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcNSEW));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcNSEW));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt->Serialize());
     return result;
 }
 
-Reader ContProcNSEW::Deserialize(Reader reader)
+Reader ProcNSEW::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcNSEW is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcNSEW) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcNSEW");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ProcNSEW);
     reader = super::Deserialize(reader);
-    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    std::tie(pnt, reader) = DeserializePoint(reader);
     return reader;
 }
 
-// ContProcRotate
-ContProcRotate::ContProcRotate(ContValue* angle, ContValue* steps, ContPoint* p)
-    : ang(angle)
-    , stps(steps)
-    , pnt(p)
-{
-    SetParentPtr_helper(this, ang, stps, pnt);
-}
-
-ContProcRotate::ContProcRotate(std::unique_ptr<ContValue> angle, std::unique_ptr<ContValue> steps, std::unique_ptr<ContPoint> p)
-    : ang(std::move(angle))
-    , stps(std::move(steps))
-    , pnt(std::move(p))
-{
-    SetParentPtr_helper(this, ang, stps, pnt);
-}
-
-void ContProcRotate::Compile(AnimationCompile& anim)
+// ProcRotate
+void ProcRotate::Compile(AnimationCompile& anim)
 {
     // Most of the work is converting to polar coordinates
     auto c = pnt->Get(anim);
     auto rad = anim.GetPointPosition() - c;
     float start_ang;
     if (c == anim.GetPointPosition())
-        start_ang = anim.GetVarValue(CONTVAR_DOH, this);
+        start_ang = anim.GetVarValue(Cont::Variable::DOH, this);
     else
         start_ang = c.Direction(anim.GetPointPosition());
     int b = float2int(this, anim, stps->Get(anim));
@@ -3841,7 +2869,7 @@ void ContProcRotate::Compile(AnimationCompile& anim)
         this);
 }
 
-std::ostream& ContProcRotate::Print(std::ostream& os) const
+std::ostream& ProcRotate::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CPrR]";
@@ -3849,31 +2877,26 @@ std::ostream& ContProcRotate::Print(std::ostream& os) const
               << " around pivot point " << *pnt;
 }
 
-DrawableCont ContProcRotate::GetDrawableCont() const
+Drawable ProcRotate::GetDrawable() const
 {
     return {
         this, parent_ptr,
-        ContType::procedure,
+        Type::procedure,
         "Rotate at angle %@ for steps %@ around pivot point %@",
         "ROTATE %@ for %@ around %@",
-        { ang->GetDrawableCont(), stps->GetDrawableCont(), pnt->GetDrawableCont() }
+        { ang->GetDrawable(), stps->GetDrawable(), pnt->GetDrawable() }
     };
 }
 
-std::unique_ptr<ContProcedure> ContProcRotate::clone() const
-{
-    return std::make_unique<ContProcRotate>(ang->clone(), stps->clone(), pnt->clone());
-}
-
-void ContProcRotate::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ProcRotate::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, ang, stps, pnt);
 }
 
-std::vector<uint8_t> ContProcRotate::Serialize() const
+std::vector<uint8_t> ProcRotate::Serialize() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcRotate));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcRotate));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, ang->Serialize());
     Parser::Append(result, stps->Serialize());
@@ -3881,19 +2904,13 @@ std::vector<uint8_t> ContProcRotate::Serialize() const
     return result;
 }
 
-Reader ContProcRotate::Deserialize(Reader reader)
+Reader ProcRotate::Deserialize(Reader reader)
 {
-    if (reader.size() < 1) {
-        throw std::runtime_error("Error, size of ContProcRotate is not correct");
-    }
-    auto token = static_cast<SerializationToken>(reader.Get<uint8_t>());
-    if (token != SerializationToken::ContProcRotate) {
-        throw std::runtime_error("Error, token is not SerializationToken::ContProcRotate");
-    }
+    reader = CheckForToken(reader, 1, SerializationToken::ProcRotate);
     reader = super::Deserialize(reader);
-    std::tie(ang, reader) = DeserializeContValue(reader);
-    std::tie(stps, reader) = DeserializeContValue(reader);
-    std::tie(pnt, reader) = DeserializeContPoint(reader);
+    std::tie(ang, reader) = DeserializeValue(reader);
+    std::tie(stps, reader) = DeserializeValue(reader);
+    std::tie(pnt, reader) = DeserializePoint(reader);
     return reader;
 }
 

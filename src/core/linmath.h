@@ -23,7 +23,7 @@
 
 #include <math.h>
 
-typedef float LinElem;
+template <typename LinElem>
 class Vector {
 public:
     Vector()
@@ -113,18 +113,19 @@ protected:
     LinElem elem[4];
 };
 
+template <typename LinElem>
 class Matrix {
 public:
     Matrix()
     {
-        vect[0] = Vector(1.0, 0.0, 0.0, 0.0);
-        vect[1] = Vector(0.0, 1.0, 0.0, 0.0);
-        vect[2] = Vector(0.0, 0.0, 1.0, 0.0);
-        vect[3] = Vector(0.0, 0.0, 0.0, 1.0);
+        vect[0] = Vector<LinElem>(1.0, 0.0, 0.0, 0.0);
+        vect[1] = Vector<LinElem>(0.0, 1.0, 0.0, 0.0);
+        vect[2] = Vector<LinElem>(0.0, 0.0, 1.0, 0.0);
+        vect[3] = Vector<LinElem>(0.0, 0.0, 0.0, 1.0);
     }
     Matrix(const Matrix& ref) { *this = ref; }
-    Matrix(const Vector& v0, const Vector& v1, const Vector& v2,
-        const Vector& v3)
+    Matrix(const Vector<LinElem>& v0, const Vector<LinElem>& v1, const Vector<LinElem>& v2,
+        const Vector<LinElem>& v3)
     {
         vect[0] = v0;
         vect[1] = v1;
@@ -183,166 +184,183 @@ public:
             Vector(b.vect[3] * at.vect[0], b.vect[3] * at.vect[1],
                 b.vect[3] * at.vect[2], b.vect[3] * at.vect[3]));
     }
-    inline friend Vector operator*(const Matrix& a, const Vector& b)
+    inline friend Vector<LinElem> operator*(const Matrix& a, const Vector<LinElem>& b)
     {
         return Vector(a.vect[0] * b, a.vect[1] * b, a.vect[2] * b, a.vect[3] * b);
     }
 
 protected:
-    Vector vect[4];
+    Vector<LinElem> vect[4];
 };
 
-class TranslationMatrix : public Matrix {
+template <typename LinElem>
+class TranslationMatrix : public Matrix<LinElem> {
 public:
-    TranslationMatrix(const Vector& v)
-        : Matrix()
+    TranslationMatrix(const Vector<LinElem>& v)
+        : Matrix<LinElem>()
     {
-        vect[0].SetW(v.GetX());
-        vect[1].SetW(v.GetY());
-        vect[2].SetW(v.GetZ());
+        // yes, the this is necessary here:
+        // https://yunmingzhang.wordpress.com/2019/01/26/accessing-template-base-class-members-in-c/
+        this->vect[0].SetW(v.GetX());
+        this->vect[1].SetW(v.GetY());
+        this->vect[2].SetW(v.GetZ());
     }
 };
 
-class ScaleMatrix : public Matrix {
+template <typename LinElem>
+class ScaleMatrix : public Matrix<LinElem> {
 public:
-    ScaleMatrix(const Vector& v)
+    ScaleMatrix(const Vector<LinElem>& v)
     {
-        vect[0] = Vector(v.GetX(), 0.0, 0.0, 0.0);
-        vect[1] = Vector(0.0, v.GetY(), 0.0, 0.0);
-        vect[2] = Vector(0.0, 0.0, v.GetZ(), 0.0);
-        vect[3] = Vector(0.0, 0.0, 0.0, 1.0);
+        this->vect[0] = Vector<LinElem>(v.GetX(), 0.0, 0.0, 0.0);
+        this->vect[1] = Vector<LinElem>(0.0, v.GetY(), 0.0, 0.0);
+        this->vect[2] = Vector<LinElem>(0.0, 0.0, v.GetZ(), 0.0);
+        this->vect[3] = Vector<LinElem>(0.0, 0.0, 0.0, 1.0);
     }
 };
 
-class XReflectionMatrix : public Matrix {
+template <typename LinElem>
+class XReflectionMatrix : public Matrix<LinElem> {
 public:
     XReflectionMatrix()
-        : Matrix()
+        : Matrix<LinElem>()
     {
-        vect[0].SetX(-1);
+        this->vect[0].SetX(-1);
     }
 };
 
-class YReflectionMatrix : public Matrix {
+template <typename LinElem>
+class YReflectionMatrix : public Matrix<LinElem> {
 public:
     YReflectionMatrix()
-        : Matrix()
+        : Matrix<LinElem>()
     {
-        vect[1].SetY(-1);
+        this->vect[1].SetY(-1);
     }
 };
 
-class ZReflectionMatrix : public Matrix {
+template <typename LinElem>
+class ZReflectionMatrix : public Matrix<LinElem> {
 public:
     ZReflectionMatrix()
-        : Matrix()
+        : Matrix<LinElem>()
     {
-        vect[2].SetZ(-1);
+        this->vect[2].SetZ(-1);
     }
 };
 
-class XYShearMatrix : public Matrix {
+template <typename LinElem>
+class XYShearMatrix : public Matrix<LinElem> {
 public:
     XYShearMatrix(LinElem amount)
-        : Matrix()
+        : Matrix<LinElem>()
     {
-        vect[0].SetY(amount);
+        this->vect[0].SetY(amount);
     }
 };
 
-class XZShearMatrix : public Matrix {
+template <typename LinElem>
+class XZShearMatrix : public Matrix<LinElem> {
 public:
     XZShearMatrix(LinElem amount)
-        : Matrix()
+        : Matrix<LinElem>()
     {
-        vect[0].SetZ(amount);
+        this->vect[0].SetZ(amount);
     }
 };
 
-class YXShearMatrix : public Matrix {
+template <typename LinElem>
+class YXShearMatrix : public Matrix<LinElem> {
 public:
     YXShearMatrix(LinElem amount)
-        : Matrix()
+        : Matrix<LinElem>()
     {
-        vect[1].SetX(amount);
+        this->vect[1].SetX(amount);
     }
 };
 
-class YZShearMatrix : public Matrix {
+template <typename LinElem>
+class YZShearMatrix : public Matrix<LinElem> {
 public:
     YZShearMatrix(LinElem amount)
-        : Matrix()
+        : Matrix<LinElem>()
     {
-        vect[1].SetZ(amount);
+        this->vect[1].SetZ(amount);
     }
 };
 
-class ZXShearMatrix : public Matrix {
+template <typename LinElem>
+class ZXShearMatrix : public Matrix<LinElem> {
 public:
     ZXShearMatrix(LinElem amount)
-        : Matrix()
+        : Matrix<LinElem>()
     {
-        vect[2].SetX(amount);
+        this->vect[2].SetX(amount);
     }
 };
 
-class ZYShearMatrix : public Matrix {
+template <typename LinElem>
+class ZYShearMatrix : public Matrix<LinElem> {
 public:
     ZYShearMatrix(LinElem amount)
-        : Matrix()
+        : Matrix<LinElem>()
     {
-        vect[2].SetY(amount);
+        this->vect[2].SetY(amount);
     }
 };
 
-class XRotationMatrix : public Matrix {
+template <typename LinElem>
+class XRotationMatrix : public Matrix<LinElem> {
 public:
     XRotationMatrix(LinElem ang)
-        : Matrix()
+        : Matrix<LinElem>()
     {
         LinElem c = cos(ang);
         LinElem s = sin(ang);
-        vect[1].SetY(c);
-        vect[1].SetZ(-s);
-        vect[2].SetY(s);
-        vect[2].SetZ(c);
+        this->vect[1].SetY(c);
+        this->vect[1].SetZ(-s);
+        this->vect[2].SetY(s);
+        this->vect[2].SetZ(c);
     }
 };
 
-class YRotationMatrix : public Matrix {
+template <typename LinElem>
+class YRotationMatrix : public Matrix<LinElem> {
 public:
     YRotationMatrix(LinElem ang)
-        : Matrix()
+        : Matrix<LinElem>()
     {
         LinElem c = cos(ang);
         LinElem s = sin(ang);
-        vect[0].SetX(c);
-        vect[0].SetZ(s);
-        vect[2].SetX(-s);
-        vect[2].SetZ(c);
+        this->vect[0].SetX(c);
+        this->vect[0].SetZ(s);
+        this->vect[2].SetX(-s);
+        this->vect[2].SetZ(c);
     }
 };
 
-class ZRotationMatrix : public Matrix {
+template <typename LinElem>
+class ZRotationMatrix : public Matrix<LinElem> {
 public:
     ZRotationMatrix(LinElem ang)
-        : Matrix()
+        : Matrix<LinElem>()
     {
         LinElem c = cos(ang);
         LinElem s = sin(ang);
-        vect[0].SetX(c);
-        vect[0].SetY(-s);
-        vect[1].SetX(s);
-        vect[1].SetY(c);
+        this->vect[0].SetX(c);
+        this->vect[0].SetY(-s);
+        this->vect[1].SetX(s);
+        this->vect[1].SetY(c);
     }
 };
 
-class ProjectionMatrix : public Matrix {
+template <typename LinElem>
+class ProjectionMatrix : public Matrix<LinElem> {
 public:
     ProjectionMatrix(LinElem d)
-        : Matrix()
+        : Matrix<LinElem>()
     {
-        vect[2].SetZ(0.0);
-        vect[3].SetZ(1.0 / d);
+        this->vect[2].SetZ(0.0);
+        this->vect[3].SetZ(1.0 / d);
     }
 };

@@ -74,14 +74,14 @@ auto Compare(T const& test, T const& gold)
 
 TEST_CASE("Fountain", "CalChartContinuityToken")
 {
-    auto uut = std::make_unique<ContProcFountain>(std::make_unique<ContValueDefined>(CC_NE), std::make_unique<ContValueDefined>(CC_E), std::make_unique<ContValueFloat>(2), std::make_unique<ContValueFloat>(1), std::make_unique<ContNextPoint>());
+    auto uut = std::make_unique<Cont::ProcFountain>(std::make_unique<Cont::ValueDefined>(Cont::DefinedValue::CC_NE), std::make_unique<Cont::ValueDefined>(Cont::DefinedValue::CC_E), std::make_unique<Cont::ValueFloat>(2), std::make_unique<Cont::ValueFloat>(1), std::make_unique<Cont::NextPoint>());
 
     CHECK(*uut == serializeDeserialize(*uut));
     CHECK(*uut == *uut);
     CHECK(print(*uut) == "[CT][CPr]Procedure: [CPrF]Fountain step, first going [CT][CV]Value:[CVC]Defined:NE then [CT][CV]Value:[CVC]Defined:E, first at [CT][CV]Value:[CVF]2, then at [CT][CV]Value:[CVF]1ending at [CT][CP]Point:[CNP]Next Point");
 
     // now move things into a vector so we can work with it
-    auto procs = std::vector<std::unique_ptr<ContProcedure>>{};
+    auto procs = std::vector<std::unique_ptr<Cont::Procedure>>{};
     procs.push_back(std::move(uut));
     auto sheets = CreateSheetsForTest({ 0, 0 }, { 8, 16 }, 14);
     auto compiledResults = GetCompiledResults(sheets, procs);
@@ -95,14 +95,14 @@ TEST_CASE("Fountain", "CalChartContinuityToken")
 
 TEST_CASE("Fountain with nulls", "CalChartContinuityToken")
 {
-    auto uut = std::make_unique<ContProcFountain>(std::make_unique<ContValueDefined>(CC_NE), std::make_unique<ContValueDefined>(CC_E), nullptr, nullptr, std::make_unique<ContNextPoint>());
+    auto uut = std::make_unique<Cont::ProcFountain>(std::make_unique<Cont::ValueDefined>(Cont::DefinedValue::CC_NE), std::make_unique<Cont::ValueDefined>(Cont::DefinedValue::CC_E), nullptr, nullptr, std::make_unique<Cont::NextPoint>());
 
     CHECK(*uut == serializeDeserialize(*uut));
     CHECK(*uut == *uut);
     CHECK(print(*uut) == "[CT][CPr]Procedure: [CPrF]Fountain step, first going [CT][CV]Value:[CVC]Defined:NE then [CT][CV]Value:[CVC]Defined:Eending at [CT][CP]Point:[CNP]Next Point");
 
     // now move things into a vector so we can work with it
-    auto procs = std::vector<std::unique_ptr<ContProcedure>>{};
+    auto procs = std::vector<std::unique_ptr<Cont::Procedure>>{};
     procs.push_back(std::move(uut));
     auto sheets = CreateSheetsForTest({ 0, 0 }, { 8, 16 }, 16);
     auto compiledResults = GetCompiledResults(sheets, procs);
@@ -117,14 +117,14 @@ TEST_CASE("Fountain with nulls", "CalChartContinuityToken")
 
 TEST_CASE("HSCM", "CalChartContinuityToken")
 {
-    auto uut = std::make_unique<ContProcHSCM>(std::make_unique<ContRefPoint>(1), std::make_unique<ContRefPoint>(2), std::make_unique<ContValueFloat>(40));
+    auto uut = std::make_unique<Cont::ProcHSCM>(std::make_unique<Cont::RefPoint>(1), std::make_unique<Cont::RefPoint>(2), std::make_unique<Cont::ValueFloat>(40));
 
     CHECK(*uut == serializeDeserialize(*uut));
     CHECK(*uut == *uut);
     CHECK(print(*uut) == "[CT][CPr]Procedure: [CPrHCM]High Step CounterMarch starting at [CT][CP]Point:[CRP]Ref Point 1 passing through [CT][CP]Point:[CRP]Ref Point 2 for number beats[CT][CV]Value:[CVF]40");
 
     // now move things into a vector so we can work with it
-    auto procs = std::vector<std::unique_ptr<ContProcedure>>{};
+    auto procs = std::vector<std::unique_ptr<Cont::Procedure>>{};
     procs.push_back(std::move(uut));
     auto sheets = CreateSheetsForTest({ 0, 0 }, { -8, 0 }, { 8, -2 }, { 0, 0 }, 40);
     auto compiledResults = GetCompiledResults(sheets, procs);
@@ -141,14 +141,14 @@ TEST_CASE("HSCM", "CalChartContinuityToken")
 
 TEST_CASE("DMCM", "CalChartContinuityToken")
 {
-    auto uut = std::make_unique<ContProcDMCM>(std::make_unique<ContRefPoint>(1), std::make_unique<ContRefPoint>(2), std::make_unique<ContValueFloat>(40));
+    auto uut = std::make_unique<Cont::ProcDMCM>(std::make_unique<Cont::RefPoint>(1), std::make_unique<Cont::RefPoint>(2), std::make_unique<Cont::ValueFloat>(40));
 
     CHECK(*uut == serializeDeserialize(*uut));
     CHECK(*uut == *uut);
     CHECK(print(*uut) == "[CT][CPr]Procedure: [CPrDC]Diagonal march CounterMarch starting at [CT][CP]Point:[CRP]Ref Point 1 passing through [CT][CP]Point:[CRP]Ref Point 2 for number beats[CT][CV]Value:[CVF]40");
 
     // now move things into a vector so we can work with it
-    auto procs = std::vector<std::unique_ptr<ContProcedure>>{};
+    auto procs = std::vector<std::unique_ptr<Cont::Procedure>>{};
     procs.push_back(std::move(uut));
     auto sheets = CreateSheetsForTest({ 0, 0 }, { -8, 8 }, { 8, -10 }, { 0, 0 }, 40);
     auto compiledResults = GetCompiledResults(sheets, procs);

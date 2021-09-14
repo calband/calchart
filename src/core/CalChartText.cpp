@@ -122,11 +122,9 @@ Textline ParseTextLine(std::string line)
         if ((line.length() >= 3) && (line.at(0) == '\\') && ((tolower(line.at(1)) == 'b'))) {
             if (tolower(line.at(2)) == 's') {
                 currfontnum = (currfontnum == PSFONT::NORM || currfontnum == PSFONT::BOLD) ? PSFONT::BOLD : PSFONT::BOLDITAL;
-            }
-            else if (tolower(line.at(2)) == 'e') {
+            } else if (tolower(line.at(2)) == 'e') {
                 currfontnum = (currfontnum == PSFONT::NORM || currfontnum == PSFONT::BOLD) ? PSFONT::NORM : PSFONT::ITAL;
-            }
-            else {
+            } else {
                 // code not recognized
                 throw std::runtime_error("Print continuity not recognized");
             }
@@ -137,17 +135,14 @@ Textline ParseTextLine(std::string line)
         if ((line.length() >= 3) && (line.at(0) == '\\') && ((tolower(line.at(1)) == 'i'))) {
             if (tolower(line.at(2)) == 's') {
                 currfontnum = (currfontnum == PSFONT::NORM || currfontnum == PSFONT::ITAL) ? PSFONT::ITAL : PSFONT::BOLDITAL;
-            }
-            else if (tolower(line.at(2)) == 'e') {
+            } else if (tolower(line.at(2)) == 'e') {
                 currfontnum = (currfontnum == PSFONT::NORM || currfontnum == PSFONT::ITAL) ? PSFONT::NORM : PSFONT::BOLD;
-            }
-            else {
+            } else {
                 // code not recognized
                 throw std::runtime_error("Print continuity not recognized");
             }
             line.erase(0, 3);
             continue;
-
         }
         auto pos = line.find_first_of("\\\t", 1);
 

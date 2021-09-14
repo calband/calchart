@@ -29,9 +29,9 @@
 #include "CalChartSheet.h"
 #include "CalChartShowMode.h"
 #include "CalChartSizes.h"
+#include "CalChartUtils.h"
 #include "CalChartView.h"
 #include "draw.h"
-#include "math_utils.h"
 #include "platconf.h"
 
 #include <wx/dcbuffer.h>
@@ -106,17 +106,17 @@ void AnimationView::OnDrawDots(wxDC& dc, CalChartConfiguration const& config)
                 dc.SetPen(brushAndPen.second);
             }
         } else if (mView->IsSelected(info.index)) {
-            switch (info.mDirection) {
-            case CalChart::AnimateDir::SW:
-            case CalChart::AnimateDir::W:
-            case CalChart::AnimateDir::NW: {
+            switch (AngleToDirection(info.mFacingDirection)) {
+            case CalChart::Direction::SouthWest:
+            case CalChart::Direction::West:
+            case CalChart::Direction::NorthWest: {
                 auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_BACK);
                 dc.SetBrush(brushAndPen.first);
                 dc.SetPen(brushAndPen.second);
             } break;
-            case CalChart::AnimateDir::SE:
-            case CalChart::AnimateDir::E:
-            case CalChart::AnimateDir::NE: {
+            case CalChart::Direction::SouthEast:
+            case CalChart::Direction::East:
+            case CalChart::Direction::NorthEast: {
                 auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_FRONT);
                 dc.SetBrush(brushAndPen.first);
                 dc.SetPen(brushAndPen.second);
@@ -128,17 +128,17 @@ void AnimationView::OnDrawDots(wxDC& dc, CalChartConfiguration const& config)
             }
             }
         } else {
-            switch (info.mDirection) {
-            case CalChart::AnimateDir::SW:
-            case CalChart::AnimateDir::W:
-            case CalChart::AnimateDir::NW: {
+            switch (AngleToDirection(info.mFacingDirection)) {
+            case CalChart::Direction::SouthWest:
+            case CalChart::Direction::West:
+            case CalChart::Direction::NorthWest: {
                 auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_BACK);
                 dc.SetBrush(brushAndPen.first);
                 dc.SetPen(brushAndPen.second);
             } break;
-            case CalChart::AnimateDir::SE:
-            case CalChart::AnimateDir::E:
-            case CalChart::AnimateDir::NE: {
+            case CalChart::Direction::SouthEast:
+            case CalChart::Direction::East:
+            case CalChart::Direction::NorthEast: {
                 auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_FRONT);
                 dc.SetBrush(brushAndPen.first);
                 dc.SetPen(brushAndPen.second);
@@ -154,7 +154,7 @@ void AnimationView::OnDrawDots(wxDC& dc, CalChartConfiguration const& config)
         auto x = position.x + mView->GetShowMode().Offset().x;
         auto y = position.y + mView->GetShowMode().Offset().y;
         auto drawPosition = fDIP(wxPoint(x, y));
-        auto rectangleSize = fDIP(wxSize(Int2CoordUnits(1), Int2CoordUnits(1)));
+        auto rectangleSize = fDIP(wxSize(CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(1)));
 
         dc.DrawRectangle(drawPosition - rectangleSize / 2, rectangleSize);
     }
@@ -169,7 +169,7 @@ void AnimationView::OnDrawSprites(wxDC& dc, CalChartConfiguration const& config)
     for (auto info : mAnimation->GetAllAnimateInfo()) {
         auto image_offset = !GetAnimationFrame()->TimerOn() ? 0 : OnBeat() ? 1
                                                                            : 2;
-        auto image_index = static_cast<int>(info.mDirection) + image_offset * 8;
+        auto image_index = AngleToQuadrant(info.mFacingDirection) + image_offset * 8;
         auto image = mSpriteImages[image_index];
         image = image.Scale(image.GetWidth() * scale, image.GetHeight() * scale);
         if (mView->IsSelected(info.index)) {
@@ -331,13 +331,13 @@ MarcherInfo AnimationView::GetMarcherInfo(int which) const
     MarcherInfo info{};
     if (mAnimation) {
         auto anim_info = mAnimation->GetAnimateInfo(which);
-        info.direction = NormalizeAngleRad((anim_info.mRealDirection * M_PI / 180.0));
+        info.direction = NormalizeAngleRad((anim_info.mFacingDirection * M_PI / 180.0));
 
         auto position = anim_info.mPosition;
-        info.x = CoordUnits2Float(position.x);
+        info.x = CalChart::CoordUnits2Float(position.x);
         // because the coordinate system for continuity and OpenGL are different,
         // correct here.
-        info.y = -1.0 * CoordUnits2Float(position.y);
+        info.y = -1.0 * CalChart::CoordUnits2Float(position.y);
     }
     return info;
 }

@@ -31,7 +31,7 @@ public:
     // Basic functions
     ContinuityComposerCanvas(CalChartConfiguration& config, wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxScrolledWindowStyle, wxString const& name = wxPanelNameStr);
     ~ContinuityComposerCanvas() override = default;
-    void DoSetContinuity(CalChart::DrawableCont const& drawableCont, std::function<void(CalChart::DrawableCont const&)> action);
+    void DoSetContinuity(CalChart::Cont::Drawable const& drawableCont, std::function<void(CalChart::Cont::Drawable const&)> action);
 
 private:
     CalChartConfiguration& mConfig;
@@ -49,7 +49,7 @@ ContinuityComposerCanvas::ContinuityComposerCanvas(CalChartConfiguration& config
     SetMinSize(current_size);
 }
 
-void ContinuityComposerCanvas::DoSetContinuity(CalChart::DrawableCont const& drawableCont, std::function<void(CalChart::DrawableCont const&)> action)
+void ContinuityComposerCanvas::DoSetContinuity(CalChart::Cont::Drawable const& drawableCont, std::function<void(CalChart::Cont::Drawable const&)> action)
 {
     std::vector<std::unique_ptr<DrawableCell>> contCells;
     contCells.emplace_back(std::make_unique<ContinuityBoxDrawer>(drawableCont, mConfig, action));
@@ -62,10 +62,10 @@ class ContinuityComposerPanel : public wxPanel {
     DECLARE_CLASS(ContinuityComposerPanel)
 
 public:
-    ContinuityComposerPanel(std::unique_ptr<CalChart::ContProcedure> starting_continuity, CalChartConfiguration& config, wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, wxString const& name = wxPanelNameStr);
+    ContinuityComposerPanel(std::unique_ptr<CalChart::Cont::Procedure> starting_continuity, CalChartConfiguration& config, wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, wxString const& name = wxPanelNameStr);
     ~ContinuityComposerPanel() override = default;
 
-    std::unique_ptr<CalChart::ContProcedure> GetContinuity();
+    std::unique_ptr<CalChart::Cont::Procedure> GetContinuity();
     bool Validate() override;
     void SetOnUpdateIsValid(std::function<void(bool)> const& f) { mOnUpdateIsValid = f; }
     auto GetOnUpdateIsValid() const { return mOnUpdateIsValid; }
@@ -77,18 +77,18 @@ private:
     void CreateControls();
 
     // Event Handlers
-    void OnDrawableContClick(CalChart::DrawableCont const& c);
+    void OnDrawableContClick(CalChart::Cont::Drawable const& c);
     void OnCmdTextEnterKeyPressed(wxCommandEvent const& event);
     void OnComboPressed(wxCommandEvent const& event);
     void OnComboText(wxCommandEvent const& event);
 
-    std::unique_ptr<CalChart::ContProcedure> mCont;
-    CalChart::DrawableCont mDrawableCont;
+    std::unique_ptr<CalChart::Cont::Procedure> mCont;
+    CalChart::Cont::Drawable mDrawableCont;
     ContinuityComposerCanvas* mCanvas{};
     wxComboBox* mComboSelection{};
-    CalChart::ContToken const* mCurrentSelected = nullptr;
-    CalChart::ContToken* mCurrentParent = nullptr;
-    std::function<void(CalChart::DrawableCont const& c)> const mAction;
+    CalChart::Cont::Token const* mCurrentSelected = nullptr;
+    CalChart::Cont::Token* mCurrentParent = nullptr;
+    std::function<void(CalChart::Cont::Drawable const& c)> const mAction;
     CalChartConfiguration& mConfig;
     std::function<void(bool)> mOnUpdateIsValid{};
     std::string mLastValue;
@@ -100,9 +100,9 @@ static const auto sRightBasicSizerFlags = wxSizerFlags{}.Border(wxALL, 2).Right(
 static const auto sExpandSizerFlags = wxSizerFlags{}.Border(wxALL, 2).Center().Proportion(0);
 
 // find unselected and parent
-std::pair<CalChart::ContToken const*, CalChart::ContToken*> first_unset(CalChart::DrawableCont const& cont)
+std::pair<CalChart::Cont::Token const*, CalChart::Cont::Token*> first_unset(CalChart::Cont::Drawable const& cont)
 {
-    if (cont.type == CalChart::ContType::unset) {
+    if (cont.type == CalChart::Cont::Type::unset) {
         return { cont.self_ptr, cont.parent_ptr };
     }
     for (auto&& i : cont.args) {
@@ -114,11 +114,11 @@ std::pair<CalChart::ContToken const*, CalChart::ContToken*> first_unset(CalChart
     return { nullptr, nullptr };
 }
 
-ContinuityComposerPanel::ContinuityComposerPanel(std::unique_ptr<CalChart::ContProcedure> starting_continuity, CalChartConfiguration& config, wxWindow* parent,
+ContinuityComposerPanel::ContinuityComposerPanel(std::unique_ptr<CalChart::Cont::Procedure> starting_continuity, CalChartConfiguration& config, wxWindow* parent,
     wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
     : wxPanel(parent, winid, pos, size, style, name)
     , mCont(std::move(starting_continuity))
-    , mAction([this](CalChart::DrawableCont const& c) { this->OnDrawableContClick(c); })
+    , mAction([this](CalChart::Cont::Drawable const& c) { this->OnDrawableContClick(c); })
     , mConfig(config)
 {
     Init();
@@ -152,9 +152,9 @@ void ContinuityComposerPanel::CreateControls()
     }));
 
     if (!mCont) {
-        mCont = std::make_unique<CalChart::ContProcUnset>();
+        mCont = std::make_unique<CalChart::Cont::ProcUnset>();
     }
-    mDrawableCont = mCont->GetDrawableCont();
+    mDrawableCont = mCont->GetDrawable();
     std::tie(mCurrentSelected, mCurrentParent) = first_unset(mDrawableCont);
     // preset the highlighted
     mCanvas->DoSetContinuity(mDrawableCont, mAction);
@@ -191,26 +191,26 @@ enum class ContProc {
     LAST
 };
 
-const std::pair<std::string, std::function<std::unique_ptr<CalChart::ContProcedure>()>> ContMap[] = {
-    { "BLAM", []() { return std::make_unique<CalChart::ContProcBlam>(); } },
-    { "Counter March", []() { return std::make_unique<CalChart::ContProcCM>(std::make_unique<CalChart::ContPointUnset>(), std::make_unique<CalChart::ContPointUnset>(), std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>()); } },
-    { "Diagonal Military Counter March", []() { return std::make_unique<CalChart::ContProcDMCM>(std::make_unique<CalChart::ContPointUnset>(), std::make_unique<CalChart::ContPointUnset>(), std::make_unique<CalChart::ContValueUnset>()); } },
-    { "Diagonal Military High Step", []() { return std::make_unique<CalChart::ContProcDMHS>(std::make_unique<CalChart::ContPointUnset>()); } },
-    { "EVEN step", []() { return std::make_unique<CalChart::ContProcEven>(std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContPointUnset>()); } },
-    { "East/West North/South", []() { return std::make_unique<CalChart::ContProcEWNS>(std::make_unique<CalChart::ContPointUnset>()); } },
-    { "FOUNTAIN", []() { return std::make_unique<CalChart::ContProcFountain>(std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContPointUnset>()); } },
-    { "Forward March", []() { return std::make_unique<CalChart::ContProcFM>(std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>()); } },
-    { "Forward March TO", []() { return std::make_unique<CalChart::ContProcFMTO>(std::make_unique<CalChart::ContPointUnset>()); } },
-    { "GRID", []() { return std::make_unique<CalChart::ContProcGrid>(std::make_unique<CalChart::ContValueUnset>()); } },
-    { "High Steps Counter March", []() { return std::make_unique<CalChart::ContProcHSCM>(std::make_unique<CalChart::ContPointUnset>(), std::make_unique<CalChart::ContPointUnset>(), std::make_unique<CalChart::ContValueUnset>()); } },
-    { "High Steps Diagonal Military", []() { return std::make_unique<CalChart::ContProcHSDM>(std::make_unique<CalChart::ContPointUnset>()); } },
-    { "MAGIC", []() { return std::make_unique<CalChart::ContProcMagic>(std::make_unique<CalChart::ContPointUnset>()); } },
-    { "MARCH", []() { return std::make_unique<CalChart::ContProcMarch>(std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>()); } },
-    { "MarkTime", []() { return std::make_unique<CalChart::ContProcMT>(std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>()); } },
-    { "MarkTime ReMaining", []() { return std::make_unique<CalChart::ContProcMTRM>(std::make_unique<CalChart::ContValueUnset>()); } },
-    { "North/South East/West", []() { return std::make_unique<CalChart::ContProcNSEW>(std::make_unique<CalChart::ContPointUnset>()); } },
-    { "ROTATE", []() { return std::make_unique<CalChart::ContProcRotate>(std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContPointUnset>()); } },
-    { "SET", []() { return std::make_unique<CalChart::ContProcSet>(std::make_unique<CalChart::ContValueVarUnset>(), std::make_unique<CalChart::ContValueUnset>()); } },
+const std::pair<std::string, std::function<std::unique_ptr<CalChart::Cont::Procedure>()>> ContMap[] = {
+    { "BLAM", []() { return std::make_unique<CalChart::Cont::ProcBlam>(); } },
+    { "Counter March", []() { return std::make_unique<CalChart::Cont::ProcCM>(std::make_unique<CalChart::Cont::PointUnset>(), std::make_unique<CalChart::Cont::PointUnset>(), std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()); } },
+    { "Diagonal Military Counter March", []() { return std::make_unique<CalChart::Cont::ProcDMCM>(std::make_unique<CalChart::Cont::PointUnset>(), std::make_unique<CalChart::Cont::PointUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()); } },
+    { "Diagonal Military High Step", []() { return std::make_unique<CalChart::Cont::ProcDMHS>(std::make_unique<CalChart::Cont::PointUnset>()); } },
+    { "EVEN step", []() { return std::make_unique<CalChart::Cont::ProcEven>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::PointUnset>()); } },
+    { "East/West North/South", []() { return std::make_unique<CalChart::Cont::ProcEWNS>(std::make_unique<CalChart::Cont::PointUnset>()); } },
+    { "FOUNTAIN", []() { return std::make_unique<CalChart::Cont::ProcFountain>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::PointUnset>()); } },
+    { "Forward March", []() { return std::make_unique<CalChart::Cont::ProcFM>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()); } },
+    { "Forward March TO", []() { return std::make_unique<CalChart::Cont::ProcFMTO>(std::make_unique<CalChart::Cont::PointUnset>()); } },
+    { "GRID", []() { return std::make_unique<CalChart::Cont::ProcGrid>(std::make_unique<CalChart::Cont::ValueUnset>()); } },
+    { "High Steps Counter March", []() { return std::make_unique<CalChart::Cont::ProcHSCM>(std::make_unique<CalChart::Cont::PointUnset>(), std::make_unique<CalChart::Cont::PointUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()); } },
+    { "High Steps Diagonal Military", []() { return std::make_unique<CalChart::Cont::ProcHSDM>(std::make_unique<CalChart::Cont::PointUnset>()); } },
+    { "MAGIC", []() { return std::make_unique<CalChart::Cont::ProcMagic>(std::make_unique<CalChart::Cont::PointUnset>()); } },
+    { "MARCH", []() { return std::make_unique<CalChart::Cont::ProcMarch>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()); } },
+    { "MarkTime", []() { return std::make_unique<CalChart::Cont::ProcMT>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()); } },
+    { "MarkTime ReMaining", []() { return std::make_unique<CalChart::Cont::ProcMTRM>(std::make_unique<CalChart::Cont::ValueUnset>()); } },
+    { "North/South East/West", []() { return std::make_unique<CalChart::Cont::ProcNSEW>(std::make_unique<CalChart::Cont::PointUnset>()); } },
+    { "ROTATE", []() { return std::make_unique<CalChart::Cont::ProcRotate>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::PointUnset>()); } },
+    { "SET", []() { return std::make_unique<CalChart::Cont::ProcSet>(std::make_unique<CalChart::Cont::ValueVarUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()); } },
 };
 
 static_assert(sizeof(ContMap) / sizeof(ContMap[0]) == static_cast<int>(ContProc::LAST), "");
@@ -330,44 +330,44 @@ const ContValue SettableValueVar[] = {
     ContValue::Z,
 };
 
-const std::pair<std::string, std::function<std::unique_ptr<CalChart::ContValue>()>> ValueMap[] = {
-    { "+", []() { return std::make_unique<CalChart::ContValueAdd>(std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>()); } },
-    { "-", []() { return std::make_unique<CalChart::ContValueSub>(std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>()); } },
-    { "*", []() { return std::make_unique<CalChart::ContValueMult>(std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>()); } },
-    { "/", []() { return std::make_unique<CalChart::ContValueDiv>(std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>()); } },
-    { "NEG", []() { return std::make_unique<CalChart::ContValueNeg>(std::make_unique<CalChart::ContValueUnset>()); } },
-    { "REMaining", []() { return std::make_unique<CalChart::ContValueREM>(); } },
-    { "DIRection TO", []() { return std::make_unique<CalChart::ContFuncDir>(std::make_unique<CalChart::ContPointUnset>()); } },
-    { "DIRection From", []() { return std::make_unique<CalChart::ContFuncDirFrom>(std::make_unique<CalChart::ContPointUnset>(), std::make_unique<CalChart::ContPointUnset>()); } },
-    { "DIStant To", []() { return std::make_unique<CalChart::ContFuncDist>(std::make_unique<CalChart::ContPointUnset>()); } },
-    { "DIStant From", []() { return std::make_unique<CalChart::ContFuncDistFrom>(std::make_unique<CalChart::ContPointUnset>(), std::make_unique<CalChart::ContPointUnset>()); } },
-    { "EITHER", []() { return std::make_unique<CalChart::ContFuncEither>(std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContPointUnset>()); } },
-    { "OPPosite", []() { return std::make_unique<CalChart::ContFuncOpp>(std::make_unique<CalChart::ContValueUnset>()); } },
-    { "STEP drill", []() { return std::make_unique<CalChart::ContFuncStep>(std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContPointUnset>()); } },
-    { "A", []() { return std::make_unique<CalChart::ContValueVar>(CalChart::CONTVAR_A); } },
-    { "B", []() { return std::make_unique<CalChart::ContValueVar>(CalChart::CONTVAR_B); } },
-    { "C", []() { return std::make_unique<CalChart::ContValueVar>(CalChart::CONTVAR_C); } },
-    { "D", []() { return std::make_unique<CalChart::ContValueVar>(CalChart::CONTVAR_D); } },
-    { "X", []() { return std::make_unique<CalChart::ContValueVar>(CalChart::CONTVAR_X); } },
-    { "Y", []() { return std::make_unique<CalChart::ContValueVar>(CalChart::CONTVAR_Y); } },
-    { "Z", []() { return std::make_unique<CalChart::ContValueVar>(CalChart::CONTVAR_Z); } },
-    { "Direction Of Flow", []() { return std::make_unique<CalChart::ContValueVar>(CalChart::CONTVAR_DOF); } },
-    { "Direction Of Horn", []() { return std::make_unique<CalChart::ContValueVar>(CalChart::CONTVAR_DOH); } },
-    { "North", []() { return std::make_unique<CalChart::ContValueDefined>(CalChart::CC_N); } },
-    { "NorthEast", []() { return std::make_unique<CalChart::ContValueDefined>(CalChart::CC_NE); } },
-    { "East", []() { return std::make_unique<CalChart::ContValueDefined>(CalChart::CC_E); } },
-    { "SouthEast", []() { return std::make_unique<CalChart::ContValueDefined>(CalChart::CC_SE); } },
-    { "South", []() { return std::make_unique<CalChart::ContValueDefined>(CalChart::CC_S); } },
-    { "SouthWest", []() { return std::make_unique<CalChart::ContValueDefined>(CalChart::CC_SW); } },
-    { "West", []() { return std::make_unique<CalChart::ContValueDefined>(CalChart::CC_W); } },
-    { "NorthWest", []() { return std::make_unique<CalChart::ContValueDefined>(CalChart::CC_NW); } },
-    { "HighStep", []() { return std::make_unique<CalChart::ContValueDefined>(CalChart::CC_HS); } },
-    { "Mini-Military", []() { return std::make_unique<CalChart::ContValueDefined>(CalChart::CC_MM); } },
-    { "ShowHigh", []() { return std::make_unique<CalChart::ContValueDefined>(CalChart::CC_SH); } },
-    { "Jerky Step", []() { return std::make_unique<CalChart::ContValueDefined>(CalChart::CC_JS); } },
-    { "GrapeVine", []() { return std::make_unique<CalChart::ContValueDefined>(CalChart::CC_GV); } },
-    { "Military", []() { return std::make_unique<CalChart::ContValueDefined>(CalChart::CC_M); } },
-    { "Diagonal Military", []() { return std::make_unique<CalChart::ContValueDefined>(CalChart::CC_DM); } },
+const std::pair<std::string, std::function<std::unique_ptr<CalChart::Cont::Value>()>> ValueMap[] = {
+    { "+", []() { return std::make_unique<CalChart::Cont::ValueAdd>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()); } },
+    { "-", []() { return std::make_unique<CalChart::Cont::ValueSub>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()); } },
+    { "*", []() { return std::make_unique<CalChart::Cont::ValueMult>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()); } },
+    { "/", []() { return std::make_unique<CalChart::Cont::ValueDiv>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()); } },
+    { "NEG", []() { return std::make_unique<CalChart::Cont::ValueNeg>(std::make_unique<CalChart::Cont::ValueUnset>()); } },
+    { "REMaining", []() { return std::make_unique<CalChart::Cont::ValueREM>(); } },
+    { "DIRection TO", []() { return std::make_unique<CalChart::Cont::FuncDir>(std::make_unique<CalChart::Cont::PointUnset>()); } },
+    { "DIRection From", []() { return std::make_unique<CalChart::Cont::FuncDirFrom>(std::make_unique<CalChart::Cont::PointUnset>(), std::make_unique<CalChart::Cont::PointUnset>()); } },
+    { "DIStant To", []() { return std::make_unique<CalChart::Cont::FuncDist>(std::make_unique<CalChart::Cont::PointUnset>()); } },
+    { "DIStant From", []() { return std::make_unique<CalChart::Cont::FuncDistFrom>(std::make_unique<CalChart::Cont::PointUnset>(), std::make_unique<CalChart::Cont::PointUnset>()); } },
+    { "EITHER", []() { return std::make_unique<CalChart::Cont::FuncEither>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::PointUnset>()); } },
+    { "OPPosite", []() { return std::make_unique<CalChart::Cont::FuncOpp>(std::make_unique<CalChart::Cont::ValueUnset>()); } },
+    { "STEP drill", []() { return std::make_unique<CalChart::Cont::FuncStep>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::PointUnset>()); } },
+    { "A", []() { return std::make_unique<CalChart::Cont::ValueVar>(CalChart::Cont::Variable::A); } },
+    { "B", []() { return std::make_unique<CalChart::Cont::ValueVar>(CalChart::Cont::Variable::B); } },
+    { "C", []() { return std::make_unique<CalChart::Cont::ValueVar>(CalChart::Cont::Variable::C); } },
+    { "D", []() { return std::make_unique<CalChart::Cont::ValueVar>(CalChart::Cont::Variable::D); } },
+    { "X", []() { return std::make_unique<CalChart::Cont::ValueVar>(CalChart::Cont::Variable::X); } },
+    { "Y", []() { return std::make_unique<CalChart::Cont::ValueVar>(CalChart::Cont::Variable::Y); } },
+    { "Z", []() { return std::make_unique<CalChart::Cont::ValueVar>(CalChart::Cont::Variable::Z); } },
+    { "Direction Of Flow", []() { return std::make_unique<CalChart::Cont::ValueVar>(CalChart::Cont::Variable::DOF); } },
+    { "Direction Of Horn", []() { return std::make_unique<CalChart::Cont::ValueVar>(CalChart::Cont::Variable::DOH); } },
+    { "North", []() { return std::make_unique<CalChart::Cont::ValueDefined>(CalChart::Cont::CC_N); } },
+    { "NorthEast", []() { return std::make_unique<CalChart::Cont::ValueDefined>(CalChart::Cont::CC_NE); } },
+    { "East", []() { return std::make_unique<CalChart::Cont::ValueDefined>(CalChart::Cont::CC_E); } },
+    { "SouthEast", []() { return std::make_unique<CalChart::Cont::ValueDefined>(CalChart::Cont::CC_SE); } },
+    { "South", []() { return std::make_unique<CalChart::Cont::ValueDefined>(CalChart::Cont::CC_S); } },
+    { "SouthWest", []() { return std::make_unique<CalChart::Cont::ValueDefined>(CalChart::Cont::CC_SW); } },
+    { "West", []() { return std::make_unique<CalChart::Cont::ValueDefined>(CalChart::Cont::CC_W); } },
+    { "NorthWest", []() { return std::make_unique<CalChart::Cont::ValueDefined>(CalChart::Cont::CC_NW); } },
+    { "HighStep", []() { return std::make_unique<CalChart::Cont::ValueDefined>(CalChart::Cont::CC_HS); } },
+    { "Mini-Military", []() { return std::make_unique<CalChart::Cont::ValueDefined>(CalChart::Cont::CC_MM); } },
+    { "ShowHigh", []() { return std::make_unique<CalChart::Cont::ValueDefined>(CalChart::Cont::CC_SH); } },
+    { "Jerky Step", []() { return std::make_unique<CalChart::Cont::ValueDefined>(CalChart::Cont::CC_JS); } },
+    { "GrapeVine", []() { return std::make_unique<CalChart::Cont::ValueDefined>(CalChart::Cont::CC_GV); } },
+    { "Military", []() { return std::make_unique<CalChart::Cont::ValueDefined>(CalChart::Cont::CC_M); } },
+    { "Diagonal Military", []() { return std::make_unique<CalChart::Cont::ValueDefined>(CalChart::Cont::CC_DM); } },
 };
 
 static_assert(sizeof(ValueMap) / sizeof(ValueMap[0]) == static_cast<int>(ContValue::LAST), "");
@@ -392,13 +392,13 @@ const ContPoint PointUsageOrder[] = {
     ContPoint::RefPoint3,
 };
 
-const std::pair<std::string, std::function<std::unique_ptr<CalChart::ContPoint>()>> PointMap[] = {
-    { "Point", []() { return std::make_unique<CalChart::ContPoint>(); } },
-    { "Starting Point", []() { return std::make_unique<CalChart::ContStartPoint>(); } },
-    { "Next Point", []() { return std::make_unique<CalChart::ContNextPoint>(); } },
-    { "Ref Point 1", []() { return std::make_unique<CalChart::ContRefPoint>(1); } },
-    { "Ref Point 2", []() { return std::make_unique<CalChart::ContRefPoint>(2); } },
-    { "Ref Point 3", []() { return std::make_unique<CalChart::ContRefPoint>(3); } },
+const std::pair<std::string, std::function<std::unique_ptr<CalChart::Cont::Point>()>> PointMap[] = {
+    { "Point", []() { return std::make_unique<CalChart::Cont::Point>(); } },
+    { "Starting Point", []() { return std::make_unique<CalChart::Cont::StartPoint>(); } },
+    { "Next Point", []() { return std::make_unique<CalChart::Cont::NextPoint>(); } },
+    { "Ref Point 1", []() { return std::make_unique<CalChart::Cont::RefPoint>(1); } },
+    { "Ref Point 2", []() { return std::make_unique<CalChart::Cont::RefPoint>(2); } },
+    { "Ref Point 3", []() { return std::make_unique<CalChart::Cont::RefPoint>(3); } },
 };
 
 static_assert(sizeof(ValueMap) / sizeof(ValueMap[0]) == static_cast<int>(ContValue::LAST), "");
@@ -443,24 +443,24 @@ bool string_matches_upper_case(std::string const& target, std::string const& che
     return std::equal(target.begin(), target.end(), new_string.begin(), new_string.end(), [](auto&& a, auto&& b) { return tolower(a) == tolower(b); });
 }
 
-auto WhatType(CalChart::ContToken const* ptr)
+auto WhatType(CalChart::Cont::Token const* ptr)
 {
-    if (dynamic_cast<CalChart::ContProcedure const*>(ptr)) {
+    if (dynamic_cast<CalChart::Cont::Procedure const*>(ptr)) {
         return TokenType::Do_Continuity;
     }
-    if (dynamic_cast<CalChart::ContValueVarUnset const*>(ptr)) {
+    if (dynamic_cast<CalChart::Cont::ValueVarUnset const*>(ptr)) {
         return TokenType::Do_ValuesVarUnset;
     }
-    if (dynamic_cast<CalChart::ContValue const*>(ptr)) {
+    if (dynamic_cast<CalChart::Cont::Value const*>(ptr)) {
         return TokenType::Do_Values;
     }
-    if (dynamic_cast<CalChart::ContPoint const*>(ptr)) {
+    if (dynamic_cast<CalChart::Cont::Point const*>(ptr)) {
         return TokenType::Do_Points;
     }
     throw std::runtime_error("unknown pointer type");
 }
 
-auto GetCurrentList(CalChart::ContToken const* selected)
+auto GetCurrentList(CalChart::Cont::Token const* selected)
 {
     std::vector<std::string> result;
     if (selected) {
@@ -539,7 +539,7 @@ void ContinuityComposerPanel::OnCmdTextEnterKeyPressed(wxCommandEvent const& eve
                 // special, if it just numbers, then it's a float.
                 double value;
                 if (event.GetString().ToDouble(&value)) {
-                    mCurrentParent->replace(mCurrentSelected, std::make_unique<CalChart::ContValueFloat>(value));
+                    mCurrentParent->replace(mCurrentSelected, std::make_unique<CalChart::Cont::ValueFloat>(value));
                     changed = true;
                     break;
                 }
@@ -550,12 +550,12 @@ void ContinuityComposerPanel::OnCmdTextEnterKeyPressed(wxCommandEvent const& eve
                 }
             } break;
             }
-        } catch (CalChart::ContProcSet::ReplaceError_NotAVar const& e) {
+        } catch (CalChart::Cont::ProcSet::ReplaceError_NotAVar const& e) {
             wxString msg("Not a valid variable\n");
             wxMessageBox(msg, wxT("Invalid variable name"), wxICON_INFORMATION | wxOK);
         }
         if (changed) {
-            mDrawableCont = mCont->GetDrawableCont();
+            mDrawableCont = mCont->GetDrawable();
             std::tie(mCurrentSelected, mCurrentParent) = first_unset(mDrawableCont);
             // clear out the text
             mComboSelection->SetValue("");
@@ -578,8 +578,7 @@ auto findStringsThatMatchString(std::string const& str, std::vector<std::string>
             auto result = std::min(i.first.find(tolower(l), i.second), i.first.find(toupper(l), i.second));
             return { i.first, result };
         });
-        listOfStrings.erase(std::remove_copy_if(listOfStrings.begin(), listOfStrings.end(), listOfStrings.begin(), [](auto&& i) {
-            return i.second == std::string::npos; }), listOfStrings.cend());
+        listOfStrings.erase(std::remove_copy_if(listOfStrings.begin(), listOfStrings.end(), listOfStrings.begin(), [](auto&& i) { return i.second == std::string::npos; }), listOfStrings.cend());
     }
     auto result = std::vector<std::string>{};
     std::transform(listOfStrings.cbegin(), listOfStrings.cend(), std::back_inserter(result), [](auto&& i) { return i.first; });
@@ -632,7 +631,7 @@ void ContinuityComposerPanel::OnComboText(wxCommandEvent const& /*event*/)
     }
 }
 
-void ContinuityComposerPanel::OnDrawableContClick(CalChart::DrawableCont const& c)
+void ContinuityComposerPanel::OnDrawableContClick(CalChart::Cont::Drawable const& c)
 {
     mCurrentSelected = c.self_ptr;
     mCurrentParent = c.parent_ptr;
@@ -644,7 +643,7 @@ bool ContinuityComposerPanel::Validate()
     return first_unset(mDrawableCont).first == nullptr;
 }
 
-std::unique_ptr<CalChart::ContProcedure>
+std::unique_ptr<CalChart::Cont::Procedure>
 ContinuityComposerPanel::GetContinuity()
 {
     return mCont->clone();
@@ -652,7 +651,7 @@ ContinuityComposerPanel::GetContinuity()
 
 IMPLEMENT_CLASS(ContinuityComposerDialog, wxDialog)
 
-ContinuityComposerDialog::ContinuityComposerDialog(std::unique_ptr<CalChart::ContProcedure> starting_continuity, wxWindow* parent)
+ContinuityComposerDialog::ContinuityComposerDialog(std::unique_ptr<CalChart::Cont::Procedure> starting_continuity, wxWindow* parent)
     : super(parent, wxID_ANY, "Compose Continuity")
 {
     // create a sizer for laying things out top down:
@@ -674,7 +673,7 @@ ContinuityComposerDialog::ContinuityComposerDialog(std::unique_ptr<CalChart::Con
     Update();
 }
 
-std::unique_ptr<CalChart::ContProcedure>
+std::unique_ptr<CalChart::Cont::Procedure>
 ContinuityComposerDialog::GetContinuity()
 {
     return mPanel->GetContinuity();

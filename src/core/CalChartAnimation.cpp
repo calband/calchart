@@ -25,12 +25,11 @@
 #include "CalChartAnimationCompile.h"
 #include "CalChartAnimationErrors.h"
 #include "CalChartContinuity.h"
-#include "CalChartContinuityToken.h"
 #include "CalChartDrawCommand.h"
 #include "CalChartPoint.h"
 #include "CalChartSheet.h"
 #include "CalChartShow.h"
-#include "math_utils.h"
+#include "CalChartUtils.h"
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -38,12 +37,6 @@
 #include <numeric>
 #include <sstream>
 #include <string>
-
-template <typename E>
-constexpr auto toUType(E enumerator)
-{
-    return static_cast<std::underlying_type_t<E>>(enumerator);
-}
 
 namespace CalChart {
 
@@ -289,8 +282,7 @@ Animation::animate_info_t Animation::GetAnimateInfo(int which) const
     return {
         which,
         mCollisions.count({ which, mCurrentSheetNumber, mCurrentBeatNumber }) ? mCollisions.find({ which, mCurrentSheetNumber, mCurrentBeatNumber })->second : Coord::CollisionType::none,
-        GetCommand(mCurrentSheetNumber, which).Direction(),
-        GetCommand(mCurrentSheetNumber, which).RealDirection(), mPoints.at(which)
+        GetCommand(mCurrentSheetNumber, which).FacingDirection(), mPoints.at(which)
     };
 }
 
@@ -303,8 +295,7 @@ std::vector<Animation::animate_info_t> Animation::GetAllAnimateInfo() const
         return {
             which,
             mCollisions.count({ which, mCurrentSheetNumber, mCurrentBeatNumber }) ? mCollisions.find({ which, mCurrentSheetNumber, mCurrentBeatNumber })->second : Coord::CollisionType::none,
-            GetCommand(mCurrentSheetNumber, which).Direction(),
-            GetCommand(mCurrentSheetNumber, which).RealDirection(), mPoints.at(which)
+            GetCommand(mCurrentSheetNumber, which).FacingDirection(), mPoints.at(which)
         };
     });
     std::sort(animates.begin(), animates.end(), [](auto& a, auto& b) {
@@ -369,8 +360,7 @@ Animation::GetCurrentInfo() const
         std::ostringstream each_string;
         auto info = GetAnimateInfo(i);
         each_string << "pt " << i << ": (" << info.mPosition.x << ", "
-                    << info.mPosition.y << "), dir=" << toUType(info.mDirection)
-                    << ", realdir=" << info.mRealDirection
+                    << info.mPosition.y << "), dir=" << info.mFacingDirection
                     << ((info.mCollision != CalChart::Coord::CollisionType::none) ? ", collision!" : "");
         each.push_back(each_string.str());
     }

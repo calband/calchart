@@ -21,7 +21,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartUtils.h"
+
 #include <cstdint>
+#include <iostream>
 
 namespace CalChart {
 
@@ -81,15 +84,15 @@ struct Coord {
 
     Coord& operator*=(double s)
     {
-        x *= s;
-        y *= s;
+        x = static_cast<units>(x * s);
+        y = static_cast<units>(y * s);
         return *this;
     }
 
     Coord& operator/=(double s)
     {
-        x /= s;
-        y /= s;
+        x = static_cast<units>(x / s);
+        y = static_cast<units>(y / s);
         return *this;
     }
 
@@ -133,7 +136,9 @@ inline bool operator!=(Coord const& a, Coord const& b)
     return ((a.x != b.x) || (a.y != b.y));
 }
 
-void Coord_UnitTests();
+inline std::ostream& operator<<(std::ostream& os, CalChart::Coord const& c)
+{
+    return os << "(" << c.x << "," << c.y << ")";
 }
 
 // RoundToCoordUnits: Use when number is already in Coord format, just needs to be
@@ -168,4 +173,15 @@ template <typename T>
 constexpr auto CoordUnits2Int(T a)
 {
     return static_cast<int>(a / CalChart::kCoordDecimal);
+}
+
+// Create vector is going to create a vector in that direction, except diagonals are different!
+template <typename T, typename U>
+CalChart::Coord CreateVector(T dir, U mag)
+{
+    auto unit = CreateUnitVector(dir);
+    return { Float2CoordUnits(mag * std::get<0>(unit)), Float2CoordUnits(mag * std::get<1>(unit)) };
+}
+
+void Coord_UnitTests();
 }

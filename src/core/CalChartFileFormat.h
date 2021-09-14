@@ -234,17 +234,17 @@ struct Current_version_and_later {
 inline void put_big_word(void* p, uint16_t v)
 {
     uint8_t* ptr = static_cast<uint8_t*>(p);
-    ptr[0] = v >> 8;
-    ptr[1] = v;
+    ptr[0] = (v >> 8) & 0xFF;
+    ptr[1] = (v)&0xFF;
 }
 
 inline void put_big_long(void* p, uint32_t v)
 {
     uint8_t* ptr = static_cast<uint8_t*>(p);
-    ptr[0] = v >> 24;
-    ptr[1] = v >> 16;
-    ptr[2] = v >> 8;
-    ptr[3] = v;
+    ptr[0] = (v >> 24) & 0xFF;
+    ptr[1] = (v >> 16) & 0xFF;
+    ptr[2] = (v >> 8) & 0xFF;
+    ptr[3] = (v)&0xFF;
 }
 
 class CC_FileException : public std::runtime_error {
@@ -362,10 +362,13 @@ namespace Parser {
     }
 }
 
-class Reader
-{
+class Reader {
 public:
-    Reader(std::pair<uint8_t const*, size_t> data, uint32_t version = kVersion) : data(data), version(version) {}
+    Reader(std::pair<uint8_t const*, size_t> data, uint32_t version = kVersion)
+        : data(data)
+        , version(version)
+    {
+    }
 
     auto size() const { return data.second; }
     auto first(std::size_t n) const
@@ -377,7 +380,12 @@ public:
         copy.data.second = n;
         return copy;
     }
-    auto subspan(std::size_t n) const { auto copy = *this; copy.subspanImpl(n); return copy; }
+    auto subspan(std::size_t n) const
+    {
+        auto copy = *this;
+        copy.subspanImpl(n);
+        return copy;
+    }
 
     template <typename T>
     T Peek() const;
@@ -413,7 +421,7 @@ public:
             if ((end != INGL_END) || (end_name != name)) {
                 return result;
             }
-            result.push_back({name, reader});
+            result.push_back({ name, reader });
         }
         return result;
     }
@@ -462,7 +470,6 @@ public:
     }
 
 private:
-
     // privateSubspan
     void subspanImpl(std::size_t n)
     {
@@ -472,7 +479,6 @@ private:
         data.first += n;
         data.second -= n;
     }
-
 
     std::pair<uint8_t const*, size_t> data;
     uint32_t version;
@@ -535,7 +541,7 @@ inline std::string Reader::Get<std::string>()
     if (size() < (result.size() + 1)) {
         throw std::runtime_error(std::string("not enough data for string.  Need " + std::to_string(result.size() + 1) + ", currently have ") + std::to_string(size()));
     }
-    subspanImpl(result.size()+1); // +1 for the null terminator
+    subspanImpl(result.size() + 1); // +1 for the null terminator
     return result;
 }
 
@@ -546,11 +552,9 @@ inline std::vector<T> Reader::GetVector()
         throw std::runtime_error(std::string("not enough data for vector size.  Need 4, currently have ") + std::to_string(size()));
     }
     auto size = Get<uint32_t>();
-    auto result = std::vector<T>(data.first, data.first+size);
+    auto result = std::vector<T>(data.first, data.first + size);
     subspanImpl(size);
     return result;
 }
-
-
 
 }

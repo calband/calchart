@@ -34,7 +34,7 @@
 
 #include "CalChartAnimationTypes.h"
 #include "CalChartCoord.h"
-#include "math_utils.h"
+#include "CalChartUtils.h"
 #include <nlohmann/json.hpp>
 
 namespace CalChart {
@@ -58,8 +58,7 @@ public:
     virtual void ApplyForward(Coord& pt);
     virtual void ApplyBackward(Coord& pt);
 
-    virtual AnimateDir Direction() const = 0;
-    virtual float RealDirection() const = 0;
+    virtual float FacingDirection() const = 0;
     virtual float MotionDirection() const;
     virtual void ClipBeats(unsigned beats);
 
@@ -99,13 +98,11 @@ class AnimationCommandMT : public AnimationCommand {
 
 public:
     AnimationCommandMT(unsigned beats, float direction);
-    AnimationCommandMT(unsigned beats, AnimateDir direction);
     virtual ~AnimationCommandMT() = default;
 
     std::unique_ptr<AnimationCommand> clone() const override;
 
-    AnimateDir Direction() const override;
-    float RealDirection() const override;
+    float FacingDirection() const override;
 
     nlohmann::json toOnlineViewerJSON(Coord start) const override;
 
@@ -116,12 +113,10 @@ protected:
         if (!ptr)
             return false;
         return super::is_equal(other)
-            && dir == ptr->dir
-            && IS_ZERO(realdir - ptr->realdir);
+            && IS_ZERO(dir - ptr->dir);
     }
 
-    AnimateDir dir;
-    float realdir;
+    float dir;
 };
 
 class AnimationCommandMove : public AnimationCommandMT {
@@ -177,8 +172,7 @@ public:
     void ApplyForward(Coord& pt) override;
     void ApplyBackward(Coord& pt) override;
 
-    AnimateDir Direction() const override;
-    float RealDirection() const override;
+    float FacingDirection() const override;
     void ClipBeats(unsigned beats) override;
 
     DrawCommand GenCC_DrawCommand(Coord pt, Coord offset) const override;

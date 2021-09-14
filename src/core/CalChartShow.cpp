@@ -65,7 +65,7 @@ std::unique_ptr<Show> Show::Create(ShowMode const& mode, std::istream& stream, P
         std::istream_iterator<uint8_t>{});
     // wxWidgets doesn't like it when we've reach the end of file.  Remove flags
     stream.clear();
-    auto reader = Reader({data.data(), data.size()});
+    auto reader = Reader({ data.data(), data.size() });
 
     reader.ReadAndCheckID(INGL_INGL);
     auto version = reader.ReadGurkSymbolAndGetVersion(INGL_GURK);
@@ -227,7 +227,7 @@ Show::Show(ShowMode const& mode, Reader reader, ParseErrorHandlers const* correc
     };
     // [=] needed here to pull in the parse functions
     auto parse_INGL_SHOW = [=](Show& show, Reader reader) {
-        std::map<uint32_t, std::function<void(Show& show, Reader)>> const parser = {
+        std::map<uint32_t, std::function<void(Show & show, Reader)>> const parser = {
             { INGL_SIZE, parse_INGL_SIZE },
             { INGL_LABL, parse_INGL_LABL },
             { INGL_INST, parse_INGL_INST },
@@ -1092,7 +1092,7 @@ void Show::CC_show_round_trip_test_with_number_label_description()
     Append(data, Construct_block(INGL_MODE, ShowMode::GetDefaultShowMode().Serialize()));
     auto show_data = Construct_block(INGL_SHOW, data);
 
-    Show show1(ShowMode::GetDefaultShowMode(), Reader({(const uint8_t*)show_data.data(), show_data.size()}));
+    Show show1(ShowMode::GetDefaultShowMode(), Reader({ (const uint8_t*)show_data.data(), show_data.size() }));
     auto show1_data = show1.SerializeShow();
     // eat header
     show1_data.erase(show1_data.begin(), show1_data.begin() + 8);
@@ -1119,7 +1119,7 @@ void Show::CC_show_round_trip_test_with_different_show_modes()
     // eat header
     show1_data.erase(show1_data.begin(), show1_data.begin() + 8);
 
-    Show show2(ShowMode::GetDefaultShowMode(), Reader({(uint8_t const*)show1_data.data(), show1_data.size()}));
+    Show show2(ShowMode::GetDefaultShowMode(), Reader({ (uint8_t const*)show1_data.data(), show1_data.size() }));
     assert(show2.GetShowMode().HashW() == 36);
 }
 
@@ -1127,8 +1127,8 @@ void Show::CC_show_blank_desc_test()
 {
     auto show_zero_points_zero_labels_zero_description = Construct_show_zero_points_zero_labels_zero_description();
     Show show1(ShowMode::GetDefaultShowMode(),
-               Reader({(uint8_t const*)show_zero_points_zero_labels_zero_description.data(),
-        show_zero_points_zero_labels_zero_description.size()}));
+        Reader({ (uint8_t const*)show_zero_points_zero_labels_zero_description.data(),
+            show_zero_points_zero_labels_zero_description.size() }));
     auto show1_data = show1.SerializeShow();
     // eat header
     show1_data.erase(show1_data.begin(), show1_data.begin() + 8);
@@ -1140,8 +1140,7 @@ void Show::CC_show_blank_desc_test()
 
     // now remove the description and they should be equal
     auto show_zero_points_zero_labels = Construct_show_zero_points_zero_labels();
-    Show show2(ShowMode::GetDefaultShowMode(), Reader({(uint8_t const*)show_zero_points_zero_labels.data(),
-        show_zero_points_zero_labels.size()}));
+    Show show2(ShowMode::GetDefaultShowMode(), Reader({ (uint8_t const*)show_zero_points_zero_labels.data(), show_zero_points_zero_labels.size() }));
     auto show2_data = show2.SerializeShow();
     show2_data.erase(show2_data.begin(), show2_data.begin() + 8);
     is_equal = show2_data.size() == show_zero_points_zero_labels.size() && std::equal(show2_data.begin(), show2_data.end(), show_zero_points_zero_labels.begin());
@@ -1178,7 +1177,7 @@ void Show::CC_show_wrong_size_throws_exception()
     auto show_data = Construct_block(INGL_SHOW, points_3);
     bool hit_exception = false;
     try {
-        Show show1(ShowMode::GetDefaultShowMode(), Reader({(uint8_t const*)show_data.data(), show_data.size()}));
+        Show show1(ShowMode::GetDefaultShowMode(), Reader({ (uint8_t const*)show_data.data(), show_data.size() }));
     } catch (CC_FileException const&) {
         hit_exception = true;
     }
@@ -1199,7 +1198,7 @@ void Show::CC_show_wrong_size_number_labels_throws()
         auto show_data = Construct_block(INGL_SHOW, t_show_data);
         bool hit_exception = false;
         try {
-            Show show1(ShowMode::GetDefaultShowMode(), Reader({(uint8_t const*)show_data.data(), show_data.size()}));
+            Show show1(ShowMode::GetDefaultShowMode(), Reader({ (uint8_t const*)show_data.data(), show_data.size() }));
         } catch (CC_FileException const&) {
             hit_exception = true;
         }
@@ -1216,7 +1215,7 @@ void Show::CC_show_wrong_size_number_labels_throws()
         auto show_data = Construct_block(INGL_SHOW, t_show_data);
         bool hit_exception = false;
         try {
-            Show show1(ShowMode::GetDefaultShowMode(), Reader({(uint8_t const*)show_data.data(), show_data.size()}));
+            Show show1(ShowMode::GetDefaultShowMode(), Reader({ (uint8_t const*)show_data.data(), show_data.size() }));
         } catch (CC_FileException const&) {
             hit_exception = true;
         }
@@ -1240,7 +1239,7 @@ void Show::CC_show_wrong_size_description()
         auto show_data = Construct_block(INGL_SHOW, t_show_data);
         bool hit_exception = false;
         try {
-            Show show1(ShowMode::GetDefaultShowMode(), Reader({(uint8_t const*)show_data.data(), show_data.size()}));
+            Show show1(ShowMode::GetDefaultShowMode(), Reader({ (uint8_t const*)show_data.data(), show_data.size() }));
         } catch (CC_FileException const&) {
             hit_exception = true;
         }
@@ -1254,7 +1253,7 @@ void Show::CC_show_extra_cruft_ok()
 {
     // now remove the description and they should be equal
     auto extra_cruft = Construct_show_zero_points_zero_labels_1_sheet_and_random();
-    Show show1(ShowMode::GetDefaultShowMode(), Reader({(uint8_t const*)extra_cruft.data(), extra_cruft.size()}));
+    Show show1(ShowMode::GetDefaultShowMode(), Reader({ (uint8_t const*)extra_cruft.data(), extra_cruft.size() }));
     auto show1_data = show1.SerializeShow();
 
     auto blank_show = Show::Create(ShowMode::GetDefaultShowMode());
@@ -1270,7 +1269,7 @@ void Show::CC_show_with_nothing_throws()
     std::vector<uint8_t> empty{};
     bool hit_exception = false;
     try {
-        Show show1(ShowMode::GetDefaultShowMode(), Reader({(uint8_t const*)empty.data(), empty.size()}));
+        Show show1(ShowMode::GetDefaultShowMode(), Reader({ (uint8_t const*)empty.data(), empty.size() }));
     } catch (CC_FileException const&) {
         hit_exception = true;
     }

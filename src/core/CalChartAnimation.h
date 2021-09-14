@@ -56,8 +56,7 @@ public:
     struct animate_info_t {
         int index;
         CalChart::Coord::CollisionType mCollision;
-        AnimateDir mDirection;
-        float mRealDirection;
+        float mFacingDirection;
         Coord mPosition;
     };
     animate_info_t GetAnimateInfo(int which) const;
@@ -69,7 +68,7 @@ public:
     auto GetNumberBeats() const { return mSheets.at(mCurrentSheetNumber).GetNumBeats(); }
     auto GetCurrentBeat() const { return mCurrentBeatNumber; }
     unsigned GetTotalNumberBeatsUpTo(int sheet) const;
-    auto GetTotalNumberBeats() const { return GetTotalNumberBeatsUpTo(mSheets.size()); }
+    auto GetTotalNumberBeats() const { return GetTotalNumberBeatsUpTo(static_cast<int>(mSheets.size())); }
     int GetTotalCurrentBeat() const;
     auto GetCurrentSheetName() const { return mSheets.at(mCurrentSheetNumber).GetName(); }
     std::vector<AnimationErrors> GetAnimationErrors() const;

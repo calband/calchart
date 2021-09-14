@@ -26,62 +26,10 @@
 #include "CalChartAnimation.h"
 #include "CalChartAnimationCommand.h"
 #include "CalChartDrawCommand.h"
-#include "math_utils.h"
+#include "CalChartUtils.h"
 #include "viewer_translate.h"
 
 namespace CalChart {
-
-inline auto AnimGetDirFromAngle(float ang)
-{
-    ang = NormalizeAngle(ang);
-    // rotate angle by 22.5:
-    ang += 22.5;
-    size_t quadrant = ang / 45.0;
-    switch (quadrant) {
-    case 0:
-        return AnimateDir::N;
-    case 1:
-        return AnimateDir::NW;
-    case 2:
-        return AnimateDir::W;
-    case 3:
-        return AnimateDir::SW;
-    case 4:
-        return AnimateDir::S;
-    case 5:
-        return AnimateDir::SE;
-    case 6:
-        return AnimateDir::E;
-    case 7:
-        return AnimateDir::NE;
-    case 8:
-        return AnimateDir::N;
-    }
-    return AnimateDir::N;
-}
-
-inline auto AngleFromAnimGetDir(AnimateDir dir)
-{
-    switch (dir) {
-    case AnimateDir::N:
-        return 0.0;
-    case AnimateDir::NW:
-        return 45.0;
-    case AnimateDir::W:
-        return 90.0;
-    case AnimateDir::SW:
-        return 135.0;
-    case AnimateDir::S:
-        return 180.0;
-    case AnimateDir::SE:
-        return 225.0;
-    case AnimateDir::E:
-        return 270.0;
-    case AnimateDir::NE:
-        return 315.0;
-    }
-    return 0.0;
-}
 
 AnimationCommand::AnimationCommand(unsigned beats)
     : mNumBeats(beats)
@@ -136,21 +84,13 @@ void AnimationCommand::ApplyForward(Coord&) { mBeat = mNumBeats; }
 
 void AnimationCommand::ApplyBackward(Coord&) { mBeat = 0; }
 
-float AnimationCommand::MotionDirection() const { return RealDirection(); }
+float AnimationCommand::MotionDirection() const { return FacingDirection(); }
 
 void AnimationCommand::ClipBeats(unsigned beats) { mNumBeats = beats; }
 
 AnimationCommandMT::AnimationCommandMT(unsigned beats, float direction)
     : AnimationCommand(beats)
-    , dir(AnimGetDirFromAngle(direction))
-    , realdir(direction)
-{
-}
-
-AnimationCommandMT::AnimationCommandMT(unsigned beats, CalChart::AnimateDir direction)
-    : AnimationCommand(beats)
     , dir(direction)
-    , realdir(AngleFromAnimGetDir(direction))
 {
 }
 
@@ -159,9 +99,7 @@ std::unique_ptr<AnimationCommand> AnimationCommandMT::clone() const
     return std::make_unique<AnimationCommandMT>(*this);
 }
 
-AnimateDir AnimationCommandMT::Direction() const { return dir; }
-
-float AnimationCommandMT::RealDirection() const { return realdir; }
+float AnimationCommandMT::FacingDirection() const { return dir; }
 
 nlohmann::json AnimationCommandMT::toOnlineViewerJSON(Coord start) const
 {
@@ -169,7 +107,7 @@ nlohmann::json AnimationCommandMT::toOnlineViewerJSON(Coord start) const
 
     j["type"] = "mark";
     j["beats"] = static_cast<double>(NumBeats());
-    j["facing"] = ToOnlineViewer::angle(RealDirection());
+    j["facing"] = ToOnlineViewer::angle(FacingDirection());
     j["x"] = ToOnlineViewer::xPosition(start.x);
     j["y"] = ToOnlineViewer::yPosition(start.y);
     return j;
@@ -196,24 +134,24 @@ AnimationCommandMove::AnimationCommandMove(unsigned beats, Coord movement,
 bool AnimationCommandMove::NextBeat(Coord& pt)
 {
     bool b = AnimationCommand::NextBeat(pt);
-    pt.x += (mNumBeats)
+    pt.x += static_cast<Coord::units>((mNumBeats)
         ? ((long)mBeat * mVector.x / (short)mNumBeats) - ((long)(mBeat - 1) * mVector.x / (short)mNumBeats)
-        : 0;
-    pt.y += (mNumBeats)
+        : 0);
+    pt.y += static_cast<Coord::units>((mNumBeats)
         ? ((long)mBeat * mVector.y / (short)mNumBeats) - ((long)(mBeat - 1) * mVector.y / (short)mNumBeats)
-        : 0;
+        : 0);
     return b;
 }
 
 bool AnimationCommandMove::PrevBeat(Coord& pt)
 {
     if (AnimationCommand::PrevBeat(pt)) {
-        pt.x += mNumBeats
+        pt.x += static_cast<Coord::units>(mNumBeats
             ? ((long)mBeat * mVector.x / (short)mNumBeats) - ((long)(mBeat + 1) * mVector.x / (short)mNumBeats)
-            : 0;
-        pt.y += mNumBeats
+            : 0);
+        pt.y += static_cast<Coord::units>(mNumBeats
             ? ((long)mBeat * mVector.y / (short)mNumBeats) - ((long)(mBeat + 1) * mVector.y / (short)mNumBeats)
-            : 0;
+            : 0);
         return true;
     } else {
         return false;
@@ -288,7 +226,7 @@ std::unique_ptr<AnimationCommand> AnimationCommandRotate::clone() const
 bool AnimationCommandRotate::NextBeat(Coord& pt)
 {
     bool b = AnimationCommand::NextBeat(pt);
-    float curr_ang = (mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart)
+    auto curr_ang = (mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart)
                                 : mAngStart)
         * M_PI / 180.0;
     pt.x = RoundToCoordUnits(mOrigin.x + cos(curr_ang) * mR);
@@ -299,7 +237,7 @@ bool AnimationCommandRotate::NextBeat(Coord& pt)
 bool AnimationCommandRotate::PrevBeat(Coord& pt)
 {
     if (AnimationCommand::PrevBeat(pt)) {
-        float curr_ang = (mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart)
+        auto curr_ang = (mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart)
                                     : mAngStart)
             * M_PI / 180.0;
         pt.x = RoundToCoordUnits(mOrigin.x + cos(curr_ang) * mR);
@@ -324,12 +262,7 @@ void AnimationCommandRotate::ApplyBackward(Coord& pt)
     pt.y = RoundToCoordUnits(mOrigin.y - sin(mAngStart * M_PI / 180.0) * mR);
 }
 
-AnimateDir AnimationCommandRotate::Direction() const
-{
-    return AnimGetDirFromAngle(RealDirection());
-}
-
-float AnimationCommandRotate::RealDirection() const
+float AnimationCommandRotate::FacingDirection() const
 {
     float curr_ang = mNumBeats
         ? (mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart

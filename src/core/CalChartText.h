@@ -34,7 +34,7 @@ struct Textchunk {
 };
 
 // helper for comparisions
-static inline bool operator==(Textchunk const &a, Textchunk const& b)
+static inline bool operator==(Textchunk const& a, Textchunk const& b)
 {
     return (a.text == b.text)
         && (a.font == b.font);

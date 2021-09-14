@@ -19,8 +19,8 @@
 #include <memory>
 #include <wx/wx.h>
 
-namespace CalChart {
-class ContProcedure;
+namespace CalChart::Cont {
+class Procedure;
 }
 
 class ContinuityComposerPanel;
@@ -30,10 +30,10 @@ class ContinuityComposerDialog : public wxDialog {
     DECLARE_CLASS(ContinuityComposerDialog)
 
 public:
-    ContinuityComposerDialog(std::unique_ptr<CalChart::ContProcedure> starting_continuity, wxWindow* parent);
+    ContinuityComposerDialog(std::unique_ptr<CalChart::Cont::Procedure> starting_continuity, wxWindow* parent);
     ~ContinuityComposerDialog() override = default;
 
-    std::unique_ptr<CalChart::ContProcedure> GetContinuity();
+    std::unique_ptr<CalChart::Cont::Procedure> GetContinuity();
     bool Validate() override;
 
 private:

@@ -1,7 +1,7 @@
-#include "catch2/catch.hpp"
-#include "print_ps.h"
 #include "CalChartShow.h"
 #include "CalChartShowMode.h"
+#include "catch2/catch.hpp"
+#include "print_ps.h"
 
 #include <regex>
 
@@ -100,7 +100,6 @@ showpage
 %%EOF
 )";
 
-
 void PrintToPS(CalChart::Show const& show, CalChart::ShowMode const& mode, bool landscape, bool cont, bool contsheet, bool overview, std::ostream& output)
 {
     auto printShowToPS = CalChart::PrintShowToPS(
@@ -118,7 +117,8 @@ void PrintToPS(CalChart::Show const& show, CalChart::ShowMode const& mode, bool 
     printShowToPS(output, picked, "show");
 }
 
-TEST_CASE( "CalChartTestPSPrintDefault") {
+TEST_CASE("CalChartTestPSPrintDefault")
+{
     auto empty_show = CalChart::Show::Create(CalChart::ShowMode::GetDefaultShowMode());
     REQUIRE(empty_show);
 
@@ -138,4 +138,3 @@ TEST_CASE( "CalChartTestPSPrintDefault") {
         REQUIRE(part_match[3] == gold_part_match[3]);
     }
 }
-

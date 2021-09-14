@@ -25,6 +25,8 @@
 #include <set>
 #include <string>
 
+namespace CalChart {
+
 enum class PSFONT {
     SYMBOL,
     NORM,
@@ -47,11 +49,28 @@ enum SYMBOL_TYPE {
 };
 
 static const SYMBOL_TYPE k_symbols[] = {
-    SYMBOL_PLAIN, SYMBOL_SOL, SYMBOL_BKSL, SYMBOL_SL,
-    SYMBOL_X, SYMBOL_SOLBKSL, SYMBOL_SOLSL, SYMBOL_SOLX
+    SYMBOL_PLAIN,
+    SYMBOL_SOL,
+    SYMBOL_BKSL,
+    SYMBOL_SL,
+    SYMBOL_X,
+    SYMBOL_SOLBKSL,
+    SYMBOL_SOLSL,
+    SYMBOL_SOLX
 };
 
-namespace CalChart {
+// we lay out directions in clockwise order from North
+enum class Direction {
+    North,
+    NorthEast,
+    East,
+    SouthEast,
+    South,
+    SouthWest,
+    West,
+    NorthWest,
+};
+
 std::string GetNameForSymbol(SYMBOL_TYPE which);
 std::string GetLongNameForSymbol(SYMBOL_TYPE which);
 SYMBOL_TYPE GetSymbolForName(const std::string& name);
@@ -64,6 +83,12 @@ struct ParseErrorHandlers {
     ContinuityParseCorrection_t mContinuityParseCorrectionHandler;
 };
 
+typedef std::set<int> SelectionList;
+
 }
 
-typedef std::set<int> SelectionList;
+template <typename E>
+constexpr auto toUType(E enumerator)
+{
+    return static_cast<std::underlying_type_t<E>>(enumerator);
+}

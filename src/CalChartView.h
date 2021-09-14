@@ -59,7 +59,7 @@ public:
     bool DoMovePoints(std::map<int, CalChart::Coord> const& transmat);
     bool DoDeletePoints();
     bool DoResetReferencePoint();
-    bool DoSetPointsSymbol(SYMBOL_TYPE sym);
+    bool DoSetPointsSymbol(CalChart::SYMBOL_TYPE sym);
     void DoSetMode(CalChart::ShowMode const& mode);
     void DoSetupMarchers(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int numColumns);
     void DoSetInstruments(std::map<int, std::string> const& dotToInstrument);
@@ -75,7 +75,7 @@ public:
     void DoSetPrintContinuity(int which_sheet, const wxString& number, const wxString& cont);
     bool DoRelabel();
     std::pair<bool, std::string> DoAppendShow(std::unique_ptr<CalChartDoc> other_show);
-    bool DoSetContinuityCommand(SYMBOL_TYPE sym, CalChart::Continuity const& new_cont);
+    bool DoSetContinuityCommand(CalChart::SYMBOL_TYPE sym, CalChart::Continuity const& new_cont);
 
     ///// query show attributes /////
     int FindPoint(CalChart::Coord pos) const;
@@ -95,7 +95,7 @@ public:
 
     std::vector<CalChart::AnimationErrors> GetAnimationErrors() const;
     // Sheet -> all collisions
-    std::map<int, SelectionList> GetAnimationCollisions() const;
+    std::map<int, CalChart::SelectionList> GetAnimationCollisions() const;
     std::unique_ptr<CalChart::Animation> GetAnimationInstance() const;
 
     auto ClipPositionToShowMode(CalChart::Coord const& pos) const { return mShow->GetShowMode().ClipPosition(pos); }
@@ -110,12 +110,12 @@ public:
 
     ///// Select /////
     void UnselectAll() { SetSelectionList(mShow->MakeUnselectAll()); }
-    void AddToSelection(const SelectionList& sl) { SetSelectionList(mShow->MakeAddToSelection(sl)); }
-    void ToggleSelection(const SelectionList& sl) { SetSelectionList(mShow->MakeToggleSelection(sl)); }
+    void AddToSelection(const CalChart::SelectionList& sl) { SetSelectionList(mShow->MakeAddToSelection(sl)); }
+    void ToggleSelection(const CalChart::SelectionList& sl) { SetSelectionList(mShow->MakeToggleSelection(sl)); }
     void SelectWithinPolygon(CalChart::RawPolygon_t const& polygon, bool toggleSelected);
     void SelectPointsInRect(const CalChart::Coord& c1, const CalChart::Coord& c2, bool toggleSelected);
     auto GetSelectionList() const { return mShow->GetSelectionList(); }
-    void SetSelectionList(const SelectionList& sl);
+    void SetSelectionList(const CalChart::SelectionList& sl);
     auto GetSelect() const { return mShow->GetSelect(); }
     void SetSelect(CalChart::Select select);
     auto GetCurrentMove() const { return mShow->GetCurrentMove(); }
@@ -124,7 +124,7 @@ public:
     auto GetGhostSource() const { return mShow->GetGhostSource(); };
     void SetGhostSource(GhostSource source, int which = 0) { mShow->SetGhostSource(source, which); }
 
-    void GoToSheetAndSetSelectionList(int which, const SelectionList& sl);
+    void GoToSheetAndSetSelectionList(int which, const CalChart::SelectionList& sl);
     auto IsSelected(int i) const { return mShow->IsSelected(i); }
 
     ///// Drawing marcher's paths /////

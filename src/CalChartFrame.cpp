@@ -82,12 +82,6 @@ static std::map<int, std::string> kAUIEnumToString = {
     { CALCHART__ViewMarcherToolBar, "Marcher ToolBar" },
 };
 
-template <typename E>
-constexpr auto toUType(E enumerator)
-{
-    return static_cast<std::underlying_type_t<E>>(enumerator);
-}
-
 BEGIN_EVENT_TABLE(CalChartFrame, wxDocChildFrame)
 EVT_CHAR(CalChartFrame::OnChar)
 EVT_MENU(CALCHART__APPEND_FILE, CalChartFrame::OnCmdAppend)
@@ -876,42 +870,42 @@ void CalChartFrame::OnCmd_label_visibility_toggle(wxCommandEvent&)
 
 void CalChartFrame::OnCmd_setsym0(wxCommandEvent&)
 {
-    GetFieldView()->DoSetPointsSymbol(SYMBOL_PLAIN);
+    GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_PLAIN);
 }
 
 void CalChartFrame::OnCmd_setsym1(wxCommandEvent&)
 {
-    GetFieldView()->DoSetPointsSymbol(SYMBOL_SOL);
+    GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_SOL);
 }
 
 void CalChartFrame::OnCmd_setsym2(wxCommandEvent&)
 {
-    GetFieldView()->DoSetPointsSymbol(SYMBOL_BKSL);
+    GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_BKSL);
 }
 
 void CalChartFrame::OnCmd_setsym3(wxCommandEvent&)
 {
-    GetFieldView()->DoSetPointsSymbol(SYMBOL_SL);
+    GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_SL);
 }
 
 void CalChartFrame::OnCmd_setsym4(wxCommandEvent&)
 {
-    GetFieldView()->DoSetPointsSymbol(SYMBOL_X);
+    GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_X);
 }
 
 void CalChartFrame::OnCmd_setsym5(wxCommandEvent&)
 {
-    GetFieldView()->DoSetPointsSymbol(SYMBOL_SOLBKSL);
+    GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_SOLBKSL);
 }
 
 void CalChartFrame::OnCmd_setsym6(wxCommandEvent&)
 {
-    GetFieldView()->DoSetPointsSymbol(SYMBOL_SOLSL);
+    GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_SOLSL);
 }
 
 void CalChartFrame::OnCmd_setsym7(wxCommandEvent&)
 {
-    GetFieldView()->DoSetPointsSymbol(SYMBOL_SOLX);
+    GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_SOLX);
 }
 
 void CalChartFrame::OnChar(wxKeyEvent& event) { mCanvas->OnChar(event); }

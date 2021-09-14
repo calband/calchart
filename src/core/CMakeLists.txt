@@ -59,11 +59,10 @@ add_library(
   CalChartText.cpp
   CalChartText.h
   CalChartTypes.h
+  CalChartUtils.h
   e7_transition_solver.cpp
   e7_transition_solver.h
   linmath.h
-  math_utils.cpp
-  math_utils.h
   parse.h
   print_ps.cpp
   print_ps.h
