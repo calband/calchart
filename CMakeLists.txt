@@ -30,8 +30,16 @@ configure_file(
   )
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/version)
 
+include(FetchContent)
+FetchContent_Declare(
+  munkres-cpp
+  GIT_REPOSITORY https://github.com/rmpowell77/munkres-cpp
+  GIT_TAG        0f18953cb04f5a09fc8087f2086590481cc820b5
+)
+
+FetchContent_MakeAvailable(munkres-cpp)
+
 # Add the submodules for the project
-add_subdirectory(submodules/munkres-cpp EXCLUDE_FROM_ALL)
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory(submodules/nlohmann_json EXCLUDE_FROM_ALL)
 add_subdirectory(submodules/docopt.cpp EXCLUDE_FROM_ALL)
