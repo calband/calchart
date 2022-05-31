@@ -79,12 +79,6 @@ add_library(
 target_compile_definitions(calchart_core PUBLIC YY_NO_UNISTD_H)
 SetupCompilerForTarget(calchart_core)
 
-target_include_directories(
-  calchart_core
-  PRIVATE
-  ${PROJECT_SOURCE_DIR}/submodules/munkres-cpp/src
-)
-
 # this is a hack to get contgram to build
 target_include_directories(
   calchart_core
@@ -94,5 +88,5 @@ target_include_directories(
   ${PROJECT_SOURCE_DIR}/src/core
 )
 
-target_link_libraries(calchart_core PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(calchart_core PRIVATE nlohmann_json::nlohmann_json munkres)
 

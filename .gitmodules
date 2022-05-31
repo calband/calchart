@@ -1,6 +1,3 @@
-[submodule "submodules/munkres-cpp"]
-	path = submodules/munkres-cpp
-	url = https://github.com/saebyn/munkres-cpp.git
 [submodule "submodules/wxWidgets"]
 	path = submodules/wxWidgets
 	url = https://github.com/rmpowell77/wxWidgets.git
