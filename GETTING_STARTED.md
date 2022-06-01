@@ -47,7 +47,7 @@ sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev git cma
 The CalChart3 source code lives on [Github](https://github.com/calband/calchart).  We use submodules to package several projects sources together for the final project.  To get the source code to your machine, you will need to clone the repository to a local copy.  You should choose a target directory that you can find easily on your machine.  In this guide, we use the default directory location.
 
 ```
-git clone --recursive https://github.com/calband/calchart.git ./calchart
+git clone https://github.com/calband/calchart.git ./calchart
 ```
 
 You should see the project being downloaded, and it should appear to be similar to:
@@ -60,20 +60,15 @@ remote: Total 12166 (delta 896), reused 1143 (delta 848), pack-reused 10952
 ...
 Receiving objects: 100% (5068/5068), 2.70 MiB | 11.27 MiB/s, done.
 Resolving deltas: 100% (3559/3559), done.
-Submodule path 'submodules/wxWidgets/3rdparty/catch': checked out 'ee4acb6ae6e32a02bc012d197aa82b1ca7a493ab'
-Submodule path 'submodules/wxWidgets/src/expat': checked out '7532d85708929ebdb148308ca998268d3aaf3527'
-Submodule path 'submodules/wxWidgets/src/jpeg': checked out '852493611506076fd9ad931d35bf1c3cc5b5a9c3'
-Submodule path 'submodules/wxWidgets/src/png': checked out '3ffeff7877598d3236cc09a6d3f478073eb33f35'
-Submodule path 'submodules/wxWidgets/src/tiff': checked out '9f657ff8a7411c95ffe83ec39e3e881c3fec6bb0'
-Submodule path 'submodules/wxWidgets/src/zlib': checked out '5888671274cde770edbe683b435f052de2b03681'
 ```
 
-## Setting up clang-format git-hook
+## Setting up clang-format git-hook (optional)
 
 If you are not able to set up your IDE for clang-format, then set up a git-hook with the following command:
 
 ```
-cp submodules/githook-clang-format/clang-format.hook .git/hooks/pre-commit       
+git clone https://github.com/andrewseidl/githook-clang-format.git /tmp/githook-clang-format.git
+cp /tmp/githook-clang-format.git/clang-format.hook .git/hooks/pre-commit       
 ```
 
 ## Setting up your IDE -- estimated time: 10 minutes
