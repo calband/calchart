@@ -22,33 +22,14 @@ message(FATAL_ERROR "In-source build detected!")
 endif()
 
 include(${PROJECT_SOURCE_DIR}/cmake/compiler.cmake)
-
 include(${PROJECT_SOURCE_DIR}/cmake/version.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/dependencies.cmake)
+
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/ccvers.h.in
   ${PROJECT_BINARY_DIR}/version/ccvers.h
   )
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/version)
-
-include(FetchContent)
-FetchContent_Declare(
-  munkres-cpp
-  GIT_REPOSITORY https://github.com/rmpowell77/munkres-cpp
-  GIT_TAG        0f18953cb04f5a09fc8087f2086590481cc820b5
-)
-
-FetchContent_MakeAvailable(munkres-cpp)
-
-# Add the submodules for the project
-set(JSON_BuildTests OFF CACHE INTERNAL "")
-add_subdirectory(submodules/nlohmann_json EXCLUDE_FROM_ALL)
-add_subdirectory(submodules/docopt.cpp EXCLUDE_FROM_ALL)
-# We include wxWidgets as a submodule (see https://docs.wxwidgets.org/trunk/overview_cmake.html for info)
-# Have wxWidgets build as static libraries
-set(wxBUILD_SHARED OFF)
-set(wxUSE_STL ON)
-set(wxUSE_STD_CONTAINERS ON)
-add_subdirectory(submodules/wxWidgets EXCLUDE_FROM_ALL)
 
 # calchart_cmd, Mac, Linux only
 if(NOT MSVC)
