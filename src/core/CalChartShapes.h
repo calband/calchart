@@ -24,16 +24,16 @@
 /**
  * CalChart Shapes
  * These are general objects that represent Shapes in CalChart.
- * A shape object returns a vector of DrawCommands that represent how to draw the shape.  This keeps the implementation details
+ * A shape object returns a vector of DrawCommand that represent how to draw the shape.  This keeps the implementation details
  * of "how" to draw seperate from the "what" to draw, allowing reusablity.
  */
 
 #include "CalChartCoord.h"
+#include "CalChartDrawCommand.h"
 #include <optional>
 #include <vector>
 
 namespace CalChart {
-struct DrawCommand;
 
 using RawPolygon_t = std::vector<Coord>;
 bool Inside(Coord p, RawPolygon_t const& polygon);

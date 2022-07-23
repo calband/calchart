@@ -29,6 +29,7 @@
 #include "CalChartDoc.h"
 #include "CalChartDocCommand.h"
 #include "CalChartDrawCommand.h"
+#include "CalChartDrawing.h"
 #include "CalChartFrame.h"
 #include "CalChartShapes.h"
 #include "CalChartSheet.h"
@@ -36,7 +37,6 @@
 #include "SetupInstruments.h"
 #include "SetupMarchers.h"
 #include "ShowModeWizard.h"
-#include "draw.h"
 
 #include <memory>
 #include <wx/docview.h>

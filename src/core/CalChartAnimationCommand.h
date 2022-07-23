@@ -34,12 +34,11 @@
 
 #include "CalChartAnimationTypes.h"
 #include "CalChartCoord.h"
+#include "CalChartDrawCommand.h"
 #include "CalChartUtils.h"
 #include <nlohmann/json.hpp>
 
 namespace CalChart {
-
-struct DrawCommand;
 
 class AnimationCommand {
 public:

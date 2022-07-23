@@ -30,7 +30,6 @@
 #include "CalChartShowMode.h"
 #include "CalChartUtils.h"
 #include "ContinuityEditorPopup.h"
-#include "draw.h"
 #include "platconf.h"
 #include "print_ps.h"
 

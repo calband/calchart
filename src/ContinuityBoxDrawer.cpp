@@ -18,6 +18,7 @@
 #include "ContinuityBoxDrawer.h"
 #include "CalChartConfiguration.h"
 #include "CalChartContinuityToken.h"
+#include "DCSaveRestore.h"
 #include "basic_ui.h"
 
 #include <regex>
@@ -92,7 +93,7 @@ void ContinuityBoxSubPartDrawer::DrawProcCellBox(wxDC& dc, CalChartConfiguration
     auto box_size_x = GetTextBoxSize(dc, config) + 2 * text_padding;
     {
         auto currentPen = dc.GetPen();
-        auto restore = SaveAndRestoreBrushAndPen(dc);
+        auto restore = SaveAndRestore::BrushAndPen(dc);
         // fill with the color for this continuity
         dc.SetBrush(GetBrush(mDrawCont.type, config));
         if (mDrawCont.type == CalChart::Cont::Type::unset) {

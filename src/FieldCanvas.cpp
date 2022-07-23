@@ -24,11 +24,11 @@
 
 #include "CalChartConfiguration.h"
 #include "CalChartDrawCommand.h"
+#include "CalChartDrawing.h"
 #include "CalChartFrame.h"
 #include "CalChartMovePointsTool.h"
 #include "CalChartShapes.h"
 #include "CalChartView.h"
-#include "draw.h"
 
 #include <wx/dcbuffer.h>
 

@@ -22,11 +22,11 @@
 
 #include "PrintContinuityEditor.h"
 #include "CalChartApp.h"
+#include "CalChartDrawing.h"
 #include "CalChartSheet.h"
 #include "CalChartText.h"
 #include "CalChartView.h"
 #include "basic_ui.h"
-#include "draw.h"
 #include "ui_enums.h"
 
 #include <wx/artprov.h>

@@ -1,6 +1,6 @@
 #pragma once
 /*
- * draw.h
+ * CalChartDrawing.h
  * Member functions for drawing stuntsheets
  */
 
@@ -21,6 +21,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// Drawing is a huge part of CalChart.  These drawing primatives are for
+// the UI, the Print buffer, and the Animation windows.
+// Reuse is done where possible.
+//
+// The CalChart module attempts to keep the "how to draw" separated from
+// the "what to draw" -- the CalChart::DrawCommand object contains the
+// primatives of what to draw, but the details are done within the wxWidgets
+// part of the code.
+
 #include "CalChartConfiguration.h"
 #include "CalChartShow.h"
 #include <map>
@@ -36,7 +45,6 @@ struct Textline;
 using Textline_list = std::vector<Textline>;
 class Point;
 struct Coord;
-struct DrawCommand;
 }
 class CalChartDoc;
 class CalChartConfiguration;

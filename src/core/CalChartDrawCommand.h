@@ -22,85 +22,115 @@
 */
 
 #include "CalChartCoord.h"
+#include <variant>
 
 namespace CalChart {
 
-struct DrawCommand {
-    typedef enum { Ignore,
-        Line,
-        Arc,
-        Ellipse } DrawType;
-    DrawType mType = Ignore;
-    int x1{}, y1{}, x2{}, y2{};
-    int xc{}, yc{};
-    // nothing version
-    DrawCommand()
-        : mType(Ignore)
-    {
-    }
+namespace DrawCommands {
 
-    // Line version
-    DrawCommand(int startx, int starty, int endx, int endy)
-        : mType(Line)
-        , x1(startx)
-        , y1(starty)
-        , x2(endx)
-        , y2(endy)
-    {
-    }
+    struct Ignore {
+    };
 
-    // Line version
-    DrawCommand(const Coord& start, const Coord& end)
-        : mType(Line)
-        , x1(start.x)
-        , y1(start.y)
-        , x2(end.x)
-        , y2(end.y)
-    {
-    }
+    struct Line {
+        int x1{}, y1{}, x2{}, y2{};
 
-    // Arc version
-    DrawCommand(int startx, int starty, int endx, int endy, int centerx,
-        int centery)
-        : mType(Arc)
-        , x1(startx)
-        , y1(starty)
-        , x2(endx)
-        , y2(endy)
-        , xc(centerx)
-        , yc(centery)
-    {
-    }
+        Line(int startx, int starty, int endx, int endy)
+            : x1(startx)
+            , y1(starty)
+            , x2(endx)
+            , y2(endy)
+        {
+        }
 
-    // Generic version
-    DrawCommand(DrawType t, int startx, int starty, int endx, int endy)
-        : mType(t)
-        , x1(startx)
-        , y1(starty)
-        , x2(endx)
-        , y2(endy)
-    {
-    }
+        Line(Coord start, Coord end)
+            : Line(start.x, start.y, end.x, end.y)
+        {
+        }
+    };
 
-    // Generic version
-    DrawCommand(DrawType t, const Coord& start, const Coord& end)
-        : mType(t)
-        , x1(start.x)
-        , y1(start.y)
-        , x2(end.x)
-        , y2(end.y)
-    {
-    }
-};
+    struct Arc {
+        int x1{}, y1{}, x2{}, y2{};
+        int xc{}, yc{};
 
-inline bool operator==(DrawCommand const& lhs, DrawCommand const& rhs)
-{
-    return lhs.mType == rhs.mType
-        && lhs.x1 == rhs.x1
-        && lhs.y1 == rhs.y1
-        && lhs.x2 == rhs.x2
-        && lhs.y2 == rhs.y2
-        && lhs.yc == rhs.yc;
+        Arc(int startx, int starty, int endx, int endy)
+            : x1(startx)
+            , y1(starty)
+            , x2(endx)
+            , y2(endy)
+        {
+        }
+
+        Arc(Coord start, Coord end)
+            : Arc(start.x, start.y, end.x, end.y)
+        {
+        }
+
+        Arc(int startx, int starty, int endx, int endy, int centerx, int centery)
+            : x1(startx)
+            , y1(starty)
+            , x2(endx)
+            , y2(endy)
+            , xc(centerx)
+            , yc(centery)
+        {
+        }
+    };
+
+    struct Ellipse {
+        int x1{}, y1{}, x2{}, y2{};
+
+        Ellipse(int startx, int starty, int endx, int endy)
+            : x1(startx)
+            , y1(starty)
+            , x2(endx)
+            , y2(endy)
+        {
+        }
+
+        Ellipse(Coord start, Coord end)
+            : Ellipse(start.x, start.y, end.x, end.y)
+        {
+        }
+    };
+
+    struct Text {
+        enum class TextAnchor : uint32_t {
+            None = 0,
+            Top = 1 << 0,
+            VerticalCenter = 1 << 1,
+            Bottom = 1 << 2,
+            Left = 1 << 3,
+            HorizontalCenter = 1 << 4,
+            Right = 1 << 5,
+            ScreenTop = 1 << 6,
+            ScreenBottom = 1 << 7,
+            ScreenRight = 1 << 8,
+            ScreenLeft = 1 << 9,
+        };
+        using TextAnchor_t = std::underlying_type_t<TextAnchor>;
+
+        int x{}, y{};
+        std::string text;
+        TextAnchor_t anchor{};
+        bool withBackground{};
+
+        Text(int startx, int starty, std::string const& text = "", TextAnchor_t anchor = toUType(TextAnchor::None), bool withBackground = false)
+            : x(startx)
+            , y(starty)
+            , text(text)
+            , anchor(anchor)
+            , withBackground(withBackground)
+        {
+        }
+
+        Text(Coord start, std::string const& text = "", TextAnchor_t anchor = toUType(TextAnchor::None), bool withBackground = false)
+            : Text(start.x, start.y, text, anchor, withBackground)
+        {
+        }
+    };
+
 }
+
+using DrawCommand = std::variant<DrawCommands::Ignore, DrawCommands::Line, DrawCommands::Arc, DrawCommands::Ellipse, DrawCommands::Text>;
 
 }

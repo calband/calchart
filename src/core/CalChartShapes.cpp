@@ -80,8 +80,8 @@ void Shape_crosshairs::OnMove(Coord, Coord snapped_p)
 std::vector<DrawCommand> Shape_crosshairs::GetCC_DrawCommand(float x, float y) const
 {
     return {
-        DrawCommand(origin.x + x - crosshairs_width, origin.y + y - crosshairs_width, origin.x + x + crosshairs_width, origin.y + y + crosshairs_width),
-        DrawCommand(origin.x + x + crosshairs_width, origin.y + y - crosshairs_width, origin.x + x - crosshairs_width, origin.y + y + crosshairs_width),
+        DrawCommands::Line(origin.x + x - crosshairs_width, origin.y + y - crosshairs_width, origin.x + x + crosshairs_width, origin.y + y + crosshairs_width),
+        DrawCommands::Line(origin.x + x + crosshairs_width, origin.y + y - crosshairs_width, origin.x + x - crosshairs_width, origin.y + y + crosshairs_width),
     };
 }
 
@@ -108,7 +108,7 @@ void Shape_line::OnMove(Coord, Coord snapped_p)
 std::vector<DrawCommand> Shape_line::GetCC_DrawCommand(float x, float y) const
 {
     return {
-        DrawCommand(origin.x + x, origin.y + y, point.x + x, point.y + y)
+        DrawCommands::Line(origin.x + x, origin.y + y, point.x + x, point.y + y)
     };
 }
 
@@ -120,8 +120,8 @@ void Shape_x::OnMove(Coord, Coord snapped_p)
 std::vector<DrawCommand> Shape_x::GetCC_DrawCommand(float x, float y) const
 {
     return {
-        DrawCommand(origin.x + x, origin.y + y, point.x + x, point.y + y),
-        DrawCommand(point.x + x, origin.y + y, origin.x + x, point.y + y),
+        DrawCommands::Line(origin.x + x, origin.y + y, point.x + x, point.y + y),
+        DrawCommands::Line(point.x + x, origin.y + y, origin.x + x, point.y + y),
     };
 }
 
@@ -133,8 +133,8 @@ void Shape_cross::OnMove(Coord, Coord snapped_p)
 std::vector<DrawCommand> Shape_cross::GetCC_DrawCommand(float x, float y) const
 {
     return {
-        DrawCommand(origin.x + (point.x - origin.x) / 2 + x, origin.y + y, origin.x + (point.x - origin.x) / 2 + x, point.y + y),
-        DrawCommand(origin.x + x, origin.y + (point.y - origin.y) / 2 + y, point.x + x, origin.y + (point.y - origin.y) / 2 + y),
+        DrawCommands::Line(origin.x + (point.x - origin.x) / 2 + x, origin.y + y, origin.x + (point.x - origin.x) / 2 + x, point.y + y),
+        DrawCommands::Line(origin.x + x, origin.y + (point.y - origin.y) / 2 + y, point.x + x, origin.y + (point.y - origin.y) / 2 + y),
     };
 }
 
@@ -146,7 +146,7 @@ void Shape_ellipse::OnMove(Coord, Coord snapped_p)
 std::vector<DrawCommand> Shape_ellipse::GetCC_DrawCommand(float x, float y) const
 {
     return {
-        DrawCommand(DrawCommand::Ellipse, origin.x + x, origin.y + y, point.x + x, point.y + y),
+        DrawCommands::Ellipse(origin.x + x, origin.y + y, point.x + x, point.y + y)
     };
 }
 
@@ -193,11 +193,23 @@ std::vector<DrawCommand> Shape_arc::GetCC_DrawCommand(float x, float y) const
 {
     if (GetAngle() < 0.0 || GetAngle() > 180.0) {
         return {
-            DrawCommand(origin.x + x + d * cos(r), origin.y + y + -d * sin(r), origin.x + x + d * cos(r0), origin.y + y + -d * sin(r0), origin.x + x, origin.y + y),
+            DrawCommands::Arc(
+                origin.x + x + d * cos(r),
+                origin.y + y + -d * sin(r),
+                origin.x + x + d * cos(r0),
+                origin.y + y + -d * sin(r0),
+                origin.x + x,
+                origin.y + y)
         };
     }
     return {
-        DrawCommand(origin.x + x + d * cos(r0), origin.y + y + -d * sin(r0), origin.x + x + d * cos(r), origin.y + y + -d * sin(r), origin.x + x, origin.y + y),
+        DrawCommands::Arc(
+            origin.x + x + d * cos(r0),
+            origin.y + y + -d * sin(r0),
+            origin.x + x + d * cos(r),
+            origin.y + y + -d * sin(r),
+            origin.x + x,
+            origin.y + y)
     };
 }
 
@@ -221,10 +233,10 @@ std::vector<DrawCommand> Shape_rect::GetCC_DrawCommand(float x, float y) const
     }
     if ((w > 1) && (h > 1)) {
         return {
-            DrawCommand(x, y, x + w, y),
-            DrawCommand(x + w, y, x + w, y + h),
-            DrawCommand(x + w, y + h, x, y + h),
-            DrawCommand(x, y + h, x, y),
+            DrawCommands::Line(x, y, x + w, y),
+            DrawCommands::Line(x + w, y, x + w, y + h),
+            DrawCommands::Line(x + w, y + h, x, y + h),
+            DrawCommands::Line(x, y + h, x, y),
         };
     }
     return {};
@@ -321,8 +333,9 @@ std::vector<DrawCommand> Lasso::GetCC_DrawCommand(float x, float y) const
     if (pntlist.size() > 1) {
         for (auto iter = 0u; iter < pntlist.size() - 1; ++iter) {
             result.emplace_back(
-                x + pntlist.at(iter).x, y + pntlist.at(iter).y,
-                x + pntlist.at(iter + 1).x, y + pntlist.at(iter + 1).y);
+                DrawCommands::Line(
+                    x + pntlist.at(iter).x, y + pntlist.at(iter).y,
+                    x + pntlist.at(iter + 1).x, y + pntlist.at(iter + 1).y));
         }
     }
     return result;

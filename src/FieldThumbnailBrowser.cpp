@@ -21,12 +21,12 @@
 
 #include "FieldThumbnailBrowser.h"
 #include "CalChartConfiguration.h"
+#include "CalChartDrawing.h"
 #include "CalChartShow.h"
 #include "CalChartShowMode.h"
 #include "CalChartSizes.h"
 #include "CalChartView.h"
 #include "basic_ui.h"
-#include "draw.h"
 
 #include <wx/dcbuffer.h>
 

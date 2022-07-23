@@ -21,7 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "draw_utils.h"
+#include "DCSaveRestore.h"
 #include <array>
 #include <map>
 #include <memory>
@@ -66,9 +66,16 @@ public:
     std::pair<wxPoint, wxPoint> GetMarcherSizeAndOffset() const;
 
     CalChart::ShowMode const& GetShowMode() const;
-    MarcherInfo GetMarcherInfo(int which) const;
-    std::multimap<double, MarcherInfo> GetMarchersByDistance(ViewPoint const& from) const;
 
+    struct MarcherInfo {
+        float direction, x, y;
+    };
+
+    MarcherInfo GetMarcherInfo(int which) const;
+
+    std::multimap<double, MarcherInfo> GetMarchersByDistance(float fromX, float fromY) const;
+
+public:
     void UnselectAll();
     void SelectMarchersInBox(wxPoint const& mouseStart, wxPoint const& mouseEnd, bool altDown);
 

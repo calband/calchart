@@ -24,7 +24,7 @@
 #include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
 #include "CalChartDrawCommand.h"
-#include "draw.h"
+#include "CalChartDrawing.h"
 
 #include <wx/dcbuffer.h>
 
@@ -94,10 +94,10 @@ ColorSetupCanvas::ColorSetupCanvas(CalChartConfiguration& config, wxWindow* pare
 
     auto point_start = offset + field_offset + Coord(Int2CoordUnits(4), Int2CoordUnits(2));
     mPathEnd = point_start + Coord(Int2CoordUnits(0), Int2CoordUnits(2));
-    mPath.emplace_back(point_start, mPathEnd);
+    mPath.emplace_back(DrawCommands::Line{ point_start, mPathEnd });
     point_start = mPathEnd;
     mPathEnd += Coord(Int2CoordUnits(18), Int2CoordUnits(0));
-    mPath.emplace_back(point_start, mPathEnd);
+    mPath.emplace_back(DrawCommands::Line{ point_start, mPathEnd });
 
     auto shape_start = field_offset + Coord(Int2CoordUnits(18), Int2CoordUnits(-2));
     auto shape_end = shape_start + Coord(Int2CoordUnits(4), Int2CoordUnits(4));

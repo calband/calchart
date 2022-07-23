@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartDrawCommand.h"
 #include "CalChartShowMode.h"
 #include "basic_ui.h"
 #include <memory>
@@ -32,7 +33,6 @@
 class CalChartConfiguration;
 namespace CalChart {
 class Show;
-struct DrawCommand;
 }
 
 class ColorSetupCanvas : public ClickDragCtrlScrollCanvas {

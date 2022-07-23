@@ -33,7 +33,6 @@
 #include "ModeSetupDialog.h"
 #include "PreferencesUtils.h"
 #include "ShowModeSetupCanvas.h"
-#include "draw.h"
 
 #include <wx/colordlg.h>
 #include <wx/dcbuffer.h>
