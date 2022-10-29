@@ -71,12 +71,12 @@ void CalChartView::OnDraw(wxDC* dc)
     if (mShow) {
         // draw the field
         auto origin = mShow->GetShowMode().Offset();
-        DrawMode(*dc, mConfig, mShow->GetShowMode(), ShowMode_kFieldView);
+        CalChartDraw::DrawMode(*dc, mConfig, mShow->GetShowMode(), ShowMode_kFieldView);
 
         auto ghostSheet = mShow->GetGhostSheet(GetCurrentSheetNum());
 
         if (ghostSheet != nullptr) {
-            DrawGhostSheet(*dc, mConfig, origin, CalChart::SelectionList(),
+            CalChartDraw::DrawGhostSheet(*dc, mConfig, origin, CalChart::SelectionList(),
                 mShow->GetNumPoints(), mShow->GetPointsLabel(),
                 *ghostSheet, 0);
         }
@@ -84,14 +84,14 @@ void CalChartView::OnDraw(wxDC* dc)
         auto sheet = mShow->GetCurrentSheet();
         if (sheet != mShow->GetSheetEnd()) {
             if (mShow->GetCurrentReferencePoint() > 0) {
-                DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(),
+                CalChartDraw::DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(),
                     mShow->GetNumPoints(), mShow->GetPointsLabel(),
                     *mShow->GetCurrentSheet(), 0, false);
-                DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(),
+                CalChartDraw::DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(),
                     mShow->GetNumPoints(), mShow->GetPointsLabel(),
                     *mShow->GetCurrentSheet(), mShow->GetCurrentReferencePoint(), true);
             } else {
-                DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(),
+                CalChartDraw::DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(),
                     mShow->GetNumPoints(), mShow->GetPointsLabel(),
                     *mShow->GetCurrentSheet(), mShow->GetCurrentReferencePoint(), true);
             }
@@ -102,7 +102,7 @@ void CalChartView::OnDraw(wxDC* dc)
 
 void CalChartView::DrawUncommitedMovePoints(wxDC& dc, std::map<int, CalChart::Coord> const& positions)
 {
-    DrawPhatomPoints(dc, mConfig, *mShow, *mShow->GetCurrentSheet(), positions);
+    CalChartDraw::DrawPhatomPoints(dc, mConfig, *mShow, *mShow->GetCurrentSheet(), positions);
 }
 
 void CalChartView::OnDrawBackground(wxDC& dc)
@@ -540,7 +540,7 @@ void CalChartView::DrawPaths(wxDC& dc)
     if (mShow->GetDrawPaths() && animation && animation->GetNumberSheets() && (animation->GetNumberSheets() > mShow->GetCurrentSheetNum())) {
         auto origin = GetShowFieldOffset();
         for (auto&& point : mShow->GetSelectionList()) {
-            DrawPath(dc, mConfig, animation->GenPathToDraw(mShow->GetCurrentSheetNum(), point, origin), animation->EndPosition(mShow->GetCurrentSheetNum(), point, origin));
+            CalChartDraw::DrawPath(dc, mConfig, animation->GenPathToDraw(mShow->GetCurrentSheetNum(), point, origin), animation->EndPosition(mShow->GetCurrentSheetNum(), point, origin));
         }
     }
 }

@@ -86,7 +86,7 @@ void PrintContinuityPreview::OnPaint(wxPaintEvent&)
 
     dc.Clear();
     dc.DrawRectangle(wxRect(wxPoint(0, 0), virtSize));
-    DrawContForPreview(dc, mPrintContinuity, wxRect(wxPoint(0, 0), virtSize));
+    CalChartDraw::DrawContForPreview(dc, mPrintContinuity, wxRect(wxPoint(0, 0), virtSize));
 }
 
 void PrintContinuityPreview::OnSizeEvent(wxSizeEvent& event)

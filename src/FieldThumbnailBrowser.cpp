@@ -150,7 +150,7 @@ void FieldThumbnailBrowser::OnPaint(wxPaintEvent&)
         dc.SetDeviceOrigin(origin.x + newOffsetX, origin.y + newOffsetY);
 
         dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
-        DrawMode(dc, config, mView->GetShowMode(), ShowMode_kAnimation);
+        CalChartDraw::DrawMode(dc, config, mView->GetShowMode(), ShowMode_kAnimation);
         for (auto i = 0; i < mView->GetNumPoints(); ++i) {
             auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_FRONT);
             dc.SetBrush(brushAndPen.first);

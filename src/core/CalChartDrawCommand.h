@@ -22,7 +22,9 @@
 */
 
 #include "CalChartCoord.h"
+#include <span>
 #include <variant>
+#include <vector>
 
 namespace CalChart {
 
@@ -133,4 +135,28 @@ namespace DrawCommands {
 
 using DrawCommand = std::variant<DrawCommands::Ignore, DrawCommands::Line, DrawCommands::Arc, DrawCommands::Ellipse, DrawCommands::Text>;
 
+namespace DrawCommands {
+
+    // What follows are a collection of functions to create different common "images" for CalChart.
+    namespace Field {
+        // Construct commands for the field outline
+        std::vector<CalChart::DrawCommand> CreateOutline(CalChart::Coord const& fieldsize, CalChart::Coord const& border1);
+
+        // Construct commands for the vertical solid line down from the top at 8 step spacing
+        std::vector<CalChart::DrawCommand> CreateVerticalSolidLine(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int step1);
+
+        // Construct commands for the vertical dotted lines in between the Solid lines
+        std::vector<CalChart::DrawCommand> CreateVerticalDottedLine(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int step1);
+
+        // Construct commands for the horizontal dotted lines
+        std::vector<CalChart::DrawCommand> CreateHorizontalDottedLine(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int mode_HashW, int mode_HashE, int step1);
+
+        // Draw the hashes
+        std::vector<CalChart::DrawCommand> CreateHashes(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int mode_HashW, int mode_HashE, int step1);
+        std::vector<CalChart::DrawCommand> CreateHashTicks(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int mode_HashW, int mode_HashE, int step1);
+
+        std::vector<CalChart::DrawCommand> CreateYardlineLabels(std::span<std::string const> yard_text, CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int offset, int step1);
+    }
+
+}
 }

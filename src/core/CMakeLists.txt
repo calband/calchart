@@ -38,6 +38,7 @@ add_library(
   CalChartContinuityToken.h
   CalChartCoord.cpp
   CalChartCoord.h
+  CalChartDrawCommand.cpp
   CalChartDrawCommand.h
   CalChartFileFormat.h
   CalChartImage.cpp

@@ -14,6 +14,7 @@ add_executable(CalChartTests
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartContinuityTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartContinuityTokenTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartCoordTests.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/CalChartDrawCommandTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartFileFormatTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartPointTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartSheetTests.cpp

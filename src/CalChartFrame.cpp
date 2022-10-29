@@ -201,7 +201,7 @@ public:
         auto sheet = mShow.GetNthSheet(pageNum - 1);
         auto size = wxGetApp().GetGlobalPrintDialog().GetPrintData().GetOrientation();
 
-        DrawForPrinting(dc, mConfig, mShow, *sheet, 0, 2 == size);
+        CalChartDraw::DrawForPrinting(dc, mConfig, mShow, *sheet, 0, 2 == size);
         return true;
     }
     CalChartDoc const& mShow;

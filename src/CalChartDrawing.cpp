@@ -42,6 +42,8 @@
 // Conventions:  When drawing with wxPoints/Size, assume that is already in the correct DIP.
 // Drawing constants
 
+namespace CalChartDraw {
+
 static const auto ArrowSize = fDIP(4);
 static const auto kStep8 = fDIP(CalChart::Int2CoordUnits(8));
 static const auto kStep4 = fDIP(CalChart::Int2CoordUnits(4));
@@ -191,22 +193,22 @@ auto toCoord(wxPoint point)
 
 namespace CalChartDraw::Point {
 
-static void DrawPoint(wxDC& dc,
-    CalChartConfiguration const& config,
-    CalChart::Point const& point,
-    CalChart::SYMBOL_TYPE symbol,
-    int reference,
-    CalChart::Coord const& origin,
-    wxString const& label);
+    static void DrawPoint(wxDC& dc,
+        CalChartConfiguration const& config,
+        CalChart::Point const& point,
+        CalChart::SYMBOL_TYPE symbol,
+        int reference,
+        CalChart::Coord const& origin,
+        wxString const& label);
 
-static void DrawPoint(wxDC& dc,
-    double dotRatio,
-    double pLineRatio,
-    double sLineRatio,
-    CalChart::Coord const& pos,
-    CalChart::Point const& point,
-    CalChart::SYMBOL_TYPE symbol,
-    wxString const& label);
+    static void DrawPoint(wxDC& dc,
+        double dotRatio,
+        double pLineRatio,
+        double sLineRatio,
+        CalChart::Coord const& pos,
+        CalChart::Point const& point,
+        CalChart::SYMBOL_TYPE symbol,
+        wxString const& label);
 
 }
 
@@ -568,75 +570,75 @@ void DrawForPrinting(wxDC* printerdc, CalChartConfiguration const& config, CalCh
 
 namespace CalChartDraw::Point {
 
-void DrawPoint(wxDC& dc,
-    double dotRatio,
-    double pLineRatio,
-    double sLineRatio,
-    CalChart::Coord const& pos,
-    CalChart::Point const& point,
-    CalChart::SYMBOL_TYPE symbol,
-    wxString const& label)
-{
-    SaveAndRestore::Brush restore(dc);
-    switch (symbol) {
-    case CalChart::SYMBOL_SOL:
-    case CalChart::SYMBOL_SOLBKSL:
-    case CalChart::SYMBOL_SOLSL:
-    case CalChart::SYMBOL_SOLX:
-        break;
-    default:
-        dc.SetBrush(*wxTRANSPARENT_BRUSH);
+    void DrawPoint(wxDC& dc,
+        double dotRatio,
+        double pLineRatio,
+        double sLineRatio,
+        CalChart::Coord const& pos,
+        CalChart::Point const& point,
+        CalChart::SYMBOL_TYPE symbol,
+        wxString const& label)
+    {
+        SaveAndRestore::Brush restore(dc);
+        switch (symbol) {
+        case CalChart::SYMBOL_SOL:
+        case CalChart::SYMBOL_SOLBKSL:
+        case CalChart::SYMBOL_SOLSL:
+        case CalChart::SYMBOL_SOLX:
+            break;
+        default:
+            dc.SetBrush(*wxTRANSPARENT_BRUSH);
+        }
+
+        auto const circ_r = fDIP(CalChart::Float2CoordUnits(dotRatio) / 2.0);
+        auto const plineoff = circ_r * pLineRatio;
+        auto const slineoff = circ_r * sLineRatio;
+        auto const textoff = circ_r * 1.25;
+
+        auto where = fDIP(wxPoint{ pos.x, pos.y });
+        dc.DrawCircle(where, circ_r);
+        switch (symbol) {
+        case CalChart::SYMBOL_SL:
+        case CalChart::SYMBOL_X:
+            dc.DrawLine(where.x - plineoff, where.y + plineoff, where.x + plineoff, where.y - plineoff);
+            break;
+        case CalChart::SYMBOL_SOLSL:
+        case CalChart::SYMBOL_SOLX:
+            dc.DrawLine(where.x - slineoff, where.y + slineoff, where.x + slineoff, where.y - slineoff);
+            break;
+        default:
+            break;
+        }
+        switch (symbol) {
+        case CalChart::SYMBOL_BKSL:
+        case CalChart::SYMBOL_X:
+            dc.DrawLine(where.x - plineoff, where.y - plineoff, where.x + plineoff, where.y + plineoff);
+            break;
+        case CalChart::SYMBOL_SOLBKSL:
+        case CalChart::SYMBOL_SOLX:
+            dc.DrawLine(where.x - slineoff, where.y - slineoff, where.x + slineoff, where.y + slineoff);
+            break;
+        default:
+            break;
+        }
+        if (point.LabelIsVisible()) {
+            wxCoord textw, texth, textd;
+            dc.GetTextExtent(label, &textw, &texth, &textd);
+            dc.DrawText(label, point.GetFlip() ? where.x : (where.x - textw), where.y - textoff - texth + textd);
+        }
     }
 
-    auto const circ_r = fDIP(CalChart::Float2CoordUnits(dotRatio) / 2.0);
-    auto const plineoff = circ_r * pLineRatio;
-    auto const slineoff = circ_r * sLineRatio;
-    auto const textoff = circ_r * 1.25;
-
-    auto where = fDIP(wxPoint{ pos.x, pos.y });
-    dc.DrawCircle(where, circ_r);
-    switch (symbol) {
-    case CalChart::SYMBOL_SL:
-    case CalChart::SYMBOL_X:
-        dc.DrawLine(where.x - plineoff, where.y + plineoff, where.x + plineoff, where.y - plineoff);
-        break;
-    case CalChart::SYMBOL_SOLSL:
-    case CalChart::SYMBOL_SOLX:
-        dc.DrawLine(where.x - slineoff, where.y + slineoff, where.x + slineoff, where.y - slineoff);
-        break;
-    default:
-        break;
+    static void DrawPoint(wxDC& dc, CalChartConfiguration const& config, CalChart::Point const& point, CalChart::SYMBOL_TYPE symbol, int reference, CalChart::Coord const& origin, wxString const& label)
+    {
+        DrawPoint(dc,
+            config.Get_DotRatio(),
+            config.Get_PLineRatio(),
+            config.Get_SLineRatio(),
+            point.GetPos(reference) + origin,
+            point,
+            symbol,
+            label);
     }
-    switch (symbol) {
-    case CalChart::SYMBOL_BKSL:
-    case CalChart::SYMBOL_X:
-        dc.DrawLine(where.x - plineoff, where.y - plineoff, where.x + plineoff, where.y + plineoff);
-        break;
-    case CalChart::SYMBOL_SOLBKSL:
-    case CalChart::SYMBOL_SOLX:
-        dc.DrawLine(where.x - slineoff, where.y - slineoff, where.x + slineoff, where.y + slineoff);
-        break;
-    default:
-        break;
-    }
-    if (point.LabelIsVisible()) {
-        wxCoord textw, texth, textd;
-        dc.GetTextExtent(label, &textw, &texth, &textd);
-        dc.DrawText(label, point.GetFlip() ? where.x : (where.x - textw), where.y - textoff - texth + textd);
-    }
-}
-
-static void DrawPoint(wxDC& dc, CalChartConfiguration const& config, CalChart::Point const& point, CalChart::SYMBOL_TYPE symbol, int reference, CalChart::Coord const& origin, wxString const& label)
-{
-    DrawPoint(dc,
-        config.Get_DotRatio(),
-        config.Get_PLineRatio(),
-        config.Get_SLineRatio(),
-        point.GetPos(reference) + origin,
-        point,
-        symbol,
-        label);
-}
 
 }
 
@@ -666,8 +668,8 @@ void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config,
 }
 
 namespace {
-template <class>
-inline constexpr bool always_false_v = false;
+    template <class>
+    inline constexpr bool always_false_v = false;
 }
 
 // this draws the yardline labels
@@ -754,175 +756,44 @@ void DrawPath(wxDC& dc, const CalChartConfiguration& config,
 
 namespace CalChartDraw::Field {
 
-// this draws the Outline
-static void DrawOutline(wxDC& dc, wxSize const& fieldsize, wxPoint const& border1)
-{
-    wxPoint points[5] = {
-        { 0, 0 },
-        { fieldsize.x, 0 },
-        { fieldsize.x, fieldsize.y },
-        { 0, fieldsize.y },
-        { 0, 0 },
-    };
-    dc.DrawLines(5, points, border1.x, border1.y);
-}
+    static void DrawField(wxDC& dc, CalChartConfiguration const& config, CalChart::ShowMode const& mode, HowToDraw howToDraw)
+    {
+        auto tborder1 = (howToDraw == ShowMode_kOmniView) ? CalChart::Coord(0, 0) : mode.Border1();
+        DrawCC_DrawCommandList(dc, CalChart::DrawCommands::Field::CreateOutline(mode.FieldSize(), tborder1));
+        DrawCC_DrawCommandList(dc, CalChart::DrawCommands::Field::CreateVerticalSolidLine(mode.FieldSize(), tborder1, kStep1));
 
-// Construct commands for the field outline
-static std::vector<CalChart::DrawCommand> CreateOutline(CalChart::Coord const& fieldsize, CalChart::Coord const& border1)
-{
-    return {
-        CalChart::DrawCommands::Line{ CalChart::Coord(0, 0) + border1, CalChart::Coord(fieldsize.x, 0) + border1 },
-        CalChart::DrawCommands::Line{ CalChart::Coord(fieldsize.x, 0) + border1, CalChart::Coord(fieldsize.x, fieldsize.y) + border1 },
-        CalChart::DrawCommands::Line{ CalChart::Coord(fieldsize.x, fieldsize.y) + border1, CalChart::Coord(0, fieldsize.y) + border1 },
-        CalChart::DrawCommands::Line{ CalChart::Coord(0, fieldsize.y) + border1, CalChart::Coord(0, 0) + border1 },
-    };
-}
-
-// Draw the vertical solid line down from the top
-static void DrawVerticalSolidLine(wxDC& dc, wxSize const& fieldsize, wxPoint const& border1)
-{
-    for (auto j = 0; j <= fieldsize.x; j += kStep8) {
-        // draw solid yardlines
-        wxPoint points[2] = {
-            { j, 0 },
-            { j, fieldsize.y },
-        };
-        dc.DrawLines(2, points, border1.x, border1.y);
-    }
-}
-
-// Construct commands for the vertical solid line down from the top
-static std::vector<CalChart::DrawCommand> CreateVerticalSolidLine(CalChart::Coord const& fieldsize, CalChart::Coord const& border1)
-{
-    std::vector<CalChart::DrawCommand> result;
-    for (auto j = 0; j <= fieldsize.x; j += kStep8) {
-        result.emplace_back(CalChart::DrawCommands::Line{ CalChart::Coord(j, 0) + border1, CalChart::Coord(j, fieldsize.y) + border1 });
-    }
-    return result;
-}
-
-// Construct commands for the vertical solid line down from the top
-static std::vector<CalChart::DrawCommand> CreateVerticalDottedLine(CalChart::Coord const& fieldsize, CalChart::Coord const& border1)
-{
-    std::vector<CalChart::DrawCommand> result;
-    for (auto j = kStep4; j < fieldsize.x; j += kStep8) {
-        // draw mid-dotted lines
-        for (auto k = 0; k < fieldsize.y; k += kStep2) {
-            result.emplace_back(CalChart::DrawCommands::Line{ CalChart::Coord(j, k) + border1, CalChart::Coord(j, k + kStep1) + border1 });
-        }
-    }
-    return result;
-}
-
-// Construct commands for the Horizontal dotted lines
-static std::vector<CalChart::DrawCommand> CreateHorizontalDottedLine(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int mode_HashW, int mode_HashE)
-{
-    std::vector<CalChart::DrawCommand> result;
-    for (auto j = kStep4; j < fieldsize.y; j += kStep4) {
-        if ((j == CalChart::Int2CoordUnits(mode_HashW)) || j == CalChart::Int2CoordUnits(mode_HashE))
-            continue;
-        for (auto k = 0; k < fieldsize.x; k += kStep2) {
-            result.emplace_back(CalChart::DrawCommands::Line{ CalChart::Coord(k, j) + border1, CalChart::Coord(k + kStep1, j) + border1 });
-        }
-    }
-    return result;
-}
-
-// Draw the hashes
-static std::vector<CalChart::DrawCommand> CreateHashes(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int mode_HashW, int mode_HashE)
-{
-    std::vector<CalChart::DrawCommand> result;
-    auto hashW = CalChart::Int2CoordUnits(mode_HashW);
-    auto hashE = CalChart::Int2CoordUnits(mode_HashE);
-    for (auto j = CalChart::Int2CoordUnits(0); j < fieldsize.x; j += kStep8) {
-        result.emplace_back(CalChart::DrawCommands::Line{
-            CalChart::Coord(j + CalChart::Float2CoordUnits(0.0 * 8), hashW) + border1,
-            CalChart::Coord(j + CalChart::Float2CoordUnits(0.1 * 8), hashW) + border1 });
-        result.emplace_back(CalChart::DrawCommands::Line{
-            CalChart::Coord(j + CalChart::Float2CoordUnits(0.9 * 8), hashW) + border1,
-            CalChart::Coord(j + CalChart::Float2CoordUnits(1.0 * 8), hashW) + border1 });
-
-        result.emplace_back(CalChart::DrawCommands::Line{
-            CalChart::Coord(j + CalChart::Float2CoordUnits(0.0 * 8), hashE) + border1,
-            CalChart::Coord(j + CalChart::Float2CoordUnits(0.1 * 8), hashE) + border1 });
-        result.emplace_back(CalChart::DrawCommands::Line{
-            CalChart::Coord(j + CalChart::Float2CoordUnits(0.9 * 8), hashE) + border1,
-            CalChart::Coord(j + CalChart::Float2CoordUnits(1.0 * 8), hashE) + border1 });
-    }
-    return result;
-}
-
-// Draw the hashes
-static std::vector<CalChart::DrawCommand> CreateHashTicks(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int mode_HashW, int mode_HashE)
-{
-    std::vector<CalChart::DrawCommand> result;
-    auto hashW = CalChart::Int2CoordUnits(mode_HashW);
-    auto hashE = CalChart::Int2CoordUnits(mode_HashE);
-    for (auto j = CalChart::Int2CoordUnits(0); j < fieldsize.x; j += kStep8) {
-        for (size_t midhash = 1; midhash < 5; ++midhash) {
-            result.emplace_back(CalChart::DrawCommands::Line{
-                CalChart::Coord(j + CalChart::Float2CoordUnits(midhash / 5.0 * 8), hashW) + border1,
-                CalChart::Coord(j + CalChart::Float2CoordUnits(midhash / 5.0 * 8), CalChart::Float2CoordUnits(mode_HashW - (0.2 * 8))) + border1 });
-            result.emplace_back(CalChart::DrawCommands::Line{
-                CalChart::Coord(j + CalChart::Float2CoordUnits(midhash / 5.0 * 8), hashE) + border1,
-                CalChart::Coord(j + CalChart::Float2CoordUnits(midhash / 5.0 * 8), CalChart::Float2CoordUnits(mode_HashE + (0.2 * 8))) + border1 });
-        }
-    }
-    return result;
-}
-
-static std::vector<CalChart::DrawCommand> CreateYardlineLabels(std::span<std::string const> yard_text, CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int offset)
-{
-    std::vector<CalChart::DrawCommand> result;
-    for (int i = 0; i < CalChart::CoordUnits2Int(fieldsize.x) / 8 + 1; i++) {
-        auto text = yard_text[i];
-
-        using TextAnchor = CalChart::DrawCommands::Text::TextAnchor;
-        result.emplace_back(CalChart::DrawCommands::Text{ CalChart::Coord(i * kStep8 + border1.x, border1.y + offset), text, toUType(TextAnchor::Bottom) | toUType(TextAnchor::HorizontalCenter) | toUType(TextAnchor::ScreenTop), true });
-        result.emplace_back(CalChart::DrawCommands::Text{ CalChart::Coord(i * kStep8 + border1.x, border1.y + fieldsize.y - offset), text, toUType(TextAnchor::Top) | toUType(TextAnchor::HorizontalCenter), true });
-    }
-    return result;
-}
-
-static void DrawField(wxDC& dc, CalChartConfiguration const& config, CalChart::ShowMode const& mode, HowToDraw howToDraw)
-{
-    auto tborder1 = (howToDraw == ShowMode_kOmniView) ? CalChart::Coord(0, 0) : mode.Border1();
-    using namespace CalChartDraw::Field;
-    DrawCC_DrawCommandList(dc, CreateOutline(mode.FieldSize(), tborder1));
-    DrawCC_DrawCommandList(dc, CreateVerticalSolidLine(mode.FieldSize(), tborder1));
-
-    if (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting) {
-        DrawCC_DrawCommandList(dc, CreateVerticalDottedLine(mode.FieldSize(), tborder1));
-        DrawCC_DrawCommandList(dc, CreateHorizontalDottedLine(mode.FieldSize(), tborder1, mode.HashW(), mode.HashE()));
-    }
-
-    if (mode.HashW() != static_cast<unsigned short>(-1)) {
-        DrawCC_DrawCommandList(dc, CreateHashes(mode.FieldSize(), tborder1, mode.HashW(), mode.HashE()));
         if (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting) {
-            DrawCC_DrawCommandList(dc, CreateHashTicks(mode.FieldSize(), tborder1, mode.HashW(), mode.HashE()));
+            DrawCC_DrawCommandList(dc, CalChart::DrawCommands::Field::CreateVerticalDottedLine(mode.FieldSize(), tborder1, kStep1));
+            DrawCC_DrawCommandList(dc, CalChart::DrawCommands::Field::CreateHorizontalDottedLine(mode.FieldSize(), tborder1, mode.HashW(), mode.HashE(), kStep1));
         }
+
+        if (mode.HashW() != static_cast<unsigned short>(-1)) {
+            DrawCC_DrawCommandList(dc, CalChart::DrawCommands::Field::CreateHashes(mode.FieldSize(), tborder1, mode.HashW(), mode.HashE(), kStep1));
+            if (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting) {
+                DrawCC_DrawCommandList(dc, CalChart::DrawCommands::Field::CreateHashTicks(mode.FieldSize(), tborder1, mode.HashW(), mode.HashE(), kStep1));
+            }
+        }
+
+        // Draw labels
+        if (howToDraw == ShowMode_kAnimation) {
+            return;
+        }
+
+        dc.SetFont(CreateFont(CalChart::Float2CoordUnits(config.Get_YardsSize()), wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+        // set color so when we make the label appear clearer over the lines.
+        if (howToDraw == ShowMode_kPrinting) {
+            dc.SetBrush(*wxTRANSPARENT_BRUSH);
+            dc.SetPen(*wxTRANSPARENT_PEN);
+        } else {
+            dc.SetBrush(config.Get_CalChartBrushAndPen(COLOR_FIELD).first);
+            dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD).second);
+        }
+
+        auto yard_text = std::span(mode.Get_yard_text());
+        auto yard_text2 = yard_text.subspan((-CalChart::CoordUnits2Int((mode.Offset() - mode.Border1()).x) + (CalChart::kYardTextValues - 1) * 4) / 8);
+
+        DrawCC_DrawCommandList(dc, CalChart::DrawCommands::Field::CreateYardlineLabels(yard_text2, mode.FieldSize(), tborder1, (howToDraw == ShowMode_kOmniView) ? kStep8 : 0, kStep1));
     }
-
-    // Draw labels
-    if (howToDraw == ShowMode_kAnimation) {
-        return;
-    }
-
-    dc.SetFont(CreateFont(CalChart::Float2CoordUnits(config.Get_YardsSize()), wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
-    // set color so when we make the label appear clearer over the lines.
-    if (howToDraw == ShowMode_kPrinting) {
-        dc.SetBrush(*wxTRANSPARENT_BRUSH);
-        dc.SetPen(*wxTRANSPARENT_PEN);
-    } else {
-        dc.SetBrush(config.Get_CalChartBrushAndPen(COLOR_FIELD).first);
-        dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD).second);
-    }
-
-    auto yard_text = std::span(mode.Get_yard_text());
-    auto yard_text2 = yard_text.subspan((-CalChart::CoordUnits2Int((mode.Offset() - mode.Border1()).x) + (CalChart::kYardTextValues - 1) * 4) / 8);
-
-    DrawCC_DrawCommandList(dc, CreateYardlineLabels(yard_text2, mode.FieldSize(), tborder1, (howToDraw == ShowMode_kOmniView) ? kStep8 : 0));
-}
 
 }
 
@@ -963,4 +834,6 @@ wxImage GetOmniLinesImage(const CalChartConfiguration& config, const CalChart::S
         }
     }
     return image;
+}
+
 }

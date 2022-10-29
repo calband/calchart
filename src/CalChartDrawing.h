@@ -56,6 +56,8 @@ typedef enum {
     ShowMode_kOmniView
 } HowToDraw;
 
+namespace CalChartDraw {
+
 // draw the continuity starting at a specific offset
 void Draw(wxDC& dc, CalChartDoc const& show, CalChart::Sheet const& sheet, int ref, bool primary);
 void DrawPoints(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord origin, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, bool primary);
@@ -72,8 +74,10 @@ void PrintSpringshow(std::ostream& buffer, CalChart::Sheet const& sheet);
 void PrintOverview(std::ostream& buffer, CalChart::Sheet const& sheet);
 void PrintCont(std::ostream& buffer, CalChart::Sheet const& sheet);
 
-// We break this out of the class to make CalChart internals more cross platform
 // Draw the point
 void DrawPath(wxDC& dc, CalChartConfiguration const& config, std::vector<CalChart::DrawCommand> const& draw_commands, CalChart::Coord const& end);
 
+// Give an list of commands, apply them to the DeviceContext
 void DrawCC_DrawCommandList(wxDC& dc, std::vector<CalChart::DrawCommand> const& draw_commands);
+
+}
