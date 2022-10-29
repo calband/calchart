@@ -27,6 +27,7 @@
 #include <vector>
 
 namespace CalChart {
+class Point;
 
 namespace DrawCommands {
 
@@ -95,6 +96,24 @@ namespace DrawCommands {
         }
     };
 
+    struct Circle {
+        int x1{}, y1{}, radius{};
+        bool filled = true;
+
+        Circle(int startx, int starty, int radius, bool filled = true)
+            : x1(startx)
+            , y1(starty)
+            , radius(radius)
+            , filled(filled)
+        {
+        }
+
+        Circle(Coord start, int radius, bool filled = true)
+            : Circle(start.x, start.y, radius, filled)
+        {
+        }
+    };
+
     struct Text {
         enum class TextAnchor : uint32_t {
             None = 0,
@@ -133,11 +152,15 @@ namespace DrawCommands {
 
 }
 
-using DrawCommand = std::variant<DrawCommands::Ignore, DrawCommands::Line, DrawCommands::Arc, DrawCommands::Ellipse, DrawCommands::Text>;
+using DrawCommand = std::variant<DrawCommands::Ignore, DrawCommands::Line, DrawCommands::Arc, DrawCommands::Ellipse, DrawCommands::Circle, DrawCommands::Text>;
 
 namespace DrawCommands {
 
     // What follows are a collection of functions to create different common "images" for CalChart.
+    namespace Point {
+        // Construct commands for drawing a point
+        std::vector<CalChart::DrawCommand> CreatePoint(CalChart::Point const& point, CalChart::Coord const& pos, std::string const& label, CalChart::SYMBOL_TYPE symbol, double dotRatio, double pLineRatio, double sLineRatio);
+    }
     namespace Field {
         // Construct commands for the field outline
         std::vector<CalChart::DrawCommand> CreateOutline(CalChart::Coord const& fieldsize, CalChart::Coord const& border1);

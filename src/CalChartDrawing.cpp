@@ -579,53 +579,7 @@ namespace CalChartDraw::Point {
         CalChart::SYMBOL_TYPE symbol,
         wxString const& label)
     {
-        SaveAndRestore::Brush restore(dc);
-        switch (symbol) {
-        case CalChart::SYMBOL_SOL:
-        case CalChart::SYMBOL_SOLBKSL:
-        case CalChart::SYMBOL_SOLSL:
-        case CalChart::SYMBOL_SOLX:
-            break;
-        default:
-            dc.SetBrush(*wxTRANSPARENT_BRUSH);
-        }
-
-        auto const circ_r = fDIP(CalChart::Float2CoordUnits(dotRatio) / 2.0);
-        auto const plineoff = circ_r * pLineRatio;
-        auto const slineoff = circ_r * sLineRatio;
-        auto const textoff = circ_r * 1.25;
-
-        auto where = fDIP(wxPoint{ pos.x, pos.y });
-        dc.DrawCircle(where, circ_r);
-        switch (symbol) {
-        case CalChart::SYMBOL_SL:
-        case CalChart::SYMBOL_X:
-            dc.DrawLine(where.x - plineoff, where.y + plineoff, where.x + plineoff, where.y - plineoff);
-            break;
-        case CalChart::SYMBOL_SOLSL:
-        case CalChart::SYMBOL_SOLX:
-            dc.DrawLine(where.x - slineoff, where.y + slineoff, where.x + slineoff, where.y - slineoff);
-            break;
-        default:
-            break;
-        }
-        switch (symbol) {
-        case CalChart::SYMBOL_BKSL:
-        case CalChart::SYMBOL_X:
-            dc.DrawLine(where.x - plineoff, where.y - plineoff, where.x + plineoff, where.y + plineoff);
-            break;
-        case CalChart::SYMBOL_SOLBKSL:
-        case CalChart::SYMBOL_SOLX:
-            dc.DrawLine(where.x - slineoff, where.y - slineoff, where.x + slineoff, where.y + slineoff);
-            break;
-        default:
-            break;
-        }
-        if (point.LabelIsVisible()) {
-            wxCoord textw, texth, textd;
-            dc.GetTextExtent(label, &textw, &texth, &textd);
-            dc.DrawText(label, point.GetFlip() ? where.x : (where.x - textw), where.y - textoff - texth + textd);
-        }
+        DrawCC_DrawCommandList(dc, CalChart::DrawCommands::Point::CreatePoint(point, pos, label, symbol, dotRatio, pLineRatio, sLineRatio));
     }
 
     static void DrawPoint(wxDC& dc, CalChartConfiguration const& config, CalChart::Point const& point, CalChart::SYMBOL_TYPE symbol, int reference, CalChart::Coord const& origin, wxString const& label)
@@ -655,15 +609,11 @@ void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config,
     dc.SetBrush(brushAndPen.first);
     dc.SetTextForeground(config.Get_CalChartBrushAndPen(COLOR_GHOST_POINT_TEXT).first.GetColour());
 
+    auto dotRatio = config.Get_DotRatio();
+    auto pLineRatio = config.Get_PLineRatio();
+    auto sLineRatio = config.Get_SLineRatio();
     for (auto& i : positions) {
-        CalChartDraw::Point::DrawPoint(dc,
-            config.Get_DotRatio(),
-            config.Get_PLineRatio(),
-            config.Get_SLineRatio(),
-            i.second + origin,
-            sheet.GetPoint(i.first),
-            sheet.GetSymbol(i.first),
-            show.GetPointLabel(i.first));
+        DrawCC_DrawCommandList(dc, CalChart::DrawCommands::Point::CreatePoint(sheet.GetPoint(i.first), i.second + origin, show.GetPointLabel(i.first), sheet.GetSymbol(i.first), dotRatio, pLineRatio, sLineRatio));
     }
 }
 
@@ -729,6 +679,13 @@ void DrawCC_DrawCommandList(wxDC& dc,
                 auto start = fDIP(wxPoint{ c.x1, c.y1 });
                 auto end = fDIP(wxSize{ c.x2 - c.x1, c.y2 - c.y1 });
                 dc.DrawEllipse(start, end);
+            } else if constexpr (std::is_same_v<T, CalChart::DrawCommands::Circle>) {
+                SaveAndRestore::Brush restore(dc);
+                if (!c.filled) {
+                    dc.SetBrush(*wxTRANSPARENT_BRUSH);
+                }
+                auto center = fDIP(wxPoint{ c.x1, c.y1 });
+                dc.DrawCircle(center, fDIP(c.radius));
             } else if constexpr (std::is_same_v<T, CalChart::DrawCommands::Text>) {
                 DrawText(dc, c.text, CalChart::Coord(c.x, c.y), c.anchor, c.withBackground);
             } else if constexpr (std::is_same_v<T, CalChart::DrawCommands::Ignore>) {
@@ -835,5 +792,4 @@ wxImage GetOmniLinesImage(const CalChartConfiguration& config, const CalChart::S
     }
     return image;
 }
-
 }

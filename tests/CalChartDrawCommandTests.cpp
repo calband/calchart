@@ -1,6 +1,91 @@
 #include "CalChartDrawCommand.h"
+#include "CalChartPoint.h"
 #include <catch2/catch_test_macros.hpp>
 #include <wx/dcmemory.h>
+
+auto TestPointPlain(auto cmds, bool filled)
+{
+    CHECK(cmds.size() == 2);
+
+    auto uut1 = std::get<CalChart::DrawCommands::Circle>(cmds[0]);
+    CHECK(uut1.x1 == 3);
+    CHECK(uut1.y1 == 5);
+    CHECK(uut1.radius == 9);
+    CHECK(uut1.filled == filled);
+    auto uut2 = std::get<CalChart::DrawCommands::Text>(cmds[1]);
+    CHECK(uut2.x == 3);
+    CHECK(uut2.y == -4);
+    CHECK(uut2.text == "A");
+    CHECK(!uut2.withBackground);
+}
+
+auto TestPointBksl(auto cmds, bool filled)
+{
+    CHECK(cmds.size() == 3);
+
+    auto uut1 = std::get<CalChart::DrawCommands::Circle>(cmds[0]);
+    CHECK(uut1.x1 == 3);
+    CHECK(uut1.y1 == 5);
+    CHECK(uut1.radius == 9);
+    CHECK(uut1.filled == filled);
+    auto uut2 = std::get<CalChart::DrawCommands::Line>(cmds[1]);
+    CHECK(uut2.x1 == (filled ? -12 : -10));
+    CHECK(uut2.y1 == (filled ? -10 : -8));
+    CHECK(uut2.x2 == (filled ? 18 : 16));
+    CHECK(uut2.y2 == (filled ? 20 : 18));
+    auto uut3 = std::get<CalChart::DrawCommands::Text>(cmds[2]);
+    CHECK(uut3.x == 3);
+    CHECK(uut3.y == -4);
+    CHECK(uut3.text == "A");
+    CHECK(!uut3.withBackground);
+}
+
+auto TestPointSl(auto cmds, bool filled)
+{
+    CHECK(cmds.size() == 3);
+
+    auto uut1 = std::get<CalChart::DrawCommands::Circle>(cmds[0]);
+    CHECK(uut1.x1 == 3);
+    CHECK(uut1.y1 == 5);
+    CHECK(uut1.radius == 9);
+    CHECK(uut1.filled == filled);
+    auto uut2 = std::get<CalChart::DrawCommands::Line>(cmds[1]);
+    CHECK(uut2.x1 == (filled ? -12 : -10));
+    CHECK(uut2.y1 == (filled ? 20 : 18));
+    CHECK(uut2.x2 == (filled ? 18 : 16));
+    CHECK(uut2.y2 == (filled ? -10 : -8));
+    auto uut3 = std::get<CalChart::DrawCommands::Text>(cmds[2]);
+    CHECK(uut3.x == 3);
+    CHECK(uut3.y == -4);
+    CHECK(uut3.text == "A");
+    CHECK(!uut3.withBackground);
+}
+
+auto TestPointX(auto cmds, bool filled)
+{
+    CHECK(cmds.size() == 4);
+
+    auto uut1 = std::get<CalChart::DrawCommands::Circle>(cmds[0]);
+    CHECK(uut1.x1 == 3);
+    CHECK(uut1.y1 == 5);
+    CHECK(uut1.radius == 9);
+    CHECK(uut1.filled == filled);
+    auto uut2 = std::get<CalChart::DrawCommands::Line>(cmds[1]);
+    CHECK(uut2.x1 == (filled ? -12 : -10));
+    CHECK(uut2.y1 == (filled ? 20 : 18));
+    CHECK(uut2.x2 == (filled ? 18 : 16));
+    CHECK(uut2.y2 == (filled ? -10 : -8));
+    auto uut4 = std::get<CalChart::DrawCommands::Line>(cmds[2]);
+    CHECK(uut4.x1 == (filled ? -12 : -10));
+    CHECK(uut4.y1 == (filled ? -10 : -8));
+    CHECK(uut4.x2 == (filled ? 18 : 16));
+    CHECK(uut4.y2 == (filled ? 20 : 18));
+    auto uut3 = std::get<CalChart::DrawCommands::Text>(cmds[3]);
+    CHECK(uut3.x == 3);
+    CHECK(uut3.y == -4);
+    CHECK(uut3.text == "A");
+    CHECK(!uut3.withBackground);
+}
 
 TEST_CASE("DrawCommand")
 {
@@ -16,6 +101,62 @@ TEST_CASE("DrawCommand")
         CHECK(uut1.y1 == 2);
         CHECK(uut1.x2 == 3);
         CHECK(uut1.y2 == 4);
+    }
+
+    SECTION("CreatePoint.plain")
+    {
+        TestPointPlain(CalChart::DrawCommands::Point::CreatePoint(
+                           CalChart::Point{ { 1, 2 } }, { 3, 5 }, "A", CalChart::SYMBOL_PLAIN, 1.2, 1.4, 1.6),
+            false);
+    }
+
+    SECTION("CreatePoint.sol")
+    {
+        TestPointPlain(CalChart::DrawCommands::Point::CreatePoint(
+                           CalChart::Point{ { 1, 2 } }, { 3, 5 }, "A", CalChart::SYMBOL_SOL, 1.2, 1.4, 1.6),
+            true);
+    }
+
+    SECTION("CreatePoint.bksl")
+    {
+        TestPointBksl(CalChart::DrawCommands::Point::CreatePoint(
+                          CalChart::Point{ { 1, 2 } }, { 3, 5 }, "A", CalChart::SYMBOL_BKSL, 1.2, 1.4, 1.6),
+            false);
+    }
+
+    SECTION("CreatePoint.solbksl")
+    {
+        TestPointBksl(CalChart::DrawCommands::Point::CreatePoint(
+                          CalChart::Point{ { 1, 2 } }, { 3, 5 }, "A", CalChart::SYMBOL_SOLBKSL, 1.2, 1.4, 1.6),
+            true);
+    }
+
+    SECTION("CreatePoint.sl")
+    {
+        TestPointSl(CalChart::DrawCommands::Point::CreatePoint(
+                        CalChart::Point{ { 1, 2 } }, { 3, 5 }, "A", CalChart::SYMBOL_SL, 1.2, 1.4, 1.6),
+            false);
+    }
+
+    SECTION("CreatePoint.solsl")
+    {
+        TestPointSl(CalChart::DrawCommands::Point::CreatePoint(
+                        CalChart::Point{ { 1, 2 } }, { 3, 5 }, "A", CalChart::SYMBOL_SOLSL, 1.2, 1.4, 1.6),
+            true);
+    }
+
+    SECTION("CreatePoint.x")
+    {
+        TestPointX(CalChart::DrawCommands::Point::CreatePoint(
+                       CalChart::Point{ { 1, 2 } }, { 3, 5 }, "A", CalChart::SYMBOL_X, 1.2, 1.4, 1.6),
+            false);
+    }
+
+    SECTION("CreatePoint.solx")
+    {
+        TestPointX(CalChart::DrawCommands::Point::CreatePoint(
+                       CalChart::Point{ { 1, 2 } }, { 3, 5 }, "A", CalChart::SYMBOL_SOLX, 1.2, 1.4, 1.6),
+            true);
     }
 
     SECTION("CreateOutline")
