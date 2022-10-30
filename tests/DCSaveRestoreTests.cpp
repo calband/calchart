@@ -4,6 +4,7 @@
 
 TEST_CASE("DCSaveRestoreOrigin", "wxDC")
 {
+#ifdef __WXMAC__
     wxMemoryDC dc;
     wxPoint orig = dc.GetDeviceOrigin();
 
@@ -15,4 +16,5 @@ TEST_CASE("DCSaveRestoreOrigin", "wxDC")
     }
     wxPoint newOrigin = dc.GetDeviceOrigin();
     CHECK(orig == newOrigin);
+#endif
 }
