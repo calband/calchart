@@ -96,8 +96,8 @@ public:
 // class for saving and restoring
 class BrushAndPen {
     wxDC& mDC;
-    wxBrush const& mBrush;
-    wxPen const& mPen;
+    wxBrush mBrush;
+    wxPen mPen;
 
 public:
     BrushAndPen(wxDC& dc)

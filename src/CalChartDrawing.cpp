@@ -193,22 +193,29 @@ auto toCoord(wxPoint point)
 
 namespace CalChartDraw::Point {
 
-    static void DrawPoint(wxDC& dc,
-        CalChartConfiguration const& config,
-        CalChart::Point const& point,
-        CalChart::SYMBOL_TYPE symbol,
-        int reference,
-        CalChart::Coord const& origin,
-        wxString const& label);
-
-    static void DrawPoint(wxDC& dc,
+    void DrawPoint(wxDC& dc,
         double dotRatio,
         double pLineRatio,
         double sLineRatio,
         CalChart::Coord const& pos,
         CalChart::Point const& point,
         CalChart::SYMBOL_TYPE symbol,
-        wxString const& label);
+        wxString const& label)
+    {
+        DrawCC_DrawCommandList(dc, CalChart::DrawCommands::Point::CreatePoint(point, pos, label, symbol, dotRatio, pLineRatio, sLineRatio));
+    }
+
+    auto DrawPoint(CalChartConfiguration const& config, CalChart::Point const& point, CalChart::SYMBOL_TYPE symbol, int reference, CalChart::Coord const& origin, wxString const& label)
+    {
+        return CalChart::DrawCommands::Point::CreatePoint(
+            point,
+            point.GetPos(reference) + origin,
+            label,
+            symbol,
+            config.Get_DotRatio(),
+            config.Get_PLineRatio(),
+            config.Get_SLineRatio());
+    }
 
 }
 
@@ -217,19 +224,28 @@ void DrawSheetPoints(wxDC& dc, CalChartConfiguration const& config, CalChart::Co
     SaveAndRestore::Font orig_font(dc);
     dc.SetFont(CreateFont(CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio())));
     dc.SetTextForeground(config.Get_CalChartBrushAndPen(COLOR_POINT_TEXT).first.GetColour());
-    for (auto i = 0; i < numberPoints; i++) {
-        if (selection_list.count(i)) {
-            auto brushAndPen = config.Get_CalChartBrushAndPen(selectedColor);
-            dc.SetBrush(brushAndPen.first);
-            dc.SetPen(brushAndPen.second);
-            dc.SetTextForeground(config.Get_CalChartBrushAndPen(selectedTextColor).second.GetColour());
-        } else {
-            auto brushAndPen = config.Get_CalChartBrushAndPen(unselectedColor);
-            dc.SetBrush(brushAndPen.first);
-            dc.SetPen(brushAndPen.second);
-            dc.SetTextForeground(config.Get_CalChartBrushAndPen(unselectedTextColor).second.GetColour());
+
+    {
+        auto brushAndPen = config.Get_CalChartBrushAndPen(selectedColor);
+        dc.SetBrush(brushAndPen.first);
+        dc.SetPen(brushAndPen.second);
+        dc.SetTextForeground(config.Get_CalChartBrushAndPen(selectedTextColor).second.GetColour());
+        for (auto i = 0; i < numberPoints; i++) {
+            if (selection_list.count(i)) {
+                DrawCC_DrawCommandList(dc, CalChartDraw::Point::DrawPoint(config, sheet.GetPoint(i), sheet.GetSymbol(i), ref, origin, labels.at(i)));
+            }
         }
-        CalChartDraw::Point::DrawPoint(dc, config, sheet.GetPoint(i), sheet.GetSymbol(i), ref, origin, labels.at(i));
+    }
+    {
+        auto brushAndPen = config.Get_CalChartBrushAndPen(unselectedColor);
+        dc.SetBrush(brushAndPen.first);
+        dc.SetPen(brushAndPen.second);
+        dc.SetTextForeground(config.Get_CalChartBrushAndPen(unselectedTextColor).second.GetColour());
+        for (auto i = 0; i < numberPoints; i++) {
+            if (!selection_list.count(i)) {
+                DrawCC_DrawCommandList(dc, CalChartDraw::Point::DrawPoint(config, sheet.GetPoint(i), sheet.GetSymbol(i), ref, origin, labels.at(i)));
+            }
+        }
     }
 }
 
@@ -482,19 +498,10 @@ void DrawForPrintingHelper(wxDC& dc, CalChartConfiguration const& config, CalCha
 
     // draw the field.
     DrawMode(dc, config, mode, ShowMode_kPrinting);
+
     dc.SetFont(CreateFont(CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio())));
     for (auto i = 0u; i < pts.size(); i++) {
-        const auto point = pts.at(i);
-        const auto pos = point.GetPos(ref) + mode.Offset();
-        dc.SetBrush(*wxBLACK_BRUSH);
-        CalChartDraw::Point::DrawPoint(dc,
-            config.Get_DotRatio(),
-            config.Get_PLineRatio(),
-            config.Get_SLineRatio(),
-            pos,
-            point,
-            sheet.GetSymbol(i),
-            show.GetPointLabel(i));
+        DrawCC_DrawCommandList(dc, CalChartDraw::Point::DrawPoint(config, pts.at(i), sheet.GetSymbol(i), ref, mode.Offset(), show.GetPointLabel(i)));
     }
 
     // now reset everything to draw the rest of the text
@@ -566,34 +573,6 @@ void DrawForPrinting(wxDC* printerdc, CalChartConfiguration const& config, CalCh
     auto scaleY = printer.y / float(rotate_membm.GetHeight());
     printerdc->SetUserScale(scaleX, scaleY);
     printerdc->Blit(0, 0, rotate_membm.GetWidth(), rotate_membm.GetHeight(), &tmemdc, 0, 0);
-}
-
-namespace CalChartDraw::Point {
-
-    void DrawPoint(wxDC& dc,
-        double dotRatio,
-        double pLineRatio,
-        double sLineRatio,
-        CalChart::Coord const& pos,
-        CalChart::Point const& point,
-        CalChart::SYMBOL_TYPE symbol,
-        wxString const& label)
-    {
-        DrawCC_DrawCommandList(dc, CalChart::DrawCommands::Point::CreatePoint(point, pos, label, symbol, dotRatio, pLineRatio, sLineRatio));
-    }
-
-    static void DrawPoint(wxDC& dc, CalChartConfiguration const& config, CalChart::Point const& point, CalChart::SYMBOL_TYPE symbol, int reference, CalChart::Coord const& origin, wxString const& label)
-    {
-        DrawPoint(dc,
-            config.Get_DotRatio(),
-            config.Get_PLineRatio(),
-            config.Get_SLineRatio(),
-            point.GetPos(reference) + origin,
-            point,
-            symbol,
-            label);
-    }
-
 }
 
 void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config,
@@ -756,6 +735,8 @@ namespace CalChartDraw::Field {
 
 void DrawMode(wxDC& dc, CalChartConfiguration const& config, CalChart::ShowMode const& mode, HowToDraw howToDraw)
 {
+    SaveAndRestore::BrushAndPen restore(dc);
+
     switch (howToDraw) {
     case ShowMode_kFieldView:
     case ShowMode_kAnimation:
