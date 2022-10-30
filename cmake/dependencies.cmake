@@ -37,7 +37,7 @@ set(wxUSE_STD_CONTAINERS ON)
 FetchContent_Declare(
   wxWidgets
   GIT_REPOSITORY "https://github.com/wxWidgets/wxWidgets"
-  GIT_TAG 9c0a8be1dc32063d91ed1901fd5fcd54f4f955a1 # v3.1.5
+  GIT_TAG 97e99707c5d2271a70cb686720b48dbf34ced496 # v3.2.1
 )
 FetchContent_MakeAvailable(wxWidgets)
 
