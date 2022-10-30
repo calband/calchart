@@ -332,22 +332,21 @@ std::map<int, CalChart::Coord> MovePointsTool_MoveShear::TransformPoints(std::ma
 {
     if (m_shape_list.size() < 2) {
         return select_list;
-    } else {
-        assert(m_shape_list.size() == 2);
-        auto start = dynamic_cast<CalChart::Shape_1point&>(*m_shape_list[0]).GetOrigin();
-        auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
-        auto c1 = shape->GetOrigin();
-        auto c2 = shape->GetPoint();
-        auto v1 = c1 - start;
-        auto v2 = c2 - c1;
-        float amount = v2.Magnitude() / v1.Magnitude();
-        if (BoundDirectionSigned(v1.Direction() - (c2 - start).Direction()) < 0) {
-            amount = -amount;
-        }
-        float ang = -v1.Direction() * M_PI / 180.0;
-        auto m = TranslationMatrix(Vector<float>(-start.x, -start.y, 0)) * ZRotationMatrix(-ang) * YXShearMatrix(amount) * ZRotationMatrix(ang) * TranslationMatrix(Vector<float>(start.x, start.y, 0));
-        return GetTransformedPoints(m, select_list);
     }
+    assert(m_shape_list.size() == 2);
+    auto start = dynamic_cast<CalChart::Shape_1point&>(*m_shape_list[0]).GetOrigin();
+    auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
+    auto c1 = shape->GetOrigin();
+    auto c2 = shape->GetPoint();
+    auto v1 = c1 - start;
+    auto v2 = c2 - c1;
+    float amount = v2.Magnitude() / v1.Magnitude();
+    if (BoundDirectionSigned(v1.Direction() - (c2 - start).Direction()) < 0) {
+        amount = -amount;
+    }
+    float ang = Deg2Rad(-v1.Direction());
+    auto m = TranslationMatrix(Vector<float>(-start.x, -start.y, 0)) * ZRotationMatrix(-ang) * YXShearMatrix(amount) * ZRotationMatrix(ang) * TranslationMatrix(Vector<float>(start.x, start.y, 0));
+    return GetTransformedPoints(m, select_list);
 }
 
 void MovePointsTool_MoveShear::OnClickUp(CalChart::Coord pos)
@@ -386,7 +385,7 @@ std::map<int, CalChart::Coord> MovePointsTool_MoveReflect::TransformPoints(std::
     auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
     auto c1 = shape->GetOrigin();
     auto c2 = shape->GetPoint() - c1;
-    float ang = -c2.Direction() * M_PI / 180.0;
+    float ang = Deg2Rad(-c2.Direction());
     auto m = TranslationMatrix(Vector<float>(-c1.x, -c1.y, 0)) * ZRotationMatrix(-ang) * YReflectionMatrix<float>() * ZRotationMatrix(ang) * TranslationMatrix(Vector<float>(c1.x, c1.y, 0));
     return GetTransformedPoints(m, select_list);
 }
@@ -555,12 +554,12 @@ std::map<int, CalChart::Coord> MovePointsTool_ShapeEllipse::TransformPoints(std:
     const auto a = (end.x - start.x) / 2.0;
     const auto b = (end.y - start.y) / 2.0;
     std::map<int, CalChart::Coord> result;
-    auto amount = (2.0 * M_PI) / select_list.size();
-    auto angle = -M_PI / 2.0;
+    auto amount = (2.0 * std::numbers::pi) / select_list.size();
+    auto angle = -std::numbers::pi / 2.0;
     auto ordered = get_ordered_selection(select_list);
     for (auto i : ordered) {
         // should this have a snap to grid?
-        if ((angle > M_PI / 2.0) && (angle <= 3.0 * M_PI / 2.0)) {
+        if ((angle > std::numbers::pi / 2.0) && (angle <= 3.0 * std::numbers::pi / 2.0)) {
             result[i] = center + CalChart::Coord(-(a * b) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2))), -(a * b * tan(angle)) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2))));
         } else {
             result[i] = center + CalChart::Coord((a * b) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2))), (a * b * tan(angle)) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2))));

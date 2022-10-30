@@ -54,8 +54,10 @@ float Coord::Direction() const
     if (*this == 0)
         return 0.0;
 
-    auto ang = acos(CoordUnits2Float(x) / Magnitude()); // normalize
-    ang *= static_cast<float>(180.0 / M_PI); // convert to degrees
+    auto ang = Rad2Deg(acos(CoordUnits2Float(x) / Magnitude())); // normalize
+    // ang = Rad2Deg<float>(ang); // normalize
+    //    ang = Rad2Deg<float>(ang); // normalize
+    // ang *= 180.0 / M_PI;
     if (y > 0)
         ang = (-ang); // check for > PI
 

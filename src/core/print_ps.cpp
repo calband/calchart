@@ -143,10 +143,10 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
 
     auto fullsize = mode.Size();
     auto fieldsize = mode.FieldSize();
-    float fullwidth = CoordUnits2Float(fullsize.x);
-    float fullheight = CoordUnits2Float(fullsize.y);
-    float fieldwidth = CoordUnits2Float(fieldsize.x);
-    float fieldheight = CoordUnits2Float(fieldsize.y);
+    auto fullwidth = CoordUnits2Float(fullsize.x);
+    auto fullheight = CoordUnits2Float(fullsize.y);
+    auto fieldwidth = CoordUnits2Float(fieldsize.x);
+    auto fieldheight = CoordUnits2Float(fieldsize.y);
 
     /* first, calculate dimensions */
     if (!overview) {
@@ -641,11 +641,11 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const Sheet& sheet,
     for (auto i = 0; i < mShow.GetNumPoints(); i++) {
         if ((sheet.GetPoint(i).GetPos().x > clip_n) || (sheet.GetPoint(i).GetPos().x < clip_s))
             continue;
-        float fieldheight = CoordUnits2Float(fieldsize.y);
-        float fieldoffx = CoordUnits2Float(fieldoff.x);
-        float fieldoffy = CoordUnits2Float(fieldoff.y);
-        float dot_x = (CoordUnits2Float(sheet.GetPoint(i).GetPos().x) - fieldoffx - step_offset) / step_width * field_w;
-        float dot_y = (1.0 - (CoordUnits2Float(sheet.GetPoint(i).GetPos().y) - fieldoffy) / fieldheight) * field_h;
+        auto fieldheight = CoordUnits2Float(fieldsize.y);
+        auto fieldoffx = CoordUnits2Float(fieldoff.x);
+        auto fieldoffy = CoordUnits2Float(fieldoff.y);
+        auto dot_x = (CoordUnits2Float(sheet.GetPoint(i).GetPos().x) - fieldoffx - step_offset) / step_width * field_w;
+        auto dot_y = (1.0 - (CoordUnits2Float(sheet.GetPoint(i).GetPos().y) - fieldoffy) / fieldheight) * field_h;
         buffer << dot_x << " " << dot_y << " "
                << dot_routines[sheet.GetSymbol(i)] << "\n";
         buffer << "(" << mShow.GetPointLabel(i) << ") " << dot_x << " " << dot_y
@@ -668,12 +668,12 @@ void PrintShowToPS::PrintOverview(std::ostream& buffer,
     buffer << "drawfield\n";
     auto fieldoff = mMode.FieldOffset();
     auto fieldsize = mMode.FieldSize();
-    float fieldwidth = CoordUnits2Float(fieldsize.x);
+    auto fieldwidth = CoordUnits2Float(fieldsize.x);
     buffer << "/w " << (width / fieldwidth * 2.0 / 3.0) << " def\n";
 
-    float fieldx = CoordUnits2Float(fieldoff.x);
-    float fieldy = CoordUnits2Float(fieldoff.y);
-    float fieldheight = CoordUnits2Float(fieldsize.y);
+    auto fieldx = CoordUnits2Float(fieldoff.x);
+    auto fieldy = CoordUnits2Float(fieldoff.y);
+    auto fieldheight = CoordUnits2Float(fieldsize.y);
 
     for (auto i = 0; i < mShow.GetNumPoints(); i++) {
         buffer << ((CoordUnits2Float(sheet.GetPoint(i).GetPos().x) - fieldx) / fieldwidth * width)

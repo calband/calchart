@@ -31,13 +31,11 @@
 #include "CalChartShowMode.h"
 #include "cc_omniview_constants.h"
 
-using namespace CalChart;
-
 // Yard lines
-const std::array<std::string, kYardTextValues> yard_text_defaults = []() {
-    std::array<std::string, kYardTextValues> values;
-    auto default_yards = ShowMode::GetDefaultYardLines();
-    for (auto i = 0; i < kYardTextValues; ++i) {
+const std::array<std::string, CalChart::kYardTextValues> yard_text_defaults = []() {
+    std::array<std::string, CalChart::kYardTextValues> values;
+    auto default_yards = CalChart::ShowMode::GetDefaultYardLines();
+    for (auto i = 0; i < CalChart::kYardTextValues; ++i) {
         values[i] = default_yards[i];
     }
     return values;
@@ -45,21 +43,21 @@ const std::array<std::string, kYardTextValues> yard_text_defaults = []() {
 
 const auto yard_text_index = yard_text_defaults;
 
-const std::string kPaletteColorDefault[kNumberPalettes] = {
+const std::array<std::string, kNumberPalettes> kPaletteColorDefault = {
     "FOREST GREEN",
     "GREY",
     "GREY",
     "GREY",
 };
 
-const std::string kPaletteNameDefault[kNumberPalettes] = {
+const std::array<std::string, kNumberPalettes> kPaletteNameDefault = {
     "Default",
     "[Unset]",
     "[Unset]",
     "[Unset]",
 };
 
-static CalChartConfiguration& GetConfig()
+static auto GetConfig() -> CalChartConfiguration&
 {
     static CalChartConfiguration sconfig;
     return sconfig;
@@ -215,7 +213,7 @@ GetConfigValue(const std::string& key,
     auto values = def;
     std::string path = "/SHOWMODES/" + key;
     for (auto i = 0; i < CalChart::kShowModeValues; ++i) {
-        values[i] = GetConfigPathKey<long>(path, ShowModeKeys[i], values[i]);
+        values[i] = GetConfigPathKey<long>(path, CalChart::ShowModeKeys[i], values[i]);
     }
     return values;
 }
@@ -223,11 +221,11 @@ GetConfigValue(const std::string& key,
 // Specialize on show mode
 template <>
 void SetConfigValue(const std::string& key,
-    const ShowModeData_t& value,
-    const ShowModeData_t& def)
+    const CalChart::ShowModeData_t& value,
+    const CalChart::ShowModeData_t& def)
 {
     // don't write if we don't have to
-    if (GetConfigValue<ShowModeData_t>(key, def) == value) {
+    if (GetConfigValue<CalChart::ShowModeData_t>(key, def) == value) {
         return;
     }
     std::string path = "/SHOWMODES/" + key;
@@ -236,13 +234,13 @@ void SetConfigValue(const std::string& key,
     // clear out the value if it's the same as the default
     if (def == value) {
         for (auto i = 0; i < CalChart::kShowModeValues; ++i) {
-            ClearConfigPathKey<long>(path, ShowModeKeys[i]);
+            ClearConfigPathKey<long>(path, CalChart::ShowModeKeys[i]);
         }
         return;
     }
 
     for (auto i = 0; i < CalChart::kShowModeValues; ++i) {
-        SetConfigPathKey<long>(path, ShowModeKeys[i], value[i]);
+        SetConfigPathKey<long>(path, CalChart::ShowModeKeys[i], value[i]);
     }
 }
 
@@ -379,7 +377,7 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS(ContCellRounding, long, 4);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(ContCellTextPadding, long, 4);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(ContCellBoxPadding, long, 4);
 
-// OBSOLETE Settigns
+// OBSOLETE Settings
 // "MainFrameZoom" now obsolete with version post 3.2, use "MainFrameZoom2"
 // IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameZoom, float, 0.5);
 // "MainFrameZoom", "MainFrameWidth", "MainFrameHeight" now obsolete with
@@ -391,38 +389,38 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS(ContCellBoxPadding, long, 4);
 template <int Which, typename T, std::size_t N, typename Indices = std::make_index_sequence<N>>
 auto GetVectorFromTupleArray(std::array<T, N> const& a)
 {
-    auto data = details::at_offset<Which>(a, Indices{});
+    auto data = CalChart::details::at_offset<Which>(a, Indices{});
     return std::vector(data.begin(), data.end());
 }
 
 std::vector<std::string> CalChartConfiguration::GetColorNames() const
 {
-    return GetVectorFromTupleArray<0>(ColorInfoDefaults);
+    return GetVectorFromTupleArray<0>(CalChart::ColorInfoDefaults);
 }
 
 std::vector<std::string> CalChartConfiguration::GetDefaultColors() const
 {
-    return GetVectorFromTupleArray<1>(ColorInfoDefaults);
+    return GetVectorFromTupleArray<1>(CalChart::ColorInfoDefaults);
 }
 
 std::vector<int> CalChartConfiguration::GetDefaultPenWidth() const
 {
-    return GetVectorFromTupleArray<2>(ColorInfoDefaults);
+    return GetVectorFromTupleArray<2>(CalChart::ColorInfoDefaults);
 }
 
 std::vector<std::string> CalChartConfiguration::GetContCellColorNames() const
 {
-    return GetVectorFromTupleArray<0>(ContCellColorInfoDefaults);
+    return GetVectorFromTupleArray<0>(CalChart::ContCellColorInfoDefaults);
 }
 
 std::vector<std::string> CalChartConfiguration::GetContCellDefaultColors() const
 {
-    return GetVectorFromTupleArray<1>(ContCellColorInfoDefaults);
+    return GetVectorFromTupleArray<1>(CalChart::ContCellColorInfoDefaults);
 }
 
 std::vector<int> CalChartConfiguration::GetContCellDefaultPenWidth() const
 {
-    return GetVectorFromTupleArray<2>(ContCellColorInfoDefaults);
+    return GetVectorFromTupleArray<2>(CalChart::ContCellColorInfoDefaults);
 }
 
 std::vector<std::string> CalChartConfiguration::Get_yard_text_index() const
@@ -630,23 +628,23 @@ CalChartConfiguration::Get_ShowModeData(CalChart::ShowModes which) const
     }
 
     if (!mShowModeInfos.count(which)) {
-        auto& defaultValue = kShowModeDefaultValues[twhich];
-        mShowModeInfos[which] = GetConfigValue<ShowModeData_t>(
+        auto& defaultValue = CalChart::kShowModeDefaultValues[twhich];
+        mShowModeInfos[which] = GetConfigValue<CalChart::ShowModeData_t>(
             std::string(std::get<0>(defaultValue)), CalChart::ShowModeData_t{ std::get<1>(defaultValue) });
     }
     return mShowModeInfos[which];
 }
 
-void CalChartConfiguration::Set_ShowModeData(CalChart::ShowModes which, ShowModeData_t const& values)
+void CalChartConfiguration::Set_ShowModeData(CalChart::ShowModes which, CalChart::ShowModeData_t const& values)
 {
     auto twhich = toUType(which);
     if (twhich >= toUType(CalChart::ShowModes::NUM)) {
         throw std::runtime_error("Error, exceeding CalChart::ShowModes::NUM size");
     }
 
-    auto& defaultValue = kShowModeDefaultValues[twhich];
+    auto& defaultValue = CalChart::kShowModeDefaultValues[twhich];
     mWriteQueue[std::string(std::get<0>(defaultValue))] = [defaultValue, which, values]() {
-        SetConfigValue<ShowModeData_t>(std::string(std::get<0>(defaultValue)), values,
+        SetConfigValue<CalChart::ShowModeData_t>(std::string(std::get<0>(defaultValue)), values,
             CalChart::ShowModeData_t{ std::get<1>(defaultValue) });
     };
     mShowModeInfos[which] = values;
@@ -659,8 +657,8 @@ void CalChartConfiguration::Clear_ShowModeData(CalChart::ShowModes which)
         throw std::runtime_error("Error, exceeding CalChart::ShowModes::NUM size");
     }
 
-    auto& defaultValue = kShowModeDefaultValues[twhich];
-    SetConfigValue<ShowModeData_t>(std::string(std::get<0>(defaultValue)), CalChart::ShowModeData_t{ std::get<1>(defaultValue) },
+    auto& defaultValue = CalChart::kShowModeDefaultValues[twhich];
+    SetConfigValue<CalChart::ShowModeData_t>(std::string(std::get<0>(defaultValue)), CalChart::ShowModeData_t{ std::get<1>(defaultValue) },
         CalChart::ShowModeData_t{ std::get<1>(defaultValue) });
     mShowModeInfos.erase(which);
 }
@@ -668,7 +666,7 @@ void CalChartConfiguration::Clear_ShowModeData(CalChart::ShowModes which)
 // Yard Lines
 std::string CalChartConfiguration::Get_yard_text(size_t which) const
 {
-    if (which >= kYardTextValues)
+    if (which >= CalChart::kYardTextValues)
         throw std::runtime_error("Error, exceeding kYardTextValues size");
 
     if (!mYardTextInfos.count(which)) {
@@ -712,14 +710,14 @@ void CalChartConfiguration::FlushWriteQueue() const
     mWriteQueue.clear();
 }
 
-ShowMode GetConfigShowMode(const std::string& which)
+CalChart::ShowMode GetConfigShowMode(const std::string& which)
 {
-    auto iter = std::find_if(std::begin(kShowModeDefaultValues), std::end(kShowModeDefaultValues), [which](auto&& t) {
+    auto iter = std::find_if(std::begin(CalChart::kShowModeDefaultValues), std::end(CalChart::kShowModeDefaultValues), [which](auto&& t) {
         return std::get<0>(t) == which;
     });
-    if (iter != std::end(kShowModeDefaultValues)) {
-        auto item = static_cast<CalChart::ShowModes>(std::distance(std::begin(kShowModeDefaultValues), iter));
-        return ShowMode::CreateShowMode(CalChartConfiguration::GetGlobalConfig().Get_ShowModeData(item), Get_yard_text_all(CalChartConfiguration::GetGlobalConfig()));
+    if (iter != std::end(CalChart::kShowModeDefaultValues)) {
+        auto item = static_cast<CalChart::ShowModes>(std::distance(std::begin(CalChart::kShowModeDefaultValues), iter));
+        return CalChart::ShowMode::CreateShowMode(CalChartConfiguration::GetGlobalConfig().Get_ShowModeData(item), Get_yard_text_all(CalChartConfiguration::GetGlobalConfig()));
     }
     throw std::runtime_error("No such show");
 }
@@ -742,10 +740,10 @@ std::vector<std::string> GetColorPaletteNames(CalChartConfiguration const& confi
     return result;
 }
 
-std::array<std::string, kYardTextValues> Get_yard_text_all(CalChartConfiguration const& config)
+std::array<std::string, CalChart::kYardTextValues> Get_yard_text_all(CalChartConfiguration const& config)
 {
-    std::array<std::string, kYardTextValues> values;
-    for (auto i = 0; i < kYardTextValues; ++i) {
+    std::array<std::string, CalChart::kYardTextValues> values;
+    for (auto i = 0; i < CalChart::kYardTextValues; ++i) {
         values[i] = config.Get_yard_text(i);
     }
     return values;

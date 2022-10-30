@@ -28,6 +28,8 @@
 #include "CalChartUtils.h"
 #include "parse.h"
 
+#include <cmath>
+
 // for serialization we need to pre-register all of the different types that can exist in the inuity AST.
 
 enum class SerializationToken {

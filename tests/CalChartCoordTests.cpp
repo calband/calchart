@@ -11,7 +11,7 @@ TEST_CASE("Basic", "CalChartCoord")
     REQUIRE(0.0 == undertest.Direction());
 
     auto undertest2 = CalChart::Coord{ 16, 16 };
-    CHECK(IS_ZERO(SQRT2 - undertest2.Magnitude()));
+    CHECK(CalChart::IS_ZERO(CalChart::SQRT2 - undertest2.Magnitude()));
     CHECK(1.0f == undertest2.DM_Magnitude());
     CHECK(-45.0 == undertest2.Direction());
 }

@@ -25,8 +25,11 @@
 #include <array>
 #include <vector>
 
-// forward declare
 namespace CalChart {
+
+// the fudge factor for floating point math
+constexpr auto kEpsilon = 1e-6;
+constexpr auto SQRT2 = 1.4142136;
 
 enum class Colors {
     FIELD,

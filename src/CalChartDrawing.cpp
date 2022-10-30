@@ -715,6 +715,7 @@ namespace CalChartDraw::Field {
         if (howToDraw != ShowMode_kPrinting) {
             // set color so when we make background box it blends
             wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD));
+            dc.DrawRectangle(top_row, textSize);
         }
 
         auto yard_text = std::span(mode.Get_yard_text());

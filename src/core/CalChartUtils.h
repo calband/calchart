@@ -21,30 +21,23 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define _USE_MATH_DEFINES
 #include <cmath>
 #include <cstdlib>
+#include <numbers>
 #include <tuple>
 
+#include "CalChartConstants.h"
 #include "CalChartTypes.h"
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 namespace CalChart {
 struct Coord;
-}
-
-constexpr auto kEpsilon = 0.00001;
-constexpr auto SQRT2 = 1.4142136;
 
 template <typename T>
 constexpr auto IS_ZERO(T a) { return std::abs(a) < kEpsilon; }
 template <typename T>
-constexpr auto Deg2Rad(T a) { return a * M_PI / 180.0; }
+constexpr auto Deg2Rad(T a) { return a * std::numbers::pi / 180.0; }
 template <typename T>
-constexpr auto Rad2Deg(T a) { return a * 180.0 / M_PI; }
+constexpr auto Rad2Deg(T a) { return a * 180.0 / std::numbers::pi; }
 
 template <typename T>
 constexpr auto BoundDirection(T f)
@@ -69,10 +62,10 @@ T BoundDirectionSigned(T f)
 template <typename T>
 constexpr auto BoundDirectionRad(T f)
 {
-    while (f >= 2 * M_PI)
-        f -= 2 * M_PI;
+    while (f >= 2 * std::numbers::pi)
+        f -= 2 * std::numbers::pi;
     while (f < 0.0)
-        f += 2 * M_PI;
+        f += 2 * std::numbers::pi;
     return f;
 }
 
@@ -119,4 +112,6 @@ auto CreateUnitVector(T dir)
         std::get<1>(result) = -std::get<1>(result);
     }
     return result;
+}
+
 }

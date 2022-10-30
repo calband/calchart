@@ -165,7 +165,7 @@ Shape_arc::Shape_arc(Coord c, Coord p)
 {
     auto p1 = p - c;
 
-    r = r0 = p1.Direction() * M_PI / 180.0;
+    r = r0 = Deg2Rad(p1.Direction());
     d = p1.Magnitude() * kCoordDecimal;
 }
 
@@ -183,7 +183,7 @@ void Shape_arc::OnMove(Coord, Coord snapped_p)
 {
     auto p1 = snapped_p;
 
-    r = GetOrigin().Direction(p1) * M_PI / 180.0;
+    r = Deg2Rad(GetOrigin().Direction(p1));
     p1.x = Coord::units(origin.x + d * cos(r));
     p1.y = Coord::units(origin.y + -d * sin(r));
     MovePoint(p1);
