@@ -22,6 +22,7 @@
 
 #include "ColorPalette.h"
 #include "CalChartConfiguration.h"
+#include "CalChartDrawPrimativesHelper.h"
 #include "CalChartSizes.h"
 #include "CalChartView.h"
 #include "ColorSetupDialog.h"
@@ -66,7 +67,7 @@ void ColorPalettePanel::OnPaint(wxPaintEvent&)
         } else {
             dc.SetPen(*wxBLACK_PEN);
         }
-        dc.SetBrush(config.GetColorPaletteColor(i));
+        wxCalChart::setBrush(dc, config.GetColorPaletteColor(i));
         dc.DrawRoundedRectangle(point, size, kBoxRadius);
         point.x += kBoxBorder + kBoxSize;
     }

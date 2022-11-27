@@ -24,6 +24,7 @@
 #include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
 #include "CalChartDrawCommand.h"
+#include "CalChartDrawPrimativesHelper.h"
 #include "CalChartShapes.h"
 #include "CalChartSheet.h"
 #include "CalChartShowMode.h"
@@ -73,11 +74,14 @@ void DrawingSetup::CreateControls()
 {
     SetSizer(VStack([this](auto& sizer) {
         NamedVBoxStack(this, sizer, "Palette Selector", [this](auto& sizer) {
-            mPaletteNameBox = new wxBitmapComboBox(this, NEW_COLOR_PALETTE, mColorPaletteNames.at(0), wxDefaultPosition, wxSize(200, -1), kNumberPalettes, mColorPaletteNames.data(), wxCB_READONLY | wxCB_DROPDOWN);
+            auto colorNames = std::vector<wxString>{};
+            std::copy(mColorPaletteNames.cbegin(), mColorPaletteNames.cend(), std::back_inserter(colorNames));
+
+            mPaletteNameBox = new wxBitmapComboBox(this, NEW_COLOR_PALETTE, colorNames.at(0), wxDefaultPosition, wxSize(200, -1), kNumberPalettes, colorNames.data(), wxCB_READONLY | wxCB_DROPDOWN);
             sizer->Add(mPaletteNameBox, LeftBasicSizerFlags());
 
             for (auto i = 0; i < kNumberPalettes; ++i) {
-                CreateAndSetItemBitmap(mPaletteNameBox, i, mColorPaletteColors.at(i));
+                CreateAndSetItemBitmap(mPaletteNameBox, i, wxCalChart::toBrush(mColorPaletteColors.at(i)));
             }
             mPaletteNameBox->SetSelection(mActiveColorPalette);
 
@@ -93,11 +97,15 @@ void DrawingSetup::CreateControls()
 
         NamedVBoxStack(this, sizer, "Color settings", [this](auto& sizer) {
             HStack(sizer, LeftBasicSizerFlags(), [this](auto& sizer) {
-                mNameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, mConfig.GetColorNames().at(0), wxDefaultPosition, wxDefaultSize, COLOR_NUM, mConfig.GetColorNames().data(), wxCB_READONLY | wxCB_DROPDOWN);
+                auto colorNamesRaw = mConfig.GetColorNames();
+                auto colorNames = std::vector<wxString>{};
+                std::copy(colorNamesRaw.cbegin(), colorNamesRaw.cend(), std::back_inserter(colorNames));
+
+                mNameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, colorNames.at(0), wxDefaultPosition, wxDefaultSize, colorNames.size(), colorNames.data(), wxCB_READONLY | wxCB_DROPDOWN);
                 sizer->Add(mNameBox, BasicSizerFlags());
 
-                for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i) + 1)) {
-                    CreateAndSetItemBitmap(mNameBox, i, mConfig.Get_CalChartBrushAndPen(i).first);
+                for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM; i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
+                    CreateAndSetItemBitmap(mNameBox, toUType(i), wxCalChart::toBrush(mConfig.Get_CalChartBrushAndPen(i)));
                 }
                 mNameBox->SetSelection(0);
 
@@ -141,10 +149,10 @@ void DrawingSetup::InitFromConfig()
     mColorPaletteColors = GetColorPaletteColors(mConfig);
 
     for (auto palette = 0; palette < kNumberPalettes; ++palette) {
-        for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i) + 1)) {
+        for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM; i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
             auto brushAndPen = mConfig.Get_CalChartBrushAndPen(palette, i);
-            mCalChartPens[palette][i] = brushAndPen.second;
-            mCalChartBrushes[palette][i] = brushAndPen.first;
+            mCalChartPens[palette][toUType(i)] = wxCalChart::toPen(brushAndPen);
+            mCalChartBrushes[palette][toUType(i)] = wxCalChart::toBrush(brushAndPen);
         }
     }
 
@@ -159,16 +167,15 @@ void DrawingSetup::InitFromConfig()
 bool DrawingSetup::TransferDataToWindow()
 {
     for (auto i = 0; i < kNumberPalettes; ++i) {
-        CreateAndSetItemBitmap(mPaletteNameBox, i, mColorPaletteColors.at(i));
+        CreateAndSetItemBitmap(mPaletteNameBox, i, wxCalChart::toBrush(mColorPaletteColors.at(i)));
     }
     for (auto i = 0; i < kNumberPalettes; ++i) {
         mPaletteNameBox->SetString(i, mColorPaletteNames.at(i));
     }
     mPaletteNameBox->SetSelection(mActiveColorPalette);
 
-    for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM;
-         i = static_cast<CalChartColors>(static_cast<int>(i) + 1)) {
-        CreateAndSetItemBitmap(mNameBox, i, mCalChartBrushes[mActiveColorPalette][i]);
+    for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM; i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
+        CreateAndSetItemBitmap(mNameBox, toUType(i), mCalChartBrushes[mActiveColorPalette][toUType(i)]);
     }
     spin->SetValue(mCalChartPens[mActiveColorPalette][mNameBox->GetSelection()].GetWidth());
 
@@ -211,7 +218,7 @@ bool DrawingSetup::ClearValuesToDefault()
     }
 
     for (auto palette = 0; palette < kNumberPalettes; ++palette) {
-        for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i) + 1)) {
+        for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM; i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
             mConfig.Clear_CalChartConfigColor(palette, i);
         }
     }
@@ -225,7 +232,7 @@ void DrawingSetup::SetColor(int selection, int width, const wxColour& color)
     mCalChartPens[mActiveColorPalette][selection] = *wxThePenList->FindOrCreatePen(color, width, wxPENSTYLE_SOLID);
     mCalChartBrushes[mActiveColorPalette][selection] = *wxTheBrushList->FindOrCreateBrush(color, wxBRUSHSTYLE_SOLID);
 
-    mConfig.Set_CalChartBrushAndPen(static_cast<CalChartColors>(selection), mCalChartBrushes[mActiveColorPalette][selection], mCalChartPens[mActiveColorPalette][selection]);
+    mConfig.Set_CalChartBrushAndPen(static_cast<CalChart::Colors>(selection), wxCalChart::toBrushAndPen(color, width));
 
     // update the namebox list
     CreateAndSetItemBitmap(mNameBox, selection, mCalChartBrushes[mActiveColorPalette][selection]);
@@ -234,12 +241,12 @@ void DrawingSetup::SetColor(int selection, int width, const wxColour& color)
 
 void DrawingSetup::SetPaletteColor(int selection, wxColour const& color)
 {
-    mColorPaletteColors.at(selection) = *wxTheBrushList->FindOrCreateBrush(color, wxBRUSHSTYLE_SOLID);
+    mColorPaletteColors.at(selection) = wxCalChart::toColor(color);
 
     // this is needed so we draw things out on the page correctly.
     mConfig.SetColorPaletteColor(selection, mColorPaletteColors.at(selection));
 
-    CreateAndSetItemBitmap(mPaletteNameBox, selection, mColorPaletteColors.at(selection));
+    CreateAndSetItemBitmap(mPaletteNameBox, selection, wxCalChart::toBrush(mColorPaletteColors.at(selection)));
     Refresh();
 }
 
@@ -274,7 +281,7 @@ void DrawingSetup::OnCmdChangePaletteColor()
     int selection = mPaletteNameBox->GetSelection();
     wxColourData data;
     data.SetChooseFull(true);
-    data.SetColour(mColorPaletteColors.at(selection).GetColour());
+    data.SetColour(wxCalChart::toColour(mColorPaletteColors.at(selection)));
     wxColourDialog dialog(this, &data);
     if (dialog.ShowModal() == wxID_OK) {
         wxColourData retdata = dialog.GetColourData();
@@ -304,9 +311,8 @@ void DrawingSetup::OnCmdSelectWidth(wxSpinEvent& e)
 void DrawingSetup::OnCmdResetColors()
 {
     int selection = mNameBox->GetSelection();
-    SetColor(selection, mConfig.GetDefaultPenWidth()[selection],
-        mConfig.GetDefaultColors()[selection]);
-    mConfig.Clear_CalChartConfigColor(static_cast<CalChartColors>(selection));
+    SetColor(selection, mConfig.GetDefaultPenWidth()[selection], wxColour{ mConfig.GetDefaultColors()[selection] });
+    mConfig.Clear_CalChartConfigColor(static_cast<CalChart::Colors>(selection));
 }
 
 void DrawingSetup::OnCmdChooseNewColor(wxCommandEvent&)

@@ -74,5 +74,5 @@ private:
 
     // we can set up the Font, colors, size.
     wxBitmapComboBox* mNameBox{};
-    wxBrush mContCellBrushes[COLOR_CONTCELLS_NUM]{};
+    std::array<wxBrush, toUType(CalChart::ContinuityCellColors::NUM)> mContCellBrushes{};
 };

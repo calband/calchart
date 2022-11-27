@@ -22,6 +22,7 @@
 
 #include "ColorSetupDialog.h"
 #include "CalChartConfiguration.h"
+#include "CalChartDrawPrimativesHelper.h"
 #include "ColorSetupCanvas.h"
 
 #include <fstream>
@@ -73,13 +74,12 @@ ColorSetupDialog::ColorSetupDialog(wxWindow* parent, int palette)
     GetSizer()->SetSizeHints(this);
 }
 
-template <typename Color>
-auto CreateTempBitmap(Color const& c)
+auto CreateTempBitmap(CalChart::Color c)
 {
     wxBitmap temp_bitmap(GetColorBoxSize());
     wxMemoryDC temp_dc;
     temp_dc.SelectObject(temp_bitmap);
-    temp_dc.SetBackground(c);
+    wxCalChart::setBackground(temp_dc, c);
     temp_dc.Clear();
     return temp_bitmap;
 }
@@ -97,11 +97,14 @@ void ColorSetupDialog::CreateControls()
         });
         NamedVBoxStack(this, sizer, "Color settings", [this](auto sizer) {
             HStack(sizer, LeftBasicSizerFlags(), [this](auto sizer) {
-                mNameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, mConfig.GetColorNames().at(0), wxDefaultPosition, wxDefaultSize, COLOR_NUM, mConfig.GetColorNames().data(), wxCB_READONLY | wxCB_DROPDOWN);
+                auto colorNamesRaw = mConfig.GetColorNames();
+                auto colorNames = std::vector<wxString>{};
+                std::copy(colorNamesRaw.cbegin(), colorNamesRaw.cend(), std::back_inserter(colorNames));
+                mNameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, colorNames.at(0), wxDefaultPosition, wxDefaultSize, colorNames.size(), colorNames.data(), wxCB_READONLY | wxCB_DROPDOWN);
                 sizer->Add(mNameBox, BasicSizerFlags());
 
-                for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i) + 1)) {
-                    CreateAndSetItemBitmap(mNameBox, i, mConfig.Get_CalChartBrushAndPen(i).first);
+                for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM; i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
+                    CreateAndSetItemBitmap(mNameBox, toUType(i), wxCalChart::toBrush(mConfig.Get_CalChartBrushAndPen(i)));
                 }
                 mNameBox->SetSelection(0);
 
@@ -135,10 +138,10 @@ void ColorSetupDialog::Init()
     mColorPaletteColors = GetColorPaletteColors(mConfig);
 
     for (auto palette = 0; palette < kNumberPalettes; ++palette) {
-        for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i) + 1)) {
+        for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM; i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
             auto brushAndPen = mConfig.Get_CalChartBrushAndPen(palette, i);
-            mCalChartPens[palette][i] = brushAndPen.second;
-            mCalChartBrushes[palette][i] = brushAndPen.first;
+            mCalChartPens[palette][toUType(i)] = wxCalChart::toPen(brushAndPen);
+            mCalChartBrushes[palette][toUType(i)] = wxCalChart::toBrush(brushAndPen);
         }
     }
 }
@@ -151,8 +154,8 @@ bool ColorSetupDialog::TransferDataToWindow()
     auto text = static_cast<wxTextCtrl*>(FindWindow(PALETTE_NAME));
     text->SetValue(mColorPaletteNames.at(mActiveColorPalette));
 
-    for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i) + 1)) {
-        CreateAndSetItemBitmap(mNameBox, i, mCalChartBrushes[mActiveColorPalette][i]);
+    for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM; i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
+        CreateAndSetItemBitmap(mNameBox, toUType(i), mCalChartBrushes[mActiveColorPalette][toUType(i)]);
     }
     mSpin->SetValue(mCalChartPens[mActiveColorPalette][mNameBox->GetSelection()].GetWidth());
 
@@ -174,8 +177,8 @@ bool ColorSetupDialog::ClearValuesToDefault()
 
     auto text = static_cast<wxTextCtrl*>(FindWindow(PALETTE_NAME));
     text->SetValue(mColorPaletteNames.at(mActiveColorPalette));
-    for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i) + 1)) {
-        SetColor(i, mConfig.GetDefaultPenWidth()[i], mConfig.GetDefaultColors()[i]);
+    for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM; i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
+        SetColor(toUType(i), mConfig.GetDefaultPenWidth()[toUType(i)], wxColour{ mConfig.GetDefaultColors()[toUType(i)] });
         mConfig.Clear_CalChartConfigColor(i);
     }
     return true;
@@ -187,7 +190,7 @@ void ColorSetupDialog::SetColor(int selection, int width, const wxColour& color)
     mCalChartBrushes[mActiveColorPalette][selection] = *wxTheBrushList->FindOrCreateBrush(color, wxBRUSHSTYLE_SOLID);
 
     // this is needed so we draw things out on the page correctly.
-    mConfig.Set_CalChartBrushAndPen(static_cast<CalChartColors>(selection), mCalChartBrushes[mActiveColorPalette][selection], mCalChartPens[mActiveColorPalette][selection]);
+    mConfig.Set_CalChartBrushAndPen(static_cast<CalChart::Colors>(selection), wxCalChart::toBrushAndPen(color, width));
 
     CreateAndSetItemBitmap(mNameBox, selection, mCalChartBrushes[mActiveColorPalette][selection]);
     Refresh();
@@ -195,7 +198,7 @@ void ColorSetupDialog::SetColor(int selection, int width, const wxColour& color)
 
 void ColorSetupDialog::SetPaletteColor(const wxColour& color)
 {
-    mColorPaletteColors.at(mActiveColorPalette) = *wxTheBrushList->FindOrCreateBrush(color, wxBRUSHSTYLE_SOLID);
+    mColorPaletteColors.at(mActiveColorPalette) = wxCalChart::toColor(color);
 
     // this is needed so we draw things out on the page correctly.
     mConfig.SetColorPaletteColor(mActiveColorPalette, mColorPaletteColors.at(mActiveColorPalette));
@@ -235,7 +238,7 @@ void ColorSetupDialog::OnCmdChangePaletteColor(wxCommandEvent&)
 {
     wxColourData data;
     data.SetChooseFull(true);
-    data.SetColour(mColorPaletteColors.at(mActiveColorPalette).GetColour());
+    data.SetColour(wxCalChart::toColour(mColorPaletteColors.at(mActiveColorPalette)));
     wxColourDialog dialog(this, &data);
     if (dialog.ShowModal() == wxID_OK) {
         wxColourData retdata = dialog.GetColourData();
@@ -255,8 +258,8 @@ void ColorSetupDialog::OnCmdSelectWidth(wxSpinEvent& e)
 void ColorSetupDialog::OnCmdResetColors(wxCommandEvent&)
 {
     auto selection = mNameBox->GetSelection();
-    SetColor(selection, mConfig.GetDefaultPenWidth()[selection], mConfig.GetDefaultColors()[selection]);
-    mConfig.Clear_CalChartConfigColor(static_cast<CalChartColors>(selection));
+    SetColor(selection, mConfig.GetDefaultPenWidth()[selection], wxColour{ mConfig.GetDefaultColors()[selection] });
+    mConfig.Clear_CalChartConfigColor(static_cast<CalChart::Colors>(selection));
 }
 
 void ColorSetupDialog::OnCmdChooseNewColor(wxCommandEvent&)
@@ -298,7 +301,7 @@ nlohmann::json ColorSetupDialog::Export() const
     json j;
     j[kColorPaletteVersion] = 1;
     j[kPaletteName] = mColorPaletteNames.at(mActiveColorPalette);
-    j[kPaletteColor] = ColourToRGB(mColorPaletteColors.at(mActiveColorPalette).GetColour());
+    j[kPaletteColor] = ColourToRGB(wxCalChart::toColour(mColorPaletteColors.at(mActiveColorPalette)));
     std::vector<RGB_t> allColors;
     std::transform(std::begin(mCalChartBrushes[mActiveColorPalette]), std::end(mCalChartBrushes[mActiveColorPalette]), std::back_inserter(allColors), [](auto&& i) { return ColourToRGB(i.GetColour()); });
     j[kFieldColors] = allColors;
@@ -314,8 +317,8 @@ void ColorSetupDialog::Import(nlohmann::json const& j)
     // Read all values and after they are read, then write them out.
     wxString newName{};
     wxColor newColor{};
-    wxColor newFieldColors[COLOR_NUM] = {};
-    int newFieldColorsWidths[COLOR_NUM] = {};
+    wxColor newFieldColors[toUType(CalChart::Colors::NUM)] = {};
+    int newFieldColorsWidths[toUType(CalChart::Colors::NUM)] = {};
     try {
         if (j.find(kPaletteName) != j.end()) {
             newName = j.at(kPaletteName).get<std::string>();
@@ -329,7 +332,7 @@ void ColorSetupDialog::Import(nlohmann::json const& j)
                 newFieldColors[selection] = RGBToColour(i);
                 ++selection;
             }
-            if (selection != COLOR_NUM) {
+            if (selection != toUType(CalChart::Colors::NUM)) {
                 throw std::runtime_error("Did not find enough colors widths");
             }
         }
@@ -339,7 +342,7 @@ void ColorSetupDialog::Import(nlohmann::json const& j)
                 newFieldColorsWidths[selection] = i;
                 ++selection;
             }
-            if (selection != COLOR_NUM) {
+            if (selection != toUType(CalChart::Colors::NUM)) {
                 throw std::runtime_error("Did not find enough pen widths");
             }
         }
@@ -349,8 +352,8 @@ void ColorSetupDialog::Import(nlohmann::json const& j)
     }
     SetPaletteName(newName);
     SetPaletteColor(newColor);
-    for (auto i = 0; i < COLOR_NUM; ++i) {
-        SetColor(i, newFieldColorsWidths[i], newFieldColors[i]);
+    for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM; i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
+        SetColor(toUType(i), newFieldColorsWidths[toUType(i)], newFieldColors[toUType(i)]);
     }
 }
 

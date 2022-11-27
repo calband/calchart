@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartConstants.h"
 #include "CalChartCoord.h"
 
 #include <array>
@@ -68,9 +69,8 @@ public:
         ksize_y,
         kShowModeValues
     };
-    using ShowModeInfo_t = std::array<long, kShowModeValues>;
 
-    static ShowMode CreateShowMode(ShowModeInfo_t const& values, YardLinesInfo_t const& yardlines);
+    static ShowMode CreateShowMode(ShowModeData_t const& values, YardLinesInfo_t const& yardlines);
     static ShowMode CreateShowMode(CalChart::Coord size, CalChart::Coord offset,
         CalChart::Coord border1, CalChart::Coord border2, unsigned short whash,
         unsigned short ehash, YardLinesInfo_t const& yardlines);
@@ -78,7 +78,7 @@ public:
     static ShowMode CreateShowMode(CalChart::Reader reader);
     std::vector<uint8_t> Serialize() const;
 
-    ShowModeInfo_t GetShowModeInfo() const;
+    ShowModeData_t GetShowModeData() const;
 
     auto Offset() const { return mOffset + mBorder1; }
     auto FieldOffset() const { return -mOffset; }

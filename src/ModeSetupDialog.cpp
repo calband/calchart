@@ -65,7 +65,7 @@ private:
     void OnCmdLineText(wxCommandEvent&);
     void OnCmdChoice();
 
-    CalChartConfiguration::ShowModeInfo_t mShowModeValues;
+    CalChart::ShowModeData_t mShowModeValues;
     CalChart::ShowMode::YardLinesInfo_t mYardText;
     int mWhichYardLine{};
     CalChartConfiguration mConfig;
@@ -109,7 +109,7 @@ void ShowModeDialogSetup::CreateControls()
     SetSizer(VStack([this](auto sizer) {
         std::vector<wxString> choices;
         choices.emplace_back("Reload from...");
-        choices.insert(choices.end(), std::begin(kShowModeStrings), std::end(kShowModeStrings));
+        choices.insert(choices.end(), CalChart::GetShowModeNames().begin(), CalChart::GetShowModeNames().end());
         CreateChoiceWithHandler(this, sizer, LeftBasicSizerFlags(), MODE_CHOICE, choices, [this](wxCommandEvent&) {
             OnCmdChoice();
         });
@@ -176,7 +176,7 @@ void ShowModeDialogSetup::CreateControls()
 void ShowModeDialogSetup::Init(CalChart::ShowMode const& current_mode)
 {
     mWhichYardLine = 0;
-    mShowModeValues = current_mode.GetShowModeInfo();
+    mShowModeValues = current_mode.GetShowModeData();
     mYardText = current_mode.Get_yard_text();
 }
 
@@ -216,7 +216,7 @@ void ShowModeDialogSetup::OnCmdChoice()
     auto whichMode = modes->GetSelection();
     if (whichMode > 0) {
         modes->SetSelection(0);
-        mShowModeValues = mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(whichMode - 1));
+        mShowModeValues = mConfig.Get_ShowModeData(static_cast<CalChart::ShowModes>(whichMode - 1));
         static_cast<ShowModeSetupCanvas*>(FindWindow(CANVAS))->SetMode(CalChart::ShowMode::CreateShowMode(mShowModeValues, mYardText));
     }
 

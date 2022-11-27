@@ -65,7 +65,7 @@ IMPLEMENT_CLASS(ShowModeSetup, PreferencePage)
 void ShowModeSetup::CreateControls()
 {
     SetSizer(VStack([this](auto& sizer) {
-        CreateChoiceWithHandler(this, sizer, MODE_CHOICE, { std::begin(kShowModeStrings), std::end(kShowModeStrings) }, [this](wxCommandEvent&) {
+        CreateChoiceWithHandler(this, sizer, MODE_CHOICE, CalChart::GetShowModeNames(), [this](wxCommandEvent&) {
             OnCmdChoice();
         });
 
@@ -124,7 +124,7 @@ void ShowModeSetup::CreateControls()
         modeSetupCanvas->SetScrollRate(1, 1);
         sizer->Add(modeSetupCanvas, 1, wxEXPAND);
 
-        modeSetupCanvas->SetMode(CalChart::ShowMode::CreateShowMode(mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(mWhichMode)), mYardText));
+        modeSetupCanvas->SetMode(CalChart::ShowMode::CreateShowMode(mConfig.Get_ShowModeData(static_cast<CalChart::ShowModes>(mWhichMode)), mYardText));
         modeSetupCanvas->SetZoom(zoom_amounts[defaultZoom] / 100.0);
     }));
 
@@ -135,8 +135,8 @@ void ShowModeSetup::InitFromConfig()
 {
     mWhichMode = 0;
     mWhichYardLine = 0;
-    for (size_t i = 0; i < SHOWMODE_NUM; ++i) {
-        mShowModeValues[i] = mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(i));
+    for (size_t i = 0; i < toUType(CalChart::ShowModes::NUM); ++i) {
+        mShowModeValues[i] = mConfig.Get_ShowModeData(static_cast<CalChart::ShowModes>(i));
     }
     for (size_t i = 0; i < kYardTextValues; ++i) {
         mYardText[i] = mConfig.Get_yard_text(i);
@@ -173,8 +173,8 @@ bool ShowModeSetup::TransferDataFromWindow()
         *i = val;
     }
     // write out the values defaults:
-    for (size_t i = 0; i < SHOWMODE_NUM; ++i) {
-        mConfig.Set_ShowModeInfo(static_cast<CalChartShowModes>(i),
+    for (size_t i = 0; i < toUType(CalChart::ShowModes::NUM); ++i) {
+        mConfig.Set_ShowModeData(static_cast<CalChart::ShowModes>(i),
             mShowModeValues[i]);
     }
 
@@ -185,21 +185,21 @@ bool ShowModeSetup::TransferDataFromWindow()
         mConfig.Set_yard_text(i, mYardText[i]);
     }
     // now set the canvas
-    ((ShowModeSetupCanvas*)FindWindow(CANVAS))->SetMode(CalChart::ShowMode::CreateShowMode(mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(mWhichMode)), mYardText));
+    ((ShowModeSetupCanvas*)FindWindow(CANVAS))->SetMode(CalChart::ShowMode::CreateShowMode(mConfig.Get_ShowModeData(static_cast<CalChart::ShowModes>(mWhichMode)), mYardText));
 
     return true;
 }
 
 bool ShowModeSetup::ClearValuesToDefault()
 {
-    for (size_t i = 0; i < SHOWMODE_NUM; ++i) {
-        mConfig.Clear_ShowModeInfo(static_cast<CalChartShowModes>(i));
+    for (size_t i = 0; i < toUType(CalChart::ShowModes::NUM); ++i) {
+        mConfig.Clear_ShowModeData(static_cast<CalChart::ShowModes>(i));
     }
     for (auto i = 0; i < kYardTextValues; ++i) {
         mConfig.Clear_yard_text(i);
     }
     InitFromConfig();
-    ((ShowModeSetupCanvas*)FindWindow(CANVAS))->SetMode(CalChart::ShowMode::CreateShowMode(mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(mWhichMode)), mYardText));
+    ((ShowModeSetupCanvas*)FindWindow(CANVAS))->SetMode(CalChart::ShowMode::CreateShowMode(mConfig.Get_ShowModeData(static_cast<CalChart::ShowModes>(mWhichMode)), mYardText));
     return TransferDataToWindow();
 }
 
@@ -217,7 +217,7 @@ void ShowModeSetup::OnCmdChoice()
     wxChoice* modes = (wxChoice*)FindWindow(MODE_CHOICE);
     mWhichMode = modes->GetSelection();
     ShowModeSetupCanvas* canvas = (ShowModeSetupCanvas*)FindWindow(CANVAS);
-    canvas->SetMode(CalChart::ShowMode::CreateShowMode(mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(mWhichMode)), mYardText));
+    canvas->SetMode(CalChart::ShowMode::CreateShowMode(mConfig.Get_ShowModeData(static_cast<CalChart::ShowModes>(mWhichMode)), mYardText));
 
     wxTextCtrl* text = (wxTextCtrl*)FindWindow(SHOW_LINE_VALUE);
     mYardText[mWhichYardLine] = text->GetValue();

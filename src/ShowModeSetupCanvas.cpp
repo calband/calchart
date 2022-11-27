@@ -21,6 +21,7 @@
 */
 
 #include "ShowModeSetupCanvas.h"
+#include "CalChartDrawPrimativesHelper.h"
 #include "CalChartDrawing.h"
 #include "CalChartShowMode.h"
 #include "basic_ui.h"
@@ -55,7 +56,7 @@ void ShowModeSetupCanvas::OnPaint(wxPaintEvent&)
 
     // draw the background
     dc.SetBackgroundMode(wxTRANSPARENT);
-    dc.SetBackground(mConfig.Get_CalChartBrushAndPen(COLOR_FIELD).first);
+    wxCalChart::setBackground(dc, mConfig.Get_CalChartBrushAndPen(CalChart::Colors::FIELD));
     dc.Clear();
 
     // Draw the field

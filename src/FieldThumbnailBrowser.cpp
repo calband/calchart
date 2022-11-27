@@ -21,6 +21,7 @@
 
 #include "FieldThumbnailBrowser.h"
 #include "CalChartConfiguration.h"
+#include "CalChartDrawPrimativesHelper.h"
 #include "CalChartDrawing.h"
 #include "CalChartShow.h"
 #include "CalChartShowMode.h"
@@ -123,7 +124,7 @@ void FieldThumbnailBrowser::OnPaint(wxPaintEvent&)
     for (auto sheet = mView->GetSheetBegin(); sheet != mView->GetSheetEnd(); ++sheet) {
 
         dc.SetUserScale(1, 1);
-        dc.SetBrush((config.Get_CalChartBrushAndPen(COLOR_FIELD).first));
+        wxCalChart::setBrush(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD));
         dc.DrawText(sheet->GetName(), offset_x + mXLeftPadding, offset_y + mYUpperPadding);
         auto newOffsetX = offset_x + mXLeftPadding;
         auto newOffsetY = offset_y + mYUpperPadding + mYNameSize + mYNamePadding;
@@ -149,12 +150,10 @@ void FieldThumbnailBrowser::OnPaint(wxPaintEvent&)
         dc.SetUserScale(userScale, userScale);
         dc.SetDeviceOrigin(origin.x + newOffsetX, origin.y + newOffsetY);
 
-        dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
+        wxCalChart::setPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD_DETAIL));
         CalChartDraw::DrawMode(dc, config, mView->GetShowMode(), ShowMode_kAnimation);
         for (auto i = 0; i < mView->GetNumPoints(); ++i) {
-            auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_FRONT);
-            dc.SetBrush(brushAndPen.first);
-            dc.SetPen(brushAndPen.second);
+            wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_FRONT));
             auto position = sheet->GetPoint(i).GetPos();
             auto x = position.x + mView->GetShowMode().Offset().x;
             auto y = position.y + mView->GetShowMode().Offset().y;

@@ -8,7 +8,6 @@
 
 #include "TransitionSolverFrame.h"
 #include "CalChartApp.h"
-#include "CalChartConfiguration.h"
 #include "CalChartContinuity.h"
 #include "CalChartDoc.h"
 #include "CalChartDocCommand.h"
@@ -131,7 +130,7 @@ Civil Engineering Department for developing these algorithms.)T");
         HStack(sizer, [this, scrolledWindow](auto& sizer) {
             CreateText(scrolledWindow, sizer, "Select an algorithm: ");
 
-            mAlgorithmChoiceControl = CreateChoiceWithHandler(scrolledWindow, sizer, {
+            mAlgorithmChoiceControl = CreateChoiceWithHandler(scrolledWindow, sizer, std::vector<std::string>{
                                                                                          "E7 Algorithm: Chiu, Zamora, Malani",
                                                                                          "E7 Algorithm: Namini Asl, Ramirez, Zhang",
                                                                                          "Ey Algorithm: Sover, Eliceiri, Hershkovitz",

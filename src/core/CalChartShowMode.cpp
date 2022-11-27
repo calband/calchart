@@ -83,8 +83,8 @@ CalChart::Coord ShowMode::ClipPosition(const CalChart::Coord& pos) const
     return clipped;
 }
 
-ShowMode::ShowModeInfo_t
-ShowMode::GetShowModeInfo() const
+ShowModeData_t
+ShowMode::GetShowModeData() const
 {
     return { {
         mHashW,
@@ -101,7 +101,7 @@ ShowMode::GetShowModeInfo() const
 }
 
 ShowMode
-ShowMode::CreateShowMode(ShowModeInfo_t const& values, YardLinesInfo_t const& yardlines)
+ShowMode::CreateShowMode(ShowModeData_t const& values, YardLinesInfo_t const& yardlines)
 {
     unsigned short whash = values[kwhash];
     unsigned short ehash = values[kehash];
@@ -136,7 +136,7 @@ ShowMode ShowMode::CreateShowMode(CalChart::Coord size, CalChart::Coord offset, 
 
 ShowMode ShowMode::CreateShowMode(CalChart::Reader reader)
 {
-    ShowModeInfo_t values;
+    ShowModeData_t values;
     for (auto& i : values) {
         if (reader.size() < 4) {
             throw std::runtime_error("Error, size of ShowMode is not correct");
@@ -159,7 +159,7 @@ ShowMode ShowMode::CreateShowMode(CalChart::Reader reader)
 std::vector<uint8_t> ShowMode::Serialize() const
 {
     std::vector<uint8_t> result;
-    for (uint32_t i : GetShowModeInfo()) {
+    for (uint32_t i : GetShowModeData()) {
         Parser::Append(result, i);
     }
     for (auto& i : Get_yard_text()) {
