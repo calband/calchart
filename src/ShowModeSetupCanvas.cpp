@@ -21,9 +21,9 @@
 */
 
 #include "ShowModeSetupCanvas.h"
+#include "CalChartDrawing.h"
 #include "CalChartShowMode.h"
 #include "basic_ui.h"
-#include "draw.h"
 
 #include <wx/dcbuffer.h>
 
@@ -59,7 +59,7 @@ void ShowModeSetupCanvas::OnPaint(wxPaintEvent&)
     dc.Clear();
 
     // Draw the field
-    DrawMode(dc, mConfig, mMode, ShowMode_kFieldView);
+    CalChartDraw::DrawMode(dc, mConfig, mMode, ShowMode_kFieldView);
 }
 
 void ShowModeSetupCanvas::SetMode(CalChart::ShowMode const& mode)

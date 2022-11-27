@@ -41,11 +41,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(wxWidgets)
 
-include(FetchContent)
 FetchContent_Declare(
   Catch2
   GIT_REPOSITORY https://github.com/catchorg/Catch2
   GIT_TAG        605a34765aa5d5ecbf476b4598a862ada971b0cc # v3.0.1
 )
 FetchContent_MakeAvailable(Catch2)
-

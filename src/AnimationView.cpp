@@ -25,13 +25,13 @@
 #include "CalChartAnimation.h"
 #include "CalChartApp.h"
 #include "CalChartConfiguration.h"
+#include "CalChartDrawing.h"
 #include "CalChartShapes.h"
 #include "CalChartSheet.h"
 #include "CalChartShowMode.h"
 #include "CalChartSizes.h"
 #include "CalChartUtils.h"
 #include "CalChartView.h"
-#include "draw.h"
 #include "platconf.h"
 
 #include <wx/dcbuffer.h>
@@ -83,7 +83,7 @@ void AnimationView::OnDraw(wxDC& dc, CalChartConfiguration const& config)
         return;
     }
     dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
-    DrawMode(dc, config, mView->GetShowMode(), ShowMode_kAnimation);
+    CalChartDraw::DrawMode(dc, config, mView->GetShowMode(), ShowMode_kAnimation);
     auto useSprites = config.Get_UseSprites();
     if (useSprites) {
         return OnDrawSprites(dc, config);
@@ -326,7 +326,7 @@ CalChart::ShowMode const& AnimationView::GetShowMode() const
     return mView->GetShowMode();
 }
 
-MarcherInfo AnimationView::GetMarcherInfo(int which) const
+AnimationView::MarcherInfo AnimationView::GetMarcherInfo(int which) const
 {
     MarcherInfo info{};
     if (mAnimation) {
@@ -342,7 +342,7 @@ MarcherInfo AnimationView::GetMarcherInfo(int which) const
     return info;
 }
 
-std::multimap<double, MarcherInfo> AnimationView::GetMarchersByDistance(ViewPoint const& from) const
+std::multimap<double, AnimationView::MarcherInfo> AnimationView::GetMarchersByDistance(float fromX, float fromY) const
 {
     auto anySelected = !mView->GetSelectionList().empty();
     std::multimap<double, MarcherInfo> result;
@@ -351,7 +351,7 @@ std::multimap<double, MarcherInfo> AnimationView::GetMarchersByDistance(ViewPoin
             continue;
         }
         auto info = GetMarcherInfo(i);
-        auto distance = sqrt(pow(from.x - info.x, 2) + pow(from.y - info.y, 2));
+        auto distance = sqrt(pow(fromX - info.x, 2) + pow(fromY - info.y, 2));
         result.insert(std::pair<double, MarcherInfo>(distance, info));
     }
     return result;

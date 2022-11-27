@@ -25,7 +25,6 @@
 #include "CalChartShowMode.h"
 #include "ShowModeSetupCanvas.h"
 #include "basic_ui.h"
-#include "draw.h"
 
 //////// Show Mode setup ////////
 // setup drawing characteristics

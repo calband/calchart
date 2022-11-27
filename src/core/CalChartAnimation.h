@@ -24,6 +24,7 @@
 #include "CalChartAnimationSheet.h"
 #include "CalChartAnimationTypes.h"
 #include "CalChartCoord.h"
+#include "CalChartDrawCommand.h"
 
 #include <map>
 #include <memory>
@@ -33,7 +34,6 @@ namespace CalChart {
 
 class AnimationCommand;
 class AnimationSheet;
-struct DrawCommand;
 class Show;
 class AnimationErrors;
 

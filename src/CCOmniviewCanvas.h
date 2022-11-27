@@ -21,7 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "draw_utils.h"
+#include "DCSaveRestore.h"
 #include <map>
 #include <memory>
 #include <wx/glcanvas.h>
@@ -35,6 +35,10 @@ class CCOmniviewCanvas : public wxGLCanvas {
     wxDECLARE_EVENT_TABLE();
 
 public:
+    struct ViewPoint {
+        float x, y, z;
+    };
+
     CCOmniviewCanvas(wxWindow* parent, CalChartConfiguration& config, wxSize const& size = wxDefaultSize);
     ~CCOmniviewCanvas() override = default;
 
@@ -62,6 +66,7 @@ private:
     std::shared_ptr<CCOmniView_GLContext> m_glContext;
     AnimationView* mView{};
     CalChartConfiguration& config;
+
     ViewPoint mViewPoint{};
 
     // a -1 means not following any marcher

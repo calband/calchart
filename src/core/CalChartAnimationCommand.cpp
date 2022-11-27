@@ -39,7 +39,7 @@ AnimationCommand::AnimationCommand(unsigned beats)
 
 DrawCommand AnimationCommand::GenCC_DrawCommand(Coord /*pt*/, Coord /*offset*/) const
 {
-    return DrawCommand();
+    return DrawCommands::Ignore{};
 }
 
 bool AnimationCommand::Begin(Coord& pt)
@@ -135,11 +135,11 @@ bool AnimationCommandMove::NextBeat(Coord& pt)
 {
     bool b = AnimationCommand::NextBeat(pt);
     pt.x += static_cast<Coord::units>((mNumBeats)
-        ? ((long)mBeat * mVector.x / (short)mNumBeats) - ((long)(mBeat - 1) * mVector.x / (short)mNumBeats)
-        : 0);
+            ? ((long)mBeat * mVector.x / (short)mNumBeats) - ((long)(mBeat - 1) * mVector.x / (short)mNumBeats)
+            : 0);
     pt.y += static_cast<Coord::units>((mNumBeats)
-        ? ((long)mBeat * mVector.y / (short)mNumBeats) - ((long)(mBeat - 1) * mVector.y / (short)mNumBeats)
-        : 0);
+            ? ((long)mBeat * mVector.y / (short)mNumBeats) - ((long)(mBeat - 1) * mVector.y / (short)mNumBeats)
+            : 0);
     return b;
 }
 
@@ -147,11 +147,11 @@ bool AnimationCommandMove::PrevBeat(Coord& pt)
 {
     if (AnimationCommand::PrevBeat(pt)) {
         pt.x += static_cast<Coord::units>(mNumBeats
-            ? ((long)mBeat * mVector.x / (short)mNumBeats) - ((long)(mBeat + 1) * mVector.x / (short)mNumBeats)
-            : 0);
+                ? ((long)mBeat * mVector.x / (short)mNumBeats) - ((long)(mBeat + 1) * mVector.x / (short)mNumBeats)
+                : 0);
         pt.y += static_cast<Coord::units>(mNumBeats
-            ? ((long)mBeat * mVector.y / (short)mNumBeats) - ((long)(mBeat + 1) * mVector.y / (short)mNumBeats)
-            : 0);
+                ? ((long)mBeat * mVector.y / (short)mNumBeats) - ((long)(mBeat + 1) * mVector.y / (short)mNumBeats)
+                : 0);
         return true;
     } else {
         return false;
@@ -183,7 +183,7 @@ void AnimationCommandMove::ClipBeats(unsigned beats)
 DrawCommand
 AnimationCommandMove::GenCC_DrawCommand(Coord pt, Coord offset) const
 {
-    return { pt.x + offset.x, pt.y + offset.y,
+    return DrawCommands::Line{ pt.x + offset.x, pt.y + offset.y,
         pt.x + mVector.x + offset.x,
         pt.y + mVector.y + offset.y };
 }
@@ -227,7 +227,7 @@ bool AnimationCommandRotate::NextBeat(Coord& pt)
 {
     bool b = AnimationCommand::NextBeat(pt);
     auto curr_ang = (mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart)
-                                : mAngStart)
+                               : mAngStart)
         * M_PI / 180.0;
     pt.x = RoundToCoordUnits(mOrigin.x + cos(curr_ang) * mR);
     pt.y = RoundToCoordUnits(mOrigin.y - sin(curr_ang) * mR);
@@ -238,7 +238,7 @@ bool AnimationCommandRotate::PrevBeat(Coord& pt)
 {
     if (AnimationCommand::PrevBeat(pt)) {
         auto curr_ang = (mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart)
-                                    : mAngStart)
+                                   : mAngStart)
             * M_PI / 180.0;
         pt.x = RoundToCoordUnits(mOrigin.x + cos(curr_ang) * mR);
         pt.y = RoundToCoordUnits(mOrigin.y - sin(curr_ang) * mR);
@@ -289,7 +289,7 @@ AnimationCommandRotate::GenCC_DrawCommand(Coord /*pt*/, Coord offset) const
     auto x_end = RoundToCoordUnits(mOrigin.x + cos(end * M_PI / 180.0) * mR) + offset.x;
     auto y_end = RoundToCoordUnits(mOrigin.y - sin(end * M_PI / 180.0) * mR) + offset.y;
 
-    return { x_start, y_start, x_end, y_end, mOrigin.x + offset.x, mOrigin.y + offset.y };
+    return DrawCommands::Arc{ x_start, y_start, x_end, y_end, mOrigin.x + offset.x, mOrigin.y + offset.y };
 }
 
 nlohmann::json AnimationCommandRotate::toOnlineViewerJSON(Coord start) const

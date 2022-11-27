@@ -1,3 +1,4 @@
+#pragma once
 /*
  * draw.cpp
  * Member functions for drawing stuntsheets
@@ -20,86 +21,96 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __DRAW_UTILS_H__
-#define __DRAW_UTILS_H__
-
 #include <wx/dc.h>
 
-struct ViewPoint {
-    float x, y, z;
-};
-
-struct MarcherInfo {
-    float direction, x, y;
-};
-
+namespace SaveAndRestore {
 // helper classes for saving and restoring state
-class SaveAndRestore_DeviceOrigin {
+class DeviceOrigin {
     wxDC& dc;
     wxCoord origX, origY;
 
 public:
-    SaveAndRestore_DeviceOrigin(wxDC& dc_)
+    DeviceOrigin(wxDC& dc_)
         : dc(dc_)
     {
         dc.GetDeviceOrigin(&origX, &origY);
     }
-    ~SaveAndRestore_DeviceOrigin() { dc.SetDeviceOrigin(origX, origY); }
+    ~DeviceOrigin() { dc.SetDeviceOrigin(origX, origY); }
 };
 
-class SaveAndRestore_UserScale {
+class UserScale {
     wxDC& dc;
     double origXscale, origYscale;
 
 public:
-    SaveAndRestore_UserScale(wxDC& dc_)
+    UserScale(wxDC& dc_)
         : dc(dc_)
     {
         dc.GetUserScale(&origXscale, &origYscale);
     }
-    ~SaveAndRestore_UserScale() { dc.SetUserScale(origXscale, origYscale); }
+    ~UserScale() { dc.SetUserScale(origXscale, origYscale); }
 };
 
-class SaveAndRestore_TextForeground {
+class TextForeground {
     wxDC& dc;
     wxColour origForegroundColor;
 
 public:
-    SaveAndRestore_TextForeground(wxDC& dc_)
+    TextForeground(wxDC& dc_)
         : dc(dc_)
         , origForegroundColor(dc.GetTextForeground())
     {
     }
-    ~SaveAndRestore_TextForeground()
+    ~TextForeground()
     {
         dc.SetTextForeground(origForegroundColor);
     }
 };
 
-class SaveAndRestore_Font {
+class Font {
     wxDC& dc;
     wxFont origFont;
 
 public:
-    SaveAndRestore_Font(wxDC& dc_)
+    Font(wxDC& dc_)
         : dc(dc_)
         , origFont(dc.GetFont())
     {
     }
-    ~SaveAndRestore_Font() { dc.SetFont(origFont); }
+    ~Font() { dc.SetFont(origFont); }
 };
 
-class SaveAndRestore_Brush {
+class Brush {
     wxDC& dc;
     wxBrush origBrush;
 
 public:
-    SaveAndRestore_Brush(wxDC& dc_)
+    Brush(wxDC& dc_)
         : dc(dc_)
         , origBrush(dc.GetBrush())
     {
     }
-    ~SaveAndRestore_Brush() { dc.SetBrush(origBrush); }
+    ~Brush() { dc.SetBrush(origBrush); }
 };
 
-#endif // __DRAW_UTILS_H__
+// class for saving and restoring
+class BrushAndPen {
+    wxDC& mDC;
+    wxBrush mBrush;
+    wxPen mPen;
+
+public:
+    BrushAndPen(wxDC& dc)
+        : mDC(dc)
+        , mBrush(dc.GetBrush())
+        , mPen(dc.GetPen())
+    {
+    }
+    ~BrushAndPen()
+    {
+        mDC.SetBrush(mBrush);
+        mDC.SetPen(mPen);
+    }
+};
+
+}

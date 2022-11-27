@@ -24,11 +24,11 @@
 
 #include "CalChartConfiguration.h"
 #include "CalChartDrawCommand.h"
+#include "CalChartDrawing.h"
 #include "CalChartFrame.h"
 #include "CalChartMovePointsTool.h"
 #include "CalChartShapes.h"
 #include "CalChartView.h"
-#include "draw.h"
 
 #include <wx/dcbuffer.h>
 
@@ -148,7 +148,7 @@ void FieldCanvas::PaintShapes(wxDC& dc, CalChartConfiguration const& config, Cal
         dc.SetBrush(*wxTRANSPARENT_BRUSH);
         dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_SHAPES).second);
         auto origin = mView->GetShowFieldOffset();
-        DrawCC_DrawCommandList(dc, shapeList->GetCC_DrawCommand(origin.x, origin.y));
+        CalChartDraw::DrawCC_DrawCommandList(dc, shapeList->GetCC_DrawCommand(origin.x, origin.y));
     }
 }
 

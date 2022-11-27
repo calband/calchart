@@ -38,6 +38,7 @@ add_library(
   CalChartContinuityToken.h
   CalChartCoord.cpp
   CalChartCoord.h
+  CalChartDrawCommand.cpp
   CalChartDrawCommand.h
   CalChartFileFormat.h
   CalChartImage.cpp
@@ -88,5 +89,9 @@ target_include_directories(
   ${PROJECT_SOURCE_DIR}/src/core
 )
 
-target_link_libraries(calchart_core PRIVATE nlohmann_json::nlohmann_json munkres)
+target_link_libraries(calchart_core PRIVATE
+  nlohmann_json::nlohmann_json
+  munkres
+)
+ 
 

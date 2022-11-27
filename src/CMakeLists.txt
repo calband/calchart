@@ -41,6 +41,8 @@ add_executable(
   CalChartDoc.h
   CalChartDocCommand.cpp
   CalChartDocCommand.h
+  CalChartDrawing.h
+  CalChartDrawing.cpp
   CalChartFrame.cpp
   CalChartFrame.h
   CalChartPreferences.cpp
@@ -71,6 +73,7 @@ add_executable(
   ContinuityEditorPopup.h
   CustomListViewPanel.cpp
   CustomListViewPanel.h
+  DCSaveRestore.h
   FieldCanvas.cpp
   FieldCanvas.h
   FieldControlsToolBar.cpp
@@ -117,9 +120,6 @@ add_executable(
   basic_ui.h
   calchart.rc
   cc_omniview_constants.h
-  draw.cpp
-  draw.h
-  draw_utils.h
   platconf.h
   ui_enums.h
   ${CalChartDocs}

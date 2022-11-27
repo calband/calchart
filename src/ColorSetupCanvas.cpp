@@ -24,7 +24,7 @@
 #include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
 #include "CalChartDrawCommand.h"
-#include "draw.h"
+#include "CalChartDrawing.h"
 
 #include <wx/dcbuffer.h>
 
@@ -94,10 +94,10 @@ ColorSetupCanvas::ColorSetupCanvas(CalChartConfiguration& config, wxWindow* pare
 
     auto point_start = offset + field_offset + Coord(Int2CoordUnits(4), Int2CoordUnits(2));
     mPathEnd = point_start + Coord(Int2CoordUnits(0), Int2CoordUnits(2));
-    mPath.emplace_back(point_start, mPathEnd);
+    mPath.emplace_back(DrawCommands::Line{ point_start, mPathEnd });
     point_start = mPathEnd;
     mPathEnd += Coord(Int2CoordUnits(18), Int2CoordUnits(0));
-    mPath.emplace_back(point_start, mPathEnd);
+    mPath.emplace_back(DrawCommands::Line{ point_start, mPathEnd });
 
     auto shape_start = field_offset + Coord(Int2CoordUnits(18), Int2CoordUnits(-2));
     auto shape_end = shape_start + Coord(Int2CoordUnits(4), Int2CoordUnits(4));
@@ -117,7 +117,7 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent&)
     dc.Clear();
 
     // Draw the field
-    DrawMode(dc, mConfig, mMode, ShowMode_kFieldView);
+    CalChartDraw::DrawMode(dc, mConfig, mMode, ShowMode_kFieldView);
 
     auto sheet = static_cast<CalChart::Show const&>(*mShow).GetCurrentSheet();
     auto nextSheet = sheet + 1;
@@ -127,19 +127,19 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent&)
     list.insert(3);
 
     // draw the ghost sheet
-    DrawGhostSheet(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(), mShow->GetPointsLabel(), *nextSheet, 0);
+    CalChartDraw::DrawGhostSheet(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(), mShow->GetPointsLabel(), *nextSheet, 0);
 
     // Draw the points
-    DrawPoints(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(), mShow->GetPointsLabel(), *sheet, 0, true);
-    DrawPoints(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(), mShow->GetPointsLabel(), *sheet, 1, false);
+    CalChartDraw::DrawPoints(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(), mShow->GetPointsLabel(), *sheet, 0, true);
+    CalChartDraw::DrawPoints(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(), mShow->GetPointsLabel(), *sheet, 1, false);
 
     // draw the path
-    DrawPath(dc, mConfig, mPath, mPathEnd);
+    CalChartDraw::DrawPath(dc, mConfig, mPath, mPathEnd);
 
     // draw the shap
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
     dc.SetPen(mConfig.Get_CalChartBrushAndPen(COLOR_SHAPES).second);
-    DrawCC_DrawCommandList(dc, mShape);
+    CalChartDraw::DrawCC_DrawCommandList(dc, mShape);
 }
 
 // We have a empty erase background to improve redraw performance.

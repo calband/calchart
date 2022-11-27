@@ -31,6 +31,7 @@
 #include "CalChartApp.h"
 #include "CalChartConfiguration.h"
 #include "CalChartCoord.h"
+#include "CalChartDrawing.h"
 #include "CalChartPoint.h"
 #include "CalChartPreferences.h"
 #include "CalChartSheet.h"
@@ -53,7 +54,6 @@
 #include "TransitionSolverFrame.h"
 #include "TransitionSolverView.h"
 #include "ccvers.h"
-#include "draw.h"
 #include "platconf.h"
 #include "ui_enums.h"
 
@@ -201,7 +201,7 @@ public:
         auto sheet = mShow.GetNthSheet(pageNum - 1);
         auto size = wxGetApp().GetGlobalPrintDialog().GetPrintData().GetOrientation();
 
-        DrawForPrinting(dc, mConfig, mShow, *sheet, 0, 2 == size);
+        CalChartDraw::DrawForPrinting(dc, mConfig, mShow, *sheet, 0, 2 == size);
         return true;
     }
     CalChartDoc const& mShow;

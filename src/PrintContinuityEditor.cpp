@@ -22,11 +22,11 @@
 
 #include "PrintContinuityEditor.h"
 #include "CalChartApp.h"
+#include "CalChartDrawing.h"
 #include "CalChartSheet.h"
 #include "CalChartText.h"
 #include "CalChartView.h"
 #include "basic_ui.h"
-#include "draw.h"
 #include "ui_enums.h"
 
 #include <wx/artprov.h>
@@ -86,7 +86,7 @@ void PrintContinuityPreview::OnPaint(wxPaintEvent&)
 
     dc.Clear();
     dc.DrawRectangle(wxRect(wxPoint(0, 0), virtSize));
-    DrawContForPreview(dc, mPrintContinuity, wxRect(wxPoint(0, 0), virtSize));
+    CalChartDraw::DrawContForPreview(dc, mPrintContinuity, wxRect(wxPoint(0, 0), virtSize));
 }
 
 void PrintContinuityPreview::OnSizeEvent(wxSizeEvent& event)

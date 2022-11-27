@@ -48,26 +48,6 @@ wxStaticText* TextStringWithSize(wxWindow* parent, std::string const& label, int
 wxHyperlinkCtrl* LinkStringWithSize(wxWindow* parent, std::string const& label, std::string const& url, int pointSize);
 wxStaticLine* LineWithLength(wxWindow* parent, int length, long style = wxLI_HORIZONTAL);
 
-// class for saving and restoring
-class SaveAndRestoreBrushAndPen {
-    wxDC& mDC;
-    wxBrush const& mBrush;
-    wxPen const& mPen;
-
-public:
-    SaveAndRestoreBrushAndPen(wxDC& dc)
-        : mDC(dc)
-        , mBrush(dc.GetBrush())
-        , mPen(dc.GetPen())
-    {
-    }
-    ~SaveAndRestoreBrushAndPen()
-    {
-        mDC.SetBrush(mBrush);
-        mDC.SetPen(mPen);
-    }
-};
-
 // Define a text subwindow that can respond to drag-and-drop
 class FancyTextWin : public wxTextCtrl {
     using super = wxTextCtrl;

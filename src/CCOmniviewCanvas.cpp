@@ -32,7 +32,6 @@
 #include "CalChartUtils.h"
 #include "basic_ui.h"
 #include "cc_omniview_constants.h"
-#include "draw.h"
 #include "platconf.h"
 
 #include <wx/dcbuffer.h>
@@ -72,7 +71,7 @@ auto GetImageDir()
     return kImageDir;
 }
 
-static constexpr auto kStartingViewPoint = ViewPoint{ kViewPoint_x_1, kViewPoint_y_1, kViewPoint_z_1 };
+static constexpr auto kStartingViewPoint = CCOmniviewCanvas::ViewPoint{ kViewPoint_x_1, kViewPoint_y_1, kViewPoint_z_1 };
 static constexpr auto kStartingViewAngle = kViewAngle_1;
 static constexpr auto kStartingViewAngleZ = kViewAngle_z_1;
 
@@ -335,9 +334,9 @@ auto GetMarcherTextureAndPoints(float cameraAngleToMarcher, float marcherDirecti
 }
 
 // Returns the angle in regards to the camera.
-static auto GetAngle(float x, float y, ViewPoint const& viewpoint)
+static auto GetAngle(float x, float y, CCOmniviewCanvas::ViewPoint const& viewpoint)
 {
-    auto v = ViewPoint{ x - viewpoint.x, y - viewpoint.y, 0.f };
+    auto v = CCOmniviewCanvas::ViewPoint{ x - viewpoint.x, y - viewpoint.y, 0.f };
     auto mag = sqrt(v.x * v.x + v.y * v.y);
     auto ang = acos(v.x / mag); // normalize
     return (v.y < 0) ? -ang : ang;
@@ -349,7 +348,7 @@ public:
     CCOmniView_GLContext(wxGLCanvas* canvas);
 
     void DrawField(float FieldEW, float FieldNS, bool crowdOn);
-    void Draw3dMarcher(MarcherInfo const& info, const ViewPoint& viewpoint, WhichMarchingStyle style);
+    void Draw3dMarcher(AnimationView::MarcherInfo const& info, const CCOmniviewCanvas::ViewPoint& viewpoint, WhichMarchingStyle style);
 
     bool UseForLines(wxImage const& lines);
 
@@ -532,7 +531,7 @@ void CCOmniView_GLContext::DrawField(float FieldEW, float FieldNS, bool crowdOn)
     CheckGLError();
 }
 
-void CCOmniView_GLContext::Draw3dMarcher(const MarcherInfo& info, ViewPoint const& viewpoint, WhichMarchingStyle style)
+void CCOmniView_GLContext::Draw3dMarcher(AnimationView::MarcherInfo const& info, CCOmniviewCanvas::ViewPoint const& viewpoint, WhichMarchingStyle style)
 {
     auto ang = NormalizeAngleRad(GetAngle(info.x, info.y, viewpoint));
     auto dir = info.direction;
@@ -713,7 +712,7 @@ void CCOmniviewCanvas::OnPaint(wxPaintEvent&)
     // Render the graphics and swap the buffers.
     m_glContext->DrawField(FieldEW, FieldNS, mCrowdOn);
     if (mView) {
-        auto marchers = mView->GetMarchersByDistance(mViewPoint);
+        auto marchers = mView->GetMarchersByDistance(mViewPoint.x, mViewPoint.y);
         for (auto i = marchers.rbegin(); i != marchers.rend(); ++i) {
             m_glContext->Draw3dMarcher(i->second, mViewPoint, mShowMarching ? (mView->OnBeat() ? WhichMarchingStyle::kLeftHSHup : WhichMarchingStyle::kRightHSHup) : WhichMarchingStyle::kClosed);
         }
