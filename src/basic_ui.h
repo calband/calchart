@@ -397,6 +397,13 @@ inline auto CreateChoiceWithHandler(wxWindow* parent, wxSizer* sizer, wxSizerFla
     return choice;
 }
 
+inline auto CreateChoiceWithHandler(wxWindow* parent, wxSizer* sizer, wxSizerFlags flags, int id, std::vector<std::string> const& choices)
+{
+    auto names = std::vector<wxString>{};
+    std::copy(choices.cbegin(), choices.cend(), std::back_inserter(names));
+    return CreateChoiceWithHandler(parent, sizer, flags, id, names);
+}
+
 template <typename Handler>
 inline auto CreateChoiceWithHandler(wxWindow* parent, wxSizer* sizer, int id, std::vector<wxString> const& choices, Handler handler)
 {
@@ -407,6 +414,14 @@ inline auto CreateChoiceWithHandler(wxWindow* parent, wxSizer* sizer, int id, st
     choice->SetSelection(0);
     sizer->Add(choice);
     return choice;
+}
+
+template <typename Handler>
+inline auto CreateChoiceWithHandler(wxWindow* parent, wxSizer* sizer, int id, std::vector<std::string> const& choices, Handler handler)
+{
+    auto names = std::vector<wxString>{};
+    std::copy(choices.cbegin(), choices.cend(), std::back_inserter(names));
+    return CreateChoiceWithHandler(parent, sizer, id, names, handler);
 }
 
 template <typename Handler>
@@ -422,7 +437,21 @@ inline auto CreateChoiceWithHandler(wxWindow* parent, wxSizer* sizer, wxSizerFla
 }
 
 template <typename Handler>
+inline auto CreateChoiceWithHandler(wxWindow* parent, wxSizer* sizer, wxSizerFlags flags, int id, std::vector<std::string> const& choices, Handler handler)
+{
+    auto names = std::vector<wxString>{};
+    std::copy(choices.cbegin(), choices.cend(), std::back_inserter(names));
+    return CreateChoiceWithHandler(parent, sizer, flags, id, names, handler);
+}
+
+template <typename Handler>
 inline auto CreateChoiceWithHandler(wxWindow* parent, wxSizer* sizer, std::vector<wxString> const& choices, Handler handler)
+{
+    return CreateChoiceWithHandler(parent, sizer, wxID_ANY, choices, std::forward<Handler>(handler));
+}
+
+template <typename Handler>
+inline auto CreateChoiceWithHandler(wxWindow* parent, wxSizer* sizer, std::vector<std::string> const& choices, Handler handler)
 {
     return CreateChoiceWithHandler(parent, sizer, wxID_ANY, choices, std::forward<Handler>(handler));
 }

@@ -27,6 +27,7 @@
 #include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
 #include "CalChartDrawCommand.h"
+#include "CalChartDrawPrimativesHelper.h"
 #include "CalChartPoint.h"
 #include "CalChartSheet.h"
 #include "CalChartShow.h"
@@ -219,17 +220,15 @@ namespace CalChartDraw::Point {
 
 }
 
-void DrawSheetPoints(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord origin, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, CalChartColors unselectedColor, CalChartColors selectedColor, CalChartColors unselectedTextColor, CalChartColors selectedTextColor)
+void DrawSheetPoints(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord origin, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, CalChart::Colors unselectedColor, CalChart::Colors selectedColor, CalChart::Colors unselectedTextColor, CalChart::Colors selectedTextColor)
 {
     SaveAndRestore::Font orig_font(dc);
     dc.SetFont(CreateFont(CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio())));
-    dc.SetTextForeground(config.Get_CalChartBrushAndPen(COLOR_POINT_TEXT).first.GetColour());
+    wxCalChart::setTextForeground(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_TEXT));
 
     {
-        auto brushAndPen = config.Get_CalChartBrushAndPen(selectedColor);
-        dc.SetBrush(brushAndPen.first);
-        dc.SetPen(brushAndPen.second);
-        dc.SetTextForeground(config.Get_CalChartBrushAndPen(selectedTextColor).second.GetColour());
+        wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(selectedColor));
+        wxCalChart::setTextForeground(dc, config.Get_CalChartBrushAndPen(selectedTextColor));
         for (auto i = 0; i < numberPoints; i++) {
             if (selection_list.count(i)) {
                 DrawCC_DrawCommandList(dc, CalChartDraw::Point::DrawPoint(config, sheet.GetPoint(i), sheet.GetSymbol(i), ref, origin, labels.at(i)));
@@ -237,10 +236,8 @@ void DrawSheetPoints(wxDC& dc, CalChartConfiguration const& config, CalChart::Co
         }
     }
     {
-        auto brushAndPen = config.Get_CalChartBrushAndPen(unselectedColor);
-        dc.SetBrush(brushAndPen.first);
-        dc.SetPen(brushAndPen.second);
-        dc.SetTextForeground(config.Get_CalChartBrushAndPen(unselectedTextColor).second.GetColour());
+        wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(unselectedColor));
+        wxCalChart::setTextForeground(dc, config.Get_CalChartBrushAndPen(unselectedTextColor));
         for (auto i = 0; i < numberPoints; i++) {
             if (!selection_list.count(i)) {
                 DrawCC_DrawCommandList(dc, CalChartDraw::Point::DrawPoint(config, sheet.GetPoint(i), sheet.GetSymbol(i), ref, origin, labels.at(i)));
@@ -251,15 +248,15 @@ void DrawSheetPoints(wxDC& dc, CalChartConfiguration const& config, CalChart::Co
 
 void DrawGhostSheet(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord origin, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref)
 {
-    DrawSheetPoints(dc, config, origin, selection_list, numberPoints, labels, sheet, ref, COLOR_GHOST_POINT, COLOR_GHOST_POINT_HLIT, COLOR_GHOST_POINT_TEXT, COLOR_GHOST_POINT_HLIT_TEXT);
+    DrawSheetPoints(dc, config, origin, selection_list, numberPoints, labels, sheet, ref, CalChart::Colors::GHOST_POINT, CalChart::Colors::GHOST_POINT_HLIT, CalChart::Colors::GHOST_POINT_TEXT, CalChart::Colors::GHOST_POINT_HLIT_TEXT);
 }
 
 void DrawPoints(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord origin, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, bool primary)
 {
-    auto unselectedColor = primary ? COLOR_POINT : COLOR_REF_POINT;
-    auto selectedColor = primary ? COLOR_POINT_HILIT : COLOR_REF_POINT_HILIT;
-    auto unselectedTextColor = primary ? COLOR_POINT_TEXT : COLOR_REF_POINT_TEXT;
-    auto selectedTextColor = primary ? COLOR_POINT_HILIT_TEXT : COLOR_REF_POINT_HILIT_TEXT;
+    auto unselectedColor = primary ? CalChart::Colors::POINT : CalChart::Colors::REF_POINT;
+    auto selectedColor = primary ? CalChart::Colors::POINT_HILIT : CalChart::Colors::REF_POINT_HILIT;
+    auto unselectedTextColor = primary ? CalChart::Colors::POINT_TEXT : CalChart::Colors::REF_POINT_TEXT;
+    auto selectedTextColor = primary ? CalChart::Colors::POINT_HILIT_TEXT : CalChart::Colors::REF_POINT_HILIT_TEXT;
     DrawSheetPoints(dc, config, origin, selection_list, numberPoints, labels, sheet, ref, unselectedColor, selectedColor, unselectedTextColor, selectedTextColor);
 }
 
@@ -583,10 +580,8 @@ void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config,
     auto pointLabelFont = CreateFont(CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio()));
     dc.SetFont(pointLabelFont);
     auto origin = show.GetShowMode().Offset();
-    auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_GHOST_POINT);
-    dc.SetPen(brushAndPen.second);
-    dc.SetBrush(brushAndPen.first);
-    dc.SetTextForeground(config.Get_CalChartBrushAndPen(COLOR_GHOST_POINT_TEXT).first.GetColour());
+    wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::GHOST_POINT));
+    wxCalChart::setTextForeground(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::GHOST_POINT_TEXT));
 
     auto dotRatio = config.Get_DotRatio();
     auto pLineRatio = config.Get_PLineRatio();
@@ -681,10 +676,10 @@ void DrawPath(wxDC& dc, const CalChartConfiguration& config,
     const CalChart::Coord& end)
 {
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
-    auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_PATHS);
-    dc.SetPen(brushAndPen.second);
+    auto brushAndPen = config.Get_CalChartBrushAndPen(CalChart::Colors::PATHS);
+    wxCalChart::setPen(dc, brushAndPen);
     DrawCC_DrawCommandList(dc, draw_commands);
-    dc.SetBrush(brushAndPen.first);
+    wxCalChart::setBrush(dc, brushAndPen);
     auto where = fDIP(wxPoint{ end.x, end.y });
     float circ_r = fDIP(CalChart::Float2CoordUnits(config.Get_DotRatio()) / 2);
     dc.DrawCircle(where, circ_r);
@@ -717,12 +712,9 @@ namespace CalChartDraw::Field {
 
         dc.SetFont(CreateFont(CalChart::Float2CoordUnits(config.Get_YardsSize()), wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
         // set color so when we make the label appear clearer over the lines.
-        if (howToDraw == ShowMode_kPrinting) {
-            dc.SetBrush(*wxTRANSPARENT_BRUSH);
-            dc.SetPen(*wxTRANSPARENT_PEN);
-        } else {
-            dc.SetBrush(config.Get_CalChartBrushAndPen(COLOR_FIELD).first);
-            dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD).second);
+        if (howToDraw != ShowMode_kPrinting) {
+            // set color so when we make background box it blends
+            wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD));
         }
 
         auto yard_text = std::span(mode.Get_yard_text());
@@ -741,8 +733,8 @@ void DrawMode(wxDC& dc, CalChartConfiguration const& config, CalChart::ShowMode 
     case ShowMode_kFieldView:
     case ShowMode_kAnimation:
     case ShowMode_kOmniView:
-        dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
-        dc.SetTextForeground(config.Get_CalChartBrushAndPen(COLOR_FIELD_TEXT).second.GetColour());
+        wxCalChart::setPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD_DETAIL));
+        wxCalChart::setTextForeground(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD_TEXT));
         break;
     case ShowMode_kPrinting:
         dc.SetPen(*wxBLACK_PEN);

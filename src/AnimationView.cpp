@@ -25,6 +25,7 @@
 #include "CalChartAnimation.h"
 #include "CalChartApp.h"
 #include "CalChartConfiguration.h"
+#include "CalChartDrawPrimativesHelper.h"
 #include "CalChartDrawing.h"
 #include "CalChartShapes.h"
 #include "CalChartSheet.h"
@@ -82,7 +83,7 @@ void AnimationView::OnDraw(wxDC& dc, CalChartConfiguration const& config)
         // no animation, our job is done.
         return;
     }
-    dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
+    wxCalChart::setPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD_DETAIL));
     CalChartDraw::DrawMode(dc, config, mView->GetShowMode(), ShowMode_kAnimation);
     auto useSprites = config.Get_UseSprites();
     if (useSprites) {
@@ -97,34 +98,24 @@ void AnimationView::OnDrawDots(wxDC& dc, CalChartConfiguration const& config)
     for (auto info : mAnimation->GetAllAnimateInfo()) {
         if (checkForCollision && (info.mCollision != CalChart::Coord::CollisionType::none)) {
             if (info.mCollision == CalChart::Coord::CollisionType::warning) {
-                auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_COLLISION_WARNING);
-                dc.SetBrush(brushAndPen.first);
-                dc.SetPen(brushAndPen.second);
+                wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_COLLISION_WARNING));
             } else if (info.mCollision == CalChart::Coord::CollisionType::intersect) {
-                auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_COLLISION);
-                dc.SetBrush(brushAndPen.first);
-                dc.SetPen(brushAndPen.second);
+                wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_COLLISION));
             }
         } else if (mView->IsSelected(info.index)) {
             switch (AngleToDirection(info.mFacingDirection)) {
             case CalChart::Direction::SouthWest:
             case CalChart::Direction::West:
             case CalChart::Direction::NorthWest: {
-                auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_BACK);
-                dc.SetBrush(brushAndPen.first);
-                dc.SetPen(brushAndPen.second);
+                wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_HILIT_BACK));
             } break;
             case CalChart::Direction::SouthEast:
             case CalChart::Direction::East:
             case CalChart::Direction::NorthEast: {
-                auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_FRONT);
-                dc.SetBrush(brushAndPen.first);
-                dc.SetPen(brushAndPen.second);
+                wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_HILIT_FRONT));
             } break;
             default: {
-                auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_SIDE);
-                dc.SetBrush(brushAndPen.first);
-                dc.SetPen(brushAndPen.second);
+                wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_HILIT_SIDE));
             }
             }
         } else {
@@ -132,21 +123,15 @@ void AnimationView::OnDrawDots(wxDC& dc, CalChartConfiguration const& config)
             case CalChart::Direction::SouthWest:
             case CalChart::Direction::West:
             case CalChart::Direction::NorthWest: {
-                auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_BACK);
-                dc.SetBrush(brushAndPen.first);
-                dc.SetPen(brushAndPen.second);
+                wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_BACK));
             } break;
             case CalChart::Direction::SouthEast:
             case CalChart::Direction::East:
             case CalChart::Direction::NorthEast: {
-                auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_FRONT);
-                dc.SetBrush(brushAndPen.first);
-                dc.SetPen(brushAndPen.second);
+                wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_FRONT));
             } break;
             default: {
-                auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_SIDE);
-                dc.SetBrush(brushAndPen.first);
-                dc.SetPen(brushAndPen.second);
+                wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_SIDE));
             }
             }
         }

@@ -77,10 +77,10 @@ private:
     wxSpinCtrl* mSpin{};
 
     int const mActiveColorPalette{};
-    std::vector<wxString> mColorPaletteNames;
-    std::vector<wxBrush> mColorPaletteColors;
-    wxPen mCalChartPens[kNumberPalettes][COLOR_NUM];
-    wxBrush mCalChartBrushes[kNumberPalettes][COLOR_NUM];
+    std::vector<std::string> mColorPaletteNames;
+    std::vector<CalChart::Color> mColorPaletteColors;
+    std::array<std::array<wxPen, toUType(CalChart::Colors::NUM)>, kNumberPalettes> mCalChartPens;
+    std::array<std::array<wxBrush, toUType(CalChart::Colors::NUM)>, kNumberPalettes> mCalChartBrushes;
 
     CalChartConfiguration mConfig;
 };

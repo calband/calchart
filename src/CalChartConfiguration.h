@@ -40,73 +40,20 @@
  *  IMPLEMENT_CONFIGURATION_FUNCTIONS with the default.
  */
 
+#include "CalChartConstants.h"
+#include "CalChartDrawPrimatives.h"
 #include <array>
 #include <functional>
 #include <map>
 #include <memory>
 #include <vector>
 #include <wx/gdicmn.h>
-#include <wx/string.h>
 
 // forward declare
-class wxPen;
-class wxBrush;
 class wxPathList;
-class wxColour;
 namespace CalChart {
 class ShowMode;
 }
-
-enum CalChartColors {
-    COLOR_FIELD,
-    COLOR_FIELD_DETAIL,
-    COLOR_FIELD_TEXT,
-    COLOR_POINT,
-    COLOR_POINT_TEXT,
-    COLOR_POINT_HILIT,
-    COLOR_POINT_HILIT_TEXT,
-    COLOR_REF_POINT,
-    COLOR_REF_POINT_TEXT,
-    COLOR_REF_POINT_HILIT,
-    COLOR_REF_POINT_HILIT_TEXT,
-    COLOR_GHOST_POINT,
-    COLOR_GHOST_POINT_TEXT,
-    COLOR_GHOST_POINT_HLIT,
-    COLOR_GHOST_POINT_HLIT_TEXT,
-    COLOR_POINT_ANIM_FRONT,
-    COLOR_POINT_ANIM_BACK,
-    COLOR_POINT_ANIM_SIDE,
-    COLOR_POINT_ANIM_HILIT_FRONT,
-    COLOR_POINT_ANIM_HILIT_BACK,
-    COLOR_POINT_ANIM_HILIT_SIDE,
-    COLOR_POINT_ANIM_COLLISION,
-    COLOR_POINT_ANIM_COLLISION_WARNING,
-    COLOR_SHAPES,
-    COLOR_PATHS,
-    COLOR_NUM
-};
-
-enum ContCellColors {
-    COLOR_CONTCELLS_PROC,
-    COLOR_CONTCELLS_VALUE,
-    COLOR_CONTCELLS_FUNCTION,
-    COLOR_CONTCELLS_DIRECTION,
-    COLOR_CONTCELLS_STEPTYPE,
-    COLOR_CONTCELLS_POINT,
-    COLOR_CONTCELLS_UNSET,
-    COLOR_CONTCELLS_NUM,
-};
-
-enum CalChartShowModes {
-    STANDARD,
-    FULL_FIELD,
-    TUNNEL,
-    OLD_FIELD,
-    PRO_FIELD,
-    SHOWMODE_NUM
-};
-
-extern wxString const kShowModeStrings[SHOWMODE_NUM];
 
 constexpr auto kNumberPalettes = 4; // arbitrary, could go more, but 4 is a good starting point
 
@@ -119,7 +66,7 @@ public:
     void FlushWriteQueue() const;
 
 private:
-    mutable std::map<wxString, std::function<void()>> mWriteQueue;
+    mutable std::map<std::string, std::function<void()>> mWriteQueue;
 
 // macro for declaring configuration Get_, Set_, and Clear_
 #define DECLARE_CONFIGURATION_FUNCTIONS(Key, Type) \
@@ -143,11 +90,11 @@ private:                                           \
     DECLARE_CONFIGURATION_FUNCTIONS(FieldFramePositionY, long);
 
     // printing configurations
-    DECLARE_CONFIGURATION_FUNCTIONS(PrintFile, wxString);
-    DECLARE_CONFIGURATION_FUNCTIONS(PrintCmd, wxString);
-    DECLARE_CONFIGURATION_FUNCTIONS(PrintOpts, wxString);
-    DECLARE_CONFIGURATION_FUNCTIONS(PrintViewCmd, wxString);
-    DECLARE_CONFIGURATION_FUNCTIONS(PrintViewOpts, wxString);
+    DECLARE_CONFIGURATION_FUNCTIONS(PrintFile, std::string);
+    DECLARE_CONFIGURATION_FUNCTIONS(PrintCmd, std::string);
+    DECLARE_CONFIGURATION_FUNCTIONS(PrintOpts, std::string);
+    DECLARE_CONFIGURATION_FUNCTIONS(PrintViewCmd, std::string);
+    DECLARE_CONFIGURATION_FUNCTIONS(PrintViewOpts, std::string);
 
     DECLARE_CONFIGURATION_FUNCTIONS(PageWidth, double);
     DECLARE_CONFIGURATION_FUNCTIONS(PageHeight, double);
@@ -155,13 +102,13 @@ private:                                           \
     DECLARE_CONFIGURATION_FUNCTIONS(PageOffsetY, double);
     DECLARE_CONFIGURATION_FUNCTIONS(PaperLength, double);
 
-    DECLARE_CONFIGURATION_FUNCTIONS(HeadFont, wxString);
-    DECLARE_CONFIGURATION_FUNCTIONS(MainFont, wxString);
-    DECLARE_CONFIGURATION_FUNCTIONS(NumberFont, wxString);
-    DECLARE_CONFIGURATION_FUNCTIONS(ContFont, wxString);
-    DECLARE_CONFIGURATION_FUNCTIONS(BoldFont, wxString);
-    DECLARE_CONFIGURATION_FUNCTIONS(ItalFont, wxString);
-    DECLARE_CONFIGURATION_FUNCTIONS(BoldItalFont, wxString);
+    DECLARE_CONFIGURATION_FUNCTIONS(HeadFont, std::string);
+    DECLARE_CONFIGURATION_FUNCTIONS(MainFont, std::string);
+    DECLARE_CONFIGURATION_FUNCTIONS(NumberFont, std::string);
+    DECLARE_CONFIGURATION_FUNCTIONS(ContFont, std::string);
+    DECLARE_CONFIGURATION_FUNCTIONS(BoldFont, std::string);
+    DECLARE_CONFIGURATION_FUNCTIONS(ItalFont, std::string);
+    DECLARE_CONFIGURATION_FUNCTIONS(BoldItalFont, std::string);
 
     DECLARE_CONFIGURATION_FUNCTIONS(HeaderSize, double);
     DECLARE_CONFIGURATION_FUNCTIONS(YardsSize, double);
@@ -215,7 +162,7 @@ private:                                           \
 
     DECLARE_CONFIGURATION_FUNCTIONS(BeepOnCollisions, bool);
 
-    DECLARE_CONFIGURATION_FUNCTIONS(CalChartFrameAUILayout_3_6_1, wxString);
+    DECLARE_CONFIGURATION_FUNCTIONS(CalChartFrameAUILayout_3_6_1, std::string);
 
     DECLARE_CONFIGURATION_FUNCTIONS(ContCellLongForm, bool);
     DECLARE_CONFIGURATION_FUNCTIONS(ContCellFontSize, long);
@@ -225,13 +172,13 @@ private:                                           \
 
 public:
     // helpers for displaying different config attributes
-    std::vector<wxString> GetColorNames() const;
-    std::vector<wxString> GetDefaultColors() const;
+    std::vector<std::string> GetColorNames() const;
+    std::vector<std::string> GetDefaultColors() const;
     std::vector<int> GetDefaultPenWidth() const;
-    std::vector<wxString> GetContCellColorNames() const;
-    std::vector<wxString> GetContCellDefaultColors() const;
+    std::vector<std::string> GetContCellColorNames() const;
+    std::vector<std::string> GetContCellDefaultColors() const;
     std::vector<int> GetContCellDefaultPenWidth() const;
-    std::vector<wxString> Get_yard_text_index() const;
+    std::vector<std::string> Get_yard_text_index() const;
 
     // color palettes:  The color Palettes allow you to set different "blocks" of
     // colors.
@@ -240,55 +187,53 @@ public:
     void SetActiveColorPalette(long);
     void ClearActiveColorPalette();
 
-    wxBrush GetColorPaletteColor(long which) const;
-    void SetColorPaletteColor(long which, wxBrush const&);
+    CalChart::Color GetColorPaletteColor(long which) const;
+    void SetColorPaletteColor(long which, CalChart::Color);
     void ClearColorPaletteColor(long which);
 
-    wxString GetColorPaletteName(long which) const;
-    void SetColorPaletteName(long which, wxString const&);
+    std::string GetColorPaletteName(long which) const;
+    void SetColorPaletteName(long which, std::string const&);
     void ClearColorPaletteName(long which);
 
     // Colors
-    using ColorWidth_t = std::pair<wxColour, int>;
-    std::pair<wxBrush, wxPen> Get_CalChartBrushAndPen(CalChartColors c) const;
-    void Set_CalChartBrushAndPen(CalChartColors c, wxBrush const& brush, wxPen const& pen);
-    void Clear_CalChartConfigColor(CalChartColors selection);
+    using ColorWidth_t = std::pair<CalChart::Color, int>;
+    CalChart::BrushAndPen Get_CalChartBrushAndPen(CalChart::Colors c) const;
+    void Set_CalChartBrushAndPen(CalChart::Colors c, CalChart::BrushAndPen);
+    void Clear_CalChartConfigColor(CalChart::Colors selection);
 
-    std::pair<wxBrush, wxPen> Get_CalChartBrushAndPen(int palette, CalChartColors c) const;
-    void Set_CalChartBrushAndPen(int palette, CalChartColors c, wxBrush const& brush, wxPen const& pen);
-    void Clear_CalChartConfigColor(int palette, CalChartColors selection);
+    CalChart::BrushAndPen Get_CalChartBrushAndPen(int palette, CalChart::Colors c) const;
+    void Set_CalChartBrushAndPen(int palette, CalChart::Colors c, CalChart::BrushAndPen);
+    void Clear_CalChartConfigColor(int palette, CalChart::Colors selection);
 
-    std::pair<wxBrush, wxPen> Get_ContCellBrushAndPen(ContCellColors c) const;
-    void Set_ContCellBrushAndPen(ContCellColors c, wxBrush const& brush, wxPen const& pen);
-    void Clear_ContCellConfigColor(ContCellColors selection);
+    CalChart::BrushAndPen Get_ContCellBrushAndPen(CalChart::ContinuityCellColors c) const;
+    void Set_ContCellBrushAndPen(CalChart::ContinuityCellColors c, CalChart::BrushAndPen);
+    void Clear_ContCellConfigColor(CalChart::ContinuityCellColors selection);
 
     // Shows
-    static constexpr auto kShowModeValues = 10;
-    using ShowModeInfo_t = std::array<long, kShowModeValues>;
-    ShowModeInfo_t Get_ShowModeInfo(CalChartShowModes which) const;
-    void Set_ShowModeInfo(CalChartShowModes which, ShowModeInfo_t const& values);
-    void Clear_ShowModeInfo(CalChartShowModes which);
+    CalChart::ShowModeData_t Get_ShowModeData(CalChart::ShowModes which) const;
+    void Set_ShowModeData(CalChart::ShowModes which, CalChart::ShowModeData_t const& values);
+    void Clear_ShowModeData(CalChart::ShowModes which);
 
     // Yard Lines
     static constexpr auto kYardTextValues = 53;
-    wxString Get_yard_text(size_t which) const;
-    void Set_yard_text(size_t which, wxString const&);
+    std::string Get_yard_text(size_t which) const;
+    void Set_yard_text(size_t which, std::string const&);
     void Clear_yard_text(size_t which);
 
 private:
-    std::vector<wxBrush> GetDefaultColorPaletteColors() const;
-    std::vector<wxString> GetDefaultColorPaletteNames() const;
+    std::vector<CalChart::Color> GetDefaultColorPaletteColors() const;
+    std::vector<std::string> GetDefaultColorPaletteNames() const;
 
     mutable int mActiveColorPalette = -1;
-    mutable std::map<CalChartColors, ColorWidth_t> mColorsAndWidth[kNumberPalettes];
-    mutable std::map<ContCellColors, ColorWidth_t> mContCellColorsAndWidth;
-    mutable std::map<CalChartShowModes, ShowModeInfo_t> mShowModeInfos;
-    mutable std::map<size_t, wxString> mYardTextInfos;
+    mutable std::map<CalChart::Colors, ColorWidth_t> mColorsAndWidth[kNumberPalettes];
+    mutable std::map<CalChart::ContinuityCellColors, ColorWidth_t> mContCellColorsAndWidth;
+    mutable std::map<CalChart::ShowModes, CalChart::ShowModeData_t> mShowModeInfos;
+    mutable std::map<size_t, std::string> mYardTextInfos;
 };
 
-std::vector<wxBrush> GetColorPaletteColors(CalChartConfiguration const& config);
-std::vector<wxString> GetColorPaletteNames(CalChartConfiguration const& config);
+std::vector<CalChart::Color> GetColorPaletteColors(CalChartConfiguration const& config);
+std::vector<std::string> GetColorPaletteNames(CalChartConfiguration const& config);
 std::array<std::string, CalChartConfiguration::kYardTextValues> Get_yard_text_all(CalChartConfiguration const& config);
 
 // to find a specific Show:
-CalChart::ShowMode GetConfigShowMode(wxString const& which);
+CalChart::ShowMode GetConfigShowMode(std::string const& which);

@@ -81,7 +81,7 @@ void PointPicker::CreateControls()
 
             auto instruments = mShow.GetPointsInstrument();
             auto currentInstruments = std::set(instruments.begin(), instruments.end());
-            auto choice = CreateChoiceWithHandler(this, sizer, BasicSizerFlags(), wxID_ANY, { currentInstruments.begin(), currentInstruments.end() }, [this](wxCommandEvent& e) {
+            auto choice = CreateChoiceWithHandler(this, sizer, BasicSizerFlags(), wxID_ANY, std::vector<std::string>{ currentInstruments.begin(), currentInstruments.end() }, [this](wxCommandEvent& e) {
                 mSelection = mShow.MakeSelectByInstrument(e.GetString());
                 EndModal(wxID_OK);
             });

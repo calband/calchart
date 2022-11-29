@@ -18,6 +18,7 @@
 #include "ContinuityBoxDrawer.h"
 #include "CalChartConfiguration.h"
 #include "CalChartContinuityToken.h"
+#include "CalChartDrawPrimativesHelper.h"
 #include "DCSaveRestore.h"
 #include "basic_ui.h"
 
@@ -46,21 +47,21 @@ auto GetBrush(CalChart::Cont::Type contType, CalChartConfiguration const& config
 {
     switch (contType) {
     case CalChart::Cont::Type::procedure:
-        return config.Get_ContCellBrushAndPen(COLOR_CONTCELLS_PROC).first;
+        return wxCalChart::toBrush(config.Get_ContCellBrushAndPen(CalChart::ContinuityCellColors::PROC));
     case CalChart::Cont::Type::value:
-        return config.Get_ContCellBrushAndPen(COLOR_CONTCELLS_VALUE).first;
+        return wxCalChart::toBrush(config.Get_ContCellBrushAndPen(CalChart::ContinuityCellColors::VALUE));
     case CalChart::Cont::Type::function:
-        return config.Get_ContCellBrushAndPen(COLOR_CONTCELLS_FUNCTION).first;
+        return wxCalChart::toBrush(config.Get_ContCellBrushAndPen(CalChart::ContinuityCellColors::FUNCTION));
     case CalChart::Cont::Type::direction:
-        return config.Get_ContCellBrushAndPen(COLOR_CONTCELLS_DIRECTION).first;
+        return wxCalChart::toBrush(config.Get_ContCellBrushAndPen(CalChart::ContinuityCellColors::DIRECTION));
     case CalChart::Cont::Type::steptype:
-        return config.Get_ContCellBrushAndPen(COLOR_CONTCELLS_STEPTYPE).first;
+        return wxCalChart::toBrush(config.Get_ContCellBrushAndPen(CalChart::ContinuityCellColors::STEPTYPE));
     case CalChart::Cont::Type::point:
-        return config.Get_ContCellBrushAndPen(COLOR_CONTCELLS_POINT).first;
+        return wxCalChart::toBrush(config.Get_ContCellBrushAndPen(CalChart::ContinuityCellColors::POINT));
     case CalChart::Cont::Type::unset:
-        return config.Get_ContCellBrushAndPen(COLOR_CONTCELLS_UNSET).first;
+        return wxCalChart::toBrush(config.Get_ContCellBrushAndPen(CalChart::ContinuityCellColors::UNSET));
     }
-    return config.Get_ContCellBrushAndPen(COLOR_CONTCELLS_PROC).first;
+    return wxCalChart::toBrush(config.Get_ContCellBrushAndPen(CalChart::ContinuityCellColors::PROC));
 }
 
 ContinuityBoxSubPartDrawer::ContinuityBoxSubPartDrawer(CalChart::Cont::Drawable const& proc)

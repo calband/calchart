@@ -100,7 +100,7 @@ static void LayoutShowInfo(wxWindow* parent, bool putLastRowButtons)
                     sizer->Add(numberColumns, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
                 });
 
-                CreateChoiceWithHandler(parent, sizer, BasicSizerFlags(), SetupMarchers_ID_LABEL_TYPE, { wxT("Numbers"), wxT("Letters") }, [parent](auto& event) {
+                CreateChoiceWithHandler(parent, sizer, BasicSizerFlags(), SetupMarchers_ID_LABEL_TYPE, std::vector<wxString>{ wxT("Numbers"), wxT("Letters") }, [parent](auto& event) {
                     EnableLetter(*parent, event.GetInt() == 1);
                     parent->Refresh();
                 });

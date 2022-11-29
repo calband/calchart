@@ -8,7 +8,6 @@
 
 #include "TransitionSolverProgressFrame.h"
 #include "CalChartApp.h"
-#include "CalChartConfiguration.h"
 #include "CalChartContinuity.h"
 #include "CalChartDoc.h"
 #include "CalChartDocCommand.h"

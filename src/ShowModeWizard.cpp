@@ -32,8 +32,8 @@
 ShowModeWizard::ShowModeWizard(wxWizard* parent)
     : wxWizardPageSimple(parent)
 {
-    for (auto mode : kShowModeStrings) {
-        modeStrings.Add(mode);
+    for (auto mode : CalChart::kShowModeDefaultValues) {
+        modeStrings.Add(std::get<0>(mode));
     }
 
     SetSizer(VStack([this](auto sizer) {

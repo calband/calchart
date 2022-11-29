@@ -22,6 +22,7 @@
 #include "CalChartDoc.h"
 #include "CalChartApp.h"
 #include "CalChartConfiguration.h"
+#include "CalChartConstants.h"
 #include "CalChartContinuity.h"
 #include "CalChartDocCommand.h"
 #include "CalChartPoint.h"
@@ -49,7 +50,7 @@ IMPLEMENT_DYNAMIC_CLASS(CalChartDoc, CalChartDoc::super);
 
 // Create a new show
 CalChartDoc::CalChartDoc()
-    : mShow(Show::Create(GetConfigShowMode(kShowModeStrings[0])))
+    : mShow(Show::Create(GetConfigShowMode(std::get<0>(CalChart::kShowModeDefaultValues[0]))))
     , mTimer(*this)
 {
     mTimer.Start(static_cast<int>(CalChartConfiguration::GetGlobalConfig().Get_AutosaveInterval()) * 1000);
@@ -218,7 +219,7 @@ T& CalChartDoc::LoadObjectGeneric(T& stream)
                 return ContinuityEditorPopup::ProcessEditContinuity(GetDocumentWindow(), description, what, line, column).ToStdString();
             }
         };
-        mShow = Show::Create(GetConfigShowMode(kShowModeStrings[0]), stream, &handlers);
+        mShow = Show::Create(GetConfigShowMode(CalChart::GetShowModeNames()[0]), stream, &handlers);
     } catch (std::exception const& e) {
         wxString message = wxT("Error encountered:\n");
         message += e.what();
@@ -395,13 +396,13 @@ int CalChartDoc::PrintToPS(std::ostream& buffer, bool overview,
 
     PrintShowToPS printShowToPS(
         *mShow, doLandscape, doCont, doContSheet, overview, min_yards, GetShowMode(),
-        { { config_.Get_HeadFont().ToStdString(),
-            config_.Get_MainFont().ToStdString(),
-            config_.Get_NumberFont().ToStdString(),
-            config_.Get_ContFont().ToStdString(),
-            config_.Get_BoldFont().ToStdString(),
-            config_.Get_ItalFont().ToStdString(),
-            config_.Get_BoldItalFont().ToStdString() } },
+        { { config_.Get_HeadFont(),
+            config_.Get_MainFont(),
+            config_.Get_NumberFont(),
+            config_.Get_ContFont(),
+            config_.Get_BoldFont(),
+            config_.Get_ItalFont(),
+            config_.Get_BoldItalFont() } },
         config_.Get_PageWidth(), config_.Get_PageHeight(),
         config_.Get_PageOffsetX(), config_.Get_PageOffsetY(),
         config_.Get_PaperLength(), config_.Get_HeaderSize(),

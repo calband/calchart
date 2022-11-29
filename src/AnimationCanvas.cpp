@@ -24,6 +24,7 @@
 #include "AnimationView.h"
 #include "CalChartConfiguration.h"
 #include "CalChartCoord.h"
+#include "CalChartDrawPrimativesHelper.h"
 #include "basic_ui.h"
 #include "ui_enums.h"
 
@@ -126,7 +127,7 @@ void AnimationCanvas::OnPaint(wxPaintEvent&)
     wxBufferedPaintDC dc(this);
     auto& config = CalChartConfiguration::GetGlobalConfig();
 
-    dc.SetBackground(config.Get_CalChartBrushAndPen(COLOR_FIELD).first);
+    wxCalChart::setBackground(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD));
     dc.Clear();
     dc.SetUserScale(mUserScale, mUserScale);
     dc.SetDeviceOrigin(mUserOrigin.first, mUserOrigin.second);
@@ -134,7 +135,7 @@ void AnimationCanvas::OnPaint(wxPaintEvent&)
     // draw the box
     if (mMouseDown) {
         dc.SetBrush(*wxTRANSPARENT_BRUSH);
-        dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_SHAPES).second);
+        wxCalChart::setPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::SHAPES));
         dc.DrawRectangle(mMouseStart.x, mMouseStart.y, mMouseEnd.x - mMouseStart.x, mMouseEnd.y - mMouseStart.y);
     }
     // draw the view

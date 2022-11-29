@@ -24,6 +24,7 @@
 #include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
 #include "CalChartDrawCommand.h"
+#include "CalChartDrawPrimativesHelper.h"
 #include "CalChartDrawing.h"
 
 #include <wx/dcbuffer.h>
@@ -113,7 +114,7 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent&)
 
     // draw the background
     dc.SetBackgroundMode(wxTRANSPARENT);
-    dc.SetBackground(mConfig.Get_CalChartBrushAndPen(COLOR_FIELD).first);
+    wxCalChart::setBackground(dc, mConfig.Get_CalChartBrushAndPen(CalChart::Colors::FIELD));
     dc.Clear();
 
     // Draw the field
@@ -138,7 +139,7 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent&)
 
     // draw the shap
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
-    dc.SetPen(mConfig.Get_CalChartBrushAndPen(COLOR_SHAPES).second);
+    wxCalChart::setPen(dc, mConfig.Get_CalChartBrushAndPen(CalChart::Colors::SHAPES));
     CalChartDraw::DrawCC_DrawCommandList(dc, mShape);
 }
 

@@ -22,6 +22,7 @@
 
 #include "PreferencesContCellSetup.h"
 #include "CalChartContinuityToken.h"
+#include "CalChartDrawPrimativesHelper.h"
 #include "ContinuityBrowserPanel.h"
 #include "PreferencesUtils.h"
 
@@ -63,11 +64,14 @@ void ContCellSetup::CreateControls()
     SetSizer(VStack([this](auto sizer) {
         NamedVBoxStack(this, sizer, "Color settings", [this](auto& sizer) {
             HStack(sizer, LeftBasicSizerFlags(), [this](auto& sizer) {
-                mNameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, mConfig.GetContCellColorNames().at(0), wxDefaultPosition, wxDefaultSize, COLOR_CONTCELLS_NUM, mConfig.GetContCellColorNames().data(), wxCB_READONLY | wxCB_DROPDOWN);
+                auto colorNamesRaw = mConfig.GetContCellColorNames();
+                auto colorNames = std::vector<wxString>{};
+                std::copy(colorNamesRaw.cbegin(), colorNamesRaw.cend(), std::back_inserter(colorNames));
+                mNameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, colorNames.at(0), wxDefaultPosition, wxDefaultSize, colorNames.size(), colorNames.data(), wxCB_READONLY | wxCB_DROPDOWN);
                 sizer->Add(mNameBox, BasicSizerFlags());
 
-                for (auto i = 0; i < COLOR_CONTCELLS_NUM; ++i) {
-                    CreateAndSetItemBitmap(mNameBox, i, mConfig.Get_ContCellBrushAndPen(static_cast<ContCellColors>(i)).first);
+                for (auto i = 0; i < toUType(CalChart::ContinuityCellColors::NUM); ++i) {
+                    CreateAndSetItemBitmap(mNameBox, i, wxCalChart::toBrush(mConfig.Get_ContCellBrushAndPen(static_cast<CalChart::ContinuityCellColors>(i))));
                 }
                 mNameBox->SetSelection(0);
             });
@@ -128,9 +132,9 @@ void ContCellSetup::CreateControls()
 void ContCellSetup::InitFromConfig()
 {
     // first read out the defaults:
-    for (auto i = 0; i < COLOR_CONTCELLS_NUM; ++i) {
-        auto brushAndPen = mConfig.Get_ContCellBrushAndPen(static_cast<ContCellColors>(i));
-        mContCellBrushes[i] = brushAndPen.first;
+    for (auto i = 0; i < toUType(CalChart::ContinuityCellColors::NUM); ++i) {
+        auto brushAndPen = mConfig.Get_ContCellBrushAndPen(static_cast<CalChart::ContinuityCellColors>(i));
+        mContCellBrushes[i] = wxCalChart::toBrush(brushAndPen);
     }
 }
 
@@ -152,8 +156,8 @@ bool ContCellSetup::ClearValuesToDefault()
     mConfig.Clear_ContCellTextPadding();
     mConfig.Clear_ContCellBoxPadding();
 
-    for (ContCellColors i = COLOR_CONTCELLS_PROC; i < COLOR_CONTCELLS_NUM; i = static_cast<ContCellColors>(static_cast<int>(i) + 1)) {
-        SetColor(i, mConfig.GetContCellDefaultColors()[i]);
+    for (auto i = CalChart::ContinuityCellColors::PROC; i != CalChart::ContinuityCellColors::NUM; i = static_cast<CalChart::ContinuityCellColors>(static_cast<int>(i) + 1)) {
+        SetColor(toUType(i), wxColour{ mConfig.GetContCellDefaultColors()[toUType(i)] });
         mConfig.Clear_ContCellConfigColor(i);
     }
     InitFromConfig();
@@ -187,10 +191,9 @@ void ContCellSetup::OnCmdBoxPadding(wxSpinEvent& e)
 
 void ContCellSetup::SetColor(int selection, const wxColour& color)
 {
-    auto pen = *wxThePenList->FindOrCreatePen(color, 1, wxPENSTYLE_SOLID);
     mContCellBrushes[selection] = *wxTheBrushList->FindOrCreateBrush(color, wxBRUSHSTYLE_SOLID);
 
-    mConfig.Set_ContCellBrushAndPen(static_cast<ContCellColors>(selection), mContCellBrushes[selection], pen);
+    mConfig.Set_ContCellBrushAndPen(static_cast<CalChart::ContinuityCellColors>(selection), wxCalChart::toBrushAndPen(color, 1));
 
     // update the namebox list
     CreateAndSetItemBitmap(mNameBox, selection, mContCellBrushes[selection]);
@@ -215,8 +218,8 @@ void ContCellSetup::OnCmdSelectColors()
 void ContCellSetup::OnCmdResetColors()
 {
     auto selection = mNameBox->GetSelection();
-    SetColor(selection, mConfig.GetContCellDefaultColors()[selection]);
-    mConfig.Clear_ContCellConfigColor(static_cast<ContCellColors>(selection));
+    SetColor(selection, wxColour{ mConfig.GetContCellDefaultColors()[selection] });
+    mConfig.Clear_ContCellConfigColor(static_cast<CalChart::ContinuityCellColors>(selection));
     Refresh();
 }
 

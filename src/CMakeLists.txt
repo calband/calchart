@@ -43,6 +43,7 @@ add_executable(
   CalChartDocCommand.h
   CalChartDrawing.h
   CalChartDrawing.cpp
+  CalChartDrawPrimativesHelper.h
   CalChartFrame.cpp
   CalChartFrame.h
   CalChartPreferences.cpp

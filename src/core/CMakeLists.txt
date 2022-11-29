@@ -32,6 +32,7 @@ add_library(
   CalChartAnimationCompile.cpp
   CalChartAnimationCompile.h
   CalChartAnimationTypes.h
+  CalChartConstants.h
   CalChartContinuity.cpp
   CalChartContinuity.h
   CalChartContinuityToken.cpp
@@ -40,6 +41,7 @@ add_library(
   CalChartCoord.h
   CalChartDrawCommand.cpp
   CalChartDrawCommand.h
+  CalChartDrawPrimatives.h
   CalChartFileFormat.h
   CalChartImage.cpp
   CalChartImage.h
