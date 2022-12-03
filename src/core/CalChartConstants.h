@@ -21,15 +21,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartTypes.h"
+#include "CalChartUtils.h"
 #include <array>
+#include <string>
 #include <vector>
 
 namespace CalChart {
-
-// the fudge factor for floating point math
-constexpr auto kEpsilon = 1e-6;
-constexpr auto SQRT2 = 1.4142136;
 
 enum class Colors {
     FIELD,
@@ -148,6 +145,60 @@ static const std::array<ShowModeInfo_t, toUType(ShowModes::NUM)> kShowModeDefaul
     ShowModeInfo_t{ "Old Field", { 28, 52, 8, 8, 8, 8, -80, -42, 160, 84 } },
     ShowModeInfo_t{ "Pro Field", { 36, 48, 8, 8, 8, 8, -80, -42, 160, 84 } },
 };
+
+// we lay out directions in clockwise order from North
+enum class Direction {
+    North,
+    NorthEast,
+    East,
+    SouthEast,
+    South,
+    SouthWest,
+    West,
+    NorthWest,
+};
+
+template <typename T>
+constexpr auto AngleToDirection(T ang)
+{
+    return static_cast<CalChart::Direction>(AngleToQuadrant(ang));
+}
+
+enum class PSFONT {
+    SYMBOL,
+    NORM,
+    BOLD,
+    ITAL,
+    BOLDITAL,
+    TAB
+};
+
+enum SYMBOL_TYPE {
+    SYMBOL_PLAIN = 0,
+    SYMBOL_SOL,
+    SYMBOL_BKSL,
+    SYMBOL_SL,
+    SYMBOL_X,
+    SYMBOL_SOLBKSL,
+    SYMBOL_SOLSL,
+    SYMBOL_SOLX,
+    MAX_NUM_SYMBOLS
+};
+
+static const SYMBOL_TYPE k_symbols[] = {
+    SYMBOL_PLAIN,
+    SYMBOL_SOL,
+    SYMBOL_BKSL,
+    SYMBOL_SL,
+    SYMBOL_X,
+    SYMBOL_SOLBKSL,
+    SYMBOL_SOLSL,
+    SYMBOL_SOLX
+};
+
+std::string GetNameForSymbol(SYMBOL_TYPE which);
+std::string GetLongNameForSymbol(SYMBOL_TYPE which);
+SYMBOL_TYPE GetSymbolForName(const std::string& name);
 
 namespace details {
     template <std::size_t index, typename Array, std::size_t... I>

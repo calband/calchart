@@ -144,7 +144,7 @@ void DoCounterMarch(const Procedure& proc, AnimationCompile& anim,
     p[1] = ref1 + v1;
     auto steps2 = (ref2 - p[1]).Magnitude() * sin(Deg2Rad(ref2.Direction(p[1]) - d1)) / c;
     if (IsDiagonalDirection(d2)) {
-        steps2 /= static_cast<float>(SQRT2);
+        steps2 /= static_cast<float>(std::numbers::sqrt2);
     }
     auto v2 = CreateVector(d2, steps2);
     p[2] = p[1] + v2;
@@ -770,7 +770,7 @@ float ValueDefined::Get(AnimationCompile const&) const
         { CC_JS, 0.5 },
         { CC_GV, 1.0 },
         { CC_M, 4.0f / 3 },
-        { CC_DM, static_cast<float>(SQRT2) },
+        { CC_DM, static_cast<float>(std::numbers::sqrt2) },
     };
     auto i = mapping.find(val);
     if (i != mapping.end()) {

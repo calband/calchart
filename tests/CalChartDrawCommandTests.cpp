@@ -357,25 +357,25 @@ TEST_CASE("DrawCommand")
         CHECK(uut.x == 3);
         CHECK(uut.y == 7);
         CHECK(uut.text == "A");
-        CHECK(uut.anchor == (toUType(TextAnchor::Bottom) | toUType(TextAnchor::HorizontalCenter) | toUType(TextAnchor::ScreenTop)));
+        CHECK(uut.anchor == (TextAnchor::Bottom | TextAnchor::HorizontalCenter | TextAnchor::ScreenTop));
         CHECK(uut.withBackground);
         uut = std::get<CalChart::DrawCommands::Text>(cmds[1]);
         CHECK(uut.x == 3);
         CHECK(uut.y == 8);
         CHECK(uut.text == "A");
-        CHECK(uut.anchor == (toUType(TextAnchor::Top) | toUType(TextAnchor::HorizontalCenter)));
+        CHECK(uut.anchor == (TextAnchor::Top | TextAnchor::HorizontalCenter));
         CHECK(uut.withBackground);
         uut = std::get<CalChart::DrawCommands::Text>(cmds[2]);
         CHECK(uut.x == 11);
         CHECK(uut.y == 7);
         CHECK(uut.text == "B");
-        CHECK(uut.anchor == (toUType(TextAnchor::Bottom) | toUType(TextAnchor::HorizontalCenter) | toUType(TextAnchor::ScreenTop)));
+        CHECK(uut.anchor == (TextAnchor::Bottom | TextAnchor::HorizontalCenter | TextAnchor::ScreenTop));
         CHECK(uut.withBackground);
         uut = std::get<CalChart::DrawCommands::Text>(cmds[3]);
         CHECK(uut.x == 11);
         CHECK(uut.y == 8);
         CHECK(uut.text == "B");
-        CHECK(uut.anchor == (toUType(TextAnchor::Top) | toUType(TextAnchor::HorizontalCenter)));
+        CHECK(uut.anchor == (TextAnchor::Top | TextAnchor::HorizontalCenter));
         CHECK(uut.withBackground);
     }
 }

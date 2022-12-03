@@ -22,6 +22,7 @@
 */
 
 #include "CalChartAnimationTypes.h"
+#include "CalChartConstants.h"
 #include "CalChartContinuityToken.h"
 #include "CalChartTypes.h"
 #include <array>

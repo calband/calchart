@@ -19,6 +19,7 @@
 #include "CalChartConfiguration.h"
 #include "CalChartContinuityToken.h"
 #include "CalChartDrawPrimativesHelper.h"
+#include "DCSaveRestore.h"
 #include "basic_ui.h"
 
 #include <regex>

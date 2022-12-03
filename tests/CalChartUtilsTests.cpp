@@ -1,3 +1,4 @@
+#include "CalChartConstants.h"
 #include "CalChartUtils.h"
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>

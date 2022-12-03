@@ -597,34 +597,34 @@ namespace {
 }
 
 // this draws the yardline labels
-static void DrawText(wxDC& dc, std::string text, CalChart::Coord c, uint32_t anchor, bool withBox)
+static void DrawText(wxDC& dc, std::string text, CalChart::Coord c, CalChart::DrawCommands::Text::TextAnchor anchor, bool withBox)
 {
     auto where = fDIP(wxPoint{ c.x, c.y });
     auto textSize = dc.GetTextExtent(text);
     using TextAnchor = CalChart::DrawCommands::Text::TextAnchor;
-    if (anchor & toUType(TextAnchor::VerticalCenter)) {
+    if ((anchor & TextAnchor::VerticalCenter) == TextAnchor::VerticalCenter) {
         where.y -= textSize.y / 2;
     }
-    if (anchor & toUType(TextAnchor::Bottom)) {
+    if ((anchor & TextAnchor::Bottom) == TextAnchor::Bottom) {
         where.y -= textSize.y;
     }
-    if (anchor & toUType(TextAnchor::HorizontalCenter)) {
+    if ((anchor & TextAnchor::HorizontalCenter) == TextAnchor::HorizontalCenter) {
         where.x -= textSize.x / 2;
     }
-    if (anchor & toUType(TextAnchor::Right)) {
+    if ((anchor & TextAnchor::Right) == TextAnchor::Right) {
         where.x -= textSize.x;
     }
-    if (anchor & toUType(TextAnchor::ScreenTop)) {
+    if ((anchor & TextAnchor::ScreenTop) == TextAnchor::ScreenTop) {
         where.y = std::max(where.y, dc.DeviceToLogicalY(0));
     }
-    if (anchor & toUType(TextAnchor::ScreenBottom)) {
+    if ((anchor & TextAnchor::ScreenBottom) == TextAnchor::ScreenBottom) {
         auto edge = dc.DeviceToLogicalY(dc.GetSize().y);
         where.y = std::min(where.y, edge - textSize.y);
     }
-    if (anchor & toUType(TextAnchor::ScreenLeft)) {
+    if ((anchor & TextAnchor::ScreenLeft) == TextAnchor::ScreenLeft) {
         where.x = std::max(where.x, dc.DeviceToLogicalX(0));
     }
-    if (anchor & toUType(TextAnchor::ScreenRight)) {
+    if ((anchor & TextAnchor::ScreenRight) == TextAnchor::ScreenRight) {
         auto edge = dc.DeviceToLogicalX(dc.GetSize().x);
         where.x = std::min(where.x, edge - textSize.x);
     }
@@ -715,7 +715,6 @@ namespace CalChartDraw::Field {
         if (howToDraw != ShowMode_kPrinting) {
             // set color so when we make background box it blends
             wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD));
-            dc.DrawRectangle(top_row, textSize);
         }
 
         auto yard_text = std::span(mode.Get_yard_text());

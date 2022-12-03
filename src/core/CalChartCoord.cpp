@@ -55,9 +55,6 @@ float Coord::Direction() const
         return 0.0;
 
     auto ang = Rad2Deg(acos(CoordUnits2Float(x) / Magnitude())); // normalize
-    // ang = Rad2Deg<float>(ang); // normalize
-    //    ang = Rad2Deg<float>(ang); // normalize
-    // ang *= 180.0 / M_PI;
     if (y > 0)
         ang = (-ang); // check for > PI
 

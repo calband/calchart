@@ -76,8 +76,8 @@ namespace Point {
             break;
         }
         if (point.LabelIsVisible()) {
-            auto anchor = toUType(CalChart::DrawCommands::Text::TextAnchor::Bottom);
-            anchor |= point.GetFlip() ? toUType(CalChart::DrawCommands::Text::TextAnchor::Left) : toUType(CalChart::DrawCommands::Text::TextAnchor::Right);
+            auto anchor = CalChart::DrawCommands::Text::TextAnchor::Bottom;
+            anchor = anchor | (point.GetFlip() ? CalChart::DrawCommands::Text::TextAnchor::Left : CalChart::DrawCommands::Text::TextAnchor::Right);
             drawCmds.push_back(CalChart::DrawCommands::Text(pos - CalChart::Coord(0, circ_r), label, anchor));
         }
         return drawCmds;
@@ -190,8 +190,8 @@ namespace Field {
             auto text = yard_text[i];
 
             using TextAnchor = CalChart::DrawCommands::Text::TextAnchor;
-            result.emplace_back(CalChart::DrawCommands::Text{ CalChart::Coord(i * step8 + border1.x, border1.y + offset), text, toUType(TextAnchor::Bottom) | toUType(TextAnchor::HorizontalCenter) | toUType(TextAnchor::ScreenTop), true });
-            result.emplace_back(CalChart::DrawCommands::Text{ CalChart::Coord(i * step8 + border1.x, border1.y + fieldsize.y - offset), text, toUType(TextAnchor::Top) | toUType(TextAnchor::HorizontalCenter), true });
+            result.emplace_back(CalChart::DrawCommands::Text{ CalChart::Coord(i * step8 + border1.x, border1.y + offset), text, TextAnchor::Bottom | TextAnchor::HorizontalCenter | TextAnchor::ScreenTop, true });
+            result.emplace_back(CalChart::DrawCommands::Text{ CalChart::Coord(i * step8 + border1.x, border1.y + fieldsize.y - offset), text, TextAnchor::Top | TextAnchor::HorizontalCenter, true });
         }
         return result;
     }
