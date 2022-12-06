@@ -103,7 +103,7 @@ void AnimationView::OnDrawDots(wxDC& dc, CalChartConfiguration const& config)
                 wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_COLLISION));
             }
         } else if (mView->IsSelected(info.index)) {
-            switch (AngleToDirection(info.mFacingDirection)) {
+            switch (CalChart::AngleToDirection(info.mFacingDirection)) {
             case CalChart::Direction::SouthWest:
             case CalChart::Direction::West:
             case CalChart::Direction::NorthWest: {
@@ -119,7 +119,7 @@ void AnimationView::OnDrawDots(wxDC& dc, CalChartConfiguration const& config)
             }
             }
         } else {
-            switch (AngleToDirection(info.mFacingDirection)) {
+            switch (CalChart::AngleToDirection(info.mFacingDirection)) {
             case CalChart::Direction::SouthWest:
             case CalChart::Direction::West:
             case CalChart::Direction::NorthWest: {
@@ -154,7 +154,7 @@ void AnimationView::OnDrawSprites(wxDC& dc, CalChartConfiguration const& config)
     for (auto info : mAnimation->GetAllAnimateInfo()) {
         auto image_offset = !GetAnimationFrame()->TimerOn() ? 0 : OnBeat() ? 1
                                                                            : 2;
-        auto image_index = AngleToQuadrant(info.mFacingDirection) + image_offset * 8;
+        auto image_index = CalChart::AngleToQuadrant(info.mFacingDirection) + image_offset * 8;
         auto image = mSpriteImages[image_index];
         image = image.Scale(image.GetWidth() * scale, image.GetHeight() * scale);
         if (mView->IsSelected(info.index)) {
@@ -316,7 +316,7 @@ AnimationView::MarcherInfo AnimationView::GetMarcherInfo(int which) const
     MarcherInfo info{};
     if (mAnimation) {
         auto anim_info = mAnimation->GetAnimateInfo(which);
-        info.direction = NormalizeAngleRad((anim_info.mFacingDirection * M_PI / 180.0));
+        info.direction = CalChart::NormalizeAngleRad(CalChart::Deg2Rad(anim_info.mFacingDirection));
 
         auto position = anim_info.mPosition;
         info.x = CalChart::CoordUnits2Float(position.x);

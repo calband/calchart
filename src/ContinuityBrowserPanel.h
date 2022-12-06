@@ -20,6 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartConstants.h"
 #include "CalChartContinuity.h"
 #include "CalChartTypes.h"
 #include "CustomListViewPanel.h"

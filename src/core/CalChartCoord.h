@@ -28,8 +28,8 @@
 
 namespace CalChart {
 
-constexpr auto kCoordShift = 4;
-constexpr auto kCoordDecimal = (1 << kCoordShift);
+inline constexpr auto kCoordShift = 4;
+inline constexpr auto kCoordDecimal = (1 << kCoordShift);
 
 struct Coord {
     using units = int16_t;
@@ -159,7 +159,7 @@ constexpr auto Float2CoordUnits(T a)
 template <typename T>
 constexpr auto CoordUnits2Float(T a)
 {
-    return a / (float)CalChart::kCoordDecimal;
+    return a / static_cast<double>(CalChart::kCoordDecimal);
 }
 
 // Int2CoordUnits, CoordUnits2Int

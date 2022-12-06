@@ -1,3 +1,4 @@
+#include "CalChartConstants.h"
 #include "CalChartUtils.h"
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
@@ -5,21 +6,21 @@
 
 TEST_CASE("CalChartUtils", "basics")
 {
-
+    using namespace CalChart;
     CHECK_FALSE(IS_ZERO(1.0));
     CHECK(IS_ZERO(1.0e-9));
 
     CHECK(Deg2Rad(0) == 0);
     CHECK_FALSE(Deg2Rad(1) == 0);
     CHECK_FALSE(Deg2Rad(1) == 1.0f);
-    CHECK(IS_ZERO(Deg2Rad(180) - M_PI));
-    CHECK(IS_ZERO(Deg2Rad(225) - 5.0 / 4.0 * M_PI));
-    CHECK(IS_ZERO(Deg2Rad(360) - 2 * M_PI));
-    CHECK(IS_ZERO(Deg2Rad(540) - 3 * M_PI));
-    CHECK(IS_ZERO(Rad2Deg(M_PI) - 180));
-    CHECK(IS_ZERO(Rad2Deg(5.0 / 4.0 * M_PI) - 225));
-    CHECK(IS_ZERO(Rad2Deg(2 * M_PI) - 360));
-    CHECK(IS_ZERO(Rad2Deg(3 * M_PI) - 540));
+    CHECK(IS_ZERO(Deg2Rad(180) - std::numbers::pi));
+    CHECK(IS_ZERO(Deg2Rad(225) - 5.0 / 4.0 * std::numbers::pi));
+    CHECK(IS_ZERO(Deg2Rad(360) - 2 * std::numbers::pi));
+    CHECK(IS_ZERO(Deg2Rad(540) - 3 * std::numbers::pi));
+    CHECK(IS_ZERO(Rad2Deg(std::numbers::pi) - 180));
+    CHECK(IS_ZERO(Rad2Deg(5.0 / 4.0 * std::numbers::pi) - 225));
+    CHECK(IS_ZERO(Rad2Deg(2 * std::numbers::pi) - 360));
+    CHECK(IS_ZERO(Rad2Deg(3 * std::numbers::pi) - 540));
 
     CHECK(BoundDirection(225) == 225);
     CHECK(BoundDirection(-225) == 135);

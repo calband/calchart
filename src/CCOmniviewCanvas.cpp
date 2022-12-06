@@ -274,59 +274,59 @@ auto GetMarcherTextureAndPoints(float cameraAngleToMarcher, float marcherDirecti
 {
     // Returns which direction they are facing in regards to the camera.
     float relativeAngle = marcherDirection - cameraAngleToMarcher; // convert to relative angle;
-    relativeAngle = NormalizeAngleRad(relativeAngle);
+    relativeAngle = CalChart::NormalizeAngleRad(relativeAngle);
 
-    if (cameraAngleToMarcher >= 1.0 * M_PI / 8.0 && cameraAngleToMarcher < 3.0 * M_PI / 8.0) {
+    if (cameraAngleToMarcher >= 1.0 * std::numbers::pi / 8.0 && cameraAngleToMarcher < 3.0 * std::numbers::pi / 8.0) {
         y1 += 0.45f;
         y2 -= 0.45f;
         x1 -= 0.45f;
         x2 += 0.45f;
-    } else if (cameraAngleToMarcher >= 3.0 * M_PI / 8.0 && cameraAngleToMarcher < 5.0 * M_PI / 8.0) {
+    } else if (cameraAngleToMarcher >= 3.0 * std::numbers::pi / 8.0 && cameraAngleToMarcher < 5.0 * std::numbers::pi / 8.0) {
         x1 -= 0.45f;
         x2 += 0.45f;
-    } else if (cameraAngleToMarcher >= 5.0 * M_PI / 8.0 && cameraAngleToMarcher < 7.0 * M_PI / 8.0) {
+    } else if (cameraAngleToMarcher >= 5.0 * std::numbers::pi / 8.0 && cameraAngleToMarcher < 7.0 * std::numbers::pi / 8.0) {
         y1 -= 0.45f;
         y2 += 0.45f;
         x1 -= 0.45f;
         x2 += 0.45f;
-    } else if (cameraAngleToMarcher >= 7.0 * M_PI / 8.0 && cameraAngleToMarcher < 9.0 * M_PI / 8.0) {
+    } else if (cameraAngleToMarcher >= 7.0 * std::numbers::pi / 8.0 && cameraAngleToMarcher < 9.0 * std::numbers::pi / 8.0) {
         y1 -= 0.45f;
         y2 += 0.45f;
-    } else if (cameraAngleToMarcher >= 9.0 * M_PI / 8.0 && cameraAngleToMarcher < 11.0 * M_PI / 8.0) {
+    } else if (cameraAngleToMarcher >= 9.0 * std::numbers::pi / 8.0 && cameraAngleToMarcher < 11.0 * std::numbers::pi / 8.0) {
         y1 -= 0.45f;
         y2 += 0.45f;
         x1 += 0.45f;
         x2 -= 0.45f;
-    } else if (cameraAngleToMarcher >= 11.0 * M_PI / 8.0 && cameraAngleToMarcher < 13.0 * M_PI / 8.0) {
+    } else if (cameraAngleToMarcher >= 11.0 * std::numbers::pi / 8.0 && cameraAngleToMarcher < 13.0 * std::numbers::pi / 8.0) {
         x1 += 0.45f;
         x2 -= 0.45f;
-    } else if (cameraAngleToMarcher >= 13.0 * M_PI / 8.0 && relativeAngle < 15.0 * M_PI / 8.0) {
+    } else if (cameraAngleToMarcher >= 13.0 * std::numbers::pi / 8.0 && relativeAngle < 15.0 * std::numbers::pi / 8.0) {
         y1 += 0.45f;
         y2 -= 0.45f;
         x1 += 0.45f;
         x2 -= 0.45f;
-    } else // if (cameraAngleToMarcher >= 15.0*M_PI/8.0 || cameraAngleToMarcher <
-    // 1.0*M_PI/8.0) // and everything else
+    } else // if (cameraAngleToMarcher >= 15.0*std::numbers::pi/8.0 || cameraAngleToMarcher <
+    // 1.0*std::numbers::pi/8.0) // and everything else
     {
         y1 += 0.45f;
         y2 -= 0.45f;
     }
 
-    if (relativeAngle >= 1.0 * M_PI / 8.0 && relativeAngle < 3.0 * M_PI / 8.0) {
+    if (relativeAngle >= 1.0 * std::numbers::pi / 8.0 && relativeAngle < 3.0 * std::numbers::pi / 8.0) {
         return WhichImage::kBR0;
-    } else if (relativeAngle >= 3.0 * M_PI / 8.0 && relativeAngle < 5.0 * M_PI / 8.0) {
+    } else if (relativeAngle >= 3.0 * std::numbers::pi / 8.0 && relativeAngle < 5.0 * std::numbers::pi / 8.0) {
         return WhichImage::kR0;
-    } else if (relativeAngle >= 5.0 * M_PI / 8.0 && relativeAngle < 7.0 * M_PI / 8.0) {
+    } else if (relativeAngle >= 5.0 * std::numbers::pi / 8.0 && relativeAngle < 7.0 * std::numbers::pi / 8.0) {
         return WhichImage::kFR0;
-    } else if (relativeAngle >= 7.0 * M_PI / 8.0 && relativeAngle < 9.0 * M_PI / 8.0) {
+    } else if (relativeAngle >= 7.0 * std::numbers::pi / 8.0 && relativeAngle < 9.0 * std::numbers::pi / 8.0) {
         return WhichImage::kF0;
-    } else if (relativeAngle >= 9.0 * M_PI / 8.0 && relativeAngle < 11.0 * M_PI / 8.0) {
+    } else if (relativeAngle >= 9.0 * std::numbers::pi / 8.0 && relativeAngle < 11.0 * std::numbers::pi / 8.0) {
         return WhichImage::kFL0;
-    } else if (relativeAngle >= 11.0 * M_PI / 8.0 && relativeAngle < 13.0 * M_PI / 8.0) {
+    } else if (relativeAngle >= 11.0 * std::numbers::pi / 8.0 && relativeAngle < 13.0 * std::numbers::pi / 8.0) {
         return WhichImage::kL0;
-    } else if (relativeAngle >= 13.0 * M_PI / 8.0 && relativeAngle < 15.0 * M_PI / 8.0) {
+    } else if (relativeAngle >= 13.0 * std::numbers::pi / 8.0 && relativeAngle < 15.0 * std::numbers::pi / 8.0) {
         return WhichImage::kBL0;
-    } else // if (relativeAngle >= 15.0*M_PI/8.0 || relativeAngle < 1.0*M_PI/8.0)
+    } else // if (relativeAngle >= 15.0*std::numbers::pi/8.0 || relativeAngle < 1.0*std::numbers::pi/8.0)
     // // and everything else
     {
         return WhichImage::kB0;
@@ -533,7 +533,7 @@ void CCOmniView_GLContext::DrawField(float FieldEW, float FieldNS, bool crowdOn)
 
 void CCOmniView_GLContext::Draw3dMarcher(AnimationView::MarcherInfo const& info, CCOmniviewCanvas::ViewPoint const& viewpoint, WhichMarchingStyle style)
 {
-    auto ang = NormalizeAngleRad(GetAngle(info.x, info.y, viewpoint));
+    auto ang = CalChart::NormalizeAngleRad(GetAngle(info.x, info.y, viewpoint));
     auto dir = info.direction;
 
     auto x2 = info.x;
@@ -601,7 +601,7 @@ void CCOmniviewCanvas::SetView(AnimationView* view)
 // http://nehe.gamedev.net/article/replacement_for_gluperspective/21002/
 static void myGLUPerspective(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar)
 {
-    auto fH = tan(fovY / 360.0 * M_PI) * zNear;
+    auto fH = tan(fovY / 360.0 * std::numbers::pi) * zNear;
     auto fW = fH * aspect;
     glFrustum(-fW, fW, -fH, fH, zNear, zFar);
 }
@@ -688,8 +688,8 @@ void CCOmniviewCanvas::OnPaint(wxPaintEvent&)
     glViewport(0, 0, ClientSize.x, ClientSize.y);
 
     CalChart::Coord fieldSize = mView ? mView->GetShowMode().FieldSize() : CalChart::Coord(160, 80);
-    float FieldEW = CalChart::CoordUnits2Float(fieldSize.y);
-    float FieldNS = CalChart::CoordUnits2Float(fieldSize.x);
+    auto FieldEW = CalChart::CoordUnits2Float(fieldSize.y);
+    auto FieldNS = CalChart::CoordUnits2Float(fieldSize.x);
 
     glClear(GL_COLOR_BUFFER_BIT);
     // set our view point:
@@ -736,7 +736,7 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
         if (event.GetKeyCode() == '!') {
             mViewPoint.y *= -1;
             mViewPoint.x *= -1;
-            mViewAngle = NormalizeAngleRad(mViewAngle + M_PI);
+            mViewAngle = CalChart::NormalizeAngleRad(mViewAngle + std::numbers::pi);
         }
         break;
     case '2':
@@ -748,7 +748,7 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
         if (event.GetKeyCode() == '@') {
             mViewPoint.y *= -1;
             mViewPoint.x *= -1;
-            mViewAngle = NormalizeAngleRad(mViewAngle + M_PI);
+            mViewAngle = CalChart::NormalizeAngleRad(mViewAngle + std::numbers::pi);
         }
         break;
     case '3':
@@ -760,7 +760,7 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
         if (event.GetKeyCode() == '#') {
             mViewPoint.y *= -1;
             mViewPoint.x *= -1;
-            mViewAngle = NormalizeAngleRad(mViewAngle + M_PI);
+            mViewAngle = CalChart::NormalizeAngleRad(mViewAngle + std::numbers::pi);
         }
         break;
 
@@ -833,12 +833,12 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
     case 'q':
         OnCmd_FollowMarcher(-1);
         mViewAngle += AngleStepIncr;
-        mViewAngle = NormalizeAngleRad(mViewAngle);
+        mViewAngle = CalChart::NormalizeAngleRad(mViewAngle);
         break;
     case 'e':
         OnCmd_FollowMarcher(-1);
         mViewAngle -= AngleStepIncr;
-        mViewAngle = NormalizeAngleRad(mViewAngle);
+        mViewAngle = CalChart::NormalizeAngleRad(mViewAngle);
         break;
     case 'r':
         OnCmd_FollowMarcher(-1);
@@ -865,13 +865,13 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
     // move, following the FPS model
     case 'a':
         OnCmd_FollowMarcher(-1);
-        mViewPoint.x += -stepIncr * cos(mViewAngle - M_PI / 2);
-        mViewPoint.y += -stepIncr * sin(mViewAngle - M_PI / 2);
+        mViewPoint.x += -stepIncr * cos(mViewAngle - std::numbers::pi / 2);
+        mViewPoint.y += -stepIncr * sin(mViewAngle - std::numbers::pi / 2);
         break;
     case 'd':
         OnCmd_FollowMarcher(-1);
-        mViewPoint.x += stepIncr * cos(mViewAngle - M_PI / 2);
-        mViewPoint.y += stepIncr * sin(mViewAngle - M_PI / 2);
+        mViewPoint.x += stepIncr * cos(mViewAngle - std::numbers::pi / 2);
+        mViewPoint.y += stepIncr * sin(mViewAngle - std::numbers::pi / 2);
         break;
     case 's':
         OnCmd_FollowMarcher(-1);

@@ -55,9 +55,42 @@ private:
         kLowerLeft,
         kLower,
         kLowerRight,
-        kLast,
+        kLast
     };
+    using BackgroundAdjustTypeIterator = CalChart::Iterator<BackgroundAdjustType, BackgroundAdjustType::kUpperLeft, BackgroundAdjustType::kLowerRight>;
     BackgroundAdjustType mBackgroundAdjustType;
+    BackgroundAdjustType WhereIsMouseClick(const wxMouseEvent& event, const wxDC& dc) const;
+
+    static auto toOffsetX(BackgroundAdjustType where)
+    {
+        switch (where) {
+        case BackgroundAdjustType::kUpperLeft:
+        case BackgroundAdjustType::kLeft:
+        case BackgroundAdjustType::kLowerLeft:
+            return -1;
+        case BackgroundAdjustType::kUpper:
+        case BackgroundAdjustType::kMove:
+        case BackgroundAdjustType::kLower:
+            return 0;
+        default:
+            return 1;
+        }
+    }
+    static auto toOffsetY(BackgroundAdjustType where)
+    {
+        switch (where) {
+        case BackgroundAdjustType::kUpperLeft:
+        case BackgroundAdjustType::kUpper:
+        case BackgroundAdjustType::kUpperRight:
+            return -1;
+        case BackgroundAdjustType::kLeft:
+        case BackgroundAdjustType::kMove:
+        case BackgroundAdjustType::kRight:
+            return 0;
+        default:
+            return 1;
+        }
+    }
 
     struct CalculateScaleAndMove {
     public:
@@ -81,7 +114,7 @@ BackgroundImage::BackgroundImage(const wxImage& image, int x, int y, int scaled_
     mBitmap = wxBitmap(mImage.Scale(scaled_width, scaled_height, wxIMAGE_QUALITY_HIGH));
 }
 
-bool BackgroundImage::MouseClickIsHit(const wxMouseEvent& event, const wxDC& dc) const
+BackgroundImage::BackgroundAdjustType BackgroundImage::WhereIsMouseClick(const wxMouseEvent& event, const wxDC& dc) const
 {
     auto point = event.GetPosition();
     auto x = dc.DeviceToLogicalX(point.x);
@@ -90,12 +123,12 @@ bool BackgroundImage::MouseClickIsHit(const wxMouseEvent& event, const wxDC& dc)
     // where are we?
     auto bitmapSize = mBitmap.GetSize();
     auto middle = mBitmapPoint + bitmapSize / 2;
-    for (auto where = toUType(BackgroundAdjustType::kUpperLeft); where < toUType(BackgroundAdjustType::kLast); ++where) {
-        if (where == toUType(BackgroundAdjustType::kMove) && wxRect{ mBitmapPoint, mBitmap.GetSize() }.Contains(x, y)) {
-            return true;
+    for (auto where : BackgroundAdjustTypeIterator()) {
+        if (where == BackgroundAdjustType::kMove && wxRect{ mBitmapPoint, mBitmap.GetSize() }.Contains(x, y)) {
+            return where;
         }
-        auto offsetX = (where % 3) - 1;
-        auto offsetY = (where / 3) - 1;
+        auto offsetX = toOffsetX(where);
+        auto offsetY = toOffsetY(where);
         auto grabPoint = wxRect{
             middle.x + (offsetX * (bitmapSize.x / 2 + dc.DeviceToLogicalXRel(kCircleSize / 3))) - dc.DeviceToLogicalXRel(kCircleSize),
             middle.y + (offsetY * (bitmapSize.y / 2 + dc.DeviceToLogicalYRel(kCircleSize / 3))) - dc.DeviceToLogicalXRel(kCircleSize),
@@ -104,10 +137,15 @@ bool BackgroundImage::MouseClickIsHit(const wxMouseEvent& event, const wxDC& dc)
         };
 
         if (grabPoint.Contains(x, y)) {
-            return true;
+            return where;
         }
     }
-    return false;
+    return BackgroundAdjustType::kLast;
+}
+
+bool BackgroundImage::MouseClickIsHit(const wxMouseEvent& event, const wxDC& dc) const
+{
+    return WhereIsMouseClick(event, dc) != BackgroundAdjustType::kLast;
 }
 
 void BackgroundImage::OnMouseLeftDown(wxMouseEvent const& event, wxDC const& dc)
@@ -116,36 +154,12 @@ void BackgroundImage::OnMouseLeftDown(wxMouseEvent const& event, wxDC const& dc)
     auto x = dc.DeviceToLogicalX(point.x);
     auto y = dc.DeviceToLogicalY(point.y);
 
-    // where are we?
-    auto bitmapSize = mBitmap.GetSize();
-    auto middle = mBitmapPoint + bitmapSize / 2;
-    auto where = toUType(BackgroundAdjustType::kUpperLeft);
-    for (; where < toUType(BackgroundAdjustType::kLast); ++where) {
-        if (where == toUType(BackgroundAdjustType::kMove)) {
-            continue;
-        }
-        auto offsetX = (where % 3) - 1;
-        auto offsetY = (where / 3) - 1;
-        auto grabPoint = wxRect{
-            middle.x + (offsetX * (bitmapSize.x / 2 + dc.DeviceToLogicalXRel(kCircleSize / 3))) - dc.DeviceToLogicalXRel(kCircleSize),
-            middle.y + (offsetY * (bitmapSize.y / 2 + dc.DeviceToLogicalYRel(kCircleSize / 3))) - dc.DeviceToLogicalXRel(kCircleSize),
-            dc.DeviceToLogicalXRel(kCircleSize * 2),
-            dc.DeviceToLogicalXRel(kCircleSize * 2)
-        };
-
-        if (grabPoint.Contains(x, y)) {
-            break;
-        }
+    auto where = WhereIsMouseClick(event, dc);
+    if (where == BackgroundAdjustType::kLast) {
+        return;
     }
-    mBackgroundAdjustType = static_cast<BackgroundAdjustType>(where);
-    if (mBackgroundAdjustType == BackgroundAdjustType::kLast) {
-        if (wxRect{ mBitmapPoint, wxSize{ mBitmap.GetWidth(), mBitmap.GetHeight() } }.Contains(x, y)) {
-            mBackgroundAdjustType = BackgroundAdjustType::kMove;
-        }
-    }
-    if (mBackgroundAdjustType != BackgroundAdjustType::kLast) {
-        mScaleAndMove = std::make_unique<CalculateScaleAndMove>(wxPoint{ x, y }, wxRect{ mBitmapPoint, mBitmap.GetSize() }, mBackgroundAdjustType);
-    }
+    mBackgroundAdjustType = where;
+    mScaleAndMove = std::make_unique<CalculateScaleAndMove>(wxPoint{ x, y }, wxRect{ mBitmapPoint, mBitmap.GetSize() }, mBackgroundAdjustType);
 }
 
 std::array<int, 4> BackgroundImage::OnMouseLeftUp(const wxMouseEvent&, const wxDC&)
@@ -183,21 +197,21 @@ void BackgroundImage::OnPaint(wxDC& dc, bool drawPicAdjustDots, bool selected) c
         auto middle = mBitmapPoint + bitmapSize / 2;
         dc.SetBrush(*wxBLUE_BRUSH);
         dc.SetPen(*wxBLUE_PEN);
-        for (auto where = toUType(BackgroundAdjustType::kUpperLeft); where < toUType(BackgroundAdjustType::kLast); ++where) {
+        for (auto where : BackgroundAdjustTypeIterator()) {
             dc.SetBrush(*wxBLUE_BRUSH);
-            if (where == toUType(BackgroundAdjustType::kMove)) {
+            if (where == BackgroundAdjustType::kMove) {
                 continue;
             }
-            auto offsetX = (where % 3) - 1;
-            auto offsetY = (where / 3) - 1;
-            if (toUType(mBackgroundAdjustType) == where) {
+            auto offsetX = toOffsetX(where);
+            auto offsetY = toOffsetY(where);
+            if (mBackgroundAdjustType == where) {
                 dc.SetBrush(*wxRED_BRUSH);
             }
             dc.DrawCircle(
                 middle.x + (offsetX * (bitmapSize.x / 2 + dc.DeviceToLogicalXRel(kCircleSize / 3))),
                 middle.y + (offsetY * (bitmapSize.y / 2 + dc.DeviceToLogicalYRel(kCircleSize / 3))),
                 dc.DeviceToLogicalXRel(kCircleSize));
-            if (selected && toUType(mBackgroundAdjustType) != where) {
+            if (selected && mBackgroundAdjustType != where) {
                 dc.SetBrush(*wxWHITE_BRUSH);
                 dc.DrawCircle(
                     middle.x + (offsetX * (bitmapSize.x / 2 + dc.DeviceToLogicalXRel(kCircleSize / 3))),

@@ -21,59 +21,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartUtils.h"
 #include <functional>
 #include <set>
 #include <string>
 
 namespace CalChart {
-
-enum class PSFONT {
-    SYMBOL,
-    NORM,
-    BOLD,
-    ITAL,
-    BOLDITAL,
-    TAB
-};
-
-enum SYMBOL_TYPE {
-    SYMBOL_PLAIN = 0,
-    SYMBOL_SOL,
-    SYMBOL_BKSL,
-    SYMBOL_SL,
-    SYMBOL_X,
-    SYMBOL_SOLBKSL,
-    SYMBOL_SOLSL,
-    SYMBOL_SOLX,
-    MAX_NUM_SYMBOLS
-};
-
-static const SYMBOL_TYPE k_symbols[] = {
-    SYMBOL_PLAIN,
-    SYMBOL_SOL,
-    SYMBOL_BKSL,
-    SYMBOL_SL,
-    SYMBOL_X,
-    SYMBOL_SOLBKSL,
-    SYMBOL_SOLSL,
-    SYMBOL_SOLX
-};
-
-// we lay out directions in clockwise order from North
-enum class Direction {
-    North,
-    NorthEast,
-    East,
-    SouthEast,
-    South,
-    SouthWest,
-    West,
-    NorthWest,
-};
-
-std::string GetNameForSymbol(SYMBOL_TYPE which);
-std::string GetLongNameForSymbol(SYMBOL_TYPE which);
-SYMBOL_TYPE GetSymbolForName(const std::string& name);
 
 // error occurred on parsing.  First arg is what went wrong, second is the values that need to be fixed.
 // return a string of what to try parsing.
@@ -85,10 +38,4 @@ struct ParseErrorHandlers {
 
 typedef std::set<int> SelectionList;
 
-}
-
-template <typename E>
-constexpr auto toUType(E enumerator)
-{
-    return static_cast<std::underlying_type_t<E>>(enumerator);
 }

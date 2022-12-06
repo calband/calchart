@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartConstants.h"
 #include "CalChartCoord.h"
 #include <span>
 #include <variant>
@@ -128,14 +129,13 @@ namespace DrawCommands {
             ScreenRight = 1 << 8,
             ScreenLeft = 1 << 9,
         };
-        using TextAnchor_t = std::underlying_type_t<TextAnchor>;
 
         int x{}, y{};
         std::string text;
-        TextAnchor_t anchor{};
+        TextAnchor anchor{};
         bool withBackground{};
 
-        Text(int startx, int starty, std::string const& text = "", TextAnchor_t anchor = toUType(TextAnchor::None), bool withBackground = false)
+        Text(int startx, int starty, std::string const& text = "", TextAnchor anchor = TextAnchor::None, bool withBackground = false)
             : x(startx)
             , y(starty)
             , text(text)
@@ -144,11 +144,19 @@ namespace DrawCommands {
         {
         }
 
-        Text(Coord start, std::string const& text = "", TextAnchor_t anchor = toUType(TextAnchor::None), bool withBackground = false)
+        Text(Coord start, std::string const& text = "", TextAnchor anchor = TextAnchor::None, bool withBackground = false)
             : Text(start.x, start.y, text, anchor, withBackground)
         {
         }
     };
+    inline Text::TextAnchor operator|(Text::TextAnchor lhs, Text::TextAnchor rhs)
+    {
+        return static_cast<Text::TextAnchor>(toUType(lhs) | toUType(rhs));
+    }
+    inline Text::TextAnchor operator&(Text::TextAnchor lhs, Text::TextAnchor rhs)
+    {
+        return static_cast<Text::TextAnchor>(toUType(lhs) & toUType(rhs));
+    }
 
 }
 

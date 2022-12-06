@@ -32,6 +32,7 @@
  *  likely need to continue to be in Point.
  */
 
+#include "CalChartConstants.h"
 #include "CalChartCoord.h"
 #include "CalChartTypes.h"
 

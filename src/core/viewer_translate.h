@@ -6,8 +6,8 @@
  */
 //
 
+#include "CalChartConstants.h"
 #include "CalChartCoord.h"
-#include "CalChartTypes.h"
 
 namespace CalChart {
 

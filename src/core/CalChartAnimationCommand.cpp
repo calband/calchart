@@ -226,9 +226,7 @@ std::unique_ptr<AnimationCommand> AnimationCommandRotate::clone() const
 bool AnimationCommandRotate::NextBeat(Coord& pt)
 {
     bool b = AnimationCommand::NextBeat(pt);
-    auto curr_ang = (mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart)
-                               : mAngStart)
-        * M_PI / 180.0;
+    auto curr_ang = Deg2Rad(mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart) : mAngStart);
     pt.x = RoundToCoordUnits(mOrigin.x + cos(curr_ang) * mR);
     pt.y = RoundToCoordUnits(mOrigin.y - sin(curr_ang) * mR);
     return b;
@@ -237,9 +235,7 @@ bool AnimationCommandRotate::NextBeat(Coord& pt)
 bool AnimationCommandRotate::PrevBeat(Coord& pt)
 {
     if (AnimationCommand::PrevBeat(pt)) {
-        auto curr_ang = (mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart)
-                                   : mAngStart)
-            * M_PI / 180.0;
+        auto curr_ang = Deg2Rad(mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart) : mAngStart);
         pt.x = RoundToCoordUnits(mOrigin.x + cos(curr_ang) * mR);
         pt.y = RoundToCoordUnits(mOrigin.y - sin(curr_ang) * mR);
         return true;
@@ -251,15 +247,15 @@ bool AnimationCommandRotate::PrevBeat(Coord& pt)
 void AnimationCommandRotate::ApplyForward(Coord& pt)
 {
     AnimationCommand::ApplyForward(pt);
-    pt.x = RoundToCoordUnits(mOrigin.x + cos(mAngEnd * M_PI / 180.0) * mR);
-    pt.y = RoundToCoordUnits(mOrigin.y - sin(mAngEnd * M_PI / 180.0) * mR);
+    pt.x = RoundToCoordUnits(mOrigin.x + cos(Deg2Rad(mAngEnd)) * mR);
+    pt.y = RoundToCoordUnits(mOrigin.y - sin(Deg2Rad(mAngEnd)) * mR);
 }
 
 void AnimationCommandRotate::ApplyBackward(Coord& pt)
 {
     AnimationCommand::ApplyBackward(pt);
-    pt.x = RoundToCoordUnits(mOrigin.x + cos(mAngStart * M_PI / 180.0) * mR);
-    pt.y = RoundToCoordUnits(mOrigin.y - sin(mAngStart * M_PI / 180.0) * mR);
+    pt.x = RoundToCoordUnits(mOrigin.x + cos(Deg2Rad(mAngStart)) * mR);
+    pt.y = RoundToCoordUnits(mOrigin.y - sin(Deg2Rad(mAngStart)) * mR);
 }
 
 float AnimationCommandRotate::FacingDirection() const
@@ -284,10 +280,10 @@ AnimationCommandRotate::GenCC_DrawCommand(Coord /*pt*/, Coord offset) const
 {
     float start = (mAngStart < mAngEnd) ? mAngStart : mAngEnd;
     float end = (mAngStart < mAngEnd) ? mAngEnd : mAngStart;
-    auto x_start = RoundToCoordUnits(mOrigin.x + cos(start * M_PI / 180.0) * mR) + offset.x;
-    auto y_start = RoundToCoordUnits(mOrigin.y - sin(start * M_PI / 180.0) * mR) + offset.y;
-    auto x_end = RoundToCoordUnits(mOrigin.x + cos(end * M_PI / 180.0) * mR) + offset.x;
-    auto y_end = RoundToCoordUnits(mOrigin.y - sin(end * M_PI / 180.0) * mR) + offset.y;
+    auto x_start = RoundToCoordUnits(mOrigin.x + cos(Deg2Rad(start)) * mR) + offset.x;
+    auto y_start = RoundToCoordUnits(mOrigin.y - sin(Deg2Rad(start)) * mR) + offset.y;
+    auto x_end = RoundToCoordUnits(mOrigin.x + cos(Deg2Rad(end)) * mR) + offset.x;
+    auto y_end = RoundToCoordUnits(mOrigin.y - sin(Deg2Rad(end)) * mR) + offset.y;
 
     return DrawCommands::Arc{ x_start, y_start, x_end, y_end, mOrigin.x + offset.x, mOrigin.y + offset.y };
 }
