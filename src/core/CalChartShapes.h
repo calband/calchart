@@ -24,42 +24,66 @@
 /**
  * CalChart Shapes
  * These are general objects that represent Shapes in CalChart.
- * A shape object returns a vector of DrawCommand that represent how to draw the shape.  This keeps the implementation details
- * of "how" to draw seperate from the "what" to draw, allowing reusablity.
+ * A shape object returns a vector of DrawCommand that represent how to draw the
+ * shape.  This keeps the implementation details of "how" to draw seperate from
+ * the "what" to draw, allowing reusablity.
  */
 
 #include "CalChartCoord.h"
 #include "CalChartDrawCommand.h"
+#include <numeric>
 #include <optional>
 #include <vector>
 
 namespace CalChart {
 
 using RawPolygon_t = std::vector<Coord>;
-bool Inside(Coord p, RawPolygon_t const& polygon);
+auto Inside(Coord p, RawPolygon_t const& polygon) -> bool;
+auto CrossesLine(Coord start, Coord end, Coord p) -> bool;
+auto GetDistance(RawPolygon_t const& polygon) -> double;
 
 class Shape {
 public:
+    Shape() = default;
+    Shape(Shape const&) = default;
+    Shape(Shape&&) = default;
+    auto operator=(Shape const&) -> Shape& = default;
+    auto operator=(Shape&&) -> Shape& = default;
     virtual ~Shape() = default;
 
-    virtual std::vector<DrawCommand> GetCC_DrawCommand(float x, float y) const = 0;
-    virtual void OnMove(Coord p, Coord snapped_p) = 0;
-    virtual std::optional<RawPolygon_t> GetPolygon() const { return {}; }
+    // Call OnMove to indicate that the movable point of the shape has moved.
+    // Different shapes have different "snap" policies.  The derived classes determine
+    // if they will call snap by overloading the useSnap() function and then will
+    // call the provided snapper function.
+    template <typename Function>
+    void OnMove(Coord p, Function snapper) { OnMoveImpl(useSnap() ? snapper(p) : p); }
+
+    [[nodiscard]] virtual auto GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand> = 0;
+    [[nodiscard]] virtual auto GetPolygon() const -> RawPolygon_t { return {}; }
+
+private:
+    // this is using the Template Pattern -- the derived classes determine if
+    // they should use the snapped version of the Coord, or what move should do.
+    virtual void OnMoveImpl(Coord p) = 0;
+    virtual auto useSnap() -> bool { return false; }
 };
 
 class Shape_1point : public Shape {
 public:
-    Shape_1point(Coord p)
+    explicit Shape_1point(Coord p)
         : origin(p)
     {
     }
 
-    virtual void OnMove(Coord p, Coord snapped_p) override;
-    void MoveOrigin(Coord p) { origin = p; }
-    auto GetOrigin() const { return origin; }
+    [[nodiscard]] auto GetOrigin() const { return origin; }
 
 protected:
+    void MoveOrigin(Coord p) { origin = p; }
+
+private:
     Coord origin;
+    void OnMoveImpl(Coord p) override { MoveOrigin(p); }
+    auto useSnap() -> bool override { return false; }
 };
 
 class Shape_crosshairs : public Shape_1point {
@@ -70,38 +94,43 @@ public:
     {
     }
 
-    virtual void OnMove(Coord p, Coord snapped_p) override;
-    virtual std::vector<DrawCommand> GetCC_DrawCommand(float x, float y) const override;
+    [[nodiscard]] auto GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand> override;
 
-protected:
+private:
     Coord::units crosshairs_width;
+    void OnMoveImpl(Coord p) override { MoveOrigin(p); }
+    auto useSnap() -> bool override { return true; }
 };
 
-class Shape_2point : public Shape_1point {
+class Shape_2point : public Shape {
 public:
-    Shape_2point(Coord p)
-        : Shape_1point(p)
+    explicit Shape_2point(Coord p)
+        : origin(p)
         , point(p)
     {
     }
     Shape_2point(Coord p1, Coord p2)
-        : Shape_1point(p1)
+        : origin(p1)
         , point(p2)
     {
     }
 
-    virtual void OnMove(Coord p, Coord snapped_p) override;
-    void MovePoint(Coord p) { point = p; }
-    auto GetPoint() const { return point; }
-    std::optional<RawPolygon_t> GetPolygon() const override;
+    [[nodiscard]] auto GetOrigin() const { return origin; }
+    [[nodiscard]] auto GetPoint() const { return point; }
+    [[nodiscard]] auto GetPolygon() const -> RawPolygon_t override;
 
 protected:
+    void MovePoint(Coord p) { point = p; }
+
+private:
+    Coord origin;
     Coord point;
+    void OnMoveImpl(Coord p) override { MovePoint(p); }
 };
 
 class Shape_line : public Shape_2point {
 public:
-    Shape_line(Coord p)
+    explicit Shape_line(Coord p)
         : Shape_2point(p)
     {
     }
@@ -110,13 +139,16 @@ public:
     {
     }
 
-    virtual void OnMove(Coord p, Coord snapped_p) override;
-    virtual std::vector<DrawCommand> GetCC_DrawCommand(float x, float y) const override;
+    [[nodiscard]] auto GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand> override;
+
+private:
+    void OnMoveImpl(Coord p) override { MovePoint(p); }
+    auto useSnap() -> bool override { return true; }
 };
 
 class Shape_x : public Shape_2point {
 public:
-    Shape_x(Coord p)
+    explicit Shape_x(Coord p)
         : Shape_2point(p)
     {
     }
@@ -125,13 +157,16 @@ public:
     {
     }
 
-    virtual void OnMove(Coord p, Coord snapped_p) override;
-    virtual std::vector<DrawCommand> GetCC_DrawCommand(float x, float y) const override;
+    [[nodiscard]] auto GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand> override;
+
+private:
+    void OnMoveImpl(Coord p) override { MovePoint(p); }
+    auto useSnap() -> bool override { return true; }
 };
 
 class Shape_cross : public Shape_2point {
 public:
-    Shape_cross(Coord p)
+    explicit Shape_cross(Coord p)
         : Shape_2point(p)
     {
     }
@@ -140,13 +175,16 @@ public:
     {
     }
 
-    virtual void OnMove(Coord p, Coord snapped_p) override;
-    virtual std::vector<DrawCommand> GetCC_DrawCommand(float x, float y) const override;
+    [[nodiscard]] auto GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand> override;
+
+private:
+    void OnMoveImpl(Coord p) override { MovePoint(p); }
+    auto useSnap() -> bool override { return true; }
 };
 
 class Shape_ellipse : public Shape_2point {
 public:
-    Shape_ellipse(Coord p)
+    explicit Shape_ellipse(Coord p)
         : Shape_2point(p)
     {
     }
@@ -155,8 +193,11 @@ public:
     {
     }
 
-    virtual void OnMove(Coord p, Coord snapped_p) override;
-    virtual std::vector<DrawCommand> GetCC_DrawCommand(float x, float y) const override;
+    [[nodiscard]] auto GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand> override;
+
+private:
+    void OnMoveImpl(Coord p) override { MovePoint(p); }
+    auto useSnap() -> bool override { return true; }
 };
 
 class Shape_angline : public Shape_line {
@@ -164,34 +205,44 @@ public:
     Shape_angline(Coord p, Coord refvect)
         : Shape_line(p)
         , vect(refvect)
-        , mag(refvect.Magnitude())
     {
     }
 
-    virtual void OnMove(Coord p, Coord snapped_p) override;
-
 private:
     Coord vect;
-    float mag;
+    void OnMoveImpl(Coord p) override
+    {
+        auto d = vect.dot(p - GetOrigin()) / std::pow(vect.Distance({ 0, 0 }), 2);
+        MovePoint(GetOrigin() + (vect * d));
+    }
+    auto useSnap() -> bool override { return true; }
 };
 
-class Shape_arc : public Shape_2point {
+class Shape_arc : public Shape_1point {
 public:
-    Shape_arc(Coord c, Coord p);
-    Shape_arc(Coord c, Coord p1, Coord p2);
+    Shape_arc(Coord c, Coord p)
+        : Shape_1point(c)
+        , angle(c.DirectionRad(p))
+        , angle0(c.DirectionRad(p))
+        , d(c.Distance(p))
+    {
+    }
 
-    virtual void OnMove(Coord p, Coord snapped_p) override;
-    virtual std::vector<DrawCommand> GetCC_DrawCommand(float x, float y) const override;
-
-    inline auto GetAngle() const { return r - r0; }
+    [[nodiscard]] auto GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand> override;
+    [[nodiscard]] auto GetAngleRad() const { return angle - angle0; }
 
 private:
-    float r, r0, d;
+    float angle;
+    float angle0;
+    float d;
+    void OnMoveImpl(Coord p) override { angle = GetOrigin().DirectionRad(p); }
+
+    auto useSnap() -> bool override { return true; }
 };
 
 class Shape_rect : public Shape_2point {
 public:
-    Shape_rect(Coord p)
+    explicit Shape_rect(Coord p)
         : Shape_2point(p)
     {
     }
@@ -200,37 +251,83 @@ public:
     {
     }
 
-    virtual std::vector<DrawCommand> GetCC_DrawCommand(float x, float y) const override;
+    [[nodiscard]] auto GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand> override;
 };
 
 class Lasso : public Shape {
 public:
-    Lasso(Coord p);
+    explicit Lasso(Coord p) { Append(p); }
 
-    virtual void OnMove(Coord p, Coord snapped_p) override;
-    void Clear();
-    void Start(Coord p);
-    void End();
-    void Append(Coord p);
-    virtual std::vector<DrawCommand> GetCC_DrawCommand(float x, float y) const override;
+    void Append(Coord p) { pntlist.push_back(p); }
+    [[nodiscard]] auto GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand> override;
+
+protected:
     void Drag(Coord p);
-    inline const Coord* FirstPoint() const
+
+public:
+    [[nodiscard]] auto FirstPoint() const -> Coord const*
     {
         return pntlist.empty() ? nullptr : &pntlist.front();
     }
-    std::vector<Coord> GetPointsOnLine(int numpnts) const;
-    auto NumPoints() const { return pntlist.size(); }
-    std::optional<RawPolygon_t> GetPolygon() const override { return { pntlist }; }
+    [[nodiscard]] auto GetPointsOnLine(int numpnts) const -> std::vector<Coord>;
+    [[nodiscard]] auto GetPolygon() const -> RawPolygon_t override { return { pntlist }; }
 
 private:
-    float GetDistance() const;
     std::vector<Coord> pntlist;
+
+    void OnMoveImpl(Coord p) override { Append(p); }
 };
 
 class Poly : public Lasso {
 public:
-    Poly(Coord p);
+    explicit Poly(Coord p);
 
-    virtual void OnMove(Coord p, Coord snapped_p) override;
+private:
+    void OnMoveImpl(Coord p) override { Drag(p); }
 };
+
+inline auto CrossesLine(Coord start, Coord end, Coord p) -> bool
+{
+    if (start.y <= end.y) {
+        if ((p.y > end.y) || (p.y <= start.y)) {
+            return false;
+        }
+    } else {
+        if ((p.y > start.y) || (p.y <= end.y)) {
+            return false;
+        }
+    }
+    return (p.x >= ((end.x - start.x) * (p.y - start.y) / (end.y - start.y) + start.x));
+}
+
+// Test if inside polygon using odd-even rule
+inline auto Inside(Coord p, RawPolygon_t const& polygon) -> bool
+{
+    auto parity = false;
+    if (polygon.size() < 2) {
+        return parity;
+    }
+    // use inner product to do adjacent comparisons.
+    return std::inner_product(
+        polygon.begin(), polygon.end() - 1,
+        polygon.begin() + 1,
+        CrossesLine(polygon.back(), polygon.front(), p),
+        [](auto acc, auto next) {
+            return next ^ acc;
+        },
+        [p](auto a, auto b) {
+            return CrossesLine(a, b, p);
+        });
+}
+
+inline auto GetDistance(RawPolygon_t const& polygon) -> double
+{
+    if (polygon.empty()) {
+        return {};
+    }
+    return std::inner_product(polygon.begin(), polygon.end() - 1, polygon.begin() + 1, 0.F, std::plus(), [](auto a, auto b) {
+        return b.Distance(a);
+    });
+}
+
 }

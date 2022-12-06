@@ -114,7 +114,7 @@ nlohmann::json AnimationCommandMT::toOnlineViewerJSON(Coord start) const
 }
 
 AnimationCommandMove::AnimationCommandMove(unsigned beats, Coord movement)
-    : AnimationCommandMT(beats, movement.Direction())
+    : AnimationCommandMT(beats, movement.DirectionDeg())
     , mVector(movement)
 {
 }
@@ -172,7 +172,7 @@ void AnimationCommandMove::ApplyBackward(Coord& pt)
 
 float AnimationCommandMove::MotionDirection() const
 {
-    return mVector.Direction();
+    return mVector.DirectionDeg();
 }
 
 void AnimationCommandMove::ClipBeats(unsigned beats)

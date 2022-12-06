@@ -38,6 +38,7 @@
  */
 
 #include "CalChartCoord.h"
+#include "CalChartShapes.h"
 
 #include <functional>
 #include <map>
@@ -45,7 +46,6 @@
 #include <vector>
 
 namespace CalChart {
-class Shape;
 
 enum class MoveMode {
     Normal,
@@ -73,7 +73,14 @@ public:
     virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const = 0;
 
     // provides both the high resolution point and the low resolution point.
-    void OnMove(CalChart::Coord p, CalChart::Coord snapped_p);
+
+    template <typename Function>
+    void OnMove(CalChart::Coord p, Function snapper)
+    {
+        if (!m_shape_list.empty()) {
+            m_shape_list.back()->OnMove(p, snapper);
+        }
+    }
 
     virtual void OnClickDown(CalChart::Coord pos) = 0;
     virtual void OnClickUp(CalChart::Coord){};

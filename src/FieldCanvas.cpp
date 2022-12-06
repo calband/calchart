@@ -149,7 +149,7 @@ void FieldCanvas::PaintShapes(wxDC& dc, CalChartConfiguration const& config, Cal
         dc.SetBrush(*wxTRANSPARENT_BRUSH);
         wxCalChart::setPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::SHAPES));
         auto origin = mView->GetShowFieldOffset();
-        CalChartDraw::DrawCC_DrawCommandList(dc, shapeList->GetCC_DrawCommand(origin.x, origin.y));
+        CalChartDraw::DrawCC_DrawCommandList(dc, shapeList->GetCC_DrawCommand(origin));
     }
 }
 
@@ -343,10 +343,10 @@ void FieldCanvas::OnMouseMove(wxMouseEvent& event)
 void FieldCanvas::MoveDrag(CalChart::Coord end)
 {
     if (mSelectTool) {
-        mSelectTool->OnMove(end, SnapToolToGrid(end));
+        mSelectTool->OnMove(end, [this](auto c) { return SnapToolToGrid(c); });
     }
     if (mMovePointsTool) {
-        mMovePointsTool->OnMove(end, SnapToolToGrid(end));
+        mMovePointsTool->OnMove(end, [this](auto c) { return SnapToolToGrid(c); });
         std::map<int, CalChart::Coord> selected_points;
         for (auto i : mView->GetSelectionList()) {
             selected_points[i] = mView->PointPosition(i);

@@ -34,6 +34,7 @@ namespace DrawCommands {
 
     struct Ignore {
     };
+    inline auto operator==(Ignore, Ignore) { return true; }
 
     struct Line {
         int x1{}, y1{}, x2{}, y2{};
@@ -51,6 +52,13 @@ namespace DrawCommands {
         {
         }
     };
+    inline auto operator==(Line const& lhs, Line const& rhs)
+    {
+        return lhs.x1 == rhs.x1
+            && lhs.y1 == rhs.y1
+            && lhs.x2 == rhs.x2
+            && lhs.y2 == rhs.y2;
+    }
 
     struct Arc {
         int x1{}, y1{}, x2{}, y2{};
@@ -78,7 +86,21 @@ namespace DrawCommands {
             , yc(centery)
         {
         }
+
+        Arc(Coord start, Coord end, Coord center)
+            : Arc(start.x, start.y, end.x, end.y, center.x, center.y)
+        {
+        }
     };
+    inline auto operator==(Arc const& lhs, Arc const& rhs)
+    {
+        return lhs.x1 == rhs.x1
+            && lhs.y1 == rhs.y1
+            && lhs.x2 == rhs.x2
+            && lhs.y2 == rhs.y2
+            && lhs.xc == rhs.xc
+            && lhs.yc == rhs.yc;
+    }
 
     struct Ellipse {
         int x1{}, y1{}, x2{}, y2{};
@@ -96,6 +118,13 @@ namespace DrawCommands {
         {
         }
     };
+    inline auto operator==(Ellipse const& lhs, Ellipse const& rhs)
+    {
+        return lhs.x1 == rhs.x1
+            && lhs.y1 == rhs.y1
+            && lhs.x2 == rhs.x2
+            && lhs.y2 == rhs.y2;
+    }
 
     struct Circle {
         int x1{}, y1{}, radius{};
@@ -114,6 +143,13 @@ namespace DrawCommands {
         {
         }
     };
+    inline auto operator==(Circle const& lhs, Circle const& rhs)
+    {
+        return lhs.x1 == rhs.x1
+            && lhs.y1 == rhs.y1
+            && lhs.radius == rhs.radius
+            && lhs.filled == rhs.filled;
+    }
 
     struct Text {
         enum class TextAnchor : uint32_t {
@@ -158,6 +194,14 @@ namespace DrawCommands {
         return static_cast<Text::TextAnchor>(toUType(lhs) & toUType(rhs));
     }
 
+    inline auto operator==(Text const& lhs, Text const& rhs)
+    {
+        return lhs.x == rhs.x
+            && lhs.y == rhs.y
+            && lhs.text == rhs.text
+            && lhs.anchor == rhs.anchor
+            && lhs.withBackground == rhs.withBackground;
+    }
 }
 
 using DrawCommand = std::variant<DrawCommands::Ignore, DrawCommands::Line, DrawCommands::Arc, DrawCommands::Ellipse, DrawCommands::Circle, DrawCommands::Text>;

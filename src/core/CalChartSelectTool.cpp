@@ -1,8 +1,7 @@
 /*
- * CalChartMovePoints.cpp
- * MovePoints represent the shapes and transformation of Dot manipulations.
+ * CalChartSelectTool.cpp
+ * Represents a way to select Marchers
  */
-
 /*
    Copyright (C) 1995-2012  Garrick Brian Meeker, Richard Michael Powell
 
@@ -21,7 +20,6 @@
 */
 
 #include "CalChartSelectTool.h"
-
 #include "CalChartShapes.h"
 #include "CalChartUtils.h"
 #include "linmath.h"
@@ -30,7 +28,7 @@ namespace CalChart {
 
 SelectTool::SelectTool(CalChart::Select select, CalChart::Coord start, std::function<int(int)> userScale)
     : mSelect(select)
-    , mUserScale(userScale)
+    , mUserScale(std::move(userScale))
 {
     // Factory for creating a specific move.
     switch (select) {
@@ -49,13 +47,6 @@ SelectTool::SelectTool(CalChart::Select select, CalChart::Coord start, std::func
     }
 }
 
-void SelectTool::OnMove(CalChart::Coord p, CalChart::Coord snapped_p)
-{
-    if (mLassoShape) {
-        mLassoShape->OnMove(p, snapped_p);
-    }
-}
-
 void SelectTool::OnClickUp(CalChart::Coord pos)
 {
     if (mSelect != CalChart::Select::Poly) {
@@ -63,7 +54,7 @@ void SelectTool::OnClickUp(CalChart::Coord pos)
     }
     static constexpr auto CLOSE_ENOUGH_TO_CLOSE = 10;
     auto* p = ((CalChart::Lasso*)mLassoShape.get())->FirstPoint();
-    auto numPnts = ((CalChart::Lasso*)mLassoShape.get())->NumPoints();
+    auto numPnts = ((CalChart::Lasso*)mLassoShape.get())->GetPolygon().size();
     if (p != NULL && numPnts > 2) {
         // need to know where the scale is, so we need the device.
         auto polydist = mUserScale(CLOSE_ENOUGH_TO_CLOSE);

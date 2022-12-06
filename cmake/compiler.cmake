@@ -16,7 +16,7 @@ endif()
 
 macro(SetupCompilerForTarget arg)
   if(NOT MSVC)
-  target_compile_options(${arg} PRIVATE -Wall -Wextra -Wno-c++11-extensions)
+  target_compile_options(${arg} PRIVATE -Wall -Wextra)
   endif()
   set_target_properties(${arg} PROPERTIES CXX_STANDARD 20)
 endmacro()

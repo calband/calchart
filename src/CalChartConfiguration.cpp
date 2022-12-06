@@ -643,7 +643,7 @@ void CalChartConfiguration::Set_ShowModeData(CalChart::ShowModes which, CalChart
     }
 
     auto& defaultValue = CalChart::kShowModeDefaultValues[twhich];
-    mWriteQueue[std::string(std::get<0>(defaultValue))] = [defaultValue, which, values]() {
+    mWriteQueue[std::string(std::get<0>(defaultValue))] = [defaultValue, values]() {
         SetConfigValue<CalChart::ShowModeData_t>(std::string(std::get<0>(defaultValue)), values,
             CalChart::ShowModeData_t{ std::get<1>(defaultValue) });
     };

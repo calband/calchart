@@ -36,6 +36,6 @@ struct ParseErrorHandlers {
     ContinuityParseCorrection_t mContinuityParseCorrectionHandler;
 };
 
-typedef std::set<int> SelectionList;
+using SelectionList = std::set<int>;
 
 }

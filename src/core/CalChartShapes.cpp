@@ -20,303 +20,148 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define _USE_MATH_DEFINES
+#include "CalChartShapes.h"
+#include "CalChartDrawCommand.h"
 #include <cmath>
 #include <numeric>
 
-#include "CalChartDrawCommand.h"
-#include "CalChartShapes.h"
-
 namespace CalChart {
 
-static bool CrossesLine(Coord start, Coord end, Coord p)
-{
-    if (start.y > end.y) {
-        if (!((p.y <= start.y) && (p.y > end.y))) {
-            return false;
-        }
-    } else {
-        if (!((p.y <= end.y) && (p.y > start.y))) {
-            return false;
-        }
-    }
-    if (p.x >= ((end.x - start.x) * (p.y - start.y) / (end.y - start.y) + start.x)) {
-        return true;
-    }
-    return false;
-}
-
-// Test if inside polygon using odd-even rule
-bool Inside(Coord p, RawPolygon_t const& polygon)
-{
-    auto parity = false;
-    if (polygon.size() < 2) {
-        return parity;
-    }
-    for (auto prev = polygon.begin(), next = prev + 1; next != polygon.end();
-         ++prev, ++next) {
-        if (CrossesLine(*prev, *next, p)) {
-            parity = !parity;
-        }
-    }
-    // don't forget the first one:
-    if (CrossesLine(polygon.back(), polygon.front(), p)) {
-        parity = !parity;
-    }
-
-    return parity;
-}
-
-void Shape_1point::OnMove(Coord p, Coord)
-{
-    MoveOrigin(p);
-}
-
-void Shape_crosshairs::OnMove(Coord, Coord snapped_p)
-{
-    MoveOrigin(snapped_p);
-}
-
-std::vector<DrawCommand> Shape_crosshairs::GetCC_DrawCommand(float x, float y) const
+auto Shape_crosshairs::GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand>
 {
     return {
-        DrawCommands::Line(origin.x + x - crosshairs_width, origin.y + y - crosshairs_width, origin.x + x + crosshairs_width, origin.y + y + crosshairs_width),
-        DrawCommands::Line(origin.x + x + crosshairs_width, origin.y + y - crosshairs_width, origin.x + x - crosshairs_width, origin.y + y + crosshairs_width),
+        DrawCommands::Line(GetOrigin().x + p.x - crosshairs_width, GetOrigin().y + p.y - crosshairs_width, GetOrigin().x + p.x + crosshairs_width, GetOrigin().y + p.y + crosshairs_width),
+        DrawCommands::Line(GetOrigin().x + p.x + crosshairs_width, GetOrigin().y + p.y - crosshairs_width, GetOrigin().x + p.x - crosshairs_width, GetOrigin().y + p.y + crosshairs_width),
     };
 }
 
-void Shape_2point::OnMove(Coord p, Coord)
-{
-    MovePoint(p);
-}
-
-std::optional<RawPolygon_t> Shape_2point::GetPolygon() const
-{
-    return { {
-        Coord(origin.x, origin.y),
-        Coord(point.x, origin.y),
-        Coord(point.x, point.y),
-        Coord(origin.x, point.y),
-    } };
-}
-
-void Shape_line::OnMove(Coord, Coord snapped_p)
-{
-    MovePoint(snapped_p);
-}
-
-std::vector<DrawCommand> Shape_line::GetCC_DrawCommand(float x, float y) const
+auto Shape_2point::GetPolygon() const -> RawPolygon_t
 {
     return {
-        DrawCommands::Line(origin.x + x, origin.y + y, point.x + x, point.y + y)
+        Coord(GetOrigin().x, GetOrigin().y),
+        Coord(GetPoint().x, GetOrigin().y),
+        Coord(GetPoint().x, GetPoint().y),
+        Coord(GetOrigin().x, GetPoint().y),
     };
 }
 
-void Shape_x::OnMove(Coord, Coord snapped_p)
-{
-    MovePoint(snapped_p);
-}
-
-std::vector<DrawCommand> Shape_x::GetCC_DrawCommand(float x, float y) const
+auto Shape_line::GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand>
 {
     return {
-        DrawCommands::Line(origin.x + x, origin.y + y, point.x + x, point.y + y),
-        DrawCommands::Line(point.x + x, origin.y + y, origin.x + x, point.y + y),
+        DrawCommands::Line(GetOrigin() + p, GetPoint() + p)
     };
 }
 
-void Shape_cross::OnMove(Coord, Coord snapped_p)
-{
-    MovePoint(snapped_p);
-}
-
-std::vector<DrawCommand> Shape_cross::GetCC_DrawCommand(float x, float y) const
+auto Shape_x::GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand>
 {
     return {
-        DrawCommands::Line(origin.x + (point.x - origin.x) / 2 + x, origin.y + y, origin.x + (point.x - origin.x) / 2 + x, point.y + y),
-        DrawCommands::Line(origin.x + x, origin.y + (point.y - origin.y) / 2 + y, point.x + x, origin.y + (point.y - origin.y) / 2 + y),
+        DrawCommands::Line(GetOrigin() + p, GetPoint() + p),
+        DrawCommands::Line(GetPoint().x + p.x, GetOrigin().y + p.y, GetOrigin().x + p.x, GetPoint().y + p.y),
     };
 }
 
-void Shape_ellipse::OnMove(Coord, Coord snapped_p)
-{
-    MovePoint(snapped_p);
-}
-
-std::vector<DrawCommand> Shape_ellipse::GetCC_DrawCommand(float x, float y) const
+auto Shape_cross::GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand>
 {
     return {
-        DrawCommands::Ellipse(origin.x + x, origin.y + y, point.x + x, point.y + y)
+        DrawCommands::Line(GetOrigin().x + (GetPoint().x - GetOrigin().x) / 2 + p.x, GetOrigin().y + p.y, GetOrigin().x + (GetPoint().x - GetOrigin().x) / 2 + p.x, GetPoint().y + p.y),
+        DrawCommands::Line(GetOrigin().x + p.x, GetOrigin().y + (GetPoint().y - GetOrigin().y) / 2 + p.y, GetPoint().x + p.x, GetOrigin().y + (GetPoint().y - GetOrigin().y) / 2 + p.y),
     };
 }
 
-void Shape_angline::OnMove(Coord, Coord snapped_p)
+auto Shape_ellipse::GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand>
 {
-    auto o = GetOrigin();
-    auto p1 = snapped_p - o;
-    auto d = (CoordUnits2Float(p1.x) * CoordUnits2Float(vect.x) + CoordUnits2Float(p1.y) * CoordUnits2Float(vect.y)) / (mag * mag);
-    p1.x = (Coord::units)(o.x + vect.x * d);
-    p1.y = (Coord::units)(o.y + vect.y * d);
-    MovePoint(p1);
+    return {
+        DrawCommands::Ellipse(GetOrigin() + p, GetPoint() + p)
+    };
 }
 
-Shape_arc::Shape_arc(Coord c, Coord p)
-    : Shape_2point(c, p)
+auto Shape_arc::GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand>
 {
-    auto p1 = p - c;
-
-    r = r0 = Deg2Rad(p1.Direction());
-    d = p1.Magnitude() * kCoordDecimal;
-}
-
-Shape_arc::Shape_arc(Coord c, Coord p1, Coord p2)
-    : Shape_2point(c, p2)
-{
-    auto p = p1 - c;
-
-    r0 = p.Direction();
-    d = p.Magnitude() * kCoordDecimal;
-    r = (p2 - c).Direction();
-}
-
-void Shape_arc::OnMove(Coord, Coord snapped_p)
-{
-    auto p1 = snapped_p;
-
-    r = Deg2Rad(GetOrigin().Direction(p1));
-    p1.x = Coord::units(origin.x + d * cos(r));
-    p1.y = Coord::units(origin.y + -d * sin(r));
-    MovePoint(p1);
-}
-
-std::vector<DrawCommand> Shape_arc::GetCC_DrawCommand(float x, float y) const
-{
-    if (GetAngle() < 0.0 || GetAngle() > 180.0) {
+    auto boundingAngle = angle0 < 0 ? angle - angle0 : angle0 - angle;
+    if (boundingAngle < 0.0 || boundingAngle > std::numbers::pi) {
         return {
             DrawCommands::Arc(
-                origin.x + x + d * cos(r),
-                origin.y + y + -d * sin(r),
-                origin.x + x + d * cos(r0),
-                origin.y + y + -d * sin(r0),
-                origin.x + x,
-                origin.y + y)
+                GetOrigin() + p + CalChart::CreateCoordVectorRad(angle0 < 0 ? angle : angle0, d),
+                GetOrigin() + p + CalChart::CreateCoordVectorRad(angle0 < 0 ? angle0 : angle, d),
+                GetOrigin() + p)
         };
     }
     return {
         DrawCommands::Arc(
-            origin.x + x + d * cos(r0),
-            origin.y + y + -d * sin(r0),
-            origin.x + x + d * cos(r),
-            origin.y + y + -d * sin(r),
-            origin.x + x,
-            origin.y + y)
+            GetOrigin() + p + CalChart::CreateCoordVectorRad(angle0 < 0 ? angle0 : angle, d),
+            GetOrigin() + p + CalChart::CreateCoordVectorRad(angle0 < 0 ? angle : angle0, d),
+            GetOrigin() + p)
     };
 }
 
-std::vector<DrawCommand> Shape_rect::GetCC_DrawCommand(float x, float y) const
+auto Shape_rect::GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand>
 {
     float w, h;
 
-    if (origin.x < point.x) {
-        x += origin.x;
-        w = point.x - origin.x + 1;
+    if (GetOrigin().x < GetPoint().x) {
+        p.x += GetOrigin().x;
+        w = GetPoint().x - GetOrigin().x + 1;
     } else {
-        x += point.x;
-        w = origin.x - point.x + 1;
+        p.x += GetPoint().x;
+        w = GetOrigin().x - GetPoint().x + 1;
     }
-    if (origin.y < point.y) {
-        y += origin.y;
-        h = point.y - origin.y + 1;
+    if (GetOrigin().y < GetPoint().y) {
+        p.y += GetOrigin().y;
+        h = GetPoint().y - GetOrigin().y + 1;
     } else {
-        y += point.y;
-        h = origin.y - point.y + 1;
+        p.y += GetPoint().y;
+        h = GetOrigin().y - GetPoint().y + 1;
     }
     if ((w > 1) && (h > 1)) {
         return {
-            DrawCommands::Line(x, y, x + w, y),
-            DrawCommands::Line(x + w, y, x + w, y + h),
-            DrawCommands::Line(x + w, y + h, x, y + h),
-            DrawCommands::Line(x, y + h, x, y),
+            DrawCommands::Line(p.x, p.y, p.x + w, p.y),
+            DrawCommands::Line(p.x + w, p.y, p.x + w, p.y + h),
+            DrawCommands::Line(p.x + w, p.y + h, p.x, p.y + h),
+            DrawCommands::Line(p.x, p.y + h, p.x, p.y),
         };
     }
     return {};
 }
 
-Lasso::Lasso(Coord p) { Append(p); }
-
-void Lasso::OnMove(Coord p, Coord) { Append(p); }
-
-void Lasso::Clear() { pntlist.clear(); }
-
-void Lasso::Start(Coord p)
+auto Lasso::GetPointsOnLine(int numpnts) const -> std::vector<Coord>
 {
-    Clear();
-    Append(p);
-}
-
-// Closes polygon
-void Lasso::End()
-{
-    if (!pntlist.empty()) {
-        pntlist.push_back(pntlist[0]);
-    }
-}
-
-void Lasso::Append(Coord p) { pntlist.push_back(p); }
-
-float Lasso::GetDistance() const
-{
-    if (pntlist.empty()) {
-        return {};
-    }
-    auto iter = pntlist.begin();
-    auto curr_pnt = *iter++;
-    auto total = 0.0f;
-    while (iter != pntlist.end()) {
-        total += std::hypot(iter->x - curr_pnt.x, iter->y - curr_pnt.y);
-        curr_pnt = *iter++;
-    }
-    return total;
-}
-
-std::vector<Coord> Lasso::GetPointsOnLine(int numpnts) const
-{
-    if (numpnts < 1 || pntlist.size() < 1) {
+    if (numpnts < 1 || pntlist.empty()) {
         return {};
     }
     std::vector<Coord> results;
+    results.reserve(numpnts);
     results.push_back(pntlist.front());
     if (numpnts < 2) {
         return results;
     }
 
-    if (pntlist.size() < 2) {
-        return std::vector<Coord>(numpnts, *FirstPoint());
-    }
-
-    const auto each_segment = GetDistance() / (numpnts - 1);
+    const auto each_segment = GetDistance(GetPolygon()) / (numpnts - 1);
     auto iter = pntlist.begin();
     auto curr_pnt = *iter++;
-    auto curr_dist = std::hypot(iter->x - curr_pnt.x, iter->y - curr_pnt.y);
+    auto curr_dist = iter->Distance(curr_pnt);
     auto running_dist = each_segment;
     while (iter != pntlist.end()) {
+        // emergency rip chord on rounding cases
+        if (static_cast<int>(results.size()) == numpnts) {
+            break;
+        }
+        // if the distance to the next point is more than we need, use it up.
         if (running_dist > curr_dist) {
             running_dist -= curr_dist;
             curr_pnt = *iter++;
-            curr_dist = std::hypot(iter->x - curr_pnt.x, iter->y - curr_pnt.y);
+            curr_dist = iter->Distance(curr_pnt);
         } else {
+            // the new point will be along the vector by
             auto dist_vector = (*iter - curr_pnt);
             auto factor = (running_dist / curr_dist);
             dist_vector *= factor;
             auto new_pnt = curr_pnt + dist_vector;
 
+            // we found a place for this point.
             results.push_back(new_pnt);
-            // emergency rip chord on rounding cases
-            if (static_cast<int>(results.size()) == numpnts) {
-                return results;
-            }
+
             curr_pnt = new_pnt;
-            curr_dist = std::hypot(iter->x - curr_pnt.x, iter->y - curr_pnt.y);
+            curr_dist = iter->Distance(curr_pnt);
             running_dist = each_segment;
         }
     }
@@ -327,15 +172,12 @@ std::vector<Coord> Lasso::GetPointsOnLine(int numpnts) const
     return results;
 }
 
-std::vector<DrawCommand> Lasso::GetCC_DrawCommand(float x, float y) const
+auto Lasso::GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand>
 {
     std::vector<DrawCommand> result;
     if (pntlist.size() > 1) {
-        for (auto iter = 0u; iter < pntlist.size() - 1; ++iter) {
-            result.emplace_back(
-                DrawCommands::Line(
-                    x + pntlist.at(iter).x, y + pntlist.at(iter).y,
-                    x + pntlist.at(iter + 1).x, y + pntlist.at(iter + 1).y));
+        for (auto iter = 0U; iter < pntlist.size() - 1; ++iter) {
+            result.emplace_back(DrawCommands::Line(p + pntlist.at(iter), p + pntlist.at(iter + 1)));
         }
     }
     return result;
@@ -355,5 +197,4 @@ Poly::Poly(Coord p)
     Append(p);
 }
 
-void Poly::OnMove(Coord p, Coord) { Drag(p); }
 }

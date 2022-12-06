@@ -103,7 +103,7 @@ ColorSetupCanvas::ColorSetupCanvas(CalChartConfiguration& config, wxWindow* pare
     auto shape_start = field_offset + Coord(Int2CoordUnits(18), Int2CoordUnits(-2));
     auto shape_end = shape_start + Coord(Int2CoordUnits(4), Int2CoordUnits(4));
     Shape_rect rect(shape_start, shape_end);
-    mShape = rect.GetCC_DrawCommand(offset.x, offset.y);
+    mShape = rect.GetCC_DrawCommand(offset);
 }
 
 // Define the repainting behaviour
