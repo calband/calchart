@@ -40,17 +40,35 @@ struct Coord {
         intersect,
     };
 
-    constexpr Coord(Coord::units xval = 0, Coord::units yval = 0)
+    explicit constexpr Coord(Coord::units xval = 0)
+        : x(xval)
+        , y(0)
+    {
+    }
+
+    constexpr Coord(Coord::units xval, Coord::units yval)
         : x(xval)
         , y(yval)
     {
     }
 
+    template <typename T>
+    explicit constexpr Coord(std::tuple<T, T> pts)
+        : x(static_cast<Coord::units>(std::get<0>(pts)))
+        , y(static_cast<Coord::units>(std::get<1>(pts)))
+    {
+    }
+
     float Magnitude() const;
+    bool CloserThan(Coord const&, float tolerance) const;
     float Distance(Coord const&) const;
     float DM_Magnitude() const; // check for diagonal military also
-    float Direction() const;
-    float Direction(Coord const& c) const;
+    float DirectionRad() const;
+    float DirectionRad(Coord const& c) const;
+    float DirectionDeg() const;
+    float DirectionDeg(Coord const& c) const;
+
+    auto dot(Coord c) const { return x * c.x + y * c.y; }
 
     CollisionType DetectCollision(Coord const& c) const;
 
@@ -109,12 +127,14 @@ inline Coord operator-(Coord const& a, Coord const& b)
     return Coord(a.x - b.x, a.y - b.y);
 }
 
-inline Coord operator*(Coord const& a, int s)
+template <typename T>
+inline Coord operator*(Coord const& a, T s)
 {
     return Coord(a.x * s, a.y * s);
 }
 
-inline Coord operator/(Coord const& a, int s)
+template <typename T>
+inline Coord operator/(Coord const& a, T s)
 {
     return Coord(a.x / s, a.y / s);
 }
@@ -177,10 +197,24 @@ constexpr auto CoordUnits2Int(T a)
 
 // Create vector is going to create a vector in that direction, except diagonals are different!
 template <typename T, typename U>
-CalChart::Coord CreateVector(T dir, U mag)
+constexpr auto CreateCalChartVectorDeg(T dir, U mag) -> CalChart::Coord
 {
-    auto unit = CreateUnitVector(dir);
-    return { Float2CoordUnits(mag * std::get<0>(unit)), Float2CoordUnits(mag * std::get<1>(unit)) };
+    // using std::apply to apply a function to each tuple argument.
+    return Coord{ std::apply([mag](auto... x) { return std::make_tuple(Float2CoordUnits(x * mag)...); }, CreateCalChartUnitVectorDeg(dir)) };
+}
+
+template <typename T, typename U>
+constexpr auto CreateVectorDeg(T dir, U mag) -> CalChart::Coord
+{
+    // using std::apply to apply a function to each tuple argument.
+    return Coord{ std::apply([mag](auto... x) { return std::make_tuple(Float2CoordUnits(x * mag)...); }, CreateUnitVectorDeg(dir)) };
+}
+
+template <typename T, typename U>
+constexpr auto CreateCoordVectorRad(T dir, U mag) -> CalChart::Coord
+{
+    // using std::apply to apply a function to each tuple argument.
+    return Coord{ std::apply([mag](auto... x) { return std::make_tuple((x * mag)...); }, CreateUnitVectorRad(dir)) };
 }
 
 void Coord_UnitTests();

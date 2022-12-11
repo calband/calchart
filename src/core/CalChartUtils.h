@@ -30,6 +30,8 @@ namespace CalChart {
 /**
  * Math Utilities
  */
+
+// Should be constexpr in c++23
 template <typename T>
 inline auto IS_ZERO(T a)
 {
@@ -37,85 +39,97 @@ inline auto IS_ZERO(T a)
     constexpr auto kEpsilon = 1e-6;
     return std::abs(a) < kEpsilon;
 }
-template <typename T>
-constexpr auto Deg2Rad(T a) { return a * std::numbers::pi / 180.0; }
-template <typename T>
-constexpr auto Rad2Deg(T a) { return a * 180.0 / std::numbers::pi; }
+
+template <typename T, typename U>
+inline auto IS_EQUAL(T a, U b) { return IS_ZERO(b - a); }
+
+static constexpr auto two_pi = 2.0 * std::numbers::pi;
+static constexpr auto rad_per_deg = std::numbers::pi / 180.0;
+static constexpr auto deg_per_rad = 180.0 / std::numbers::pi;
 
 template <typename T>
-constexpr auto BoundDirection(T f)
+constexpr auto Deg2Rad(T angle) { return angle * rad_per_deg; }
+template <typename T>
+constexpr auto Rad2Deg(T angle) { return angle * deg_per_rad; }
+
+template <typename T>
+inline auto BoundDirectionRad(T angle)
 {
-    while (f >= 360.0) {
-        f -= 360.0;
+    angle = fmod(angle, two_pi);
+    if (angle < 0.0) {
+        angle += two_pi;
     }
-    while (f < 0.0) {
-        f += 360.0;
-    }
-    return f;
+    return angle;
 }
 
 template <typename T>
-constexpr auto BoundDirectionSigned(T f)
+inline auto BoundDirectionDeg(T angle) { return Rad2Deg(BoundDirectionRad(Deg2Rad(angle))); }
+
+template <typename T>
+inline auto BoundDirectionSignedRad(T angle) { return BoundDirectionRad(angle + std::numbers::pi) - std::numbers::pi; }
+
+template <typename T>
+inline auto BoundDirectionSignedDeg(T angle) { return Rad2Deg(BoundDirectionSignedRad(Deg2Rad(angle))); }
+
+template <typename T>
+inline auto NormalizeAngleDeg(T angle) { return BoundDirectionDeg(angle); }
+
+template <typename T>
+inline auto NormalizeAngleRad(T angle) { return BoundDirectionRad(angle); }
+
+// we assume the layout of quadrants are clockwise
+template <typename T>
+inline auto AngleToQuadrantRad(T angle)
 {
-    while (f >= 180.0) {
-        f -= 360.0;
-    }
-    while (f < -180.0) {
-        f += 360.0;
-    }
-    return f;
+    // rotate angle by a quarter:
+    constexpr auto quadrants = 8;
+    angle = NormalizeAngleRad(angle + std::numbers::pi / quadrants);
+
+    return (quadrants + static_cast<int>(-angle / (two_pi / quadrants))) % quadrants;
 }
 
 template <typename T>
-constexpr auto BoundDirectionRad(T f)
+inline auto AngleToQuadrantDeg(T angle) { return AngleToQuadrantRad(Deg2Rad(angle)); }
+
+template <typename T>
+inline auto IsDiagonalDirectionRad(T angle)
 {
-    while (f >= 2 * std::numbers::pi) {
-        f -= 2 * std::numbers::pi;
-    }
-    while (f < 0.0) {
-        f += 2 * std::numbers::pi;
-    }
-    return f;
+    angle = BoundDirectionRad(angle);
+    constexpr auto pi_1_4 = std::numbers::pi / 4;
+    constexpr auto pi_3_4 = 3 * std::numbers::pi / 4;
+    constexpr auto pi_5_4 = 5 * std::numbers::pi / 4;
+    constexpr auto pi_7_4 = 7 * std::numbers::pi / 4;
+    return (IS_ZERO(angle - pi_1_4) || IS_ZERO(angle - pi_3_4) || IS_ZERO(angle - pi_5_4) || IS_ZERO(angle - pi_7_4));
 }
 
 template <typename T>
-constexpr auto NormalizeAngle(T ang) { return BoundDirection(ang); }
-template <typename T>
-constexpr auto NormalizeAngleRad(T ang) { return BoundDirectionRad(ang); }
+inline auto IsDiagonalDirectionDeg(T angle) { return IsDiagonalDirectionRad(Deg2Rad(angle)); }
 
-// we assume the layout of quadrants are
 template <typename T>
-constexpr auto AngleToQuadrant(T ang)
+inline auto CreateUnitVectorRad(T angle)
 {
-    // rotate angle by 22.5:
-    auto ang1 = ang + 22.5;
-    ang1 = NormalizeAngle(ang1);
-
-    return (8 + static_cast<int>(-ang1 / 45.0)) % 8;
+    // our coordinate system is clockwise.
+    angle = -BoundDirectionRad(angle);
+    return std::tuple<decltype(angle), decltype(angle)>{ std::cos(angle), std::sin(angle) };
 }
 
 template <typename T>
-inline auto IsDiagonalDirection(T f)
-{
-    f = BoundDirection(f);
-    return (IS_ZERO(f - 45.0) || IS_ZERO(f - 135.0) || IS_ZERO(f - 225.0) || IS_ZERO(f - 315.0));
-}
+inline auto CreateUnitVectorDeg(T angle) { return CreateUnitVectorRad(Deg2Rad(angle)); }
 
+// UnitVector is a very special beast in CalChart.  Diagonals are 1,1 instead of sqrt(2)/2
 template <typename T>
-inline auto CreateUnitVector(T dir)
+inline auto CreateCalChartUnitVectorRad(T angle)
 {
-    dir = -BoundDirection(dir);
-    auto result = std::tuple<decltype(dir), decltype(dir)>{ cos(Deg2Rad(dir)), sin(Deg2Rad(dir)) };
-    // we 'normalize' the diagonal direction to 1,1 because that be the CalChart way.
-    if (IsDiagonalDirection(dir)) {
+    auto result = CreateUnitVectorRad(angle);
+    if (IsDiagonalDirectionRad(angle)) {
         std::get<0>(result) /= std::numbers::sqrt2 / 2;
         std::get<1>(result) /= std::numbers::sqrt2 / 2;
     }
-    if (dir > 180) {
-        std::get<1>(result) = -std::get<1>(result);
-    }
     return result;
 }
+
+template <typename T>
+inline auto CreateCalChartUnitVectorDeg(T angle) { return CreateCalChartUnitVectorRad(Deg2Rad(angle)); }
 
 /**
  * Common utils
@@ -157,30 +171,10 @@ public:
 };
 
 // static tests
-static_assert(Deg2Rad(180.0) == std::numbers::pi);
-static_assert(Rad2Deg(std::numbers::pi) == 180.0);
-static_assert(BoundDirection(1082.0) == 2.0);
-static_assert(BoundDirection(2.0) == 2.0);
-static_assert(BoundDirection(-1082.0) == 358.0);
-static_assert(BoundDirection(-2.0) == 358.0);
-static_assert(BoundDirectionSigned(182.0) == -178.0);
-static_assert(BoundDirectionSigned(-182.0) == 178.0);
-static_assert(BoundDirectionRad(2.0) == 2.0);
-static_assert(BoundDirectionRad(-2.0) == 2 * (std::numbers::pi - 1.0));
-static_assert(BoundDirection(1082.0) == NormalizeAngle(1082.0));
-static_assert(BoundDirectionRad(-2.0) == NormalizeAngleRad(-2.0));
-static_assert(AngleToQuadrant(0) == 0);
-static_assert(AngleToQuadrant(44) == 7);
-static_assert(AngleToQuadrant(45) == 7);
-static_assert(AngleToQuadrant(90) == 6);
-static_assert(AngleToQuadrant(135) == 5);
-static_assert(AngleToQuadrant(160) == 4);
-static_assert(AngleToQuadrant(180) == 4);
-static_assert(AngleToQuadrant(225) == 3);
-static_assert(AngleToQuadrant(270) == 2);
-static_assert(AngleToQuadrant(315) == 1);
-static_assert(AngleToQuadrant(350) == 0);
-static_assert(AngleToQuadrant(360) == 0);
-static_assert(AngleToQuadrant(341341) == 7);
+namespace details {
+    constexpr auto t_180 = 180.0;
+    static_assert(Deg2Rad(t_180) == std::numbers::pi);
+    static_assert(Rad2Deg(std::numbers::pi) == t_180);
+}
 
 }

@@ -8,15 +8,15 @@ TEST_CASE("Basic", "CalChartCoord")
     CalChart::Coord undertest;
     REQUIRE(0.0 == undertest.Magnitude());
     REQUIRE(0.0 == undertest.DM_Magnitude());
-    REQUIRE(0.0 == undertest.Direction());
+    REQUIRE(0.0 == undertest.DirectionDeg());
 
     auto undertest2 = CalChart::Coord{ 16, 16 };
     CHECK(CalChart::IS_ZERO(std::numbers::sqrt2 - undertest2.Magnitude()));
-    CHECK(1.0f == undertest2.DM_Magnitude());
-    CHECK(-45.0 == undertest2.Direction());
+    CHECK(1.0F == undertest2.DM_Magnitude());
+    CHECK(CalChart::IS_EQUAL(-std::numbers::pi / 4, undertest2.DirectionRad()));
 }
 
-TEST_CASE("CreateVector", "CalChartCoord")
+TEST_CASE("CreateCalChartVectorDeg", "CalChartCoord")
 {
     for (auto [dir, mag, v] : std::vector<std::tuple<double, double, CalChart::Coord>>{
              { 0, 1, CalChart::Coord{ 16, 0 } },
@@ -32,7 +32,7 @@ TEST_CASE("CreateVector", "CalChartCoord")
              { 355, 1, CalChart::Coord{ 16, 1 } },
              { 360, 1, CalChart::Coord{ 16, 0 } },
          }) {
-        auto unit = CalChart::CreateVector(dir, 1);
+        auto unit = CalChart::CreateCalChartVectorDeg(dir, 1);
         CHECK(unit == v);
     }
 }

@@ -38,6 +38,11 @@ float Coord::Distance(Coord const& other) const
     return std::hypot(other.x - x, other.y - y);
 }
 
+bool Coord::CloserThan(Coord const& other, float tolerance) const
+{
+    return Distance(other) < tolerance;
+}
+
 // Get magnitude, but check for diagonal military
 float Coord::DM_Magnitude() const
 {
@@ -49,23 +54,28 @@ float Coord::DM_Magnitude() const
 }
 
 // Get direction of this vector
-float Coord::Direction() const
+float Coord::DirectionRad() const
 {
-    if (*this == 0)
+    if (*this == Coord{ 0 })
         return 0.0;
 
-    auto ang = Rad2Deg(acos(CoordUnits2Float(x) / Magnitude())); // normalize
+    auto ang = acos(CoordUnits2Float(x) / Magnitude()); // normalize
     if (y > 0)
         ang = (-ang); // check for > PI
 
     return ang;
 }
 
+float Coord::DirectionDeg() const { return Rad2Deg(DirectionRad()); }
+
 // Get direction from this coord to another
-float Coord::Direction(Coord const& c) const
+float Coord::DirectionRad(Coord const& c) const
 {
-    return (c - *this).Direction();
+    return (c - *this).DirectionRad();
 }
+
+// Get direction from this coord to another
+float Coord::DirectionDeg(Coord const& c) const { return Rad2Deg(DirectionRad(c)); }
 
 // Returns the type of collision between this point and another
 Coord::CollisionType Coord::DetectCollision(Coord const& c) const
@@ -108,7 +118,7 @@ void Coord_UnitTests()
         Coord undertest;
         assert(0.0 == undertest.Magnitude());
         assert(0.0 == undertest.DM_Magnitude());
-        assert(0.0 == undertest.Direction());
+        assert(0.0 == undertest.DirectionRad());
     }
 
     std::random_device rd;

@@ -23,11 +23,11 @@
 
 /**
  * CalChart SelectTool
- * SelectTool represent the way the selection tool that for the field, effectively the collection of points that represents
- * the box/polygon/lasso that you use to select the points.
+ * SelectTool represent the way the selection tool that for the field,
+ * effectively the collection of points that represents the box/polygon/lasso
+ * that you use to select the points.
  */
 
-#include "CalChartCoord.h"
 #include "CalChartShapes.h"
 #include "CalChartTypes.h"
 
@@ -38,6 +38,7 @@
 
 namespace CalChart {
 class Shape;
+struct Coord;
 
 enum class Select {
     Box,
@@ -49,18 +50,34 @@ enum class Select {
 class SelectTool {
 public:
     SelectTool(CalChart::Select, CalChart::Coord start, std::function<int(int)> userScale);
-    virtual ~SelectTool() = default;
 
-    CalChart::Shape const* GetShapeList() const { return mLassoShape.get(); }
-    std::optional<CalChart::RawPolygon_t> GetPolygon() const { return mLassoShape ? mLassoShape->GetPolygon() : std::optional<CalChart::RawPolygon_t>{}; }
+    [[nodiscard]] auto GetShapeList() const -> CalChart::Shape const*
+    {
+        return mLassoShape.get();
+    }
+
+    [[nodiscard]] auto GetPolygon() const -> std::optional<CalChart::RawPolygon_t>
+    {
+        return mLassoShape ? mLassoShape->GetPolygon() : std::optional<CalChart::RawPolygon_t>{};
+    }
 
     // provides both the high resolution point and the low resolution point.
-    void OnMove(CalChart::Coord p, CalChart::Coord snapped_p);
+    template <typename Function>
+    void OnMove(CalChart::Coord p, Function snapper)
+    {
+        if (mLassoShape) {
+            mLassoShape->OnMove(p, snapper);
+        }
+    }
 
     void OnClickUp(CalChart::Coord);
-    virtual bool SelectDone() const { return mSelectComplete; }
 
-protected:
+    [[nodiscard]] auto SelectDone() const
+    {
+        return mSelectComplete;
+    }
+
+private:
     std::unique_ptr<CalChart::Shape> mLassoShape;
     CalChart::Select mSelect = CalChart::Select::Box;
     bool mSelectComplete = true;

@@ -138,38 +138,38 @@ void DoCounterMarch(const Procedure& proc, AnimationCompile& anim,
     auto steps1 = stps.Get(anim);
     auto beats = numbeats.Get(anim);
 
-    auto v1 = CreateVector(d1, steps1);
+    auto v1 = CreateCalChartVectorDeg(d1, steps1);
 
     Coord p[4];
     p[1] = ref1 + v1;
-    auto steps2 = (ref2 - p[1]).Magnitude() * sin(Deg2Rad(ref2.Direction(p[1]) - d1)) / c;
-    if (IsDiagonalDirection(d2)) {
+    auto steps2 = (ref2 - p[1]).Magnitude() * sin(Deg2Rad(ref2.DirectionDeg(p[1]) - d1)) / c;
+    if (IsDiagonalDirectionDeg(d2)) {
         steps2 /= static_cast<float>(std::numbers::sqrt2);
     }
-    auto v2 = CreateVector(d2, steps2);
+    auto v2 = CreateCalChartVectorDeg(d2, steps2);
     p[2] = p[1] + v2;
     p[3] = ref2 - v1;
     p[0] = p[3] - v2;
 
     v1 = p[1] - anim.GetPointPosition();
-    c = BoundDirectionSigned(v1.Direction() - d1);
+    c = BoundDirectionSignedDeg(v1.DirectionDeg() - d1);
     auto leg = 0;
-    if ((v1 != 0) && (IS_ZERO(c))) {
+    if ((v1 != Coord{ 0 }) && (IS_ZERO(c))) {
         leg = 1;
     } else {
         v1 = p[2] - anim.GetPointPosition();
-        c = BoundDirectionSigned(v1.Direction() - d2);
-        if ((v1 != 0) && (IS_ZERO(c))) {
+        c = BoundDirectionSignedDeg(v1.DirectionDeg() - d2);
+        if ((v1 != Coord{ 0 }) && (IS_ZERO(c))) {
             leg = 2;
         } else {
             v1 = p[3] - anim.GetPointPosition();
-            c = BoundDirectionSigned(v1.Direction() - d1 - 180.0f);
-            if ((v1 != 0) && (IS_ZERO(c))) {
+            c = BoundDirectionSignedDeg(v1.DirectionDeg() - d1 - 180.0f);
+            if ((v1 != Coord{ 0 }) && (IS_ZERO(c))) {
                 leg = 3;
             } else {
                 v1 = p[0] - anim.GetPointPosition();
-                c = BoundDirectionSigned(v1.Direction() - d2 - 180.0f);
-                if ((v1 != 0) && (IS_ZERO(c))) {
+                c = BoundDirectionSignedDeg(v1.DirectionDeg() - d2 - 180.0f);
+                if ((v1 != Coord{ 0 }) && (IS_ZERO(c))) {
                     leg = 0;
                 } else {
                     // Current point is not in path of countermarch
@@ -193,16 +193,16 @@ void DoCounterMarch(const Procedure& proc, AnimationCompile& anim,
         } else {
             switch (leg) {
             case 0:
-                v1 = CreateVector(d2 + 180.0f, beats);
+                v1 = CreateCalChartVectorDeg(d2 + 180.0f, beats);
                 break;
             case 1:
-                v1 = CreateVector(d1, beats);
+                v1 = CreateCalChartVectorDeg(d1, beats);
                 break;
             case 2:
-                v1 = CreateVector(d2, beats);
+                v1 = CreateCalChartVectorDeg(d2, beats);
                 break;
             default:
-                v1 = CreateVector(d1 + 180.0f, beats);
+                v1 = CreateCalChartVectorDeg(d1 + 180.0f, beats);
                 break;
             }
             anim.Append(std::make_unique<AnimationCommandMove>(
@@ -1194,7 +1194,7 @@ float FuncDir::Get(AnimationCompile const& anim) const
     if (c == anim.GetPointPosition()) {
         anim.RegisterError(AnimateError::UNDEFINED, this);
     }
-    return anim.GetPointPosition().Direction(c);
+    return anim.GetPointPosition().DirectionDeg(c);
 }
 
 std::ostream& FuncDir::Print(std::ostream& os) const
@@ -1245,7 +1245,7 @@ float FuncDirFrom::Get(AnimationCompile const& anim) const
     if (start == end) {
         anim.RegisterError(AnimateError::UNDEFINED, this);
     }
-    return start.Direction(end);
+    return start.DirectionDeg(end);
 }
 
 std::ostream& FuncDirFrom::Print(std::ostream& os) const
@@ -1394,7 +1394,7 @@ float FuncEither::Get(AnimationCompile const& anim) const
         anim.RegisterError(AnimateError::UNDEFINED, this);
         return dir1->Get(anim);
     }
-    auto dir = anim.GetPointPosition().Direction(c);
+    auto dir = anim.GetPointPosition().DirectionDeg(c);
     auto d1 = dir1->Get(anim) - dir;
     while (d1 > 180)
         d1 -= 360;
@@ -1890,14 +1890,14 @@ void ProcDMHS::Compile(AnimationCompile& anim)
         c_dm.y = ((c.x < 0) != (c.y < 0)) ? -c.x : c.x;
         b_hs = CoordUnits2Int(c_hs.y);
     }
-    if (c_dm != 0) {
+    if (c_dm != Coord{ 0 }) {
         auto b = CoordUnits2Int(c_dm.x);
         if (!anim.Append(std::make_unique<AnimationCommandMove>(std::abs(b), c_dm),
                 this)) {
             return;
         }
     }
-    if (c_hs != 0) {
+    if (c_hs != Coord{ 0 }) {
         anim.Append(std::make_unique<AnimationCommandMove>(std::abs(b_hs), c_hs),
             this);
     }
@@ -1950,7 +1950,7 @@ void ProcEven::Compile(AnimationCompile& anim)
     auto steps = float2int(this, anim, stps->Get(anim));
     if (steps < 0) {
         anim.Append(std::make_unique<AnimationCommandMove>((unsigned)-steps, c,
-                        -c.Direction()),
+                        -c.DirectionDeg()),
             this);
     } else {
         anim.Append(std::make_unique<AnimationCommandMove>((unsigned)steps, c), this);
@@ -2072,7 +2072,7 @@ void ProcFountain::Compile(AnimationCompile& anim)
         a = f2 * cos(Deg2Rad(f1));
         c = f2 * -sin(Deg2Rad(f1));
     } else {
-        std::tie(a, c) = CreateUnitVector(f1);
+        std::tie(a, c) = CreateCalChartUnitVectorDeg(f1);
     }
     f1 = dir2->Get(anim);
     if (stepsize2) {
@@ -2080,7 +2080,7 @@ void ProcFountain::Compile(AnimationCompile& anim)
         b = f2 * cos(Deg2Rad(f1));
         d = f2 * -sin(Deg2Rad(f1));
     } else {
-        std::tie(b, d) = CreateUnitVector(f1);
+        std::tie(b, d) = CreateCalChartUnitVectorDeg(f1);
     }
     auto v = pnt->Get(anim) - anim.GetPointPosition();
     auto e = CoordUnits2Float(v.x);
@@ -2224,11 +2224,11 @@ void ProcFM::Compile(AnimationCompile& anim)
 {
     auto b = float2int(this, anim, stps->Get(anim));
     if (b != 0) {
-        auto c = CreateVector(dir->Get(anim), stps->Get(anim));
-        if (c != 0) {
+        auto c = CreateCalChartVectorDeg(dir->Get(anim), stps->Get(anim));
+        if (c != Coord{ 0 }) {
             if (b < 0) {
                 anim.Append(std::make_unique<AnimationCommandMove>((unsigned)-b, c,
-                                -c.Direction()),
+                                -c.DirectionDeg()),
                     this);
             } else {
                 anim.Append(std::make_unique<AnimationCommandMove>((unsigned)b, c), this);
@@ -2283,7 +2283,7 @@ Reader ProcFM::Deserialize(Reader reader)
 void ProcFMTO::Compile(AnimationCompile& anim)
 {
     auto c = pnt->Get(anim) - anim.GetPointPosition();
-    if (c != 0) {
+    if (c != Coord{ 0 }) {
         anim.Append(
             std::make_unique<AnimationCommandMove>((unsigned)c.DM_Magnitude(), c),
             this);
@@ -2354,7 +2354,7 @@ void ProcGrid::Compile(AnimationCompile& anim)
     c.y = roundcoord(anim.GetPointPosition().y - Int2CoordUnits(2), gridc) + Int2CoordUnits(2);
 
     c -= anim.GetPointPosition();
-    if (c != 0) {
+    if (c != Coord{ 0 }) {
         anim.Append(std::make_unique<AnimationCommandMove>(0, c), this);
     }
 }
@@ -2493,13 +2493,13 @@ void ProcHSDM::Compile(AnimationCompile& anim)
         c_dm.y = ((c.x < 0) != (c.y < 0)) ? -c.x : c.x;
         b = CoordUnits2Int(c_hs.y);
     }
-    if (c_hs != 0) {
+    if (c_hs != Coord{ 0 }) {
         if (!anim.Append(std::make_unique<AnimationCommandMove>(std::abs(b), c_hs),
                 this)) {
             return;
         }
     }
-    if (c_dm != 0) {
+    if (c_dm != Coord{ 0 }) {
         b = CoordUnits2Int(c_dm.x);
         anim.Append(std::make_unique<AnimationCommandMove>(std::abs(b), c_dm), this);
     }
@@ -2601,14 +2601,14 @@ void ProcMarch::Compile(AnimationCompile& anim)
         auto mag = stpsize->Get(anim) * stps->Get(anim);
         Coord c{ Float2CoordUnits(cos(rads) * mag),
             static_cast<Coord::units>(-Float2CoordUnits(sin(rads) * mag)) };
-        if (c != 0) {
+        if (c != Coord{ 0 }) {
             if (facedir)
                 anim.Append(std::make_unique<AnimationCommandMove>((unsigned)std::abs(b),
                                 c, facedir->Get(anim)),
                     this);
             else if (b < 0) {
                 anim.Append(std::make_unique<AnimationCommandMove>((unsigned)-b, c,
-                                -c.Direction()),
+                                -c.DirectionDeg()),
                     this);
             } else {
                 anim.Append(std::make_unique<AnimationCommandMove>((unsigned)b, c), this);
@@ -2855,7 +2855,7 @@ void ProcRotate::Compile(AnimationCompile& anim)
     if (c == anim.GetPointPosition())
         start_ang = anim.GetVarValue(Cont::Variable::DOH, this);
     else
-        start_ang = c.Direction(anim.GetPointPosition());
+        start_ang = c.DirectionDeg(anim.GetPointPosition());
     int b = float2int(this, anim, stps->Get(anim));
     float angle = ang->Get(anim);
     bool backwards = false;
