@@ -11,6 +11,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2)
 
 add_executable(CalChartTests
+  ${CMAKE_CURRENT_SOURCE_DIR}/CalChartAnglesTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartContinuityTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartContinuityTokenTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartCoordTests.cpp

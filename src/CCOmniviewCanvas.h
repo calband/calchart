@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartAngles.h"
 #include "DCSaveRestore.h"
 #include <map>
 #include <memory>
@@ -73,13 +74,13 @@ private:
     int mFollowMarcher = -1;
     bool mCrowdOn = false;
     bool mShowMarching = true;
-    float mViewAngle{};
-    float mViewAngleZ{};
+    CalChart::Radian mViewAngle{};
+    CalChart::Radian mViewAngleZ{};
     float mFOV = 60;
 
     // for mouse camera move:
     bool mShiftMoving = false;
     wxPoint mStartShiftMoveMousePosition{};
-    float mStartShiftMoveViewAngle{};
-    float mStartShiftMoveViewAngleZ{};
+    CalChart::Radian mStartShiftMoveViewAngle{};
+    CalChart::Radian mStartShiftMoveViewAngleZ{};
 };

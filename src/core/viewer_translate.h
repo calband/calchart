@@ -59,7 +59,7 @@ public:
      * @param angle A CalChart angle.
      * @return An Online Viewer angle.
      */
-    static float angle(float angle);
+    static float angle(CalChart::Degree angle);
 
     /*!
      * @brief Translates a CalChart enumerated

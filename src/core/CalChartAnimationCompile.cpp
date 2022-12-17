@@ -103,7 +103,7 @@ Compile(
     // report if we have extra time.
     if (ac.GetBeatsRemaining()) {
         ac.RegisterError(AnimateError::EXTRATIME, NULL);
-        ac.Append(std::make_unique<AnimationCommandMT>(ac.GetBeatsRemaining(), 90), NULL);
+        ac.Append(std::make_unique<AnimationCommandMT>(ac.GetBeatsRemaining(), CalChart::Degree{ 90 }), NULL);
     }
 
     return ac.GetCommands();
@@ -133,8 +133,8 @@ bool AnimationCompileState::Append(std::unique_ptr<AnimationCommand> cmd, Cont::
     mBeatsRem -= cmd->NumBeats();
 
     cmd->ApplyForward(mWhichPos); // Move current point to new position
-    SetVarValue(Cont::Variable::DOF, cmd->MotionDirection());
-    SetVarValue(Cont::Variable::DOH, cmd->FacingDirection());
+    SetVarValue(Cont::Variable::DOF, CalChart::Degree{ cmd->MotionDirection() }.getValue());
+    SetVarValue(Cont::Variable::DOH, CalChart::Degree{ cmd->FacingDirection() }.getValue());
     mCmds.emplace_back(cmd.release());
     return true;
 }

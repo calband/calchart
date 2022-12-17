@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartAngles.h"
 #include "CalChartUtils.h"
 
 #include <cstdint>
@@ -63,10 +64,8 @@ struct Coord {
     bool CloserThan(Coord const&, float tolerance) const;
     float Distance(Coord const&) const;
     float DM_Magnitude() const; // check for diagonal military also
-    float DirectionRad() const;
-    float DirectionRad(Coord const& c) const;
-    float DirectionDeg() const;
-    float DirectionDeg(Coord const& c) const;
+    CalChart::Radian Direction() const;
+    CalChart::Radian Direction(Coord const& c) const;
 
     auto dot(Coord c) const { return x * c.x + y * c.y; }
 
@@ -196,25 +195,43 @@ constexpr auto CoordUnits2Int(T a)
 }
 
 // Create vector is going to create a vector in that direction, except diagonals are different!
-template <typename T, typename U>
-constexpr auto CreateCalChartVectorDeg(T dir, U mag) -> CalChart::Coord
+template <typename T>
+constexpr auto CreateCalChartVector(CalChart::Radian dir, T mag) -> CalChart::Coord
 {
     // using std::apply to apply a function to each tuple argument.
-    return Coord{ std::apply([mag](auto... x) { return std::make_tuple(Float2CoordUnits(x * mag)...); }, CreateCalChartUnitVectorDeg(dir)) };
+    return Coord{ std::apply([mag](auto... x) { return std::make_tuple(Float2CoordUnits(x * mag)...); }, CreateCalChartUnitVector(dir)) };
 }
 
-template <typename T, typename U>
-constexpr auto CreateVectorDeg(T dir, U mag) -> CalChart::Coord
+template <typename T>
+constexpr auto CreateCalChartVector(CalChart::Degree dir, T mag) -> CalChart::Coord
 {
-    // using std::apply to apply a function to each tuple argument.
-    return Coord{ std::apply([mag](auto... x) { return std::make_tuple(Float2CoordUnits(x * mag)...); }, CreateUnitVectorDeg(dir)) };
+    return CreateCalChartVector(static_cast<CalChart::Radian>(dir), mag);
 }
 
-template <typename T, typename U>
-constexpr auto CreateCoordVectorRad(T dir, U mag) -> CalChart::Coord
+template <typename T>
+constexpr auto CreateVector(CalChart::Radian dir, T mag) -> CalChart::Coord
 {
     // using std::apply to apply a function to each tuple argument.
-    return Coord{ std::apply([mag](auto... x) { return std::make_tuple((x * mag)...); }, CreateUnitVectorRad(dir)) };
+    return Coord{ std::apply([mag](auto... x) { return std::make_tuple(Float2CoordUnits(x * mag)...); }, CreateUnitVector(dir)) };
+}
+
+template <typename T>
+constexpr auto CreateVector(CalChart::Degree dir, T mag) -> CalChart::Coord
+{
+    return CreateVector(static_cast<CalChart::Radian>(dir), mag);
+}
+
+template <typename T>
+constexpr auto CreateCoordVector(CalChart::Radian dir, T mag) -> CalChart::Coord
+{
+    // using std::apply to apply a function to each tuple argument.
+    return Coord{ std::apply([mag](auto... x) { return std::make_tuple((x * mag)...); }, CreateUnitVector(dir)) };
+}
+
+template <typename T>
+constexpr auto CreateCoordVector(CalChart::Degree dir, T mag) -> CalChart::Coord
+{
+    return CreateCoordVector(static_cast<CalChart::Radian>(dir), mag);
 }
 
 void Coord_UnitTests();

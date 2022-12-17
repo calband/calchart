@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartAngles.h"
 #include "DCSaveRestore.h"
 #include <array>
 #include <map>
@@ -68,7 +69,9 @@ public:
     CalChart::ShowMode const& GetShowMode() const;
 
     struct MarcherInfo {
-        float direction, x, y;
+        CalChart::Radian direction{};
+        float x{};
+        float y{};
     };
 
     MarcherInfo GetMarcherInfo(int which) const;

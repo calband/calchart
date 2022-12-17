@@ -270,63 +270,63 @@ static void DrawBox(double const points[4][3])
     glEnd();
 }
 
-auto GetMarcherTextureAndPoints(float cameraAngleToMarcher, float marcherDirection, float& x1, float& x2, float& y1, float& y2)
+auto GetMarcherTextureAndPoints(CalChart::Radian cameraAngleToMarcher, CalChart::Radian marcherDirection, float& x1, float& x2, float& y1, float& y2)
 {
     // Returns which direction they are facing in regards to the camera.
-    float relativeAngle = marcherDirection - cameraAngleToMarcher; // convert to relative angle;
-    relativeAngle = CalChart::NormalizeAngleRad(relativeAngle);
+    auto relativeAngle = marcherDirection - cameraAngleToMarcher; // convert to relative angle;
+    relativeAngle = CalChart::NormalizeAngle(relativeAngle);
 
-    if (cameraAngleToMarcher >= 1.0 * std::numbers::pi / 8.0 && cameraAngleToMarcher < 3.0 * std::numbers::pi / 8.0) {
+    if (cameraAngleToMarcher >= 1.0 * CalChart::pi / 8.0 && cameraAngleToMarcher < 3.0 * CalChart::pi / 8.0) {
         y1 += 0.45f;
         y2 -= 0.45f;
         x1 -= 0.45f;
         x2 += 0.45f;
-    } else if (cameraAngleToMarcher >= 3.0 * std::numbers::pi / 8.0 && cameraAngleToMarcher < 5.0 * std::numbers::pi / 8.0) {
+    } else if (cameraAngleToMarcher >= 3.0 * CalChart::pi / 8.0 && cameraAngleToMarcher < 5.0 * CalChart::pi / 8.0) {
         x1 -= 0.45f;
         x2 += 0.45f;
-    } else if (cameraAngleToMarcher >= 5.0 * std::numbers::pi / 8.0 && cameraAngleToMarcher < 7.0 * std::numbers::pi / 8.0) {
+    } else if (cameraAngleToMarcher >= 5.0 * CalChart::pi / 8.0 && cameraAngleToMarcher < 7.0 * CalChart::pi / 8.0) {
         y1 -= 0.45f;
         y2 += 0.45f;
         x1 -= 0.45f;
         x2 += 0.45f;
-    } else if (cameraAngleToMarcher >= 7.0 * std::numbers::pi / 8.0 && cameraAngleToMarcher < 9.0 * std::numbers::pi / 8.0) {
+    } else if (cameraAngleToMarcher >= 7.0 * CalChart::pi / 8.0 && cameraAngleToMarcher < 9.0 * CalChart::pi / 8.0) {
         y1 -= 0.45f;
         y2 += 0.45f;
-    } else if (cameraAngleToMarcher >= 9.0 * std::numbers::pi / 8.0 && cameraAngleToMarcher < 11.0 * std::numbers::pi / 8.0) {
+    } else if (cameraAngleToMarcher >= 9.0 * CalChart::pi / 8.0 && cameraAngleToMarcher < 11.0 * CalChart::pi / 8.0) {
         y1 -= 0.45f;
         y2 += 0.45f;
         x1 += 0.45f;
         x2 -= 0.45f;
-    } else if (cameraAngleToMarcher >= 11.0 * std::numbers::pi / 8.0 && cameraAngleToMarcher < 13.0 * std::numbers::pi / 8.0) {
+    } else if (cameraAngleToMarcher >= 11.0 * CalChart::pi / 8.0 && cameraAngleToMarcher < 13.0 * CalChart::pi / 8.0) {
         x1 += 0.45f;
         x2 -= 0.45f;
-    } else if (cameraAngleToMarcher >= 13.0 * std::numbers::pi / 8.0 && relativeAngle < 15.0 * std::numbers::pi / 8.0) {
+    } else if (cameraAngleToMarcher >= 13.0 * CalChart::pi / 8.0 && relativeAngle < 15.0 * CalChart::pi / 8.0) {
         y1 += 0.45f;
         y2 -= 0.45f;
         x1 += 0.45f;
         x2 -= 0.45f;
-    } else // if (cameraAngleToMarcher >= 15.0*std::numbers::pi/8.0 || cameraAngleToMarcher <
-    // 1.0*std::numbers::pi/8.0) // and everything else
+    } else // if (cameraAngleToMarcher >= 15.0*CalChart::pi/8.0 || cameraAngleToMarcher <
+    // 1.0*CalChart::pi/8.0) // and everything else
     {
         y1 += 0.45f;
         y2 -= 0.45f;
     }
 
-    if (relativeAngle >= 1.0 * std::numbers::pi / 8.0 && relativeAngle < 3.0 * std::numbers::pi / 8.0) {
+    if (relativeAngle >= 1.0 * CalChart::pi / 8.0 && relativeAngle < 3.0 * CalChart::pi / 8.0) {
         return WhichImage::kBR0;
-    } else if (relativeAngle >= 3.0 * std::numbers::pi / 8.0 && relativeAngle < 5.0 * std::numbers::pi / 8.0) {
+    } else if (relativeAngle >= 3.0 * CalChart::pi / 8.0 && relativeAngle < 5.0 * CalChart::pi / 8.0) {
         return WhichImage::kR0;
-    } else if (relativeAngle >= 5.0 * std::numbers::pi / 8.0 && relativeAngle < 7.0 * std::numbers::pi / 8.0) {
+    } else if (relativeAngle >= 5.0 * CalChart::pi / 8.0 && relativeAngle < 7.0 * CalChart::pi / 8.0) {
         return WhichImage::kFR0;
-    } else if (relativeAngle >= 7.0 * std::numbers::pi / 8.0 && relativeAngle < 9.0 * std::numbers::pi / 8.0) {
+    } else if (relativeAngle >= 7.0 * CalChart::pi / 8.0 && relativeAngle < 9.0 * CalChart::pi / 8.0) {
         return WhichImage::kF0;
-    } else if (relativeAngle >= 9.0 * std::numbers::pi / 8.0 && relativeAngle < 11.0 * std::numbers::pi / 8.0) {
+    } else if (relativeAngle >= 9.0 * CalChart::pi / 8.0 && relativeAngle < 11.0 * CalChart::pi / 8.0) {
         return WhichImage::kFL0;
-    } else if (relativeAngle >= 11.0 * std::numbers::pi / 8.0 && relativeAngle < 13.0 * std::numbers::pi / 8.0) {
+    } else if (relativeAngle >= 11.0 * CalChart::pi / 8.0 && relativeAngle < 13.0 * CalChart::pi / 8.0) {
         return WhichImage::kL0;
-    } else if (relativeAngle >= 13.0 * std::numbers::pi / 8.0 && relativeAngle < 15.0 * std::numbers::pi / 8.0) {
+    } else if (relativeAngle >= 13.0 * CalChart::pi / 8.0 && relativeAngle < 15.0 * CalChart::pi / 8.0) {
         return WhichImage::kBL0;
-    } else // if (relativeAngle >= 15.0*std::numbers::pi/8.0 || relativeAngle < 1.0*std::numbers::pi/8.0)
+    } else // if (relativeAngle >= 15.0*CalChart::pi/8.0 || relativeAngle < 1.0*CalChart::pi/8.0)
     // // and everything else
     {
         return WhichImage::kB0;
@@ -339,7 +339,7 @@ static auto GetAngle(float x, float y, CCOmniviewCanvas::ViewPoint const& viewpo
     auto v = CCOmniviewCanvas::ViewPoint{ x - viewpoint.x, y - viewpoint.y, 0.f };
     auto mag = sqrt(v.x * v.x + v.y * v.y);
     auto ang = acos(v.x / mag); // normalize
-    return (v.y < 0) ? -ang : ang;
+    return CalChart::Radian{ (v.y < 0) ? -ang : ang };
 }
 
 // the rendering context used by CCOmniviewCanvas
@@ -533,7 +533,7 @@ void CCOmniView_GLContext::DrawField(float FieldEW, float FieldNS, bool crowdOn)
 
 void CCOmniView_GLContext::Draw3dMarcher(AnimationView::MarcherInfo const& info, CCOmniviewCanvas::ViewPoint const& viewpoint, WhichMarchingStyle style)
 {
-    auto ang = CalChart::NormalizeAngleRad(GetAngle(info.x, info.y, viewpoint));
+    auto ang = CalChart::NormalizeAngle(GetAngle(info.x, info.y, viewpoint));
     auto dir = info.direction;
 
     auto x2 = info.x;
@@ -704,7 +704,7 @@ void CCOmniviewCanvas::OnPaint(wxPaintEvent&)
         mViewPoint.y = info.y;
         mViewPoint.z = 2;
         mViewAngle = info.direction;
-        mViewAngleZ = 0;
+        mViewAngleZ = CalChart::Radian{};
     }
 
     mygluLookAt(mViewPoint.x, mViewPoint.y, mViewPoint.z, mViewPoint.x + cos(mViewAngle), mViewPoint.y + sin(mViewAngle), mViewPoint.z + sin(mViewAngleZ), 0.0, 0.0, 1.0);
@@ -724,7 +724,7 @@ void CCOmniviewCanvas::OnPaint(wxPaintEvent&)
 void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
 {
     auto const stepIncr = 0.3f * 3;
-    auto const AngleStepIncr = 0.1f * 3;
+    auto const AngleStepIncr = CalChart::Radian{ 0.1f } * 3;
     switch (event.GetKeyCode()) {
     // predetermined camera angles:
     case '1':
@@ -736,7 +736,7 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
         if (event.GetKeyCode() == '!') {
             mViewPoint.y *= -1;
             mViewPoint.x *= -1;
-            mViewAngle = CalChart::NormalizeAngleRad(mViewAngle + std::numbers::pi);
+            mViewAngle = CalChart::NormalizeAngle(mViewAngle + CalChart::pi);
         }
         break;
     case '2':
@@ -748,7 +748,7 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
         if (event.GetKeyCode() == '@') {
             mViewPoint.y *= -1;
             mViewPoint.x *= -1;
-            mViewAngle = CalChart::NormalizeAngleRad(mViewAngle + std::numbers::pi);
+            mViewAngle = CalChart::NormalizeAngle(mViewAngle + CalChart::pi);
         }
         break;
     case '3':
@@ -760,7 +760,7 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
         if (event.GetKeyCode() == '#') {
             mViewPoint.y *= -1;
             mViewPoint.x *= -1;
-            mViewAngle = CalChart::NormalizeAngleRad(mViewAngle + std::numbers::pi);
+            mViewAngle = CalChart::NormalizeAngle(mViewAngle + CalChart::pi);
         }
         break;
 
@@ -769,22 +769,22 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
         mViewPoint = ViewPoint{ config.Get_OmniViewPoint_X_4(),
             config.Get_OmniViewPoint_Y_4(),
             config.Get_OmniViewPoint_Z_4() };
-        mViewAngle = config.Get_OmniViewAngle_4();
-        mViewAngleZ = config.Get_OmniViewAngle_Z_4();
+        mViewAngle = CalChart::Radian{ config.Get_OmniViewAngle_4() };
+        mViewAngleZ = CalChart::Radian{ config.Get_OmniViewAngle_Z_4() };
         break;
     case '5':
         mViewPoint = ViewPoint{ config.Get_OmniViewPoint_X_5(),
             config.Get_OmniViewPoint_Y_5(),
             config.Get_OmniViewPoint_Z_5() };
-        mViewAngle = config.Get_OmniViewAngle_5();
-        mViewAngleZ = config.Get_OmniViewAngle_Z_5();
+        mViewAngle = CalChart::Radian{ config.Get_OmniViewAngle_5() };
+        mViewAngleZ = CalChart::Radian{ config.Get_OmniViewAngle_Z_5() };
         break;
     case '6':
         mViewPoint = ViewPoint{ config.Get_OmniViewPoint_X_6(),
             config.Get_OmniViewPoint_Y_6(),
             config.Get_OmniViewPoint_Z_6() };
-        mViewAngle = config.Get_OmniViewAngle_6();
-        mViewAngleZ = config.Get_OmniViewAngle_Z_6();
+        mViewAngle = CalChart::Radian{ config.Get_OmniViewAngle_6() };
+        mViewAngleZ = CalChart::Radian{ config.Get_OmniViewAngle_Z_6() };
         break;
 
     case '$':
@@ -793,8 +793,8 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
             config.Set_OmniViewPoint_X_4(mViewPoint.x);
             config.Set_OmniViewPoint_Y_4(mViewPoint.y);
             config.Set_OmniViewPoint_Z_4(mViewPoint.z);
-            config.Set_OmniViewAngle_4(mViewAngle);
-            config.Set_OmniViewAngle_Z_4(mViewAngleZ);
+            config.Set_OmniViewAngle_4(mViewAngle.getValue());
+            config.Set_OmniViewAngle_Z_4(mViewAngleZ.getValue());
         }
         break;
     case '%':
@@ -803,8 +803,8 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
             config.Set_OmniViewPoint_X_5(mViewPoint.x);
             config.Set_OmniViewPoint_Y_5(mViewPoint.y);
             config.Set_OmniViewPoint_Z_5(mViewPoint.z);
-            config.Set_OmniViewAngle_5(mViewAngle);
-            config.Set_OmniViewAngle_Z_5(mViewAngleZ);
+            config.Set_OmniViewAngle_5(mViewAngle.getValue());
+            config.Set_OmniViewAngle_Z_5(mViewAngleZ.getValue());
         }
         break;
     case '^':
@@ -813,8 +813,8 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
             config.Set_OmniViewPoint_X_6(mViewPoint.x);
             config.Set_OmniViewPoint_Y_6(mViewPoint.y);
             config.Set_OmniViewPoint_Z_6(mViewPoint.z);
-            config.Set_OmniViewAngle_6(mViewAngle);
-            config.Set_OmniViewAngle_Z_6(mViewAngleZ);
+            config.Set_OmniViewAngle_6(mViewAngle.getValue());
+            config.Set_OmniViewAngle_Z_6(mViewAngleZ.getValue());
         }
         break;
 
@@ -833,12 +833,12 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
     case 'q':
         OnCmd_FollowMarcher(-1);
         mViewAngle += AngleStepIncr;
-        mViewAngle = CalChart::NormalizeAngleRad(mViewAngle);
+        mViewAngle = CalChart::NormalizeAngle(mViewAngle);
         break;
     case 'e':
         OnCmd_FollowMarcher(-1);
         mViewAngle -= AngleStepIncr;
-        mViewAngle = CalChart::NormalizeAngleRad(mViewAngle);
+        mViewAngle = CalChart::NormalizeAngle(mViewAngle);
         break;
     case 'r':
         OnCmd_FollowMarcher(-1);
@@ -865,13 +865,13 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
     // move, following the FPS model
     case 'a':
         OnCmd_FollowMarcher(-1);
-        mViewPoint.x += -stepIncr * cos(mViewAngle - std::numbers::pi / 2);
-        mViewPoint.y += -stepIncr * sin(mViewAngle - std::numbers::pi / 2);
+        mViewPoint.x += -stepIncr * cos(mViewAngle - CalChart::pi / 2);
+        mViewPoint.y += -stepIncr * sin(mViewAngle - CalChart::pi / 2);
         break;
     case 'd':
         OnCmd_FollowMarcher(-1);
-        mViewPoint.x += stepIncr * cos(mViewAngle - std::numbers::pi / 2);
-        mViewPoint.y += stepIncr * sin(mViewAngle - std::numbers::pi / 2);
+        mViewPoint.x += stepIncr * cos(mViewAngle - CalChart::pi / 2);
+        mViewPoint.y += stepIncr * sin(mViewAngle - CalChart::pi / 2);
         break;
     case 's':
         OnCmd_FollowMarcher(-1);
@@ -917,8 +917,8 @@ void CCOmniviewCanvas::OnMouseMove(wxMouseEvent& event)
         }
         const wxSize ClientSize = GetClientSize();
         wxPoint delta = thisPos - mStartShiftMoveMousePosition;
-        mViewAngle = mStartShiftMoveViewAngle + sin(delta.x / static_cast<float>(ClientSize.x));
-        mViewAngleZ = mStartShiftMoveViewAngleZ + sin(delta.y / static_cast<float>(ClientSize.y));
+        mViewAngle = mStartShiftMoveViewAngle + CalChart::Radian{ sin(delta.x / static_cast<float>(ClientSize.x)) };
+        mViewAngleZ = mStartShiftMoveViewAngleZ + CalChart::Radian{ sin(delta.y / static_cast<float>(ClientSize.y)) };
         Refresh();
     } else {
         mShiftMoving = false;

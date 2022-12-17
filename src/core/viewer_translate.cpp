@@ -18,16 +18,11 @@ float ToOnlineViewer::yPosition(CalChart::Coord::units coord)
     return CoordUnits2Float(coord) + 42; // TODO; the Online Viewer is only prepared for normal-sized fields, so we'll assume those dimensions for now
 }
 
-float ToOnlineViewer::angle(float angle)
+float ToOnlineViewer::angle(CalChart::Degree angle)
 {
-    angle = -(angle - 270);
-    while (angle >= 360) {
-        angle -= 360;
-    }
-    while (angle < 0) {
-        angle += 360;
-    }
-    return angle;
+    angle = -(angle - CalChart::Degree{ 270 });
+    angle = BoundDirection(angle);
+    return angle.getValue();
 }
 
 std::string ToOnlineViewer::symbolName(SYMBOL_TYPE symbol)
