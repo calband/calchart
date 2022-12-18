@@ -330,22 +330,27 @@ TEST_CASE("Shape_rect", "CalChartShapeTests")
     auto uut = CalChart::Shape_rect(CalChart::Coord{ 10, 10 });
     CHECK(uut.GetOrigin() == CalChart::Coord{ 10, 10 });
     CHECK(uut.GetPoint() == CalChart::Coord{ 10, 10 });
-    CHECK(uut.GetCC_DrawCommand(CalChart::Coord{ 20, 20 }).empty());
+    CHECK(uut.GetCC_DrawCommand(CalChart::Coord{ 20, 20 }) == std::vector<CalChart::DrawCommand>{
+              CalChart::DrawCommands::Line(30, 30, 30, 30),
+              CalChart::DrawCommands::Line(30, 30, 30, 30),
+              CalChart::DrawCommands::Line(30, 30, 30, 30),
+              CalChart::DrawCommands::Line(30, 30, 30, 30),
+          });
     uut.OnMove({ 51, 49 }, trucate);
     CHECK(uut.GetPoint() == CalChart::Coord{ 51, 49 });
     auto result = uut.GetCC_DrawCommand(CalChart::Coord{ 20, 20 });
     CHECK(uut.GetCC_DrawCommand(CalChart::Coord{ 20, 20 }) == std::vector<CalChart::DrawCommand>{
-              CalChart::DrawCommands::Line(30, 30, 72, 30),
-              CalChart::DrawCommands::Line(72, 30, 72, 70),
-              CalChart::DrawCommands::Line(72, 70, 30, 70),
-              CalChart::DrawCommands::Line(30, 70, 30, 30),
+              CalChart::DrawCommands::Line(30, 30, 71, 30),
+              CalChart::DrawCommands::Line(71, 30, 71, 69),
+              CalChart::DrawCommands::Line(71, 69, 30, 69),
+              CalChart::DrawCommands::Line(30, 69, 30, 30),
           });
     uut = CalChart::Shape_rect(CalChart::Coord{ 10, 10 }, CalChart::Coord{ 50, 50 });
     CHECK(uut.GetCC_DrawCommand(CalChart::Coord{ 20, 20 }) == std::vector<CalChart::DrawCommand>{
-              CalChart::DrawCommands::Line(30, 30, 71, 30),
-              CalChart::DrawCommands::Line(71, 30, 71, 71),
-              CalChart::DrawCommands::Line(71, 71, 30, 71),
-              CalChart::DrawCommands::Line(30, 71, 30, 30),
+              CalChart::DrawCommands::Line(30, 30, 70, 30),
+              CalChart::DrawCommands::Line(70, 30, 70, 70),
+              CalChart::DrawCommands::Line(70, 70, 30, 70),
+              CalChart::DrawCommands::Line(30, 70, 30, 30),
           });
 }
 
