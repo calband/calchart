@@ -96,31 +96,12 @@ auto Shape_arc::GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand>
 
 auto Shape_rect::GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand>
 {
-    float w, h;
-
-    if (GetOrigin().x < GetPoint().x) {
-        p.x += GetOrigin().x;
-        w = GetPoint().x - GetOrigin().x + 1;
-    } else {
-        p.x += GetPoint().x;
-        w = GetOrigin().x - GetPoint().x + 1;
-    }
-    if (GetOrigin().y < GetPoint().y) {
-        p.y += GetOrigin().y;
-        h = GetPoint().y - GetOrigin().y + 1;
-    } else {
-        p.y += GetPoint().y;
-        h = GetOrigin().y - GetPoint().y + 1;
-    }
-    if ((w > 1) && (h > 1)) {
-        return {
-            DrawCommands::Line(p.x, p.y, p.x + w, p.y),
-            DrawCommands::Line(p.x + w, p.y, p.x + w, p.y + h),
-            DrawCommands::Line(p.x + w, p.y + h, p.x, p.y + h),
-            DrawCommands::Line(p.x, p.y + h, p.x, p.y),
-        };
-    }
-    return {};
+    return {
+        DrawCommands::Line(p.x + GetOrigin().x, p.y + GetOrigin().y, p.x + GetPoint().x, p.y + GetOrigin().y),
+        DrawCommands::Line(p.x + GetPoint().x, p.y + GetOrigin().y, p.x + GetPoint().x, p.y + GetPoint().y),
+        DrawCommands::Line(p.x + GetPoint().x, p.y + GetPoint().y, p.x + GetOrigin().x, p.y + GetPoint().y),
+        DrawCommands::Line(p.x + GetOrigin().x, p.y + GetPoint().y, p.x + GetOrigin().x, p.y + GetOrigin().y),
+    };
 }
 
 auto Lasso::GetPointsOnLine(int numpnts) const -> std::vector<Coord>
