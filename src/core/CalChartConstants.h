@@ -158,12 +158,6 @@ enum class Direction {
     NorthWest,
 };
 
-template <typename T>
-constexpr auto AngleToDirectionDeg(T ang)
-{
-    return static_cast<CalChart::Direction>(AngleToQuadrantDeg(ang));
-}
-
 enum class PSFONT {
     SYMBOL,
     NORM,

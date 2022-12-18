@@ -282,7 +282,8 @@ Animation::animate_info_t Animation::GetAnimateInfo(int which) const
     return {
         which,
         mCollisions.count({ which, mCurrentSheetNumber, mCurrentBeatNumber }) ? mCollisions.find({ which, mCurrentSheetNumber, mCurrentBeatNumber })->second : Coord::CollisionType::none,
-        GetCommand(mCurrentSheetNumber, which).FacingDirection(), mPoints.at(which)
+        CalChart::Radian{ GetCommand(mCurrentSheetNumber, which).FacingDirection() },
+        mPoints.at(which)
     };
 }
 
@@ -295,7 +296,8 @@ std::vector<Animation::animate_info_t> Animation::GetAllAnimateInfo() const
         return {
             which,
             mCollisions.count({ which, mCurrentSheetNumber, mCurrentBeatNumber }) ? mCollisions.find({ which, mCurrentSheetNumber, mCurrentBeatNumber })->second : Coord::CollisionType::none,
-            GetCommand(mCurrentSheetNumber, which).FacingDirection(), mPoints.at(which)
+            CalChart::Radian{ GetCommand(mCurrentSheetNumber, which).FacingDirection() },
+            mPoints.at(which)
         };
     });
     std::sort(animates.begin(), animates.end(), [](auto& a, auto& b) {

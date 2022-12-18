@@ -54,28 +54,23 @@ float Coord::DM_Magnitude() const
 }
 
 // Get direction of this vector
-float Coord::DirectionRad() const
+CalChart::Radian Coord::Direction() const
 {
     if (*this == Coord{ 0 })
-        return 0.0;
+        return CalChart::Radian{};
 
     auto ang = acos(CoordUnits2Float(x) / Magnitude()); // normalize
     if (y > 0)
         ang = (-ang); // check for > PI
 
-    return ang;
+    return CalChart::Radian{ ang };
 }
 
-float Coord::DirectionDeg() const { return Rad2Deg(DirectionRad()); }
-
 // Get direction from this coord to another
-float Coord::DirectionRad(Coord const& c) const
+CalChart::Radian Coord::Direction(Coord const& c) const
 {
-    return (c - *this).DirectionRad();
+    return (c - *this).Direction();
 }
-
-// Get direction from this coord to another
-float Coord::DirectionDeg(Coord const& c) const { return Rad2Deg(DirectionRad(c)); }
 
 // Returns the type of collision between this point and another
 Coord::CollisionType Coord::DetectCollision(Coord const& c) const
@@ -118,7 +113,7 @@ void Coord_UnitTests()
         Coord undertest;
         assert(0.0 == undertest.Magnitude());
         assert(0.0 == undertest.DM_Magnitude());
-        assert(0.0 == undertest.DirectionRad());
+        assert(CalChart::Radian{} == undertest.Direction());
     }
 
     std::random_device rd;

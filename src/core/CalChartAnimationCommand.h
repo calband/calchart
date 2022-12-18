@@ -32,6 +32,7 @@
  * Animation by "stepping" it along each AnimationCommand
  */
 
+#include "CalChartAngles.h"
 #include "CalChartAnimationTypes.h"
 #include "CalChartCoord.h"
 #include "CalChartDrawCommand.h"
@@ -57,8 +58,8 @@ public:
     virtual void ApplyForward(Coord& pt);
     virtual void ApplyBackward(Coord& pt);
 
-    virtual float FacingDirection() const = 0;
-    virtual float MotionDirection() const;
+    virtual CalChart::Degree FacingDirection() const = 0;
+    virtual CalChart::Degree MotionDirection() const;
     virtual void ClipBeats(unsigned beats);
 
     virtual unsigned NumBeats() const { return mNumBeats; }
@@ -96,12 +97,12 @@ class AnimationCommandMT : public AnimationCommand {
     using super = AnimationCommand;
 
 public:
-    AnimationCommandMT(unsigned beats, float direction);
+    AnimationCommandMT(unsigned beats, CalChart::Degree direction);
     virtual ~AnimationCommandMT() = default;
 
     std::unique_ptr<AnimationCommand> clone() const override;
 
-    float FacingDirection() const override;
+    CalChart::Degree FacingDirection() const override;
 
     nlohmann::json toOnlineViewerJSON(Coord start) const override;
 
@@ -112,10 +113,10 @@ protected:
         if (!ptr)
             return false;
         return super::is_equal(other)
-            && IS_ZERO(dir - ptr->dir);
+            && dir.IsEqual(ptr->dir);
     }
 
-    float dir;
+    CalChart::Degree dir;
 };
 
 class AnimationCommandMove : public AnimationCommandMT {
@@ -123,7 +124,7 @@ class AnimationCommandMove : public AnimationCommandMT {
 
 public:
     AnimationCommandMove(unsigned beats, Coord movement);
-    AnimationCommandMove(unsigned beats, Coord movement, float direction);
+    AnimationCommandMove(unsigned beats, Coord movement, CalChart::Degree direction);
     virtual ~AnimationCommandMove() = default;
 
     std::unique_ptr<AnimationCommand> clone() const override;
@@ -134,7 +135,7 @@ public:
     void ApplyForward(Coord& pt) override;
     void ApplyBackward(Coord& pt) override;
 
-    float MotionDirection() const override;
+    CalChart::Degree MotionDirection() const override;
     void ClipBeats(unsigned beats) override;
 
     DrawCommand GenCC_DrawCommand(Coord pt, Coord offset) const override;
@@ -159,8 +160,13 @@ class AnimationCommandRotate : public AnimationCommand {
     using super = AnimationCommand;
 
 public:
-    AnimationCommandRotate(unsigned beats, Coord cntr, float rad, float ang1,
-        float ang2, bool backwards = false);
+    AnimationCommandRotate(
+        unsigned beats,
+        Coord cntr,
+        float radius,
+        CalChart::Degree ang1,
+        CalChart::Degree ang2,
+        bool backwards = false);
     virtual ~AnimationCommandRotate() = default;
 
     std::unique_ptr<AnimationCommand> clone() const override;
@@ -171,7 +177,7 @@ public:
     void ApplyForward(Coord& pt) override;
     void ApplyBackward(Coord& pt) override;
 
-    float FacingDirection() const override;
+    CalChart::Degree FacingDirection() const override;
     void ClipBeats(unsigned beats) override;
 
     DrawCommand GenCC_DrawCommand(Coord pt, Coord offset) const override;
@@ -186,15 +192,17 @@ private:
             return false;
         return super::is_equal(other)
             && mOrigin == ptr->mOrigin
-            && IS_ZERO(mR - ptr->mR)
-            && IS_ZERO(mAngStart - ptr->mAngStart)
-            && IS_ZERO(mAngEnd - ptr->mAngEnd)
-            && IS_ZERO(mFace - ptr->mFace);
+            && IS_EQUAL(mRadius, ptr->mRadius)
+            && mAngStart.IsEqual(ptr->mAngStart)
+            && mAngEnd.IsEqual(ptr->mAngEnd)
+            && mFace.IsEqual(ptr->mFace);
     }
 
     Coord mOrigin;
-    float mR, mAngStart, mAngEnd;
-    float mFace;
+    float mRadius;
+    CalChart::Degree mAngStart;
+    CalChart::Degree mAngEnd;
+    CalChart::Degree mFace;
 };
 
 }

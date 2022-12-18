@@ -222,20 +222,20 @@ class Shape_arc : public Shape_1point {
 public:
     Shape_arc(Coord c, Coord p)
         : Shape_1point(c)
-        , angle(c.DirectionRad(p))
-        , angle0(c.DirectionRad(p))
+        , angle(c.Direction(p))
+        , angle0(c.Direction(p))
         , d(c.Distance(p))
     {
     }
 
     [[nodiscard]] auto GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand> override;
-    [[nodiscard]] auto GetAngleRad() const { return angle - angle0; }
+    [[nodiscard]] auto GetAngle() const { return angle - angle0; }
 
 private:
-    float angle;
-    float angle0;
+    CalChart::Radian angle;
+    CalChart::Radian angle0;
     float d;
-    void OnMoveImpl(Coord p) override { angle = GetOrigin().DirectionRad(p); }
+    void OnMoveImpl(Coord p) override { angle = GetOrigin().Direction(p); }
 
     auto useSnap() -> bool override { return true; }
 };

@@ -279,8 +279,8 @@ std::map<int, CalChart::Coord> MovePointsTool_MoveRotate::TransformPoints(std::m
         return select_list;
     } else {
         auto start = dynamic_cast<CalChart::Shape_1point const&>(*m_shape_list[0]).GetOrigin();
-        auto r = -((CalChart::Shape_arc*)m_shape_list.back().get())->GetAngleRad();
-        auto m = TranslationMatrix(Vector<float>(-start.x, -start.y, 0)) * ZRotationMatrix(r) * TranslationMatrix(Vector<float>(start.x, start.y, 0));
+        auto r = -((CalChart::Shape_arc*)m_shape_list.back().get())->GetAngle();
+        auto m = TranslationMatrix(Vector<double>(-start.x, -start.y, 0)) * ZRotationMatrix(r.getValue()) * TranslationMatrix(Vector<double>(start.x, start.y, 0));
         return GetTransformedPoints(m, select_list);
     }
 }
@@ -333,12 +333,12 @@ std::map<int, CalChart::Coord> MovePointsTool_MoveShear::TransformPoints(std::ma
     auto c2 = shape->GetPoint();
     auto v1 = c1 - start;
     auto v2 = c2 - c1;
-    float amount = v2.Magnitude() / v1.Magnitude();
-    if (BoundDirectionSignedDeg(v1.DirectionDeg() - (c2 - start).DirectionDeg()) < 0) {
+    double amount = v2.Magnitude() / v1.Magnitude();
+    if (BoundDirectionSigned(v1.Direction() - (c2 - start).Direction()) < CalChart::Radian{}) {
         amount = -amount;
     }
-    float ang = Deg2Rad(-v1.DirectionDeg());
-    auto m = TranslationMatrix(Vector<float>(-start.x, -start.y, 0)) * ZRotationMatrix(-ang) * YXShearMatrix(amount) * ZRotationMatrix(ang) * TranslationMatrix(Vector<float>(start.x, start.y, 0));
+    auto ang = -v1.Direction();
+    auto m = TranslationMatrix(Vector<double>(-start.x, -start.y, 0)) * ZRotationMatrix(-ang.getValue()) * YXShearMatrix(amount) * ZRotationMatrix(ang.getValue()) * TranslationMatrix(Vector<double>(start.x, start.y, 0));
     return GetTransformedPoints(m, select_list);
 }
 
@@ -378,8 +378,8 @@ std::map<int, CalChart::Coord> MovePointsTool_MoveReflect::TransformPoints(std::
     auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
     auto c1 = shape->GetOrigin();
     auto c2 = shape->GetPoint() - c1;
-    float ang = Deg2Rad(-c2.DirectionDeg());
-    auto m = TranslationMatrix(Vector<float>(-c1.x, -c1.y, 0)) * ZRotationMatrix(-ang) * YReflectionMatrix<float>() * ZRotationMatrix(ang) * TranslationMatrix(Vector<float>(c1.x, c1.y, 0));
+    auto ang = -c2.Direction();
+    auto m = TranslationMatrix(Vector<double>(-c1.x, -c1.y, 0)) * ZRotationMatrix(-ang.getValue()) * YReflectionMatrix<double>() * ZRotationMatrix(ang.getValue()) * TranslationMatrix(Vector<double>(c1.x, c1.y, 0));
     return GetTransformedPoints(m, select_list);
 }
 

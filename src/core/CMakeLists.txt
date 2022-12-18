@@ -22,6 +22,7 @@ FLEX_TARGET(
 add_library(
   calchart_core
   STATIC
+  CalChartAngles.h
   CalChartAnimation.cpp
   CalChartAnimation.h
   CalChartAnimationErrors.h

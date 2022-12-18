@@ -77,19 +77,19 @@ auto Shape_ellipse::GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand>
 
 auto Shape_arc::GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand>
 {
-    auto boundingAngle = angle0 < 0 ? angle - angle0 : angle0 - angle;
-    if (boundingAngle < 0.0 || boundingAngle > std::numbers::pi) {
+    auto boundingAngle = angle0 < CalChart::Radian{} ? angle - angle0 : angle0 - angle;
+    if (boundingAngle < CalChart::Radian{} || boundingAngle > CalChart::pi) {
         return {
             DrawCommands::Arc(
-                GetOrigin() + p + CalChart::CreateCoordVectorRad(angle0 < 0 ? angle : angle0, d),
-                GetOrigin() + p + CalChart::CreateCoordVectorRad(angle0 < 0 ? angle0 : angle, d),
+                GetOrigin() + p + CalChart::CreateCoordVector(angle0 < CalChart::Radian{} ? angle : angle0, d),
+                GetOrigin() + p + CalChart::CreateCoordVector(angle0 < CalChart::Radian{} ? angle0 : angle, d),
                 GetOrigin() + p)
         };
     }
     return {
         DrawCommands::Arc(
-            GetOrigin() + p + CalChart::CreateCoordVectorRad(angle0 < 0 ? angle0 : angle, d),
-            GetOrigin() + p + CalChart::CreateCoordVectorRad(angle0 < 0 ? angle : angle0, d),
+            GetOrigin() + p + CalChart::CreateCoordVector(angle0 < CalChart::Radian{} ? angle0 : angle, d),
+            GetOrigin() + p + CalChart::CreateCoordVector(angle0 < CalChart::Radian{} ? angle : angle0, d),
             GetOrigin() + p)
     };
 }

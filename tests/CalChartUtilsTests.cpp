@@ -1,3 +1,4 @@
+#include "CalChartAngles.h"
 #include "CalChartConstants.h"
 #include "CalChartUtils.h"
 #include <catch2/catch_test_macros.hpp>
@@ -11,22 +12,22 @@ TEST_CASE("CalChartUtils", "basics")
     CHECK_FALSE(CalChart::IS_ZERO(1.0));
     CHECK(CalChart::IS_ZERO(1.0e-9));
 
-    CHECK(CalChart::Deg2Rad(0) == 0);
-    CHECK_FALSE(CalChart::Deg2Rad(1) == 0);
-    CHECK_FALSE(CalChart::Deg2Rad(1) == 1.0F);
-    CHECK(CalChart::IS_ZERO(CalChart::Deg2Rad(180) - std::numbers::pi));
-    CHECK(CalChart::IS_ZERO(CalChart::Deg2Rad(225) - 5.0 / 4.0 * std::numbers::pi));
-    CHECK(CalChart::IS_ZERO(CalChart::Deg2Rad(360) - 2 * std::numbers::pi));
-    CHECK(CalChart::IS_ZERO(CalChart::Deg2Rad(540) - 3 * std::numbers::pi));
-    CHECK(CalChart::IS_ZERO(CalChart::Rad2Deg(std::numbers::pi) - 180));
-    CHECK(CalChart::IS_ZERO(CalChart::Rad2Deg(5.0 / 4.0 * std::numbers::pi) - 225));
-    CHECK(CalChart::IS_ZERO(CalChart::Rad2Deg(2 * std::numbers::pi) - 360));
-    CHECK(CalChart::IS_ZERO(CalChart::Rad2Deg(3 * std::numbers::pi) - 540));
+    CHECK(CalChart::details::Deg2Rad(0) == 0);
+    CHECK_FALSE(CalChart::details::Deg2Rad(1) == 0);
+    CHECK_FALSE(CalChart::details::Deg2Rad(1) == 1.0F);
+    CHECK(CalChart::IS_ZERO(CalChart::details::Deg2Rad(180) - std::numbers::pi));
+    CHECK(CalChart::IS_ZERO(CalChart::details::Deg2Rad(225) - 5.0 / 4.0 * std::numbers::pi));
+    CHECK(CalChart::IS_ZERO(CalChart::details::Deg2Rad(360) - 2 * std::numbers::pi));
+    CHECK(CalChart::IS_ZERO(CalChart::details::Deg2Rad(540) - 3 * std::numbers::pi));
+    CHECK(CalChart::IS_ZERO(CalChart::details::Rad2Deg(std::numbers::pi) - 180));
+    CHECK(CalChart::IS_ZERO(CalChart::details::Rad2Deg(5.0 / 4.0 * std::numbers::pi) - 225));
+    CHECK(CalChart::IS_ZERO(CalChart::details::Rad2Deg(2 * std::numbers::pi) - 360));
+    CHECK(CalChart::IS_ZERO(CalChart::details::Rad2Deg(3 * std::numbers::pi) - 540));
 
-    CHECK(CalChart::BoundDirectionDeg(225) == 225);
-    CHECK(CalChart::BoundDirectionDeg(-225) == 135);
-    CHECK(CalChart::IS_EQUAL(CalChart::BoundDirectionDeg(585), 225));
-    CHECK(CalChart::IS_EQUAL(CalChart::BoundDirectionDeg(-585), 135));
+    CHECK(BoundDirection(CalChart::Degree{ 225 }).IsEqual(CalChart::Degree{ 225 }));
+    CHECK(CalChart::BoundDirection(CalChart::Degree{ -225 }) == CalChart::Degree{ 135 });
+    CHECK(CalChart::BoundDirection(CalChart::Degree{ 585 }).IsEqual(CalChart::Degree{ 225 }));
+    CHECK(CalChart::BoundDirection(-CalChart::Degree{ 585 }).IsEqual(CalChart::Degree{ 135 }));
 
     for (auto [value, dir] : std::vector<std::tuple<int, CalChart::Direction>>{
              { 0, CalChart::Direction::North },
@@ -49,7 +50,7 @@ TEST_CASE("CalChartUtils", "basics")
          }) {
         for (auto minorscrub : { 0, 10, -10 }) {
             for (auto majorscrub : { 0, 360, -360, 720, -720 }) {
-                CHECK(CalChart::AngleToDirectionDeg(value + minorscrub + majorscrub) == dir);
+                CHECK(CalChart::AngleToDirection(CalChart::Degree{ value + minorscrub + majorscrub }) == dir);
             }
         }
     }
@@ -74,7 +75,7 @@ TEST_CASE("CalChartUtils", "basics")
          }) {
         for (auto minorscrub : { 0, 10, -10 }) {
             for (auto majorscrub : { 0, 360, -360, 720, -720 }) {
-                CHECK(CalChart::AngleToQuadrantDeg(value + minorscrub + majorscrub) == dir);
+                CHECK(CalChart::AngleToQuadrant(CalChart::Degree{ value + minorscrub + majorscrub }) == dir);
             }
         }
     }
@@ -84,9 +85,9 @@ TEST_CASE("CalChartUtils", "basics")
              225,
              315,
          }) {
-        CHECK(CalChart::IsDiagonalDirectionDeg(value));
+        CHECK(CalChart::IsDiagonalDirection(CalChart::Degree{ value }));
         for (auto minorscrub : { 10, -10 }) {
-            CHECK_FALSE(CalChart::IsDiagonalDirectionDeg(value + minorscrub));
+            CHECK_FALSE(CalChart::IsDiagonalDirection(CalChart::Degree{ value + minorscrub }));
         }
     }
 
@@ -104,34 +105,34 @@ TEST_CASE("CalChartUtils", "basics")
              { 355, { 0.9961946981, 0.0871557427 } },
              { 360, { 1, 0 } },
          }) {
-        auto unit = CalChart::CreateCalChartUnitVectorDeg(dir);
+        auto unit = CalChart::CreateCalChartUnitVector(CalChart::Degree{ dir });
         CHECK(CalChart::IS_ZERO(std::get<0>(v) - std::get<0>(unit)));
         CHECK(CalChart::IS_ZERO(std::get<1>(v) - std::get<1>(unit)));
     }
 
-    CHECK(CalChart::IS_EQUAL(CalChart::BoundDirectionDeg(1082.0), 2.0));
-    CHECK(CalChart::IS_EQUAL(CalChart::BoundDirectionDeg(2.0), 2.0));
-    CHECK(CalChart::IS_EQUAL(CalChart::BoundDirectionDeg(-1082.0), 358.0));
-    CHECK(CalChart::IS_EQUAL(CalChart::BoundDirectionDeg(-2.0), 358.0));
-    CHECK(CalChart::IS_EQUAL(CalChart::BoundDirectionSignedDeg(182.0), -178.0));
-    CHECK(CalChart::IS_EQUAL(CalChart::BoundDirectionSignedDeg(-182.0), 178.0));
-    CHECK(CalChart::IS_EQUAL(CalChart::BoundDirectionRad(2.0), 2.0));
-    CHECK(CalChart::IS_EQUAL(CalChart::BoundDirectionRad(-2.0), 2 * (std::numbers::pi - 1.0)));
-    CHECK(CalChart::IS_EQUAL(CalChart::BoundDirectionDeg(1082.0), CalChart::NormalizeAngleDeg(1082.0)));
-    CHECK(CalChart::IS_EQUAL(CalChart::BoundDirectionRad(-2.0), CalChart::NormalizeAngleRad(-2.0)));
-    CHECK(CalChart::AngleToQuadrantDeg(0) == 0);
-    CHECK(CalChart::AngleToQuadrantDeg(44) == 7);
-    CHECK(CalChart::AngleToQuadrantDeg(45) == 7);
-    CHECK(CalChart::AngleToQuadrantDeg(90) == 6);
-    CHECK(CalChart::AngleToQuadrantDeg(135) == 5);
-    CHECK(CalChart::AngleToQuadrantDeg(160) == 4);
-    CHECK(CalChart::AngleToQuadrantDeg(180) == 4);
-    CHECK(CalChart::AngleToQuadrantDeg(225) == 3);
-    CHECK(CalChart::AngleToQuadrantDeg(270) == 2);
-    CHECK(CalChart::AngleToQuadrantDeg(315) == 1);
-    CHECK(CalChart::AngleToQuadrantDeg(350) == 0);
-    CHECK(CalChart::AngleToQuadrantDeg(360) == 0);
-    CHECK(CalChart::AngleToQuadrantDeg(341341) == 7);
+    CHECK(CalChart::BoundDirection(CalChart::Degree{ 1082.0 }).IsEqual(CalChart::Degree{ 2.0 }));
+    CHECK(CalChart::BoundDirection(CalChart::Degree{ 2.0 }).IsEqual(CalChart::Degree{ 2.0 }));
+    CHECK(CalChart::BoundDirection(CalChart::Degree{ -1082.0 }).IsEqual(CalChart::Degree{ 358.0 }));
+    CHECK(CalChart::BoundDirection(CalChart::Degree{ -2.0 }).IsEqual(CalChart::Degree{ 358.0 }));
+    CHECK(CalChart::BoundDirectionSigned(CalChart::Degree{ 182.0 }).IsEqual(CalChart::Degree{ -178.0 }));
+    CHECK(CalChart::BoundDirectionSigned(CalChart::Degree{ -182.0 }).IsEqual(CalChart::Degree{ 178.0 }));
+    CHECK(CalChart::BoundDirection(CalChart::Radian{ 2.0 }).IsEqual(CalChart::Radian{ 2.0 }));
+    CHECK(CalChart::BoundDirection(CalChart::Radian{ -2.0 }).IsEqual(2 * (CalChart::pi - CalChart::Radian{ 1.0 })));
+    CHECK(CalChart::BoundDirection(CalChart::Degree{ 1082.0 }).IsEqual(CalChart::NormalizeAngle(CalChart::Degree{ 1082.0 })));
+    CHECK(CalChart::BoundDirection(CalChart::Radian{ -2.0 }).IsEqual(CalChart::NormalizeAngle(CalChart::Radian{ -2.0 })));
+    CHECK(CalChart::AngleToQuadrant(CalChart::Degree{ 0 }) == 0);
+    CHECK(CalChart::AngleToQuadrant(CalChart::Degree{ 44 }) == 7);
+    CHECK(CalChart::AngleToQuadrant(CalChart::Degree{ 45 }) == 7);
+    CHECK(CalChart::AngleToQuadrant(CalChart::Degree{ 90 }) == 6);
+    CHECK(CalChart::AngleToQuadrant(CalChart::Degree{ 135 }) == 5);
+    CHECK(CalChart::AngleToQuadrant(CalChart::Degree{ 160 }) == 4);
+    CHECK(CalChart::AngleToQuadrant(CalChart::Degree{ 180 }) == 4);
+    CHECK(CalChart::AngleToQuadrant(CalChart::Degree{ 225 }) == 3);
+    CHECK(CalChart::AngleToQuadrant(CalChart::Degree{ 270 }) == 2);
+    CHECK(CalChart::AngleToQuadrant(CalChart::Degree{ 315 }) == 1);
+    CHECK(CalChart::AngleToQuadrant(CalChart::Degree{ 350 }) == 0);
+    CHECK(CalChart::AngleToQuadrant(CalChart::Degree{ 360 }) == 0);
+    CHECK(CalChart::AngleToQuadrant(CalChart::Degree{ 341341 }) == 7);
 }
 
 TEST_CASE("CreateUnitVector", "CalChartUtils")
@@ -152,7 +153,7 @@ TEST_CASE("CreateUnitVector", "CalChartUtils")
              { 370, { 0.984807753, -0.1736481777 } },
              { -316, { 0.7193398003, -0.6946583705 } },
          }) {
-        auto unit = CalChart::CreateUnitVectorDeg(dir);
+        auto unit = CalChart::CreateUnitVector(CalChart::Degree{ dir });
         CHECK(CalChart::IS_ZERO(std::get<0>(v) - std::get<0>(unit)));
         CHECK(CalChart::IS_ZERO(std::get<1>(v) - std::get<1>(unit)));
     }

@@ -135,15 +135,15 @@ TEST_CASE("Shape_arc", "CalChartShapeTests")
     auto uut = CalChart::Shape_arc(CalChart::Coord{ 10, 10 }, CalChart::Coord{ 20, 20 });
     CHECK(uut.GetOrigin() == CalChart::Coord{ 10, 10 });
     CHECK(uut.GetCC_DrawCommand(CalChart::Coord{ 20, 20 }) == std::vector<CalChart::DrawCommand>{
-              CalChart::DrawCommands::Arc(39, 40, 39, 40, 30, 30),
+              CalChart::DrawCommands::Arc(39, 39, 39, 39, 30, 30),
           });
     uut.OnMove({ 51, 53 }, trucate);
     CHECK(uut.GetCC_DrawCommand(CalChart::Coord{ 20, 20 }) == std::vector<CalChart::DrawCommand>{
-              CalChart::DrawCommands::Arc(39, 40, 39, 40, 30, 30),
+              CalChart::DrawCommands::Arc(39, 39, 39, 39, 30, 30),
           });
     uut.OnMove({ 51, 100 }, trucate);
     CHECK(uut.GetCC_DrawCommand(CalChart::Coord{ 20, 20 }) == std::vector<CalChart::DrawCommand>{
-              CalChart::DrawCommands::Arc(35, 42, 39, 40, 30, 30),
+              CalChart::DrawCommands::Arc(35, 42, 39, 39, 30, 30),
           });
 }
 
@@ -152,17 +152,15 @@ TEST_CASE("Shape_arc2", "CalChartShapeTests")
     auto uut = CalChart::Shape_arc(CalChart::Coord{ 20, 20 }, CalChart::Coord{ 10, 10 });
     CHECK(uut.GetOrigin() == CalChart::Coord{ 20, 20 });
     CHECK(uut.GetCC_DrawCommand(CalChart::Coord{ 20, 20 }) == std::vector<CalChart::DrawCommand>{
-              CalChart::DrawCommands::Arc(30, 30, 30, 30, 40, 40),
+              CalChart::DrawCommands::Arc(31, 31, 31, 31, 40, 40),
           });
     uut.OnMove({ 51, 53 }, trucate);
-    auto peek = uut.GetCC_DrawCommand(CalChart::Coord{ 20, 20 });
     CHECK(uut.GetCC_DrawCommand(CalChart::Coord{ 20, 20 }) == std::vector<CalChart::DrawCommand>{
-              CalChart::DrawCommands::Arc(30, 30, 49, 50, 40, 40),
+              CalChart::DrawCommands::Arc(49, 49, 31, 31, 40, 40),
           });
     uut.OnMove({ 51, 100 }, trucate);
-    peek = uut.GetCC_DrawCommand(CalChart::Coord{ 20, 20 });
     CHECK(uut.GetCC_DrawCommand(CalChart::Coord{ 20, 20 }) == std::vector<CalChart::DrawCommand>{
-              CalChart::DrawCommands::Arc(30, 30, 44, 53, 40, 40),
+              CalChart::DrawCommands::Arc(31, 31, 44, 53, 40, 40),
           });
 }
 
@@ -251,13 +249,13 @@ TEST_CASE("Shape_arcquad1", "CalChartShapeTests")
     auto const p1 = CalChart::Coord{ 20, 20 };
     auto uut = CalChart::Shape_arc(center, p1);
     CHECK(uut.GetCC_DrawCommand(CalChart::Coord{ 0, 0 }) == std::vector<CalChart::DrawCommand>{
-              CalChart::DrawCommands::Arc({ 19, 20 }, { 19, 20 }, center),
+              CalChart::DrawCommands::Arc({ 19, 19 }, { 19, 19 }, center),
           });
     for (auto&& i : std::vector{
-             std::tuple{ CalChart::Coord{ 10, 20 }, CalChart::DrawCommands::Arc{ { 10, 24 }, { 19, 20 }, center } },
-             std::tuple{ CalChart::Coord{ 20, 10 }, CalChart::DrawCommands::Arc{ { 19, 20 }, { 24, 10 }, center } },
-             std::tuple{ CalChart::Coord{ 0, 10 }, CalChart::DrawCommands::Arc{ { -4, 10 }, { 19, 20 }, center } },
-             std::tuple{ CalChart::Coord{ 10, 0 }, CalChart::DrawCommands::Arc{ { 19, 20 }, { 10, -4 }, center } },
+             std::tuple{ CalChart::Coord{ 10, 20 }, CalChart::DrawCommands::Arc{ { 10, 24 }, { 19, 19 }, center } },
+             std::tuple{ CalChart::Coord{ 20, 10 }, CalChart::DrawCommands::Arc{ { 19, 19 }, { 24, 10 }, center } },
+             std::tuple{ CalChart::Coord{ 0, 10 }, CalChart::DrawCommands::Arc{ { -4, 10 }, { 19, 19 }, center } },
+             std::tuple{ CalChart::Coord{ 10, 0 }, CalChart::DrawCommands::Arc{ { 19, 19 }, { 10, -4 }, center } },
          }) {
         uut.OnMove(std::get<0>(i), trucate);
         auto peek = uut.GetCC_DrawCommand(CalChart::Coord{ 0, 0 });
@@ -290,14 +288,15 @@ TEST_CASE("Shape_arcquad5", "CalChartShapeTests")
     auto const center = CalChart::Coord{ 10, 10 };
     auto const p1 = CalChart::Coord{ 20, 0 };
     auto uut = CalChart::Shape_arc(center, p1);
+    auto peek = uut.GetCC_DrawCommand(CalChart::Coord{ 0, 0 });
     CHECK(uut.GetCC_DrawCommand(CalChart::Coord{ 0, 0 }) == std::vector<CalChart::DrawCommand>{
-              CalChart::DrawCommands::Arc(p1, p1, center),
+              CalChart::DrawCommands::Arc({ 20, 1 }, { 20, 1 }, center),
           });
     for (auto&& i : std::vector{
-             std::tuple{ CalChart::Coord{ 10, 20 }, CalChart::DrawCommands::Arc{ { 10, 24 }, { 20, 0 }, center } },
-             std::tuple{ CalChart::Coord{ 20, 10 }, CalChart::DrawCommands::Arc{ { 24, 10 }, { 20, 0 }, center } },
-             std::tuple{ CalChart::Coord{ 0, 10 }, CalChart::DrawCommands::Arc{ { 20, 0 }, { -4, 10 }, center } },
-             std::tuple{ CalChart::Coord{ 10, 0 }, CalChart::DrawCommands::Arc{ { 20, 0 }, { 10, -4 }, center } },
+             std::tuple{ CalChart::Coord{ 10, 20 }, CalChart::DrawCommands::Arc{ { 10, 24 }, { 20, 1 }, center } },
+             std::tuple{ CalChart::Coord{ 20, 10 }, CalChart::DrawCommands::Arc{ { 24, 10 }, { 20, 1 }, center } },
+             std::tuple{ CalChart::Coord{ 0, 10 }, CalChart::DrawCommands::Arc{ { 20, 1 }, { -4, 10 }, center } },
+             std::tuple{ CalChart::Coord{ 10, 0 }, CalChart::DrawCommands::Arc{ { 20, 1 }, { 10, -4 }, center } },
          }) {
         uut.OnMove(std::get<0>(i), trucate);
         auto peek = uut.GetCC_DrawCommand(CalChart::Coord{ 0, 0 });
@@ -310,14 +309,15 @@ TEST_CASE("Shape_arcquad7", "CalChartShapeTests")
     auto const center = CalChart::Coord{ 10, 10 };
     auto const p1 = CalChart::Coord{ 0, 0 };
     auto uut = CalChart::Shape_arc(center, p1);
+    auto peek = uut.GetCC_DrawCommand(CalChart::Coord{ 0, 0 });
     CHECK(uut.GetCC_DrawCommand(CalChart::Coord{ 0, 0 }) == std::vector<CalChart::DrawCommand>{
-              CalChart::DrawCommands::Arc(p1, p1, center),
+              CalChart::DrawCommands::Arc({ 1, 1 }, { 1, 1 }, center),
           });
     for (auto&& i : std::vector{
-             std::tuple{ CalChart::Coord{ 10, 20 }, CalChart::DrawCommands::Arc{ { 0, 0 }, { 10, 24 }, center } },
-             std::tuple{ CalChart::Coord{ 20, 10 }, CalChart::DrawCommands::Arc{ { 24, 10 }, { 0, 0 }, center } },
-             std::tuple{ CalChart::Coord{ 0, 10 }, CalChart::DrawCommands::Arc{ { 0, 0 }, { -4, 10 }, center } },
-             std::tuple{ CalChart::Coord{ 10, 0 }, CalChart::DrawCommands::Arc{ { 10, -4 }, { 0, 0 }, center } },
+             std::tuple{ CalChart::Coord{ 10, 20 }, CalChart::DrawCommands::Arc{ { 1, 1 }, { 10, 24 }, center } },
+             std::tuple{ CalChart::Coord{ 20, 10 }, CalChart::DrawCommands::Arc{ { 24, 10 }, { 1, 1 }, center } },
+             std::tuple{ CalChart::Coord{ 0, 10 }, CalChart::DrawCommands::Arc{ { 1, 1 }, { -4, 10 }, center } },
+             std::tuple{ CalChart::Coord{ 10, 0 }, CalChart::DrawCommands::Arc{ { 10, -4 }, { 1, 1 }, center } },
          }) {
         uut.OnMove(std::get<0>(i), trucate);
         auto peek = uut.GetCC_DrawCommand(CalChart::Coord{ 0, 0 });

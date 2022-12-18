@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartAngles.h"
 #include "CalChartAnimationSheet.h"
 #include "CalChartAnimationTypes.h"
 #include "CalChartCoord.h"
@@ -56,7 +57,7 @@ public:
     struct animate_info_t {
         int index;
         CalChart::Coord::CollisionType mCollision;
-        float mFacingDirection;
+        CalChart::Radian mFacingDirection;
         Coord mPosition;
     };
     animate_info_t GetAnimateInfo(int which) const;

@@ -8,12 +8,12 @@ TEST_CASE("Basic", "CalChartCoord")
     CalChart::Coord undertest;
     REQUIRE(0.0 == undertest.Magnitude());
     REQUIRE(0.0 == undertest.DM_Magnitude());
-    REQUIRE(0.0 == undertest.DirectionDeg());
+    REQUIRE(CalChart::Radian{ 0.0 } == undertest.Direction());
 
     auto undertest2 = CalChart::Coord{ 16, 16 };
     CHECK(CalChart::IS_ZERO(std::numbers::sqrt2 - undertest2.Magnitude()));
     CHECK(1.0F == undertest2.DM_Magnitude());
-    CHECK(CalChart::IS_EQUAL(-std::numbers::pi / 4, undertest2.DirectionRad()));
+    CHECK(undertest2.Direction().IsEqual(-CalChart::pi / 4));
 }
 
 TEST_CASE("CreateCalChartVectorDeg", "CalChartCoord")
@@ -32,7 +32,7 @@ TEST_CASE("CreateCalChartVectorDeg", "CalChartCoord")
              { 355, 1, CalChart::Coord{ 16, 1 } },
              { 360, 1, CalChart::Coord{ 16, 0 } },
          }) {
-        auto unit = CalChart::CreateCalChartVectorDeg(dir, 1);
+        auto unit = CalChart::CreateCalChartVector(CalChart::Degree{ dir }, 1);
         CHECK(unit == v);
     }
 }

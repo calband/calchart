@@ -84,11 +84,11 @@ void AnimationCommand::ApplyForward(Coord&) { mBeat = mNumBeats; }
 
 void AnimationCommand::ApplyBackward(Coord&) { mBeat = 0; }
 
-float AnimationCommand::MotionDirection() const { return FacingDirection(); }
+CalChart::Degree AnimationCommand::MotionDirection() const { return FacingDirection(); }
 
 void AnimationCommand::ClipBeats(unsigned beats) { mNumBeats = beats; }
 
-AnimationCommandMT::AnimationCommandMT(unsigned beats, float direction)
+AnimationCommandMT::AnimationCommandMT(unsigned beats, CalChart::Degree direction)
     : AnimationCommand(beats)
     , dir(direction)
 {
@@ -99,7 +99,7 @@ std::unique_ptr<AnimationCommand> AnimationCommandMT::clone() const
     return std::make_unique<AnimationCommandMT>(*this);
 }
 
-float AnimationCommandMT::FacingDirection() const { return dir; }
+CalChart::Degree AnimationCommandMT::FacingDirection() const { return dir; }
 
 nlohmann::json AnimationCommandMT::toOnlineViewerJSON(Coord start) const
 {
@@ -114,7 +114,7 @@ nlohmann::json AnimationCommandMT::toOnlineViewerJSON(Coord start) const
 }
 
 AnimationCommandMove::AnimationCommandMove(unsigned beats, Coord movement)
-    : AnimationCommandMT(beats, movement.DirectionDeg())
+    : AnimationCommandMT(beats, CalChart::Degree{ movement.Direction() })
     , mVector(movement)
 {
 }
@@ -124,8 +124,7 @@ std::unique_ptr<AnimationCommand> AnimationCommandMove::clone() const
     return std::make_unique<AnimationCommandMove>(*this);
 }
 
-AnimationCommandMove::AnimationCommandMove(unsigned beats, Coord movement,
-    float direction)
+AnimationCommandMove::AnimationCommandMove(unsigned beats, Coord movement, CalChart::Degree direction)
     : AnimationCommandMT(beats, direction)
     , mVector(movement)
 {
@@ -170,9 +169,9 @@ void AnimationCommandMove::ApplyBackward(Coord& pt)
     pt -= mVector;
 }
 
-float AnimationCommandMove::MotionDirection() const
+CalChart::Degree AnimationCommandMove::MotionDirection() const
 {
-    return mVector.DirectionDeg();
+    return CalChart::Degree{ mVector.Direction() };
 }
 
 void AnimationCommandMove::ClipBeats(unsigned beats)
@@ -203,19 +202,20 @@ nlohmann::json AnimationCommandMove::toOnlineViewerJSON(Coord start) const
     return j;
 }
 
-AnimationCommandRotate::AnimationCommandRotate(unsigned beats, Coord cntr,
-    float rad, float ang1, float ang2,
+AnimationCommandRotate::AnimationCommandRotate(
+    unsigned beats,
+    Coord cntr,
+    float radius,
+    CalChart::Degree ang1,
+    CalChart::Degree ang2,
     bool backwards)
     : AnimationCommand(beats)
     , mOrigin(cntr)
-    , mR(rad)
+    , mRadius(radius)
     , mAngStart(ang1)
     , mAngEnd(ang2)
+    , mFace(backwards ? -90 : 90)
 {
-    if (backwards)
-        mFace = -90;
-    else
-        mFace = 90;
 }
 
 std::unique_ptr<AnimationCommand> AnimationCommandRotate::clone() const
@@ -226,18 +226,18 @@ std::unique_ptr<AnimationCommand> AnimationCommandRotate::clone() const
 bool AnimationCommandRotate::NextBeat(Coord& pt)
 {
     bool b = AnimationCommand::NextBeat(pt);
-    auto curr_ang = Deg2Rad(mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart) : mAngStart);
-    pt.x = RoundToCoordUnits(mOrigin.x + cos(curr_ang) * mR);
-    pt.y = RoundToCoordUnits(mOrigin.y - sin(curr_ang) * mR);
+    auto curr_ang = mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart) : mAngStart;
+    pt.x = RoundToCoordUnits(mOrigin.x + cos(curr_ang) * mRadius);
+    pt.y = RoundToCoordUnits(mOrigin.y - sin(curr_ang) * mRadius);
     return b;
 }
 
 bool AnimationCommandRotate::PrevBeat(Coord& pt)
 {
     if (AnimationCommand::PrevBeat(pt)) {
-        auto curr_ang = Deg2Rad(mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart) : mAngStart);
-        pt.x = RoundToCoordUnits(mOrigin.x + cos(curr_ang) * mR);
-        pt.y = RoundToCoordUnits(mOrigin.y - sin(curr_ang) * mR);
+        auto curr_ang = mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart) : mAngStart;
+        pt.x = RoundToCoordUnits(mOrigin.x + cos(curr_ang) * mRadius);
+        pt.y = RoundToCoordUnits(mOrigin.y - sin(curr_ang) * mRadius);
         return true;
     } else {
         return false;
@@ -247,27 +247,24 @@ bool AnimationCommandRotate::PrevBeat(Coord& pt)
 void AnimationCommandRotate::ApplyForward(Coord& pt)
 {
     AnimationCommand::ApplyForward(pt);
-    pt.x = RoundToCoordUnits(mOrigin.x + cos(Deg2Rad(mAngEnd)) * mR);
-    pt.y = RoundToCoordUnits(mOrigin.y - sin(Deg2Rad(mAngEnd)) * mR);
+    pt.x = RoundToCoordUnits(mOrigin.x + cos(mAngEnd) * mRadius);
+    pt.y = RoundToCoordUnits(mOrigin.y - sin(mAngEnd) * mRadius);
 }
 
 void AnimationCommandRotate::ApplyBackward(Coord& pt)
 {
     AnimationCommand::ApplyBackward(pt);
-    pt.x = RoundToCoordUnits(mOrigin.x + cos(Deg2Rad(mAngStart)) * mR);
-    pt.y = RoundToCoordUnits(mOrigin.y - sin(Deg2Rad(mAngStart)) * mR);
+    pt.x = RoundToCoordUnits(mOrigin.x + cos(mAngStart) * mRadius);
+    pt.y = RoundToCoordUnits(mOrigin.y - sin(mAngStart) * mRadius);
 }
 
-float AnimationCommandRotate::FacingDirection() const
+CalChart::Degree AnimationCommandRotate::FacingDirection() const
 {
-    float curr_ang = mNumBeats
-        ? (mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart
-        : mAngStart;
+    auto curr_ang = mNumBeats ? (mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart : mAngStart;
     if (mAngEnd > mAngStart) {
         return curr_ang + mFace;
-    } else {
-        return curr_ang - mFace;
     }
+    return curr_ang - mFace;
 }
 
 void AnimationCommandRotate::ClipBeats(unsigned beats)
@@ -278,12 +275,12 @@ void AnimationCommandRotate::ClipBeats(unsigned beats)
 DrawCommand
 AnimationCommandRotate::GenCC_DrawCommand(Coord /*pt*/, Coord offset) const
 {
-    float start = (mAngStart < mAngEnd) ? mAngStart : mAngEnd;
-    float end = (mAngStart < mAngEnd) ? mAngEnd : mAngStart;
-    auto x_start = RoundToCoordUnits(mOrigin.x + cos(Deg2Rad(start)) * mR) + offset.x;
-    auto y_start = RoundToCoordUnits(mOrigin.y - sin(Deg2Rad(start)) * mR) + offset.y;
-    auto x_end = RoundToCoordUnits(mOrigin.x + cos(Deg2Rad(end)) * mR) + offset.x;
-    auto y_end = RoundToCoordUnits(mOrigin.y - sin(Deg2Rad(end)) * mR) + offset.y;
+    auto start = (mAngStart < mAngEnd) ? mAngStart : mAngEnd;
+    auto end = (mAngStart < mAngEnd) ? mAngEnd : mAngStart;
+    auto x_start = RoundToCoordUnits(mOrigin.x + cos(start) * mRadius) + offset.x;
+    auto y_start = RoundToCoordUnits(mOrigin.y - sin(start) * mRadius) + offset.y;
+    auto x_end = RoundToCoordUnits(mOrigin.x + cos(end) * mRadius) + offset.x;
+    auto y_end = RoundToCoordUnits(mOrigin.y - sin(end) * mRadius) + offset.y;
 
     return DrawCommands::Arc{ x_start, y_start, x_end, y_end, mOrigin.x + offset.x, mOrigin.y + offset.y };
 }
@@ -297,10 +294,10 @@ nlohmann::json AnimationCommandRotate::toOnlineViewerJSON(Coord start) const
     j["start_y"] = ToOnlineViewer::yPosition(start.y);
     j["center_x"] = ToOnlineViewer::xPosition(mOrigin.x);
     j["center_y"] = ToOnlineViewer::yPosition(mOrigin.y);
-    j["angle"] = -(mAngEnd - mAngStart);
+    j["angle"] = (-(mAngEnd - mAngStart)).getValue();
     j["beats"] = static_cast<double>(NumBeats());
     j["beats_per_step"] = static_cast<double>(1);
-    j["facing_offset"] = -mFace + 90;
+    j["facing_offset"] = (-mFace + CalChart::Degree{ 90 }).getValue();
     return j;
 }
 }
