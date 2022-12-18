@@ -22,15 +22,15 @@
 */
 
 #include "CalChartAngles.h"
-#include "CalChartUtils.h"
 
+#include <compare>
 #include <cstdint>
-#include <iostream>
+#include <ostream>
 
 namespace CalChart {
 
-inline constexpr auto kCoordShift = 4;
-inline constexpr auto kCoordDecimal = (1 << kCoordShift);
+inline constexpr auto kCoordShift = 4U;
+inline constexpr auto kCoordDecimal = (1U << kCoordShift);
 
 struct Coord {
     using units = int16_t;
@@ -60,112 +60,90 @@ struct Coord {
     {
     }
 
-    float Magnitude() const;
-    bool CloserThan(Coord const&, float tolerance) const;
-    float Distance(Coord const&) const;
-    float DM_Magnitude() const; // check for diagonal military also
-    CalChart::Radian Direction() const;
-    CalChart::Radian Direction(Coord const& c) const;
-
-    auto dot(Coord c) const { return x * c.x + y * c.y; }
-
-    CollisionType DetectCollision(Coord const& c) const;
-
-    constexpr Coord& operator+=(Coord const& c)
+    constexpr auto operator+=(Coord c) -> Coord&
     {
-        x += c.x;
-        y += c.y;
+        x = static_cast<units>(x + c.x);
+        y = static_cast<units>(y + c.y);
         return *this;
     }
 
-    constexpr Coord& operator-=(Coord const& c)
+    constexpr auto operator-=(Coord c) -> Coord&
     {
-        x -= c.x;
-        y -= c.y;
+        x = static_cast<units>(x - c.x);
+        y = static_cast<units>(y - c.y);
         return *this;
     }
 
-    Coord& operator*=(int s)
+    template <typename T>
+    constexpr auto operator*=(T s) -> Coord&
     {
         x *= s;
         y *= s;
         return *this;
     }
 
-    Coord& operator/=(int s)
+    template <typename T>
+    constexpr auto operator/=(T s) -> Coord&
     {
         x /= s;
         y /= s;
         return *this;
     }
 
-    Coord& operator*=(double s)
-    {
-        x = static_cast<units>(x * s);
-        y = static_cast<units>(y * s);
-        return *this;
-    }
+    constexpr auto operator<=>(Coord const&) const = default;
 
-    Coord& operator/=(double s)
-    {
-        x = static_cast<units>(x / s);
-        y = static_cast<units>(y / s);
-        return *this;
-    }
+    [[nodiscard]] auto Magnitude() const -> float;
+    [[nodiscard]] auto DM_Magnitude() const -> float; // check for diagonal military also
+
+    // Get distance of point to other
+    [[nodiscard]] auto Distance(Coord other) const { return std::hypot(other.x - x, other.y - y); }
+
+    // Angle of vector {0, 0} and this.
+    [[nodiscard]] auto Direction() const -> CalChart::Radian;
+    // Direction of vector this and other
+    [[nodiscard]] auto Direction(Coord c) const -> CalChart::Radian;
+
+    [[nodiscard]] constexpr auto Dot(Coord c) const { return x * c.x + y * c.y; }
+
+    [[nodiscard]] auto DetectCollision(Coord c) const -> CollisionType;
 
     units x, y;
 };
 
-inline Coord operator+(Coord const& a, Coord const& b)
+[[nodiscard]] constexpr auto operator+(Coord lhs, Coord rhs) -> Coord
 {
-    return Coord(a.x + b.x, a.y + b.y);
+    lhs += rhs;
+    return lhs;
 }
 
-inline Coord operator-(Coord const& a, Coord const& b)
+[[nodiscard]] constexpr auto operator-(Coord lhs, Coord rhs) -> Coord
 {
-    return Coord(a.x - b.x, a.y - b.y);
-}
-
-template <typename T>
-inline Coord operator*(Coord const& a, T s)
-{
-    return Coord(a.x * s, a.y * s);
+    lhs -= rhs;
+    return lhs;
 }
 
 template <typename T>
-inline Coord operator/(Coord const& a, T s)
-{
-    return Coord(a.x / s, a.y / s);
-}
+[[nodiscard]] constexpr auto operator*(Coord c, T v) -> Coord { return Coord(c.x * v, c.y * v); }
 
-inline Coord operator-(Coord const& c) { return Coord(-c.x, -c.y); }
+template <typename T>
+[[nodiscard]] constexpr auto operator*(T v, Coord c) -> Coord { return Coord(c.x * v, c.y * v); }
 
-inline bool operator==(Coord const& a, Coord const& b)
-{
-    return ((a.x == b.x) && (a.y == b.y));
-}
+template <typename T>
+[[nodiscard]] constexpr auto operator/(Coord a, T s) -> Coord { return Coord(a.x / s, a.y / s); }
 
-inline bool operator<(Coord const& a, Coord const& b)
-{
-    return (a.y == b.y) ? (a.x < b.x) : (a.y < b.y);
-}
+[[nodiscard]] constexpr auto operator-(Coord c) -> Coord { return -1 * c; }
 
-inline bool operator!=(Coord const& a, Coord const& b)
-{
-    return ((a.x != b.x) || (a.y != b.y));
-}
-
-inline std::ostream& operator<<(std::ostream& os, CalChart::Coord const& c)
+inline auto operator<<(std::ostream& os, Coord c) -> std::ostream&
 {
     return os << "(" << c.x << "," << c.y << ")";
 }
 
-// RoundToCoordUnits: Use when number is already in Coord format, just needs to be
-// rounded
+// RoundToCoordUnits: Use when number is already in Coord format, just needs to be rounded.
 template <typename T>
 constexpr auto RoundToCoordUnits(T inCoord)
 {
-    return static_cast<CalChart::Coord::units>((inCoord < 0) ? (inCoord - 0.5) : (inCoord + 0.5));
+    constexpr auto point5 = 0.5;
+    return static_cast<CalChart::Coord::units>((inCoord < 0) ? (inCoord - point5) : (inCoord + point5));
 }
 
 // RoundToCoordUnits, CoordUnits2Float
@@ -175,6 +153,7 @@ constexpr auto Float2CoordUnits(T a)
 {
     return static_cast<CalChart::Coord::units>(RoundToCoordUnits(a * CalChart::kCoordDecimal));
 }
+
 template <typename T>
 constexpr auto CoordUnits2Float(T a)
 {
@@ -234,5 +213,94 @@ constexpr auto CreateCoordVector(CalChart::Degree dir, T mag) -> CalChart::Coord
     return CreateCoordVector(static_cast<CalChart::Radian>(dir), mag);
 }
 
-void Coord_UnitTests();
+// Implementation details
+// Angle of vector {0, 0} and this.
+inline auto Coord::Direction() const -> CalChart::Radian
+{
+    if (*this == Coord{ 0 }) {
+        return CalChart::Radian{};
+    }
+
+    auto ang = acos(CoordUnits2Float(x) / Magnitude()); // normalize
+    if (y > 0) {
+        ang = (-ang); // check for > PI
+    }
+
+    return CalChart::Radian{ ang };
+}
+
+// Direction of vector this and other
+inline auto Coord::Direction(Coord c) const -> CalChart::Radian
+{
+    return (c - *this).Direction();
+}
+
+// Get magnitude of vector
+inline auto Coord::Magnitude() const -> float
+{
+    return static_cast<float>(std::hypot(CoordUnits2Float(x), CoordUnits2Float(y)));
+}
+
+// Get magnitude, but check for diagonal military
+inline auto Coord::DM_Magnitude() const -> float
+{
+    if ((x == y) || (x == -y)) {
+        return static_cast<float>(CoordUnits2Float(std::abs(x)));
+    }
+    return Magnitude();
+}
+
+// Returns the type of collision between this point and another
+inline auto Coord::DetectCollision(Coord c) const -> Coord::CollisionType
+{
+    auto dx = x - c.x;
+    auto dy = y - c.y;
+    // Check for special cases to avoid multiplications
+    if (std::abs(dx) > Int2CoordUnits(1)) {
+        return CollisionType::none;
+    }
+    if (std::abs(dy) > Int2CoordUnits(1)) {
+        return CollisionType::none;
+    }
+    auto squaredDist = ((dx * dx) + (dy * dy));
+    auto distOfOne = Int2CoordUnits(1) * Int2CoordUnits(1);
+    if (squaredDist < distOfOne) {
+        return CollisionType::intersect;
+    }
+    if (squaredDist == distOfOne) {
+        return CollisionType::warning;
+    }
+    return CollisionType::none;
+}
+
+namespace details {
+    static_assert(Coord{} == Coord{ 0 });
+    static_assert(Coord{ 1 } == Coord{ 1, 0 });
+    static_assert(Coord{ std::tuple{ 1.0, 1.0 } } == Coord{ 1, 1 });
+    static_assert(Coord{ 0, 0 } <= Coord{ 0, 0 });
+    static_assert(Coord{ -1, 0 } < Coord{ 0, 0 });
+    static_assert(Coord{ -1, -1 } < Coord{ -1, 0 });
+    static_assert(Coord{ 1, 1 } == (Coord{ 1, 0 } + Coord{ 0, 1 }));
+    static_assert(Coord{ 1, 1 } != (Coord{ 1, 0 } + Coord{ 1, 0 }));
+    static_assert(Coord{ 2, 2 } == 2 * Coord{ 1, 1 });
+    static_assert(Coord{ 2, 2 } == Coord{ 1, 1 } * 2);
+    static_assert(Coord{ 1, 1 } == Coord{ 2, 2 } / 2);
+    static_assert(Coord{ 1, -1 } == -Coord{ -1, 1 });
+    static_assert(Coord{ -1, 1 } == -Coord{ 1, -1 });
+
+    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+    static_assert(1 == RoundToCoordUnits(0.5));
+    static_assert(0 == RoundToCoordUnits(0.4));
+    static_assert(-1 == RoundToCoordUnits(-0.5));
+    static_assert(0 == RoundToCoordUnits(-0.4));
+
+    static_assert(8 == Float2CoordUnits(0.5));
+    static_assert(6 == Float2CoordUnits(0.4));
+    static_assert(-8 == Float2CoordUnits(-0.5));
+    static_assert(-6 == Float2CoordUnits(-0.4));
+    static_assert(16 == Float2CoordUnits(1));
+    static_assert(16 == Float2CoordUnits(1.0));
+    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+}
+
 }

@@ -3,9 +3,10 @@
 #include <map>
 #include <random>
 
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers, readability-function-cognitive-complexity)
 TEST_CASE("Basic", "CalChartCoord")
 {
-    CalChart::Coord undertest;
+    CalChart::Coord const undertest;
     REQUIRE(0.0 == undertest.Magnitude());
     REQUIRE(0.0 == undertest.DM_Magnitude());
     REQUIRE(CalChart::Radian{ 0.0 } == undertest.Direction());
@@ -41,32 +42,28 @@ TEST_CASE("Random", "CalChartCoord")
 {
     std::random_device rd;
     std::mt19937 gen(rd());
-    using namespace CalChart;
-    std::uniform_int_distribution<Coord::units> distrib;
+    std::uniform_int_distribution<CalChart::Coord::units> distrib;
     // test equality:
     static constexpr auto kNumRand = 10;
     for (size_t i = 0; i < kNumRand; ++i) {
-        Coord::units x1, y1, x2, y2;
-        x1 = distrib(gen);
-        y1 = distrib(gen);
-        x2 = distrib(gen);
-        y2 = distrib(gen);
-        Coord undertest1(x1, y1);
-        Coord undertest2(x2, y2);
+        auto const x1 = distrib(gen);
+        auto const y1 = distrib(gen);
+        auto const x2 = distrib(gen);
+        auto const y2 = distrib(gen);
+        CalChart::Coord undertest1(x1, y1);
+        CalChart::Coord undertest2(x2, y2);
         CHECK(x1 == undertest1.x);
         CHECK(y1 == undertest1.y);
         CHECK(x2 == undertest2.x);
         CHECK(y2 == undertest2.y);
-        CHECK(Coord(x1, y1) == undertest1);
-        CHECK(Coord(x2, y2) == undertest2);
-        CHECK(!(Coord(x1, y1) != undertest1));
-        CHECK(!(Coord(x2, y2) != undertest2));
-
-        Coord::units x3, y3;
+        CHECK(CalChart::Coord(x1, y1) == undertest1);
+        CHECK(CalChart::Coord(x2, y2) == undertest2);
+        CHECK(!(CalChart::Coord(x1, y1) != undertest1));
+        CHECK(!(CalChart::Coord(x2, y2) != undertest2));
 
         auto newValue = undertest1 + undertest2;
-        x3 = undertest1.x + undertest2.x;
-        y3 = undertest1.y + undertest2.y;
+        auto x3 = static_cast<CalChart::Coord::units>(undertest1.x + undertest2.x);
+        auto y3 = static_cast<CalChart::Coord::units>(undertest1.y + undertest2.y);
         CHECK((x3) == newValue.x);
         CHECK((y3) == newValue.y);
         newValue = undertest1;
@@ -74,8 +71,8 @@ TEST_CASE("Random", "CalChartCoord")
         CHECK((x3) == newValue.x);
         CHECK((y3) == newValue.y);
         newValue = undertest1 - undertest2;
-        x3 = undertest1.x - undertest2.x;
-        y3 = undertest1.y - undertest2.y;
+        x3 = static_cast<CalChart::Coord::units>(undertest1.x - undertest2.x);
+        y3 = static_cast<CalChart::Coord::units>(undertest1.y - undertest2.y);
         CHECK((x3) == newValue.x);
         CHECK((y3) == newValue.y);
         newValue = undertest1;
@@ -87,10 +84,10 @@ TEST_CASE("Random", "CalChartCoord")
         CHECK((-undertest1.x) == newValue.x);
         CHECK((-undertest1.y) == newValue.y);
 
-        short factor = distrib(gen);
+        auto const factor = distrib(gen);
         newValue = undertest1 * factor;
-        x3 = undertest1.x * factor;
-        y3 = undertest1.y * factor;
+        x3 = static_cast<CalChart::Coord::units>(undertest1.x * factor);
+        y3 = static_cast<CalChart::Coord::units>(undertest1.y * factor);
         CHECK((x3) == newValue.x);
         CHECK((y3) == newValue.y);
         newValue = undertest1;
@@ -98,10 +95,10 @@ TEST_CASE("Random", "CalChartCoord")
         CHECK((x3) == newValue.x);
         CHECK((y3) == newValue.y);
         // avoid div by 0
-        if (factor) {
+        if (factor != 0) {
             newValue = undertest1 / factor;
-            x3 = undertest1.x / factor;
-            y3 = undertest1.y / factor;
+            x3 = static_cast<CalChart::Coord::units>(undertest1.x / factor);
+            y3 = static_cast<CalChart::Coord::units>(undertest1.y / factor);
             CHECK((x3) == newValue.x);
             CHECK((y3) == newValue.y);
             newValue = undertest1;
@@ -111,3 +108,32 @@ TEST_CASE("Random", "CalChartCoord")
         }
     }
 }
+
+TEST_CASE("Directions", "CalChartCoord")
+{
+    CHECK(CalChart::Coord{ 0, 0 }.Direction().IsEqual(CalChart::Radian{ 0.0 }));
+    CHECK(CalChart::Coord{ 1, 0 }.Direction().IsEqual(CalChart::Radian{ 0.0 }));
+    CHECK(CalChart::Coord{ 1, 1 }.Direction().IsEqual(-CalChart::pi / 4.0));
+    CHECK(CalChart::Coord{ 0, 1 }.Direction().IsEqual(-CalChart::pi / 2.0));
+    CHECK(CalChart::Coord{ -1, 1 }.Direction().IsEqual(-3 * CalChart::pi / 4.0));
+    CHECK(CalChart::Coord{ -1, 0 }.Direction().IsEqual(CalChart::pi));
+    CHECK(CalChart::Coord{ -1, -1 }.Direction().IsEqual(3 * CalChart::pi / 4.0));
+    CHECK(CalChart::Coord{ 0, -1 }.Direction().IsEqual(CalChart::pi / 2.0));
+    CHECK(CalChart::Coord{ 1, -1 }.Direction().IsEqual(CalChart::pi / 4.0));
+}
+
+TEST_CASE("DirectionsTo", "CalChartCoord")
+{
+    auto uut = CalChart::Coord{ 1, 1 };
+    CHECK(uut.Direction(CalChart::Coord{ 1 + 0, 1 + 0 }).IsEqual(CalChart::Radian{ 0.0 }));
+    CHECK(uut.Direction(CalChart::Coord{ 1 + 1, 1 + 0 }).IsEqual(CalChart::Radian{ 0.0 }));
+    CHECK(uut.Direction(CalChart::Coord{ 1 + 1, 1 + 1 }).IsEqual(-CalChart::pi / 4.0));
+    CHECK(uut.Direction(CalChart::Coord{ 1 + 0, 1 + 1 }).IsEqual(-CalChart::pi / 2.0));
+    CHECK(uut.Direction(CalChart::Coord{ 1 + -1, 1 + 1 }).IsEqual(-3 * CalChart::pi / 4.0));
+    CHECK(uut.Direction(CalChart::Coord{ 1 + -1, 1 + 0 }).IsEqual(CalChart::pi));
+    CHECK(uut.Direction(CalChart::Coord{ 1 + -1, 1 + -1 }).IsEqual(3 * CalChart::pi / 4.0));
+    CHECK(uut.Direction(CalChart::Coord{ 1 + 0, 1 + -1 }).IsEqual(CalChart::pi / 2.0));
+    CHECK(uut.Direction(CalChart::Coord{ 1 + 1, 1 + -1 }).IsEqual(CalChart::pi / 4.0));
+}
+
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers, readability-function-cognitive-complexity)

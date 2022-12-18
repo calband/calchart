@@ -212,7 +212,7 @@ private:
     Coord vect;
     void OnMoveImpl(Coord p) override
     {
-        auto d = vect.dot(p - GetOrigin()) / std::pow(vect.Distance({ 0, 0 }), 2);
+        auto d = vect.Dot(p - GetOrigin()) / std::pow(vect.Distance({ 0, 0 }), 2);
         MovePoint(GetOrigin() + (vect * d));
     }
     auto useSnap() -> bool override { return true; }
@@ -234,7 +234,7 @@ public:
 private:
     CalChart::Radian angle;
     CalChart::Radian angle0;
-    float d;
+    double d;
     void OnMoveImpl(Coord p) override { angle = GetOrigin().Direction(p); }
 
     auto useSnap() -> bool override { return true; }
