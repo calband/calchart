@@ -48,7 +48,7 @@ struct Radian {
     [[nodiscard]] explicit operator Degree() const;
     [[nodiscard]] constexpr auto getValue() const { return value; }
 
-    auto operator<=>(const Radian&) const = default;
+    constexpr auto operator<=>(Radian const&) const = default;
     // Comparision specifically using IS_EQUAL and with wrap.
     // meaning: 2*pi == 0
     [[nodiscard]] inline auto IsEqual(Radian v) const -> bool;
@@ -102,7 +102,7 @@ struct Degree {
     [[nodiscard]] explicit operator Radian() const;
     [[nodiscard]] constexpr auto getValue() const { return value; }
 
-    constexpr auto operator<=>(const Degree&) const = default;
+    constexpr auto operator<=>(Degree const&) const = default;
     // Comparision specifically using IS_EQUAL
     [[nodiscard]] inline auto IsEqual(Degree v) const -> bool;
 
