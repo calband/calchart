@@ -182,9 +182,7 @@ void AnimationCommandMove::ClipBeats(unsigned beats)
 DrawCommand
 AnimationCommandMove::GenCC_DrawCommand(Coord pt, Coord offset) const
 {
-    return DrawCommands::Line{ pt.x + offset.x, pt.y + offset.y,
-        pt.x + mVector.x + offset.x,
-        pt.y + mVector.y + offset.y };
+    return DrawCommands::Line{ pt + offset, pt + mVector + offset };
 }
 
 nlohmann::json AnimationCommandMove::toOnlineViewerJSON(Coord start) const
@@ -277,12 +275,16 @@ AnimationCommandRotate::GenCC_DrawCommand(Coord /*pt*/, Coord offset) const
 {
     auto start = (mAngStart < mAngEnd) ? mAngStart : mAngEnd;
     auto end = (mAngStart < mAngEnd) ? mAngEnd : mAngStart;
-    auto x_start = RoundToCoordUnits(mOrigin.x + cos(start) * mRadius) + offset.x;
-    auto y_start = RoundToCoordUnits(mOrigin.y - sin(start) * mRadius) + offset.y;
-    auto x_end = RoundToCoordUnits(mOrigin.x + cos(end) * mRadius) + offset.x;
-    auto y_end = RoundToCoordUnits(mOrigin.y - sin(end) * mRadius) + offset.y;
+    auto x_start = static_cast<CalChart::Coord::units>(RoundToCoordUnits(mOrigin.x + cos(start) * mRadius) + offset.x);
+    auto y_start = static_cast<CalChart::Coord::units>(RoundToCoordUnits(mOrigin.y - sin(start) * mRadius) + offset.y);
+    auto x_end = static_cast<CalChart::Coord::units>(RoundToCoordUnits(mOrigin.x + cos(end) * mRadius) + offset.x);
+    auto y_end = static_cast<CalChart::Coord::units>(RoundToCoordUnits(mOrigin.y - sin(end) * mRadius) + offset.y);
 
-    return DrawCommands::Arc{ x_start, y_start, x_end, y_end, mOrigin.x + offset.x, mOrigin.y + offset.y };
+    return DrawCommands::Arc{
+        { x_start, y_start },
+        { x_end, y_end },
+        mOrigin + offset
+    };
 }
 
 nlohmann::json AnimationCommandRotate::toOnlineViewerJSON(Coord start) const

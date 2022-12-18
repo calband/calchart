@@ -99,6 +99,7 @@ ColorSetupCanvas::ColorSetupCanvas(CalChartConfiguration& config, wxWindow* pare
     point_start = mPathEnd;
     mPathEnd += Coord(Int2CoordUnits(18), Int2CoordUnits(0));
     mPath.emplace_back(DrawCommands::Line{ point_start, mPathEnd });
+    mPath.emplace_back(DrawCommands::Circle{ mPathEnd, CalChart::Float2CoordUnits(mConfig.Get_DotRatio()) / 2 });
 
     auto shape_start = field_offset + Coord(Int2CoordUnits(18), Int2CoordUnits(-2));
     auto shape_end = shape_start + Coord(Int2CoordUnits(4), Int2CoordUnits(4));
@@ -135,7 +136,7 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent&)
     CalChartDraw::DrawPoints(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(), mShow->GetPointsLabel(), *sheet, 1, false);
 
     // draw the path
-    CalChartDraw::DrawPath(dc, mConfig, mPath, mPathEnd);
+    CalChartDraw::DrawPath(dc, mConfig, mPath);
 
     // draw the shap
     dc.SetBrush(*wxTRANSPARENT_BRUSH);

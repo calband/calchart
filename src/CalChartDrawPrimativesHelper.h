@@ -27,8 +27,10 @@
  */
 
 #include "CalChartDrawPrimatives.h"
+#include "CalChartSizes.h"
 #include <wx/brush.h>
 #include <wx/colour.h>
+#include <wx/font.h>
 #include <wx/pen.h>
 
 namespace wxCalChart {
@@ -66,6 +68,9 @@ inline auto toPen(CalChart::Pen p)
 
 inline auto toPen(CalChart::BrushAndPen b)
 {
+    if (b.style == CalChart::Brush::Style::Transparent) {
+        return *wxTRANSPARENT_PEN;
+    }
     return *wxThePenList->FindOrCreatePen(toColour(b.color), b.width);
 }
 
@@ -138,6 +143,39 @@ inline auto setBrushAndPen(wxDC& dc, CalChart::BrushAndPen brushAndPen)
 inline auto setTextForeground(wxDC& dc, CalChart::BrushAndPen brushAndPen)
 {
     dc.SetTextForeground(wxCalChart::toColour(brushAndPen.color));
+}
+
+inline auto setFont(wxDC& dc, CalChart::Font font)
+{
+    auto family = [font] {
+        switch (font.family) {
+        case CalChart::Font::Family::Swiss:
+            return wxFONTFAMILY_SWISS;
+        case CalChart::Font::Family::Roman:
+            return wxFONTFAMILY_ROMAN;
+        case CalChart::Font::Family::Modern:
+            return wxFONTFAMILY_MODERN;
+        }
+    }();
+    auto style = [font] {
+        switch (font.style) {
+        case CalChart::Font::Style::Normal:
+            return wxFONTSTYLE_NORMAL;
+        case CalChart::Font::Style::Italic:
+            return wxFONTSTYLE_ITALIC;
+        }
+    }();
+    auto weight = [font] {
+        switch (font.weight) {
+        case CalChart::Font::Weight::Normal:
+            return wxFONTWEIGHT_NORMAL;
+        case CalChart::Font::Weight::Bold:
+            return wxFONTWEIGHT_BOLD;
+        }
+    }();
+
+    auto size = wxSize{ 0, fDIP(font.size) };
+    dc.SetFont(wxFont(size, family, style, weight));
 }
 
 }

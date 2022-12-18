@@ -23,6 +23,7 @@
 
 #include "CalChartConstants.h"
 #include "CalChartCoord.h"
+#include "CalChartDrawPrimatives.h"
 #include <span>
 #include <variant>
 #include <vector>
@@ -34,204 +35,247 @@ namespace DrawCommands {
 
     struct Ignore {
     };
-    inline auto operator==(Ignore, Ignore) { return true; }
+    inline auto operator==([[maybe_unused]] Ignore lhs, [[maybe_unused]] Ignore rhs) { return true; }
 
     struct Line {
-        int x1{}, y1{}, x2{}, y2{};
+        Coord c1{};
+        Coord c2{};
 
-        Line(int startx, int starty, int endx, int endy)
-            : x1(startx)
-            , y1(starty)
-            , x2(endx)
-            , y2(endy)
+        // Assumed
+        constexpr Line(Coord::units startx, Coord::units starty, Coord::units endx, Coord::units endy)
+            : Line({ startx, starty }, { endx, endy })
         {
         }
 
-        Line(Coord start, Coord end)
-            : Line(start.x, start.y, end.x, end.y)
+        constexpr Line(Coord start, Coord end)
+            : c1(start)
+            , c2(end)
         {
         }
     };
-    inline auto operator==(Line const& lhs, Line const& rhs)
+    constexpr inline auto operator==(Line const& lhs, Line const& rhs)
     {
-        return lhs.x1 == rhs.x1
-            && lhs.y1 == rhs.y1
-            && lhs.x2 == rhs.x2
-            && lhs.y2 == rhs.y2;
+        return lhs.c1 == rhs.c1
+            && lhs.c2 == rhs.c2;
     }
 
     struct Arc {
-        int x1{}, y1{}, x2{}, y2{};
-        int xc{}, yc{};
+        Coord c1{};
+        Coord c2{};
+        Coord cc{};
 
-        Arc(int startx, int starty, int endx, int endy)
-            : x1(startx)
-            , y1(starty)
-            , x2(endx)
-            , y2(endy)
+        constexpr Arc(Coord::units startx, Coord::units starty, Coord::units endx, Coord::units endy, Coord::units centerx, Coord::units centery)
+            : Arc({ startx, starty }, { endx, endy }, { centerx, centery })
         {
         }
 
-        Arc(Coord start, Coord end)
-            : Arc(start.x, start.y, end.x, end.y)
-        {
-        }
-
-        Arc(int startx, int starty, int endx, int endy, int centerx, int centery)
-            : x1(startx)
-            , y1(starty)
-            , x2(endx)
-            , y2(endy)
-            , xc(centerx)
-            , yc(centery)
-        {
-        }
-
-        Arc(Coord start, Coord end, Coord center)
-            : Arc(start.x, start.y, end.x, end.y, center.x, center.y)
+        constexpr Arc(Coord start, Coord end, Coord center)
+            : c1(start)
+            , c2(end)
+            , cc(center)
         {
         }
     };
-    inline auto operator==(Arc const& lhs, Arc const& rhs)
+    constexpr inline auto operator==(Arc const& lhs, Arc const& rhs)
     {
-        return lhs.x1 == rhs.x1
-            && lhs.y1 == rhs.y1
-            && lhs.x2 == rhs.x2
-            && lhs.y2 == rhs.y2
-            && lhs.xc == rhs.xc
-            && lhs.yc == rhs.yc;
+        return lhs.c1 == rhs.c1
+            && lhs.c2 == rhs.c2
+            && lhs.cc == rhs.cc;
     }
 
     struct Ellipse {
-        int x1{}, y1{}, x2{}, y2{};
+        Coord c1{};
+        Coord c2{};
 
-        Ellipse(int startx, int starty, int endx, int endy)
-            : x1(startx)
-            , y1(starty)
-            , x2(endx)
-            , y2(endy)
+        constexpr Ellipse(Coord::units startx, Coord::units starty, Coord::units endx, Coord::units endy)
+            : Ellipse({ startx, starty }, { endx, endy })
         {
         }
 
-        Ellipse(Coord start, Coord end)
-            : Ellipse(start.x, start.y, end.x, end.y)
+        constexpr Ellipse(Coord start, Coord end)
+            : c1(start)
+            , c2(end)
         {
         }
     };
-    inline auto operator==(Ellipse const& lhs, Ellipse const& rhs)
+    constexpr inline auto operator==(Ellipse const& lhs, Ellipse const& rhs)
     {
-        return lhs.x1 == rhs.x1
-            && lhs.y1 == rhs.y1
-            && lhs.x2 == rhs.x2
-            && lhs.y2 == rhs.y2;
+        return lhs.c1 == rhs.c1
+            && lhs.c2 == rhs.c2;
     }
 
     struct Circle {
-        int x1{}, y1{}, radius{};
+        Coord c1{};
+        Coord::units radius{};
         bool filled = true;
 
-        Circle(int startx, int starty, int radius, bool filled = true)
-            : x1(startx)
-            , y1(starty)
+        constexpr Circle(Coord::units startx, Coord::units starty, Coord::units radius, bool filled = true)
+            : Circle({ startx, starty }, radius, filled)
+        {
+        }
+
+        constexpr Circle(Coord start, int radius, bool filled = true)
+            : c1(start)
             , radius(radius)
             , filled(filled)
         {
         }
-
-        Circle(Coord start, int radius, bool filled = true)
-            : Circle(start.x, start.y, radius, filled)
-        {
-        }
     };
-    inline auto operator==(Circle const& lhs, Circle const& rhs)
+    constexpr inline auto operator==(Circle const& lhs, Circle const& rhs)
     {
-        return lhs.x1 == rhs.x1
-            && lhs.y1 == rhs.y1
+        return lhs.c1 == rhs.c1
             && lhs.radius == rhs.radius
             && lhs.filled == rhs.filled;
     }
 
     struct Text {
         enum class TextAnchor : uint32_t {
-            None = 0,
-            Top = 1 << 0,
-            VerticalCenter = 1 << 1,
-            Bottom = 1 << 2,
-            Left = 1 << 3,
-            HorizontalCenter = 1 << 4,
-            Right = 1 << 5,
-            ScreenTop = 1 << 6,
-            ScreenBottom = 1 << 7,
-            ScreenRight = 1 << 8,
-            ScreenLeft = 1 << 9,
+            None = 0U,
+            Top = 1U << 0U,
+            VerticalCenter = 1U << 1U,
+            Bottom = 1U << 2U,
+            Left = 1U << 3U,
+            HorizontalCenter = 1U << 4U,
+            Right = 1U << 5U,
+            ScreenTop = 1U << 6U,
+            ScreenBottom = 1U << 7U,
+            ScreenRight = 1U << 8U,
+            ScreenLeft = 1U << 9U,
         };
 
-        int x{}, y{};
+        Coord c1{};
         std::string text;
         TextAnchor anchor{};
         bool withBackground{};
 
-        Text(int startx, int starty, std::string const& text = "", TextAnchor anchor = TextAnchor::None, bool withBackground = false)
-            : x(startx)
-            , y(starty)
+        Text(Coord::units startx, Coord::units starty, std::string text = "", TextAnchor anchor = TextAnchor::None, bool withBackground = false)
+            : Text(Coord{ startx, starty }, text, anchor, withBackground)
+        {
+        }
+
+        explicit Text(Coord start, std::string const& text = "", TextAnchor anchor = TextAnchor::None, bool withBackground = false)
+            : c1(start)
             , text(text)
             , anchor(anchor)
             , withBackground(withBackground)
         {
         }
-
-        Text(Coord start, std::string const& text = "", TextAnchor anchor = TextAnchor::None, bool withBackground = false)
-            : Text(start.x, start.y, text, anchor, withBackground)
-        {
-        }
     };
-    inline Text::TextAnchor operator|(Text::TextAnchor lhs, Text::TextAnchor rhs)
+    constexpr inline auto operator|(Text::TextAnchor lhs, Text::TextAnchor rhs)
     {
         return static_cast<Text::TextAnchor>(toUType(lhs) | toUType(rhs));
     }
-    inline Text::TextAnchor operator&(Text::TextAnchor lhs, Text::TextAnchor rhs)
+    constexpr inline auto operator&(Text::TextAnchor lhs, Text::TextAnchor rhs)
     {
         return static_cast<Text::TextAnchor>(toUType(lhs) & toUType(rhs));
     }
 
     inline auto operator==(Text const& lhs, Text const& rhs)
     {
-        return lhs.x == rhs.x
-            && lhs.y == rhs.y
+        return lhs.c1 == rhs.c1
             && lhs.text == rhs.text
             && lhs.anchor == rhs.anchor
             && lhs.withBackground == rhs.withBackground;
     }
+
+    // DeviceDetails: This is the way that we specify the color/font for all the descent commands.
+    struct OverrideFont;
+    struct OverrideBrushAndPen;
 }
 
-using DrawCommand = std::variant<DrawCommands::Ignore, DrawCommands::Line, DrawCommands::Arc, DrawCommands::Ellipse, DrawCommands::Circle, DrawCommands::Text>;
+using DrawCommand = std::variant<DrawCommands::Ignore, DrawCommands::Line, DrawCommands::Arc, DrawCommands::Ellipse, DrawCommands::Circle, DrawCommands::Text, DrawCommands::OverrideFont, DrawCommands::OverrideBrushAndPen>;
 
+namespace DrawCommands {
+    struct OverrideFont {
+        Font font;
+        std::vector<DrawCommand> commands{};
+    };
+
+    struct OverrideBrushAndPen {
+        BrushAndPen brushAndPen;
+        std::vector<DrawCommand> commands{};
+    };
+
+    inline auto withFont(Font font, std::vector<DrawCommand> commands) -> DrawCommand
+    {
+        return OverrideFont{
+            font,
+            std::move(commands)
+        };
+    }
+
+    inline auto withFont(Font font, DrawCommand command)
+    {
+        return withFont(font, std::vector<DrawCommand>{ std::move(command) });
+    }
+
+    inline auto withBrushAndPen(BrushAndPen brushAndPen, std::vector<DrawCommand> commands) -> DrawCommand
+    {
+        return OverrideBrushAndPen{
+            brushAndPen,
+            std::move(commands)
+        };
+    }
+
+    inline auto withBrushAndPen(BrushAndPen brushAndPen, DrawCommand command)
+    {
+        return withBrushAndPen(brushAndPen, std::vector<DrawCommand>{ std::move(command) });
+    }
+
+    constexpr inline auto operator==(OverrideFont const& lhs, OverrideFont const& rhs)
+    {
+        return lhs.font == rhs.font
+            && lhs.commands == rhs.commands;
+    }
+    constexpr inline auto operator==(OverrideBrushAndPen const& lhs, OverrideBrushAndPen const& rhs)
+    {
+        return lhs.brushAndPen == rhs.brushAndPen
+            && lhs.commands == rhs.commands;
+    }
+}
 namespace DrawCommands {
 
     // What follows are a collection of functions to create different common "images" for CalChart.
     namespace Point {
         // Construct commands for drawing a point
-        std::vector<CalChart::DrawCommand> CreatePoint(CalChart::Point const& point, CalChart::Coord const& pos, std::string const& label, CalChart::SYMBOL_TYPE symbol, double dotRatio, double pLineRatio, double sLineRatio);
+        auto CreatePoint(CalChart::Point const& point, CalChart::Coord const& pos, std::string const& label, CalChart::SYMBOL_TYPE symbol, double dotRatio, double pLineRatio, double sLineRatio) -> std::vector<CalChart::DrawCommand>;
     }
     namespace Field {
         // Construct commands for the field outline
-        std::vector<CalChart::DrawCommand> CreateOutline(CalChart::Coord const& fieldsize, CalChart::Coord const& border1);
+        auto CreateOutline(CalChart::Coord const& fieldsize, CalChart::Coord const& border1) -> std::vector<CalChart::DrawCommand>;
 
         // Construct commands for the vertical solid line down from the top at 8 step spacing
-        std::vector<CalChart::DrawCommand> CreateVerticalSolidLine(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int step1);
+        auto CreateVerticalSolidLine(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int step1) -> std::vector<CalChart::DrawCommand>;
 
         // Construct commands for the vertical dotted lines in between the Solid lines
-        std::vector<CalChart::DrawCommand> CreateVerticalDottedLine(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int step1);
+        auto CreateVerticalDottedLine(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int step1) -> std::vector<CalChart::DrawCommand>;
 
         // Construct commands for the horizontal dotted lines
-        std::vector<CalChart::DrawCommand> CreateHorizontalDottedLine(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int mode_HashW, int mode_HashE, int step1);
+        auto CreateHorizontalDottedLine(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int mode_HashW, int mode_HashE, int step1) -> std::vector<CalChart::DrawCommand>;
 
         // Draw the hashes
-        std::vector<CalChart::DrawCommand> CreateHashes(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int mode_HashW, int mode_HashE, int step1);
-        std::vector<CalChart::DrawCommand> CreateHashTicks(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int mode_HashW, int mode_HashE, int step1);
+        auto CreateHashes(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int mode_HashW, int mode_HashE, int step1) -> std::vector<CalChart::DrawCommand>;
+        auto CreateHashTicks(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int mode_HashW, int mode_HashE, int step1) -> std::vector<CalChart::DrawCommand>;
 
-        std::vector<CalChart::DrawCommand> CreateYardlineLabels(std::span<std::string const> yard_text, CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int offset, int step1);
+        auto CreateYardlineLabels(std::span<std::string const> yard_text, CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int offset, int step1) -> std::vector<CalChart::DrawCommand>;
     }
 
+}
+
+// Implementation Details
+namespace DrawCommands::details {
+    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+    static_assert(Line{ 1, 2, 3, 4 }.c1.x == 1);
+    static_assert(Line{ 1, 2, 3, 4 }.c1.y == 2);
+    static_assert(Line{ 1, 2, 3, 4 }.c2.x == 3);
+    static_assert(Line{ 1, 2, 3, 4 }.c2.y == 4);
+    static_assert(Line{ { 1, 2 }, { 3, 4 } }.c1.x == 1);
+    static_assert(Line{ { 1, 2 }, { 3, 4 } }.c1.y == 2);
+    static_assert(Line{ { 1, 2 }, { 3, 4 } }.c2.x == 3);
+    static_assert(Line{ { 1, 2 }, { 3, 4 } }.c2.y == 4);
+    static_assert(Line{ 1, 2, 3, 4 } == Line{ { 1, 2 }, { 3, 4 } });
+
+    static_assert(Arc{ 1, 2, 3, 4, 5, 6 } == Arc{ { 1, 2 }, { 3, 4 }, { 5, 6 } });
+    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 }
 }
