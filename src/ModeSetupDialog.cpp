@@ -187,7 +187,7 @@ bool ShowModeDialogSetup::TransferDataToWindow()
         static_cast<wxTextCtrl*>(FindWindow(WESTHASH + std::distance(mShowModeValues.begin(), i)))->ChangeValue(std::to_string(*i));
     }
 
-    static_cast<wxTextCtrl*>(FindWindow(SHOW_LINE_VALUE))->SetValue(mYardText[mWhichYardLine]);
+    static_cast<wxTextCtrl*>(FindWindow(SHOW_LINE_VALUE))->SetValue(std::string{ mYardText[mWhichYardLine] });
     return true;
 }
 

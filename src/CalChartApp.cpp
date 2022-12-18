@@ -38,7 +38,6 @@
 namespace CalChart {
 void Point_UnitTests();
 void Show_UnitTests();
-void ShowMode_UnitTests();
 void Sheet_UnitTests();
 void Continuity_UnitTests();
 }
@@ -137,7 +136,6 @@ void CalChartApp::InitAppAsServer()
     // run the built in self tests.
     CalChart::Continuity_UnitTests();
     CalChart::Point_UnitTests();
-    CalChart::ShowMode_UnitTests();
     CalChart::Show_UnitTests();
     CalChart::Sheet_UnitTests();
 

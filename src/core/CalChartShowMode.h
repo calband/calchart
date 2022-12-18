@@ -23,6 +23,7 @@
 
 #include "CalChartConstants.h"
 #include "CalChartCoord.h"
+#include "CalChartDrawCommand.h"
 
 #include <array>
 #include <functional>
@@ -33,28 +34,25 @@
 namespace CalChart {
 
 class Reader;
-
-static constexpr auto SPR_YARD_LEFT = 8;
-static constexpr auto SPR_YARD_RIGHT = 4;
-static constexpr auto SPR_YARD_ABOVE = 2;
-static constexpr auto SPR_YARD_BELOW = 1;
+struct Font;
+struct BrushAndPen;
 
 static constexpr auto kYardTextValues = 53;
 static constexpr auto kSprLineTextValues = 5;
 
-static constexpr int kFieldStepSizeNorthSouth[2] = { 96, 160 };
+static constexpr auto kFieldStepSizeNorthSouth = std::array{ 96, 160 };
 static constexpr auto kFieldStepSizeEastWest = 84;
-static constexpr int kFieldStepSizeSouthEdgeFromCenter[2] = { 48, 80 };
+static constexpr auto kFieldStepSizeSouthEdgeFromCenter = std::array{ 48, 80 };
 static constexpr auto kFieldStepSizeWestEdgeFromCenter = 42;
 static constexpr auto kFieldStepWestHashFromWestSideline = 32;
 static constexpr auto kFieldStepEastHashFromWestSideline = 52;
 
 class ShowMode {
 public:
-    static ShowMode GetDefaultShowMode();
+    static auto GetDefaultShowMode() -> ShowMode;
 
     using YardLinesInfo_t = std::array<std::string, kYardTextValues>;
-    static YardLinesInfo_t GetDefaultYardLines();
+    static auto GetDefaultYardLines() -> YardLinesInfo_t;
 
     enum ShowModeArrayValues {
         kwhash,
@@ -70,52 +68,50 @@ public:
         kShowModeValues
     };
 
-    static ShowMode CreateShowMode(ShowModeData_t const& values, YardLinesInfo_t const& yardlines);
-    static ShowMode CreateShowMode(CalChart::Coord size, CalChart::Coord offset,
-        CalChart::Coord border1, CalChart::Coord border2, unsigned short whash,
-        unsigned short ehash, YardLinesInfo_t const& yardlines);
+    static auto CreateShowMode(ShowModeData_t const& values, YardLinesInfo_t const& yardlines) -> ShowMode;
+    static auto CreateShowMode(Coord size, Coord offset, Coord border1, Coord border2, uint16_t whash, uint16_t ehash, YardLinesInfo_t const& yardlines) -> ShowMode;
+    static auto CreateShowMode(CalChart::Reader reader) -> ShowMode;
 
-    static ShowMode CreateShowMode(CalChart::Reader reader);
-    std::vector<uint8_t> Serialize() const;
+    [[nodiscard]] auto Serialize() const -> std::vector<uint8_t>;
 
-    ShowModeData_t GetShowModeData() const;
+    [[nodiscard]] auto GetShowModeData() const -> ShowModeData_t;
 
-    auto Offset() const { return mOffset + mBorder1; }
-    auto FieldOffset() const { return -mOffset; }
-    auto Size() const { return mSize + mBorder1 + mBorder2; }
-    auto FieldSize() const { return mSize; }
-    auto MinPosition() const { return -(mOffset + mBorder1); }
-    auto MaxPosition() const { return mSize - mOffset + mBorder2; }
-    auto Border1() const { return mBorder1; }
-    CalChart::Coord ClipPosition(const CalChart::Coord& pos) const;
+    [[nodiscard]] auto Offset() const { return mOffset + mBorder1; }
+    [[nodiscard]] auto FieldOffset() const { return -mOffset; }
+    [[nodiscard]] auto Size() const { return mSize + mBorder1 + mBorder2; }
+    [[nodiscard]] auto FieldSize() const { return mSize; }
+    [[nodiscard]] auto MinPosition() const { return -(mOffset + mBorder1); }
+    [[nodiscard]] auto MaxPosition() const { return mSize - mOffset + mBorder2; }
+    [[nodiscard]] auto Border1() const { return mBorder1; }
+    [[nodiscard]] auto ClipPosition(const CalChart::Coord& pos) const -> CalChart::Coord;
 
-    auto HashW() const { return mHashW; }
-    auto HashE() const { return mHashE; }
+    [[nodiscard]] auto HashW() const { return mHashW; }
+    [[nodiscard]] auto HashE() const { return mHashE; }
 
     // Yard Lines
-    YardLinesInfo_t const& Get_yard_text() const;
+    [[nodiscard]] auto Get_yard_text() const -> YardLinesInfo_t { return mYardLines; }
+
+    [[nodiscard]] auto DrawField(bool withDottedLine, bool withHashTicks, bool withYardlineLabels, bool largeOffset, CalChart::Font yardlineFont, CalChart::BrushAndPen yardlineBackground) -> std::vector<CalChart::DrawCommand>;
 
 private:
     ShowMode(CalChart::Coord size,
         CalChart::Coord offset,
         CalChart::Coord border1,
         CalChart::Coord border2,
-        unsigned short whash,
-        unsigned short ehash,
-        YardLinesInfo_t const& yardlines);
+        uint16_t whash,
+        uint16_t ehash,
+        YardLinesInfo_t yardlines);
 
     CalChart::Coord mSize;
     CalChart::Coord mOffset;
     CalChart::Coord mBorder1;
     CalChart::Coord mBorder2;
 
-    unsigned short mHashW, mHashE;
+    uint16_t mHashW, mHashE;
 
     YardLinesInfo_t mYardLines;
 
-    friend bool operator==(ShowMode const& lhs, ShowMode const& rhs);
+    friend auto operator==(ShowMode const& lhs, ShowMode const& rhs) -> bool;
 };
-
-void ShowMode_UnitTests();
 
 }

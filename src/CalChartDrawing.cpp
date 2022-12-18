@@ -700,19 +700,18 @@ namespace CalChartDraw::Field {
     static auto DrawField(CalChart::ShowMode const& mode, HowToDraw howToDraw, CalChart::Font yardlineFont, CalChart::BrushAndPen yardlineBackground) -> std::vector<CalChart::DrawCommand>
     {
         auto drawCmds = std::vector<CalChart::DrawCommand>{};
-        auto tborder1 = (howToDraw == ShowMode_kOmniView) ? CalChart::Coord(0, 0) : mode.Border1();
-        append(drawCmds, CalChart::DrawCommands::Field::CreateOutline(mode.FieldSize(), tborder1));
-        append(drawCmds, CalChart::DrawCommands::Field::CreateVerticalSolidLine(mode.FieldSize(), tborder1, kStep1));
+        append(drawCmds, CalChart::DrawCommands::Field::CreateOutline(mode.FieldSize()));
+        append(drawCmds, CalChart::DrawCommands::Field::CreateVerticalSolidLine(mode.FieldSize(), kStep1));
 
         if (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting) {
-            append(drawCmds, CalChart::DrawCommands::Field::CreateVerticalDottedLine(mode.FieldSize(), tborder1, kStep1));
-            append(drawCmds, CalChart::DrawCommands::Field::CreateHorizontalDottedLine(mode.FieldSize(), tborder1, mode.HashW(), mode.HashE(), kStep1));
+            append(drawCmds, CalChart::DrawCommands::Field::CreateVerticalDottedLine(mode.FieldSize(), kStep1));
+            append(drawCmds, CalChart::DrawCommands::Field::CreateHorizontalDottedLine(mode.FieldSize(), mode.HashW(), mode.HashE(), kStep1));
         }
 
         if (mode.HashW() != static_cast<unsigned short>(-1)) {
-            append(drawCmds, CalChart::DrawCommands::Field::CreateHashes(mode.FieldSize(), tborder1, mode.HashW(), mode.HashE(), kStep1));
+            append(drawCmds, CalChart::DrawCommands::Field::CreateHashes(mode.FieldSize(), mode.HashW(), mode.HashE(), kStep1));
             if (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting) {
-                append(drawCmds, CalChart::DrawCommands::Field::CreateHashTicks(mode.FieldSize(), tborder1, mode.HashW(), mode.HashE(), kStep1));
+                append(drawCmds, CalChart::DrawCommands::Field::CreateHashTicks(mode.FieldSize(), mode.HashW(), mode.HashE(), kStep1));
             }
         }
 
@@ -721,9 +720,9 @@ namespace CalChartDraw::Field {
             return drawCmds;
         }
 
-        auto yard_text = std::span(mode.Get_yard_text());
-        auto yard_text2 = yard_text.subspan((-CalChart::CoordUnits2Int((mode.Offset() - mode.Border1()).x) + (CalChart::kYardTextValues - 1) * 4) / 8);
-        auto labelCmds = CalChart::DrawCommands::Field::CreateYardlineLabels(yard_text2, mode.FieldSize(), tborder1, (howToDraw == ShowMode_kOmniView) ? kStep8 : 0, kStep1);
+        auto yard_text = mode.Get_yard_text();
+        auto yard_text2 = std::vector<std::string>(yard_text.begin() + (-CalChart::CoordUnits2Int((mode.Offset() - mode.Border1()).x) + (CalChart::kYardTextValues - 1) * 4) / 8, yard_text.end());
+        auto labelCmds = CalChart::DrawCommands::Field::CreateYardlineLabels(yard_text2, mode.FieldSize(), (howToDraw == ShowMode_kOmniView) ? kStep8 : 0, kStep1);
 
         append(drawCmds, CalChart::DrawCommands::withFont(yardlineFont, CalChart::DrawCommands::withBrushAndPen(yardlineBackground, labelCmds)));
 
@@ -751,7 +750,8 @@ void DrawMode(wxDC& dc, CalChartConfiguration const& config, CalChart::ShowMode 
     auto font = CalChart::Font{ .size = CalChart::Float2CoordUnits(config.Get_YardsSize()) };
     auto brushAndPen = howToDraw != ShowMode_kPrinting ? config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD)
                                                        : CalChart::BrushAndPen{ .style = CalChart::Brush::Style::Transparent };
-    DrawCC_DrawCommandList(dc, CalChartDraw::Field::DrawField(mode, howToDraw, font, brushAndPen));
+    auto tborder1 = (howToDraw == ShowMode_kOmniView) ? CalChart::Coord(0, 0) : mode.Border1();
+    DrawCC_DrawCommandList(dc, CalChartDraw::Field::DrawField(mode, howToDraw, font, brushAndPen) + tborder1);
 }
 
 wxImage GetOmniLinesImage(const CalChartConfiguration& config, const CalChart::ShowMode& mode)

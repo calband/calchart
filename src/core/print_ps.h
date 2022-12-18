@@ -55,7 +55,7 @@ public:
         double YardsSize, double TextSize, double DotRatio,
         double NumRatio, double PLineRatio, double SLineRatio,
         double ContRatio,
-        std::function<std::string(size_t)> Get_yard_text);
+        std::function<std::string_view(size_t)> Get_yard_text);
 
     int operator()(std::ostream& buffer, std::set<size_t> const& isPicked, std::string const& title) const;
 
@@ -99,7 +99,7 @@ private:
     double mSLineRatio;
     double mContRatio;
 
-    std::function<std::string(size_t)> mGet_yard_text;
+    std::function<std::string_view(size_t)> mGet_yard_text;
 
     float width, height, real_width, real_height;
     float field_x, field_y, field_w, field_h;

@@ -217,7 +217,7 @@ PrintShowToPS::PrintShowToPS(
     double PageWidth, double PageHeight, double PageOffsetX, double PageOffsetY,
     double PaperLength, double HeaderSize, double YardsSize, double TextSize,
     double DotRatio, double NumRatio, double PLineRatio, double SLineRatio,
-    double ContRatio, std::function<std::string(size_t)> Get_yard_text)
+    double ContRatio, std::function<std::string_view(size_t)> Get_yard_text)
     : mShow(show)
     , mPrintLandscape(PrintLandscape)
     , mPrintDoCont(PrintDoCont)
