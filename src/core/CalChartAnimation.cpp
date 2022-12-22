@@ -331,7 +331,7 @@ AnimationCommand& Animation::GetCommand(unsigned whichSheet, unsigned whichPoint
 }
 
 std::vector<DrawCommand>
-Animation::GenPathToDraw(unsigned whichSheet, unsigned point, const Coord& offset, int endRadius) const
+Animation::GenPathToDraw(unsigned whichSheet, unsigned point, const Coord& offset, Coord::units endRadius) const
 {
     auto animation_commands = GetCommands(whichSheet, point);
     auto position = mSheets.at(whichSheet).GetPoints().at(point);

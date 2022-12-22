@@ -71,6 +71,23 @@ auto TestPointX(auto cmds, bool filled)
     CHECK(!uut3.withBackground);
 }
 
+auto TestCreateOutline(auto cmds)
+{
+    CHECK(cmds.size() == 4);
+    auto uut = std::get<CalChart::DrawCommands::Line>(cmds[0]);
+    CHECK(uut.c1 == CalChart::Coord{ 1, 2 });
+    CHECK(uut.c2 == CalChart::Coord{ 17, 2 });
+    uut = std::get<CalChart::DrawCommands::Line>(cmds[1]);
+    CHECK(uut.c1 == CalChart::Coord{ 17, 2 });
+    CHECK(uut.c2 == CalChart::Coord{ 17, 7 });
+    uut = std::get<CalChart::DrawCommands::Line>(cmds[2]);
+    CHECK(uut.c1 == CalChart::Coord{ 17, 7 });
+    CHECK(uut.c2 == CalChart::Coord{ 1, 7 });
+    uut = std::get<CalChart::DrawCommands::Line>(cmds[3]);
+    CHECK(uut.c1 == CalChart::Coord{ 1, 7 });
+    CHECK(uut.c2 == CalChart::Coord{ 1, 2 });
+}
+
 TEST_CASE("DrawCommand")
 {
     SECTION("Line")
@@ -142,20 +159,9 @@ TEST_CASE("DrawCommand")
     SECTION("CreateOutline")
     {
         auto cmds = CalChart::DrawCommands::Field::CreateOutline({ 16, 5 }, { 1, 2 });
-        CHECK(cmds.size() == 4);
-        auto uut = std::get<CalChart::DrawCommands::Line>(cmds[0]);
-        CHECK(uut.c1 == CalChart::Coord{ 1, 2 });
-        CHECK(uut.c2 == CalChart::Coord{ 17, 2 });
-        uut = std::get<CalChart::DrawCommands::Line>(cmds[1]);
-        CHECK(uut.c1 == CalChart::Coord{ 17, 2 });
-        CHECK(uut.c2 == CalChart::Coord{ 17, 7 });
-        uut = std::get<CalChart::DrawCommands::Line>(cmds[2]);
-        CHECK(uut.c1 == CalChart::Coord{ 17, 7 });
-        CHECK(uut.c2 == CalChart::Coord{ 1, 7 });
-        uut = std::get<CalChart::DrawCommands::Line>(cmds[3]);
-        CHECK(uut.c1 == CalChart::Coord{ 1, 7 });
-        CHECK(uut.c2 == CalChart::Coord{ 1, 2 });
+        TestCreateOutline(cmds);
     }
+
     SECTION("CreateVerticalSolidLine")
     {
         auto cmds = CalChart::DrawCommands::Field::CreateVerticalSolidLine({ 16, 5 }, { 1, 2 }, 1);
@@ -291,5 +297,11 @@ TEST_CASE("DrawCommand")
         CHECK(uut.text == "B");
         CHECK(uut.anchor == (TextAnchor::Top | TextAnchor::HorizontalCenter));
         CHECK(uut.withBackground);
+    }
+
+    SECTION("CreateOutlineWithOffset")
+    {
+        auto cmds = CalChart::DrawCommands::Field::CreateOutline({ 16, 5 }, { 0, 0 }) + CalChart::Coord{ 1, 2 };
+        TestCreateOutline(cmds);
     }
 }

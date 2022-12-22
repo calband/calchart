@@ -82,4 +82,11 @@ public:
     auto operator!=(const Iterator& i) const { return val != i.val; }
 };
 
+template <class... Ts>
+struct overloaded : Ts... {
+    using Ts::operator()...;
+};
+template <class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
+
 }
