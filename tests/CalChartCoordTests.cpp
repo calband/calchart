@@ -136,4 +136,22 @@ TEST_CASE("DirectionsTo", "CalChartCoord")
     CHECK(uut.Direction(CalChart::Coord{ 1 + 1, 1 + -1 }).IsEqual(CalChart::pi / 4.0));
 }
 
+TEST_CASE("CoordMath", "CalChartCoord")
+{
+    // auto tester = static_cast<short>(-1280);
+    // CHECK(CalChart::CoordUnits2Int(tester) == -80);
+    CHECK(CalChart::Int2CoordUnits(static_cast<short>(1)) == 16);
+    CHECK(CalChart::Int2CoordUnits(static_cast<short>(-1)) == -16);
+    CHECK(CalChart::CoordUnits2Int(static_cast<short>(16)) == 1);
+    CHECK(CalChart::CoordUnits2Int(static_cast<short>(-16)) == -1);
+    CHECK(CalChart::CoordUnits2Int(static_cast<short>(17)) == 1);
+    CHECK(CalChart::CoordUnits2Int(static_cast<int>(-17)) == -1);
+    CHECK(CalChart::Int2CoordUnits(static_cast<int>(1)) == 16);
+    CHECK(CalChart::Int2CoordUnits(static_cast<int>(-1)) == -16);
+    CHECK(CalChart::CoordUnits2Int(static_cast<int>(16)) == 1);
+    CHECK(CalChart::CoordUnits2Int(static_cast<int>(-16)) == -1);
+    CHECK(CalChart::CoordUnits2Int(static_cast<int>(17)) == 1);
+    CHECK(CalChart::CoordUnits2Int(static_cast<int>(-17)) == -1);
+}
+
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers, readability-function-cognitive-complexity)

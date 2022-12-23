@@ -41,10 +41,6 @@ double PLineRatio = 1.2;
 double SLineRatio = 1.2;
 double ContRatio = 0.2;
 
-auto Get_yard_text = [](size_t offset) {
-    return CalChart::ShowMode::GetDefaultYardLines()[offset];
-};
-
 static const CalChart::ShowMode Standard_mode = CalChart::ShowMode::GetDefaultShowMode();
 
 const std::string standard_mode_ps_gold = R"(%!PS-Adobe-3.0
@@ -122,7 +118,7 @@ void PrintToPS(CalChart::Show const& show, CalChart::ShowMode const& mode, bool 
             bold_font_str, ital_font_str, bold_ital_font_str } },
         PageWidth, PageHeight, PageOffsetX, PageOffsetY, PaperLength, HeaderSize,
         YardsSize, TextSize, DotRatio, NumRatio, PLineRatio, SLineRatio,
-        ContRatio, Get_yard_text);
+        ContRatio, CalChart::ShowMode::GetDefaultYardLines());
 
     std::set<size_t> picked;
     for (auto i = 0; i < show.GetNumSheets(); ++i)

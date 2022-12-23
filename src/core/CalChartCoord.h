@@ -170,7 +170,7 @@ constexpr auto Int2CoordUnits(T a)
 template <typename T>
 constexpr auto CoordUnits2Int(T a)
 {
-    return static_cast<int>(a / CalChart::kCoordDecimal);
+    return static_cast<int>(a / static_cast<int>(CalChart::kCoordDecimal));
 }
 
 // Create vector is going to create a vector in that direction, except diagonals are different!
