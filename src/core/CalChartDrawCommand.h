@@ -259,22 +259,22 @@ namespace DrawCommands {
     }
     namespace Field {
         // Construct commands for the field outline
-        auto CreateOutline(CalChart::Coord const& fieldsize, CalChart::Coord const& border1) -> std::vector<CalChart::DrawCommand>;
+        auto CreateOutline(CalChart::Coord const& fieldsize) -> std::vector<CalChart::DrawCommand>;
 
         // Construct commands for the vertical solid line down from the top at 8 step spacing
-        auto CreateVerticalSolidLine(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int step1) -> std::vector<CalChart::DrawCommand>;
+        auto CreateVerticalSolidLine(CalChart::Coord const& fieldsize, int step1) -> std::vector<CalChart::DrawCommand>;
 
         // Construct commands for the vertical dotted lines in between the Solid lines
-        auto CreateVerticalDottedLine(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int step1) -> std::vector<CalChart::DrawCommand>;
+        auto CreateVerticalDottedLine(CalChart::Coord const& fieldsize, int step1) -> std::vector<CalChart::DrawCommand>;
 
         // Construct commands for the horizontal dotted lines
-        auto CreateHorizontalDottedLine(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int mode_HashW, int mode_HashE, int step1) -> std::vector<CalChart::DrawCommand>;
+        auto CreateHorizontalDottedLine(CalChart::Coord const& fieldsize, int mode_HashW, int mode_HashE, int step1) -> std::vector<CalChart::DrawCommand>;
 
         // Draw the hashes
-        auto CreateHashes(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int mode_HashW, int mode_HashE, int step1) -> std::vector<CalChart::DrawCommand>;
-        auto CreateHashTicks(CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int mode_HashW, int mode_HashE, int step1) -> std::vector<CalChart::DrawCommand>;
+        auto CreateHashes(CalChart::Coord const& fieldsize, int mode_HashW, int mode_HashE, int step1) -> std::vector<CalChart::DrawCommand>;
+        auto CreateHashTicks(CalChart::Coord const& fieldsize, int mode_HashW, int mode_HashE, int step1) -> std::vector<CalChart::DrawCommand>;
 
-        auto CreateYardlineLabels(std::span<std::string const> yard_text, CalChart::Coord const& fieldsize, CalChart::Coord const& border1, int offset, int step1) -> std::vector<CalChart::DrawCommand>;
+        auto CreateYardlineLabels(std::vector<std::string> const& yard_text, CalChart::Coord const& fieldsize, int offset, int step1) -> std::vector<CalChart::DrawCommand>;
     }
 
 }
@@ -284,7 +284,7 @@ namespace DrawCommands::details {
     // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     static_assert(Ignore{} == Ignore{});
     static_assert(Ignore{} == (Ignore{} + Coord{}));
-    //    static_assert(Ignore{} == (Coord{} + Ignore{}));
+    static_assert(Ignore{} == (Coord{} + Ignore{}));
 
     static_assert(Line{ 1, 2, 3, 4 }.c1.x == 1);
     static_assert(Line{ 1, 2, 3, 4 }.c1.y == 2);

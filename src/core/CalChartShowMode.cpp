@@ -22,69 +22,65 @@
 
 #include "CalChartShowMode.h"
 #include "CalChartFileFormat.h"
-#include "ccvers.h"
 
 #include <algorithm>
 #include <cassert>
 
 namespace CalChart {
 
-static constexpr const char* kYardTextDefaults[] = {
-    "N", "M", "L", "K", "J", "I", "H", "G", "F", "E", "D", "C", "B", "A", "-10", "-5",
-    "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50",
-    "45", "40", "35", "30", "25", "20", "15", "10", "5", "0",
-    "-5", "-10", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N"
-};
-
-ShowMode::YardLinesInfo_t ShowMode::GetDefaultYardLines()
+auto ShowMode::GetDefaultYardLines() -> ShowMode::YardLinesInfo_t
 {
-    ShowMode::YardLinesInfo_t data;
-    for (auto i = 0; i < kYardTextValues; ++i) {
-        data[i] = kYardTextDefaults[i];
-    }
-    return data;
+    static auto kYardTextDefaults = std::array<std::string, kYardTextValues>{
+        "N", "M", "L", "K", "J", "I", "H", "G", "F", "E", "D", "C", "B", "A", "-10", "-5",
+        "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50",
+        "45", "40", "35", "30", "25", "20", "15", "10", "5", "0",
+        "-5", "-10", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N"
+    };
+
+    return kYardTextDefaults;
 }
 
 ShowMode::ShowMode(CalChart::Coord size,
     CalChart::Coord offset,
     CalChart::Coord border1,
     CalChart::Coord border2,
-    unsigned short whash,
-    unsigned short ehash,
-    YardLinesInfo_t const& yardlines)
+    uint16_t whash,
+    uint16_t ehash,
+    YardLinesInfo_t yardlines)
     : mSize(size)
     , mOffset(offset)
     , mBorder1(border1)
     , mBorder2(border2)
     , mHashW(whash)
     , mHashE(ehash)
-    , mYardLines(yardlines)
+    , mYardLines(std::move(yardlines))
 {
 }
 
-CalChart::Coord ShowMode::ClipPosition(const CalChart::Coord& pos) const
+auto ShowMode::ClipPosition(const CalChart::Coord& pos) const -> CalChart::Coord
 {
     auto min = MinPosition();
     auto max = MaxPosition();
 
     CalChart::Coord clipped;
-    if (pos.x < min.x)
+    if (pos.x < min.x) {
         clipped.x = min.x;
-    else if (pos.x > max.x)
+    } else if (pos.x > max.x) {
         clipped.x = max.x;
-    else
+    } else {
         clipped.x = pos.x;
-    if (pos.y < min.y)
+    }
+    if (pos.y < min.y) {
         clipped.y = min.y;
-    else if (pos.y > max.y)
+    } else if (pos.y > max.y) {
         clipped.y = max.y;
-    else
+    } else {
         clipped.y = pos.y;
+    }
     return clipped;
 }
 
-ShowModeData_t
-ShowMode::GetShowModeData() const
+auto ShowMode::GetShowModeData() const -> ShowModeData_t
 {
     return { {
         mHashW,
@@ -100,15 +96,14 @@ ShowMode::GetShowModeData() const
     } };
 }
 
-ShowMode
-ShowMode::CreateShowMode(ShowModeData_t const& values, YardLinesInfo_t const& yardlines)
+auto ShowMode::CreateShowMode(ShowModeData_t const& values, YardLinesInfo_t const& yardlines) -> ShowMode
 {
-    unsigned short whash = values[kwhash];
-    unsigned short ehash = values[kehash];
-    CalChart::Coord bord1{ Int2CoordUnits(values[kbord1_x]), Int2CoordUnits(values[kbord1_y]) };
-    CalChart::Coord bord2{ Int2CoordUnits(values[kbord2_x]), Int2CoordUnits(values[kbord2_y]) };
-    CalChart::Coord offset{ Int2CoordUnits(-values[koffset_x]), Int2CoordUnits(-values[koffset_y]) };
-    CalChart::Coord size{ Int2CoordUnits(values[ksize_x]), Int2CoordUnits(values[ksize_y]) };
+    auto whash = static_cast<uint16_t>(values[kwhash]);
+    auto ehash = static_cast<uint16_t>(values[kehash]);
+    auto bord1 = CalChart::Coord{ Int2CoordUnits(values[kbord1_x]), Int2CoordUnits(values[kbord1_y]) };
+    auto bord2 = CalChart::Coord{ Int2CoordUnits(values[kbord2_x]), Int2CoordUnits(values[kbord2_y]) };
+    auto offset = CalChart::Coord{ Int2CoordUnits(-values[koffset_x]), Int2CoordUnits(-values[koffset_y]) };
+    auto size = CalChart::Coord{ Int2CoordUnits(values[ksize_x]), Int2CoordUnits(values[ksize_y]) };
     return {
         size,
         offset,
@@ -120,8 +115,7 @@ ShowMode::CreateShowMode(ShowModeData_t const& values, YardLinesInfo_t const& ya
     };
 }
 
-ShowMode ShowMode::CreateShowMode(CalChart::Coord size, CalChart::Coord offset, CalChart::Coord border1,
-    CalChart::Coord border2, unsigned short whash, unsigned short ehash, YardLinesInfo_t const& yardlines)
+auto ShowMode::CreateShowMode(Coord size, Coord offset, Coord border1, Coord border2, uint16_t whash, uint16_t ehash, YardLinesInfo_t const& yardlines) -> ShowMode
 {
     return {
         size,
@@ -134,7 +128,7 @@ ShowMode ShowMode::CreateShowMode(CalChart::Coord size, CalChart::Coord offset, 
     };
 }
 
-ShowMode ShowMode::CreateShowMode(CalChart::Reader reader)
+auto ShowMode::CreateShowMode(CalChart::Reader reader) -> ShowMode
 {
     ShowModeData_t values;
     for (auto& i : values) {
@@ -156,29 +150,26 @@ ShowMode ShowMode::CreateShowMode(CalChart::Reader reader)
     return ShowMode::CreateShowMode(values, yardlines);
 }
 
-std::vector<uint8_t> ShowMode::Serialize() const
+auto ShowMode::Serialize() const -> std::vector<uint8_t>
 {
     std::vector<uint8_t> result;
-    for (uint32_t i : GetShowModeData()) {
+    for (uint32_t const i : GetShowModeData()) {
         Parser::Append(result, i);
     }
-    for (auto& i : Get_yard_text()) {
+    for (auto&& i : Get_yard_text()) {
         Parser::AppendAndNullTerminate(result, i);
     }
     return result;
 }
 
-ShowMode::YardLinesInfo_t const& ShowMode::Get_yard_text() const
+auto ShowMode::GetDefaultShowMode() -> ShowMode
 {
-    return mYardLines;
-}
-
-ShowMode ShowMode::GetDefaultShowMode()
-{
+    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     return ShowMode::CreateShowMode({ { 32, 52, 8, 8, 8, 8, -80, -42, 160, 84 } }, GetDefaultYardLines());
+    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 }
 
-bool operator==(ShowMode const& lhs, ShowMode const& rhs)
+auto operator==(ShowMode const& lhs, ShowMode const& rhs) -> bool
 {
     return lhs.mSize == rhs.mSize
         && lhs.mOffset == rhs.mOffset
@@ -189,12 +180,51 @@ bool operator==(ShowMode const& lhs, ShowMode const& rhs)
         && lhs.mYardLines == rhs.mYardLines;
 }
 
-void ShowMode_UnitTests()
+template <typename T>
+inline auto append(std::vector<T>& v, T const& other)
 {
-    auto uut1 = ShowMode::GetDefaultShowMode();
-    auto data = uut1.Serialize();
-    auto uut2 = ShowMode::CreateShowMode(CalChart::Reader({ data.data(), data.size() }));
-    assert(uut1 == uut2);
+    return v.insert(v.end(), other);
+}
+template <typename T>
+inline auto append(std::vector<T>& v, std::vector<T> const& other)
+{
+    return v.insert(v.end(), other.begin(), other.end());
 }
 
+static constexpr auto kStep8 = CalChart::Int2CoordUnits(8);
+static constexpr auto kStep4 = CalChart::Int2CoordUnits(4);
+static constexpr auto kStep2 = CalChart::Int2CoordUnits(2);
+static constexpr auto kStep1 = CalChart::Int2CoordUnits(1);
+
+auto ShowMode::DrawField(bool withDottedLine, bool withHashTicks, bool withYardlineLabels, bool largeOffset, CalChart::Font yardlineFont, CalChart::BrushAndPen yardlineBackground) -> std::vector<CalChart::DrawCommand>
+{
+    auto drawCmds = std::vector<CalChart::DrawCommand>{};
+    append(drawCmds, CalChart::DrawCommands::Field::CreateOutline(FieldSize()));
+    append(drawCmds, CalChart::DrawCommands::Field::CreateVerticalSolidLine(FieldSize(), kStep1));
+
+    if (withDottedLine) {
+        append(drawCmds, CalChart::DrawCommands::Field::CreateVerticalDottedLine(FieldSize(), kStep1));
+        append(drawCmds, CalChart::DrawCommands::Field::CreateHorizontalDottedLine(FieldSize(), HashW(), HashE(), kStep1));
+    }
+
+    if (HashW() != static_cast<uint16_t>(-1)) {
+        append(drawCmds, CalChart::DrawCommands::Field::CreateHashes(FieldSize(), HashW(), HashE(), kStep1));
+        if (withHashTicks) {
+            append(drawCmds, CalChart::DrawCommands::Field::CreateHashTicks(FieldSize(), HashW(), HashE(), kStep1));
+        }
+    }
+
+    // Draw labels
+    if (!withYardlineLabels) {
+        return drawCmds;
+    }
+
+    auto yard_text = Get_yard_text();
+    auto yard_text2 = std::vector<std::string>(yard_text.begin() + (-CalChart::CoordUnits2Int((Offset() - Border1()).x) + (CalChart::kYardTextValues - 1) * 4) / 8, yard_text.end());
+    auto labelCmds = CalChart::DrawCommands::Field::CreateYardlineLabels(yard_text2, FieldSize(), largeOffset ? kStep8 : 0, kStep1);
+
+    append(drawCmds, CalChart::DrawCommands::withFont(yardlineFont, CalChart::DrawCommands::withBrushAndPen(yardlineBackground, labelCmds)));
+
+    return drawCmds;
+}
 }
