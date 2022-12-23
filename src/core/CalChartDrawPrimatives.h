@@ -34,8 +34,8 @@ struct Color {
     uint8_t red = 0;
     uint8_t green = 0;
     uint8_t blue = 0;
-    uint8_t alpha = 0xff;
-    Color(uint8_t red = 0, uint8_t green = 0, uint8_t blue = 0, uint8_t alpha = 0xff)
+    uint8_t alpha = std::numeric_limits<uint8_t>::max();
+    constexpr explicit Color(uint8_t red = 0, uint8_t green = 0, uint8_t blue = 0, uint8_t alpha = std::numeric_limits<uint8_t>::max())
         : red(red)
         , green(green)
         , blue(blue)
@@ -44,10 +44,12 @@ struct Color {
     }
 };
 
-inline bool operator==(Color lhs, Color rhs)
+constexpr inline auto operator==(Color lhs, Color rhs)
 {
     return lhs.red == rhs.red
-        && lhs.green == rhs.green && lhs.blue == rhs.blue && lhs.alpha == rhs.alpha;
+        && lhs.green == rhs.green
+        && lhs.blue == rhs.blue
+        && lhs.alpha == rhs.alpha;
 }
 
 struct Brush {
@@ -70,5 +72,38 @@ struct BrushAndPen {
     Brush::Style style = Brush::Style::Solid;
     int width = 1;
 };
+inline constexpr auto operator==(BrushAndPen rhs, BrushAndPen lhs)
+{
+    return rhs.color == lhs.color
+        && rhs.style == lhs.style
+        && rhs.width == lhs.width;
+}
+
+struct Font {
+    enum class Family {
+        Swiss,
+        Roman,
+        Modern,
+    };
+    enum class Style {
+        Normal,
+        Italic,
+    };
+    enum class Weight {
+        Normal,
+        Bold,
+    };
+    int size = 8;
+    Family family = Family::Swiss;
+    Style style = Style::Normal;
+    Weight weight = Weight::Normal;
+};
+inline constexpr auto operator==(Font rhs, Font lhs)
+{
+    return rhs.size == lhs.size
+        && rhs.family == lhs.family
+        && rhs.style == lhs.style
+        && rhs.weight == lhs.weight;
+}
 
 }

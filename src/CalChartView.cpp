@@ -540,7 +540,10 @@ void CalChartView::DrawPaths(wxDC& dc)
     if (mShow->GetDrawPaths() && animation && animation->GetNumberSheets() && (animation->GetNumberSheets() > mShow->GetCurrentSheetNum())) {
         auto origin = GetShowFieldOffset();
         for (auto&& point : mShow->GetSelectionList()) {
-            CalChartDraw::DrawPath(dc, mConfig, animation->GenPathToDraw(mShow->GetCurrentSheetNum(), point, origin), animation->EndPosition(mShow->GetCurrentSheetNum(), point, origin));
+            CalChartDraw::DrawPath(
+                dc,
+                mConfig,
+                animation->GenPathToDraw(mShow->GetCurrentSheetNum(), point, origin, CalChart::Float2CoordUnits(mConfig.Get_DotRatio()) / 2));
         }
     }
 }

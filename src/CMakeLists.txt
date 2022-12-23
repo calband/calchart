@@ -37,6 +37,7 @@ add_executable(
   CalChartApp.h
   CalChartConfiguration.cpp
   CalChartConfiguration.h
+  CalChartCoordHelper.h
   CalChartDoc.cpp
   CalChartDoc.h
   CalChartDocCommand.cpp

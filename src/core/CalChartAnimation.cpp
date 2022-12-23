@@ -331,7 +331,7 @@ AnimationCommand& Animation::GetCommand(unsigned whichSheet, unsigned whichPoint
 }
 
 std::vector<DrawCommand>
-Animation::GenPathToDraw(unsigned whichSheet, unsigned point, const Coord& offset) const
+Animation::GenPathToDraw(unsigned whichSheet, unsigned point, const Coord& offset, Coord::units endRadius) const
 {
     auto animation_commands = GetCommands(whichSheet, point);
     auto position = mSheets.at(whichSheet).GetPoints().at(point);
@@ -340,6 +340,8 @@ Animation::GenPathToDraw(unsigned whichSheet, unsigned point, const Coord& offse
         draw_commands.push_back(commands->GenCC_DrawCommand(position, offset));
         commands->ApplyForward(position);
     }
+    // now at this point we should put in a circle for end point
+    draw_commands.push_back(CalChart::DrawCommands::Circle{ position + offset, endRadius, true });
     return draw_commands;
 }
 
@@ -387,5 +389,4 @@ std::vector<AnimationErrors> Animation::GetAnimationErrors() const
 {
     return mAnimationErrors;
 }
-
 }

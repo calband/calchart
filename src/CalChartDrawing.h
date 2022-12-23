@@ -75,7 +75,7 @@ void PrintOverview(std::ostream& buffer, CalChart::Sheet const& sheet);
 void PrintCont(std::ostream& buffer, CalChart::Sheet const& sheet);
 
 // Draw the point
-void DrawPath(wxDC& dc, CalChartConfiguration const& config, std::vector<CalChart::DrawCommand> const& draw_commands, CalChart::Coord const& end);
+void DrawPath(wxDC& dc, CalChartConfiguration const& config, std::vector<CalChart::DrawCommand> const& draw_commands);
 
 // Give an list of commands, apply them to the DeviceContext
 void DrawCC_DrawCommandList(wxDC& dc, std::vector<CalChart::DrawCommand> const& draw_commands);
