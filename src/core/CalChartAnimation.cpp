@@ -341,7 +341,7 @@ Animation::GenPathToDraw(unsigned whichSheet, unsigned point, const Coord& offse
         commands->ApplyForward(position);
     }
     // now at this point we should put in a circle for end point
-    draw_commands.push_back(CalChart::DrawCommands::Circle{ position + offset, endRadius, true });
+    draw_commands.push_back(CalChart::Draw::Circle{ position + offset, endRadius, true });
     return draw_commands;
 }
 

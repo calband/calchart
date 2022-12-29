@@ -204,12 +204,12 @@ namespace CalChartDraw::Point {
         CalChart::SYMBOL_TYPE symbol,
         wxString const& label)
     {
-        DrawCC_DrawCommandList(dc, CalChart::DrawCommands::Point::CreatePoint(point, pos, label, symbol, dotRatio, pLineRatio, sLineRatio));
+        DrawCC_DrawCommandList(dc, CalChart::Draw::Point::CreatePoint(point, pos, label, symbol, dotRatio, pLineRatio, sLineRatio));
     }
 
     auto DrawPoint(CalChartConfiguration const& config, CalChart::Point const& point, CalChart::SYMBOL_TYPE symbol, int reference, CalChart::Coord const& origin, wxString const& label)
     {
-        return CalChart::DrawCommands::Point::CreatePoint(
+        return CalChart::Draw::Point::CreatePoint(
             point,
             point.GetPos(reference) + origin,
             label,
@@ -495,7 +495,7 @@ void DrawForPrintingHelper(wxDC& dc, CalChartConfiguration const& config, CalCha
     dc.SetUserScale(scale, scale);
 
     // draw the field.
-    DrawMode(dc, config, mode, ShowMode_kPrinting);
+    DrawCC_DrawCommandList(dc, DrawMode(config, mode, ShowMode_kPrinting) + mode.Border1());
 
     dc.SetFont(CreateFont(CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio())));
     for (auto i = 0u; i < pts.size(); i++) {
@@ -588,7 +588,7 @@ void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config,
     auto pLineRatio = config.Get_PLineRatio();
     auto sLineRatio = config.Get_SLineRatio();
     for (auto& i : positions) {
-        DrawCC_DrawCommandList(dc, CalChart::DrawCommands::Point::CreatePoint(sheet.GetPoint(i.first), i.second + origin, show.GetPointLabel(i.first), sheet.GetSymbol(i.first), dotRatio, pLineRatio, sLineRatio));
+        DrawCC_DrawCommandList(dc, CalChart::Draw::Point::CreatePoint(sheet.GetPoint(i.first), i.second + origin, show.GetPointLabel(i.first), sheet.GetSymbol(i.first), dotRatio, pLineRatio, sLineRatio));
     }
 }
 
@@ -598,11 +598,11 @@ namespace {
 }
 
 // this draws the yardline labels
-static void DrawText(wxDC& dc, std::string text, CalChart::Coord c, CalChart::DrawCommands::Text::TextAnchor anchor, bool withBox)
+static void DrawText(wxDC& dc, std::string text, CalChart::Coord c, CalChart::Draw::Text::TextAnchor anchor, bool withBox)
 {
     auto where = fDIP(wxPoint{ c.x, c.y });
     auto textSize = dc.GetTextExtent(text);
-    using TextAnchor = CalChart::DrawCommands::Text::TextAnchor;
+    using TextAnchor = CalChart::Draw::Text::TextAnchor;
     if ((anchor & TextAnchor::VerticalCenter) == TextAnchor::VerticalCenter) {
         where.y -= textSize.y / 2;
     }
@@ -635,47 +635,84 @@ static void DrawText(wxDC& dc, std::string text, CalChart::Coord c, CalChart::Dr
     dc.DrawText(text, where);
 }
 
+void DrawCC_DrawCommandList(wxDC& dc, CalChart::DrawCommand const& cmd)
+{
+    std::visit([&dc](auto const& c) {
+        using T = std::decay_t<decltype(c)>;
+        if constexpr (std::is_same_v<T, CalChart::Draw::Line>) {
+            auto start = fDIP(wxCalChart::to_wxPoint(c.c1));
+            auto end = fDIP(wxCalChart::to_wxPoint(c.c2));
+            dc.DrawLine(start, end);
+        } else if constexpr (std::is_same_v<T, CalChart::Draw::Arc>) {
+            auto start = fDIP(wxCalChart::to_wxPoint(c.c1));
+            auto end = fDIP(wxCalChart::to_wxPoint(c.c2));
+            auto center = fDIP(wxCalChart::to_wxPoint(c.cc));
+            dc.DrawArc(start, end, center);
+        } else if constexpr (std::is_same_v<T, CalChart::Draw::Ellipse>) {
+            auto start = fDIP(wxCalChart::to_wxPoint(c.c1));
+            auto end = fDIP(wxCalChart::to_wxSize(c.c2 - c.c1));
+            dc.DrawEllipse(start, end);
+        } else if constexpr (std::is_same_v<T, CalChart::Draw::Circle>) {
+            SaveAndRestore::Brush restore(dc);
+            if (!c.filled) {
+                dc.SetBrush(*wxTRANSPARENT_BRUSH);
+            }
+            auto center = fDIP(wxCalChart::to_wxPoint(c.c1));
+            dc.DrawCircle(center, fDIP(c.radius));
+        } else if constexpr (std::is_same_v<T, CalChart::Draw::Text>) {
+            DrawText(dc, c.text, c.c1, c.anchor, c.withBackground);
+        } else if constexpr (std::is_same_v<T, CalChart::Draw::Ignore>) {
+        } else if constexpr (std::is_same_v<T, CalChart::Draw::OverrideFont>) {
+            if (!c.font) {
+                DrawCC_DrawCommandList(dc, c.commands);
+                return;
+            }
+            SaveAndRestore::Font restore(dc);
+            wxCalChart::setFont(dc, *c.font);
+            DrawCC_DrawCommandList(dc, c.commands);
+        } else if constexpr (std::is_same_v<T, CalChart::Draw::OverrideBrush>) {
+            if (!c.brush) {
+                DrawCC_DrawCommandList(dc, c.commands);
+                return;
+            }
+            SaveAndRestore::Brush restore(dc);
+            wxCalChart::setBrush(dc, *c.brush);
+            DrawCC_DrawCommandList(dc, c.commands);
+        } else if constexpr (std::is_same_v<T, CalChart::Draw::OverridePen>) {
+            if (!c.pen) {
+                DrawCC_DrawCommandList(dc, c.commands);
+                return;
+            }
+            SaveAndRestore::Pen restore(dc);
+            wxCalChart::setPen(dc, *c.pen);
+            DrawCC_DrawCommandList(dc, c.commands);
+        } else if constexpr (std::is_same_v<T, CalChart::Draw::OverrideBrushAndPen>) {
+            if (!c.brushAndPen) {
+                DrawCC_DrawCommandList(dc, c.commands);
+                return;
+            }
+            SaveAndRestore::BrushAndPen restore(dc);
+            wxCalChart::setBrushAndPen(dc, *c.brushAndPen);
+            DrawCC_DrawCommandList(dc, c.commands);
+        } else if constexpr (std::is_same_v<T, CalChart::Draw::OverrideTextForeground>) {
+            if (!c.brushAndPen) {
+                DrawCC_DrawCommandList(dc, c.commands);
+                return;
+            }
+            SaveAndRestore::TextForeground restore(dc);
+            wxCalChart::setTextForeground(dc, *c.brushAndPen);
+            DrawCC_DrawCommandList(dc, c.commands);
+        } else {
+            static_assert(always_false_v<T>, "non-exhaustive visitor!");
+        }
+    },
+        cmd);
+}
+
 void DrawCC_DrawCommandList(wxDC& dc, const std::vector<CalChart::DrawCommand>& draw_commands)
 {
-    for (auto cmd : draw_commands) {
-        std::visit([&dc](auto const& c) {
-            using T = std::decay_t<decltype(c)>;
-            if constexpr (std::is_same_v<T, CalChart::DrawCommands::Line>) {
-                auto start = fDIP(wxCalChart::to_wxPoint(c.c1));
-                auto end = fDIP(wxCalChart::to_wxPoint(c.c2));
-                dc.DrawLine(start, end);
-            } else if constexpr (std::is_same_v<T, CalChart::DrawCommands::Arc>) {
-                auto start = fDIP(wxCalChart::to_wxPoint(c.c1));
-                auto end = fDIP(wxCalChart::to_wxPoint(c.c2));
-                auto center = fDIP(wxCalChart::to_wxPoint(c.cc));
-                dc.DrawArc(start, end, center);
-            } else if constexpr (std::is_same_v<T, CalChart::DrawCommands::Ellipse>) {
-                auto start = fDIP(wxCalChart::to_wxPoint(c.c1));
-                auto end = fDIP(wxCalChart::to_wxSize(c.c2 - c.c1));
-                dc.DrawEllipse(start, end);
-            } else if constexpr (std::is_same_v<T, CalChart::DrawCommands::Circle>) {
-                SaveAndRestore::Brush restore(dc);
-                if (!c.filled) {
-                    dc.SetBrush(*wxTRANSPARENT_BRUSH);
-                }
-                auto center = fDIP(wxCalChart::to_wxPoint(c.c1));
-                dc.DrawCircle(center, fDIP(c.radius));
-            } else if constexpr (std::is_same_v<T, CalChart::DrawCommands::Text>) {
-                DrawText(dc, c.text, c.c1, c.anchor, c.withBackground);
-            } else if constexpr (std::is_same_v<T, CalChart::DrawCommands::Ignore>) {
-            } else if constexpr (std::is_same_v<T, CalChart::DrawCommands::OverrideFont>) {
-                SaveAndRestore::Font restore(dc);
-                wxCalChart::setFont(dc, c.font);
-                DrawCC_DrawCommandList(dc, c.commands);
-            } else if constexpr (std::is_same_v<T, CalChart::DrawCommands::OverrideBrushAndPen>) {
-                SaveAndRestore::BrushAndPen restore(dc);
-                wxCalChart::setBrushAndPen(dc, c.brushAndPen);
-                DrawCC_DrawCommandList(dc, c.commands);
-            } else {
-                static_assert(always_false_v<T>, "non-exhaustive visitor!");
-            }
-        },
-            cmd);
+    for (auto&& cmd : draw_commands) {
+        DrawCC_DrawCommandList(dc, cmd);
     }
 }
 
@@ -685,73 +722,41 @@ void DrawPath(wxDC& dc, CalChartConfiguration const& config, std::vector<CalChar
     DrawCC_DrawCommandList(dc, draw_commands);
 }
 
-namespace CalChartDraw::Field {
-    template <typename T>
-    inline auto append(std::vector<T>& v, T const& other)
-    {
-        return v.insert(v.end(), other);
-    }
-    template <typename T>
-    inline auto append(std::vector<T>& v, std::vector<T> const& other)
-    {
-        return v.insert(v.end(), other.begin(), other.end());
-    }
-
-    static auto DrawField(CalChart::ShowMode const& mode, HowToDraw howToDraw, CalChart::Font yardlineFont, CalChart::BrushAndPen yardlineBackground) -> std::vector<CalChart::DrawCommand>
-    {
-        auto drawCmds = std::vector<CalChart::DrawCommand>{};
-        append(drawCmds, CalChart::DrawCommands::Field::CreateOutline(mode.FieldSize()));
-        append(drawCmds, CalChart::DrawCommands::Field::CreateVerticalSolidLine(mode.FieldSize(), kStep1));
-
-        if (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting) {
-            append(drawCmds, CalChart::DrawCommands::Field::CreateVerticalDottedLine(mode.FieldSize(), kStep1));
-            append(drawCmds, CalChart::DrawCommands::Field::CreateHorizontalDottedLine(mode.FieldSize(), mode.HashW(), mode.HashE(), kStep1));
-        }
-
-        if (mode.HashW() != static_cast<unsigned short>(-1)) {
-            append(drawCmds, CalChart::DrawCommands::Field::CreateHashes(mode.FieldSize(), mode.HashW(), mode.HashE(), kStep1));
-            if (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting) {
-                append(drawCmds, CalChart::DrawCommands::Field::CreateHashTicks(mode.FieldSize(), mode.HashW(), mode.HashE(), kStep1));
-            }
-        }
-
-        // Draw labels
-        if (howToDraw == ShowMode_kAnimation) {
-            return drawCmds;
-        }
-
-        auto yard_text = mode.Get_yard_text();
-        auto yard_text2 = std::vector<std::string>(yard_text.begin() + (-CalChart::CoordUnits2Int((mode.Offset() - mode.Border1()).x) + (CalChart::kYardTextValues - 1) * 4) / 8, yard_text.end());
-        auto labelCmds = CalChart::DrawCommands::Field::CreateYardlineLabels(yard_text2, mode.FieldSize(), (howToDraw == ShowMode_kOmniView) ? kStep8 : 0, kStep1);
-
-        append(drawCmds, CalChart::DrawCommands::withFont(yardlineFont, CalChart::DrawCommands::withBrushAndPen(yardlineBackground, labelCmds)));
-
-        return drawCmds;
-    }
-}
-
-void DrawMode(wxDC& dc, CalChartConfiguration const& config, CalChart::ShowMode const& mode, HowToDraw howToDraw)
+auto DrawMode(CalChartConfiguration const& config, CalChart::ShowMode const& mode, HowToDraw howToDraw) -> std::vector<CalChart::DrawCommand>
 {
-    SaveAndRestore::BrushAndPen restore(dc);
+    auto result = std::vector<CalChart::DrawCommand>{};
+    auto inBlackAndWhite = howToDraw == ShowMode_kPrinting;
 
-    switch (howToDraw) {
-    case ShowMode_kFieldView:
-    case ShowMode_kAnimation:
-    case ShowMode_kOmniView:
-        wxCalChart::setPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD_DETAIL));
-        wxCalChart::setTextForeground(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD_TEXT));
-        break;
-    case ShowMode_kPrinting:
-        dc.SetPen(*wxBLACK_PEN);
-        dc.SetBrush(*wxWHITE_BRUSH);
-        dc.SetTextForeground(*wxBLACK);
-        break;
+    auto fieldPen = inBlackAndWhite ? wxCalChart::toPen(*wxBLACK_PEN) : CalChart::toPen(config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD_DETAIL));
+    auto fieldText = inBlackAndWhite ? wxCalChart::toBrushAndPen(*wxBLACK_PEN) : config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD_TEXT);
+    auto fieldBrush = wxCalChart::toBrush(*wxTRANSPARENT_BRUSH);
+
+    auto field = CalChart::CreateFieldLayout(mode, howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting);
+
+    CalChart::append(result,
+        std::vector<CalChart::DrawCommand>{ CalChart::Draw::withPen(
+            fieldPen,
+            CalChart::Draw::withTextForeground(
+                fieldText,
+                CalChart::Draw::withBrush(
+                    fieldBrush,
+                    field))) });
+
+    if (howToDraw == ShowMode_kAnimation) {
+        return result;
     }
+
     auto font = CalChart::Font{ .size = CalChart::Float2CoordUnits(config.Get_YardsSize()) };
-    auto brushAndPen = howToDraw != ShowMode_kPrinting ? config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD)
-                                                       : CalChart::BrushAndPen{ .style = CalChart::Brush::Style::Transparent };
-    auto tborder1 = (howToDraw == ShowMode_kOmniView) ? CalChart::Coord(0, 0) : mode.Border1();
-    DrawCC_DrawCommandList(dc, CalChartDraw::Field::DrawField(mode, howToDraw, font, brushAndPen) + tborder1);
+    auto brushAndPen = inBlackAndWhite ? CalChart::BrushAndPen{ .style = CalChart::Brush::Style::Transparent } : config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD);
+    auto yardLabels = CalChart::CreateYardlineLayout(mode, howToDraw == ShowMode_kOmniView);
+    CalChart::append(result,
+        CalChart::Draw::withFont(
+            font,
+            CalChart::Draw::withBrushAndPen(
+                brushAndPen,
+                yardLabels)));
+
+    return result;
 }
 
 wxImage GetOmniLinesImage(const CalChartConfiguration& config, const CalChart::ShowMode& mode)
@@ -762,7 +767,7 @@ wxImage GetOmniLinesImage(const CalChartConfiguration& config, const CalChart::S
     dc.SelectObject(bmp);
     dc.SetBackground(*wxTRANSPARENT_BRUSH);
     dc.Clear();
-    DrawMode(dc, config, mode, ShowMode_kOmniView);
+    DrawCC_DrawCommandList(dc, DrawMode(config, mode, ShowMode_kOmniView));
     auto image = bmp.ConvertToImage();
     image.InitAlpha();
     for (auto x = 0; x < fieldsize.x; ++x) {

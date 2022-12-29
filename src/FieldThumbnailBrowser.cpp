@@ -151,7 +151,9 @@ void FieldThumbnailBrowser::OnPaint(wxPaintEvent&)
         dc.SetDeviceOrigin(origin.x + newOffsetX, origin.y + newOffsetY);
 
         wxCalChart::setPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD_DETAIL));
-        CalChartDraw::DrawMode(dc, config, mView->GetShowMode(), ShowMode_kAnimation);
+        auto tborder1 = mView->GetShowMode().Border1();
+
+        CalChartDraw::DrawCC_DrawCommandList(dc, CalChartDraw::DrawMode(config, mView->GetShowMode(), ShowMode_kAnimation) + tborder1);
         for (auto i = 0; i < mView->GetNumPoints(); ++i) {
             wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_FRONT));
             auto position = sheet->GetPoint(i).GetPos();

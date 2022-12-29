@@ -91,8 +91,6 @@ public:
     // Yard Lines
     [[nodiscard]] auto Get_yard_text() const -> YardLinesInfo_t { return mYardLines; }
 
-    [[nodiscard]] auto DrawField(bool withDottedLine, bool withHashTicks, bool withYardlineLabels, bool largeOffset, CalChart::Font yardlineFont, CalChart::BrushAndPen yardlineBackground) -> std::vector<CalChart::DrawCommand>;
-
 private:
     ShowMode(CalChart::Coord size,
         CalChart::Coord offset,
@@ -113,5 +111,13 @@ private:
 
     friend auto operator==(ShowMode const& lhs, ShowMode const& rhs) -> bool;
 };
+
+auto CreateFieldLayout(
+    ShowMode const& mode,
+    bool withDetails) -> std::vector<CalChart::DrawCommand>;
+
+auto CreateYardlineLayout(
+    ShowMode const& mode,
+    bool largeOffset) -> std::vector<CalChart::DrawCommand>;
 
 }

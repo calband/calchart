@@ -26,6 +26,7 @@
 #include "CalChartDrawPrimatives.h"
 #include <algorithm>
 #include <compare>
+#include <optional>
 #include <span>
 #include <variant>
 #include <vector>
@@ -33,7 +34,7 @@
 namespace CalChart {
 class Point;
 
-namespace DrawCommands {
+namespace Draw {
 
     struct Ignore {
         friend auto operator==(Ignore const&, Ignore const&) -> bool = default;
@@ -170,32 +171,82 @@ namespace DrawCommands {
     // DeviceDetails: This is the way that we specify the color/font for all the descent commands.
     // These are forward declared because they are composed of DrawCommand instances
     struct OverrideFont;
+    struct OverrideBrush;
+    struct OverridePen;
     struct OverrideBrushAndPen;
+    struct OverrideTextForeground;
 }
 
-using DrawCommand = std::variant<DrawCommands::Ignore, DrawCommands::Line, DrawCommands::Arc, DrawCommands::Ellipse, DrawCommands::Circle, DrawCommands::Text, DrawCommands::OverrideFont, DrawCommands::OverrideBrushAndPen>;
+using DrawCommand = std::variant<
+    Draw::Ignore,
+    Draw::Line,
+    Draw::Arc,
+    Draw::Ellipse,
+    Draw::Circle,
+    Draw::Text,
+    Draw::OverrideFont,
+    Draw::OverrideBrush,
+    Draw::OverridePen,
+    Draw::OverrideBrushAndPen,
+    Draw::OverrideTextForeground>;
 
-namespace DrawCommands {
+namespace Draw {
     struct OverrideFont {
-        Font font;
+        std::optional<Font> font;
         std::vector<DrawCommand> commands{};
     };
     inline auto operator+(OverrideFont const& lhs, Coord rhs) -> OverrideFont;
     inline auto operator+(Coord lhs, OverrideFont const& rhs) -> OverrideFont;
 
+    struct OverrideBrush {
+        std::optional<Brush> brush;
+        std::vector<DrawCommand> commands{};
+    };
+    inline auto operator+(OverrideBrush const& lhs, Coord rhs) -> OverrideBrush;
+    inline auto operator+(Coord lhs, OverrideBrush const& rhs) -> OverrideBrush;
+
+    struct OverridePen {
+        std::optional<Pen> pen;
+        std::vector<DrawCommand> commands{};
+    };
+    inline auto operator+(OverridePen const& lhs, Coord rhs) -> OverridePen;
+    inline auto operator+(Coord lhs, OverridePen const& rhs) -> OverridePen;
+
     struct OverrideBrushAndPen {
-        BrushAndPen brushAndPen;
+        std::optional<BrushAndPen> brushAndPen;
         std::vector<DrawCommand> commands{};
     };
     inline auto operator+(OverrideBrushAndPen const& lhs, Coord rhs) -> OverrideBrushAndPen;
     inline auto operator+(Coord lhs, OverrideBrushAndPen const& rhs) -> OverrideBrushAndPen;
+
+    struct OverrideTextForeground {
+        std::optional<BrushAndPen> brushAndPen;
+        std::vector<DrawCommand> commands{};
+    };
+    inline auto operator+(OverrideTextForeground const& lhs, Coord rhs) -> OverrideTextForeground;
+    inline auto operator+(Coord lhs, OverrideTextForeground const& rhs) -> OverrideTextForeground;
 
     constexpr inline auto operator==(OverrideFont const& lhs, OverrideFont const& rhs)
     {
         return lhs.font == rhs.font
             && lhs.commands == rhs.commands;
     }
+    constexpr inline auto operator==(OverrideBrush const& lhs, OverrideBrush const& rhs)
+    {
+        return lhs.brush == rhs.brush
+            && lhs.commands == rhs.commands;
+    }
+    constexpr inline auto operator==(OverridePen const& lhs, OverridePen const& rhs)
+    {
+        return lhs.pen == rhs.pen
+            && lhs.commands == rhs.commands;
+    }
     constexpr inline auto operator==(OverrideBrushAndPen const& lhs, OverrideBrushAndPen const& rhs)
+    {
+        return lhs.brushAndPen == rhs.brushAndPen
+            && lhs.commands == rhs.commands;
+    }
+    constexpr inline auto operator==(OverrideTextForeground const& lhs, OverrideTextForeground const& rhs)
     {
         return lhs.brushAndPen == rhs.brushAndPen
             && lhs.commands == rhs.commands;
@@ -220,37 +271,33 @@ namespace DrawCommands {
 
     inline auto operator+(OverrideFont const& lhs, Coord rhs) -> OverrideFont { return OverrideFont{ lhs.font, lhs.commands + rhs }; }
     inline auto operator+(Coord lhs, OverrideFont const& rhs) -> OverrideFont { return rhs + lhs; }
+    inline auto operator+(OverrideBrush const& lhs, Coord rhs) -> OverrideBrush { return OverrideBrush{ lhs.brush, lhs.commands + rhs }; }
+    inline auto operator+(Coord lhs, OverrideBrush const& rhs) -> OverrideBrush { return rhs + lhs; }
+    inline auto operator+(OverridePen const& lhs, Coord rhs) -> OverridePen { return OverridePen{ lhs.pen, lhs.commands + rhs }; }
+    inline auto operator+(Coord lhs, OverridePen const& rhs) -> OverridePen { return rhs + lhs; }
     inline auto operator+(OverrideBrushAndPen const& lhs, Coord rhs) -> OverrideBrushAndPen { return OverrideBrushAndPen{ lhs.brushAndPen, lhs.commands + rhs }; }
     inline auto operator+(Coord lhs, OverrideBrushAndPen const& rhs) -> OverrideBrushAndPen { return rhs + lhs; }
+    inline auto operator+(OverrideTextForeground const& lhs, Coord rhs) -> OverrideTextForeground { return OverrideTextForeground{ lhs.brushAndPen, lhs.commands + rhs }; }
+    inline auto operator+(Coord lhs, OverrideTextForeground const& rhs) -> OverrideTextForeground { return rhs + lhs; }
 
-    inline auto withFont(Font font, std::vector<DrawCommand> commands) -> DrawCommand
-    {
-        return OverrideFont{
-            font,
-            std::move(commands)
-        };
-    }
+    inline auto withFont(Font font, std::vector<DrawCommand> commands) -> DrawCommand { return OverrideFont{ font, std::move(commands) }; }
+    inline auto withFont(Font font, DrawCommand command) { return withFont(font, std::vector<DrawCommand>{ std::move(command) }); }
 
-    inline auto withFont(Font font, DrawCommand command)
-    {
-        return withFont(font, std::vector<DrawCommand>{ std::move(command) });
-    }
+    inline auto withBrush(Brush brush, std::vector<DrawCommand> commands) -> DrawCommand { return OverrideBrush{ brush, std::move(commands) }; }
+    inline auto withBrush(Brush brush, DrawCommand command) { return withBrush(brush, std::vector<DrawCommand>{ std::move(command) }); }
 
-    inline auto withBrushAndPen(BrushAndPen brushAndPen, std::vector<DrawCommand> commands) -> DrawCommand
-    {
-        return OverrideBrushAndPen{
-            brushAndPen,
-            std::move(commands)
-        };
-    }
+    inline auto withPen(Pen pen, std::vector<DrawCommand> commands) -> DrawCommand { return OverridePen{ pen, std::move(commands) }; }
+    inline auto withPen(Pen pen, DrawCommand command) { return withPen(pen, std::vector<DrawCommand>{ std::move(command) }); }
 
-    inline auto withBrushAndPen(BrushAndPen brushAndPen, DrawCommand command)
-    {
-        return withBrushAndPen(brushAndPen, std::vector<DrawCommand>{ std::move(command) });
-    }
+    inline auto withBrushAndPen(std::optional<BrushAndPen> brushAndPen, std::vector<DrawCommand> commands) -> DrawCommand { return OverrideBrushAndPen{ brushAndPen, std::move(commands) }; }
+    inline auto withBrushAndPen(std::optional<BrushAndPen> brushAndPen, DrawCommand command) { return withBrushAndPen(brushAndPen, std::vector<DrawCommand>{ std::move(command) }); }
+
+    inline auto withTextForeground(BrushAndPen brushAndPen, std::vector<DrawCommand> commands) -> DrawCommand { return OverrideTextForeground{ brushAndPen, std::move(commands) }; }
+    inline auto withTextForeground(BrushAndPen brushAndPen, DrawCommand command) { return withTextForeground(brushAndPen, std::vector<DrawCommand>{ std::move(command) }); }
+
 }
 
-namespace DrawCommands {
+namespace Draw {
 
     // What follows are a collection of functions to create different common "images" for CalChart.
     namespace Point {
@@ -280,7 +327,7 @@ namespace DrawCommands {
 }
 
 // Implementation Details
-namespace DrawCommands::details {
+namespace Draw::details {
     // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     static_assert(Ignore{} == Ignore{});
     static_assert(Ignore{} == (Ignore{} + Coord{}));

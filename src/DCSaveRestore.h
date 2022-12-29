@@ -93,6 +93,19 @@ public:
     ~Brush() { dc.SetBrush(origBrush); }
 };
 
+class Pen {
+    wxDC& dc;
+    wxPen origPen;
+
+public:
+    Pen(wxDC& dc_)
+        : dc(dc_)
+        , origPen(dc.GetPen())
+    {
+    }
+    ~Pen() { dc.SetPen(origPen); }
+};
+
 // class for saving and restoring
 class BrushAndPen {
     wxDC& mDC;

@@ -84,6 +84,16 @@ inline auto toColor(std::string_view s)
     return toColor(wxColour(wxString(s.data())));
 }
 
+inline auto toBrush(wxBrush const& b)
+{
+    return CalChart::Brush{ toColor(b.GetColour()), CalChart::Brush::Style::Solid };
+}
+
+inline auto toPen(wxPen const& p)
+{
+    return CalChart::Pen{ toColor(p.GetColour()), p.GetWidth() };
+}
+
 inline auto toBrushAndPen(wxColour const& c, int width)
 {
     return CalChart::BrushAndPen{ toColor(c), CalChart::Brush::Style::Solid, width };
@@ -92,6 +102,11 @@ inline auto toBrushAndPen(wxColour const& c, int width)
 inline auto toBrushAndPen(std::string_view s, int width)
 {
     return CalChart::BrushAndPen{ toColor(s), CalChart::Brush::Style::Solid, width };
+}
+
+inline auto toBrushAndPen(wxPen const& p)
+{
+    return CalChart::BrushAndPen{ toColor(p.GetColour()), CalChart::Brush::Style::Solid, p.GetWidth() };
 }
 
 inline auto setBackground(wxDC& dc, CalChart::Color color)

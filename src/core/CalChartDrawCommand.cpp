@@ -25,7 +25,7 @@
 #include "CalChartPoint.h"
 #include <vector>
 
-namespace CalChart::DrawCommands {
+namespace CalChart::Draw {
 
 namespace Point {
 
@@ -49,16 +49,16 @@ namespace Point {
         auto const slineoff = circ_r * sLineRatio;
 
         auto drawCmds = std::vector<CalChart::DrawCommand>{};
-        drawCmds.push_back(CalChart::DrawCommands::Circle(pos, CalChart::Float2CoordUnits(dotRatio) / 2.0, filled));
+        drawCmds.push_back(CalChart::Draw::Circle(pos, CalChart::Float2CoordUnits(dotRatio) / 2.0, filled));
 
         switch (symbol) {
         case CalChart::SYMBOL_SL:
         case CalChart::SYMBOL_X: {
-            drawCmds.push_back(CalChart::DrawCommands::Line(pos.x - plineoff, pos.y + plineoff, pos.x + plineoff, pos.y - plineoff));
+            drawCmds.push_back(CalChart::Draw::Line(pos.x - plineoff, pos.y + plineoff, pos.x + plineoff, pos.y - plineoff));
         } break;
         case CalChart::SYMBOL_SOLSL:
         case CalChart::SYMBOL_SOLX:
-            drawCmds.push_back(CalChart::DrawCommands::Line(pos.x - slineoff, pos.y + slineoff, pos.x + slineoff, pos.y - slineoff));
+            drawCmds.push_back(CalChart::Draw::Line(pos.x - slineoff, pos.y + slineoff, pos.x + slineoff, pos.y - slineoff));
             break;
         default:
             break;
@@ -66,19 +66,19 @@ namespace Point {
         switch (symbol) {
         case CalChart::SYMBOL_BKSL:
         case CalChart::SYMBOL_X:
-            drawCmds.push_back(CalChart::DrawCommands::Line(pos.x - plineoff, pos.y - plineoff, pos.x + plineoff, pos.y + plineoff));
+            drawCmds.push_back(CalChart::Draw::Line(pos.x - plineoff, pos.y - plineoff, pos.x + plineoff, pos.y + plineoff));
             break;
         case CalChart::SYMBOL_SOLBKSL:
         case CalChart::SYMBOL_SOLX:
-            drawCmds.push_back(CalChart::DrawCommands::Line(pos.x - slineoff, pos.y - slineoff, pos.x + slineoff, pos.y + slineoff));
+            drawCmds.push_back(CalChart::Draw::Line(pos.x - slineoff, pos.y - slineoff, pos.x + slineoff, pos.y + slineoff));
             break;
         default:
             break;
         }
         if (point.LabelIsVisible()) {
-            auto anchor = CalChart::DrawCommands::Text::TextAnchor::Bottom;
-            anchor = anchor | (point.GetFlip() ? CalChart::DrawCommands::Text::TextAnchor::Left : CalChart::DrawCommands::Text::TextAnchor::Right);
-            drawCmds.push_back(CalChart::DrawCommands::Text(pos - CalChart::Coord(0, circ_r), label, anchor));
+            auto anchor = CalChart::Draw::Text::TextAnchor::Bottom;
+            anchor = anchor | (point.GetFlip() ? CalChart::Draw::Text::TextAnchor::Left : CalChart::Draw::Text::TextAnchor::Right);
+            drawCmds.push_back(CalChart::Draw::Text(pos - CalChart::Coord(0, circ_r), label, anchor));
         }
         return drawCmds;
     }
@@ -88,10 +88,10 @@ namespace Field {
     auto CreateOutline(Coord const& fieldsize) -> std::vector<CalChart::DrawCommand>
     {
         return std::vector<CalChart::DrawCommand>{
-            CalChart::DrawCommands::Line{ CalChart::Coord(0, 0), CalChart::Coord(fieldsize.x, 0) },
-            CalChart::DrawCommands::Line{ CalChart::Coord(fieldsize.x, 0), CalChart::Coord(fieldsize.x, fieldsize.y) },
-            CalChart::DrawCommands::Line{ CalChart::Coord(fieldsize.x, fieldsize.y), CalChart::Coord(0, fieldsize.y) },
-            CalChart::DrawCommands::Line{ CalChart::Coord(0, fieldsize.y), CalChart::Coord(0, 0) },
+            CalChart::Draw::Line{ CalChart::Coord(0, 0), CalChart::Coord(fieldsize.x, 0) },
+            CalChart::Draw::Line{ CalChart::Coord(fieldsize.x, 0), CalChart::Coord(fieldsize.x, fieldsize.y) },
+            CalChart::Draw::Line{ CalChart::Coord(fieldsize.x, fieldsize.y), CalChart::Coord(0, fieldsize.y) },
+            CalChart::Draw::Line{ CalChart::Coord(0, fieldsize.y), CalChart::Coord(0, 0) },
         };
     }
 
@@ -101,7 +101,7 @@ namespace Field {
         auto step8 = 8 * step1;
         std::vector<CalChart::DrawCommand> result;
         for (auto j = 0; j <= fieldsize.x; j += step8) {
-            result.emplace_back(CalChart::DrawCommands::Line{ CalChart::Coord(j, 0), CalChart::Coord(j, fieldsize.y) });
+            result.emplace_back(CalChart::Draw::Line{ CalChart::Coord(j, 0), CalChart::Coord(j, fieldsize.y) });
         }
         return result;
     }
@@ -116,7 +116,7 @@ namespace Field {
         for (auto j = step4; j < fieldsize.x; j += step8) {
             // draw mid-dotted lines
             for (auto k = 0; k < fieldsize.y; k += step2) {
-                result.emplace_back(CalChart::DrawCommands::Line{ CalChart::Coord(j, k), CalChart::Coord(j, k + step1) });
+                result.emplace_back(CalChart::Draw::Line{ CalChart::Coord(j, k), CalChart::Coord(j, k + step1) });
             }
         }
         return result;
@@ -131,7 +131,7 @@ namespace Field {
             if ((j == CalChart::Int2CoordUnits(mode_HashW)) || j == CalChart::Int2CoordUnits(mode_HashE))
                 continue;
             for (auto k = 0; k < fieldsize.x; k += step2) {
-                result.emplace_back(CalChart::DrawCommands::Line{ CalChart::Coord(k, j), CalChart::Coord(k + step1, j) });
+                result.emplace_back(CalChart::Draw::Line{ CalChart::Coord(k, j), CalChart::Coord(k + step1, j) });
             }
         }
         return result;
@@ -145,17 +145,17 @@ namespace Field {
         auto hashW = CalChart::Int2CoordUnits(mode_HashW);
         auto hashE = CalChart::Int2CoordUnits(mode_HashE);
         for (auto j = CalChart::Int2CoordUnits(0); j < fieldsize.x; j += step8) {
-            result.emplace_back(CalChart::DrawCommands::Line{
+            result.emplace_back(CalChart::Draw::Line{
                 CalChart::Coord(j + CalChart::Float2CoordUnits(0.0 * 8), hashW),
                 CalChart::Coord(j + CalChart::Float2CoordUnits(0.1 * 8), hashW) });
-            result.emplace_back(CalChart::DrawCommands::Line{
+            result.emplace_back(CalChart::Draw::Line{
                 CalChart::Coord(j + CalChart::Float2CoordUnits(0.9 * 8), hashW),
                 CalChart::Coord(j + CalChart::Float2CoordUnits(1.0 * 8), hashW) });
 
-            result.emplace_back(CalChart::DrawCommands::Line{
+            result.emplace_back(CalChart::Draw::Line{
                 CalChart::Coord(j + CalChart::Float2CoordUnits(0.0 * 8), hashE),
                 CalChart::Coord(j + CalChart::Float2CoordUnits(0.1 * 8), hashE) });
-            result.emplace_back(CalChart::DrawCommands::Line{
+            result.emplace_back(CalChart::Draw::Line{
                 CalChart::Coord(j + CalChart::Float2CoordUnits(0.9 * 8), hashE),
                 CalChart::Coord(j + CalChart::Float2CoordUnits(1.0 * 8), hashE) });
         }
@@ -171,10 +171,10 @@ namespace Field {
         auto hashE = CalChart::Int2CoordUnits(mode_HashE);
         for (auto j = CalChart::Int2CoordUnits(0); j < fieldsize.x; j += step8) {
             for (size_t midhash = 1; midhash < 5; ++midhash) {
-                result.emplace_back(CalChart::DrawCommands::Line{
+                result.emplace_back(CalChart::Draw::Line{
                     CalChart::Coord(j + CalChart::Float2CoordUnits(midhash / 5.0 * 8), hashW),
                     CalChart::Coord(j + CalChart::Float2CoordUnits(midhash / 5.0 * 8), CalChart::Float2CoordUnits(mode_HashW - (0.2 * 8))) });
-                result.emplace_back(CalChart::DrawCommands::Line{
+                result.emplace_back(CalChart::Draw::Line{
                     CalChart::Coord(j + CalChart::Float2CoordUnits(midhash / 5.0 * 8), hashE),
                     CalChart::Coord(j + CalChart::Float2CoordUnits(midhash / 5.0 * 8), CalChart::Float2CoordUnits(mode_HashE + (0.2 * 8))) });
             }
@@ -189,9 +189,9 @@ namespace Field {
         for (int i = 0; i < CalChart::CoordUnits2Int(fieldsize.x) / 8 + 1; i++) {
             auto text = yard_text[i];
 
-            using TextAnchor = CalChart::DrawCommands::Text::TextAnchor;
-            result.emplace_back(CalChart::DrawCommands::Text{ CalChart::Coord(i * step8, offset), text, TextAnchor::Bottom | TextAnchor::HorizontalCenter | TextAnchor::ScreenTop, true });
-            result.emplace_back(CalChart::DrawCommands::Text{ CalChart::Coord(i * step8, fieldsize.y - offset), text, TextAnchor::Top | TextAnchor::HorizontalCenter, true });
+            using TextAnchor = CalChart::Draw::Text::TextAnchor;
+            result.emplace_back(CalChart::Draw::Text{ CalChart::Coord(i * step8, offset), text, TextAnchor::Bottom | TextAnchor::HorizontalCenter | TextAnchor::ScreenTop, true });
+            result.emplace_back(CalChart::Draw::Text{ CalChart::Coord(i * step8, fieldsize.y - offset), text, TextAnchor::Top | TextAnchor::HorizontalCenter, true });
         }
         return result;
     }
