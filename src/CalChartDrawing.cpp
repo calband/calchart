@@ -195,18 +195,6 @@ auto toCoord(wxPoint point)
 
 namespace CalChartDraw::Point {
 
-    void DrawPoint(wxDC& dc,
-        double dotRatio,
-        double pLineRatio,
-        double sLineRatio,
-        CalChart::Coord const& pos,
-        CalChart::Point const& point,
-        CalChart::SYMBOL_TYPE symbol,
-        wxString const& label)
-    {
-        DrawCC_DrawCommandList(dc, CalChart::Draw::Point::CreatePoint(point, pos, label, symbol, dotRatio, pLineRatio, sLineRatio));
-    }
-
     auto DrawPoint(CalChartConfiguration const& config, CalChart::Point const& point, CalChart::SYMBOL_TYPE symbol, int reference, CalChart::Coord const& origin, wxString const& label)
     {
         return CalChart::Draw::Point::CreatePoint(
@@ -223,28 +211,54 @@ namespace CalChartDraw::Point {
 
 void DrawSheetPoints(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord origin, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, CalChart::Colors unselectedColor, CalChart::Colors selectedColor, CalChart::Colors unselectedTextColor, CalChart::Colors selectedTextColor)
 {
-    SaveAndRestore::Font orig_font(dc);
-    dc.SetFont(CreateFont(CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio())));
-    wxCalChart::setTextForeground(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_TEXT));
+    auto dotRatio = config.Get_DotRatio();
+    auto pLineRatio = config.Get_PLineRatio();
+    auto sLineRatio = config.Get_SLineRatio();
 
-    {
-        wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(selectedColor));
-        wxCalChart::setTextForeground(dc, config.Get_CalChartBrushAndPen(selectedTextColor));
-        for (auto i = 0; i < numberPoints; i++) {
-            if (selection_list.count(i)) {
-                DrawCC_DrawCommandList(dc, CalChartDraw::Point::DrawPoint(config, sheet.GetPoint(i), sheet.GetSymbol(i), ref, origin, labels.at(i)));
-            }
+    auto drawCmds = std::vector<CalChart::DrawCommand>{};
+    auto selectedCmds = std::vector<CalChart::DrawCommand>{};
+    for (auto i = 0; i < numberPoints; i++) {
+        if (selection_list.contains(i)) {
+            CalChart::append(selectedCmds,
+                CalChart::Draw::Point::CreatePoint(
+                    sheet.GetPoint(i),
+                    sheet.GetPoint(i).GetPos(ref),
+                    labels.at(i),
+                    sheet.GetSymbol(i),
+                    dotRatio,
+                    pLineRatio,
+                    sLineRatio));
         }
     }
-    {
-        wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(unselectedColor));
-        wxCalChart::setTextForeground(dc, config.Get_CalChartBrushAndPen(unselectedTextColor));
-        for (auto i = 0; i < numberPoints; i++) {
-            if (!selection_list.count(i)) {
-                DrawCC_DrawCommandList(dc, CalChartDraw::Point::DrawPoint(config, sheet.GetPoint(i), sheet.GetSymbol(i), ref, origin, labels.at(i)));
-            }
+    CalChart::append(
+        drawCmds,
+        CalChart::Draw::withBrushAndPen(
+            config.Get_CalChartBrushAndPen(selectedColor),
+            CalChart::Draw::withTextForeground(
+                config.Get_CalChartBrushAndPen(selectedTextColor),
+                selectedCmds + origin)));
+    auto unselectedCmds = std::vector<CalChart::DrawCommand>{};
+    for (auto i = 0; i < numberPoints; i++) {
+        if (!selection_list.contains(i)) {
+            CalChart::append(unselectedCmds,
+                CalChart::Draw::Point::CreatePoint(
+                    sheet.GetPoint(i),
+                    sheet.GetPoint(i).GetPos(ref),
+                    labels.at(i),
+                    sheet.GetSymbol(i),
+                    dotRatio,
+                    pLineRatio,
+                    sLineRatio));
         }
     }
+    CalChart::append(
+        drawCmds,
+        CalChart::Draw::withBrushAndPen(
+            config.Get_CalChartBrushAndPen(unselectedColor),
+            CalChart::Draw::withTextForeground(
+                config.Get_CalChartBrushAndPen(unselectedTextColor),
+                unselectedCmds + origin)));
+    DrawCC_DrawCommandList(dc, drawCmds);
 }
 
 void DrawGhostSheet(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord origin, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref)
@@ -573,23 +587,32 @@ void DrawForPrinting(wxDC* printerdc, CalChartConfiguration const& config, CalCh
     printerdc->Blit(0, 0, rotate_membm.GetWidth(), rotate_membm.GetHeight(), &tmemdc, 0, 0);
 }
 
-void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config,
-    const CalChartDoc& show, const CalChart::Sheet& sheet,
-    const std::map<int, CalChart::Coord>& positions)
+auto CreatePhatomPoints(
+    const CalChartConfiguration& config,
+    const CalChartDoc& show,
+    const CalChart::Sheet& sheet,
+    const std::map<int, CalChart::Coord>& positions) -> std::vector<CalChart::DrawCommand>
 {
-    SaveAndRestore::Font orig_font(dc);
-    auto pointLabelFont = CreateFont(CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio()));
-    dc.SetFont(pointLabelFont);
+    auto pointLabelFont = CalChart::Font{ .size = CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio()) };
     auto origin = show.GetShowMode().Offset();
-    wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::GHOST_POINT));
-    wxCalChart::setTextForeground(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::GHOST_POINT_TEXT));
 
     auto dotRatio = config.Get_DotRatio();
     auto pLineRatio = config.Get_PLineRatio();
     auto sLineRatio = config.Get_SLineRatio();
-    for (auto& i : positions) {
-        DrawCC_DrawCommandList(dc, CalChart::Draw::Point::CreatePoint(sheet.GetPoint(i.first), i.second + origin, show.GetPointLabel(i.first), sheet.GetSymbol(i.first), dotRatio, pLineRatio, sLineRatio));
+
+    auto drawCmds = std::vector<CalChart::DrawCommand>{};
+    for (auto&& i : positions) {
+        CalChart::append(drawCmds, CalChart::Draw::Point::CreatePoint(sheet.GetPoint(i.first), i.second, show.GetPointLabel(i.first), sheet.GetSymbol(i.first), dotRatio, pLineRatio, sLineRatio));
     }
+    return std::vector<CalChart::DrawCommand>{
+        CalChart::Draw::withFont(
+            pointLabelFont,
+            CalChart::Draw::withBrushAndPen(
+                config.Get_CalChartBrushAndPen(CalChart::Colors::GHOST_POINT),
+                CalChart::Draw::withTextForeground(
+                    config.Get_CalChartBrushAndPen(CalChart::Colors::GHOST_POINT_TEXT),
+                    drawCmds + origin)))
+    };
 }
 
 namespace {

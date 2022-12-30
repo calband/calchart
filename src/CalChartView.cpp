@@ -103,7 +103,7 @@ void CalChartView::OnDraw(wxDC* dc)
 
 void CalChartView::DrawUncommitedMovePoints(wxDC& dc, std::map<int, CalChart::Coord> const& positions)
 {
-    CalChartDraw::DrawPhatomPoints(dc, mConfig, *mShow, *mShow->GetCurrentSheet(), positions);
+    CalChartDraw::DrawCC_DrawCommandList(dc, CalChartDraw::CreatePhatomPoints(mConfig, *mShow, *mShow->GetCurrentSheet(), positions));
 }
 
 void CalChartView::OnDrawBackground(wxDC& dc)

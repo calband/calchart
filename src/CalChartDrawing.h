@@ -65,7 +65,7 @@ void DrawGhostSheet(wxDC& dc, CalChartConfiguration const& config, CalChart::Coo
 void DrawCont(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect const& bounding, bool landscape, int useConstantTabs = 0);
 void DrawContForPreview(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect const& bounding);
 void DrawForPrinting(wxDC* dc, CalChartConfiguration const& config, CalChartDoc const& show, CalChart::Sheet const& sheet, int ref, bool landscape);
-void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config, CalChartDoc const& show, CalChart::Sheet const& sheet, std::map<int, CalChart::Coord> const& positions);
+auto CreatePhatomPoints(const CalChartConfiguration& config, CalChartDoc const& show, CalChart::Sheet const& sheet, std::map<int, CalChart::Coord> const& positions) -> std::vector<CalChart::DrawCommand>;
 auto DrawMode(CalChartConfiguration const& config, CalChart::ShowMode const& mode, HowToDraw howToDraw) -> std::vector<CalChart::DrawCommand>;
 wxImage GetOmniLinesImage(const CalChartConfiguration& config, CalChart::ShowMode const& mode);
 
