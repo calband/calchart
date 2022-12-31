@@ -45,8 +45,8 @@ public:
     ~PreferencePage() override = default;
     void Initialize()
     {
-        InitFromConfig();
         CreateControls();
+        InitFromConfig();
         GetSizer()->Fit(this);
         GetSizer()->SetSizeHints(this);
         Center();

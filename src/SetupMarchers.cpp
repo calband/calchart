@@ -78,71 +78,57 @@ static void EnableLetter(wxWindow& window, bool letters)
 //  wxSlider *lettersize;
 static void LayoutShowInfo(wxWindow* parent, bool putLastRowButtons)
 {
-    parent->SetSizer(VStack([parent, putLastRowButtons](auto sizer) {
-        // now we add a left and a right side, putting boxes around things
-        // special attention about box sizers
-        // "the order in which you create
-        // new controls is important. Create your wxStaticBox control before any
-        // siblings that are to appear inside the wxStaticBox in order to preserve
-        // the correct Z-Order of controls."
-        HStack(sizer, BasicSizerFlags(), [parent](auto sizer) {
-            VStack(sizer, BasicSizerFlags(), [parent](auto sizer) {
-                // add the left side
-                HStack(sizer, BasicSizerFlags(), [parent](auto sizer) {
-                    CreateText(parent, sizer, "&Points:");
-                    auto numPoints = new wxSpinCtrl(parent, SetupMarchers_ID_POINTS_SPIN, wxEmptyString, wxDefaultPosition, wxSize(60, -1), wxSP_ARROW_KEYS, 1, kMaxPoints, 10);
-                    sizer->Add(numPoints, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-                });
+    auto labels = std::vector<wxString>{};
+    wxUI::ListBox::Proxy tlabels{};
 
-                HStack(sizer, BasicSizerFlags(), [parent](auto sizer) {
-                    CreateText(parent, sizer, "&Columns:");
-                    auto numberColumns = new wxSpinCtrl(parent, SetupMarchers_ID_COLUMNS_SPIN, wxEmptyString, wxDefaultPosition, wxSize(60, -1), wxSP_ARROW_KEYS, 0, kMaxPoints, 10);
-                    sizer->Add(numberColumns, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-                });
+    for (auto i = 0; i < 26; ++i) {
+        wxString buf(static_cast<char>('A' + i));
+        buf += wxString(static_cast<char>('A' + i));
+        labels.push_back(buf);
+    }
+    for (auto i = 0; i < 26; ++i) {
+        wxString buf(static_cast<char>('A' + i));
+        labels.push_back(buf);
+    }
+    wxUI::VSizer{
+        BasicSizerFlags(),
+        wxUI::HSizer{
+            wxUI::VSizer{
+                wxUI::HSizer{
+                    wxUI::Text{ "&Points:" },
+                    wxUI::SpinCtrl{ SetupMarchers_ID_POINTS_SPIN, std::pair{ 1, kMaxPoints }, 10 }
+                        .withSize({ 60, -1 })
+                        .withStyle(wxSP_ARROW_KEYS),
+                },
+                wxUI::HSizer{
+                    wxUI::Text{ "&Columns:" },
+                    wxUI::SpinCtrl{ SetupMarchers_ID_COLUMNS_SPIN, std::pair{ 1, kMaxPoints }, 10 }
+                        .withStyle(wxSP_ARROW_KEYS),
+                },
+                wxUI::Choice{ SetupMarchers_ID_LABEL_TYPE, std::vector<wxString>{ wxT("Numbers"), wxT("Letters") } }
+                    .bind([parent](auto& e) {
+                        EnableLetter(*parent, e.GetInt() == 1);
+                        parent->Refresh();
+                    }),
+                wxUI::HSizer{
+                    wxUI::Text{ "P&oints per letter:" },
+                    wxUI::SpinCtrl{ SetupMarchers_ID_POINTS_PER_LETTER, std::pair{ 1, 99 }, 10 }
+                        .withStyle(wxSP_ARROW_KEYS),
+                },
 
-                CreateChoiceWithHandler(parent, sizer, BasicSizerFlags(), SetupMarchers_ID_LABEL_TYPE, std::vector<wxString>{ wxT("Numbers"), wxT("Letters") }, [parent](auto& event) {
-                    EnableLetter(*parent, event.GetInt() == 1);
-                    parent->Refresh();
-                });
+            },
+            wxUI::VSizer{
+                wxUI::HSizer{
+                    "Letters",
+                    tlabels = wxUI::ListBox{ ExpandSizerFlags(), SetupMarchers_ID_LABEL_LETTERS, labels }
+                                  .withStyle(wxLB_EXTENDED)
+                                  .withEnsureVisible(0),
+                },
 
-                HStack(sizer, BasicSizerFlags(), [parent](auto sizer) {
-                    CreateText(parent, sizer, "P&oints per letter");
-                    auto lettersize = new wxSpinCtrl(parent, SetupMarchers_ID_POINTS_PER_LETTER, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 99, 10);
-                    sizer->Add(lettersize, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-                });
-            });
-
-            VStack(sizer, [parent](auto sizer) {
-                // now add right side
-                NamedHBoxStack(parent, sizer, "&Letters", [parent](auto sizer) {
-                    auto labels = new wxListBox(parent, SetupMarchers_ID_LABEL_LETTERS, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_EXTENDED);
-                    for (auto i = 0; i < 26; ++i) {
-                        wxString buf(static_cast<char>('A' + i));
-                        buf += wxString(static_cast<char>('A' + i));
-                        labels->InsertItems(1, &buf, i);
-                    }
-                    for (auto i = 0; i < 26; ++i) {
-                        wxString buf(static_cast<char>('A' + i));
-                        labels->InsertItems(1, &buf, i);
-                    }
-                    labels->EnsureVisible(0);
-                    sizer->Add(labels, 0, wxGROW | wxALL, 0);
-                });
-            });
-        });
-
-        if (putLastRowButtons) {
-            // put a line between the controls and the buttons
-            CreateHLine(parent, sizer);
-
-            // the buttons on the bottom
-            HStack(sizer, BasicSizerFlags(), [parent](auto sizer) {
-                CreateButton(parent, sizer, wxID_RESET, wxT("&Reset"));
-                CreateButton(parent, sizer, wxID_OK);
-                CreateButton(parent, sizer, wxID_CANCEL);
-            });
-        }
-    }));
+            },
+        },
+    }
+        .attachTo(parent);
 }
 
 static auto GenNumberLabels(int num)

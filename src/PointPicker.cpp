@@ -23,6 +23,7 @@
 #include "PointPicker.h"
 #include "CalChartToolBar.h"
 #include "basic_ui.h"
+#include <wxUI/wxUI.h>
 
 enum {
     PointPicker_PointPickerList = 1100,
@@ -49,48 +50,53 @@ PointPicker::PointPicker(CalChartDoc const& shw, wxWindow* parent)
 
 void PointPicker::CreateControls()
 {
-    SetSizer(VStack([this](auto sizer) {
-        HStack(sizer, BasicSizerFlags(), [this](auto sizer) {
-            CreateButtonWithHandler(this, sizer, BasicSizerFlags(), "&All", [this]() {
-                mSelection = mShow.MakeSelectAll();
-                EndModal(wxID_OK);
-            });
-            CreateButtonWithHandler(this, sizer, BasicSizerFlags(), "&None", [this]() {
-                mSelection = mShow.MakeUnselectAll();
-                EndModal(wxID_OK);
-            });
-            auto button = CreateButton(this, sizer, BasicSizerFlags(), wxID_OK);
-            button->SetDefault();
-        });
-
-        HStack(sizer, BasicSizerFlags(), [this](auto sizer) {
-            auto counter = 0;
-            for (auto&& i : GetSymbolsBitmap()) {
-                auto which = static_cast<CalChart::SYMBOL_TYPE>(counter++);
-                if (mShow.MakeSelectBySymbol(which).size()) {
-                    CreateBitmapButtonWithHandler(this, sizer, BasicSizerFlags(), i, [this, which]() {
-                        mSelection = mShow.MakeSelectBySymbol(which);
-                        EndModal(wxID_OK);
-                    });
+    auto instruments = mShow.GetPointsInstrument();
+    auto currentInstruments = std::set(instruments.begin(), instruments.end());
+    wxUI::VSizer{
+        wxSizerFlags{}.Border(wxALL, 2).Center().Proportion(0),
+        wxUI::HSizer{
+            wxUI::Button{ "&All" }
+                .bind([this] {
+                    mSelection = mShow.MakeSelectAll();
+                    EndModal(wxID_OK);
+                }),
+            wxUI::Button{ "&None" }
+                .bind([this] {
+                    mSelection = mShow.MakeUnselectAll();
+                    ;
+                    EndModal(wxID_OK);
+                }),
+            wxUI::Button{ wxID_OK }.setDefault(),
+        },
+        wxUI::HSizer{
+            wxUI::Custom{ [this](wxWindow* w, wxSizer* s, wxSizerFlags flags) {
+                auto counter = 0;
+                for (auto&& i : GetSymbolsBitmap()) {
+                    auto which = static_cast<CalChart::SYMBOL_TYPE>(counter++);
+                    if (!mShow.MakeSelectBySymbol(which).empty()) {
+                        wxUI::BitmapButton{ i }
+                            .bind([this, which] {
+                                mSelection = mShow.MakeSelectBySymbol(which);
+                                EndModal(wxID_OK);
+                            })
+                            .createAndAdd(w, s, flags);
+                    }
                 }
-            }
-        });
-
-        HStack(sizer, BasicSizerFlags(), [this](auto sizer) {
-            CreateText(this, sizer, BasicSizerFlags(), "Select Instrument");
-
-            auto instruments = mShow.GetPointsInstrument();
-            auto currentInstruments = std::set(instruments.begin(), instruments.end());
-            auto choice = CreateChoiceWithHandler(this, sizer, BasicSizerFlags(), wxID_ANY, std::vector<std::string>{ currentInstruments.begin(), currentInstruments.end() }, [this](wxCommandEvent& e) {
-                mSelection = mShow.MakeSelectByInstrument(e.GetString());
-                EndModal(wxID_OK);
-            });
-            choice->SetSelection(wxNOT_FOUND);
-        });
-
-        mList = new wxListBox(this, PointPicker_PointPickerList, wxDefaultPosition, wxSize(50, 250), 0, NULL, wxLB_EXTENDED);
-        sizer->Add(mList, wxSizerFlags(0).Border(wxALL, 5).Center());
-    }));
+            } } },
+        wxUI::HSizer{
+            wxUI::Text{ "Select Instrument" },
+            wxUI::Choice{ std::vector<wxString>{ currentInstruments.begin(), currentInstruments.end() } }
+                .withSelection(wxNOT_FOUND)
+                .bind([this](wxCommandEvent& e) {
+                    mSelection = mShow.MakeSelectByInstrument(e.GetString());
+                    EndModal(wxID_OK);
+                }),
+        },
+        mList = wxUI::ListBox{ PointPicker_PointPickerList }
+                    .withStyle(wxLB_EXTENDED)
+                    .withSize(wxSize(50, 250))
+    }
+        .attachTo(this);
 
     RereadFromShow();
 }
@@ -103,7 +109,7 @@ void PointPicker::PointPickerAll(wxCommandEvent&)
 void PointPicker::PointPickerSelect(wxCommandEvent&)
 {
     wxArrayInt selections;
-    mList->GetSelections(selections);
+    mList.control()->GetSelections(selections);
     mSelection = CalChart::SelectionList(selections.begin(), selections.end());
 }
 
@@ -113,15 +119,15 @@ void PointPicker::RereadFromShow()
     auto showLabels = std::vector<wxString>(tshowLabels.begin(), tshowLabels.end());
     if (mCachedLabels != showLabels) {
         mCachedLabels = showLabels;
-        mList->Clear();
-        mList->Set(wxArrayString{ mCachedLabels.size(), &mCachedLabels[0] });
+        mList.control()->Clear();
+        mList.control()->Set(wxArrayString{ mCachedLabels.size(), &mCachedLabels[0] });
     }
     auto showSelectionList = mShow.GetSelectionList();
     if (mSelection != showSelectionList) {
-        mList->DeselectAll();
+        mList.control()->DeselectAll();
         mSelection = showSelectionList;
         for (auto&& n : mSelection) {
-            mList->SetSelection(n);
+            mList.control()->SetSelection(n);
         }
     }
 }

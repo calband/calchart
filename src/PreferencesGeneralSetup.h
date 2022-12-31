@@ -22,6 +22,7 @@
 */
 
 #include "PreferencesUtils.h"
+#include <wxUI/wxUI.h>
 
 /// General setup
 /// Handles general configurations parameters of CalChart
@@ -61,9 +62,9 @@ private:
 
     void OnCmdResetAll(wxCommandEvent&);
 
-    wxString mAutoSave_Interval{};
-    bool mBeep_On_Collisions{};
-    bool mScroll_Natural{};
-    bool mSetSheet_Undo{};
-    bool mSelection_Undo{};
+    wxUI::TextCtrl::Proxy mAutoSave_Interval{};
+    wxUI::CheckBox::Proxy mBeep_On_Collisions{};
+    wxUI::CheckBox::Proxy mScroll_Natural{};
+    wxUI::CheckBox::Proxy mSetSheet_Undo{};
+    wxUI::CheckBox::Proxy mSelection_Undo{};
 };

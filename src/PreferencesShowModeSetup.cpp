@@ -40,6 +40,7 @@
 #include <wx/notebook.h>
 #include <wx/statline.h>
 #include <wx/stattext.h>
+#include <wxUI/wxUI.h>
 
 using namespace CalChart;
 
@@ -62,71 +63,82 @@ enum {
 
 IMPLEMENT_CLASS(ShowModeSetup, PreferencePage)
 
+auto convert(std::vector<std::string> const& input)
+{
+    std::vector<wxString> output;
+    std::copy(input.begin(), input.end(), std::back_inserter(output));
+    return output;
+}
+
 void ShowModeSetup::CreateControls()
 {
-    SetSizer(VStack([this](auto& sizer) {
-        CreateChoiceWithHandler(this, sizer, MODE_CHOICE, CalChart::GetShowModeNames(), [this](wxCommandEvent&) {
-            OnCmdChoice();
-        });
+    wxArrayString zoomtext;
+    for (auto& i : zoom_amounts) {
+        wxString buf;
+        buf.sprintf(wxT("%d%%"), i);
+        zoomtext.Add(buf);
+    }
+    auto refresh_action = [this] {
+        TransferDataFromWindow();
+        Refresh();
+    };
+    wxUI::VSizer{
+        LeftBasicSizerFlags(),
+        wxUI::Choice{ MODE_CHOICE, convert(CalChart::GetShowModeNames()) }
+            .bind([this] {
+                OnCmdChoice();
+            }),
+        wxUI::HSizer{
+            VLabelWidget("West Hash", wxUI::TextCtrl{ WESTHASH }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER).bind(refresh_action)),
+            VLabelWidget("East Hash", wxUI::TextCtrl{ EASTHASH }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER).bind(refresh_action)),
+        },
+        wxUI::HSizer{
+            VLabelWidget("Left Border", wxUI::TextCtrl{ BORDER_LEFT }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER).bind(refresh_action)),
+            VLabelWidget("Top Border", wxUI::TextCtrl{ BORDER_TOP }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER).bind(refresh_action)),
+            VLabelWidget("Right Border", wxUI::TextCtrl{ BORDER_RIGHT }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER).bind(refresh_action)),
+            VLabelWidget("Bottom Border", wxUI::TextCtrl{ BORDER_BOTTOM }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER).bind(refresh_action)),
+        },
+        wxUI::HSizer{
+            VLabelWidget("Offset X", wxUI::TextCtrl{ OFFSET_X }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER).bind(refresh_action)),
+            VLabelWidget("Offset Y", wxUI::TextCtrl{ OFFSET_Y }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER).bind(refresh_action)),
+            VLabelWidget("Size X", wxUI::TextCtrl{ SIZE_X }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER).bind(refresh_action)),
+            VLabelWidget("Size Y", wxUI::TextCtrl{ SIZE_Y }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER).bind(refresh_action)),
+        },
+        wxUI::HSizer{
+            LeftBasicSizerFlags(),
+            wxUI::HSizer{
+                BasicSizerFlags(),
+                wxUI::Text{ "Adjust yardline marker" },
+                wxUI::Choice{ SHOW_LINE_MARKING, convert(mConfig.Get_yard_text_index()) }
+                    .bind([this] {
+                        OnCmdChoice();
+                    }),
+                wxUI::TextCtrl{ SHOW_LINE_VALUE }.withStyle(wxTE_PROCESS_ENTER).bind(refresh_action),
+            },
+            wxUI::HSizer{
+                BasicSizerFlags(),
+                wxUI::Text{ "Zoom" },
+                wxUI::Choice{ zoomtext }
+                    .withSelection(defaultZoom)
+                    .bind([this](wxCommandEvent& e) {
+                        auto sel = e.GetInt();
+                        auto zoom_amount = zoom_amounts[sel] / 100.0;
+                        static_cast<ShowModeSetupCanvas*>(FindWindow(CANVAS))->SetZoom(zoom_amount);
+                    }),
+            },
 
-        auto refresh_action = [this](wxCommandEvent&) {
-            this->TransferDataFromWindow();
-            Refresh();
-        };
+        },
+        wxUI::Generic{
+            ExpandSizerFlags(), [this] {
+                auto modeSetupCanvas = new ShowModeSetupCanvas(mConfig, this, CANVAS);
+                modeSetupCanvas->SetScrollRate(1, 1);
 
-        HStack(sizer, LeftBasicSizerFlags(), [this, refresh_action](auto& sizer) {
-            CreateTextboxWithCaptionAndAction(this, sizer, WESTHASH, "West Hash", refresh_action, wxTE_PROCESS_ENTER);
-            CreateTextboxWithCaptionAndAction(this, sizer, EASTHASH, "East Hash", refresh_action, wxTE_PROCESS_ENTER);
-        });
-
-        HStack(sizer, LeftBasicSizerFlags(), [this, refresh_action](auto& sizer) {
-            CreateTextboxWithCaptionAndAction(this, sizer, BORDER_LEFT, "Left Border", refresh_action, wxTE_PROCESS_ENTER);
-            CreateTextboxWithCaptionAndAction(this, sizer, BORDER_TOP, "Top Border", refresh_action, wxTE_PROCESS_ENTER);
-            CreateTextboxWithCaptionAndAction(this, sizer, BORDER_RIGHT, "Right Border", refresh_action, wxTE_PROCESS_ENTER);
-            CreateTextboxWithCaptionAndAction(this, sizer, BORDER_BOTTOM, "Bottom Border", refresh_action, wxTE_PROCESS_ENTER);
-        });
-
-        HStack(sizer, LeftBasicSizerFlags(), [this, refresh_action](auto& sizer) {
-            CreateTextboxWithCaptionAndAction(this, sizer, OFFSET_X, "Offset X", refresh_action, wxTE_PROCESS_ENTER);
-            CreateTextboxWithCaptionAndAction(this, sizer, OFFSET_Y, "Offset Y", refresh_action, wxTE_PROCESS_ENTER);
-            CreateTextboxWithCaptionAndAction(this, sizer, SIZE_X, "Size X", refresh_action, wxTE_PROCESS_ENTER);
-            CreateTextboxWithCaptionAndAction(this, sizer, SIZE_Y, "Size Y", refresh_action, wxTE_PROCESS_ENTER);
-        });
-
-        HStack(sizer, LeftBasicSizerFlags(), [this, refresh_action](auto& sizer) {
-            HStack(sizer, BasicSizerFlags(), [this, refresh_action](auto& sizer) {
-                CreateText(this, sizer, "Adjust yardline marker");
-                CreateChoiceWithHandler(this, sizer, SHOW_LINE_MARKING, mConfig.Get_yard_text_index(), [this](wxCommandEvent&) {
-                    OnCmdChoice();
-                });
-                CreateTextboxWithAction(this, sizer, SHOW_LINE_VALUE, refresh_action, wxTE_PROCESS_ENTER);
-            });
-
-            HStack(sizer, BasicSizerFlags(), [this](auto& sizer) {
-                CreateText(this, sizer, "Zoom");
-
-                wxArrayString zoomtext;
-                for (auto& i : zoom_amounts) {
-                    wxString buf;
-                    buf.sprintf(wxT("%d%%"), i);
-                    zoomtext.Add(buf);
-                }
-                auto zoomBox = CreateChoiceWithHandler(this, sizer, wxID_ANY, zoomtext, [this](wxCommandEvent& e) {
-                    auto sel = e.GetInt();
-                    auto zoom_amount = zoom_amounts[sel] / 100.0;
-                    static_cast<ShowModeSetupCanvas*>(FindWindow(CANVAS))->SetZoom(zoom_amount);
-                });
-                zoomBox->SetSelection(defaultZoom);
-            });
-        });
-
-        auto modeSetupCanvas = new ShowModeSetupCanvas(mConfig, this, CANVAS);
-        modeSetupCanvas->SetScrollRate(1, 1);
-        sizer->Add(modeSetupCanvas, 1, wxEXPAND);
-
-        modeSetupCanvas->SetMode(CalChart::ShowMode::CreateShowMode(mConfig.Get_ShowModeData(static_cast<CalChart::ShowModes>(mWhichMode)), mYardText));
-        modeSetupCanvas->SetZoom(zoom_amounts[defaultZoom] / 100.0);
-    }));
+                modeSetupCanvas->SetMode(CalChart::ShowMode::CreateShowMode(mConfig.Get_ShowModeData(static_cast<CalChart::ShowModes>(mWhichMode)), mYardText));
+                modeSetupCanvas->SetZoom(zoom_amounts[defaultZoom] / 100.0);
+                return modeSetupCanvas;
+            }() },
+    }
+        .attachTo(this);
 
     TransferDataToWindow();
 }
@@ -156,7 +168,7 @@ bool ShowModeSetup::TransferDataToWindow()
     }
 
     wxTextCtrl* text = (wxTextCtrl*)FindWindow(SHOW_LINE_VALUE);
-    text->SetValue(mYardText[mWhichYardLine]);
+    text->ChangeValue(mYardText[mWhichYardLine]);
     return true;
 }
 

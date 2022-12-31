@@ -25,6 +25,7 @@
 #include <vector>
 #include <wx/docview.h>
 #include <wx/wizard.h>
+#include <wxUI/wxUI.h>
 
 class PointPicker : public wxDialog {
     using super = wxDialog;
@@ -37,7 +38,7 @@ public:
 
 private:
     CalChartDoc const& mShow;
-    wxListBox* mList;
+    wxUI::ListBox::Proxy mList{};
     std::vector<wxString> mCachedLabels;
     CalChart::SelectionList mSelection;
 

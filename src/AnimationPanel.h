@@ -23,6 +23,7 @@
 
 #include <wx/docview.h>
 #include <wx/wx.h>
+#include <wxUI/wxUI.h>
 
 class AnimationView;
 class AnimationCanvas;
@@ -80,15 +81,15 @@ private:
     AnimationView* mView{};
     AnimationCanvas* mCanvas{};
     CCOmniviewCanvas* mOmniCanvas{};
-    wxStaticText* mTempoLabel{};
-    wxSpinCtrl* mTempoCtrl{};
-    wxSlider* mBeatSlider{};
-    wxCheckBox* mSpritesCheckbox{};
-    wxCheckBox* mZoomCheckbox{};
-    wxCheckBox* mCollisionCheckbox{};
-    wxBitmapToggleButton* mPlayPauseButton{};
-    wxButton* mAnimateOmniToggle{};
-    wxButton* mOmniHelpButton{};
+    wxUI::Text::Proxy mTempoLabel{};
+    wxUI::SpinCtrl::Proxy mTempoCtrl{};
+    wxUI::Slider::Proxy mBeatSlider{};
+    wxUI::CheckBox::Proxy mSpritesCheckbox{};
+    wxUI::CheckBox::Proxy mZoomCheckbox{};
+    wxUI::CheckBox::Proxy mCollisionCheckbox{};
+    wxUI::BitmapToggleButton::Proxy mPlayPauseButton{};
+    wxUI::Button::Proxy mAnimateOmniToggle{};
+    wxUI::Button::Proxy mOmniHelpButton{};
     wxTimer* mTimer{};
     unsigned mTempo{};
     bool mTimerOn{};

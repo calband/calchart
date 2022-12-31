@@ -56,6 +56,7 @@ enum class Colors {
     PATHS,
     NUM
 };
+using ColorsIterator = CalChart::Iterator<Colors, Colors::FIELD, Colors::PATHS>;
 
 using ColorInfoDefault_t = std::tuple<std::string const, std::string const, int const>;
 static const std::array<ColorInfoDefault_t, toUType(Colors::NUM)> ColorInfoDefaults = {
@@ -96,6 +97,7 @@ enum class ContinuityCellColors {
     UNSET,
     NUM,
 };
+using ContinuityCellColorsIterator = CalChart::Iterator<ContinuityCellColors, ContinuityCellColors::PROC, ContinuityCellColors::UNSET>;
 
 static const std::array<ColorInfoDefault_t, toUType(ContinuityCellColors::NUM)> ContCellColorInfoDefaults = {
     ColorInfoDefault_t{ "CONT CELL PROCEDURE", "LIME GREEN", 1 },

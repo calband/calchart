@@ -29,6 +29,7 @@
 #include <wx/tglbtn.h>
 #include <wx/toolbar.h>
 #include <wx/wx.h>
+#include <wxUI/wxUI.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
@@ -171,15 +172,21 @@ void AddToSizerRight(wxSizer* sizer, T window)
     sizer->Add(window, RightBasicSizerFlags());
 }
 
-template <typename T, typename Int, typename Brush>
-void CreateAndSetItemBitmap(T* target, Int which, Brush const& brush)
+template <typename Brush>
+auto CreateItemBitmap(Brush const& brush)
 {
     wxBitmap temp_bitmap(GetColorBoxSize());
     wxMemoryDC temp_dc;
     temp_dc.SelectObject(temp_bitmap);
     temp_dc.SetBackground(brush);
     temp_dc.Clear();
-    target->SetItemBitmap(which, temp_bitmap);
+    return temp_bitmap;
+}
+
+template <typename T, typename Int, typename Brush>
+void CreateAndSetItemBitmap(T* target, Int which, Brush const& brush)
+{
+    target->SetItemBitmap(which, CreateItemBitmap(brush));
 }
 
 wxFont CreateFont(int pixelSize, wxFontFamily family = wxFONTFAMILY_SWISS, wxFontStyle style = wxFONTSTYLE_NORMAL, wxFontWeight weight = wxFONTWEIGHT_NORMAL);
@@ -539,6 +546,21 @@ auto CreateTextboxWithCaptionAndAction(wxWindow* parent, wxSizer* sizer, int id,
         textCtrl->Bind((style & wxTE_PROCESS_ENTER) ? wxEVT_TEXT_ENTER : wxEVT_TEXT, f);
         sizer->Add(textCtrl, BasicSizerFlags());
     });
+}
+
+// Give a wxUI::Widgets a vertical label
+template <wxUI::details::Widget W>
+auto VLabelWidget(std::string caption, W widget)
+{
+    return wxUI::Custom{
+        [widget = std::move(widget), caption](wxWindow* window, wxSizer* sizer, wxSizerFlags flags) {
+            wxUI::VSizer{
+                wxUI::Text{ caption },
+                std::move(widget),
+            }
+                .createAndAdd(window, sizer, flags);
+        }
+    };
 }
 
 #pragma GCC diagnostic pop

@@ -26,7 +26,16 @@
 #include "ccvers.h"
 
 #include <wx/dnd.h>
+#include <wx/filename.h>
 #include <wx/html/helpctrl.h>
+#include <wx/icon.h>
+#include <wx/stdpaths.h>
+#include <wxUI/Hyperlink.h>
+#include <wxUI/wxUI.h>
+
+#include "calchart.xbm"
+#include "calchart.xpm"
+#include "platconf.h"
 
 IMPLEMENT_CLASS(CalChartSplash, wxDocParentFrame)
 
@@ -53,6 +62,24 @@ public:
 private:
     wxDocManager* mManager;
 };
+
+auto BitmapWithBandIcon(wxSize const& size)
+{
+
+    wxImage image;
+#if defined(__APPLE__) && (__APPLE__)
+    const static wxString kImageDir = wxT("CalChart.app/Contents/Resources/calchart.png");
+#else
+    const static wxString kImageDir = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR wxT("resources") PATH_SEPARATOR wxT("calchart.png"));
+#endif
+    if (image.LoadFile(kImageDir)) {
+        if (size != wxDefaultSize) {
+            image = image.Scale(size.GetX(), size.GetY(), wxIMAGE_QUALITY_HIGH);
+        }
+        return wxBitmap{ image };
+    }
+    return wxBitmap(BITMAP_NAME(calchart));
+}
 
 CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString const& title)
     : super(manager, frame, wxID_ANY, title)
@@ -82,21 +109,35 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString c
     SetDropTarget(new CalChartSplashDropTarget(manager));
 
     // create a sizer and populate
-    SetSizer(VStack([this](auto sizer) {
-        // add a horizontal bar to make things clear:
-        AddToSizerExpand(sizer, BitmapWithBandIcon(this, GetLogoSize()));
-        AddToSizerBasic(sizer, TextStringWithSize(this, "CalChart " CC_VERSION, GetTitleFontSize()));
-        AddToSizerBasic(sizer, LineWithLength(this, GetLogoLineSize()));
-
-        HStack(sizer, BasicSizerFlags(), [this](auto sizer) {
-            AddToSizerBasic(sizer, LinkStringWithSize(this, "Check for latest.", "https://sourceforge.net/projects/calchart/", GetSubTitleFontSize()));
-            AddToSizerBasic(sizer, TextStringWithSize(this, "        ", GetSubTitleFontSize()));
-            AddToSizerBasic(sizer, LinkStringWithSize(this, "Report an issue.", "https://github.com/calband/calchart/issues/new", GetSubTitleFontSize()));
-        });
-        AddToSizerBasic(sizer, LineWithLength(this, GetLogoLineSize()));
-        AddToSizerBasic(sizer, TextStringWithSize(this, "Authors: Gurk Meeker, Richard Michael Powell", GetSubTitleFontSize()));
-        AddToSizerBasic(sizer, TextStringWithSize(this, "Contributors: Brandon Chinn, Kevin Durand,\nNoah Gilmore, David Strachan-Olson, Allan Yu", GetSubSubTitleFontSize()));
-    }));
+    using namespace wxUI;
+    auto fontTitle = wxFontInfo(GetTitleFontSize()).Family(wxFONTFAMILY_SWISS);
+    auto fontSubTitle = wxFontInfo(GetSubTitleFontSize()).Family(wxFONTFAMILY_SWISS);
+    auto fontSubSubTitle = wxFontInfo(GetSubSubTitleFontSize()).Family(wxFONTFAMILY_SWISS);
+    VSizer{
+        BasicSizerFlags(),
+        Bitmap{ ExpandSizerFlags(), BitmapWithBandIcon(GetLogoSize()) },
+        Text{ "CalChart " CC_VERSION }
+            .withFont(fontTitle),
+        Line{}
+            .withSize({ GetLogoLineSize(), -1 }),
+        HSizer{
+            Hyperlink{ "Check for latest.", "https://sourceforge.net/projects/calchart/" }
+                .withFont(fontSubTitle)
+                .withStyle(wxHL_DEFAULT_STYLE),
+            Text{ "        " }
+                .withFont(fontSubTitle),
+            Hyperlink{ "Report an issue.", "https://github.com/calband/calchart/issues/new" }
+                .withFont(fontSubTitle)
+                .withStyle(wxHL_DEFAULT_STYLE),
+        },
+        Line{}
+            .withSize({ GetLogoLineSize(), -1 }),
+        Text{ "Authors: Gurk Meeker, Richard Michael Powell" }
+            .withFont(fontSubTitle),
+        Text{ "Contributors: Brandon Chinn, Kevin Durand,\nNoah Gilmore, David Strachan-Olson, Allan Yu" }
+            .withFont(fontSubSubTitle),
+    }
+        .attachTo(this);
 
     Show(true);
 }
