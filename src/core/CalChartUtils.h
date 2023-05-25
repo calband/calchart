@@ -24,6 +24,7 @@
 #include <cmath>
 #include <numbers>
 #include <tuple>
+#include <vector>
 
 namespace CalChart {
 
@@ -89,4 +90,14 @@ struct overloaded : Ts... {
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
+template <typename T>
+inline auto append(std::vector<T>& v, T const& other)
+{
+    return v.insert(v.end(), other);
+}
+template <typename T>
+inline auto append(std::vector<T>& v, std::vector<T> const& other)
+{
+    return v.insert(v.end(), other.begin(), other.end());
+}
 }

@@ -217,7 +217,7 @@ PrintShowToPS::PrintShowToPS(
     double PageWidth, double PageHeight, double PageOffsetX, double PageOffsetY,
     double PaperLength, double HeaderSize, double YardsSize, double TextSize,
     double DotRatio, double NumRatio, double PLineRatio, double SLineRatio,
-    double ContRatio, std::function<std::string_view(size_t)> Get_yard_text)
+    double ContRatio, ShowMode::YardLinesInfo_t yardText)
     : mShow(show)
     , mPrintLandscape(PrintLandscape)
     , mPrintDoCont(PrintDoCont)
@@ -238,7 +238,7 @@ PrintShowToPS::PrintShowToPS(
     , mPLineRatio(PLineRatio)
     , mSLineRatio(SLineRatio)
     , mContRatio(ContRatio)
-    , mGet_yard_text(Get_yard_text)
+    , mYardText(std::move(yardText))
 {
     std::tie(width, height, real_width, real_height, field_x, field_y, field_w,
         field_h,
@@ -621,7 +621,7 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const Sheet& sheet,
         buffer << "/lmargin " << (step_size * j) << " def /rmargin "
                << (step_size * j) << " def\n";
         buffer << "/y " << (field_h + (step_size / 2)) << " def\n";
-        std::string yardstr(mGet_yard_text(
+        std::string yardstr(mYardText.at(
             (step_offset + (kYardTextValues - 1) * 4 + CoordUnits2Int(fieldoff.x) + j) / 8));
         buffer << "(" << yardstr << ") dup centerText\n";
         buffer << "/y " << (-(step_size * 2)) << " def\n";

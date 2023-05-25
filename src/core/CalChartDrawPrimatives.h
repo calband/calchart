@@ -42,15 +42,8 @@ struct Color {
         , alpha(alpha)
     {
     }
+    friend auto operator==(Color const&, Color const&) -> bool = default;
 };
-
-constexpr inline auto operator==(Color lhs, Color rhs)
-{
-    return lhs.red == rhs.red
-        && lhs.green == rhs.green
-        && lhs.blue == rhs.blue
-        && lhs.alpha == rhs.alpha;
-}
 
 struct Brush {
     Color color;
@@ -59,11 +52,13 @@ struct Brush {
         Transparent
     };
     Style style = Style::Solid;
+    friend auto operator==(Brush const&, Brush const&) -> bool = default;
 };
 
 struct Pen {
     Color color{};
     int width = 1;
+    friend auto operator==(Pen const&, Pen const&) -> bool = default;
 };
 
 // for the cases where we share a color
@@ -71,13 +66,11 @@ struct BrushAndPen {
     Color color{};
     Brush::Style style = Brush::Style::Solid;
     int width = 1;
+    friend auto operator==(BrushAndPen const&, BrushAndPen const&) -> bool = default;
 };
-inline constexpr auto operator==(BrushAndPen rhs, BrushAndPen lhs)
-{
-    return rhs.color == lhs.color
-        && rhs.style == lhs.style
-        && rhs.width == lhs.width;
-}
+
+inline auto toBrush(BrushAndPen b) { return Brush{ b.color, b.style }; }
+inline auto toPen(BrushAndPen b) { return Pen{ b.color, b.width }; }
 
 struct Font {
     enum class Family {
@@ -97,13 +90,7 @@ struct Font {
     Family family = Family::Swiss;
     Style style = Style::Normal;
     Weight weight = Weight::Normal;
+    friend auto operator==(Font const&, Font const&) -> bool = default;
 };
-inline constexpr auto operator==(Font rhs, Font lhs)
-{
-    return rhs.size == lhs.size
-        && rhs.family == lhs.family
-        && rhs.style == lhs.style
-        && rhs.weight == lhs.weight;
-}
 
 }

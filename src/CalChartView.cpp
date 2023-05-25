@@ -71,7 +71,8 @@ void CalChartView::OnDraw(wxDC* dc)
     if (mShow) {
         // draw the field
         auto origin = mShow->GetShowMode().Offset();
-        CalChartDraw::DrawMode(*dc, mConfig, mShow->GetShowMode(), ShowMode_kFieldView);
+        auto tborder1 = mShow->GetShowMode().Border1();
+        CalChartDraw::DrawCC_DrawCommandList(*dc, CalChartDraw::DrawMode(mConfig, mShow->GetShowMode(), ShowMode_kFieldView) + tborder1);
 
         auto ghostSheet = mShow->GetGhostSheet(GetCurrentSheetNum());
 
@@ -102,7 +103,7 @@ void CalChartView::OnDraw(wxDC* dc)
 
 void CalChartView::DrawUncommitedMovePoints(wxDC& dc, std::map<int, CalChart::Coord> const& positions)
 {
-    CalChartDraw::DrawPhatomPoints(dc, mConfig, *mShow, *mShow->GetCurrentSheet(), positions);
+    CalChartDraw::DrawCC_DrawCommandList(dc, CalChartDraw::CreatePhatomPoints(mConfig, *mShow, *mShow->GetCurrentSheet(), positions));
 }
 
 void CalChartView::OnDrawBackground(wxDC& dc)

@@ -6,23 +6,23 @@
 //
 //
 
-#include "CalChartShow.h"
-#include "CalChartSheet.h"
 #include "CalChartAnimation.h"
 #include "CalChartAnimationCompile.h"
 #include "CalChartAnimationErrors.h"
-#include "print_ps.h"
-#include "CalChartShowMode.h"
-#include "CalChartContinuityToken.h"
-#include "docopt.h"
 #include "CalChartContinuity.h"
+#include "CalChartContinuityToken.h"
+#include "CalChartSheet.h"
+#include "CalChartShow.h"
+#include "CalChartShowMode.h"
+#include "docopt.h"
+#include "print_ps.h"
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <iterator>
 
 static const char USAGE[] =
-R"(calchart_cmd
+    R"(calchart_cmd
 
     Usage:
       calchart_cmd parse [-acdpDU] <shows>...
@@ -52,7 +52,7 @@ void AnimateShow(const char* show)
     Animation a(*p);
     for (auto&& errors : a.GetAnimationErrors()) {
         for (auto&& [key, value] : errors.GetErrors()) {
-            std::cout << "error " << key <<"\n";
+            std::cout << "error " << key << "\n";
         };
     };
 }
@@ -64,7 +64,7 @@ void PrintShow(const char* show)
     Animation a(*p);
     for (auto&& errors : a.GetAnimationErrors()) {
         for (auto&& [key, value] : errors.GetErrors()) {
-            std::cout << "error " << key <<"\n";
+            std::cout << "error " << key << "\n";
         };
     };
     a.GotoSheet(0);
@@ -131,8 +131,7 @@ void DumpContinuityText(std::string const& text)
         for (auto& proc : continuity.GetParsedContinuity()) {
             std::cout << *proc << "\n";
         }
-    }
-    catch (std::runtime_error const& error) {
+    } catch (std::runtime_error const& error) {
         std::cout << "Errors during compile: " << error.what() << "\n";
     }
 }
@@ -192,21 +191,24 @@ void DoContinuityUnitTest(const char* test_cases)
             for (auto& proc : continuity.GetParsedContinuity()) {
                 parsed_continuity << *proc << "\n";
             }
-        }
-        catch (std::runtime_error const& error) {
+        } catch (std::runtime_error const& error) {
             // Supply a generic parse error
-            parse_errors << "Error: "<< error.what()<<"\n";
+            parse_errors << "Error: " << error.what() << "\n";
         }
         auto parsed_cont = parsed_continuity.str();
         if ((e.AnyErrors() && parse_errors.str() != errors) || !std::equal(parsed.begin(), parsed.end(), parsed_cont.begin(), parsed_cont.end())) {
             std::cout << "parse failed!\n";
-            std::cout << "Found text: \n" << text << "\n";
-            std::cout << "Found parse: \n" << parsed << "\n";
-            std::cout << "Parse errors: \n" << errors << "\n";
-            std::cout << "parsed_continuity: \n" << parsed_cont << "\n";
-            std::cout << "has Parse Errors: \n" << parse_errors.str() << "\n";
-        }
-        else {
+            std::cout << "Found text: \n"
+                      << text << "\n";
+            std::cout << "Found parse: \n"
+                      << parsed << "\n";
+            std::cout << "Parse errors: \n"
+                      << errors << "\n";
+            std::cout << "parsed_continuity: \n"
+                      << parsed_cont << "\n";
+            std::cout << "has Parse Errors: \n"
+                      << parse_errors.str() << "\n";
+        } else {
             ++numTestsPassed;
         }
         ++numTestsRun;
@@ -245,17 +247,6 @@ void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet,
     double SLineRatio = 1.2;
     double ContRatio = 0.2;
 
-    auto Get_yard_text = [](size_t offset) {
-        static const std::string yard_text[] = {
-            "N", "M", "L", "K", "J", "I", "H", "G", "F", "E", "D",
-            "C", "B", "A", "-10", "-5", "0", "5", "10", "15", "20", "25",
-            "30", "35", "40", "45", "50", "45", "40", "35", "30", "25", "20",
-            "15", "10", "5", "0", "-5", "-10", "A", "B", "C", "D", "E",
-            "F", "G", "H", "I", "J", "K", "L", "M", "N"
-        };
-        return yard_text[offset];
-    };
-
     auto mode = ShowMode::GetDefaultShowMode();
 
     PrintShowToPS printShowToPS(
@@ -264,7 +255,7 @@ void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet,
             bold_font_str, ital_font_str, bold_ital_font_str } },
         PageWidth, PageHeight, PageOffsetX, PageOffsetY, PaperLength, HeaderSize,
         YardsSize, TextSize, DotRatio, NumRatio, PLineRatio, SLineRatio,
-        ContRatio, Get_yard_text);
+        ContRatio, ShowMode::GetDefaultYardLines());
 
     std::set<size_t> picked;
     for (auto i = 0; i < p->GetNumSheets(); ++i)
@@ -301,9 +292,9 @@ int main(int argc, char* argv[])
 {
     std::map<std::string, docopt::value> args
         = docopt::docopt(USAGE,
-                         { argv + 1, argv + argc },
-                         true,               // show help if requested
-                         version);  // version string
+            { argv + 1, argv + argc },
+            true, // show help if requested
+            version); // version string
 
     int print_flag = args["--print_show"].asBool();
     int animate_flag = args["--animate_show"].asBool();

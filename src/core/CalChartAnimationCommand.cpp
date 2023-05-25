@@ -39,7 +39,7 @@ AnimationCommand::AnimationCommand(unsigned beats)
 
 DrawCommand AnimationCommand::GenCC_DrawCommand(Coord /*pt*/, Coord /*offset*/) const
 {
-    return DrawCommands::Ignore{};
+    return Draw::Ignore{};
 }
 
 bool AnimationCommand::Begin(Coord& pt)
@@ -182,7 +182,7 @@ void AnimationCommandMove::ClipBeats(unsigned beats)
 DrawCommand
 AnimationCommandMove::GenCC_DrawCommand(Coord pt, Coord offset) const
 {
-    return DrawCommands::Line{ pt + offset, pt + mVector + offset };
+    return Draw::Line{ pt + offset, pt + mVector + offset };
 }
 
 nlohmann::json AnimationCommandMove::toOnlineViewerJSON(Coord start) const
@@ -280,7 +280,7 @@ AnimationCommandRotate::GenCC_DrawCommand(Coord /*pt*/, Coord offset) const
     auto x_end = static_cast<CalChart::Coord::units>(RoundToCoordUnits(mOrigin.x + cos(end) * mRadius) + offset.x);
     auto y_end = static_cast<CalChart::Coord::units>(RoundToCoordUnits(mOrigin.y - sin(end) * mRadius) + offset.y);
 
-    return DrawCommands::Arc{
+    return Draw::Arc{
         { x_start, y_start },
         { x_end, y_end },
         mOrigin + offset

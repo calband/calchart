@@ -180,51 +180,41 @@ auto operator==(ShowMode const& lhs, ShowMode const& rhs) -> bool
         && lhs.mYardLines == rhs.mYardLines;
 }
 
-template <typename T>
-inline auto append(std::vector<T>& v, T const& other)
-{
-    return v.insert(v.end(), other);
-}
-template <typename T>
-inline auto append(std::vector<T>& v, std::vector<T> const& other)
-{
-    return v.insert(v.end(), other.begin(), other.end());
-}
-
 static constexpr auto kStep8 = CalChart::Int2CoordUnits(8);
 static constexpr auto kStep4 = CalChart::Int2CoordUnits(4);
 static constexpr auto kStep2 = CalChart::Int2CoordUnits(2);
 static constexpr auto kStep1 = CalChart::Int2CoordUnits(1);
 
-auto ShowMode::DrawField(bool withDottedLine, bool withHashTicks, bool withYardlineLabels, bool largeOffset, CalChart::Font yardlineFont, CalChart::BrushAndPen yardlineBackground) -> std::vector<CalChart::DrawCommand>
+auto CreateFieldLayout(
+    ShowMode const& mode,
+    bool withDetails) -> std::vector<CalChart::DrawCommand>
 {
     auto drawCmds = std::vector<CalChart::DrawCommand>{};
-    append(drawCmds, CalChart::DrawCommands::Field::CreateOutline(FieldSize()));
-    append(drawCmds, CalChart::DrawCommands::Field::CreateVerticalSolidLine(FieldSize(), kStep1));
+    append(drawCmds, CalChart::Draw::Field::CreateOutline(mode.FieldSize()));
+    append(drawCmds, CalChart::Draw::Field::CreateVerticalSolidLine(mode.FieldSize(), kStep1));
 
-    if (withDottedLine) {
-        append(drawCmds, CalChart::DrawCommands::Field::CreateVerticalDottedLine(FieldSize(), kStep1));
-        append(drawCmds, CalChart::DrawCommands::Field::CreateHorizontalDottedLine(FieldSize(), HashW(), HashE(), kStep1));
+    if (withDetails) {
+        append(drawCmds, CalChart::Draw::Field::CreateVerticalDottedLine(mode.FieldSize(), kStep1));
+        append(drawCmds, CalChart::Draw::Field::CreateHorizontalDottedLine(mode.FieldSize(), mode.HashW(), mode.HashE(), kStep1));
     }
 
-    if (HashW() != static_cast<uint16_t>(-1)) {
-        append(drawCmds, CalChart::DrawCommands::Field::CreateHashes(FieldSize(), HashW(), HashE(), kStep1));
-        if (withHashTicks) {
-            append(drawCmds, CalChart::DrawCommands::Field::CreateHashTicks(FieldSize(), HashW(), HashE(), kStep1));
+    if (mode.HashW() != static_cast<uint16_t>(-1)) {
+        append(drawCmds, CalChart::Draw::Field::CreateHashes(mode.FieldSize(), mode.HashW(), mode.HashE(), kStep1));
+        if (withDetails) {
+            append(drawCmds, CalChart::Draw::Field::CreateHashTicks(mode.FieldSize(), mode.HashW(), mode.HashE(), kStep1));
         }
     }
-
-    // Draw labels
-    if (!withYardlineLabels) {
-        return drawCmds;
-    }
-
-    auto yard_text = Get_yard_text();
-    auto yard_text2 = std::vector<std::string>(yard_text.begin() + (-CalChart::CoordUnits2Int((Offset() - Border1()).x) + (CalChart::kYardTextValues - 1) * 4) / 8, yard_text.end());
-    auto labelCmds = CalChart::DrawCommands::Field::CreateYardlineLabels(yard_text2, FieldSize(), largeOffset ? kStep8 : 0, kStep1);
-
-    append(drawCmds, CalChart::DrawCommands::withFont(yardlineFont, CalChart::DrawCommands::withBrushAndPen(yardlineBackground, labelCmds)));
-
     return drawCmds;
 }
+
+auto CreateYardlineLayout(
+    ShowMode const& mode,
+    bool largeOffset) -> std::vector<CalChart::DrawCommand>
+{
+    auto drawCmds = std::vector<CalChart::DrawCommand>{};
+    auto yard_text = mode.Get_yard_text();
+    auto yard_text2 = std::vector<std::string>(yard_text.begin() + (-CalChart::CoordUnits2Int((mode.Offset() - mode.Border1()).x) + (CalChart::kYardTextValues - 1) * 4) / 8, yard_text.end());
+    return CalChart::Draw::Field::CreateYardlineLabels(yard_text2, mode.FieldSize(), largeOffset ? kStep8 : 0, kStep1);
+}
+
 }

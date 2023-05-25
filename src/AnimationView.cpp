@@ -85,7 +85,9 @@ void AnimationView::OnDraw(wxDC& dc, CalChartConfiguration const& config)
         return;
     }
     wxCalChart::setPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD_DETAIL));
-    CalChartDraw::DrawMode(dc, config, mView->GetShowMode(), ShowMode_kAnimation);
+    auto tborder1 = mView->GetShowMode().Border1();
+
+    CalChartDraw::DrawCC_DrawCommandList(dc, CalChartDraw::DrawMode(config, mView->GetShowMode(), ShowMode_kAnimation) + tborder1);
     auto useSprites = config.Get_UseSprites();
     if (useSprites) {
         return OnDrawSprites(dc, config);

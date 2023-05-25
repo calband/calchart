@@ -95,11 +95,11 @@ ColorSetupCanvas::ColorSetupCanvas(CalChartConfiguration& config, wxWindow* pare
 
     auto point_start = offset + field_offset + Coord(Int2CoordUnits(4), Int2CoordUnits(2));
     mPathEnd = point_start + Coord(Int2CoordUnits(0), Int2CoordUnits(2));
-    mPath.emplace_back(DrawCommands::Line{ point_start, mPathEnd });
+    mPath.emplace_back(Draw::Line{ point_start, mPathEnd });
     point_start = mPathEnd;
     mPathEnd += Coord(Int2CoordUnits(18), Int2CoordUnits(0));
-    mPath.emplace_back(DrawCommands::Line{ point_start, mPathEnd });
-    mPath.emplace_back(DrawCommands::Circle{ mPathEnd, static_cast<Coord::units>(CalChart::Float2CoordUnits(mConfig.Get_DotRatio()) / 2) });
+    mPath.emplace_back(Draw::Line{ point_start, mPathEnd });
+    mPath.emplace_back(Draw::Circle{ mPathEnd, static_cast<Coord::units>(CalChart::Float2CoordUnits(mConfig.Get_DotRatio()) / 2) });
 
     auto shape_start = field_offset + Coord(Int2CoordUnits(18), Int2CoordUnits(-2));
     auto shape_end = shape_start + Coord(Int2CoordUnits(4), Int2CoordUnits(4));
@@ -119,7 +119,8 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent&)
     dc.Clear();
 
     // Draw the field
-    CalChartDraw::DrawMode(dc, mConfig, mMode, ShowMode_kFieldView);
+    auto tborder1 = mMode.Border1();
+    CalChartDraw::DrawCC_DrawCommandList(dc, CalChartDraw::DrawMode(mConfig, mMode, ShowMode_kFieldView) + tborder1);
 
     auto sheet = static_cast<CalChart::Show const&>(*mShow).GetCurrentSheet();
     auto nextSheet = sheet + 1;

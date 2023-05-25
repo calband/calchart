@@ -409,9 +409,7 @@ int CalChartDoc::PrintToPS(std::ostream& buffer, bool overview,
         config_.Get_YardsSize(), config_.Get_TextSize(), config_.Get_DotRatio(),
         config_.Get_NumRatio(), config_.Get_PLineRatio(),
         config_.Get_SLineRatio(), config_.Get_ContRatio(),
-        [this](size_t which) {
-            return this->GetShowMode().Get_yard_text()[which];
-        });
+        GetShowMode().Get_yard_text());
     return printShowToPS(buffer, isPicked, GetTitle().ToStdString());
 }
 

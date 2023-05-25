@@ -20,6 +20,7 @@ add_executable(CalChartTests
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartPointTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartSheetTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartShapesTests.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/CalChartShowModeTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartShowTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartTextTests.cpp
