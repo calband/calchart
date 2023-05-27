@@ -197,6 +197,7 @@ namespace Draw {
     };
     inline auto operator+(OverrideFont const& lhs, Coord rhs) -> OverrideFont;
     inline auto operator+(Coord lhs, OverrideFont const& rhs) -> OverrideFont;
+    inline auto operator==(OverrideFont const& lhs, OverrideFont const& rhs) -> bool;
 
     struct OverrideBrush {
         std::optional<Brush> brush;
@@ -204,6 +205,7 @@ namespace Draw {
     };
     inline auto operator+(OverrideBrush const& lhs, Coord rhs) -> OverrideBrush;
     inline auto operator+(Coord lhs, OverrideBrush const& rhs) -> OverrideBrush;
+    inline auto operator==(OverrideBrush const& lhs, OverrideBrush const& rhs) -> bool;
 
     struct OverridePen {
         std::optional<Pen> pen;
@@ -211,6 +213,7 @@ namespace Draw {
     };
     inline auto operator+(OverridePen const& lhs, Coord rhs) -> OverridePen;
     inline auto operator+(Coord lhs, OverridePen const& rhs) -> OverridePen;
+    inline auto operator==(OverridePen const& lhs, OverridePen const& rhs) -> bool;
 
     struct OverrideBrushAndPen {
         std::optional<BrushAndPen> brushAndPen;
@@ -218,6 +221,7 @@ namespace Draw {
     };
     inline auto operator+(OverrideBrushAndPen const& lhs, Coord rhs) -> OverrideBrushAndPen;
     inline auto operator+(Coord lhs, OverrideBrushAndPen const& rhs) -> OverrideBrushAndPen;
+    inline auto operator==(OverrideBrushAndPen const& lhs, OverrideBrushAndPen const& rhs) -> bool;
 
     struct OverrideTextForeground {
         std::optional<BrushAndPen> brushAndPen;
@@ -225,28 +229,29 @@ namespace Draw {
     };
     inline auto operator+(OverrideTextForeground const& lhs, Coord rhs) -> OverrideTextForeground;
     inline auto operator+(Coord lhs, OverrideTextForeground const& rhs) -> OverrideTextForeground;
+    inline auto operator==(OverrideTextForeground const& lhs, OverrideTextForeground const& rhs) -> bool;
 
-    constexpr inline auto operator==(OverrideFont const& lhs, OverrideFont const& rhs)
+    inline auto operator==(OverrideFont const& lhs, OverrideFont const& rhs) -> bool
     {
         return lhs.font == rhs.font
             && lhs.commands == rhs.commands;
     }
-    constexpr inline auto operator==(OverrideBrush const& lhs, OverrideBrush const& rhs)
+    inline auto operator==(OverrideBrush const& lhs, OverrideBrush const& rhs) -> bool
     {
         return lhs.brush == rhs.brush
             && lhs.commands == rhs.commands;
     }
-    constexpr inline auto operator==(OverridePen const& lhs, OverridePen const& rhs)
+    inline auto operator==(OverridePen const& lhs, OverridePen const& rhs) -> bool
     {
         return lhs.pen == rhs.pen
             && lhs.commands == rhs.commands;
     }
-    constexpr inline auto operator==(OverrideBrushAndPen const& lhs, OverrideBrushAndPen const& rhs)
+    inline auto operator==(OverrideBrushAndPen const& lhs, OverrideBrushAndPen const& rhs) -> bool
     {
         return lhs.brushAndPen == rhs.brushAndPen
             && lhs.commands == rhs.commands;
     }
-    constexpr inline auto operator==(OverrideTextForeground const& lhs, OverrideTextForeground const& rhs)
+    inline auto operator==(OverrideTextForeground const& lhs, OverrideTextForeground const& rhs) -> bool
     {
         return lhs.brushAndPen == rhs.brushAndPen
             && lhs.commands == rhs.commands;

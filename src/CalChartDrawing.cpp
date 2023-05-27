@@ -615,7 +615,7 @@ auto CreatePhatomPoints(
     };
 }
 
-namespace {
+namespace details {
     template <class>
     inline constexpr bool always_false_v = false;
 }
@@ -726,7 +726,7 @@ void DrawCC_DrawCommandList(wxDC& dc, CalChart::DrawCommand const& cmd)
             wxCalChart::setTextForeground(dc, *c.brushAndPen);
             DrawCC_DrawCommandList(dc, c.commands);
         } else {
-            static_assert(always_false_v<T>, "non-exhaustive visitor!");
+            static_assert(details::always_false_v<T>, "non-exhaustive visitor!");
         }
     },
         cmd);
