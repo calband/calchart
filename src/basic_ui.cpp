@@ -143,7 +143,7 @@ ScrollZoomWindow::~ScrollZoomWindow() { }
 void ScrollZoomWindow::PrepareDC(wxDC& dc)
 {
     super::PrepareDC(dc);
-    auto screenRatio = static_cast<float>(GetSize().x) / static_cast<float>(mCanvasSize.x);
+    auto screenRatio = static_cast<float>(GetSize().x) / (mCanvasSize.x == 0 ? 1.0f : static_cast<float>(mCanvasSize.x));
     dc.SetUserScale(mZoomFactor * screenRatio, mZoomFactor * screenRatio);
 }
 
