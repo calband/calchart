@@ -181,8 +181,6 @@ auto operator==(ShowMode const& lhs, ShowMode const& rhs) -> bool
 }
 
 static constexpr auto kStep8 = CalChart::Int2CoordUnits(8);
-static constexpr auto kStep4 = CalChart::Int2CoordUnits(4);
-static constexpr auto kStep2 = CalChart::Int2CoordUnits(2);
 static constexpr auto kStep1 = CalChart::Int2CoordUnits(1);
 
 auto CreateFieldLayout(
