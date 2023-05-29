@@ -96,57 +96,57 @@ TEST_CASE("DrawCommand")
 
     SECTION("CreatePoint.plain")
     {
-        TestPointPlain(CalChart::Draw::Point::CreatePoint(
-                           CalChart::Point{ { 1, 2 } }, { 3, 5 }, "A", CalChart::SYMBOL_PLAIN, 1.2, 1.4, 1.6),
+        TestPointPlain(CalChart::Point{ { 0, 0 }, CalChart::SYMBOL_PLAIN }.GetDrawCommands("A", 1.2, 1.4, 1.6)
+                + CalChart::Coord{ 3, 5 },
             false);
     }
 
     SECTION("CreatePoint.sol")
     {
-        TestPointPlain(CalChart::Draw::Point::CreatePoint(
-                           CalChart::Point{ { 1, 2 } }, { 3, 5 }, "A", CalChart::SYMBOL_SOL, 1.2, 1.4, 1.6),
+        TestPointPlain(CalChart::Point{ { 0, 0 }, CalChart::SYMBOL_SOL }.GetDrawCommands("A", 1.2, 1.4, 1.6)
+                + CalChart::Coord{ 3, 5 },
             true);
     }
 
     SECTION("CreatePoint.bksl")
     {
-        TestPointBksl(CalChart::Draw::Point::CreatePoint(
-                          CalChart::Point{ { 1, 2 } }, { 3, 5 }, "A", CalChart::SYMBOL_BKSL, 1.2, 1.4, 1.6),
+        TestPointBksl(CalChart::Point{ { 0, 0 }, CalChart::SYMBOL_BKSL }.GetDrawCommands("A", 1.2, 1.4, 1.6)
+                + CalChart::Coord{ 3, 5 },
             false);
     }
 
     SECTION("CreatePoint.solbksl")
     {
-        TestPointBksl(CalChart::Draw::Point::CreatePoint(
-                          CalChart::Point{ { 1, 2 } }, { 3, 5 }, "A", CalChart::SYMBOL_SOLBKSL, 1.2, 1.4, 1.6),
+        TestPointBksl(CalChart::Point{ { 0, 0 }, CalChart::SYMBOL_SOLBKSL }.GetDrawCommands("A", 1.2, 1.4, 1.6)
+                + CalChart::Coord{ 3, 5 },
             true);
     }
 
     SECTION("CreatePoint.sl")
     {
-        TestPointSl(CalChart::Draw::Point::CreatePoint(
-                        CalChart::Point{ { 1, 2 } }, { 3, 5 }, "A", CalChart::SYMBOL_SL, 1.2, 1.4, 1.6),
+        TestPointSl(CalChart::Point{ { 0, 0 }, CalChart::SYMBOL_SL }.GetDrawCommands("A", 1.2, 1.4, 1.6)
+                + CalChart::Coord{ 3, 5 },
             false);
     }
 
     SECTION("CreatePoint.solsl")
     {
-        TestPointSl(CalChart::Draw::Point::CreatePoint(
-                        CalChart::Point{ { 1, 2 } }, { 3, 5 }, "A", CalChart::SYMBOL_SOLSL, 1.2, 1.4, 1.6),
+        TestPointSl(CalChart::Point{ { 0, 0 }, CalChart::SYMBOL_SOLSL }.GetDrawCommands("A", 1.2, 1.4, 1.6)
+                + CalChart::Coord{ 3, 5 },
             true);
     }
 
     SECTION("CreatePoint.x")
     {
-        TestPointX(CalChart::Draw::Point::CreatePoint(
-                       CalChart::Point{ { 1, 2 } }, { 3, 5 }, "A", CalChart::SYMBOL_X, 1.2, 1.4, 1.6),
+        TestPointX(CalChart::Point{ { 0, 0 }, CalChart::SYMBOL_X }.GetDrawCommands("A", 1.2, 1.4, 1.6)
+                + CalChart::Coord{ 3, 5 },
             false);
     }
 
     SECTION("CreatePoint.solx")
     {
-        TestPointX(CalChart::Draw::Point::CreatePoint(
-                       CalChart::Point{ { 1, 2 } }, { 3, 5 }, "A", CalChart::SYMBOL_SOLX, 1.2, 1.4, 1.6),
+        TestPointX(CalChart::Point{ { 0, 0 }, CalChart::SYMBOL_SOLX }.GetDrawCommands("A", 1.2, 1.4, 1.6)
+                + CalChart::Coord{ 3, 5 },
             true);
     }
 
@@ -295,8 +295,26 @@ TEST_CASE("DrawCommand")
 
     SECTION("CreateOutlineWithOffset")
     {
-        auto cmds = CalChart::Draw::Field::CreateOutline({ 16, 5 }) + CalChart::Coord{ 1, 2 };
-        TestCreateOutline(cmds);
+        TestCreateOutline(CalChart::Draw::Field::CreateOutline({ 16, 5 }) + CalChart::Coord{ 1, 2 });
+        TestCreateOutline(CalChart::Coord{ 1, 2 } + CalChart::Draw::Field::CreateOutline({ 16, 5 }));
+        TestCreateOutline(CalChart::Draw::Field::CreateOutline({ 16, 5 }) - CalChart::Coord{ 1, 2 } + CalChart::Coord{ 2, 4 });
+    }
+
+    SECTION("TestCoordMinusVector")
+    {
+        auto drawLines = std::vector<CalChart::DrawCommand>{
+            CalChart::Draw::Line{ CalChart::Coord(0, 0), CalChart::Coord(10, 0) },
+            CalChart::Draw::Line{ CalChart::Coord(3, 3), CalChart::Coord(1, 1) },
+        };
+        auto coord = CalChart::Coord{ 5, 5 };
+        auto cmds = coord - drawLines;
+        CHECK(cmds.size() == 2);
+        auto uut = std::get<CalChart::Draw::Line>(cmds[0]);
+        CHECK(uut.c1 == CalChart::Coord{ 5, 5 });
+        CHECK(uut.c2 == CalChart::Coord{ -5, 5 });
+        uut = std::get<CalChart::Draw::Line>(cmds[1]);
+        CHECK(uut.c1 == CalChart::Coord{ 2, 2 });
+        CHECK(uut.c2 == CalChart::Coord{ 4, 4 });
     }
 }
 

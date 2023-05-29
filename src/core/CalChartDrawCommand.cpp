@@ -27,62 +27,6 @@
 
 namespace CalChart::Draw {
 
-namespace Point {
-
-    auto CreatePoint(CalChart::Point const& point, CalChart::Coord const& pos, std::string const& label, CalChart::SYMBOL_TYPE symbol, double dotRatio, double pLineRatio, double sLineRatio) -> std::vector<CalChart::DrawCommand>
-    {
-        auto filled = [](auto symbol) {
-            switch (symbol) {
-            case CalChart::SYMBOL_SOL:
-            case CalChart::SYMBOL_SOLBKSL:
-            case CalChart::SYMBOL_SOLSL:
-            case CalChart::SYMBOL_SOLX:
-                return true;
-                break;
-            default:
-                return false;
-            }
-        }(symbol);
-
-        auto const circ_r = CalChart::Float2CoordUnits(dotRatio) / 2.0;
-        auto const plineoff = circ_r * pLineRatio;
-        auto const slineoff = circ_r * sLineRatio;
-
-        auto drawCmds = std::vector<CalChart::DrawCommand>{};
-        drawCmds.push_back(CalChart::Draw::Circle(pos, CalChart::Float2CoordUnits(dotRatio) / 2.0, filled));
-
-        switch (symbol) {
-        case CalChart::SYMBOL_SL:
-        case CalChart::SYMBOL_X: {
-            drawCmds.push_back(CalChart::Draw::Line(pos.x - plineoff, pos.y + plineoff, pos.x + plineoff, pos.y - plineoff));
-        } break;
-        case CalChart::SYMBOL_SOLSL:
-        case CalChart::SYMBOL_SOLX:
-            drawCmds.push_back(CalChart::Draw::Line(pos.x - slineoff, pos.y + slineoff, pos.x + slineoff, pos.y - slineoff));
-            break;
-        default:
-            break;
-        }
-        switch (symbol) {
-        case CalChart::SYMBOL_BKSL:
-        case CalChart::SYMBOL_X:
-            drawCmds.push_back(CalChart::Draw::Line(pos.x - plineoff, pos.y - plineoff, pos.x + plineoff, pos.y + plineoff));
-            break;
-        case CalChart::SYMBOL_SOLBKSL:
-        case CalChart::SYMBOL_SOLX:
-            drawCmds.push_back(CalChart::Draw::Line(pos.x - slineoff, pos.y - slineoff, pos.x + slineoff, pos.y + slineoff));
-            break;
-        default:
-            break;
-        }
-        if (point.LabelIsVisible()) {
-            auto anchor = CalChart::Draw::Text::TextAnchor::Bottom;
-            anchor = anchor | (point.GetFlip() ? CalChart::Draw::Text::TextAnchor::Left : CalChart::Draw::Text::TextAnchor::Right);
-            drawCmds.push_back(CalChart::Draw::Text(pos - CalChart::Coord(0, circ_r), label, anchor));
-        }
-        return drawCmds;
-    }
-}
 namespace Field {
     // Construct commands for the field outline
     auto CreateOutline(Coord const& fieldsize) -> std::vector<CalChart::DrawCommand>

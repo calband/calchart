@@ -41,6 +41,8 @@ namespace Draw {
     };
     inline constexpr auto operator+([[maybe_unused]] Ignore lhs, [[maybe_unused]] Coord rhs) { return Ignore{}; }
     inline constexpr auto operator+([[maybe_unused]] Coord lhs, [[maybe_unused]] Ignore rhs) { return Ignore{}; }
+    inline constexpr auto operator-([[maybe_unused]] Ignore lhs, [[maybe_unused]] Coord rhs) { return Ignore{}; }
+    inline constexpr auto operator-([[maybe_unused]] Coord lhs, [[maybe_unused]] Ignore rhs) { return Ignore{}; }
 
     struct Line {
         Coord c1{};
@@ -60,7 +62,9 @@ namespace Draw {
         friend auto operator==(Line const&, Line const&) -> bool = default;
     };
     inline constexpr auto operator+(Line lhs, Coord rhs) { return Line{ lhs.c1 + rhs, lhs.c2 + rhs }; }
-    inline constexpr auto operator+(Coord lhs, Line rhs) { return rhs + lhs; }
+    inline constexpr auto operator+(Coord lhs, Line rhs) { return Line{ lhs + rhs.c1, lhs + rhs.c2 }; }
+    inline constexpr auto operator-(Line lhs, Coord rhs) { return Line{ lhs.c1 - rhs, lhs.c2 - rhs }; }
+    inline constexpr auto operator-(Coord lhs, Line rhs) { return Line{ lhs - rhs.c1, lhs - rhs.c2 }; }
 
     struct Arc {
         Coord c1{};
@@ -81,7 +85,9 @@ namespace Draw {
         friend auto operator==(Arc const&, Arc const&) -> bool = default;
     };
     inline constexpr auto operator+(Arc lhs, Coord rhs) { return Arc{ lhs.c1 + rhs, lhs.c2 + rhs, lhs.cc + rhs }; }
-    inline constexpr auto operator+(Coord lhs, Arc rhs) { return rhs + lhs; }
+    inline constexpr auto operator+(Coord lhs, Arc rhs) { return Arc{ lhs + rhs.c1, lhs + rhs.c2, lhs + rhs.cc }; }
+    inline constexpr auto operator-(Arc lhs, Coord rhs) { return Arc{ lhs.c1 - rhs, lhs.c2 - rhs, lhs.cc - rhs }; }
+    inline constexpr auto operator-(Coord lhs, Arc rhs) { return Arc{ lhs - rhs.c1, lhs - rhs.c2, lhs - rhs.cc }; }
 
     struct Ellipse {
         Coord c1{};
@@ -100,7 +106,9 @@ namespace Draw {
         friend auto operator==(Ellipse const&, Ellipse const&) -> bool = default;
     };
     inline constexpr auto operator+(Ellipse lhs, Coord rhs) { return Ellipse{ lhs.c1 + rhs, lhs.c2 + rhs }; }
-    inline constexpr auto operator+(Coord lhs, Ellipse rhs) { return rhs + lhs; }
+    inline constexpr auto operator+(Coord lhs, Ellipse rhs) { return Ellipse{ lhs + rhs.c1, lhs + rhs.c2 }; }
+    inline constexpr auto operator-(Ellipse lhs, Coord rhs) { return Ellipse{ lhs.c1 - rhs, lhs.c2 - rhs }; }
+    inline constexpr auto operator-(Coord lhs, Ellipse rhs) { return Ellipse{ lhs - rhs.c1, lhs - rhs.c2 }; }
 
     struct Circle {
         Coord c1{};
@@ -121,7 +129,9 @@ namespace Draw {
         friend auto operator==(Circle const&, Circle const&) -> bool = default;
     };
     inline constexpr auto operator+(Circle lhs, Coord rhs) { return Circle{ lhs.c1 + rhs, lhs.radius, lhs.filled }; }
-    inline constexpr auto operator+(Coord lhs, Circle rhs) { return rhs + lhs; }
+    inline constexpr auto operator+(Coord lhs, Circle rhs) { return Circle{ lhs + rhs.c1, rhs.radius, rhs.filled }; }
+    inline constexpr auto operator-(Circle lhs, Coord rhs) { return Circle{ lhs.c1 - rhs, lhs.radius, lhs.filled }; }
+    inline constexpr auto operator-(Coord lhs, Circle rhs) { return Circle{ lhs - rhs.c1, rhs.radius, rhs.filled }; }
 
     struct Text {
         enum class TextAnchor : uint32_t {
@@ -166,7 +176,9 @@ namespace Draw {
         return static_cast<Text::TextAnchor>(toUType(lhs) & toUType(rhs));
     }
     inline auto operator+(Text const& lhs, Coord rhs) { return Text{ lhs.c1 + rhs, lhs.text, lhs.anchor, lhs.withBackground }; }
-    inline auto operator+(Coord lhs, Text const& rhs) { return rhs + lhs; }
+    inline auto operator+(Coord lhs, Text const& rhs) { return Text{ lhs + rhs.c1, rhs.text, rhs.anchor, rhs.withBackground }; }
+    inline auto operator-(Text const& lhs, Coord rhs) { return Text{ lhs.c1 - rhs, lhs.text, lhs.anchor, lhs.withBackground }; }
+    inline auto operator-(Coord lhs, Text const& rhs) { return Text{ lhs - rhs.c1, rhs.text, rhs.anchor, rhs.withBackground }; }
 
     // DeviceDetails: This is the way that we specify the color/font for all the descent commands.
     // These are forward declared because they are composed of DrawCommand instances
@@ -197,6 +209,8 @@ namespace Draw {
     };
     inline auto operator+(OverrideFont const& lhs, Coord rhs) -> OverrideFont;
     inline auto operator+(Coord lhs, OverrideFont const& rhs) -> OverrideFont;
+    inline auto operator-(OverrideFont const& lhs, Coord rhs) -> OverrideFont;
+    inline auto operator-(Coord lhs, OverrideFont const& rhs) -> OverrideFont;
     inline auto operator==(OverrideFont const& lhs, OverrideFont const& rhs) -> bool;
 
     struct OverrideBrush {
@@ -205,6 +219,8 @@ namespace Draw {
     };
     inline auto operator+(OverrideBrush const& lhs, Coord rhs) -> OverrideBrush;
     inline auto operator+(Coord lhs, OverrideBrush const& rhs) -> OverrideBrush;
+    inline auto operator-(OverrideBrush const& lhs, Coord rhs) -> OverrideBrush;
+    inline auto operator-(Coord lhs, OverrideBrush const& rhs) -> OverrideBrush;
     inline auto operator==(OverrideBrush const& lhs, OverrideBrush const& rhs) -> bool;
 
     struct OverridePen {
@@ -213,6 +229,8 @@ namespace Draw {
     };
     inline auto operator+(OverridePen const& lhs, Coord rhs) -> OverridePen;
     inline auto operator+(Coord lhs, OverridePen const& rhs) -> OverridePen;
+    inline auto operator-(OverridePen const& lhs, Coord rhs) -> OverridePen;
+    inline auto operator-(Coord lhs, OverridePen const& rhs) -> OverridePen;
     inline auto operator==(OverridePen const& lhs, OverridePen const& rhs) -> bool;
 
     struct OverrideBrushAndPen {
@@ -221,6 +239,8 @@ namespace Draw {
     };
     inline auto operator+(OverrideBrushAndPen const& lhs, Coord rhs) -> OverrideBrushAndPen;
     inline auto operator+(Coord lhs, OverrideBrushAndPen const& rhs) -> OverrideBrushAndPen;
+    inline auto operator-(OverrideBrushAndPen const& lhs, Coord rhs) -> OverrideBrushAndPen;
+    inline auto operator-(Coord lhs, OverrideBrushAndPen const& rhs) -> OverrideBrushAndPen;
     inline auto operator==(OverrideBrushAndPen const& lhs, OverrideBrushAndPen const& rhs) -> bool;
 
     struct OverrideTextForeground {
@@ -229,6 +249,8 @@ namespace Draw {
     };
     inline auto operator+(OverrideTextForeground const& lhs, Coord rhs) -> OverrideTextForeground;
     inline auto operator+(Coord lhs, OverrideTextForeground const& rhs) -> OverrideTextForeground;
+    inline auto operator-(OverrideTextForeground const& lhs, Coord rhs) -> OverrideTextForeground;
+    inline auto operator-(Coord lhs, OverrideTextForeground const& rhs) -> OverrideTextForeground;
     inline auto operator==(OverrideTextForeground const& lhs, OverrideTextForeground const& rhs) -> bool;
 
     inline auto operator==(OverrideFont const& lhs, OverrideFont const& rhs) -> bool
@@ -264,26 +286,77 @@ namespace Draw {
                           },
             lhs);
     }
+    inline auto operator+(Coord lhs, CalChart::DrawCommand const& rhs) -> CalChart::DrawCommand
+    {
+        return std::visit(overloaded{
+                              [lhs](auto arg) { return CalChart::DrawCommand{ lhs + arg }; },
+                          },
+            rhs);
+    }
+    inline auto operator-(CalChart::DrawCommand const& lhs, Coord rhs) -> CalChart::DrawCommand
+    {
+        return std::visit(overloaded{
+                              [rhs](auto arg) { return CalChart::DrawCommand{ arg - rhs }; },
+                          },
+            lhs);
+    }
+    inline auto operator-(Coord lhs, CalChart::DrawCommand const& rhs) -> CalChart::DrawCommand
+    {
+        return std::visit(overloaded{
+                              [lhs](auto arg) { return CalChart::DrawCommand{ lhs - arg }; },
+                          },
+            rhs);
+    }
 
     inline auto operator+(std::vector<CalChart::DrawCommand> const& lhs, Coord rhs) -> std::vector<CalChart::DrawCommand>
     {
         std::vector<DrawCommand> result;
         result.reserve(lhs.size());
-        std::transform(lhs.begin(), lhs.end(), std::back_inserter(result), [rhs](auto const& a) { return a + rhs; });
+        std::transform(lhs.begin(), lhs.end(), std::back_inserter(result), [rhs](auto const& arg) { return arg + rhs; });
         return result;
     }
-    inline auto operator+(Coord lhs, std::vector<CalChart::DrawCommand> const& rhs) -> std::vector<CalChart::DrawCommand> { return rhs + lhs; }
+    inline auto operator+(Coord lhs, std::vector<CalChart::DrawCommand> const& rhs) -> std::vector<CalChart::DrawCommand>
+    {
+        std::vector<DrawCommand> result;
+        result.reserve(rhs.size());
+        std::transform(rhs.begin(), rhs.end(), std::back_inserter(result), [lhs](auto const& arg) { return lhs + arg; });
+        return result;
+    }
+    inline auto operator-(std::vector<CalChart::DrawCommand> const& lhs, Coord rhs) -> std::vector<CalChart::DrawCommand>
+    {
+        std::vector<DrawCommand> result;
+        result.reserve(lhs.size());
+        std::transform(lhs.begin(), lhs.end(), std::back_inserter(result), [rhs](auto const& arg) { return arg - rhs; });
+        return result;
+    }
+    inline auto operator-(Coord lhs, std::vector<CalChart::DrawCommand> const& rhs) -> std::vector<CalChart::DrawCommand>
+    {
+        std::vector<DrawCommand> result;
+        result.reserve(rhs.size());
+        std::transform(rhs.begin(), rhs.end(), std::back_inserter(result), [lhs](auto const& arg) { return lhs - arg; });
+        return result;
+    }
 
     inline auto operator+(OverrideFont const& lhs, Coord rhs) -> OverrideFont { return OverrideFont{ lhs.font, lhs.commands + rhs }; }
-    inline auto operator+(Coord lhs, OverrideFont const& rhs) -> OverrideFont { return rhs + lhs; }
+    inline auto operator+(Coord lhs, OverrideFont const& rhs) -> OverrideFont { return OverrideFont{ rhs.font, lhs + rhs.commands }; }
+    inline auto operator-(OverrideFont const& lhs, Coord rhs) -> OverrideFont { return OverrideFont{ lhs.font, lhs.commands - rhs }; }
+    inline auto operator-(Coord lhs, OverrideFont const& rhs) -> OverrideFont { return OverrideFont{ rhs.font, lhs - rhs.commands }; }
     inline auto operator+(OverrideBrush const& lhs, Coord rhs) -> OverrideBrush { return OverrideBrush{ lhs.brush, lhs.commands + rhs }; }
-    inline auto operator+(Coord lhs, OverrideBrush const& rhs) -> OverrideBrush { return rhs + lhs; }
+    inline auto operator+(Coord lhs, OverrideBrush const& rhs) -> OverrideBrush { return OverrideBrush{ rhs.brush, lhs + rhs.commands }; }
+    inline auto operator-(OverrideBrush const& lhs, Coord rhs) -> OverrideBrush { return OverrideBrush{ lhs.brush, lhs.commands - rhs }; }
+    inline auto operator-(Coord lhs, OverrideBrush const& rhs) -> OverrideBrush { return OverrideBrush{ rhs.brush, lhs - rhs.commands }; }
     inline auto operator+(OverridePen const& lhs, Coord rhs) -> OverridePen { return OverridePen{ lhs.pen, lhs.commands + rhs }; }
-    inline auto operator+(Coord lhs, OverridePen const& rhs) -> OverridePen { return rhs + lhs; }
+    inline auto operator+(Coord lhs, OverridePen const& rhs) -> OverridePen { return OverridePen{ rhs.pen, lhs + rhs.commands }; }
+    inline auto operator-(OverridePen const& lhs, Coord rhs) -> OverridePen { return OverridePen{ lhs.pen, lhs.commands - rhs }; }
+    inline auto operator-(Coord lhs, OverridePen const& rhs) -> OverridePen { return OverridePen{ rhs.pen, lhs - rhs.commands }; }
     inline auto operator+(OverrideBrushAndPen const& lhs, Coord rhs) -> OverrideBrushAndPen { return OverrideBrushAndPen{ lhs.brushAndPen, lhs.commands + rhs }; }
-    inline auto operator+(Coord lhs, OverrideBrushAndPen const& rhs) -> OverrideBrushAndPen { return rhs + lhs; }
+    inline auto operator+(Coord lhs, OverrideBrushAndPen const& rhs) -> OverrideBrushAndPen { return OverrideBrushAndPen{ rhs.brushAndPen, lhs + rhs.commands }; }
+    inline auto operator-(OverrideBrushAndPen const& lhs, Coord rhs) -> OverrideBrushAndPen { return OverrideBrushAndPen{ lhs.brushAndPen, lhs.commands - rhs }; }
+    inline auto operator-(Coord lhs, OverrideBrushAndPen const& rhs) -> OverrideBrushAndPen { return OverrideBrushAndPen{ rhs.brushAndPen, lhs - rhs.commands }; }
     inline auto operator+(OverrideTextForeground const& lhs, Coord rhs) -> OverrideTextForeground { return OverrideTextForeground{ lhs.brushAndPen, lhs.commands + rhs }; }
-    inline auto operator+(Coord lhs, OverrideTextForeground const& rhs) -> OverrideTextForeground { return rhs + lhs; }
+    inline auto operator+(Coord lhs, OverrideTextForeground const& rhs) -> OverrideTextForeground { return OverrideTextForeground{ rhs.brushAndPen, lhs + rhs.commands }; }
+    inline auto operator-(OverrideTextForeground const& lhs, Coord rhs) -> OverrideTextForeground { return OverrideTextForeground{ lhs.brushAndPen, lhs.commands - rhs }; }
+    inline auto operator-(Coord lhs, OverrideTextForeground const& rhs) -> OverrideTextForeground { return OverrideTextForeground{ rhs.brushAndPen, lhs - rhs.commands }; }
 
     inline auto withFont(Font font, std::vector<DrawCommand> commands) -> DrawCommand { return OverrideFont{ font, std::move(commands) }; }
     inline auto withFont(Font font, DrawCommand command) { return withFont(font, std::vector<DrawCommand>{ std::move(command) }); }
@@ -305,10 +378,6 @@ namespace Draw {
 namespace Draw {
 
     // What follows are a collection of functions to create different common "images" for CalChart.
-    namespace Point {
-        // Construct commands for drawing a point
-        auto CreatePoint(CalChart::Point const& point, CalChart::Coord const& pos, std::string const& label, CalChart::SYMBOL_TYPE symbol, double dotRatio, double pLineRatio, double sLineRatio) -> std::vector<CalChart::DrawCommand>;
-    }
     namespace Field {
         // Construct commands for the field outline
         auto CreateOutline(CalChart::Coord const& fieldsize) -> std::vector<CalChart::DrawCommand>;
