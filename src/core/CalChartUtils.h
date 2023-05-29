@@ -91,13 +91,24 @@ template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
 template <typename T>
-inline auto append(std::vector<T>& v, T const& other)
+auto append(std::vector<T>& v, T const& other) -> std::vector<T>&
 {
-    return v.insert(v.end(), other);
+    v.insert(v.end(), other);
+    return v;
 }
+
 template <typename T>
-inline auto append(std::vector<T>& v, std::vector<T> const& other)
+auto append(std::vector<T>& v, std::vector<T> const& other) -> std::vector<T>&
 {
-    return v.insert(v.end(), other.begin(), other.end());
+    v.insert(v.end(), other.begin(), other.end());
+    return v;
 }
+
+template <typename T>
+auto append(std::vector<T>&& v, std::vector<T> const& other) -> std::vector<T>&&
+{
+    v.insert(v.end(), other.begin(), other.end());
+    return std::forward<std::vector<T>>(v);
+}
+
 }

@@ -34,6 +34,7 @@
 
 #include "CalChartConstants.h"
 #include "CalChartCoord.h"
+#include "CalChartDrawCommand.h"
 #include "CalChartTypes.h"
 
 #include <array>
@@ -48,20 +49,25 @@ class Point {
 public:
     static constexpr auto kNumRefPoints = 3;
     Point();
-    Point(Coord const& pos);
+    Point(Coord const& pos)
+        : Point(pos, SYMBOL_PLAIN){};
+    Point(Coord const& pos, SYMBOL_TYPE sym);
 
-    Point(Reader);
-    std::vector<uint8_t> Serialize() const;
+    explicit Point(Reader);
+    [[nodiscard]] auto Serialize() const -> std::vector<uint8_t>;
 
-    auto GetFlip() const { return mFlags.test(kPointLabelFlipped); }
+    [[nodiscard]] auto GetFlip() const { return mFlags.test(kPointLabelFlipped); }
     void Flip(bool val = true);
 
-    auto LabelIsVisible() const { return !mFlags.test(kLabelIsInvisible); }
+    [[nodiscard]] auto LabelIsVisible() const { return !mFlags.test(kLabelIsInvisible); }
     void SetLabelVisibility(bool isVisible);
 
     // reference points 0 is the point, refs are [1, kNumRefPoints]
-    Coord GetPos(unsigned ref = 0) const;
+    [[nodiscard]] auto GetPos(unsigned ref = 0) const -> Coord;
     void SetPos(Coord c, unsigned ref = 0);
+
+    [[nodiscard]] auto GetDrawCommands(unsigned ref, std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) const -> std::vector<CalChart::DrawCommand>;
+    [[nodiscard]] auto GetDrawCommands(std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) const { return GetDrawCommands(0, label, dotRatio, pLineRatio, sLineRatio); }
 
 private:
     enum { kPointLabelFlipped,
@@ -73,7 +79,7 @@ private:
     Coord mPos;
     std::array<Coord, kNumRefPoints> mRef;
 
-    auto GetSymbol() const { return mSym; }
+    [[nodiscard]] auto GetSymbol() const { return mSym; }
     void SetSymbol(SYMBOL_TYPE sym);
 
     friend class Sheet;

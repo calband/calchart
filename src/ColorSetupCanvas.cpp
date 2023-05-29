@@ -139,7 +139,7 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent&)
     // draw the path
     CalChartDraw::DrawPath(dc, mConfig, mPath);
 
-    // draw the shap
+    // draw the shape
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
     wxCalChart::setPen(dc, mConfig.Get_CalChartBrushAndPen(CalChart::Colors::SHAPES));
     CalChartDraw::DrawCC_DrawCommandList(dc, mShape);
