@@ -26,6 +26,7 @@
  * These are objects that drawing elements like Color, Brush, Pen, Font for drawing elements of the Show and UI.
  */
 
+#include <cstdint>
 #include <vector>
 
 namespace CalChart {
@@ -53,6 +54,11 @@ struct Brush {
     };
     Style style = Style::Solid;
     friend auto operator==(Brush const&, Brush const&) -> bool = default;
+
+    static auto TransparentBrush() -> Brush
+    {
+        return CalChart::Brush{ Color(), Brush::Style::Transparent };
+    }
 };
 
 struct Pen {
@@ -92,5 +98,4 @@ struct Font {
     Weight weight = Weight::Normal;
     friend auto operator==(Font const&, Font const&) -> bool = default;
 };
-
 }

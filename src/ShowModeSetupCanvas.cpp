@@ -61,7 +61,7 @@ void ShowModeSetupCanvas::OnPaint(wxPaintEvent&)
 
     // Draw the field
     auto tborder1 = mMode.Border1();
-    CalChartDraw::DrawCC_DrawCommandList(dc, CalChartDraw::DrawMode(mConfig, mMode, ShowMode_kFieldView) + tborder1);
+    CalChartDraw::DrawCC_DrawCommandList(dc, CalChartDraw::GenerateModeDrawCommands(mConfig, mMode, ShowMode_kFieldView) + tborder1);
 }
 
 void ShowModeSetupCanvas::SetMode(CalChart::ShowMode const& mode)

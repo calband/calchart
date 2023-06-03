@@ -37,7 +37,7 @@ AnimationCommand::AnimationCommand(unsigned beats)
 {
 }
 
-DrawCommand AnimationCommand::GenCC_DrawCommand(Coord /*pt*/, Coord /*offset*/) const
+DrawCommand AnimationCommand::GenCC_DrawCommand(Coord /*pt*/) const
 {
     return Draw::Ignore{};
 }
@@ -180,9 +180,9 @@ void AnimationCommandMove::ClipBeats(unsigned beats)
 }
 
 DrawCommand
-AnimationCommandMove::GenCC_DrawCommand(Coord pt, Coord offset) const
+AnimationCommandMove::GenCC_DrawCommand(Coord pt) const
 {
-    return Draw::Line{ pt + offset, pt + mVector + offset };
+    return Draw::Line{ pt, pt + mVector };
 }
 
 nlohmann::json AnimationCommandMove::toOnlineViewerJSON(Coord start) const
@@ -271,19 +271,19 @@ void AnimationCommandRotate::ClipBeats(unsigned beats)
 }
 
 DrawCommand
-AnimationCommandRotate::GenCC_DrawCommand(Coord /*pt*/, Coord offset) const
+AnimationCommandRotate::GenCC_DrawCommand(Coord /*pt*/) const
 {
     auto start = (mAngStart < mAngEnd) ? mAngStart : mAngEnd;
     auto end = (mAngStart < mAngEnd) ? mAngEnd : mAngStart;
-    auto x_start = static_cast<CalChart::Coord::units>(RoundToCoordUnits(mOrigin.x + cos(start) * mRadius) + offset.x);
-    auto y_start = static_cast<CalChart::Coord::units>(RoundToCoordUnits(mOrigin.y - sin(start) * mRadius) + offset.y);
-    auto x_end = static_cast<CalChart::Coord::units>(RoundToCoordUnits(mOrigin.x + cos(end) * mRadius) + offset.x);
-    auto y_end = static_cast<CalChart::Coord::units>(RoundToCoordUnits(mOrigin.y - sin(end) * mRadius) + offset.y);
+    auto x_start = static_cast<CalChart::Coord::units>(RoundToCoordUnits(mOrigin.x + cos(start) * mRadius));
+    auto y_start = static_cast<CalChart::Coord::units>(RoundToCoordUnits(mOrigin.y - sin(start) * mRadius));
+    auto x_end = static_cast<CalChart::Coord::units>(RoundToCoordUnits(mOrigin.x + cos(end) * mRadius));
+    auto y_end = static_cast<CalChart::Coord::units>(RoundToCoordUnits(mOrigin.y - sin(end) * mRadius));
 
     return Draw::Arc{
         { x_start, y_start },
         { x_end, y_end },
-        mOrigin + offset
+        mOrigin
     };
 }
 

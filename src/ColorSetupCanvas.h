@@ -51,7 +51,4 @@ private:
     std::unique_ptr<CalChart::Show> mShow;
     CalChart::ShowMode mMode;
     CalChartConfiguration& mConfig;
-    std::vector<CalChart::DrawCommand> mPath;
-    CalChart::Coord mPathEnd{};
-    std::vector<CalChart::DrawCommand> mShape;
 };

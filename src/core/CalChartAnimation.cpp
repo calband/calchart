@@ -330,30 +330,18 @@ AnimationCommand& Animation::GetCommand(unsigned whichSheet, unsigned whichPoint
     return *GetCommands(whichSheet, whichPoint).at(mCurrentCmdIndex.at(whichPoint));
 }
 
-std::vector<DrawCommand>
-Animation::GenPathToDraw(unsigned whichSheet, unsigned point, const Coord& offset, Coord::units endRadius) const
+auto Animation::GenPathToDraw(unsigned whichSheet, unsigned point, Coord::units endRadius) const -> std::vector<DrawCommand>
 {
     auto animation_commands = GetCommands(whichSheet, point);
     auto position = mSheets.at(whichSheet).GetPoints().at(point);
     std::vector<DrawCommand> draw_commands;
     for (auto&& commands : animation_commands) {
-        draw_commands.push_back(commands->GenCC_DrawCommand(position, offset));
+        draw_commands.push_back(commands->GenCC_DrawCommand(position));
         commands->ApplyForward(position);
     }
     // now at this point we should put in a circle for end point
-    draw_commands.push_back(CalChart::Draw::Circle{ position + offset, endRadius, true });
+    draw_commands.push_back(CalChart::Draw::Circle{ position, endRadius, true });
     return draw_commands;
-}
-
-Coord Animation::EndPosition(unsigned whichSheet, unsigned point, const Coord& offset) const
-{
-    auto animation_commands = GetCommands(whichSheet, point);
-    auto position = mSheets.at(whichSheet).GetPoints().at(point);
-    for (auto&& commands : animation_commands) {
-        commands->ApplyForward(position);
-    }
-    position += offset;
-    return position;
 }
 
 std::pair<std::string, std::vector<std::string>>
