@@ -33,11 +33,12 @@ FetchContent_MakeAvailable(nlohmann_json)
 # Have wxWidgets build as static libraries
 set(wxBUILD_SHARED OFF)
 set(wxUSE_STL ON)
+set(wxUSE_STC OFF)
 set(wxUSE_STD_CONTAINERS ON)
 FetchContent_Declare(
   wxWidgets
   GIT_REPOSITORY "https://github.com/wxWidgets/wxWidgets"
-  GIT_TAG 97e99707c5d2271a70cb686720b48dbf34ced496 # v3.2.1
+  GIT_TAG a812fffda3fe686c94e24bff27e8effd96e4de64 # v3.2.2.1
 )
 FetchContent_MakeAvailable(wxWidgets)
 
