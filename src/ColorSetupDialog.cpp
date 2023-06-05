@@ -90,7 +90,7 @@ void ColorSetupDialog::CreateControls()
         NamedHBoxStack(this, sizer, "Palette", [this](auto sizer) {
             sizer->Add(new wxBitmapButton(this, BUTTON_EDIT_PALETTE_COLOR, CreateTempBitmap(mColorPaletteColors.at(mActiveColorPalette))), BasicSizerFlags());
 
-            sizer->Add(new wxTextCtrl(this, PALETTE_NAME, mColorPaletteNames.at(mActiveColorPalette), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER), BasicSizerFlags());
+            sizer->Add(new wxTextCtrl(this, PALETTE_NAME, mColorPaletteNames.at(mActiveColorPalette), wxDefaultPosition, wxSize{ 100, -1 }, wxTE_PROCESS_ENTER), BasicSizerFlags());
 
             CreateButton(this, sizer, BUTTON_EXPORT, "&Export...");
             CreateButton(this, sizer, BUTTON_IMPORT, "&Import...");
