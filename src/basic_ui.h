@@ -472,14 +472,14 @@ inline auto CreateText(wxWindow* parent, wxSizer* sizer, String text)
 
 inline auto CreateTextCtrl(wxWindow* parent, wxSizer* sizer, int id = wxID_ANY, long style = 0)
 {
-    auto textCtrl = new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, style);
+    auto textCtrl = new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition, wxSize{ 100, -1 }, style);
     sizer->Add(textCtrl, 0, wxGROW | wxALL, 5);
     return textCtrl;
 }
 
 inline auto CreateTextCtrl(wxWindow* parent, wxSizer* sizer, wxSizerFlags flags, int id = wxID_ANY, long style = 0)
 {
-    auto textCtrl = new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, style);
+    auto textCtrl = new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition, wxSize{ 100, -1 }, style);
     sizer->Add(textCtrl, flags);
     return textCtrl;
 }
@@ -487,7 +487,7 @@ inline auto CreateTextCtrl(wxWindow* parent, wxSizer* sizer, wxSizerFlags flags,
 template <typename Function>
 auto CreateTextboxWithAction(wxWindow* parent, wxSizer* sizer, int id, Function&& f, long style = 0)
 {
-    auto textCtrl = new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, style);
+    auto textCtrl = new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition, wxSize{ 100, -1 }, style);
     textCtrl->Bind((style & wxTE_PROCESS_ENTER) ? wxEVT_TEXT_ENTER : wxEVT_TEXT, f);
     sizer->Add(textCtrl, BasicSizerFlags());
     return textCtrl;
@@ -526,7 +526,7 @@ auto CreateTextboxWithCaption(wxWindow* parent, wxSizer* sizer, int id, String c
 {
     VStack(sizer, LeftBasicSizerFlags(), [parent, caption, id, style](auto& sizer) {
         sizer->Add(new wxStaticText(parent, wxID_STATIC, caption, wxDefaultPosition, wxDefaultSize, 0), LeftBasicSizerFlags());
-        sizer->Add(new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, style), BasicSizerFlags());
+        sizer->Add(new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition, wxSize{ 100, -1 }, style), BasicSizerFlags());
     });
 }
 
@@ -535,7 +535,7 @@ auto CreateTextboxWithCaptionAndAction(wxWindow* parent, wxSizer* sizer, int id,
 {
     VStack(sizer, LeftBasicSizerFlags(), [parent, caption, id, style, f](auto& sizer) {
         sizer->Add(new wxStaticText(parent, wxID_STATIC, caption, wxDefaultPosition, wxDefaultSize, 0), LeftBasicSizerFlags());
-        auto textCtrl = new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, style);
+        auto textCtrl = new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition, wxSize{ 100, -1 }, style);
         textCtrl->Bind((style & wxTE_PROCESS_ENTER) ? wxEVT_TEXT_ENTER : wxEVT_TEXT, f);
         sizer->Add(textCtrl, BasicSizerFlags());
     });
