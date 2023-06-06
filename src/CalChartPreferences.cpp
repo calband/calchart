@@ -25,6 +25,7 @@
 #include "PreferencesDrawingSetup.h"
 #include "PreferencesGeneralSetup.h"
 #include "PreferencesPSPrintingSetup.h"
+#include "PreferencesPrintContinuitySetup.h"
 #include "PreferencesShowModeSetup.h"
 #include "PreferencesUtils.h"
 
@@ -64,8 +65,9 @@ CalChartPreferences::CalChartPreferences(wxWindow* parent)
         mNotebook->AddPage(GeneralSetup::CreatePreference(mConfig, mNotebook), wxT("General"));
         mNotebook->AddPage(ContCellSetup::CreatePreference(mConfig, mNotebook), wxT("Continuity"));
         mNotebook->AddPage(DrawingSetup::CreatePreference(mConfig, mNotebook), wxT("Drawing"));
-        mNotebook->AddPage(PSPrintingSetUp::CreatePreference(mConfig, mNotebook), wxT("PS Printing"));
         mNotebook->AddPage(ShowModeSetup::CreatePreference(mConfig, mNotebook), wxT("Show Mode Setup"));
+        mNotebook->AddPage(PrintContinuitySetup::CreatePreference(mConfig, mNotebook), wxT("Print Continuity Setup"));
+        mNotebook->AddPage(PSPrintingSetUp::CreatePreference(mConfig, mNotebook), wxT("PS Printing"));
 
         // the buttons on the bottom
         HStack(sizer, BasicSizerFlags(), [this](auto sizer) {

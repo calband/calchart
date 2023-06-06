@@ -335,7 +335,7 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChartConfiguratio
     mFieldThumbnailBrowser = new FieldThumbnailBrowser(this, wxID_ANY, wxDefaultPosition, GetFieldThumbnailBrowserConstructSize());
     mAnimationErrorsPanel = new AnimationErrorsPanel(this);
     mAnimationPanel = new AnimationPanel(this);
-    mPrintContinuityEditor = new PrintContinuityEditor(this);
+    mPrintContinuityEditor = new PrintContinuityEditor(this, mConfig);
 
     // for doing mini and main panels
     mShadowAnimationPanel = new AnimationPanel(this);
