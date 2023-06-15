@@ -24,6 +24,7 @@
 #include "CalChartConfiguration.h"
 
 #include <wx/listbook.h>
+#include <wxUI/wxUI.h>
 
 using namespace CalChart;
 
@@ -49,30 +50,29 @@ IMPLEMENT_CLASS(PSPrintingSetUp, PreferencePage)
 
 void PSPrintingSetUp::CreateControls()
 {
-    SetSizer(VStack([this](auto& sizer) {
-        HStack(sizer, LeftBasicSizerFlags(), [this](auto& sizer) {
-            CreateTextboxWithCaption(this, sizer, HEADFONT, "Header Font:");
-            CreateTextboxWithCaption(this, sizer, MAINFONT, "Main Font:");
-            CreateTextboxWithCaption(this, sizer, NUMBERFONT, "Number Font:");
-            CreateTextboxWithCaption(this, sizer, CONTFONT, "Continuity Font:");
-        });
-
-        HStack(sizer, LeftBasicSizerFlags(), [this](auto& sizer) {
-            CreateTextboxWithCaption(this, sizer, BOLDFONT, "Bold Font:");
-            CreateTextboxWithCaption(this, sizer, ITALFONT, "Italic Font:");
-            CreateTextboxWithCaption(this, sizer, BOLDITALFONT, "Bold Italic Font:");
-        });
-
-        HStack(sizer, LeftBasicSizerFlags(), [this](auto& sizer) {
-            CreateTextboxWithCaption(this, sizer, HEADERSIZE, "Header Size:");
-            CreateTextboxWithCaption(this, sizer, YARDSSIZE, "Yards Side:");
-            CreateTextboxWithCaption(this, sizer, TEXTSIZE, "Text Side:");
-        });
-
-        HStack(sizer, LeftBasicSizerFlags(), [this](auto& sizer) {
-            CreateTextboxWithCaption(this, sizer, CONTRATIO, "Continuity Ratio:");
-        });
-    }));
+    wxUI::VSizer{
+        LeftBasicSizerFlags(),
+        wxUI::HSizer{
+            VLabelWidget("Header Font:", wxUI::TextCtrl{ HEADFONT }.withSize({ 100, -1 })),
+            VLabelWidget("Main Font:", wxUI::TextCtrl{ MAINFONT }.withSize({ 100, -1 })),
+            VLabelWidget("Number Font:", wxUI::TextCtrl{ NUMBERFONT }.withSize({ 100, -1 })),
+            VLabelWidget("Continuity Font:", wxUI::TextCtrl{ CONTFONT }.withSize({ 100, -1 })),
+        },
+        wxUI::HSizer{
+            VLabelWidget("Bold Font:", wxUI::TextCtrl{ BOLDFONT }.withSize({ 100, -1 })),
+            VLabelWidget("Italic Font:", wxUI::TextCtrl{ ITALFONT }.withSize({ 100, -1 })),
+            VLabelWidget("Bold Italic Font:", wxUI::TextCtrl{ BOLDITALFONT }.withSize({ 100, -1 })),
+        },
+        wxUI::HSizer{
+            VLabelWidget("Header Size:", wxUI::TextCtrl{ HEADERSIZE }.withSize({ 100, -1 })),
+            VLabelWidget("Yards Side:", wxUI::TextCtrl{ YARDSSIZE }.withSize({ 100, -1 })),
+            VLabelWidget("Text Side:", wxUI::TextCtrl{ TEXTSIZE }.withSize({ 100, -1 })),
+        },
+        wxUI::HSizer{
+            VLabelWidget("Continuity Ratio:", wxUI::TextCtrl{ CONTRATIO }.withSize({ 100, -1 })),
+        },
+    }
+        .attachTo(this);
 
     TransferDataToWindow();
 }

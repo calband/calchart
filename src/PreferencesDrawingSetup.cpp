@@ -70,73 +70,79 @@ END_EVENT_TABLE()
 
 IMPLEMENT_CLASS(DrawingSetup, PreferencePage)
 
+// private, use the CreatePreference method
+DrawingSetup::DrawingSetup(CalChartConfiguration& config, wxWindow* parent)
+    : super(config, parent, "Drawing Setup")
+{
+    // first read out the defaults:
+    mActiveColorPalette = mConfig.GetActiveColorPalette();
+    mColorPaletteNames = GetColorPaletteNames(mConfig);
+    mColorPaletteColors = GetColorPaletteColors(mConfig);
+    for (auto palette = 0; palette < kNumberPalettes; ++palette) {
+        for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM; i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
+            auto brushAndPen = mConfig.Get_CalChartBrushAndPen(palette, i);
+            mCalChartPens[palette][toUType(i)] = wxCalChart::toPen(brushAndPen);
+            mCalChartBrushes[palette][toUType(i)] = wxCalChart::toBrush(brushAndPen);
+        }
+    }
+}
+
 void DrawingSetup::CreateControls()
 {
-    SetSizer(VStack([this](auto& sizer) {
-        NamedVBoxStack(this, sizer, "Palette Selector", [this](auto& sizer) {
-            auto colorNames = std::vector<wxString>{};
-            std::copy(mColorPaletteNames.cbegin(), mColorPaletteNames.cend(), std::back_inserter(colorNames));
+    auto colorPalettes = std::vector<std::tuple<wxString, wxBitmap>>{};
+    for (auto i = 0; i < kNumberPalettes; ++i) {
+        colorPalettes.push_back({ mColorPaletteNames.at(i), CreateItemBitmap(wxCalChart::toBrush(mColorPaletteColors.at(i))) });
+    }
+    auto colorNames = std::vector<std::tuple<wxString, wxBitmap>>{};
+    for (auto i : CalChart::ColorsIterator{}) {
+        colorNames.push_back({ mConfig.GetColorNames().at(toUType(i)), CreateItemBitmap(wxCalChart::toBrush(mConfig.Get_CalChartBrushAndPen(i))) });
+    }
+    wxUI::VSizer{
+        LeftBasicSizerFlags(),
+        wxUI::VSizer{
+            "Palette Selector",
+            mPaletteNameBox = wxUI::BitmapComboBox(NEW_COLOR_PALETTE, colorPalettes)
+                                  .withSelection(mActiveColorPalette)
+                                  .withSize({ 200, -1 })
+                                  .withStyle(wxCB_READONLY | wxCB_DROPDOWN),
 
-            mPaletteNameBox = new wxBitmapComboBox(this, NEW_COLOR_PALETTE, colorNames.at(0), wxDefaultPosition, wxSize(200, -1), kNumberPalettes, colorNames.data(), wxCB_READONLY | wxCB_DROPDOWN);
-            sizer->Add(mPaletteNameBox, LeftBasicSizerFlags());
+            wxUI::HSizer{
+                wxUI::Button("&Edit Color")
+                    .bind([this] { OnCmdChangePaletteColor(); }),
+                wxUI::Button("&Edit Name")
+                    .bind([this] { OnCmdChangePaletteName(); }),
+            },
+        },
+        wxUI::VSizer{
+            "Color settings",
+            wxUI::HSizer{
+                mNameBox = wxUI::BitmapComboBox(NEW_COLOR_CHOICE, colorNames)
+                               .withSelection(0)
+                               .withSize({ 200, -1 })
+                               .withStyle(wxCB_READONLY | wxCB_DROPDOWN),
+                mSpin = wxUI::SpinCtrl(SPIN_WIDTH, std::pair{ 1, 10 }, mCalChartPens[mActiveColorPalette][0].GetWidth())
+                            .withStyle(wxSP_ARROW_KEYS),
+            },
 
-            for (auto i = 0; i < kNumberPalettes; ++i) {
-                CreateAndSetItemBitmap(mPaletteNameBox, i, wxCalChart::toBrush(mColorPaletteColors.at(i)));
-            }
-            mPaletteNameBox->SetSelection(mActiveColorPalette);
-
-            HStack(sizer, LeftBasicSizerFlags(), [this](auto& sizer) {
-                CreateButtonWithHandler(this, sizer, BasicSizerFlags(), "&Edit Color", [this]() {
-                    OnCmdChangePaletteColor();
-                });
-                CreateButtonWithHandler(this, sizer, BasicSizerFlags(), "&Edit Name", [this]() {
-                    OnCmdChangePaletteName();
-                });
-            });
-        });
-
-        NamedVBoxStack(this, sizer, "Color settings", [this](auto& sizer) {
-            HStack(sizer, LeftBasicSizerFlags(), [this](auto& sizer) {
-                auto colorNamesRaw = mConfig.GetColorNames();
-                auto colorNames = std::vector<wxString>{};
-                std::copy(colorNamesRaw.cbegin(), colorNamesRaw.cend(), std::back_inserter(colorNames));
-
-                mNameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, colorNames.at(0), wxDefaultPosition, wxDefaultSize, colorNames.size(), colorNames.data(), wxCB_READONLY | wxCB_DROPDOWN);
-                sizer->Add(mNameBox, BasicSizerFlags());
-
-                for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM; i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
-                    CreateAndSetItemBitmap(mNameBox, toUType(i), wxCalChart::toBrush(mConfig.Get_CalChartBrushAndPen(i)));
-                }
-                mNameBox->SetSelection(0);
-
-                spin = new wxSpinCtrl(this, SPIN_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10, mCalChartPens[mActiveColorPalette][mNameBox->GetSelection()].GetWidth());
-                spin->SetValue(mCalChartPens[mActiveColorPalette][mNameBox->GetSelection()].GetWidth());
-                sizer->Add(spin, BasicSizerFlags());
-            });
-
-            HStack(sizer, LeftBasicSizerFlags(), [this](auto& sizer) {
-                CreateButtonWithHandler(this, sizer, BasicSizerFlags(), "&Change Color", [this]() {
-                    OnCmdSelectColors();
-                });
-                CreateButtonWithHandler(this, sizer, BasicSizerFlags(), "&Reset Color", [this]() {
-                    OnCmdResetColors();
-                });
-            });
-        });
-
-        NamedHBoxStack(this, sizer, "ratios", [this](auto& sizer) {
-            CreateTextboxWithCaption(this, sizer, DOTRATIO, wxT("Dot Ratio:"), wxTE_PROCESS_ENTER);
-            CreateTextboxWithCaption(this, sizer, NUMRATIO, wxT("Num Ratio:"), wxTE_PROCESS_ENTER);
-            CreateTextboxWithCaption(this, sizer, PLINERATIO, wxT("P-Line Ratio:"), wxTE_PROCESS_ENTER);
-            CreateTextboxWithCaption(this, sizer, SLINERATIO, wxT("S-Line Ratio:"), wxTE_PROCESS_ENTER);
-
-            CreateTextboxWithCaption(this, sizer, SPRITESCALE, wxT("Sprite Scale:"), wxTE_PROCESS_ENTER);
-            CreateTextboxWithCaption(this, sizer, SPRITEHEIGHT, wxT("Sprite Height:"), wxTE_PROCESS_ENTER);
-        });
-
-        auto prefCanvas = new ColorSetupCanvas(mConfig, this);
-        sizer->Add(prefCanvas, 1, wxEXPAND);
-    }));
+            wxUI::HSizer{
+                wxUI::Button("&Change Color")
+                    .bind([this] { OnCmdSelectColors(); }),
+                wxUI::Button("&Reset Name")
+                    .bind([this] { OnCmdResetColors(); }),
+            },
+        },
+        wxUI::HSizer{
+            "ratios",
+            VLabelWidget("Dot Ratio:", wxUI::TextCtrl{ DOTRATIO }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER)),
+            VLabelWidget("Num Ratio:", wxUI::TextCtrl{ NUMRATIO }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER)),
+            VLabelWidget("P-Line Ratio:", wxUI::TextCtrl{ PLINERATIO }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER)),
+            VLabelWidget("S-Line Ratio:", wxUI::TextCtrl{ SLINERATIO }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER)),
+            VLabelWidget("Sprite Scale:", wxUI::TextCtrl{ SPRITESCALE }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER)),
+            VLabelWidget("Sprite Height:", wxUI::TextCtrl{ SPRITEHEIGHT }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER)),
+        },
+        wxUI::Generic{ ExpandSizerFlags(), new ColorSetupCanvas(mConfig, this) },
+    }
+        .attachTo(this);
 
     TransferDataToWindow();
 }
@@ -167,17 +173,17 @@ void DrawingSetup::InitFromConfig()
 bool DrawingSetup::TransferDataToWindow()
 {
     for (auto i = 0; i < kNumberPalettes; ++i) {
-        CreateAndSetItemBitmap(mPaletteNameBox, i, wxCalChart::toBrush(mColorPaletteColors.at(i)));
+        CreateAndSetItemBitmap(mPaletteNameBox.control(), i, wxCalChart::toBrush(mColorPaletteColors.at(i)));
     }
     for (auto i = 0; i < kNumberPalettes; ++i) {
-        mPaletteNameBox->SetString(i, mColorPaletteNames.at(i));
+        mPaletteNameBox.control()->SetString(i, mColorPaletteNames.at(i));
     }
-    mPaletteNameBox->SetSelection(mActiveColorPalette);
+    mPaletteNameBox.control()->SetSelection(mActiveColorPalette);
 
     for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM; i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
-        CreateAndSetItemBitmap(mNameBox, toUType(i), mCalChartBrushes[mActiveColorPalette][toUType(i)]);
+        CreateAndSetItemBitmap(mNameBox.control(), toUType(i), mCalChartBrushes[mActiveColorPalette][toUType(i)]);
     }
-    spin->SetValue(mCalChartPens[mActiveColorPalette][mNameBox->GetSelection()].GetWidth());
+    *mSpin = mCalChartPens[mActiveColorPalette][static_cast<int>(mNameBox.selection())].GetWidth();
 
     wxString buf;
     wxTextCtrl* text = (wxTextCtrl*)FindWindow(DOTRATIO);
@@ -235,7 +241,7 @@ void DrawingSetup::SetColor(int selection, int width, const wxColour& color)
     mConfig.Set_CalChartBrushAndPen(static_cast<CalChart::Colors>(selection), wxCalChart::toBrushAndPen(color, width));
 
     // update the namebox list
-    CreateAndSetItemBitmap(mNameBox, selection, mCalChartBrushes[mActiveColorPalette][selection]);
+    CreateAndSetItemBitmap(mNameBox.control(), selection, mCalChartBrushes[mActiveColorPalette][selection]);
     Refresh();
 }
 
@@ -246,7 +252,7 @@ void DrawingSetup::SetPaletteColor(int selection, wxColour const& color)
     // this is needed so we draw things out on the page correctly.
     mConfig.SetColorPaletteColor(selection, mColorPaletteColors.at(selection));
 
-    CreateAndSetItemBitmap(mPaletteNameBox, selection, wxCalChart::toBrush(mColorPaletteColors.at(selection)));
+    CreateAndSetItemBitmap(mPaletteNameBox.control(), selection, wxCalChart::toBrush(mColorPaletteColors.at(selection)));
     Refresh();
 }
 
@@ -257,13 +263,13 @@ void DrawingSetup::SetPaletteName(int selection, wxString const& name)
     // this is needed so we draw things out on the page correctly.
     mConfig.SetColorPaletteName(selection, name);
 
-    mPaletteNameBox->SetString(selection, mColorPaletteNames.at(selection));
+    mPaletteNameBox.control()->SetString(selection, mColorPaletteNames.at(selection));
     Refresh();
 }
 
 void DrawingSetup::OnCmdSelectColors()
 {
-    int selection = mNameBox->GetSelection();
+    int selection = mNameBox.selection();
     wxColourData data;
     data.SetChooseFull(true);
     data.SetColour(mCalChartBrushes[mActiveColorPalette][selection].GetColour());
@@ -278,7 +284,7 @@ void DrawingSetup::OnCmdSelectColors()
 
 void DrawingSetup::OnCmdChangePaletteColor()
 {
-    int selection = mPaletteNameBox->GetSelection();
+    int selection = mPaletteNameBox.selection();
     wxColourData data;
     data.SetChooseFull(true);
     data.SetColour(wxCalChart::toColour(mColorPaletteColors.at(selection)));
@@ -293,8 +299,8 @@ void DrawingSetup::OnCmdChangePaletteColor()
 
 void DrawingSetup::OnCmdChangePaletteName()
 {
-    int selection = mPaletteNameBox->GetSelection();
-    auto v = mPaletteNameBox->GetValue();
+    int selection = mPaletteNameBox.selection();
+    auto v = static_cast<std::string>(*mPaletteNameBox);
     wxTextEntryDialog dialog(this, wxT("Enter name for Palette"), wxT("Enter name for Palette"), v, wxOK | wxCANCEL);
     if (dialog.ShowModal() == wxID_OK) {
         SetPaletteName(selection, dialog.GetValue());
@@ -304,26 +310,26 @@ void DrawingSetup::OnCmdChangePaletteName()
 
 void DrawingSetup::OnCmdSelectWidth(wxSpinEvent& e)
 {
-    int selection = mNameBox->GetSelection();
+    int selection = mNameBox.selection();
     SetColor(selection, e.GetPosition(), mCalChartPens[mActiveColorPalette][selection].GetColour());
 }
 
 void DrawingSetup::OnCmdResetColors()
 {
-    int selection = mNameBox->GetSelection();
+    int selection = mNameBox.selection();
     SetColor(selection, mConfig.GetDefaultPenWidth()[selection], wxColour{ mConfig.GetDefaultColors()[selection] });
     mConfig.Clear_CalChartConfigColor(static_cast<CalChart::Colors>(selection));
 }
 
 void DrawingSetup::OnCmdChooseNewColor(wxCommandEvent&)
 {
-    spin->SetValue(mCalChartPens[mActiveColorPalette][mNameBox->GetSelection()].GetWidth());
+    *mSpin = mCalChartPens[mActiveColorPalette][mNameBox.selection()].GetWidth();
 }
 
 void DrawingSetup::OnCmdChooseNewPalette(wxCommandEvent&)
 {
     // we set the active palette, and now need to refresh everything
-    mActiveColorPalette = mPaletteNameBox->GetSelection();
+    mActiveColorPalette = mPaletteNameBox.selection();
     mConfig.SetActiveColorPalette(mActiveColorPalette);
     TransferDataToWindow();
     Refresh();

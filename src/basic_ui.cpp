@@ -31,6 +31,7 @@
 
 #include "calchart.xbm"
 #include "calchart.xpm"
+#include "platconf.h"
 
 // Set icon to band's insignia
 void SetBandIcon(wxFrame* frame)

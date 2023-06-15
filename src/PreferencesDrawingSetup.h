@@ -26,6 +26,7 @@
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>
 #include <wx/wx.h>
+#include <wxUI/wxUI.h>
 
 class DrawingSetup : public PreferencePage {
     using super = PreferencePage;
@@ -42,10 +43,7 @@ public:
 
 private:
     // private, use the CreatePreference method
-    DrawingSetup(CalChartConfiguration& config, wxWindow* parent)
-        : super(config, parent, "Drawing Setup")
-    {
-    }
+    DrawingSetup(CalChartConfiguration& config, wxWindow* parent);
 
 public:
     ~DrawingSetup() override = default;
@@ -72,9 +70,9 @@ private:
     void SetColor(int selection, int width, const wxColour& color);
     void SetPaletteColor(int selection, const wxColour& color);
     void SetPaletteName(int selection, const wxString& name);
-    wxBitmapComboBox* mNameBox{};
-    wxBitmapComboBox* mPaletteNameBox{};
-    wxSpinCtrl* spin{};
+    wxUI::BitmapComboBox::Proxy mNameBox{};
+    wxUI::BitmapComboBox::Proxy mPaletteNameBox{};
+    wxUI::SpinCtrl::Proxy mSpin{};
 
     int mActiveColorPalette{};
     std::vector<std::string> mColorPaletteNames;

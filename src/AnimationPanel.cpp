@@ -39,6 +39,7 @@
 #include <wx/splitter.h>
 #include <wx/tglbtn.h>
 #include <wx/timer.h>
+#include <wxUI/wxUI.h>
 
 using namespace CalChart;
 
@@ -51,10 +52,12 @@ END_EVENT_TABLE()
 AnimationPanel::AnimationPanel(wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
     : super(parent, winid, pos, size, style, name)
     , mCanvas(new AnimationCanvas(this, wxID_ANY, wxDefaultPosition, wxSize(-1, GetAnimationCanvasMinY())))
+    , mOmniCanvas(new CCOmniviewCanvas(this, CalChartConfiguration::GetGlobalConfig()))
     , mTimer(new wxTimer(this, CALCHART__anim_next_beat_timer))
     , mTempo(120)
     , mTimerOn(false)
     , mInMiniMode(true)
+
 {
     Init();
     CreateControls();
@@ -74,78 +77,69 @@ void AnimationPanel::Init()
 
 void AnimationPanel::CreateControls()
 {
-    // create a sizer and populate
-    SetSizer(VStack([this](auto sizer) {
-        HStack(sizer, [this](auto sizer) {
-            mAnimateOmniToggle = CreateButtonWithHandler(this, sizer, BasicSizerFlags(), "Omni", [this]() {
-                OnCmd_ToggleAnimOmni();
-            });
-            mItemsToHide.push_back(mAnimateOmniToggle);
+    auto tmp = GetTempo();
 
-            mPlayPauseButton = CreateBitmapToggleWithHandler(this, sizer, BasicSizerFlags(), ScaleButtonBitmap(wxBitmap{ BITMAP_NAME(tb_play) }), ScaleButtonBitmap(wxBitmap{ BITMAP_NAME(tb_stop) }), [this]() {
-                OnCmd_PlayButton();
-            });
+    wxUI::VSizer{
+        BasicSizerFlags(),
+        wxUI::HSizer{
+            mAnimateOmniToggle = wxUI::Button{ "Omni" }
+                                     .bind([this] {
+                                         OnCmd_ToggleAnimOmni();
+                                     }),
+            mPlayPauseButton = wxUI::BitmapToggleButton{ ScaleButtonBitmap(wxBitmap{ BITMAP_NAME(tb_play) }), ScaleButtonBitmap(wxBitmap{ BITMAP_NAME(tb_stop) }) }
+                                   .bind([this] {
+                                       OnCmd_PlayButton();
+                                   }),
+            mBeatSlider = wxUI::Slider{ ExpandSizerFlags(), CALCHART__anim_gotobeat, std::pair{ 1, 2 }, 1 }
+                              .withStyle(wxSL_HORIZONTAL | wxSL_LABELS),
+            wxUI::VSizer{
+                mTempoLabel = wxUI::Text{ "Tempo" },
+                mTempoCtrl = wxUI::SpinCtrl{ CALCHART__anim_tempo, std::pair(10, 300), tmp },
+            },
+            wxUI::VSizer{
+                mSpritesCheckbox = wxUI::CheckBox{ "Sprites" }
+                                       .bind([this](wxCommandEvent& event) {
+                                           mCanvas->SetUseSprites(event.IsChecked());
+                                       }),
+                mZoomCheckbox = wxUI::CheckBox{ "Zoom" }
+                                    .bind([this](wxCommandEvent& event) {
+                                        mCanvas->SetZoomOnMarchers(event.IsChecked());
+                                    }),
+            },
+            wxUI::VSizer{
+                mCollisionCheckbox = wxUI::CheckBox{ "Collisions" }
+                                         .bind([this](wxCommandEvent& event) {
+                                             if (mView) {
+                                                 mView->SetDrawCollisionWarning(event.IsChecked());
+                                             }
+                                         }),
+            },
 
-            // Sheet slider (will get set later with UpdatePanel())
-            mBeatSlider = new wxSlider(this, CALCHART__anim_gotobeat, 1, 1, 2, wxDefaultPosition, wxSize(-1, -1), wxSL_HORIZONTAL | wxSL_LABELS);
-            AddToSizerExpand(sizer, mBeatSlider);
+            mOmniHelpButton = wxUI::Button{ wxID_HELP, "&Help" }
+                                  .bind([this]() {
+                                      mOmniCanvas->OnCmd_ShowKeyboardControls();
+                                  }),
+        },
+        wxUI::Generic{ ExpandSizerFlags(), mCanvas },
+        wxUI::Generic{ ExpandSizerFlags(), mOmniCanvas },
+    }
+        .attachTo(this);
 
-            VStack(sizer, [this](auto sizer) {
-                mTempoLabel = CreateText(this, sizer, BasicSizerFlags(), "Tempo");
-                mItemsToHide.push_back(mTempoLabel);
-                // defect 3538572: Callings set may update tempo, cache value before call.
-                auto tmp = GetTempo();
-                mTempoCtrl = new wxSpinCtrl(this, CALCHART__anim_tempo, wxEmptyString, wxDefaultPosition, wxSize(GetAnimationViewTempoSpinnerMinX(), -1));
-                mTempoCtrl->SetRange(10, 300);
-                mTempoCtrl->SetValue(tmp);
-                SetTempo(tmp);
-                AddToSizerBasic(sizer, mTempoCtrl);
-                mItemsToHide.push_back(mTempoCtrl);
-            });
+    mItemsToHide.push_back(mAnimateOmniToggle.control());
+    mItemsToHide.push_back(mOmniHelpButton.control());
+    mItemsToHide.push_back(mSpritesCheckbox.control());
+    mItemsToHide.push_back(mZoomCheckbox.control());
+    mItemsToHide.push_back(mCollisionCheckbox.control());
+    mItemsToHide.push_back(mTempoLabel.control());
+    mItemsToHide.push_back(mTempoCtrl.control());
+    SetTempo(tmp);
+    mCanvas->Show();
+    mOmniCanvas->Hide();
 
-            VStack(sizer, [this](auto sizer) {
-                mSpritesCheckbox = CreateCheckbox(this, sizer, "Sprites", [this](wxCommandEvent& event) {
-                    mCanvas->SetUseSprites(event.IsChecked());
-                });
-                mSpritesCheckbox->SetValue(mCanvas->GetUseSprites());
-                mItemsToHide.push_back(mSpritesCheckbox);
-
-                mZoomCheckbox = CreateCheckbox(this, sizer, "Zoom", [this](wxCommandEvent& event) {
-                    mCanvas->SetZoomOnMarchers(event.IsChecked());
-                });
-                mZoomCheckbox->SetValue(mCanvas->GetZoomOnMarchers());
-                mItemsToHide.push_back(mZoomCheckbox);
-
-                mCollisionCheckbox = CreateCheckbox(this, sizer, "Collisions", [this](wxCommandEvent& event) {
-                    if (mView) {
-                        mView->SetDrawCollisionWarning(event.IsChecked());
-                    }
-                });
-                mItemsToHide.push_back(mCollisionCheckbox);
-            });
-
-            mOmniHelpButton = new wxButton(this, wxID_HELP, "&Help");
-            mOmniHelpButton->Bind(wxEVT_BUTTON, [this](auto const&) {
-                mOmniCanvas->OnCmd_ShowKeyboardControls();
-            });
-            AddToSizerBasic(sizer, mOmniHelpButton);
-            mItemsToHide.push_back(mOmniHelpButton);
-        });
-
-        mOmniCanvas = new CCOmniviewCanvas(this, CalChartConfiguration::GetGlobalConfig());
-
-        AddToSizerExpand(sizer, mCanvas);
-        AddToSizerExpand(sizer, mOmniCanvas);
-
-        // we default to animate view
-        mCanvas->Show();
-        mOmniCanvas->Hide();
-
-        for (auto&& i : mItemsToHide) {
-            i->Show(!mInMiniMode);
-        }
-        SetInMiniMode(mInMiniMode);
-    }));
+    for (auto&& i : mItemsToHide) {
+        i->Show(!mInMiniMode);
+    }
+    SetInMiniMode(mInMiniMode);
 }
 
 void AnimationPanel::SetInMiniMode(bool miniMode)
@@ -155,7 +149,7 @@ void AnimationPanel::SetInMiniMode(bool miniMode)
         i->Show(!mInMiniMode);
     }
     // expand the slider to fill everything!
-    mBeatSlider->SetSizeHints(mInMiniMode ? -1 : GetAnimationViewBeatSliderInNonMinimode(), -1);
+    mBeatSlider.control()->SetSizeHints(mInMiniMode ? -1 : GetAnimationViewBeatSliderInNonMinimode(), -1);
     Layout();
 }
 
@@ -182,20 +176,20 @@ void AnimationPanel::OnCmd_ToggleAnimOmni()
     mShowOmni = !mShowOmni;
     if (mShowOmni) {
         mCanvas->Hide();
-        mSpritesCheckbox->Hide();
-        mZoomCheckbox->Hide();
-        mCollisionCheckbox->Hide();
+        mSpritesCheckbox.control()->Hide();
+        mZoomCheckbox.control()->Hide();
+        mCollisionCheckbox.control()->Hide();
         mOmniCanvas->Show();
-        mOmniHelpButton->Show();
-        mAnimateOmniToggle->SetLabel("Animate");
+        mOmniHelpButton.control()->Show();
+        mAnimateOmniToggle.control()->SetLabel("Animate");
     } else {
         mCanvas->Show();
-        mSpritesCheckbox->Show();
-        mZoomCheckbox->Show();
-        mCollisionCheckbox->Show();
+        mSpritesCheckbox.control()->Show();
+        mZoomCheckbox.control()->Show();
+        mCollisionCheckbox.control()->Show();
         mOmniCanvas->Hide();
-        mOmniHelpButton->Hide();
-        mAnimateOmniToggle->SetLabel("Omni");
+        mOmniHelpButton.control()->Hide();
+        mAnimateOmniToggle.control()->SetLabel("Omni");
     }
     Layout();
     Refresh();
@@ -235,19 +229,22 @@ void AnimationPanel::UpdatePanel()
     auto curr = mView->GetTotalCurrentBeat();
 
     if (num > 0) {
-        mBeatSlider->Enable(true);
-        if (mBeatSlider->GetMax() != num)
-            mBeatSlider->SetValue(0); // So Motif doesn't complain about value
-        mBeatSlider->SetRange(0, num);
-        if (mBeatSlider->GetValue() != curr)
-            mBeatSlider->SetValue(curr);
+        mBeatSlider.control()->Enable(true);
+        if (mBeatSlider.control()->GetMax() != num)
+            *mBeatSlider = 0; // So Motif doesn't complain about value
+        mBeatSlider.control()->SetRange(0, num);
+        if (*mBeatSlider != curr)
+            *mBeatSlider = curr;
     } else {
-        mBeatSlider->Enable(false);
+        mBeatSlider.control()->Enable(false);
     }
-    mPlayPauseButton->SetValue(mTimerOn);
+    *mPlayPauseButton = mTimerOn;
 }
 
-bool AnimationPanel::OnBeat() const { return mBeatSlider->GetValue() & 1; }
+bool AnimationPanel::OnBeat() const
+{
+    return *mBeatSlider & 1;
+}
 
 void AnimationPanel::SetPlayState(bool playState)
 {
@@ -297,5 +294,5 @@ void AnimationPanel::SetView(CalChartView* view)
     mCanvas->SetView(mView);
     mOmniCanvas->SetView(mView);
 
-    mCollisionCheckbox->SetValue(mView->GetDrawCollisionWarning());
+    *mCollisionCheckbox = mView->GetDrawCollisionWarning();
 }

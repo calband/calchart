@@ -22,6 +22,7 @@
 */
 
 #include "PreferencesUtils.h"
+#include <wxUI/wxUI.h>
 
 /// Continuity Cell setup
 /// Handles configurations parameters of Continuity input system
@@ -73,6 +74,6 @@ private:
     void SetColor(int selection, const wxColour& color);
 
     // we can set up the Font, colors, size.
-    wxBitmapComboBox* mNameBox{};
+    wxUI::BitmapComboBox::Proxy mNameBox{};
     std::array<wxBrush, toUType(CalChart::ContinuityCellColors::NUM)> mContCellBrushes{};
 };

@@ -61,70 +61,68 @@ static auto do_cloning(T const& cont)
 
 void ContCellSetup::CreateControls()
 {
-    SetSizer(VStack([this](auto sizer) {
-        NamedVBoxStack(this, sizer, "Color settings", [this](auto& sizer) {
-            HStack(sizer, LeftBasicSizerFlags(), [this](auto& sizer) {
-                auto colorNamesRaw = mConfig.GetContCellColorNames();
-                auto colorNames = std::vector<wxString>{};
-                std::copy(colorNamesRaw.cbegin(), colorNamesRaw.cend(), std::back_inserter(colorNames));
-                mNameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, colorNames.at(0), wxDefaultPosition, wxDefaultSize, colorNames.size(), colorNames.data(), wxCB_READONLY | wxCB_DROPDOWN);
-                sizer->Add(mNameBox, BasicSizerFlags());
+    auto colorNames = std::vector<std::tuple<wxString, wxBitmap>>{};
+    for (auto i : CalChart::ContinuityCellColorsIterator{}) {
+        colorNames.push_back({ mConfig.GetContCellColorNames().at(toUType(i)), CreateItemBitmap(wxCalChart::toBrush(mConfig.Get_ContCellBrushAndPen(i))) });
+    }
+    wxUI::VSizer{
+        LeftBasicSizerFlags(),
+        wxUI::VSizer{
+            "Color settings",
+            mNameBox = wxUI::BitmapComboBox(NEW_COLOR_CHOICE, colorNames)
+                           .withSize({ 200, -1 })
+                           .withStyle(wxCB_READONLY | wxCB_DROPDOWN),
 
-                for (auto i = 0; i < toUType(CalChart::ContinuityCellColors::NUM); ++i) {
-                    CreateAndSetItemBitmap(mNameBox, i, wxCalChart::toBrush(mConfig.Get_ContCellBrushAndPen(static_cast<CalChart::ContinuityCellColors>(i))));
-                }
-                mNameBox->SetSelection(0);
-            });
+            wxUI::HSizer{
+                wxUI::Button("&Change Color")
+                    .bind([this] { OnCmdSelectColors(); }),
+                wxUI::Button("&Reset Color")
+                    .bind([this] { OnCmdResetColors(); }),
+            },
+        },
+        wxUI::HSizer{
+            "Cont Cell settings",
+            wxUI::VSizer{
+                "Long form",
+                wxUI::CheckBox{ "Long form" }
+                    .withValue(mConfig.Get_ContCellLongForm())
+                    .bind([this](wxCommandEvent& e) {
+                        mConfig.Set_ContCellLongForm(e.IsChecked());
+                        Refresh();
+                    }),
+            },
+            wxUI::VSizer{
+                "Font Size",
+                wxUI::SpinCtrl{ SPIN_Font_Size, std::pair{ 1, 30 }, mConfig.Get_ContCellFontSize() }
+                    .withStyle(wxSP_ARROW_KEYS) },
 
-            HStack(sizer, LeftBasicSizerFlags(), [this](auto& sizer) {
-                CreateButtonWithHandler(this, sizer, BasicSizerFlags(), "&Change Color", [this]() {
-                    OnCmdSelectColors();
-                });
-                CreateButtonWithHandler(this, sizer, BasicSizerFlags(), "&Reset Color", [this]() {
-                    OnCmdResetColors();
-                });
-            });
-        });
+            wxUI::VSizer{
+                "Rounding",
+                wxUI::SpinCtrl{ SPIN_Rouding, std::pair{ 1, 10 }, mConfig.Get_ContCellRounding() }
+                    .withStyle(wxSP_ARROW_KEYS) },
+            wxUI::VSizer{
+                "Text Padding",
+                wxUI::SpinCtrl{ SPIN_Text_Padding, std::pair{ 1, 10 }, mConfig.Get_ContCellTextPadding() }
+                    .withStyle(wxSP_ARROW_KEYS) },
+            wxUI::VSizer{
+                "Box Padding",
+                wxUI::SpinCtrl{ SPIN_Box_Padding, std::pair{ 1, 10 }, mConfig.Get_ContCellBoxPadding() }
+                    .withStyle(wxSP_ARROW_KEYS) },
+        },
 
-        NamedHBoxStack(this, sizer, "Cont Cell settings", [this](auto& sizer) {
-            NamedVBoxStack(this, sizer, "Long form", [this](auto& sizer) {
-                auto checkbox = new wxCheckBox(this, wxID_ANY, wxT("Long form"));
-                checkbox->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent& e) {
-                    mConfig.Set_ContCellLongForm(e.IsChecked());
-                    Refresh();
-                });
-                checkbox->SetValue(mConfig.Get_ContCellLongForm());
-                sizer->Add(checkbox, BasicSizerFlags());
-            });
-
-            NamedVBoxStack(this, sizer, "Font Size", [this](auto& sizer) {
-                auto spin = new wxSpinCtrl(this, SPIN_Font_Size, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 30, mConfig.Get_ContCellFontSize());
-                sizer->Add(spin, BasicSizerFlags());
-            });
-
-            NamedVBoxStack(this, sizer, "Rounding", [this](auto& sizer) {
-                auto spin = new wxSpinCtrl(this, SPIN_Rouding, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10, mConfig.Get_ContCellRounding());
-                sizer->Add(spin, BasicSizerFlags());
-            });
-
-            NamedVBoxStack(this, sizer, "Text Padding", [this](auto& sizer) {
-                auto spin = new wxSpinCtrl(this, SPIN_Text_Padding, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10, mConfig.Get_ContCellTextPadding());
-                sizer->Add(spin, BasicSizerFlags());
-            });
-
-            NamedVBoxStack(this, sizer, "Box Padding", [this](auto& sizer) {
-                auto spin = new wxSpinCtrl(this, SPIN_Box_Padding, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10, mConfig.Get_ContCellBoxPadding());
-                sizer->Add(spin, BasicSizerFlags());
-            });
-        });
-
-        auto canvas = new ContinuityBrowserPanel(CalChart::SYMBOL_PLAIN, mConfig, this);
-        sizer->Add(canvas, 1, wxEXPAND);
-        auto basic_cont = CalChart::Continuity{ "ewns np\nX = distfrom(sp r2)\nmt (24-X)w\nmarch gv dist(np) dir(np) w\nmtrm e" };
-        auto clonedOut = do_cloning(basic_cont);
-        clonedOut.emplace_back(std::make_unique<CalChart::Cont::ProcMT>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()));
-        canvas->DoSetContinuity(CalChart::Continuity{ std::move(clonedOut) });
-    }));
+        wxUI::Generic{
+            ExpandSizerFlags(),
+            [this] {
+                auto canvas = new ContinuityBrowserPanel(CalChart::SYMBOL_PLAIN, mConfig, this);
+                auto basic_cont = CalChart::Continuity{ "ewns np\nX = distfrom(sp r2)\nmt (24-X)w\nmarch gv dist(np) dir(np) w\nmtrm e" };
+                auto clonedOut = do_cloning(basic_cont);
+                clonedOut.emplace_back(std::make_unique<CalChart::Cont::ProcMT>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()));
+                canvas->DoSetContinuity(CalChart::Continuity{ std::move(clonedOut) });
+                return canvas;
+            }(),
+        },
+    }
+        .attachTo(this);
 
     TransferDataToWindow();
 }
@@ -196,13 +194,13 @@ void ContCellSetup::SetColor(int selection, const wxColour& color)
     mConfig.Set_ContCellBrushAndPen(static_cast<CalChart::ContinuityCellColors>(selection), wxCalChart::toBrushAndPen(color, 1));
 
     // update the namebox list
-    CreateAndSetItemBitmap(mNameBox, selection, mContCellBrushes[selection]);
+    CreateAndSetItemBitmap(mNameBox.control(), selection, mContCellBrushes[selection]);
     Refresh();
 }
 
 void ContCellSetup::OnCmdSelectColors()
 {
-    auto selection = mNameBox->GetSelection();
+    auto selection = static_cast<int>(mNameBox.selection());
     auto data = wxColourData{};
     data.SetChooseFull(true);
     data.SetColour(mContCellBrushes[selection].GetColour());
@@ -217,7 +215,7 @@ void ContCellSetup::OnCmdSelectColors()
 
 void ContCellSetup::OnCmdResetColors()
 {
-    auto selection = mNameBox->GetSelection();
+    auto selection = static_cast<int>(mNameBox.selection());
     SetColor(selection, wxColour{ mConfig.GetContCellDefaultColors()[selection] });
     mConfig.Clear_ContCellConfigColor(static_cast<CalChart::ContinuityCellColors>(selection));
     Refresh();
