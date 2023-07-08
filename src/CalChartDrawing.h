@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 // Reuse is done where possible.
 //
 // The CalChart module attempts to keep the "how to draw" separated from
-// the "what to draw" -- the CalChart::Draw::Command object contains the
+// the "what to draw" -- the CalChart::Draw::DrawCommand object contains the
 // primatives of what to draw, but the details are done within the wxWidgets
 // part of the code.
 
@@ -64,8 +64,9 @@ void Draw(wxDC& dc, CalChartDoc const& show, CalChart::Sheet const& sheet, int r
 void DrawPoints(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord origin, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, bool primary);
 void DrawGhostSheet(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord origin, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref);
 void DrawCont(wxDC& dc, CalChartConfiguration const& config, CalChart::Textline_list const& print_continuity, wxRect const& bounding, bool landscape);
+
 void DrawForPrinting(wxDC* dc, CalChartConfiguration const& config, CalChartDoc const& show, CalChart::Sheet const& sheet, int ref, bool landscape);
-wxImage GetOmniLinesImage(const CalChartConfiguration& config, CalChart::ShowMode const& mode);
+auto GetOmniLinesImage(const CalChartConfiguration& config, CalChart::ShowMode const& mode) -> wxImage;
 
 auto GeneratePointsDrawCommands(CalChartConfiguration const& config, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, bool primary) -> std::vector<CalChart::Draw::DrawCommand>;
 auto GenerateGhostPointsDrawCommands(CalChartConfiguration const& config, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref) -> std::vector<CalChart::Draw::DrawCommand>;
@@ -81,16 +82,40 @@ void PrintCont(std::ostream& buffer, CalChart::Sheet const& sheet);
 
 namespace wxCalChart::Draw {
 
-// Give an list of commands, apply them to the DeviceContext
-void DrawCommandList(wxDC& dc, CalChart::Draw::DrawCommand const& cmd);
+struct DrawSurface {
+    wxPoint origin{};
+    wxSize size{};
+};
 
+namespace details {
+    void DrawCommand(wxDC& dc, DrawSurface surface, CalChart::Draw::DrawItems const& cmd);
+    void DrawCommand(wxDC& dc, DrawSurface surface, CalChart::Draw::DrawManipulators const& cmd);
+    void DrawCommand(wxDC& dc, DrawSurface surface, CalChart::Draw::DrawStack const& cmd);
+    void DrawCommand(wxDC& dc, DrawSurface surface, CalChart::Draw::DrawCommand const& cmd);
+}
+
+inline void DrawCommandList(wxDC& dc, CalChart::Draw::DrawCommand const& draw_command)
+{
+    auto drawSurface = DrawSurface{ { 0, 0 }, dc.GetSize() };
+    details::DrawCommand(dc, drawSurface, draw_command);
+}
+
+// Give an list of commands, apply them to the DeviceContext
+template <std::ranges::range R>
+    requires std::convertible_to<std::ranges::range_value_t<R>, CalChart::Draw::DrawCommand>
+void DrawCommandList(wxDC& dc, DrawSurface surface, R&& draw_commands)
+{
+    for (auto&& cmd : draw_commands) {
+        details::DrawCommand(dc, surface, cmd);
+    }
+}
+
+// Give an list of commands, apply them to the DeviceContext
 template <std::ranges::range R>
     requires std::convertible_to<std::ranges::range_value_t<R>, CalChart::Draw::DrawCommand>
 void DrawCommandList(wxDC& dc, R&& draw_commands)
 {
-    for (auto&& cmd : draw_commands) {
-        DrawCommandList(dc, cmd);
-    }
+    DrawCommandList(dc, { { 0, 0 }, dc.GetSize() }, std::forward<R>(draw_commands));
 }
 
 }

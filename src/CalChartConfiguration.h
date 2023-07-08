@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -118,6 +118,12 @@ private:                                           \
     DECLARE_CONFIGURATION_FUNCTIONS(PLineRatio, double);
     DECLARE_CONFIGURATION_FUNCTIONS(SLineRatio, double);
     DECLARE_CONFIGURATION_FUNCTIONS(ContRatio, double);
+
+    DECLARE_CONFIGURATION_FUNCTIONS(PrintContUseNewDraw, bool);
+    DECLARE_CONFIGURATION_FUNCTIONS(PrintContDotRatio, double);
+    DECLARE_CONFIGURATION_FUNCTIONS(PrintContPLineRatio, double);
+    DECLARE_CONFIGURATION_FUNCTIONS(PrintContSLineRatio, double);
+    DECLARE_CONFIGURATION_FUNCTIONS(PrintContLinePad, long);
 
     DECLARE_CONFIGURATION_FUNCTIONS(PrintPSModes, long);
     DECLARE_CONFIGURATION_FUNCTIONS(PrintPSLandscape, bool);

@@ -1,3 +1,4 @@
+#include "CalChartPostScript.h"
 #include "CalChartShow.h"
 #include "CalChartShowMode.h"
 #include "print_ps.h"
@@ -660,35 +661,92 @@ void PrintToPS(CalChart::Show const& show, CalChart::ShowMode const& mode, bool 
 
 TEST_CASE("CalChartTestPSPrintDefault")
 {
-    auto empty_show = CalChart::Show::Create(CalChart::ShowMode::GetDefaultShowMode());
-    REQUIRE(empty_show);
-
-    std::regex find_good_part("(.*)CreationDate(.*)Title(.*)", std::regex::extended);
-
+    SECTION("LongTest")
     {
-        std::stringstream output;
-        PrintToPS(*empty_show, Standard_mode, true, true, true, true, output);
-        auto output_str = output.str();
-        std::smatch part_match;
-        std::regex_search(output_str, part_match, find_good_part);
+        auto empty_show = CalChart::Show::Create(CalChart::ShowMode::GetDefaultShowMode());
+        REQUIRE(empty_show);
 
-        std::smatch gold_part_match;
-        std::regex_search(standard_mode_ps_gold, gold_part_match, find_good_part);
+        std::regex find_good_part("(.*)CreationDate(.*)Title(.*)", std::regex::extended);
 
-        REQUIRE(part_match[1] == gold_part_match[1]);
-        REQUIRE(part_match[3] == gold_part_match[3]);
+        {
+            std::stringstream output;
+            PrintToPS(*empty_show, Standard_mode, true, true, true, true, output);
+            auto output_str = output.str();
+            std::smatch part_match;
+            std::regex_search(output_str, part_match, find_good_part);
+
+            std::smatch gold_part_match;
+            std::regex_search(standard_mode_ps_gold, gold_part_match, find_good_part);
+
+            REQUIRE(part_match[1] == gold_part_match[1]);
+            REQUIRE(part_match[3] == gold_part_match[3]);
+        }
+        {
+            std::stringstream output;
+            PrintToPS(*empty_show, Standard_mode, true, true, true, false, output);
+            auto output_str = output.str();
+            std::smatch part_match;
+            std::regex_search(output_str, part_match, find_good_part);
+
+            std::smatch gold_part_match;
+            std::regex_search(standard_mode_ps_no_overview_gold, gold_part_match, find_good_part);
+
+            REQUIRE(part_match[1] == gold_part_match[1]);
+            REQUIRE(part_match[3] == gold_part_match[3]);
+        }
     }
+
+    SECTION("ContinuityTest")
     {
-        std::stringstream output;
-        PrintToPS(*empty_show, Standard_mode, true, true, true, false, output);
-        auto output_str = output.str();
-        std::smatch part_match;
-        std::regex_search(output_str, part_match, find_good_part);
-
-        std::smatch gold_part_match;
-        std::regex_search(standard_mode_ps_no_overview_gold, gold_part_match, find_good_part);
-
-        REQUIRE(part_match[1] == gold_part_match[1]);
-        REQUIRE(part_match[3] == gold_part_match[3]);
+        auto DefaultText = std::vector{
+            std::pair{
+                "~This is a centered line of text\n",
+                "/x lmargin def\n(This is a centered line of text) centerText\n/y y h sub def\n" },
+            std::pair{
+                "Normal \\bsBold \\isBold+Italics \\beItalics \\ieNormal\n",
+                "/x lmargin def\n(Normal ) leftText\n/boldfont findfont 12 scalefont setfont\n(Bold ) leftText\n/bolditalfont findfont 12 scalefont setfont\n(Bold+Italics ) leftText\n/italfont findfont 12 scalefont setfont\n(Italics ) leftText\n/contfont findfont 12 scalefont setfont\n(Normal) leftText\n/y y h sub def\n" },
+            std::pair{
+                "Next line is all tabs with numbers\n",
+                "/x lmargin def\n(Next line is all tabs with numbers) leftText\n/y y h sub def\n" },
+            std::pair{
+                "1\t2\t3\t4\t5\t6\t7\n",
+                "/x lmargin def\n(1) leftText\ntab1 do_tab\n(2) leftText\ntab2 do_tab\n(3) leftText\ntab3 do_tab\n(4) leftText\nspace_over\n(5) leftText\nspace_over\n(6) leftText\nspace_over\n(7) leftText\n/y y h sub def\n" },
+            std::pair{
+                "All the symbols with two tabs\n",
+                "/x lmargin def\n(All the symbols with two tabs) leftText\n/y y h sub def\n" },
+            std::pair{
+                "\t\t\\po:\tplainman\n",
+                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12 scalefont setfont\n(A) leftText\n/contfont findfont 12 scalefont setfont\n(:) leftText\ntab3 do_tab\n(plainman) leftText\n/y y h sub def\n" },
+            std::pair{
+                "\t\t\\pb:\tbackslashman\n",
+                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12 scalefont setfont\n(C) leftText\n/contfont findfont 12 scalefont setfont\n(:) leftText\ntab3 do_tab\n(backslashman) leftText\n/y y h sub def\n" },
+            std::pair{
+                "\t\t\\ps:\tslashman\n",
+                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12 scalefont setfont\n(D) leftText\n/contfont findfont 12 scalefont setfont\n(:) leftText\ntab3 do_tab\n(slashman) leftText\n/y y h sub def\n" },
+            std::pair{
+                "\t\t\\px:\txman\n",
+                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12 scalefont setfont\n(E) leftText\n/contfont findfont 12 scalefont setfont\n(:) leftText\ntab3 do_tab\n(xman) leftText\n/y y h sub def\n" },
+            std::pair{
+                "\t\t\\so:\tsolidman\n",
+                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12 scalefont setfont\n(B) leftText\n/contfont findfont 12 scalefont setfont\n(:) leftText\ntab3 do_tab\n(solidman) leftText\n/y y h sub def\n" },
+            std::pair{
+                "\t\t\\sb:\tsolidbackslashman\n",
+                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12 scalefont setfont\n(F) leftText\n/contfont findfont 12 scalefont setfont\n(:) leftText\ntab3 do_tab\n(solidbackslashman) leftText\n/y y h sub def\n" },
+            std::pair{
+                "\t\t\\ss:\tsolidslashman\n",
+                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12 scalefont setfont\n(G) leftText\n/contfont findfont 12 scalefont setfont\n(:) leftText\ntab3 do_tab\n(solidslashman) leftText\n/y y h sub def\n" },
+            std::pair{
+                "\t\t\\sx:\tsolidxman\n",
+                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12 scalefont setfont\n(H) leftText\n/contfont findfont 12 scalefont setfont\n(:) leftText\ntab3 do_tab\n(solidxman) leftText\n/y y h sub def\n" },
+        };
+        for (auto [text, result] : DefaultText) {
+            auto printCont = CalChart::PrintContinuity("", text);
+            auto textChunks = printCont.GetChunks();
+            std::stringstream buffer;
+            for (auto& text : printCont.GetChunks()) {
+                CalChart::PostScript::GenerateContinuityLine(buffer, text, CalChart::PSFONT::NORM, 12);
+            }
+            CHECK(buffer.str() == result);
+        }
     }
 }

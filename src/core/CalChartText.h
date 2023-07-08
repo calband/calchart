@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2012  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -22,41 +22,59 @@
 */
 
 #include "CalChartConstants.h"
+#include "CalChartDrawCommand.h"
+#include "CalChartPrintContinuityLayout.h"
 
 #include <string>
 #include <vector>
 
 namespace CalChart {
 
-struct Textchunk {
+struct TextChunk {
     std::string text;
     PSFONT font = PSFONT::NORM;
 };
 
+enum class SymbolChunk {
+    Plain,
+    Backslash,
+    Slash,
+    Cross,
+    Solid,
+    SolidBackslash,
+    SolidSlash,
+    SolidCross,
+};
+
+struct TabChunk {
+    friend auto operator==(TabChunk const&, TabChunk const&) -> bool = default;
+};
+
 // helper for comparisions
-static inline bool operator==(Textchunk const& a, Textchunk const& b)
+[[nodiscard]] static inline auto operator==(TextChunk const& a, TextChunk const& b)
 {
     return (a.text == b.text)
         && (a.font == b.font);
 }
 
 struct Textline {
-    std::vector<Textchunk> chunks;
+    std::vector<std::variant<TextChunk, TabChunk, SymbolChunk>> chunks;
     bool center = false;
     bool on_main = true;
     bool on_sheet = true;
 };
 
-Textline ParseTextLine(std::string line);
+[[nodiscard]] auto ParseTextLine(std::string line) -> Textline;
 
 using Textline_list = std::vector<Textline>;
 
 class PrintContinuity {
 public:
-    PrintContinuity(std::string const& number = "", std::string const& data = "");
-    auto GetChunks() const { return mPrintChunks; }
-    auto GetOriginalLine() const { return mOriginalLine; }
-    auto GetPrintNumber() const { return mNumber; }
+    explicit PrintContinuity(std::string const& number = "", std::string const& data = "");
+    [[nodiscard]] auto GetChunks() const { return mPrintChunks; }
+    [[nodiscard]] auto GetOriginalLine() const { return mOriginalLine; }
+    [[nodiscard]] auto GetPrintNumber() const { return mNumber; }
+    [[nodiscard]] auto GetDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>;
 
 private:
     Textline_list mPrintChunks;

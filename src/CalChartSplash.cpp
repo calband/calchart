@@ -3,7 +3,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include "CalChartSplash.h"
 #include "CalChartApp.h"
 #include "CalChartPreferences.h"
+#include "StackDrawPlayground.h"
 #include "basic_ui.h"
 #include "ccvers.h"
 
@@ -87,24 +88,36 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString c
     // Give it an icon
     SetBandIcon(this);
 
-    auto file_menu = new wxMenu;
-    file_menu->Append(wxID_NEW, wxT("&New Show\tCTRL-N"), wxT("Create a new show"));
-    file_menu->Append(wxID_OPEN, wxT("&Open...\tCTRL-O"), wxT("Load a saved show"));
-    file_menu->Append(wxID_PREFERENCES, wxT("&Preferences\tCTRL-,"));
-    file_menu->Append(wxID_EXIT, wxT("&Quit\tCTRL-Q"), wxT("Quit CalChart"));
+    wxUI::MenuBar{
+        wxUI::Menu{
+            "&File",
+            wxUI::Item{ wxID_NEW, "&New Show\tCTRL-N", "Create a new show" },
+            wxUI::Item{ wxID_OPEN, "&Open...\tCTRL-O", "Load a saved show" },
+            wxUI::Item{ wxID_PREFERENCES, "&Preferences\tCTRL-,", [this] {
+                           CalChartPreferences(this).ShowModal();
+                       } },
+            wxUI::Item{ wxID_EXIT, "&Quit\tCTRL-Q", "Quit CalChart" },
+        },
+        wxUI::Menu{
+            "&Debug",
+            wxUI::Item{ "Stack Draw Playground", [this] {
+                           StackDrawPlayground(this).ShowModal();
+                       } },
+        },
+        wxUI::Menu{
+            "&Help",
+            wxUI::Item{ wxID_ABOUT, "&About CalChart...", "Information about the program", [] {
+                           About();
+                       } },
+            wxUI::Item{ wxID_HELP, "&Help on CalChart...\tCTRL-H", "Help on using CalChart ", [] {
+                           Help();
+                       } },
+        }
+    }.attachTo(this);
 
     // A nice touch: a history of files visited. Use this menu.
-    manager->FileHistoryUseMenu(file_menu);
-
-    auto help_menu = new wxMenu;
-    help_menu->Append(wxID_ABOUT, wxT("&About CalChart..."), wxT("Information about the program"));
-    // this comes up as a leak on Mac?
-    help_menu->Append(wxID_HELP, wxT("&Help on CalChart...\tCTRL-H"), wxT("Help on using CalChart"));
-
-    auto menu_bar = new wxMenuBar;
-    menu_bar->Append(file_menu, wxT("&File"));
-    menu_bar->Append(help_menu, wxT("&Help"));
-    SetMenuBar(menu_bar);
+    auto which = GetMenuBar()->FindMenu("&File");
+    manager->FileHistoryUseMenu(GetMenuBar()->GetMenu(which));
 
     SetDropTarget(new CalChartSplashDropTarget(manager));
 

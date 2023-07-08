@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -38,12 +38,16 @@ IMPLEMENT_CLASS(PrintContinuitySetup, PreferencePage)
 enum {
     CALCHART__CONT_NEW = 100,
     PrintContinuitySetup_KeyPress,
-    PrintContinuitySetup_LandScapeChanged,
+    PrintContinuitySetup_DOTRATIO,
+    PrintContinuitySetup_PLINERATIO,
+    PrintContinuitySetup_SLINERATIO,
 };
 
 BEGIN_EVENT_TABLE(PrintContinuitySetup, PrintContinuitySetup::super)
 EVT_TEXT(PrintContinuitySetup_KeyPress, PrintContinuitySetup::OnKeyPress)
-EVT_CHECKBOX(PrintContinuitySetup_LandScapeChanged, PrintContinuitySetup::OnKeyPress)
+EVT_TEXT_ENTER(PrintContinuitySetup_DOTRATIO, PrintContinuitySetup::OnCmdTextChanged)
+EVT_TEXT_ENTER(PrintContinuitySetup_PLINERATIO, PrintContinuitySetup::OnCmdTextChanged)
+EVT_TEXT_ENTER(PrintContinuitySetup_SLINERATIO, PrintContinuitySetup::OnCmdTextChanged)
 END_EVENT_TABLE()
 
 static constexpr auto DefaultText
@@ -65,7 +69,29 @@ static constexpr auto DefaultText
 void PrintContinuitySetup::CreateControls()
 {
     wxUI::VSizer{
-        mLandscape = wxUI::CheckBox{ PrintContinuitySetup_LandScapeChanged, "Landscape" },
+        wxSizerFlags{}.Border(wxALL, 2),
+        wxUI::HSizer{
+            mLandscape = wxUI::CheckBox{ "Landscape" }
+                             .bind([this] {
+                                 mPrintContDisplay->SetOrientation(*mLandscape);
+                                 Refresh();
+                             }),
+        },
+        wxUI::HSizer{
+            "Draw details",
+            mUseNewDraw = wxUI::CheckBox{ "Use New Draw" }
+                              .bind([this] {
+                                  mConfig.Set_PrintContUseNewDraw(*mUseNewDraw);
+                                  Refresh();
+                              }),
+            VLabelWidget("Symbol Ratio:", mDotRatio = wxUI::TextCtrl{ PrintContinuitySetup_DOTRATIO }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER)),
+            VLabelWidget("P-Line Ratio:", mPLineRatio = wxUI::TextCtrl{ PrintContinuitySetup_PLINERATIO }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER)),
+            VLabelWidget("S-Line Ratio:", mSLineRatio = wxUI::TextCtrl{ PrintContinuitySetup_SLINERATIO }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER)),
+            VLabelWidget("Line Pad:", mLinePad = wxUI::SpinCtrl{ std::pair{ 0, 10 } }.bind([this] {
+                mConfig.Set_PrintContLinePad(static_cast<int>(*mLinePad));
+                Refresh();
+            })),
+        },
         wxUI::HSplitter{
             wxSizerFlags{ 1 }.Expand(),
             mPrintContDisplay = [this](wxWindow* parent) { return new PrintContinuityPreview(parent, mConfig); },
@@ -76,8 +102,29 @@ void PrintContinuitySetup::CreateControls()
 
     mUserInput->SetValue(DefaultText);
 
-    mPrintContDisplay->SetPrintContinuity(CalChart::PrintContinuity("", mUserInput->GetValue()).GetChunks());
+    mPrintContDisplay->SetPrintContinuity(CalChart::PrintContinuity("", mUserInput->GetValue()));
     TransferDataToWindow();
+}
+
+void PrintContinuitySetup::OnCmdTextChanged(wxCommandEvent& e)
+{
+    auto id = e.GetId();
+    wxTextCtrl* text = (wxTextCtrl*)FindWindow(id);
+    double value;
+    if (text->GetValue().ToDouble(&value)) {
+        switch (id) {
+        case PrintContinuitySetup_DOTRATIO:
+            mConfig.Set_PrintContDotRatio(value);
+            break;
+        case PrintContinuitySetup_PLINERATIO:
+            mConfig.Set_PrintContPLineRatio(value);
+            break;
+        case PrintContinuitySetup_SLINERATIO:
+            mConfig.Set_PrintContSLineRatio(value);
+            break;
+        }
+    }
+    Refresh();
 }
 
 void PrintContinuitySetup::InitFromConfig()
@@ -86,21 +133,51 @@ void PrintContinuitySetup::InitFromConfig()
 
 bool PrintContinuitySetup::TransferDataToWindow()
 {
+    *mUseNewDraw = mConfig.Get_PrintContUseNewDraw();
+    wxString buf;
+    wxTextCtrl* text = static_cast<wxTextCtrl*>(FindWindow(PrintContinuitySetup_DOTRATIO));
+    buf.Printf(wxT("%.2f"), mConfig.Get_PrintContDotRatio());
+    text->SetValue(buf);
+    text = static_cast<wxTextCtrl*>(FindWindow(PrintContinuitySetup_PLINERATIO));
+    buf.Printf(wxT("%.2f"), mConfig.Get_PrintContPLineRatio());
+    text->SetValue(buf);
+    text = static_cast<wxTextCtrl*>(FindWindow(PrintContinuitySetup_SLINERATIO));
+    buf.Printf(wxT("%.2f"), mConfig.Get_PrintContSLineRatio());
+    text->SetValue(buf);
+    *mLinePad = mConfig.Get_PrintContLinePad();
+
     return true;
 }
 
 bool PrintContinuitySetup::TransferDataFromWindow()
 {
+    mConfig.Set_PrintContUseNewDraw(*mUseNewDraw);
+    double value = 0.0;
+    if (mDotRatio->GetValue().ToDouble(&value)) {
+        mConfig.Set_PrintContDotRatio(value);
+    }
+    if (mPLineRatio->GetValue().ToDouble(&value)) {
+        mConfig.Set_PrintContPLineRatio(value);
+    }
+    if (mSLineRatio->GetValue().ToDouble(&value)) {
+        mConfig.Set_PrintContSLineRatio(value);
+    }
+    mConfig.Set_PrintContLinePad(*mLinePad);
     return true;
 }
 
 bool PrintContinuitySetup::ClearValuesToDefault()
 {
+    mConfig.Clear_PrintContUseNewDraw();
+    mConfig.Clear_PrintContDotRatio();
+    mConfig.Clear_PrintContPLineRatio();
+    mConfig.Clear_PrintContSLineRatio();
+    mConfig.Clear_PrintContLinePad();
     return TransferDataToWindow();
 }
+
 void PrintContinuitySetup::OnKeyPress(wxCommandEvent&)
 {
-    mPrintContDisplay->SetOrientation(mLandscape->GetValue());
-    mPrintContDisplay->SetPrintContinuity(CalChart::PrintContinuity("", mUserInput->GetValue()).GetChunks());
+    mPrintContDisplay->SetPrintContinuity(CalChart::PrintContinuity("", mUserInput->GetValue()));
     Refresh();
 }

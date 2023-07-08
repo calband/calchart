@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2022  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -33,8 +33,15 @@
 #include <wx/font.h>
 #include <wx/pen.h>
 
+// this needs to be in the same namespace as wxSize, which would be the global namespace
+inline auto operator<(wxSize const& p1, wxSize const& p2)
+{
+    return p1.x == p2.x ? p1.y < p2.y : p1.x < p2.y;
+}
+
 namespace wxCalChart {
 
+inline auto make_wxSize(CalChart::Coord coord) { return wxSize{ coord.x, coord.y }; }
 inline auto toColour(CalChart::Color c)
 {
     return wxColour{ c.red, c.green, c.blue, c.alpha };

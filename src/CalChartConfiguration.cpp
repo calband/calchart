@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -324,6 +324,12 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS(NumRatio, double, 1.35);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(PLineRatio, double, 1.2);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(SLineRatio, double, 1.2);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(ContRatio, double, 0.2);
+
+IMPLEMENT_CONFIGURATION_FUNCTIONS(PrintContUseNewDraw, bool, true);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(PrintContDotRatio, double, 1.0);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(PrintContPLineRatio, double, 1.2);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(PrintContSLineRatio, double, 1.2);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(PrintContLinePad, long, 2);
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS(PrintPSModes, long, 0);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(PrintPSLandscape, bool, false);

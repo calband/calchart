@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -98,6 +98,14 @@ struct Font {
         Normal,
         Bold,
     };
+    Font(int size = 8, Family family = Family::Swiss, Style style = Style::Normal, Weight weight = Weight::Normal)
+        : size(size)
+        , family(family)
+        , style(style)
+        , weight(weight)
+    {
+    }
+
     int size = 8;
     Family family = Family::Swiss;
     Style style = Style::Normal;

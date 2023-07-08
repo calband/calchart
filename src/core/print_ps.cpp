@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 */
 #include "print_ps.h"
 
+#include "CalChartPostScript.h"
 #include "CalChartSheet.h"
 #include "CalChartShow.h"
 #include "CalChartShowMode.h"
@@ -56,14 +57,6 @@ static const char* dot_routines[] = {
     "dotsolx",
 };
 
-static const char* fontnames[] = {
-    "CalChart",
-    "contfont",
-    "boldfont",
-    "italfont",
-    "bolditalfont",
-};
-
 template <typename IOS>
 class RAII_setprecision {
 public:
@@ -78,28 +71,6 @@ private:
     IOS& os;
     std::streamsize precision;
 };
-
-static void PageHeader(std::ostream& buffer, double dots_x, double dots_y)
-{
-    buffer << "0 setgray\n";
-    buffer << "0.25 setlinewidth\n";
-    buffer << (dots_x) << " " << (dots_y) << " translate\n";
-}
-
-static void PrintContinuityPreamble(std::ostream& buffer, double y_def,
-    double h_def, double rmargin, double tab1,
-    double tab2, double tab3,
-    double font_size)
-{
-    buffer << "/y " << (y_def) << " def\n";
-    buffer << "/h " << (h_def) << " def\n";
-    buffer << "/lmargin 0 def /rmargin " << (rmargin) << " def\n";
-    buffer << "/tab1 " << (tab1) << " def /tab2 " << (tab2) << " def /tab3 "
-           << (tab3) << " def\n";
-    buffer << "/contfont findfont " << (font_size) << " scalefont setfont\n";
-}
-
-static void PageBreak(std::ostream& buffer) { buffer << "showpage\n"; }
 
 static std::tuple<float, float, float, float, float>
 CalcValues(bool PrintLandscape, bool PrintDoCont, double PageWidth,
@@ -247,23 +218,6 @@ PrintShowToPS::PrintShowToPS(
             mPageHeight, mContRatio, min_yards, mMode);
 }
 
-template <typename OS>
-void PrintFontHeader(OS& buffer, std::array<std::string, 7> const& fonts)
-{
-    buffer << "%%IncludeResources: font";
-    for (auto& i : fonts) {
-        buffer << " " << i;
-    }
-    buffer << "\n";
-    buffer << "/headfont0 /" << fonts[0] << " def\n";
-    buffer << "/mainfont0 /" << fonts[1] << " def\n";
-    buffer << "/numberfont0 /" << fonts[2] << " def\n";
-    buffer << "/contfont0 /" << fonts[3] << " def\n";
-    buffer << "/boldfont0 /" << fonts[4] << " def\n";
-    buffer << "/italfont0 /" << fonts[5] << " def\n";
-    buffer << "/bolditalfont0 /" << fonts[6] << " def\n";
-}
-
 int PrintShowToPS::operator()(std::ostream& buffer,
     const std::set<size_t>& isPicked,
     std::string const& title) const
@@ -350,7 +304,7 @@ void PrintShowToPS::PrintFieldDefinition(std::ostream& buffer) const
         buffer << prolog0_ps;
         buffer << "%%EndProlog\n";
         buffer << "%%BeginSetup\n";
-        PrintFontHeader(buffer, fonts);
+        PostScript::PrintFontHeader(buffer, fonts);
         buffer << setup0_ps;
         buffer << "%%EndSetup\n";
     } else {
@@ -378,20 +332,19 @@ short PrintShowToPS::PrintSheets(std::ostream& buffer,
             if (!mOverview) {
                 PrintStandard(buffer, *curr_sheet, false);
                 if (SplitSheet(*curr_sheet)) {
-                    PageBreak(buffer);
+                    PostScript::PageBreak(buffer);
                     num_pages++;
                     PrintStandard(buffer, *curr_sheet, true);
                 }
             } else {
                 PrintOverview(buffer, *curr_sheet);
             }
-            PageBreak(buffer);
+            PostScript::PageBreak(buffer);
         }
         ++curr_sheet;
     }
     return num_pages;
 }
-
 short PrintShowToPS::PrintContinuitySheets(std::ostream& buffer,
     short num_pages) const
 {
@@ -405,26 +358,26 @@ short PrintShowToPS::PrintContinuitySheets(std::ostream& buffer,
                 continue;
             if (lines_left <= 0) {
                 if (num_pages > 0) {
-                    PageBreak(buffer);
+                    PostScript::PageBreak(buffer);
                 }
                 num_pages++;
                 buffer << "%%Page: CONT" << num_pages << "\n";
-                PageHeader(buffer, mPageOffsetX * DPI,
+                PostScript::PageHeader(buffer, mPageOffsetX * DPI,
                     (mPaperLength - mPageOffsetY) * DPI - real_height);
                 lines_left = (short)(real_height / mTextSize - 0.5);
-                PrintContinuityPreamble(buffer, real_height - mTextSize, mTextSize,
+                PostScript::PrintContinuityPreamble(buffer, real_height - mTextSize, mTextSize,
                     real_width, real_width * 0.5 / 7.5,
                     real_width * 1.5 / 7.5, real_width * 2.0 / 7.5,
                     mTextSize);
             }
 
-            gen_cont_line(buffer, text, PSFONT::NORM, mTextSize);
+            PostScript::GenerateContinuityLine(buffer, text, PSFONT::NORM, mTextSize);
             lines_left--;
             need_eject = true;
         }
     }
     if (need_eject) {
-        PageBreak(buffer);
+        PostScript::PageBreak(buffer);
     }
     return num_pages;
 }
@@ -442,65 +395,21 @@ void PrintShowToPS::PrintContSections(std::ostream& buffer,
     float this_size = cont_height / (cont_len + 0.5);
     if (this_size > mTextSize)
         this_size = mTextSize;
-    PrintContinuityPreamble(buffer, cont_height - this_size, this_size, width,
+    PostScript::PrintContinuityPreamble(buffer, cont_height - this_size, this_size, width,
         width * 0.5 / 7.5, width * 1.5 / 7.5,
         width * 2.0 / 7.5, this_size);
     for (auto& text : continuity) {
         if (!text.on_sheet)
             continue;
-        gen_cont_line(buffer, text, PSFONT::NORM, this_size);
+        PostScript::GenerateContinuityLine(buffer, text, PSFONT::NORM, this_size);
     }
-}
-
-void PrintShowToPS::gen_cont_line(std::ostream& buffer, const Textline& line,
-    PSFONT currfontnum,
-    float fontsize) const
-{
-    buffer << "/x lmargin def\n";
-    short tabstop = 0;
-    for (auto& part : line.chunks) {
-        if (part.font == PSFONT::TAB) {
-            if (++tabstop > 3) {
-                buffer << "space_over\n";
-            } else {
-                buffer << "tab" << tabstop << " do_tab\n";
-            }
-        } else {
-            if (part.font != currfontnum) {
-                buffer << "/" << fontnames[static_cast<int>(part.font)];
-                buffer << " findfont " << fontsize << " scalefont setfont\n";
-                currfontnum = part.font;
-            }
-            std::string textstr(part.text);
-            const char* text = textstr.c_str();
-            while (*text != 0) {
-                std::string temp_buf = "";
-                while (*text != 0) {
-                    // Need backslash before parenthesis
-                    if ((*text == '(') || (*text == ')')) {
-                        temp_buf += "\\";
-                    }
-                    temp_buf += *(text++);
-                }
-
-                if (!temp_buf.empty()) {
-                    if (line.center) {
-                        buffer << "(" << temp_buf << ") centerText\n";
-                    } else {
-                        buffer << "(" << temp_buf << ") leftText\n";
-                    }
-                }
-            }
-        }
-    }
-    buffer << "/y y h sub def\n";
 }
 
 void PrintShowToPS::print_start_page(std::ostream& buffer, bool landscape,
     double translate_x,
     double translate_y) const
 {
-    PageHeader(buffer, mPageOffsetX * DPI,
+    PostScript::PageHeader(buffer, mPageOffsetX * DPI,
         (mPaperLength - mPageOffsetY) * DPI - real_height);
     if (landscape) {
         buffer << real_width << " 0 translate 90 rotate\n";

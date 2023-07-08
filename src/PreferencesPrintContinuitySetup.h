@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -65,8 +65,14 @@ private:
     wxUI::Generic<FancyTextWin>::Proxy mUserInput{};
     wxUI::Generic<PrintContinuityPreview>::Proxy mPrintContDisplay{};
     wxUI::CheckBox::Proxy mLandscape{};
+    wxUI::CheckBox::Proxy mUseNewDraw{};
+    wxUI::TextCtrl::Proxy mDotRatio{};
+    wxUI::TextCtrl::Proxy mPLineRatio{};
+    wxUI::TextCtrl::Proxy mSLineRatio{};
+    wxUI::SpinCtrl::Proxy mLinePad{};
 
     void InitFromConfig() override;
     void CreateControls() override;
     void OnKeyPress(wxCommandEvent&);
+    void OnCmdTextChanged(wxCommandEvent&);
 };

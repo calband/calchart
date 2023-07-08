@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -178,9 +178,8 @@ namespace {
 
     auto CreatePointCross(CalChart::SYMBOL_TYPE symbol, double dotRatio, double pLineRatio, double sLineRatio) -> std::vector<Draw::DrawCommand>
     {
-        auto const circ_r = CalChart::Float2CoordUnits(dotRatio) / 2.0;
-        auto const plineoff = circ_r * pLineRatio;
-        auto const slineoff = circ_r * sLineRatio;
+        auto const plineoff = CalChart::Float2CoordUnits(dotRatio * pLineRatio) / 2.0;
+        auto const slineoff = CalChart::Float2CoordUnits(dotRatio * sLineRatio) / 2.0;
 
         auto drawCmds = std::vector<Draw::DrawCommand>{};
         switch (symbol) {
@@ -221,12 +220,17 @@ namespace {
         return { Draw::Text(-CalChart::Coord(0, circ_r), label, anchor) };
     }
 
+    auto CreatePoint(SYMBOL_TYPE sym, double dotRatio, double pLineRatio, double sLineRatio) -> std::vector<Draw::DrawCommand>
+    {
+        return CalChart::append(
+            CreatePointCircle(sym, dotRatio),
+            CreatePointCross(sym, dotRatio, pLineRatio, sLineRatio));
+    }
+
     auto CreatePoint(CalChart::Point const& point, SYMBOL_TYPE sym, std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) -> std::vector<Draw::DrawCommand>
     {
         return CalChart::append(
-            CalChart::append(
-                CreatePointCircle(sym, dotRatio),
-                CreatePointCross(sym, dotRatio, pLineRatio, sLineRatio)),
+            CreatePoint(sym, dotRatio, pLineRatio, sLineRatio),
             CreatePointLabel(point, label, dotRatio));
     }
 }
@@ -234,6 +238,11 @@ namespace {
 auto Point::GetDrawCommands(unsigned ref, std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) const -> std::vector<Draw::DrawCommand>
 {
     return CreatePoint(*this, GetSymbol(), label, dotRatio, pLineRatio, sLineRatio) + GetPos(ref);
+}
+
+auto Point::GetDrawCommands(double dotRatio, double pLineRatio, double sLineRatio) const -> std::vector<Draw::DrawCommand>
+{
+    return CreatePoint(GetSymbol(), dotRatio, pLineRatio, sLineRatio) + GetPos(0);
 }
 
 // Test Suite stuff
