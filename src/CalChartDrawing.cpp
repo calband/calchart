@@ -80,11 +80,9 @@ void DrawArrow(wxDC& dc, wxPoint const& pt, wxCoord lineLength, bool pointRight)
 }
 
 // calculate the distance for tab stops
-auto TabStops(int which, bool landscape, int useConstantTabs)
+auto TabStops(int which, bool landscape)
 {
-    if (useConstantTabs != 0) {
-        return which * useConstantTabs;
-    }
+    // all this can be config
     auto tab = 0;
     while (which > 4) {
         which--;
@@ -272,12 +270,7 @@ void DrawPoints(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord o
 }
 
 // draw the continuity starting at a specific offset
-void DrawContForPreview(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect const& bounding)
-{
-    return DrawCont(dc, print_continuity, bounding, false, 6);
-}
-
-void DrawCont(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect const& bounding, bool landscape, int useConstantTabs)
+void DrawCont(wxDC& dc, CalChartConfiguration const& config, CalChart::Textline_list const& print_continuity, wxRect const& bounding, bool landscape)
 {
     SaveAndRestore::DeviceOrigin orig_dev(dc);
     SaveAndRestore::UserScale orig_scale(dc);
@@ -295,7 +288,8 @@ void DrawCont(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect 
 
     auto font_size = ((bounding.GetBottom() - bounding.GetTop()) - (numLines - 1) * 2) / (numLines ? numLines : 1);
     // font size, we scale to be no more than 256 pixels.
-    font_size = std::min<int>(font_size, 10);
+    // 256 can be config
+    font_size = std::min<int>(font_size, 256);
 
     auto contPlainFont = CreateFont(font_size, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
     auto contBoldFont = CreateFont(font_size, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
@@ -303,6 +297,7 @@ void DrawCont(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect 
     auto contBoldItalFont = CreateFont(font_size, wxFONTFAMILY_MODERN, wxFONTSTYLE_ITALIC, wxFONTWEIGHT_BOLD);
 
     dc.SetFont(contPlainFont);
+    // 2 can be config
     const wxCoord maxtexth = font_size + 2;
 
     float y = bounding.GetTop();
@@ -365,7 +360,7 @@ void DrawCont(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect 
                 break;
             case CalChart::PSFONT::TAB: {
                 tabnum++;
-                wxCoord textw = bounding.GetLeft() + charWidth * TabStops(tabnum, landscape, useConstantTabs);
+                wxCoord textw = bounding.GetLeft() + charWidth * TabStops(tabnum, landscape);
                 if (textw >= x)
                     x = textw;
                 else
@@ -402,6 +397,7 @@ void DrawCont(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect 
                         case CalChart::SYMBOL_X:
                         case CalChart::SYMBOL_SOLSL:
                         case CalChart::SYMBOL_SOLX:
+                            // 1 can be config
                             dc.DrawLine(x - 1, top_y + d + 1, x + d + 1, top_y - 1);
                             break;
                         default:
@@ -412,6 +408,7 @@ void DrawCont(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect 
                         case CalChart::SYMBOL_X:
                         case CalChart::SYMBOL_SOLBKSL:
                         case CalChart::SYMBOL_SOLX:
+                            // 1 can be config
                             dc.DrawLine(x - 1, top_y - 1, x + d + 1, top_y + d + 1);
                             break;
                         default:
@@ -560,7 +557,7 @@ void DrawForPrintingHelper(wxDC& dc, CalChartConfiguration const& config, CalCha
     DrawCenteredText(dc, kLowerNorthLabel, wxPoint(page.x * kLowerNorthPosition[landscape][0], page.y * kLowerNorthPosition[landscape][1]));
     DrawArrow(dc, wxPoint(page.x * kLowerNorthArrow[landscape][0], page.y * kLowerNorthArrow[landscape][1]), page.x * kLowerNorthArrow[landscape][2], true);
 
-    DrawCont(dc, sheet.GetPrintableContinuity(), wxRect(wxPoint(10, page.y * kContinuityStart[landscape]), wxSize(page.x - 20, page.y - page.y * kContinuityStart[landscape])), landscape);
+    DrawCont(dc, config, sheet.GetPrintableContinuity(), wxRect(wxPoint(10, page.y * kContinuityStart[landscape]), wxSize(page.x - 20, page.y - page.y * kContinuityStart[landscape])), landscape);
 }
 
 void DrawForPrinting(wxDC* printerdc, CalChartConfiguration const& config, CalChartDoc const& show, CalChart::Sheet const& sheet, int ref, bool landscape)

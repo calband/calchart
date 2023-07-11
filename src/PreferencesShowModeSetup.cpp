@@ -113,7 +113,10 @@ void ShowModeSetup::CreateControls()
                     .bind([this] {
                         OnCmdChoice();
                     }),
-                wxUI::TextCtrl{ SHOW_LINE_VALUE }.withStyle(wxTE_PROCESS_ENTER).bind(refresh_action),
+                wxUI::TextCtrl{ SHOW_LINE_VALUE }
+                    .withSize({ 100, -1 })
+                    .withStyle(wxTE_PROCESS_ENTER)
+                    .bind(refresh_action),
             },
             wxUI::HSizer{
                 BasicSizerFlags(),

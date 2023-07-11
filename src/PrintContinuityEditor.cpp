@@ -26,6 +26,7 @@
 #include "CalChartSheet.h"
 #include "CalChartText.h"
 #include "CalChartView.h"
+#include "PrintContinuityPreview.h"
 #include "basic_ui.h"
 #include "ui_enums.h"
 
@@ -40,62 +41,6 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
-class PrintContinuityPreview : public wxScrolled<wxWindow> {
-    using super = wxScrolled<wxWindow>;
-    DECLARE_EVENT_TABLE()
-
-public:
-    PrintContinuityPreview(wxWindow* parent);
-
-    void OnPaint(wxPaintEvent& event);
-    void SetPrintContinuity(const CalChart::Textline_list& printContinuity)
-    {
-        mPrintContinuity = printContinuity;
-    }
-    void SetOrientation(bool landscape) { m_landscape = landscape; }
-    void OnSizeEvent(wxSizeEvent& event);
-
-private:
-    CalChart::Textline_list mPrintContinuity;
-    bool m_landscape;
-};
-
-BEGIN_EVENT_TABLE(PrintContinuityPreview, PrintContinuityPreview::super)
-EVT_SIZE(PrintContinuityPreview::OnSizeEvent)
-END_EVENT_TABLE()
-
-static constexpr auto kPrintContinuityPreviewMinX = 256;
-static constexpr auto kPrintContinuityPreviewMinY = 734 - 606;
-PrintContinuityPreview::PrintContinuityPreview(wxWindow* parent)
-    : wxScrolled<wxWindow>(parent, wxID_ANY)
-    , m_landscape(false)
-{
-    static const double kSizeX = 576, kSizeY = 734 - 606;
-    SetVirtualSize(wxSize(kSizeX, kSizeY));
-    SetScrollRate(10, 10);
-    SetBackgroundColour(*wxWHITE);
-    Connect(wxEVT_PAINT, wxPaintEventHandler(PrintContinuityPreview::OnPaint));
-}
-
-void PrintContinuityPreview::OnPaint(wxPaintEvent&)
-{
-    wxPaintDC dc(this);
-    PrepareDC(dc);
-    wxSize virtSize = GetVirtualSize();
-
-    dc.Clear();
-    dc.DrawRectangle(wxRect(wxPoint(0, 0), virtSize));
-    CalChartDraw::DrawContForPreview(dc, mPrintContinuity, wxRect(wxPoint(0, 0), virtSize));
-}
-
-void PrintContinuityPreview::OnSizeEvent(wxSizeEvent& event)
-{
-    auto x = std::max(event.m_size.x, kPrintContinuityPreviewMinX);
-    auto y = std::max(event.m_size.y, kPrintContinuityPreviewMinY);
-    SetVirtualSize(wxSize(x, y));
-    SetScrollRate(10, 10);
-}
 
 enum {
     CALCHART__CONT_NEW = 100,
@@ -115,6 +60,7 @@ EVT_SIZE(PrintContinuityEditor::OnSizeEvent)
 END_EVENT_TABLE()
 
 PrintContinuityEditor::PrintContinuityEditor(wxWindow* parent,
+    CalChartConfiguration const& config,
     wxWindowID id,
     const wxPoint& pos,
     const wxSize& size,
@@ -122,6 +68,7 @@ PrintContinuityEditor::PrintContinuityEditor(wxWindow* parent,
     const wxString& name)
     : super(parent, id, pos, size, style, name)
     , mTimer(new wxTimer(this, PrintContinuityEditor_TimerExpiration))
+    , mConfig(config)
 {
     CreateControls();
 
@@ -165,7 +112,7 @@ void PrintContinuityEditor::CreateControls()
 
     mUserInput = new FancyTextWin(mSplitter, PrintContinuityEditor_KeyPress);
 
-    mPrintContDisplay = new PrintContinuityPreview(mSplitter);
+    mPrintContDisplay = new PrintContinuityPreview(mSplitter, mConfig);
     mSplitter->Initialize(mPrintContDisplay);
     mSplitter->SplitHorizontally(mPrintContDisplay, mUserInput);
 }
