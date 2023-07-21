@@ -31,6 +31,7 @@
 // part of the code.
 
 #include "CalChartConfiguration.h"
+#include "CalChartCoord.h"
 #include "CalChartShow.h"
 #include <map>
 #include <set>
@@ -44,7 +45,6 @@ class Sheet;
 struct Textline;
 using Textline_list = std::vector<Textline>;
 class Point;
-struct Coord;
 }
 class CalChartDoc;
 class CalChartConfiguration;

@@ -32,8 +32,11 @@ namespace CalChart {
 inline constexpr auto kCoordShift = 4U;
 inline constexpr auto kCoordDecimal = (1U << kCoordShift);
 
-struct Coord {
-    using units = int16_t;
+template <typename T>
+concept Arithmetic = std::is_arithmetic_v<T>;
+template <Arithmetic T>
+struct CoordBasic {
+    using units = T;
 
     enum class CollisionType {
         none = 0,
@@ -41,76 +44,82 @@ struct Coord {
         intersect,
     };
 
-    explicit constexpr Coord(Coord::units xval = 0)
+    explicit constexpr CoordBasic(CoordBasic::units xval = 0)
         : x(xval)
         , y(0)
     {
     }
 
-    constexpr Coord(Coord::units xval, Coord::units yval)
+    constexpr CoordBasic(CoordBasic::units xval, CoordBasic::units yval)
         : x(xval)
         , y(yval)
     {
     }
 
-    template <typename T>
-    explicit constexpr Coord(std::tuple<T, T> pts)
-        : x(static_cast<Coord::units>(std::get<0>(pts)))
-        , y(static_cast<Coord::units>(std::get<1>(pts)))
+    template <typename U>
+        requires std::is_arithmetic_v<U>
+    explicit constexpr CoordBasic(std::tuple<U, U> pts)
+        : x(static_cast<CoordBasic::units>(std::get<0>(pts)))
+        , y(static_cast<CoordBasic::units>(std::get<1>(pts)))
     {
     }
 
-    constexpr auto operator+=(Coord c) -> Coord&
+    constexpr auto operator+=(CoordBasic c) -> CoordBasic&
     {
         x = static_cast<units>(x + c.x);
         y = static_cast<units>(y + c.y);
         return *this;
     }
 
-    constexpr auto operator-=(Coord c) -> Coord&
+    constexpr auto operator-=(CoordBasic c) -> CoordBasic&
     {
         x = static_cast<units>(x - c.x);
         y = static_cast<units>(y - c.y);
         return *this;
     }
 
-    template <typename T>
-    constexpr auto operator*=(T s) -> Coord&
+    template <typename U>
+        requires std::is_arithmetic_v<U>
+    constexpr auto operator*=(U s) -> CoordBasic&
     {
         x *= s;
         y *= s;
         return *this;
     }
 
-    template <typename T>
-    constexpr auto operator/=(T s) -> Coord&
+    template <typename U>
+        requires std::is_arithmetic_v<U>
+    constexpr auto operator/=(U s) -> CoordBasic&
     {
         x /= s;
         y /= s;
         return *this;
     }
 
-    constexpr auto operator<=>(Coord const&) const = default;
+    constexpr auto operator<=>(CoordBasic<T> const&) const = default;
 
     [[nodiscard]] auto Magnitude() const -> float;
     [[nodiscard]] auto DM_Magnitude() const -> float; // check for diagonal military also
 
     // Get distance of point to other
-    [[nodiscard]] auto Distance(Coord other) const { return std::hypot(other.x - x, other.y - y); }
+    [[nodiscard]] auto Distance(CoordBasic<T> other) const { return std::hypot(other.x - x, other.y - y); }
 
     // Angle of vector {0, 0} and this.
     [[nodiscard]] auto Direction() const -> CalChart::Radian;
     // Direction of vector this and other
-    [[nodiscard]] auto Direction(Coord c) const -> CalChart::Radian;
+    [[nodiscard]] auto Direction(CoordBasic<T> c) const -> CalChart::Radian;
 
-    [[nodiscard]] constexpr auto Dot(Coord c) const { return x * c.x + y * c.y; }
+    [[nodiscard]] constexpr auto Dot(CoordBasic<T> c) const { return x * c.x + y * c.y; }
 
-    [[nodiscard]] auto DetectCollision(Coord c) const -> CollisionType;
+    [[nodiscard]] auto DetectCollision(CoordBasic<T> c) const -> CollisionType;
 
     units x, y;
 };
 
-[[nodiscard]] constexpr auto operator+(Coord lhs, Coord rhs) -> Coord
+using Coord = CoordBasic<int16_t>;
+
+template <Arithmetic T>
+[[nodiscard]] constexpr auto operator+(CoordBasic<T> lhs, CoordBasic<T> rhs) -> CoordBasic<T>
 {
     lhs += rhs;
     return lhs;
@@ -122,13 +131,13 @@ struct Coord {
     return lhs;
 }
 
-template <typename T>
+template <Arithmetic T>
 [[nodiscard]] constexpr auto operator*(Coord c, T v) -> Coord { return Coord(c.x * v, c.y * v); }
 
-template <typename T>
+template <Arithmetic T>
 [[nodiscard]] constexpr auto operator*(T v, Coord c) -> Coord { return Coord(c.x * v, c.y * v); }
 
-template <typename T>
+template <Arithmetic T>
 [[nodiscard]] constexpr auto operator/(Coord a, T s) -> Coord { return Coord(a.x / s, a.y / s); }
 
 [[nodiscard]] constexpr auto operator-(Coord c) -> Coord { return -1 * c; }
@@ -139,7 +148,7 @@ inline auto operator<<(std::ostream& os, Coord c) -> std::ostream&
 }
 
 // RoundToCoordUnits: Use when number is already in Coord format, just needs to be rounded.
-template <typename T>
+template <Arithmetic T>
 constexpr auto RoundToCoordUnits(T inCoord)
 {
     constexpr auto point5 = 0.5;
@@ -148,13 +157,13 @@ constexpr auto RoundToCoordUnits(T inCoord)
 
 // RoundToCoordUnits, CoordUnits2Float
 //  Use when we want to convert to Coord system
-template <typename T>
+template <Arithmetic T>
 constexpr auto Float2CoordUnits(T a)
 {
     return static_cast<CalChart::Coord::units>(RoundToCoordUnits(a * CalChart::kCoordDecimal));
 }
 
-template <typename T>
+template <Arithmetic T>
 constexpr auto CoordUnits2Float(T a)
 {
     return a / static_cast<double>(CalChart::kCoordDecimal);
@@ -162,52 +171,52 @@ constexpr auto CoordUnits2Float(T a)
 
 // Int2CoordUnits, CoordUnits2Int
 //  Use when we want to convert to Coord system
-template <typename T>
+template <Arithmetic T>
 constexpr auto Int2CoordUnits(T a)
 {
     return static_cast<CalChart::Coord::units>(a * CalChart::kCoordDecimal);
 }
-template <typename T>
+template <Arithmetic T>
 constexpr auto CoordUnits2Int(T a)
 {
     return static_cast<int>(a / static_cast<int>(CalChart::kCoordDecimal));
 }
 
 // Create vector is going to create a vector in that direction, except diagonals are different!
-template <typename T>
+template <Arithmetic T>
 constexpr auto CreateCalChartVector(CalChart::Radian dir, T mag) -> CalChart::Coord
 {
     // using std::apply to apply a function to each tuple argument.
     return Coord{ std::apply([mag](auto... x) { return std::make_tuple(Float2CoordUnits(x * mag)...); }, CreateCalChartUnitVector(dir)) };
 }
 
-template <typename T>
+template <Arithmetic T>
 constexpr auto CreateCalChartVector(CalChart::Degree dir, T mag) -> CalChart::Coord
 {
     return CreateCalChartVector(static_cast<CalChart::Radian>(dir), mag);
 }
 
-template <typename T>
+template <Arithmetic T>
 constexpr auto CreateVector(CalChart::Radian dir, T mag) -> CalChart::Coord
 {
     // using std::apply to apply a function to each tuple argument.
     return Coord{ std::apply([mag](auto... x) { return std::make_tuple(Float2CoordUnits(x * mag)...); }, CreateUnitVector(dir)) };
 }
 
-template <typename T>
+template <Arithmetic T>
 constexpr auto CreateVector(CalChart::Degree dir, T mag) -> CalChart::Coord
 {
     return CreateVector(static_cast<CalChart::Radian>(dir), mag);
 }
 
-template <typename T>
+template <Arithmetic T>
 constexpr auto CreateCoordVector(CalChart::Radian dir, T mag) -> CalChart::Coord
 {
     // using std::apply to apply a function to each tuple argument.
     return Coord{ std::apply([mag](auto... x) { return std::make_tuple((x * mag)...); }, CreateUnitVector(dir)) };
 }
 
-template <typename T>
+template <Arithmetic T>
 constexpr auto CreateCoordVector(CalChart::Degree dir, T mag) -> CalChart::Coord
 {
     return CreateCoordVector(static_cast<CalChart::Radian>(dir), mag);
@@ -215,9 +224,10 @@ constexpr auto CreateCoordVector(CalChart::Degree dir, T mag) -> CalChart::Coord
 
 // Implementation details
 // Angle of vector {0, 0} and this.
-inline auto Coord::Direction() const -> CalChart::Radian
+template <Arithmetic T>
+inline auto CoordBasic<T>::Direction() const -> CalChart::Radian
 {
-    if (*this == Coord{ 0 }) {
+    if (*this == CoordBasic<T>{}) {
         return CalChart::Radian{};
     }
 
@@ -230,19 +240,22 @@ inline auto Coord::Direction() const -> CalChart::Radian
 }
 
 // Direction of vector this and other
-inline auto Coord::Direction(Coord c) const -> CalChart::Radian
+template <Arithmetic T>
+inline auto CoordBasic<T>::Direction(CoordBasic<T> c) const -> CalChart::Radian
 {
     return (c - *this).Direction();
 }
 
 // Get magnitude of vector
-inline auto Coord::Magnitude() const -> float
+template <Arithmetic T>
+inline auto CoordBasic<T>::Magnitude() const -> float
 {
     return static_cast<float>(std::hypot(CoordUnits2Float(x), CoordUnits2Float(y)));
 }
 
 // Get magnitude, but check for diagonal military
-inline auto Coord::DM_Magnitude() const -> float
+template <Arithmetic T>
+inline auto CoordBasic<T>::DM_Magnitude() const -> float
 {
     if ((x == y) || (x == -y)) {
         return static_cast<float>(CoordUnits2Float(std::abs(x)));
@@ -251,7 +264,8 @@ inline auto Coord::DM_Magnitude() const -> float
 }
 
 // Returns the type of collision between this point and another
-inline auto Coord::DetectCollision(Coord c) const -> Coord::CollisionType
+template <Arithmetic T>
+inline auto CoordBasic<T>::DetectCollision(CoordBasic<T> c) const -> CoordBasic<T>::CollisionType
 {
     auto dx = x - c.x;
     auto dy = y - c.y;

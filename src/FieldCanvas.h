@@ -22,6 +22,7 @@
 */
 
 #include "CalChartMovePointsTool.h"
+#include "CalChartPoint.h"
 #include "CalChartSelectTool.h"
 #include "CalChartTypes.h"
 #include "basic_ui.h"
@@ -37,7 +38,6 @@ class CalChartFrame;
 class BackgroundImage;
 namespace CalChart {
 class Shape;
-struct Coord;
 class Shape_2point;
 class MovePoints;
 }
