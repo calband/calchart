@@ -24,7 +24,7 @@
 
 namespace CalChart {
 
-std::pair<ImageData, Reader> CreateImageData(Reader reader)
+auto CreateImageData(Reader reader) -> std::pair<ImageData, Reader>
 {
     auto left = reader.Get<int32_t>();
     auto top = reader.Get<int32_t>();
@@ -39,9 +39,9 @@ std::pair<ImageData, Reader> CreateImageData(Reader reader)
     return { ImageData{ left, top, scaled_width, scaled_height, image_width, image_height, data, alpha }, reader };
 }
 
-std::vector<uint8_t> Serialize(ImageData const& image)
+auto Serialize(ImageData const& image) -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    std::vector<std::byte> result;
     Parser::Append(result, uint32_t(image.left));
     Parser::Append(result, uint32_t(image.top));
     Parser::Append(result, uint32_t(image.scaled_width));

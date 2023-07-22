@@ -61,8 +61,8 @@ std::unique_ptr<Show> Show::Create(ShowMode const& mode, std::istream& stream, P
 {
     // read the whole stream into a block, making sure we don't skip white space
     stream.unsetf(std::ios::skipws);
-    std::vector<uint8_t> data(std::istream_iterator<uint8_t>{ stream },
-        std::istream_iterator<uint8_t>{});
+    auto data = std::vector<std::byte>{};
+    std::transform(std::istream_iterator<char>{ stream }, std::istream_iterator<char>{}, std::back_inserter(data), [](auto b) { return static_cast<std::byte>(b); });
     // wxWidgets doesn't like it when we've reach the end of file.  Remove flags
     stream.clear();
     auto reader = Reader({ data.data(), data.size() });
@@ -270,18 +270,18 @@ auto anyInstrumentsBesidesDefault(T const& all)
     return instruments.size();
 }
 
-std::vector<uint8_t> Show::SerializeShowData() const
+auto Show::SerializeShowData() const -> std::vector<std::byte>
 {
     using Parser::Append;
     using Parser::AppendAndNullTerminate;
     using Parser::Construct_block;
-    std::vector<uint8_t> result;
+    std::vector<std::byte> result;
     // SHOW_DATA          = NUM_MARCH , LABEL , [ DESCRIPTION ] , { SHEET }* ;
     // Write NUM_MARCH
     Append(result, Construct_block(INGL_SIZE, static_cast<uint32_t>(GetNumPoints())));
 
     // Write LABEL
-    std::vector<uint8_t> labels;
+    std::vector<std::byte> labels;
     for (auto& i : mDotLabelAndInstrument) {
         AppendAndNullTerminate(labels, i.first);
     }
@@ -289,7 +289,7 @@ std::vector<uint8_t> Show::SerializeShowData() const
 
     // Write INSTRUMENTS
     if (anyInstrumentsBesidesDefault(GetPointsInstrument())) {
-        std::vector<uint8_t> instruments;
+        std::vector<std::byte> instruments;
         for (auto& i : mDotLabelAndInstrument) {
             AppendAndNullTerminate(instruments, i.second == kDefault ? "" : i.second);
         }
@@ -298,7 +298,7 @@ std::vector<uint8_t> Show::SerializeShowData() const
 
     // write Description
     if (!GetDescr().empty()) {
-        std::vector<uint8_t> descr;
+        std::vector<std::byte> descr;
         AppendAndNullTerminate(descr, GetDescr());
         Append(result, Construct_block(INGL_DESC, descr));
     }
@@ -310,7 +310,7 @@ std::vector<uint8_t> Show::SerializeShowData() const
 
     // add selection
     if (!mSelectionList.empty()) {
-        std::vector<uint8_t> selections;
+        std::vector<std::byte> selections;
         for (auto&& i : mSelectionList) {
             Append(selections, uint32_t(i));
         }
@@ -326,11 +326,11 @@ std::vector<uint8_t> Show::SerializeShowData() const
     return result;
 }
 
-std::vector<uint8_t> Show::SerializeShow() const
+auto Show::SerializeShow() const -> std::vector<std::byte>
 {
     using Parser::Append;
     using Parser::Construct_block;
-    std::vector<uint8_t> result;
+    std::vector<std::byte> result;
     // show               = START , SHOW ;
     // START              = INGL_INGL , INGL_VERS ;
     // SHOW               = INGL_SHOW , BigEndianInt32(DataTill_SHOW_END) ,
@@ -1024,7 +1024,7 @@ using namespace Parser;
 static auto
 Construct_show_zero_points_zero_labels_zero_description()
 {
-    std::vector<uint8_t> show_data;
+    std::vector<std::byte> show_data;
     Append(show_data, Construct_block(INGL_SIZE, std::vector<uint8_t>(4)));
     Append(show_data, Construct_block(INGL_LABL, std::vector<uint8_t>{}));
     Append(show_data, Construct_block(INGL_DESC, std::vector<uint8_t>(1)));
@@ -1035,7 +1035,7 @@ Construct_show_zero_points_zero_labels_zero_description()
 
 static auto Construct_show_zero_points_zero_labels()
 {
-    std::vector<uint8_t> show_data;
+    std::vector<std::byte> show_data;
     Append(show_data, Construct_block(INGL_SIZE, std::vector<uint8_t>(4)));
     Append(show_data, Construct_block(INGL_LABL, std::vector<uint8_t>{}));
     Append(show_data, Construct_block(INGL_CURR, std::vector<uint8_t>(4)));
@@ -1045,14 +1045,14 @@ static auto Construct_show_zero_points_zero_labels()
 
 static auto Construct_show_zero_points_zero_labels_1_sheet_and_random()
 {
-    std::vector<uint8_t> show_data;
+    std::vector<std::byte> show_data;
     Append(show_data, Construct_block(0x12345678, std::vector<uint8_t>(4)));
     Append(show_data, Construct_block(INGL_SIZE, std::vector<uint8_t>(4)));
     Append(show_data, Construct_block(0x87654321, std::vector<uint8_t>(13)));
     Append(show_data, Construct_block(INGL_LABL, std::vector<uint8_t>{}));
     Append(show_data, Construct_block(0xDEADBEEF, std::vector<uint8_t>(1)));
 
-    std::vector<uint8_t> sheet_data;
+    std::vector<std::byte> sheet_data;
     Append(sheet_data, Construct_block(INGL_NAME, std::vector<uint8_t>{ '1', '\0' }));
     Append(sheet_data, Construct_block(INGL_DURA, std::vector<uint8_t>{ 0, 0, 0, 1 }));
     Append(sheet_data, Construct_block(INGL_PNTS, std::vector<uint8_t>{}));
@@ -1069,8 +1069,9 @@ void Show::CC_show_round_trip_test()
 {
     auto blank_show = Show::Create(ShowMode::GetDefaultShowMode());
     auto blank_show_data = blank_show->SerializeShow();
-    std::vector<char> char_data{ blank_show_data.begin(), blank_show_data.end() };
-    std::istringstream is(std::string{ char_data.data(), char_data.size() });
+    auto char_data = std::string{};
+    std::transform(blank_show_data.begin(), blank_show_data.end(), std::back_inserter(char_data), [](auto a) { return std::to_integer<char>(a); });
+    std::istringstream is(char_data);
     auto re_read_show = Show::Create(ShowMode::GetDefaultShowMode(), is);
     auto re_read_show_data = re_read_show->SerializeShow();
     bool is_equal = blank_show_data.size() == re_read_show_data.size() && std::equal(blank_show_data.begin(), blank_show_data.end(), re_read_show_data.begin());
@@ -1080,25 +1081,25 @@ void Show::CC_show_round_trip_test()
 
 void Show::CC_show_round_trip_test_with_number_label_description()
 {
-    std::vector<uint8_t> point_data;
+    std::vector<std::byte> point_data;
     Append(point_data, uint32_t{ 1 });
-    std::vector<uint8_t> data;
+    std::vector<std::byte> data;
     Append(data, Construct_block(INGL_SIZE, point_data));
     Append(data, Construct_block(INGL_LABL, std::vector<char>{ 'p', 'o', 'i', 'n', 't', '\0' }));
     Append(data, Construct_block(INGL_DESC, std::vector<char>{ 'd', 'e', 's', 'c', 'r', 'i', 'p', 't', 'i', 'o', 'n', '\0' }));
-    std::vector<uint8_t> curr_data;
+    std::vector<std::byte> curr_data;
     Append(curr_data, uint32_t{ 0 });
     Append(data, Construct_block(INGL_CURR, curr_data));
     Append(data, Construct_block(INGL_MODE, ShowMode::GetDefaultShowMode().Serialize()));
     auto show_data = Construct_block(INGL_SHOW, data);
 
-    Show show1(ShowMode::GetDefaultShowMode(), Reader({ (const uint8_t*)show_data.data(), show_data.size() }));
+    Show show1(ShowMode::GetDefaultShowMode(), Reader({ show_data.data(), show_data.size() }));
     auto show1_data = show1.SerializeShow();
     // eat header
     show1_data.erase(show1_data.begin(), show1_data.begin() + 8);
     for (auto i = 0llu; i < show1_data.size(); ++i) {
         if (show1_data.at(i) != show_data.at(i))
-            std::cout << "Wrong at " << i << ", " << show1_data.at(i) << "\n";
+            std::cout << "Wrong at " << i << ", " << std::to_integer<char>(show1_data.at(i)) << "\n";
     }
     auto is_equal = show1_data.size() == show_data.size() && std::equal(show1_data.begin(), show1_data.end(), show_data.begin());
     (void)is_equal;
@@ -1119,7 +1120,7 @@ void Show::CC_show_round_trip_test_with_different_show_modes()
     // eat header
     show1_data.erase(show1_data.begin(), show1_data.begin() + 8);
 
-    Show show2(ShowMode::GetDefaultShowMode(), Reader({ (uint8_t const*)show1_data.data(), show1_data.size() }));
+    Show show2(ShowMode::GetDefaultShowMode(), Reader({ show1_data.data(), show1_data.size() }));
     assert(show2.GetShowMode().HashW() == 36);
 }
 
@@ -1127,7 +1128,7 @@ void Show::CC_show_blank_desc_test()
 {
     auto show_zero_points_zero_labels_zero_description = Construct_show_zero_points_zero_labels_zero_description();
     Show show1(ShowMode::GetDefaultShowMode(),
-        Reader({ (uint8_t const*)show_zero_points_zero_labels_zero_description.data(),
+        Reader({ show_zero_points_zero_labels_zero_description.data(),
             show_zero_points_zero_labels_zero_description.size() }));
     auto show1_data = show1.SerializeShow();
     // eat header
@@ -1140,7 +1141,7 @@ void Show::CC_show_blank_desc_test()
 
     // now remove the description and they should be equal
     auto show_zero_points_zero_labels = Construct_show_zero_points_zero_labels();
-    Show show2(ShowMode::GetDefaultShowMode(), Reader({ (uint8_t const*)show_zero_points_zero_labels.data(), show_zero_points_zero_labels.size() }));
+    Show show2(ShowMode::GetDefaultShowMode(), Reader({ show_zero_points_zero_labels.data(), show_zero_points_zero_labels.size() }));
     auto show2_data = show2.SerializeShow();
     show2_data.erase(show2_data.begin(), show2_data.begin() + 8);
     is_equal = show2_data.size() == show_zero_points_zero_labels.size() && std::equal(show2_data.begin(), show2_data.end(), show_zero_points_zero_labels.begin());
@@ -1157,7 +1158,8 @@ void Show::CC_show_future_show_test()
     // except the data gets reverted
     auto blank_show = Show::Create(ShowMode::GetDefaultShowMode());
     auto blank_show_data = blank_show->SerializeShow();
-    std::vector<char> char_data{ blank_show_data.begin(), blank_show_data.end() };
+    auto char_data = std::vector<char>{};
+    std::transform(blank_show_data.begin(), blank_show_data.end(), std::back_inserter(char_data), [](auto a) { return std::to_integer<char>(a); });
     assert(char_data.at(6) - '0' == CC_MAJOR_VERSION && char_data.at(7) - '0' == CC_MINOR_VERSION);
     ++char_data.at(6);
     ++char_data.at(7);
@@ -1177,7 +1179,7 @@ void Show::CC_show_wrong_size_throws_exception()
     auto show_data = Construct_block(INGL_SHOW, points_3);
     bool hit_exception = false;
     try {
-        Show show1(ShowMode::GetDefaultShowMode(), Reader({ (uint8_t const*)show_data.data(), show_data.size() }));
+        Show show1(ShowMode::GetDefaultShowMode(), Reader({ show_data.data(), show_data.size() }));
     } catch (CC_FileException const&) {
         hit_exception = true;
     }
@@ -1189,8 +1191,8 @@ void Show::CC_show_wrong_size_throws_exception()
 void Show::CC_show_wrong_size_number_labels_throws()
 {
     {
-        std::vector<uint8_t> point_data(4);
-        put_big_long(point_data.data(), 1);
+        std::vector<std::byte> point_data(4);
+        details::put_big_long(point_data.data(), 1);
         auto points(Construct_block(INGL_SIZE, point_data));
         auto no_labels(Construct_block(INGL_LABL, std::vector<uint8_t>{}));
         auto t_show_data = points;
@@ -1198,7 +1200,7 @@ void Show::CC_show_wrong_size_number_labels_throws()
         auto show_data = Construct_block(INGL_SHOW, t_show_data);
         bool hit_exception = false;
         try {
-            Show show1(ShowMode::GetDefaultShowMode(), Reader({ (uint8_t const*)show_data.data(), show_data.size() }));
+            Show show1(ShowMode::GetDefaultShowMode(), Reader({ show_data.data(), show_data.size() }));
         } catch (CC_FileException const&) {
             hit_exception = true;
         }
@@ -1206,8 +1208,8 @@ void Show::CC_show_wrong_size_number_labels_throws()
         assert(hit_exception);
     }
     {
-        std::vector<uint8_t> point_data(4);
-        put_big_long(point_data.data(), 1);
+        std::vector<std::byte> point_data(4);
+        details::put_big_long(point_data.data(), 1);
         auto points(Construct_block(INGL_SIZE, point_data));
         auto labels(Construct_block(INGL_LABL, std::vector<char>{ 'a', '\0', 'b', '\0' }));
         auto t_show_data = points;
@@ -1215,7 +1217,7 @@ void Show::CC_show_wrong_size_number_labels_throws()
         auto show_data = Construct_block(INGL_SHOW, t_show_data);
         bool hit_exception = false;
         try {
-            Show show1(ShowMode::GetDefaultShowMode(), Reader({ (uint8_t const*)show_data.data(), show_data.size() }));
+            Show show1(ShowMode::GetDefaultShowMode(), Reader({ show_data.data(), show_data.size() }));
         } catch (CC_FileException const&) {
             hit_exception = true;
         }
@@ -1232,14 +1234,14 @@ void Show::CC_show_wrong_size_description()
         auto no_labels(Construct_block(INGL_LABL, std::vector<uint8_t>{}));
         auto descr(
             Construct_block(INGL_DESC, std::vector<char>{ 'a', 'b', 'c', '\0' }));
-        descr.at(9) = '\0';
+        descr.at(9) = std::byte{};
         auto t_show_data = no_points;
         t_show_data.insert(t_show_data.end(), no_labels.begin(), no_labels.end());
         t_show_data.insert(t_show_data.end(), descr.begin(), descr.end());
         auto show_data = Construct_block(INGL_SHOW, t_show_data);
         bool hit_exception = false;
         try {
-            Show show1(ShowMode::GetDefaultShowMode(), Reader({ (uint8_t const*)show_data.data(), show_data.size() }));
+            Show show1(ShowMode::GetDefaultShowMode(), Reader({ show_data.data(), show_data.size() }));
         } catch (CC_FileException const&) {
             hit_exception = true;
         }
@@ -1253,7 +1255,7 @@ void Show::CC_show_extra_cruft_ok()
 {
     // now remove the description and they should be equal
     auto extra_cruft = Construct_show_zero_points_zero_labels_1_sheet_and_random();
-    Show show1(ShowMode::GetDefaultShowMode(), Reader({ (uint8_t const*)extra_cruft.data(), extra_cruft.size() }));
+    Show show1(ShowMode::GetDefaultShowMode(), Reader({ extra_cruft.data(), extra_cruft.size() }));
     auto show1_data = show1.SerializeShow();
 
     auto blank_show = Show::Create(ShowMode::GetDefaultShowMode());
@@ -1266,10 +1268,10 @@ void Show::CC_show_extra_cruft_ok()
 // show with nothing should fail:
 void Show::CC_show_with_nothing_throws()
 {
-    std::vector<uint8_t> empty{};
+    std::vector<std::byte> empty{};
     bool hit_exception = false;
     try {
-        Show show1(ShowMode::GetDefaultShowMode(), Reader({ (uint8_t const*)empty.data(), empty.size() }));
+        Show show1(ShowMode::GetDefaultShowMode(), Reader({ empty.data(), empty.size() }));
     } catch (CC_FileException const&) {
         hit_exception = true;
     }

@@ -153,7 +153,7 @@ Sheet::Sheet(Version_3_3_and_earlier, size_t numPoints, Reader& reader, ParseErr
 {
     // Read in sheet name
     // <INGL_NAME><size><string + 1>
-    std::vector<uint8_t> data = reader.ReadCheckIDandFillData(INGL_NAME);
+    auto data = reader.ReadCheckIDandFillData(INGL_NAME);
     mName = (const char*)&data[0];
 
     // read in the duration:
@@ -413,24 +413,24 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
     }
 }
 
-std::vector<uint8_t> Sheet::SerializeAllPoints() const
+auto Sheet::SerializeAllPoints() const -> std::vector<std::byte>
 {
     // for each of the points, serialize them.  Don't need to wrap in block
     // because it's not specified that way
-    std::vector<uint8_t> result;
+    std::vector<std::byte> result;
     for (auto&& i : mPoints) {
         Parser::Append(result, i.Serialize());
     }
     return result;
 }
 
-std::vector<uint8_t> Sheet::SerializeContinuityData() const
+auto Sheet::SerializeContinuityData() const -> std::vector<std::byte>
 {
     // for each continuity in use, serialize them.
-    std::vector<uint8_t> result;
+    std::vector<std::byte> result;
     for (auto& current_symbol : k_symbols) {
         if (ContinuityInUse(current_symbol)) {
-            std::vector<uint8_t> continuity;
+            std::vector<std::byte> continuity;
             Parser::Append(continuity, static_cast<uint8_t>(current_symbol));
             Parser::Append(continuity, mAnimationContinuity.at(current_symbol).Serialize());
             Parser::Append(result, Parser::Construct_block(INGL_EVCT, continuity));
@@ -439,9 +439,9 @@ std::vector<uint8_t> Sheet::SerializeContinuityData() const
     return result;
 }
 
-std::vector<uint8_t> Sheet::SerializePrintContinuityData() const
+auto Sheet::SerializePrintContinuityData() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    std::vector<std::byte> result;
     Parser::AppendAndNullTerminate(
         result, mPrintableContinuity.GetPrintNumber());
     Parser::AppendAndNullTerminate(
@@ -449,9 +449,9 @@ std::vector<uint8_t> Sheet::SerializePrintContinuityData() const
     return result;
 }
 
-std::vector<uint8_t> Sheet::SerializeBackgroundImageData() const
+auto Sheet::SerializeBackgroundImageData() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    std::vector<std::byte> result;
     Parser::Append(result, static_cast<uint32_t>(mBackgroundImages.size()));
     for (auto&& i : mBackgroundImages) {
         Parser::Append(result, Serialize(i));
@@ -459,14 +459,14 @@ std::vector<uint8_t> Sheet::SerializeBackgroundImageData() const
     return result;
 }
 
-std::vector<uint8_t> Sheet::SerializeSheetData() const
+auto Sheet::SerializeSheetData() const -> std::vector<std::byte>
 {
     // SHEET_DATA         = NAME , DURATION , ALL_POINTS , CONTINUITY,
     // PRINT_CONTINUITY ;
 
-    std::vector<uint8_t> result;
+    std::vector<std::byte> result;
     // Write NAME
-    std::vector<uint8_t> tstring;
+    std::vector<std::byte> tstring;
     Parser::AppendAndNullTerminate(tstring, GetName());
     Parser::Append(
         result, Parser::Construct_block(INGL_NAME, tstring));
@@ -496,9 +496,9 @@ std::vector<uint8_t> Sheet::SerializeSheetData() const
 // SHEET_DATA         = NAME , DURATION , ALL_POINTS , VCONTINUITY, [
 // PRINT_CONTINUITY ] ;
 // SHEET_END          = INGL_END , INGL_SHET ;
-std::vector<uint8_t> Sheet::SerializeSheet() const
+auto Sheet::SerializeSheet() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    std::vector<std::byte> result;
     Parser::Append(result, Parser::Construct_block(INGL_SHET, SerializeSheetData()));
     return result;
 }
@@ -535,7 +535,7 @@ std::vector<Point> Sheet::NewNumPointsPositions(int num, int columns, Coord new_
     auto col = 0;
     auto num_left = num - newpts.size();
     while (num_left--) {
-        newpts.push_back(c);
+        newpts.emplace_back(c);
         ++col;
         c.x += Int2CoordUnits(2);
         if (col >= columns) {

@@ -58,14 +58,14 @@ public:
     ~Sheet();
 
 private:
-    std::vector<uint8_t> SerializeAllPoints() const;
-    std::vector<uint8_t> SerializeContinuityData() const;
-    std::vector<uint8_t> SerializePrintContinuityData() const;
-    std::vector<uint8_t> SerializeBackgroundImageData() const;
-    std::vector<uint8_t> SerializeSheetData() const;
+    auto SerializeAllPoints() const -> std::vector<std::byte>;
+    auto SerializeContinuityData() const -> std::vector<std::byte>;
+    auto SerializePrintContinuityData() const -> std::vector<std::byte>;
+    auto SerializeBackgroundImageData() const -> std::vector<std::byte>;
+    auto SerializeSheetData() const -> std::vector<std::byte>;
 
 public:
-    std::vector<uint8_t> SerializeSheet() const;
+    auto SerializeSheet() const -> std::vector<std::byte>;
 
     // continuity Functions
     const Continuity& GetContinuityBySymbol(SYMBOL_TYPE i) const;

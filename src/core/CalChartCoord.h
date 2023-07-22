@@ -44,7 +44,9 @@ struct CoordBasic {
         intersect,
     };
 
-    explicit constexpr CoordBasic(CoordBasic::units xval = 0)
+    constexpr CoordBasic() = default;
+
+    constexpr CoordBasic(CoordBasic::units xval)
         : x(xval)
         , y(0)
     {
@@ -113,7 +115,8 @@ struct CoordBasic {
 
     [[nodiscard]] auto DetectCollision(CoordBasic<T> c) const -> CollisionType;
 
-    units x, y;
+    units x{};
+    units y{};
 };
 
 using Coord = CoordBasic<int16_t>;

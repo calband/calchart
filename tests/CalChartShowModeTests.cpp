@@ -2,7 +2,7 @@
 #include "CalChartShowMode.h"
 #include <catch2/catch_test_macros.hpp>
 
-// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers, readability-function-cognitive-complexity)
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers, cppcoreguidelines-avoid-do-while, readability-magic-numbers, readability-function-cognitive-complexity, misc-use-anonymous-namespace)
 
 TEST_CASE("ShowModeBasics", "CalChartShowMode")
 {
@@ -29,4 +29,4 @@ TEST_CASE("Draw", "CalChartShowMode")
     TestCreateOutline(std::vector(cmds.begin(), cmds.begin() + 4));
 }
 
-// NOLINTEND(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers, readability-function-cognitive-complexity)
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers, cppcoreguidelines-avoid-do-while, readability-magic-numbers, readability-function-cognitive-complexity, misc-use-anonymous-namespace)

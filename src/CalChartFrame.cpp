@@ -588,7 +588,7 @@ void CalChartFrame::OnCmdCopySheet(wxCommandEvent&)
     if (wxTheClipboard->Open()) {
         std::unique_ptr<wxCustomDataObject> clipboardObject(
             new wxCustomDataObject(kSheetDataClipboardFormat));
-        std::vector<uint8_t> serializedSheet = GetShow()->GetCurrentSheet()->SerializeSheet();
+        auto serializedSheet = GetShow()->GetCurrentSheet()->SerializeSheet();
 
         auto numPoints = GetShow()->GetNumPoints();
 
@@ -622,7 +622,7 @@ void CalChartFrame::OnCmdPasteSheet(wxCommandEvent&)
                 wxTheClipboard->Close();
                 return;
             }
-            auto reader = CalChart::Reader({ (uint8_t const*)(clipboardObject.GetData()) + sizeof(numPoints),
+            auto reader = CalChart::Reader({ static_cast<std::byte const*>(clipboardObject.GetData()) + sizeof(numPoints),
                 clipboardObject.GetDataSize() - sizeof(numPoints) });
             reader.Get<uint32_t>();
             reader.Get<uint32_t>();

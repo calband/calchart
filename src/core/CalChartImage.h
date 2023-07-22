@@ -35,7 +35,7 @@ struct ImageData {
     std::vector<unsigned char> alpha;
 };
 
-std::pair<ImageData, Reader> CreateImageData(Reader);
-std::vector<uint8_t> Serialize(ImageData const&);
+auto CreateImageData(Reader) -> std::pair<ImageData, Reader>;
+auto Serialize(ImageData const&) -> std::vector<std::byte>;
 
 }

@@ -49,12 +49,12 @@ class Point {
 public:
     static constexpr auto kNumRefPoints = 3;
     Point();
-    Point(Coord const& pos)
+    explicit Point(Coord const& pos)
         : Point(pos, SYMBOL_PLAIN){};
     Point(Coord const& pos, SYMBOL_TYPE sym);
 
     explicit Point(Reader);
-    [[nodiscard]] auto Serialize() const -> std::vector<uint8_t>;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte>;
 
     [[nodiscard]] auto GetFlip() const { return mFlags.test(kPointLabelFlipped); }
     void Flip(bool val = true);
@@ -70,22 +70,26 @@ public:
     [[nodiscard]] auto GetDrawCommands(std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) const { return GetDrawCommands(0, label, dotRatio, pLineRatio, sLineRatio); }
 
 private:
-    enum { kPointLabelFlipped,
+    enum {
+        kPointLabelFlipped,
         kLabelIsInvisible,
-        kTotalBits };
+        kTotalBits
+    };
 
-    std::bitset<kTotalBits> mFlags;
-    SYMBOL_TYPE mSym;
-    Coord mPos;
-    std::array<Coord, kNumRefPoints> mRef;
+    std::bitset<kTotalBits> mFlags{};
+    SYMBOL_TYPE mSym{};
+    Coord mPos{};
+    std::array<Coord, kNumRefPoints> mRef{};
 
     [[nodiscard]] auto GetSymbol() const { return mSym; }
     void SetSymbol(SYMBOL_TYPE sym);
 
+    [[nodiscard]] auto SerializeHelper() const -> std::vector<std::byte>;
+
     friend class Sheet;
 
     friend struct Point_values;
-    friend bool Check_Point(const Point&, const struct Point_values&);
+    friend auto Check_Point(const Point&, const struct Point_values&) -> bool;
 };
 
 void Point_UnitTests();

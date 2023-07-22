@@ -72,7 +72,7 @@ public:
     static auto CreateShowMode(Coord size, Coord offset, Coord border1, Coord border2, uint16_t whash, uint16_t ehash, YardLinesInfo_t const& yardlines) -> ShowMode;
     static auto CreateShowMode(CalChart::Reader reader) -> ShowMode;
 
-    [[nodiscard]] auto Serialize() const -> std::vector<uint8_t>;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte>;
 
     [[nodiscard]] auto GetShowModeData() const -> ShowModeData_t;
 
