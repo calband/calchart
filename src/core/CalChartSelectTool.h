@@ -28,6 +28,7 @@
  * that you use to select the points.
  */
 
+#include "CalChartCoord.h"
 #include "CalChartShapes.h"
 #include "CalChartTypes.h"
 
@@ -38,7 +39,6 @@
 
 namespace CalChart {
 class Shape;
-struct Coord;
 
 enum class Select {
     Box,
