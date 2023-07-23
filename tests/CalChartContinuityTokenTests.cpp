@@ -15,7 +15,7 @@ auto serializeDeserialize(T const& cont)
 {
     auto result = cont.Serialize();
     auto uut2 = T{};
-    uut2.Deserialize({ { result.data(), result.size() } });
+    uut2.Deserialize(Reader{ { result.data(), result.size() } });
     return uut2;
 }
 

@@ -41,6 +41,22 @@ Point::Point(Coord const& p, SYMBOL_TYPE sym)
     mRef.fill(mPos);
 }
 
+auto ReadPositionData(Reader& reader)
+{
+    auto pos = Coord{};
+    pos.x = static_cast<Coord::units>(reader.Get<uint16_t>());
+    pos.y = static_cast<Coord::units>(reader.Get<uint16_t>());
+    return pos;
+}
+
+auto WritePositionData(Coord pos)
+{
+    auto result = std::vector<std::byte>{};
+    Parser::Append(result, static_cast<uint16_t>(pos.x));
+    Parser::Append(result, static_cast<uint16_t>(pos.y));
+    return result;
+}
+
 // EACH_POINT_DATA    = BigEndianInt8(Size_rest_of_EACH_POINT_DATA) ,
 // POSITION_DATA , REF_POSITION_DATA , POINT_SYMBOL_DATA , POINT_LABEL_FLIP ;
 // POSITION_DATA      = BigEndianInt16( x ) , BigEndianInt16( y ) ;
@@ -51,18 +67,14 @@ Point::Point(Coord const& p, SYMBOL_TYPE sym)
 Point::Point(Reader reader)
     : mSym(SYMBOL_PLAIN)
 {
-    mPos.x = reader.Get<uint16_t>();
-    mPos.y = reader.Get<uint16_t>();
+    mPos = ReadPositionData(reader);
     // set all the reference points
-    for (unsigned j = 0; j < Point::kNumRefPoints; j++) {
-        mRef[j] = mPos;
-    }
+    mRef.fill(mPos);
 
-    auto num_ref = reader.Get<uint8_t>();
+    auto const num_ref = reader.Get<uint8_t>();
     for (auto i = 0; i < num_ref; ++i) {
-        auto ref = reader.Get<uint8_t>();
-        mRef[ref - 1].x = reader.Get<uint16_t>();
-        mRef[ref - 1].y = reader.Get<uint16_t>();
+        auto const ref = reader.Get<uint8_t>();
+        mRef.at(ref - 1) = ReadPositionData(reader);
     }
     mSym = static_cast<SYMBOL_TYPE>(reader.Get<uint8_t>());
     mFlags.set(kPointLabelFlipped, (reader.Get<uint8_t>()) > 0);
@@ -71,42 +83,46 @@ Point::Point(Reader reader)
     }
 }
 
-std::vector<uint8_t> Point::Serialize() const
+auto Point::SerializeHelper() const -> std::vector<std::byte>
 {
     // how many reference points are we going to write?
-    uint8_t num_ref_pts = 0;
+    auto pointsToWrite = std::vector<unsigned>{};
     for (auto j = 1; j <= Point::kNumRefPoints; j++) {
         if (GetPos(j) != GetPos(0)) {
-            ++num_ref_pts;
+            pointsToWrite.push_back(j);
         }
     }
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     // Point positions
     // Write block size
 
     // Write POSITION
-    Parser::Append(result, uint16_t(GetPos().x));
-    Parser::Append(result, uint16_t(GetPos().y));
+    Parser::Append(result, WritePositionData(GetPos()));
 
     // Write REF_POS
-    Parser::Append(result, uint8_t(num_ref_pts));
-    if (num_ref_pts) {
-        for (auto j = 1; j <= Point::kNumRefPoints; j++) {
-            if (GetPos(j) != GetPos(0)) {
-                Parser::Append(result, uint8_t(j));
-                Parser::Append(result, uint16_t(GetPos(j).x));
-                Parser::Append(result, uint16_t(GetPos(j).y));
-            }
+    Parser::Append(result, static_cast<uint8_t>(pointsToWrite.size()));
+    if (!pointsToWrite.empty()) {
+        for (auto j : pointsToWrite) {
+            Parser::Append(result, static_cast<uint8_t>(j));
+            Parser::Append(result, WritePositionData(GetPos(j)));
         }
     }
 
     // Write SYMBOL
-    Parser::Append(result, uint8_t(GetSymbol()));
+    Parser::Append(result, static_cast<uint8_t>(GetSymbol()));
 
     // Point labels (left or right)
-    Parser::Append(result, uint8_t(GetFlip()));
-    result.insert(result.begin(), uint8_t(result.size()));
+    Parser::Append(result, static_cast<uint8_t>(GetFlip()));
 
+    return result;
+}
+
+auto Point::Serialize() const -> std::vector<std::byte>
+{
+    auto const serializedData = SerializeHelper();
+    std::vector<std::byte> result;
+    Parser::Append(result, static_cast<uint8_t>(serializedData.size()));
+    Parser::Append(result, serializedData);
     return result;
 }
 
@@ -114,7 +130,7 @@ void Point::Flip(bool val) { mFlags.set(kPointLabelFlipped, val); };
 
 void Point::SetLabelVisibility(bool isVisible) { mFlags.set(kLabelIsInvisible, !isVisible); }
 
-Coord Point::GetPos(unsigned ref) const
+auto Point::GetPos(unsigned ref) const -> Coord
 {
     if (ref == 0) {
         return mPos;
@@ -122,7 +138,7 @@ Coord Point::GetPos(unsigned ref) const
     if (ref > kNumRefPoints) {
         throw std::range_error("GetPos() point out of range");
     }
-    return mRef[ref - 1];
+    return mRef.at(ref - 1);
 }
 
 void Point::SetPos(Coord c, unsigned ref)
@@ -134,119 +150,112 @@ void Point::SetPos(Coord c, unsigned ref)
     if (ref > kNumRefPoints) {
         throw std::range_error("SetRefPos() point out of range");
     }
-    mRef[ref - 1] = c;
+    mRef.at(ref - 1) = c;
 }
 
 void Point::SetSymbol(SYMBOL_TYPE s) { mSym = s; }
 
-static auto CreatePointCircle(CalChart::SYMBOL_TYPE symbol, double dotRatio) -> std::vector<CalChart::DrawCommand>
-{
-    auto filled = [](auto symbol) {
+namespace {
+    auto CreatePointCircle(CalChart::SYMBOL_TYPE symbol, double dotRatio) -> std::vector<CalChart::DrawCommand>
+    {
+        auto const filled = [](auto symbol) {
+            switch (symbol) {
+            case CalChart::SYMBOL_SOL:
+            case CalChart::SYMBOL_SOLBKSL:
+            case CalChart::SYMBOL_SOLSL:
+            case CalChart::SYMBOL_SOLX:
+                return true;
+                break;
+            default:
+                return false;
+            }
+        }(symbol);
+
+        auto const circ_r = CalChart::Float2CoordUnits(dotRatio) / 2.0;
+
+        return { CalChart::Draw::Circle({ 0, 0 }, circ_r, filled) };
+    }
+
+    auto CreatePointCross(CalChart::SYMBOL_TYPE symbol, double dotRatio, double pLineRatio, double sLineRatio) -> std::vector<CalChart::DrawCommand>
+    {
+        auto const circ_r = CalChart::Float2CoordUnits(dotRatio) / 2.0;
+        auto const plineoff = circ_r * pLineRatio;
+        auto const slineoff = circ_r * sLineRatio;
+
+        auto drawCmds = std::vector<CalChart::DrawCommand>{};
         switch (symbol) {
-        case CalChart::SYMBOL_SOL:
-        case CalChart::SYMBOL_SOLBKSL:
+        case CalChart::SYMBOL_SL:
+        case CalChart::SYMBOL_X:
+            drawCmds.push_back(CalChart::Draw::Line(-plineoff, plineoff, plineoff, -plineoff));
+            break;
         case CalChart::SYMBOL_SOLSL:
         case CalChart::SYMBOL_SOLX:
-            return true;
+            drawCmds.push_back(CalChart::Draw::Line(-slineoff, slineoff, slineoff, -slineoff));
             break;
         default:
-            return false;
+            break;
         }
-    }(symbol);
-
-    auto const circ_r = CalChart::Float2CoordUnits(dotRatio) / 2.0;
-
-    return { CalChart::Draw::Circle({ 0, 0 }, circ_r, filled) };
-}
-
-static auto CreatePointCross(CalChart::SYMBOL_TYPE symbol, double dotRatio, double pLineRatio, double sLineRatio) -> std::vector<CalChart::DrawCommand>
-{
-    auto const circ_r = CalChart::Float2CoordUnits(dotRatio) / 2.0;
-    auto const plineoff = circ_r * pLineRatio;
-    auto const slineoff = circ_r * sLineRatio;
-
-    auto drawCmds = std::vector<CalChart::DrawCommand>{};
-    switch (symbol) {
-    case CalChart::SYMBOL_SL:
-    case CalChart::SYMBOL_X:
-        drawCmds.push_back(CalChart::Draw::Line(-plineoff, plineoff, plineoff, -plineoff));
-        break;
-    case CalChart::SYMBOL_SOLSL:
-    case CalChart::SYMBOL_SOLX:
-        drawCmds.push_back(CalChart::Draw::Line(-slineoff, slineoff, slineoff, -slineoff));
-        break;
-    default:
-        break;
+        switch (symbol) {
+        case CalChart::SYMBOL_BKSL:
+        case CalChart::SYMBOL_X:
+            drawCmds.push_back(CalChart::Draw::Line(-plineoff, -plineoff, plineoff, plineoff));
+            break;
+        case CalChart::SYMBOL_SOLBKSL:
+        case CalChart::SYMBOL_SOLX:
+            drawCmds.push_back(CalChart::Draw::Line(-slineoff, -slineoff, slineoff, slineoff));
+            break;
+        default:
+            break;
+        }
+        return drawCmds;
     }
-    switch (symbol) {
-    case CalChart::SYMBOL_BKSL:
-    case CalChart::SYMBOL_X:
-        drawCmds.push_back(CalChart::Draw::Line(-plineoff, -plineoff, plineoff, plineoff));
-        break;
-    case CalChart::SYMBOL_SOLBKSL:
-    case CalChart::SYMBOL_SOLX:
-        drawCmds.push_back(CalChart::Draw::Line(-slineoff, -slineoff, slineoff, slineoff));
-        break;
-    default:
-        break;
-    }
-    return drawCmds;
-}
 
-static auto CreatePointLabel(CalChart::Point const& point, std::string const& label, double dotRatio) -> std::vector<CalChart::DrawCommand>
-{
-    if (!point.LabelIsVisible()) {
-        return {};
+    auto CreatePointLabel(CalChart::Point const& point, std::string const& label, double dotRatio) -> std::vector<CalChart::DrawCommand>
+    {
+        if (!point.LabelIsVisible()) {
+            return {};
+        }
+        auto const circ_r = CalChart::Float2CoordUnits(dotRatio) / 2.0;
+        auto anchor = CalChart::Draw::Text::TextAnchor::Bottom;
+        anchor = anchor | (point.GetFlip() ? CalChart::Draw::Text::TextAnchor::Left : CalChart::Draw::Text::TextAnchor::Right);
+        return { CalChart::Draw::Text(-CalChart::Coord(0, circ_r), label, anchor) };
     }
-    auto const circ_r = CalChart::Float2CoordUnits(dotRatio) / 2.0;
-    auto anchor = CalChart::Draw::Text::TextAnchor::Bottom;
-    anchor = anchor | (point.GetFlip() ? CalChart::Draw::Text::TextAnchor::Left : CalChart::Draw::Text::TextAnchor::Right);
-    return { CalChart::Draw::Text(-CalChart::Coord(0, circ_r), label, anchor) };
-}
 
-static auto CreatePoint(CalChart::Point const& point, SYMBOL_TYPE sym, std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) -> std::vector<CalChart::DrawCommand>
-{
-    return CalChart::append(
-        CalChart::append(
-            CreatePointCircle(sym, dotRatio),
-            CreatePointCross(sym, dotRatio, pLineRatio, sLineRatio)),
-        CreatePointLabel(point, label, dotRatio));
+    auto CreatePoint(CalChart::Point const& point, SYMBOL_TYPE sym, std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) -> std::vector<CalChart::DrawCommand>
+    {
+        return CalChart::append(
+            CalChart::append(
+                CreatePointCircle(sym, dotRatio),
+                CreatePointCross(sym, dotRatio, pLineRatio, sLineRatio)),
+            CreatePointLabel(point, label, dotRatio));
+    }
 }
 
 auto Point::GetDrawCommands(unsigned ref, std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) const -> std::vector<CalChart::DrawCommand>
 {
-    return CreatePoint(*this, GetSymbol(), label, dotRatio, pLineRatio, sLineRatio)
-        + GetPos(ref);
+    return CreatePoint(*this, GetSymbol(), label, dotRatio, pLineRatio, sLineRatio) + GetPos(ref);
 }
 
 // Test Suite stuff
 struct Point_values {
-    std::bitset<Point::kTotalBits> mFlags;
-    SYMBOL_TYPE mSym;
-    Coord mPos;
-    Coord mRef[Point::kNumRefPoints];
-    bool GetFlip;
-    bool Visable;
+    std::bitset<Point::kTotalBits> mFlags{};
+    SYMBOL_TYPE mSym{ SYMBOL_PLAIN };
+    Coord mPos{};
+    std::array<Coord, Point::kNumRefPoints> mRef{};
+    bool GetFlip{};
+    bool Visable{};
 };
 
-bool Check_Point(Point const& underTest, Point_values const& values)
+auto Check_Point(Point const& underTest, Point_values const& values) -> bool
 {
-    bool running_value = true;
-    for (unsigned i = 0; i < Point::kNumRefPoints; ++i)
-        running_value = running_value && (underTest.mRef[i] == values.mRef[i]);
-    return running_value && (underTest.mFlags == values.mFlags) && (underTest.mSym == values.mSym) && (underTest.mPos == values.mPos) && (underTest.GetFlip() == values.GetFlip) && (underTest.LabelIsVisible() == values.Visable);
+    return (underTest.mRef == values.mRef) && (underTest.mFlags == values.mFlags) && (underTest.mSym == values.mSym) && (underTest.mPos == values.mPos) && (underTest.GetFlip() == values.GetFlip) && (underTest.LabelIsVisible() == values.Visable);
 }
 
 void Point_UnitTests()
 {
     // test some defaults:
-    Point_values values;
-    values.mFlags = 0;
+    Point_values values{};
     values.mSym = SYMBOL_PLAIN;
-    values.mPos = Coord();
-    for (unsigned i = 0; i < Point::kNumRefPoints; ++i)
-        values.mRef[i] = Coord();
-    values.GetFlip = false;
     values.Visable = true;
 
     // test defaults

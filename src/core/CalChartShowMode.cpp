@@ -150,9 +150,9 @@ auto ShowMode::CreateShowMode(CalChart::Reader reader) -> ShowMode
     return ShowMode::CreateShowMode(values, yardlines);
 }
 
-auto ShowMode::Serialize() const -> std::vector<uint8_t>
+auto ShowMode::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    std::vector<std::byte> result;
     for (uint32_t const i : GetShowModeData()) {
         Parser::Append(result, i);
     }

@@ -439,9 +439,9 @@ void Token::replace(Token const* /*which*/, std::unique_ptr<Token> /*v*/)
     throw std::runtime_error("Error, replace not implemented on this class");
 }
 
-std::vector<uint8_t> Token::Serialize() const
+auto Token::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::Token));
     Parser::Append(result, static_cast<uint32_t>(line));
     Parser::Append(result, static_cast<uint32_t>(col));
@@ -480,9 +480,9 @@ Drawable Point::GetDrawable() const
     };
 }
 
-std::vector<uint8_t> Point::Serialize() const
+auto Point::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::Point));
     Parser::Append(result, super::Serialize());
     return result;
@@ -513,9 +513,9 @@ Drawable PointUnset::GetDrawable() const
     };
 }
 
-std::vector<uint8_t> PointUnset::Serialize() const
+auto PointUnset::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::PointUnset));
     Parser::Append(result, super::Serialize());
     return result;
@@ -551,9 +551,9 @@ Drawable StartPoint::GetDrawable() const
     };
 }
 
-std::vector<uint8_t> StartPoint::Serialize() const
+auto StartPoint::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::StartPoint));
     Parser::Append(result, super::Serialize());
     return result;
@@ -589,9 +589,9 @@ Drawable NextPoint::GetDrawable() const
     };
 }
 
-std::vector<uint8_t> NextPoint::Serialize() const
+auto NextPoint::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::NextPoint));
     Parser::Append(result, super::Serialize());
     return result;
@@ -632,9 +632,9 @@ Drawable RefPoint::GetDrawable() const
     };
 }
 
-std::vector<uint8_t> RefPoint::Serialize() const
+auto RefPoint::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::RefPoint));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, refnum);
@@ -657,9 +657,9 @@ std::ostream& Value::Print(std::ostream& os) const
     return os << "Value:";
 }
 
-std::vector<uint8_t> Value::Serialize() const
+auto Value::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::Value));
     Parser::Append(result, super::Serialize());
     return result;
@@ -690,9 +690,9 @@ Drawable ValueUnset::GetDrawable() const
     };
 }
 
-std::vector<uint8_t> ValueUnset::Serialize() const
+auto ValueUnset::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueUnset));
     Parser::Append(result, super::Serialize());
     return result;
@@ -728,9 +728,9 @@ Drawable ValueFloat::GetDrawable() const
     return { this, parent_ptr, Type::value, std::to_string(val), std::to_string(val), {} };
 }
 
-std::vector<uint8_t> ValueFloat::Serialize() const
+auto ValueFloat::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueFloat));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, val);
@@ -804,9 +804,9 @@ Drawable ValueDefined::GetDrawable() const
     return { this, parent_ptr, type, DefinedValue_strings[val], DefinedValue_strings[val], {} };
 }
 
-std::vector<uint8_t> ValueDefined::Serialize() const
+auto ValueDefined::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueDefined));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, static_cast<uint8_t>(val));
@@ -850,9 +850,9 @@ void ValueAdd::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, val1, val2);
 }
 
-std::vector<uint8_t> ValueAdd::Serialize() const
+auto ValueAdd::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueAdd));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, val1->Serialize());
@@ -898,9 +898,9 @@ void ValueSub::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, val1, val2);
 }
 
-std::vector<uint8_t> ValueSub::Serialize() const
+auto ValueSub::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueSub));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, val1->Serialize());
@@ -946,9 +946,9 @@ void ValueMult::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, val1, val2);
 }
 
-std::vector<uint8_t> ValueMult::Serialize() const
+auto ValueMult::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueMult));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, val1->Serialize());
@@ -1000,9 +1000,9 @@ void ValueDiv::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, val1, val2);
 }
 
-std::vector<uint8_t> ValueDiv::Serialize() const
+auto ValueDiv::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueDiv));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, val1->Serialize());
@@ -1045,9 +1045,9 @@ void ValueNeg::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, val);
 }
 
-std::vector<uint8_t> ValueNeg::Serialize() const
+auto ValueNeg::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueNeg));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, val->Serialize());
@@ -1086,9 +1086,9 @@ Drawable ValueREM::GetDrawable() const
     };
 }
 
-std::vector<uint8_t> ValueREM::Serialize() const
+auto ValueREM::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueREM));
     Parser::Append(result, super::Serialize());
     return result;
@@ -1134,9 +1134,9 @@ void ValueVar::Set(AnimationCompile& anim, float v)
     anim.SetVarValue(varnum, v);
 }
 
-std::vector<uint8_t> ValueVar::Serialize() const
+auto ValueVar::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueVar));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, static_cast<uint8_t>(varnum));
@@ -1170,9 +1170,9 @@ Drawable ValueVarUnset::GetDrawable() const
     };
 }
 
-std::vector<uint8_t> ValueVarUnset::Serialize() const
+auto ValueVarUnset::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ValueVarUnset));
     Parser::Append(result, super::Serialize());
     return result;
@@ -1217,9 +1217,9 @@ void FuncDir::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, pnt);
 }
 
-std::vector<uint8_t> FuncDir::Serialize() const
+auto FuncDir::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::FuncDir));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt->Serialize());
@@ -1268,9 +1268,9 @@ void FuncDirFrom::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, pnt_start, pnt_end);
 }
 
-std::vector<uint8_t> FuncDirFrom::Serialize() const
+auto FuncDirFrom::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::FuncDirFrom));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt_start->Serialize());
@@ -1317,9 +1317,9 @@ void FuncDist::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, pnt);
 }
 
-std::vector<uint8_t> FuncDist::Serialize() const
+auto FuncDist::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::FuncDist));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt->Serialize());
@@ -1364,9 +1364,9 @@ void FuncDistFrom::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, pnt_start, pnt_end);
 }
 
-std::vector<uint8_t> FuncDistFrom::Serialize() const
+auto FuncDistFrom::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::FuncDistFrom));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt_start->Serialize());
@@ -1421,9 +1421,9 @@ void FuncEither::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, dir1, dir2, pnt);
 }
 
-std::vector<uint8_t> FuncEither::Serialize() const
+auto FuncEither::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::FuncEither));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, dir1->Serialize());
@@ -1471,9 +1471,9 @@ void FuncOpp::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, dir);
 }
 
-std::vector<uint8_t> FuncOpp::Serialize() const
+auto FuncOpp::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::FuncOpp));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, dir->Serialize());
@@ -1520,9 +1520,9 @@ void FuncStep::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, numbeats, blksize, pnt);
 }
 
-std::vector<uint8_t> FuncStep::Serialize() const
+auto FuncStep::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::FuncStep));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, numbeats->Serialize());
@@ -1549,9 +1549,9 @@ std::ostream& Procedure::Print(std::ostream& os) const
     return os << "Procedure: ";
 }
 
-std::vector<uint8_t> Procedure::Serialize() const
+auto Procedure::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::Procedure));
     Parser::Append(result, super::Serialize());
     return result;
@@ -1582,9 +1582,9 @@ Drawable ProcUnset::GetDrawable() const
     };
 }
 
-std::vector<uint8_t> ProcUnset::Serialize() const
+auto ProcUnset::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcUnset));
     Parser::Append(result, super::Serialize());
     return result;
@@ -1652,9 +1652,9 @@ void ProcSet::replace(Token const* which, std::unique_ptr<Token> v)
     SetParentPtr_helper(this, var, val);
 }
 
-std::vector<uint8_t> ProcSet::Serialize() const
+auto ProcSet::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcSet));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, var->Serialize());
@@ -1698,9 +1698,9 @@ Drawable ProcBlam::GetDrawable() const
     };
 }
 
-std::vector<uint8_t> ProcBlam::Serialize() const
+auto ProcBlam::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcBlam));
     Parser::Append(result, super::Serialize());
     return result;
@@ -1743,9 +1743,9 @@ void ProcCM::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, pnt1, pnt2, stps, dir1, dir2, numbeats);
 }
 
-std::vector<uint8_t> ProcCM::Serialize() const
+auto ProcCM::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcCM));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt1->Serialize());
@@ -1834,9 +1834,9 @@ void ProcDMCM::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, pnt1, pnt2, numbeats);
 }
 
-std::vector<uint8_t> ProcDMCM::Serialize() const
+auto ProcDMCM::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcDMCM));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt1->Serialize());
@@ -1915,9 +1915,9 @@ void ProcDMHS::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, pnt);
 }
 
-std::vector<uint8_t> ProcDMHS::Serialize() const
+auto ProcDMHS::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcDMHS));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt->Serialize());
@@ -1967,9 +1967,9 @@ void ProcEven::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, stps, pnt);
 }
 
-std::vector<uint8_t> ProcEven::Serialize() const
+auto ProcEven::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcEven));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, stps->Serialize());
@@ -2031,9 +2031,9 @@ void ProcEWNS::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, pnt);
 }
 
-std::vector<uint8_t> ProcEWNS::Serialize() const
+auto ProcEWNS::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcEWNS));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt->Serialize());
@@ -2167,9 +2167,9 @@ void ProcFountain::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, dir1, dir2, stepsize1, stepsize2, pnt);
 }
 
-std::vector<uint8_t> ProcFountain::Serialize() const
+auto ProcFountain::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcFountain));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, dir1->Serialize());
@@ -2243,9 +2243,9 @@ void ProcFM::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, stps, dir);
 }
 
-std::vector<uint8_t> ProcFM::Serialize() const
+auto ProcFM::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcFM));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, stps->Serialize());
@@ -2309,9 +2309,9 @@ static inline Coord::units roundcoord(Coord::units a, Coord::units mod)
     return a;
 }
 
-std::vector<uint8_t> ProcFMTO::Serialize() const
+auto ProcFMTO::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcFMTO));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt->Serialize());
@@ -2365,9 +2365,9 @@ void ProcGrid::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, grid);
 }
 
-std::vector<uint8_t> ProcGrid::Serialize() const
+auto ProcGrid::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcGrid));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, grid->Serialize());
@@ -2431,9 +2431,9 @@ void ProcHSCM::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, pnt1, pnt2, numbeats);
 }
 
-std::vector<uint8_t> ProcHSCM::Serialize() const
+auto ProcHSCM::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcHSCM));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt1->Serialize());
@@ -2511,9 +2511,9 @@ void ProcHSDM::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, pnt);
 }
 
-std::vector<uint8_t> ProcHSDM::Serialize() const
+auto ProcHSDM::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcHSDM));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt->Serialize());
@@ -2558,9 +2558,9 @@ void ProcMagic::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, pnt);
 }
 
-std::vector<uint8_t> ProcMagic::Serialize() const
+auto ProcMagic::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcMagic));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt->Serialize());
@@ -2631,9 +2631,9 @@ void ProcMarch::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, stpsize, stps, dir, facedir);
 }
 
-std::vector<uint8_t> ProcMarch::Serialize() const
+auto ProcMarch::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcMarch));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, stpsize->Serialize());
@@ -2692,9 +2692,9 @@ void ProcMT::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, numbeats, dir);
 }
 
-std::vector<uint8_t> ProcMT::Serialize() const
+auto ProcMT::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcMT));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, numbeats->Serialize());
@@ -2740,9 +2740,9 @@ void ProcMTRM::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, dir);
 }
 
-std::vector<uint8_t> ProcMTRM::Serialize() const
+auto ProcMTRM::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcMTRM));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, dir->Serialize());
@@ -2802,9 +2802,9 @@ void ProcNSEW::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, pnt);
 }
 
-std::vector<uint8_t> ProcNSEW::Serialize() const
+auto ProcNSEW::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcNSEW));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, pnt->Serialize());
@@ -2870,9 +2870,9 @@ void ProcRotate::replace(Token const* which, std::unique_ptr<Token> v)
     replace_helper<NumParts>(this, which, v, ang, stps, pnt);
 }
 
-std::vector<uint8_t> ProcRotate::Serialize() const
+auto ProcRotate::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    auto result = std::vector<std::byte>{};
     Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcRotate));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, ang->Serialize());

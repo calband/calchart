@@ -181,7 +181,7 @@ public:
     void SetParentPtr(Token* p) { parent_ptr = p; }
     virtual void replace(Token const* which, std::unique_ptr<Token> v);
 
-    virtual std::vector<uint8_t> Serialize() const;
+    [[nodiscard]] virtual auto Serialize() const -> std::vector<std::byte>;
     virtual Reader Deserialize(Reader);
 
     uint32_t line, col;
@@ -220,7 +220,7 @@ public:
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 private:
@@ -236,7 +236,7 @@ public:
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 private:
@@ -254,7 +254,7 @@ public:
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 private:
@@ -272,7 +272,7 @@ public:
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 private:
@@ -291,7 +291,7 @@ public:
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -318,7 +318,7 @@ public:
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const = 0;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 private:
@@ -335,7 +335,7 @@ public:
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 private:
@@ -354,7 +354,7 @@ public:
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -380,7 +380,7 @@ public:
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -416,7 +416,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -453,7 +453,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -490,7 +490,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -527,7 +527,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -563,7 +563,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -587,7 +587,7 @@ public:
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 private:
@@ -607,7 +607,7 @@ public:
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -631,7 +631,7 @@ public:
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 private:
@@ -659,7 +659,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -695,7 +695,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -731,7 +731,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -767,7 +767,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -805,7 +805,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -842,7 +842,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -879,7 +879,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -907,7 +907,7 @@ public:
     virtual Drawable GetDrawable() const = 0;
     virtual bool IsValid() const { return true; }
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 };
 
@@ -921,7 +921,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual bool IsValid() const override { return false; }
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 private:
@@ -950,7 +950,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
     struct ReplaceError_NotAVar : std::exception {
@@ -979,7 +979,7 @@ public:
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -1020,7 +1020,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -1059,7 +1059,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -1096,7 +1096,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -1133,7 +1133,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -1170,7 +1170,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -1210,7 +1210,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -1263,7 +1263,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -1299,7 +1299,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -1335,7 +1335,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -1373,7 +1373,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -1410,7 +1410,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -1446,7 +1446,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -1486,7 +1486,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -1533,7 +1533,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -1569,7 +1569,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -1605,7 +1605,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:
@@ -1643,7 +1643,7 @@ public:
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
 
-    virtual std::vector<uint8_t> Serialize() const override;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
 
 protected:

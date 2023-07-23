@@ -119,10 +119,9 @@ bool operator==(Continuity const& lhs, Continuity const& rhs)
     });
 }
 
-std::vector<uint8_t>
-Continuity::Serialize() const
+auto Continuity::Serialize() const -> std::vector<std::byte>
 {
-    std::vector<uint8_t> result;
+    std::vector<std::byte> result;
     for (auto&& i : m_parsedContinuity) {
         Parser::Append(result, i->Serialize());
     }

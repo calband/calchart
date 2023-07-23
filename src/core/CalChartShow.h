@@ -83,7 +83,7 @@ public:
     ~Show();
 
 public:
-    std::vector<uint8_t> SerializeShow() const;
+    auto SerializeShow() const -> std::vector<std::byte>;
 
     // Create command, consists of an action and undo action
     Show_command_pair Create_SetCurrentSheetCommand(int n) const;
@@ -183,7 +183,7 @@ private:
     void SetShowMode(ShowMode const&);
 
     // implementation and helper functions
-    std::vector<uint8_t> SerializeShowData() const;
+    auto SerializeShowData() const -> std::vector<std::byte>;
 
     // members
     std::string mDescr;

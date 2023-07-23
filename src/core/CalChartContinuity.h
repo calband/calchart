@@ -61,7 +61,7 @@ public:
     Continuity(Continuity&&) noexcept;
     Continuity& operator=(Continuity&&) noexcept;
 
-    std::vector<uint8_t> Serialize() const;
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte>;
 
     std::vector<std::unique_ptr<Cont::Procedure>> const& GetParsedContinuity() const noexcept { return m_parsedContinuity; }
     auto GetText() const { return m_legacyText; }

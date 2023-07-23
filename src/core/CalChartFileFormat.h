@@ -21,8 +21,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <array>
+#include <cstddef>
 #include <cstring>
 #include <map>
+#include <span>
 #include <sstream>
 #include <stdexcept>
 #include <vector>
@@ -231,40 +234,40 @@ struct Current_version_and_later {
 #define INGL_PONT Make4CharWord('P', 'O', 'N', 'T')
 #define INGL_END Make4CharWord('E', 'N', 'D', ' ')
 
-inline void put_big_word(void* p, uint16_t v)
-{
-    uint8_t* ptr = static_cast<uint8_t*>(p);
-    ptr[0] = (v >> 8) & 0xFF;
-    ptr[1] = (v)&0xFF;
-}
-
-inline void put_big_long(void* p, uint32_t v)
-{
-    uint8_t* ptr = static_cast<uint8_t*>(p);
-    ptr[0] = (v >> 24) & 0xFF;
-    ptr[1] = (v >> 16) & 0xFF;
-    ptr[2] = (v >> 8) & 0xFF;
-    ptr[3] = (v)&0xFF;
-}
-
-class CC_FileException : public std::runtime_error {
-    static std::string GetErrorFromID(uint32_t nameID)
+namespace details {
+    static inline void put_big_word(std::byte* ptr, uint16_t v)
     {
-        uint8_t rawd[4];
-        put_big_long(rawd, nameID);
-        std::stringstream buf;
-        buf << "Wrong ID read:  Read " << rawd[0] << rawd[1] << rawd[2] << rawd[3];
+        ptr[0] = static_cast<std::byte>((v >> 8) & 0xFF);
+        ptr[1] = static_cast<std::byte>((v)&0xFF);
+    }
+
+    inline void put_big_long(std::byte* ptr, uint32_t v)
+    {
+        ptr[0] = static_cast<std::byte>((v >> 24) & 0xFF);
+        ptr[1] = static_cast<std::byte>((v >> 16) & 0xFF);
+        ptr[2] = static_cast<std::byte>((v >> 8) & 0xFF);
+        ptr[3] = static_cast<std::byte>((v)&0xFF);
+    }
+
+}
+class CC_FileException : public std::runtime_error {
+    static auto GetErrorFromID(uint32_t nameID) -> std::string
+    {
+        auto rawd = std::array<std::byte, 4>{};
+        details::put_big_long(rawd.data(), nameID);
+        auto buf = std::stringstream{};
+        buf << "Wrong ID read:  Read " << std::to_integer<uint8_t>(rawd[0]) << std::to_integer<uint8_t>(rawd[1]) << std::to_integer<uint8_t>(rawd[2]) << std::to_integer<uint8_t>(rawd[3]);
         buf << "\n";
         buf << "Check to make sure you are on the latest version of CalChart\n";
-        return std::string(buf.str());
+        return buf.str();
     }
 
 public:
-    CC_FileException(const std::string& reason)
+    explicit CC_FileException(const std::string& reason)
         : std::runtime_error(reason)
     {
     }
-    CC_FileException(uint32_t nameID)
+    explicit CC_FileException(uint32_t nameID)
         : std::runtime_error(GetErrorFromID(nameID)){};
     CC_FileException(const std::string& reason, uint32_t nameID)
         : std::runtime_error(reason + " : " + GetErrorFromID(nameID)){};
@@ -276,18 +279,16 @@ namespace Parser {
         uint32_t d;
     };
 
-    static inline std::ostream& operator<<(std::ostream& os, PrintHeader p)
+    static inline auto operator<<(std::ostream& os, PrintHeader p) -> std::ostream&
     {
-        return os << char(p.d >> 24) << char(p.d >> 16) << char(p.d >> 8)
-                  << char(p.d >> 0);
+        return os << char(p.d >> 24) << char(p.d >> 16) << char(p.d >> 8) << char(p.d >> 0);
     }
 
     template <typename Iter>
-    void DoRecursiveParsing(std::ostream& os, const std::string& prefix, Iter begin,
-        Iter end)
+    void DoRecursiveParsing(std::ostream& os, const std::string& prefix, Iter begin, Iter end)
     {
         auto table = ParseOutLabels(begin, end);
-        std::map<uint32_t, int> counter;
+        auto counter = std::map<uint32_t, int>{};
         for (auto& i : table) {
             os << prefix << "found " << PrintHeader{ std::get<0>(i) } << "\n";
             os << prefix << counter[std::get<0>(i)]++ << "\tsize " << std::get<2>(i)
@@ -297,38 +298,66 @@ namespace Parser {
         }
     }
 
-    template <typename T, typename U>
-    void Append(T& d, const U& s)
+    inline void Append(std::vector<std::byte>& d, uint32_t v)
     {
-        d.insert(d.end(), s.begin(), s.end());
-    }
-
-    template <typename T>
-    void Append(T& d, uint32_t v)
-    {
-        char rawd[4];
-        put_big_long(rawd, v);
+        std::array<std::byte, 4> rawd;
+        details::put_big_long(rawd.data(), v);
         d.insert(d.end(), std::begin(rawd), std::end(rawd));
     }
 
-    template <typename T>
-    void Append(T& d, uint16_t v)
+    inline void Append(std::vector<std::byte>& d, int32_t v)
     {
-        char rawd[2];
-        put_big_word(rawd, v);
+        std::array<std::byte, 4> rawd;
+        details::put_big_long(rawd.data(), v);
         d.insert(d.end(), std::begin(rawd), std::end(rawd));
     }
 
-    template <typename T>
-    void Append(T& d, uint8_t v) { d.insert(d.end(), v); }
-
-    template <typename T>
-    void Append(T& d, float v)
+    inline void Append(std::vector<std::byte>& d, uint16_t v)
     {
-        char rawd[sizeof(float)];
+        std::array<std::byte, 2> rawd;
+        details::put_big_word(rawd.data(), v);
+        d.insert(d.end(), std::begin(rawd), std::end(rawd));
+    }
+
+    inline void Append(std::vector<std::byte>& d, int16_t v)
+    {
+        std::array<std::byte, 2> rawd;
+        details::put_big_word(rawd.data(), v);
+        d.insert(d.end(), std::begin(rawd), std::end(rawd));
+    }
+
+    inline void Append(std::vector<std::byte>& d, uint8_t v) { d.insert(d.end(), static_cast<std::byte>(v)); }
+
+    inline void Append(std::vector<std::byte>& d, char v) { d.insert(d.end(), static_cast<std::byte>(v)); }
+
+    inline void Append(std::vector<std::byte>& d, std::byte v) { d.insert(d.end(), v); }
+
+    inline void Append(std::vector<std::byte>& d, float v)
+    {
+        std::byte rawd[sizeof(float)];
         void const* fptr = &v;
         std::memcpy(rawd, fptr, sizeof(float));
         d.insert(d.end(), std::begin(rawd), std::end(rawd));
+    }
+
+    template <typename T>
+    void Append(std::vector<std::byte>& d, std::vector<T> const& s)
+    {
+        for (auto&& i : s) {
+            Append(d, i);
+        }
+    }
+
+    inline void Append(std::vector<std::byte>& d, std::string const& s)
+    {
+        for (auto&& i : s) {
+            Append(d, i);
+        }
+    }
+
+    inline void Append(std::vector<std::byte>& d, std::vector<std::byte> const& s)
+    {
+        d.insert(d.end(), s.begin(), s.end());
     }
 
     template <typename T, typename U>
@@ -339,9 +368,9 @@ namespace Parser {
     }
 
     template <typename T>
-    auto Construct_block(uint32_t type, const T& data)
+    auto Construct_block(uint32_t type, const T& data) -> std::vector<std::byte>
     {
-        std::vector<uint8_t> result;
+        std::vector<std::byte> result;
         Append(result, uint32_t{ type });
         Append(result, static_cast<uint32_t>(data.size()));
         Append(result, data);
@@ -350,9 +379,9 @@ namespace Parser {
         return result;
     }
 
-    static inline auto Construct_block(uint32_t type, uint32_t data)
+    static inline auto Construct_block(uint32_t type, uint32_t data) -> std::vector<std::byte>
     {
-        std::vector<uint8_t> result;
+        std::vector<std::byte> result;
         Append(result, uint32_t{ type });
         Append(result, uint32_t{ sizeof(data) });
         Append(result, data);
@@ -364,44 +393,45 @@ namespace Parser {
 
 class Reader {
 public:
-    Reader(std::pair<uint8_t const*, size_t> data, uint32_t version = kVersion)
+    explicit Reader(std::span<std::byte const> data, uint32_t version = kVersion)
         : data(data)
         , version(version)
     {
     }
 
-    auto size() const { return data.second; }
-    auto first(std::size_t n) const
+    [[nodiscard]] auto size() const { return data.size(); }
+
+    // returns a reader with a section of the first N
+    [[nodiscard]] auto first(std::size_t n) const -> Reader
     {
         if (size() < n) {
             throw std::runtime_error(std::string("not enough data for first.  Need ") + std::to_string(n) + ", currently have " + std::to_string(size()));
         }
-        auto copy = *this;
-        copy.data.second = n;
-        return copy;
+        return Reader(data.first(n), version);
     }
-    auto subspan(std::size_t n) const
+
+    [[nodiscard]] auto subspan(std::size_t n) const -> Reader
     {
         auto copy = *this;
-        copy.subspanImpl(n);
+        copy.increment(n);
         return copy;
     }
 
     template <typename T>
-    T Peek() const;
+    auto Peek() const -> T;
 
     template <typename T>
-    T Get()
+    auto Get() -> T
     {
         auto result = Peek<T>();
-        subspanImpl(sizeof(T));
+        increment(sizeof(T));
         return result;
     }
 
     template <typename T>
-    std::vector<T> GetVector();
+    auto GetVector() -> std::vector<T>;
 
-    std::vector<std::tuple<uint32_t, Reader>> ParseOutLabels()
+    auto ParseOutLabels() -> std::vector<std::tuple<uint32_t, Reader>>
     {
         std::vector<std::tuple<uint32_t, Reader>> result;
         while (size()) {
@@ -411,11 +441,11 @@ public:
             }
             auto name = Get<uint32_t>();
             auto size = Get<uint32_t>();
-            if (data.second < size + 8) {
+            if (data.size() < size + 8) {
                 return result;
             }
             auto reader = first(size);
-            subspanImpl(size);
+            increment(size);
             auto end = Get<uint32_t>();
             auto end_name = Get<uint32_t>();
             if ((end != INGL_END) || (end_name != name)) {
@@ -428,7 +458,7 @@ public:
 
     void ReadAndCheckID(uint32_t inname)
     {
-        uint32_t name = Get<uint32_t>();
+        auto name = Get<uint32_t>();
         if (inname != name) {
             throw CC_FileException(inname);
         }
@@ -448,7 +478,7 @@ public:
     auto ReadCheckIDandFillData(uint32_t inname)
     {
         ReadAndCheckID(inname);
-        return GetVector<uint8_t>();
+        return GetVector<std::byte>();
     }
 
     // return false if you don't read the inname
@@ -460,8 +490,8 @@ public:
             return 0x0;
         }
         if ((((name >> 24) & 0xFF) == ((inname >> 24) & 0xFF)) && (((name >> 16) & 0xFF) == ((inname >> 16) & 0xFF))) {
-            char major_vers = (name >> 8) & 0xFF;
-            char minor_vers = (name)&0xFF;
+            auto major_vers = static_cast<char>((name >> 8) & 0xFF);
+            auto minor_vers = static_cast<char>((name)&0xFF);
             if (isdigit(major_vers) && isdigit(minor_vers)) {
                 return ((major_vers - '0') << 8) | (minor_vers - '0');
             }
@@ -471,63 +501,118 @@ public:
 
 private:
     // privateSubspan
-    void subspanImpl(std::size_t n)
+    void increment(std::size_t n)
     {
-        if (data.second < n) {
+        if (data.size() < n) {
             throw std::runtime_error(std::string("not enough data for subspan.  Need ") + std::to_string(n) + ", currently have " + std::to_string(size()));
         }
-        data.first += n;
-        data.second -= n;
+        data = data.subspan(n);
     }
 
-    std::pair<uint8_t const*, size_t> data;
+    std::span<std::byte const> data;
     uint32_t version;
 };
 
 template <>
-inline uint8_t Reader::Peek<uint8_t>() const
+inline auto Reader::Peek<std::byte>() const -> std::byte
 {
-    if (size() < 1) {
-        throw std::runtime_error(std::string("not enough data for uint8_t.  Need 1, currently have ") + std::to_string(size()));
+    if (size() < sizeof(std::byte)) {
+        throw std::runtime_error(std::string("not enough data for type.  Need ") + std::to_string(sizeof(std::byte)) + ", currently have " + std::to_string(size()));
     }
-    return (data.first[0] & 0xFF);
+    return data[0];
 }
 
 template <>
-inline uint16_t Reader::Peek<uint16_t>() const
+inline auto Reader::Peek<char>() const -> char
 {
-    if (size() < 2) {
-        throw std::runtime_error(std::string("not enough data for uint16_t.  Need 2, currently have ") + std::to_string(size()));
+    using T = int8_t;
+    if (size() < sizeof(T)) {
+        throw std::runtime_error(std::string("not enough data for type.  Need ") + std::to_string(sizeof(T)) + ", currently have " + std::to_string(size()));
     }
-    return ((data.first[0] & 0xFF) << 8) | (data.first[1] & 0xFF);
+    auto result = T{};
+    for (std::size_t i = 0; i < sizeof(result); ++i) {
+        result = (result << 8) | static_cast<T>(data[i]);
+    }
+    return result;
 }
 
 template <>
-inline uint32_t Reader::Peek<uint32_t>() const
+inline auto Reader::Peek<uint8_t>() const -> uint8_t
 {
-    if (size() < 4) {
-        throw std::runtime_error(std::string("not enough data for uint32_t.  Need 4, currently have ") + std::to_string(size()));
+    using T = uint8_t;
+    if (size() < sizeof(T)) {
+        throw std::runtime_error(std::string("not enough data for type.  Need ") + std::to_string(sizeof(T)) + ", currently have " + std::to_string(size()));
     }
-    return ((data.first[0] & 0xFF) << 24) | ((data.first[1] & 0xFF) << 16) | ((data.first[2] & 0xFF) << 8) | ((data.first[3] & 0xFF));
+    auto result = T{};
+    for (std::size_t i = 0; i < sizeof(result); ++i) {
+        result = (result << 8) | static_cast<T>(data[i]);
+    }
+    return result;
 }
 
 template <>
-inline int32_t Reader::Peek<int32_t>() const
+inline auto Reader::Peek<int16_t>() const -> int16_t
 {
-    if (size() < 4) {
-        throw std::runtime_error(std::string("not enough data for int32_t.  Need 4, currently have ") + std::to_string(size()));
+    using T = int16_t;
+    if (size() < sizeof(T)) {
+        throw std::runtime_error(std::string("not enough data for type.  Need ") + std::to_string(sizeof(T)) + ", currently have " + std::to_string(size()));
     }
-    return ((data.first[0] & 0xFF) << 24) | ((data.first[1] & 0xFF) << 16) | ((data.first[2] & 0xFF) << 8) | ((data.first[3] & 0xFF));
+    auto result = T{};
+    for (std::size_t i = 0; i < sizeof(result); ++i) {
+        result = (result << 8) | static_cast<T>(data[i]);
+    }
+    return result;
+}
+template <>
+inline auto Reader::Peek<uint16_t>() const -> uint16_t
+{
+    using T = uint16_t;
+    if (size() < sizeof(T)) {
+        throw std::runtime_error(std::string("not enough data for type.  Need ") + std::to_string(sizeof(T)) + ", currently have " + std::to_string(size()));
+    }
+    auto result = T{};
+    for (std::size_t i = 0; i < sizeof(result); ++i) {
+        result = (result << 8) | static_cast<T>(data[i]);
+    }
+    return result;
 }
 
 template <>
-inline float Reader::Peek<float>() const
+inline auto Reader::Peek<uint32_t>() const -> uint32_t
+{
+    using T = uint32_t;
+    if (size() < sizeof(T)) {
+        throw std::runtime_error(std::string("not enough data for type.  Need ") + std::to_string(sizeof(T)) + ", currently have " + std::to_string(size()));
+    }
+    auto result = T{};
+    for (std::size_t i = 0; i < sizeof(result); ++i) {
+        result = (result << 8) | static_cast<T>(data[i]);
+    }
+    return result;
+}
+
+template <>
+inline auto Reader::Peek<int32_t>() const -> int32_t
+{
+    using T = int32_t;
+    if (size() < sizeof(T)) {
+        throw std::runtime_error(std::string("not enough data for type.  Need ") + std::to_string(sizeof(T)) + ", currently have " + std::to_string(size()));
+    }
+    auto result = T{};
+    for (std::size_t i = 0; i < sizeof(result); ++i) {
+        result = (result << 8) | static_cast<T>(data[i]);
+    }
+    return result;
+}
+
+template <>
+inline auto Reader::Peek<float>() const -> float
 {
     if (size() < sizeof(float)) {
         throw std::runtime_error(std::string("not enough data for float.  Need " + std::to_string(sizeof(float)) + ", currently have ") + std::to_string(size()));
     }
-    unsigned char rawd[sizeof(float)];
-    std::copy(data.first, data.first + sizeof(float), rawd);
+    std::byte rawd[sizeof(float)];
+    std::copy(data.begin(), data.begin() + sizeof(float), rawd);
     float result = 0.f;
     void* fptr = &result;
     std::memcpy(fptr, rawd, sizeof(float));
@@ -535,25 +620,29 @@ inline float Reader::Peek<float>() const
 }
 
 template <>
-inline std::string Reader::Get<std::string>()
+inline auto Reader::Get<std::string>() -> std::string
 {
-    auto result = std::string(reinterpret_cast<char const*>(data.first));
+    auto result = std::string(reinterpret_cast<char const*>(data.data()));
     if (size() < (result.size() + 1)) {
         throw std::runtime_error(std::string("not enough data for string.  Need " + std::to_string(result.size() + 1) + ", currently have ") + std::to_string(size()));
     }
-    subspanImpl(result.size() + 1); // +1 for the null terminator
+    increment(result.size() + 1); // +1 for the null terminator
     return result;
 }
 
 template <typename T>
-inline std::vector<T> Reader::GetVector()
+inline auto Reader::GetVector() -> std::vector<T>
 {
     if (size() < 4) {
         throw std::runtime_error(std::string("not enough data for vector size.  Need 4, currently have ") + std::to_string(size()));
     }
     auto size = Get<uint32_t>();
-    auto result = std::vector<T>(data.first, data.first + size);
-    subspanImpl(size);
+    auto result = std::vector<T>{};
+    result.reserve(size);
+    for (auto i = 0U; i < size; ++i) {
+        auto value = Get<T>();
+        result.push_back(value);
+    }
     return result;
 }
 
