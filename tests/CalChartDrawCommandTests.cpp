@@ -152,13 +152,13 @@ TEST_CASE("DrawCommand")
 
     SECTION("CreateOutline")
     {
-        auto cmds = CalChart::Draw::Field::CreateOutline({ 16, 5 }) + CalChart::Coord{ 1, 2 };
+        auto cmds = CalChart::Draw::toDrawCommands(CalChart::Draw::Field::CreateOutline({ 16, 5 }) + CalChart::Coord{ 1, 2 });
         TestCreateOutline(cmds);
     }
 
     SECTION("CreateVerticalSolidLine")
     {
-        auto cmds = CalChart::Draw::Field::CreateVerticalSolidLine({ 16, 5 }, 1) + CalChart::Coord{ 1, 2 };
+        auto cmds = CalChart::Draw::toDrawCommands(CalChart::Draw::Field::CreateVerticalSolidLine({ 16, 5 }, 1) + CalChart::Coord{ 1, 2 });
         CHECK(cmds.size() == 3);
         auto uut = std::get<CalChart::Draw::Line>(cmds[0]);
         CHECK(uut.c1 == CalChart::Coord{ 1, 2 });
@@ -173,7 +173,7 @@ TEST_CASE("DrawCommand")
 
     SECTION("CreateVerticalDottedLine")
     {
-        auto cmds = CalChart::Draw::Field::CreateVerticalDottedLine({ 16, 5 }, 1) + CalChart::Coord{ 1, 2 };
+        auto cmds = CalChart::Draw::toDrawCommands(CalChart::Draw::Field::CreateVerticalDottedLine({ 16, 5 }, 1) + CalChart::Coord{ 1, 2 });
         CHECK(cmds.size() == 6);
         auto uut = std::get<CalChart::Draw::Line>(cmds[0]);
         CHECK(uut.c1 == CalChart::Coord{ 5, 2 });
@@ -196,7 +196,7 @@ TEST_CASE("DrawCommand")
     }
     SECTION("CreateHorizontalDottedLine")
     {
-        auto cmds = CalChart::Draw::Field::CreateHorizontalDottedLine({ CalChart::Int2CoordUnits(5), CalChart::Int2CoordUnits(20) }, 8, 12, CalChart::Int2CoordUnits(1)) + CalChart::Coord{ CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(2) };
+        auto cmds = CalChart::Draw::toDrawCommands(CalChart::Draw::Field::CreateHorizontalDottedLine({ CalChart::Int2CoordUnits(5), CalChart::Int2CoordUnits(20) }, 8, 12, CalChart::Int2CoordUnits(1)) + CalChart::Coord{ CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(2) });
         CHECK(cmds.size() == 6);
         auto uut = std::get<CalChart::Draw::Line>(cmds[0]);
         CHECK(uut.c1 == CalChart::Coord{ CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(6) });
@@ -219,7 +219,7 @@ TEST_CASE("DrawCommand")
     }
     SECTION("CreateHashes")
     {
-        auto cmds = CalChart::Draw::Field::CreateHashes({ CalChart::Int2CoordUnits(5), CalChart::Int2CoordUnits(20) }, 8, 12, CalChart::Int2CoordUnits(1)) + CalChart::Coord{ CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(2) };
+        auto cmds = CalChart::Draw::toDrawCommands(CalChart::Draw::Field::CreateHashes({ CalChart::Int2CoordUnits(5), CalChart::Int2CoordUnits(20) }, 8, 12, CalChart::Int2CoordUnits(1)) + CalChart::Coord{ CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(2) });
         CHECK(cmds.size() == 4);
         auto uut = std::get<CalChart::Draw::Line>(cmds[0]);
         CHECK(uut.c1 == CalChart::Coord{ CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(10) });
@@ -236,7 +236,7 @@ TEST_CASE("DrawCommand")
     }
     SECTION("CreateHashTicks")
     {
-        auto cmds = CalChart::Draw::Field::CreateHashTicks({ CalChart::Int2CoordUnits(5), CalChart::Int2CoordUnits(20) }, 8, 12, CalChart::Int2CoordUnits(1)) + CalChart::Coord{ CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(2) };
+        auto cmds = CalChart::Draw::toDrawCommands(CalChart::Draw::Field::CreateHashTicks({ CalChart::Int2CoordUnits(5), CalChart::Int2CoordUnits(20) }, 8, 12, CalChart::Int2CoordUnits(1)) + CalChart::Coord{ CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(2) });
         CHECK(cmds.size() == 8);
         auto uut = std::get<CalChart::Draw::Line>(cmds[0]);
         CHECK(uut.c1 == CalChart::Coord{ CalChart::Float2CoordUnits(2.6), CalChart::Float2CoordUnits(10) });
@@ -268,7 +268,7 @@ TEST_CASE("DrawCommand")
         using namespace std::string_literals;
         using TextAnchor = CalChart::Draw::Text::TextAnchor;
         auto testData = std::vector{ "A"s, "B"s, "C"s };
-        auto cmds = CalChart::Draw::Field::CreateYardlineLabels(testData, { CalChart::Int2CoordUnits(14), 5 }, 2, 1) + CalChart::Coord{ 3, 5 };
+        auto cmds = CalChart::Draw::toDrawCommands(CalChart::Draw::Field::CreateYardlineLabels(testData, { CalChart::Int2CoordUnits(14), 5 }, 2, 1) + CalChart::Coord{ 3, 5 });
         CHECK(cmds.size() == 4);
 
         auto uut = std::get<CalChart::Draw::Text>(cmds[0]);

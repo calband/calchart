@@ -16,6 +16,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <cstdint>
+
 #define CC_MAJOR_VERSION @CalChart_VERSION_MAJOR@
 #define CC_MINOR_VERSION @CalChart_VERSION_MINOR@
 #define CC_PATCH_VERSION @CalChart_VERSION_PATCH@

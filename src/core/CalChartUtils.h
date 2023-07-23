@@ -23,6 +23,7 @@
 
 #include <cmath>
 #include <numbers>
+#include <ranges>
 #include <tuple>
 #include <vector>
 
@@ -109,6 +110,14 @@ auto append(std::vector<T>&& v, std::vector<T> const& other) -> std::vector<T>&&
 {
     v.insert(v.end(), other.begin(), other.end());
     return std::forward<std::vector<T>>(v);
+}
+
+// This actually does the work
+template <typename T, std::ranges::range R>
+auto append(std::vector<T>& v, R&& range) -> std::vector<T>&
+{
+    v.insert(v.end(), range.begin(), range.end());
+    return v;
 }
 
 }

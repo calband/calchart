@@ -39,6 +39,7 @@
 #include "ShowModeWizard.h"
 
 #include <memory>
+#include <ranges>
 #include <wx/docview.h>
 #include <wx/textfile.h>
 #include <wx/wizard.h>
@@ -68,42 +69,60 @@ bool CalChartView::OnCreate(wxDocument* doc, long WXUNUSED(flags))
 // Sneakily gets used for default print/preview as well as drawing on the screen.
 void CalChartView::OnDraw(wxDC* dc)
 {
-    if (mShow) {
-        // draw the field
-        auto origin = mShow->GetShowMode().Offset();
-        auto tborder1 = mShow->GetShowMode().Border1();
-        CalChartDraw::DrawCC_DrawCommandList(*dc, CalChartDraw::DrawMode(mConfig, mShow->GetShowMode(), ShowMode_kFieldView) + tborder1);
-
-        auto ghostSheet = mShow->GetGhostSheet(GetCurrentSheetNum());
-
-        if (ghostSheet != nullptr) {
-            CalChartDraw::DrawGhostSheet(*dc, mConfig, origin, CalChart::SelectionList(),
-                mShow->GetNumPoints(), mShow->GetPointsLabel(),
-                *ghostSheet, 0);
-        }
-
-        auto sheet = mShow->GetCurrentSheet();
-        if (sheet != mShow->GetSheetEnd()) {
-            if (mShow->GetCurrentReferencePoint() > 0) {
-                CalChartDraw::DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(),
-                    mShow->GetNumPoints(), mShow->GetPointsLabel(),
-                    *mShow->GetCurrentSheet(), 0, false);
-                CalChartDraw::DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(),
-                    mShow->GetNumPoints(), mShow->GetPointsLabel(),
-                    *mShow->GetCurrentSheet(), mShow->GetCurrentReferencePoint(), true);
-            } else {
-                CalChartDraw::DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(),
-                    mShow->GetNumPoints(), mShow->GetPointsLabel(),
-                    *mShow->GetCurrentSheet(), mShow->GetCurrentReferencePoint(), true);
-            }
-            DrawPaths(*dc);
-        }
+    if (!mShow) {
+        return;
     }
+    // draw the field
+    auto origin = mShow->GetShowMode().Offset();
+    auto tborder1 = mShow->GetShowMode().Border1();
+    auto drawCmds = std::vector<CalChart::DrawCommand>{};
+    CalChart::append(drawCmds,
+        CalChartDraw::GenerateModeDrawCommands(
+            mConfig,
+            mShow->GetShowMode(),
+            ShowMode_kFieldView)
+            + tborder1 - origin);
+
+    if (auto ghostSheet = mShow->GetGhostSheet(GetCurrentSheetNum()); ghostSheet != nullptr) {
+        CalChart::append(drawCmds,
+            CalChartDraw::GenerateGhostPointsDrawCommands(
+                mConfig,
+                CalChart::SelectionList(),
+                mShow->GetNumPoints(),
+                mShow->GetPointsLabel(),
+                *ghostSheet,
+                0));
+    }
+
+    if (auto sheet = mShow->GetCurrentSheet(); sheet != mShow->GetSheetEnd()) {
+        if (mShow->GetCurrentReferencePoint() > 0) {
+            // if we are editing a ref point other than 0, draw the 0 one in a different color.
+            CalChart::append(drawCmds,
+                CalChartDraw::GeneratePointsDrawCommands(mConfig,
+                    mShow->GetSelectionList(),
+                    mShow->GetNumPoints(),
+                    mShow->GetPointsLabel(),
+                    *mShow->GetCurrentSheet(),
+                    0,
+                    false));
+        }
+        CalChart::append(drawCmds,
+            CalChartDraw::GeneratePointsDrawCommands(mConfig,
+                mShow->GetSelectionList(),
+                mShow->GetNumPoints(),
+                mShow->GetPointsLabel(),
+                *mShow->GetCurrentSheet(),
+                mShow->GetCurrentReferencePoint(),
+                true));
+        CalChart::append(drawCmds,
+            GeneratePathsDrawCommands());
+    }
+    CalChartDraw::DrawCC_DrawCommandList(*dc, drawCmds + origin);
 }
 
 void CalChartView::DrawUncommitedMovePoints(wxDC& dc, std::map<int, CalChart::Coord> const& positions)
 {
-    CalChartDraw::DrawCC_DrawCommandList(dc, CalChartDraw::CreatePhatomPoints(mConfig, *mShow, *mShow->GetCurrentSheet(), positions));
+    CalChartDraw::DrawCC_DrawCommandList(dc, CalChartDraw::GeneratePhatomPointsDrawCommands(mConfig, *mShow, *mShow->GetCurrentSheet(), positions));
 }
 
 void CalChartView::OnDrawBackground(wxDC& dc)
@@ -535,18 +554,32 @@ void CalChartView::OnEnableDrawPaths(bool enable)
     mShow->SetDrawPaths(enable);
 }
 
-void CalChartView::DrawPaths(wxDC& dc)
+// Returns a view adaptor that will transform a range of point indices to the Path DrawCommands.
+auto TransformIndexToDrawPathCommands(CalChart::Animation const& animation, unsigned whichSheet, CalChart::Coord::units endRadius)
 {
-    auto animation = mShow->GetAnimation();
-    if (mShow->GetDrawPaths() && animation && animation->GetNumberSheets() && (animation->GetNumberSheets() > mShow->GetCurrentSheetNum())) {
-        auto origin = GetShowFieldOffset();
-        for (auto&& point : mShow->GetSelectionList()) {
-            CalChartDraw::DrawPath(
-                dc,
-                mConfig,
-                animation->GenPathToDraw(mShow->GetCurrentSheetNum(), point, origin, CalChart::Float2CoordUnits(mConfig.Get_DotRatio()) / 2));
-        }
+    return std::views::transform([&animation, whichSheet, endRadius](int i) {
+        return animation.GenPathToDraw(whichSheet, i, endRadius);
+    })
+        | std::views::join;
+}
+
+auto CalChartView::GeneratePathsDrawCommands() -> std::vector<CalChart::DrawCommand>
+{
+    if (!mShow->GetDrawPaths()) {
+        return {};
     }
+    auto animation = mShow->GetAnimation();
+    if (!animation || animation->GetNumberSheets() == 0 || (animation->GetNumberSheets() <= mShow->GetCurrentSheetNum())) {
+        return {};
+    }
+    auto endRadius = CalChart::Float2CoordUnits(mConfig.Get_DotRatio()) / 2;
+    auto currentSheet = mShow->GetCurrentSheetNum();
+    return {
+        CalChart::Draw::withBrushAndPen(
+            mConfig.Get_CalChartBrushAndPen(CalChart::Colors::PATHS),
+            mShow->GetSelectionList()
+                | TransformIndexToDrawPathCommands(*animation, currentSheet, endRadius))
+    };
 }
 
 void CalChartView::DoDrawBackground(bool enable)

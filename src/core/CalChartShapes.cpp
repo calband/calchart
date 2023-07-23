@@ -27,11 +27,11 @@
 
 namespace CalChart {
 
-auto Shape_crosshairs::GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand>
+auto Shape_crosshairs::GetCC_DrawCommand() const -> std::vector<DrawCommand>
 {
     return {
-        Draw::Line(GetOrigin().x + p.x - crosshairs_width, GetOrigin().y + p.y - crosshairs_width, GetOrigin().x + p.x + crosshairs_width, GetOrigin().y + p.y + crosshairs_width),
-        Draw::Line(GetOrigin().x + p.x + crosshairs_width, GetOrigin().y + p.y - crosshairs_width, GetOrigin().x + p.x - crosshairs_width, GetOrigin().y + p.y + crosshairs_width),
+        Draw::Line(GetOrigin().x - crosshairs_width, GetOrigin().y - crosshairs_width, GetOrigin().x + crosshairs_width, GetOrigin().y + crosshairs_width),
+        Draw::Line(GetOrigin().x + crosshairs_width, GetOrigin().y - crosshairs_width, GetOrigin().x - crosshairs_width, GetOrigin().y + crosshairs_width),
     };
 }
 
@@ -45,62 +45,62 @@ auto Shape_2point::GetPolygon() const -> RawPolygon_t
     };
 }
 
-auto Shape_line::GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand>
+auto Shape_line::GetCC_DrawCommand() const -> std::vector<DrawCommand>
 {
     return {
-        Draw::Line(GetOrigin() + p, GetPoint() + p)
+        Draw::Line(GetOrigin(), GetPoint())
     };
 }
 
-auto Shape_x::GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand>
+auto Shape_x::GetCC_DrawCommand() const -> std::vector<DrawCommand>
 {
     return {
-        Draw::Line(GetOrigin() + p, GetPoint() + p),
-        Draw::Line(GetPoint().x + p.x, GetOrigin().y + p.y, GetOrigin().x + p.x, GetPoint().y + p.y),
+        Draw::Line(GetOrigin(), GetPoint()),
+        Draw::Line(GetPoint().x, GetOrigin().y, GetOrigin().x, GetPoint().y),
     };
 }
 
-auto Shape_cross::GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand>
+auto Shape_cross::GetCC_DrawCommand() const -> std::vector<DrawCommand>
 {
     return {
-        Draw::Line(GetOrigin().x + (GetPoint().x - GetOrigin().x) / 2 + p.x, GetOrigin().y + p.y, GetOrigin().x + (GetPoint().x - GetOrigin().x) / 2 + p.x, GetPoint().y + p.y),
-        Draw::Line(GetOrigin().x + p.x, GetOrigin().y + (GetPoint().y - GetOrigin().y) / 2 + p.y, GetPoint().x + p.x, GetOrigin().y + (GetPoint().y - GetOrigin().y) / 2 + p.y),
+        Draw::Line(GetOrigin().x + (GetPoint().x - GetOrigin().x) / 2, GetOrigin().y, GetOrigin().x + (GetPoint().x - GetOrigin().x) / 2, GetPoint().y),
+        Draw::Line(GetOrigin().x, GetOrigin().y + (GetPoint().y - GetOrigin().y) / 2, GetPoint().x, GetOrigin().y + (GetPoint().y - GetOrigin().y) / 2),
     };
 }
 
-auto Shape_ellipse::GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand>
+auto Shape_ellipse::GetCC_DrawCommand() const -> std::vector<DrawCommand>
 {
     return {
-        Draw::Ellipse(GetOrigin() + p, GetPoint() + p)
+        Draw::Ellipse(GetOrigin(), GetPoint())
     };
 }
 
-auto Shape_arc::GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand>
+auto Shape_arc::GetCC_DrawCommand() const -> std::vector<DrawCommand>
 {
     auto boundingAngle = angle0 < CalChart::Radian{} ? angle - angle0 : angle0 - angle;
     if (boundingAngle < CalChart::Radian{} || boundingAngle > CalChart::pi) {
         return {
             Draw::Arc(
-                GetOrigin() + p + CalChart::CreateCoordVector(angle0 < CalChart::Radian{} ? angle : angle0, d),
-                GetOrigin() + p + CalChart::CreateCoordVector(angle0 < CalChart::Radian{} ? angle0 : angle, d),
-                GetOrigin() + p)
+                GetOrigin() + CalChart::CreateCoordVector(angle0 < CalChart::Radian{} ? angle : angle0, d),
+                GetOrigin() + CalChart::CreateCoordVector(angle0 < CalChart::Radian{} ? angle0 : angle, d),
+                GetOrigin())
         };
     }
     return {
         Draw::Arc(
-            GetOrigin() + p + CalChart::CreateCoordVector(angle0 < CalChart::Radian{} ? angle0 : angle, d),
-            GetOrigin() + p + CalChart::CreateCoordVector(angle0 < CalChart::Radian{} ? angle : angle0, d),
-            GetOrigin() + p)
+            GetOrigin() + CalChart::CreateCoordVector(angle0 < CalChart::Radian{} ? angle0 : angle, d),
+            GetOrigin() + CalChart::CreateCoordVector(angle0 < CalChart::Radian{} ? angle : angle0, d),
+            GetOrigin())
     };
 }
 
-auto Shape_rect::GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand>
+auto Shape_rect::GetCC_DrawCommand() const -> std::vector<DrawCommand>
 {
     return {
-        Draw::Line(p.x + GetOrigin().x, p.y + GetOrigin().y, p.x + GetPoint().x, p.y + GetOrigin().y),
-        Draw::Line(p.x + GetPoint().x, p.y + GetOrigin().y, p.x + GetPoint().x, p.y + GetPoint().y),
-        Draw::Line(p.x + GetPoint().x, p.y + GetPoint().y, p.x + GetOrigin().x, p.y + GetPoint().y),
-        Draw::Line(p.x + GetOrigin().x, p.y + GetPoint().y, p.x + GetOrigin().x, p.y + GetOrigin().y),
+        Draw::Line(GetOrigin().x, GetOrigin().y, GetPoint().x, GetOrigin().y),
+        Draw::Line(GetPoint().x, GetOrigin().y, GetPoint().x, GetPoint().y),
+        Draw::Line(GetPoint().x, GetPoint().y, GetOrigin().x, GetPoint().y),
+        Draw::Line(GetOrigin().x, GetPoint().y, GetOrigin().x, GetOrigin().y),
     };
 }
 
@@ -153,12 +153,12 @@ auto Lasso::GetPointsOnLine(int numpnts) const -> std::vector<Coord>
     return results;
 }
 
-auto Lasso::GetCC_DrawCommand(Coord p) const -> std::vector<DrawCommand>
+auto Lasso::GetCC_DrawCommand() const -> std::vector<DrawCommand>
 {
     std::vector<DrawCommand> result;
     if (pntlist.size() > 1) {
         for (auto iter = 0U; iter < pntlist.size() - 1; ++iter) {
-            result.emplace_back(Draw::Line(p + pntlist.at(iter), p + pntlist.at(iter + 1)));
+            result.emplace_back(Draw::Line(pntlist.at(iter), pntlist.at(iter + 1)));
         }
     }
     return result;
