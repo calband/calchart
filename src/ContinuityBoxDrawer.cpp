@@ -262,6 +262,11 @@ int ContinuityBoxDrawer::GetHeight(CalChartConfiguration const& config)
     return fDIP(config.Get_ContCellFontSize() + 2 * config.Get_ContCellBoxPadding() + 2 * config.Get_ContCellTextPadding());
 }
 
+int ContinuityBoxDrawer::GetMinWidth(CalChartConfiguration const& config)
+{
+    return fDIP(config.Get_ContCellFontSize() * 32 + 2 * config.Get_ContCellBoxPadding() + 2 * config.Get_ContCellTextPadding());
+}
+
 int ContinuityBoxDrawer::Width() const
 {
     wxMemoryDC temp_dc;

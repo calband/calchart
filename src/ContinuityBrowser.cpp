@@ -33,6 +33,7 @@
 #include <wx/html/helpctrl.h>
 #include <wx/statline.h>
 #include <wx/tglbtn.h>
+#include <wxUI/wxUI.h>
 
 // a panel consists of the name, canvas
 class ContinuityBrowserPerCont : public wxPanel {
@@ -54,7 +55,7 @@ private:
 
     // Internals
     CalChartView* mView{};
-    ContinuityBrowserPanel* mCanvas{};
+    wxUI::Generic<ContinuityBrowserPanel>::Proxy mCanvas{};
     CalChart::SYMBOL_TYPE mSym{};
 };
 
@@ -75,19 +76,22 @@ void ContinuityBrowserPerCont::Init()
 
 void ContinuityBrowserPerCont::CreateControls()
 {
-    SetSizer(VStack([this](auto sizer) {
-        HStack(sizer, BasicSizerFlags(), [this](auto sizer) {
-            CreateText(this, sizer, ExpandSizerFlags(), CalChart::GetLongNameForSymbol(mSym));
-            CreateBitmapButtonWithHandler(this, sizer, BasicSizerFlags(), ScaleButtonBitmap(wxArtProvider::GetBitmap(wxART_PLUS)), [this]() {
-                mCanvas->AddNewEntry();
-            });
-        });
-
+    wxUI::VSizer{
+        BasicSizerFlags(),
+        wxUI::HSizer{
+            wxUI::Text{ ExpandSizerFlags(), CalChart::GetLongNameForSymbol(mSym) },
+            wxUI::BitmapButton{ BasicSizerFlags(), ScaleButtonBitmap(wxArtProvider::GetBitmap(wxART_PLUS)) }
+                .bind([this]() {
+                    mCanvas->AddNewEntry();
+                }) },
         // here's a canvas
-        mCanvas = new ContinuityBrowserPanel(mSym, CalChartConfiguration::GetGlobalConfig(), this);
-        sizer->Add(mCanvas, 1, wxEXPAND);
-        CreateHLine(this, sizer);
-    }));
+        mCanvas = wxUI::Generic<ContinuityBrowserPanel>{
+            ExpandSizerFlags(),
+            [this](wxWindow* parent) {
+                return new ContinuityBrowserPanel(mSym, CalChartConfiguration::GetGlobalConfig(), parent);
+            } },
+    }
+        .attachTo(this);
 }
 
 void ContinuityBrowserPerCont::OnUpdate()
@@ -123,26 +127,29 @@ void ContinuityBrowser::Init()
 
 void ContinuityBrowser::CreateControls()
 {
-    // create a sizer for laying things out top down:
-    SetSizer(VStack([this](auto sizer) {
-        // add a horizontal bar to make things clear:
-        CreateHLine(this, sizer);
+    wxUI::VSizer{
+        wxUI::Line{}.withStyle(wxLI_HORIZONTAL),
+        wxUI::ForEach{
+            wxSizerFlags{ 1 }.Border(wxALL, 2).Expand(),
+            CalChart::k_symbols,
+            [this](auto eachcont) { return wxUI::Generic{
+                                        [this, eachcont](wxWindow* parent) {
+                                            auto perCont = new ContinuityBrowserPerCont(eachcont, parent);
+                                            perCont->Show(false);
+                                            mPerCont.push_back(perCont);
+                                            return perCont;
+                                        }
+                                    }; } },
 
-        // we lay things out from top to bottom, saying what point we're dealing with, then the continuity
-        for (auto&& eachcont : CalChart::k_symbols) {
-            mPerCont.push_back(new ContinuityBrowserPerCont(eachcont, this));
-            sizer->Add(mPerCont.back(), 0, wxGROW | wxALL, 5);
-            mPerCont.back()->Show(false);
-        }
-
-        // add help
-        HStack(sizer, [this](auto sizer) {
-            CreateButtonWithHandler(this, sizer, wxID_HELP, "&Help", []() {
-                wxGetApp().GetGlobalHelpController().LoadFile();
-                wxGetApp().GetGlobalHelpController().KeywordSearch(wxT("Animation Commands"));
-            });
-        });
-    }));
+        wxUI::HSizer{
+            wxUI::Button{ wxID_HELP, "&Help" }
+                .bind([] {
+                    wxGetApp().GetGlobalHelpController().LoadFile();
+                    wxGetApp().GetGlobalHelpController().KeywordSearch(wxT("Animation Commands"));
+                }),
+        },
+    }
+        .attachTo(this);
 
     SetScrollRate(1, 1);
     // now update the current screen

@@ -22,6 +22,7 @@
 */
 
 #include <wx/wx.h>
+#include <wxUI/wxUI.h>
 
 class ShowModeDialogSetup;
 namespace CalChart {
@@ -40,5 +41,5 @@ public:
     CalChart::ShowMode GetShowMode() const;
 
 private:
-    ShowModeDialogSetup* m_setup;
+    wxUI::Generic<ShowModeDialogSetup>::Proxy m_setup;
 };

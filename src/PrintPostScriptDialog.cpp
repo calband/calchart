@@ -201,105 +201,90 @@ bool PrintPostScriptDialog::Create(const CalChartDoc* show,
 
 void PrintPostScriptDialog::CreateControls()
 {
-    SetSizer(VStack([this](auto sizer) {
-        HStack(sizer, LeftBasicSizerFlags(), [this](auto sizer) {
-            CreateButton(this, sizer, BasicSizerFlags(), wxID_OK, "&Print");
-            auto close = CreateButton(this, sizer, BasicSizerFlags(), wxID_CANCEL, "&Cancel");
-            close->SetDefault();
-            CreateButton(this, sizer, BasicSizerFlags(), CC_PRINT_BUTTON_RESET_DEFAULTS, "&Reset Values");
-        });
-
+    constexpr auto minWidth = 100;
+    wxUI::VSizer{
+        wxSizerFlags{}.Border(wxALL, 5).Left(),
+        wxUI::HSizer{
+            wxUI::Button{ wxID_OK, "&Print" },
+            wxUI::Button{ wxID_CANCEL, "&Cancel" }
+                .setDefault(),
+            wxUI::Button{ CC_PRINT_BUTTON_RESET_DEFAULTS, "&Reset Values" },
+        },
 #ifdef PRINT__RUN_CMD
-        HStack(sizer, LeftBasicSizerFlags(), [this](auto sizer) {
-            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
-                CreateText(this, sizer, BasicSizerFlags(), "Printer Command:");
-                text_cmd = CreateTextCtrl(this, sizer);
-            });
-            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
-                CreateText(this, sizer, BasicSizerFlags(), "Printer Options:");
-                text_opts = CreateTextCtrl(this, sizer);
-            });
-        });
-
-        HStack(sizer, LeftBasicSizerFlags(), [this](auto sizer) {
-            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
-                CreateText(this, sizer, BasicSizerFlags(), "Preview Command:");
-                text_view_cmd = CreateTextCtrl(this, sizer);
-            });
-            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
-                CreateText(this, sizer, BasicSizerFlags(), "Preview Options:");
-                text_view_opts = CreateTextCtrl(this, sizer);
-            });
-        });
-
-#else // PRINT__RUN_CMD
-
-        HStack(sizer, LeftBasicSizerFlags(), [this](auto sizer) {
-            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
-                CreateText(this, sizer, BasicSizerFlags(), "Printer &Device:");
-                text_cmd = CreateTextCtrl(this, sizer);
-            });
-        });
-
-#endif
-
-        HStack(sizer, [this](auto sizer) {
-            wxString orientation[] = { "Portrait", "Landscape" };
-            radio_orient = new wxRadioBox(this, wxID_ANY, "&Orientation:", wxDefaultPosition, wxDefaultSize, sizeof(orientation) / sizeof(wxString), orientation);
-            sizer->Add(radio_orient, 0, wxALL, 5);
-#ifdef PRINT__RUN_CMD
-            wxString print_modes[] = { "Send to Printer", "Print to File", "Preview Only" };
+        wxUI::HSizer{
+            wxUI::VSizer{
+                wxUI::Text{ "Printer Command:" },
+                text_cmd = wxUI::TextCtrl{ wxSizerFlags{}.Expand() }.withWidthSize(minWidth),
+            },
+            wxUI::VSizer{
+                wxUI::Text{ "Printer Options:" },
+                text_opts = wxUI::TextCtrl{ wxSizerFlags{}.Expand() }.withWidthSize(minWidth),
+            },
+        },
+        wxUI::HSizer{
+            wxUI::VSizer{
+                wxUI::Text{ "Preview Command:" },
+                text_view_cmd = wxUI::TextCtrl{ wxSizerFlags{}.Expand() }.withWidthSize(minWidth),
+            },
+            wxUI::VSizer{
+                wxUI::Text{ "Preview Options:" },
+                text_view_opts = wxUI::TextCtrl{ wxSizerFlags{}.Expand() }.withWidthSize(minWidth),
+            },
+        },
 #else
-            wxString print_modes[] = { "Send to Printer", "Print to File" };
+        wxUI::HSizer{
+            wxUI::VSizer{
+                wxUI::Text{ "Printer &Device:" },
+                text_cmd = wxUI::TextCtrl{ wxSizerFlags{}.Expand() }.withWidthSize(minWidth),
+            },
+        },
 #endif
-            radio_method = new wxRadioBox(this, -1, "Post&Script:", wxDefaultPosition, wxDefaultSize, sizeof(print_modes) / sizeof(wxString), print_modes);
-            sizer->Add(radio_method, 0, wxALL, 5);
-        });
+        wxUI::HSizer{
+            radio_orient = wxUI::RadioBox{ "&Orientation:", wxUI::RadioBox::withChoices{}, { "Portrait", "Landscape" } },
+#ifdef PRINT__RUN_CMD
+            radio_method = wxUI::RadioBox{ "Post&Script:", wxUI::RadioBox::withChoices{}, { "Send to Printer", "Print to File", "Preview Only" } },
+#else
+            radio_method = wxUI::RadioBox{ "Post&Script:", wxUI::RadioBox::withChoices{}, { "Send to Printer", "Print to File" } },
+#endif
+        },
+        wxUI::HSizer{
+            check_overview = wxUI::CheckBox{ "Over&view" },
+            check_cont = wxUI::CheckBox{ "Continuit&y" },
+            check_pages = wxUI::CheckBox{ "Cove&r pages" },
+        },
+        wxUI::Button{ CC_PRINT_BUTTON_SELECT, "S&elect sheets..." },
+        wxUI::HSizer{
+            wxUI::VSizer{
+                wxUI::Text{ "Page &width:" },
+                text_width = wxUI::TextCtrl{ wxSizerFlags{}.Expand() }.withWidthSize(minWidth),
+            },
+            wxUI::VSizer{
+                wxUI::Text{ "Page &height:" },
+                text_height = wxUI::TextCtrl{ wxSizerFlags{}.Expand() }.withWidthSize(minWidth),
+            },
+            wxUI::VSizer{
+                wxUI::Text{ "&Left margin:" },
+                text_x = wxUI::TextCtrl{ wxSizerFlags{}.Expand() }.withWidthSize(minWidth),
+            },
+            wxUI::VSizer{
+                wxUI::Text{ "&Top margin:" },
+                text_y = wxUI::TextCtrl{ wxSizerFlags{}.Expand() }.withWidthSize(minWidth),
+            },
+            wxUI::VSizer{
+                wxUI::Text{ "Paper &length:" },
+                text_length = wxUI::TextCtrl{ wxSizerFlags{}.Expand() }.withWidthSize(minWidth),
+            },
 
-        HStack(sizer, [this](auto sizer) {
-            check_overview = new wxCheckBox(this, -1, "Over&view");
-            sizer->Add(check_overview, 0, wxALL, 5);
+        },
+        wxUI::HSizer{
+            wxUI::VSizer{
+                wxUI::Text{ "Yards:" },
+                text_minyards = wxUI::TextCtrl{ wxSizerFlags{}.Expand(), "50" }.withWidthSize(minWidth),
 
-            check_cont = new wxCheckBox(this, -1, "Continuit&y");
-            sizer->Add(check_cont, 0, wxALL, 5);
-
-            check_pages = new wxCheckBox(this, -1, "Cove&r pages");
-            sizer->Add(check_pages, 0, wxALL, 5);
-        });
-
-        CreateButton(this, sizer, LeftBasicSizerFlags(), CC_PRINT_BUTTON_SELECT, "S&elect sheets...");
-
-        HStack(sizer, [this](auto sizer) {
-            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
-                CreateText(this, sizer, BasicSizerFlags(), "Page &width:");
-                text_width = CreateTextCtrl(this, sizer);
-            });
-            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
-                CreateText(this, sizer, BasicSizerFlags(), "Page &height:");
-                text_height = CreateTextCtrl(this, sizer);
-            });
-            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
-                CreateText(this, sizer, BasicSizerFlags(), "&Left margin:");
-                text_x = CreateTextCtrl(this, sizer);
-            });
-            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
-                CreateText(this, sizer, BasicSizerFlags(), "&Top margin:");
-                text_y = CreateTextCtrl(this, sizer);
-            });
-            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
-                CreateText(this, sizer, BasicSizerFlags(), "Paper &length:");
-                text_length = CreateTextCtrl(this, sizer);
-            });
-        });
-
-        HStack(sizer, [this](auto sizer) {
-            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
-                CreateText(this, sizer, BasicSizerFlags(), "Yards: ");
-                text_minyards = CreateTextCtrl(this, sizer);
-                text_minyards->ChangeValue("50");
-            });
-        });
-    }));
+            },
+        },
+    }
+        .attachTo(this);
 }
 
 bool PrintPostScriptDialog::TransferDataToWindow()
@@ -317,9 +302,7 @@ bool PrintPostScriptDialog::TransferDataToWindow()
     radio_method->SetSelection(static_cast<int>(config.Get_PrintPSModes()));
     check_overview->SetValue(config.Get_PrintPSOverview());
     check_cont->SetValue(config.Get_PrintPSDoCont());
-    if (check_pages) {
-        check_pages->SetValue(config.Get_PrintPSDoContSheet());
-    }
+    check_pages->SetValue(config.Get_PrintPSDoContSheet());
 
     wxString buf;
     buf.Printf("%.2f", config.Get_PageOffsetX());
@@ -350,9 +333,7 @@ bool PrintPostScriptDialog::TransferDataFromWindow()
     config.Set_PrintPSModes(radio_method->GetSelection());
     config.Set_PrintPSOverview(check_overview->GetValue());
     config.Set_PrintPSDoCont(check_cont->GetValue());
-    if (check_pages) {
-        config.Set_PrintPSDoContSheet(check_pages->GetValue());
-    }
+    config.Set_PrintPSDoContSheet(check_pages->GetValue());
 
     double dval;
     text_x->GetValue().ToDouble(&dval);

@@ -28,6 +28,7 @@
 #include "PreferencesPrintContinuitySetup.h"
 #include "PreferencesShowModeSetup.h"
 #include "PreferencesUtils.h"
+#include <wxUI/wxUI.h>
 
 // how the preferences work:
 // preference dialog create a copy of the CalChart config from which to read and
@@ -58,30 +59,30 @@ CalChartPreferences::CalChartPreferences(wxWindow* parent)
     : super(parent, wxID_ANY, "CalChart Preferences", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
     , mConfig(CalChartConfiguration::GetGlobalConfig())
 {
-    SetSizer(VStack([this](auto sizer) {
-        mNotebook = new wxNotebook(this, wxID_ANY);
-        sizer->Add(mNotebook, BasicSizerFlags());
+    wxUI::VSizer{
+        BasicSizerFlags(),
+        wxUI::Generic{
+            [this] {
+                mNotebook = new wxNotebook(this, wxID_ANY);
 
-        mNotebook->AddPage(GeneralSetup::CreatePreference(mConfig, mNotebook), wxT("General"));
-        mNotebook->AddPage(ContCellSetup::CreatePreference(mConfig, mNotebook), wxT("Continuity"));
-        mNotebook->AddPage(DrawingSetup::CreatePreference(mConfig, mNotebook), wxT("Drawing"));
-        mNotebook->AddPage(ShowModeSetup::CreatePreference(mConfig, mNotebook), wxT("Show Mode Setup"));
-        mNotebook->AddPage(PrintContinuitySetup::CreatePreference(mConfig, mNotebook), wxT("Print Continuity Setup"));
-        mNotebook->AddPage(PSPrintingSetUp::CreatePreference(mConfig, mNotebook), wxT("PS Printing"));
+                mNotebook->AddPage(GeneralSetup::CreatePreference(mConfig, mNotebook), wxT("General"));
+                mNotebook->AddPage(ContCellSetup::CreatePreference(mConfig, mNotebook), wxT("Continuity"));
+                mNotebook->AddPage(DrawingSetup::CreatePreference(mConfig, mNotebook), wxT("Drawing"));
+                mNotebook->AddPage(ShowModeSetup::CreatePreference(mConfig, mNotebook), wxT("Show Mode Setup"));
+                mNotebook->AddPage(PrintContinuitySetup::CreatePreference(mConfig, mNotebook), wxT("Print Continuity Setup"));
+                mNotebook->AddPage(PSPrintingSetUp::CreatePreference(mConfig, mNotebook), wxT("PS Printing"));
+                return mNotebook;
+            }(),
+        },
+        wxUI::HSizer{
+            wxUI::Button{ wxID_APPLY },
+            wxUI::Button{ wxID_RESET, "&Reset All" },
+            wxUI::Button{ wxID_OK },
+            wxUI::Button{ wxID_CANCEL },
+        },
+    }
+        .attachTo(this);
 
-        // the buttons on the bottom
-        HStack(sizer, BasicSizerFlags(), [this](auto sizer) {
-            CreateButton(this, sizer, wxID_APPLY);
-            CreateButton(this, sizer, wxID_RESET, "&Reset All");
-            CreateButton(this, sizer, wxID_OK);
-            CreateButton(this, sizer, wxID_CANCEL);
-        });
-    }));
-
-    // This fits the dalog to the minimum size dictated by the sizers
-    GetSizer()->Fit(this);
-    // This ensures that the dialog cannot be smaller than the minimum size
-    GetSizer()->SetSizeHints(this);
     Center();
 }
 

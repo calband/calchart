@@ -27,6 +27,7 @@
 #include <wx/bmpcbox.h>
 #include <wx/spinctrl.h>
 #include <wx/wx.h>
+#include <wxUI/wxUI.h>
 
 class ColorSetupDialog : public wxDialog {
     using super = wxDialog;
@@ -73,8 +74,8 @@ private:
     nlohmann::json Export() const;
     void Import(nlohmann::json const&);
 
-    wxBitmapComboBox* mNameBox{};
-    wxSpinCtrl* mSpin{};
+    wxUI::BitmapComboBox::Proxy mNameBox{};
+    wxUI::SpinCtrl::Proxy mSpin{};
 
     int const mActiveColorPalette{};
     std::vector<std::string> mColorPaletteNames;

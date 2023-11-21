@@ -28,11 +28,10 @@
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>
 #include <wx/wx.h>
+#include <wxUI/wxUI.h>
 
 class FancyTextWin;
 class PrintContinuityPreview;
-class wxSplitterWindow;
-class wxCheckBox;
 
 class PrintContinuitySetup : public PreferencePage {
     using super = PreferencePage;
@@ -63,10 +62,9 @@ public:
     auto ClearValuesToDefault() -> bool override;
 
 private:
-    FancyTextWin* mUserInput{};
-    PrintContinuityPreview* mPrintContDisplay{};
-    wxSplitterWindow* mSplitter{};
-    wxCheckBox* mLandscape{};
+    wxUI::Generic<FancyTextWin>::Proxy mUserInput{};
+    wxUI::Generic<PrintContinuityPreview>::Proxy mPrintContDisplay{};
+    wxUI::CheckBox::Proxy mLandscape{};
 
     void InitFromConfig() override;
     void CreateControls() override;

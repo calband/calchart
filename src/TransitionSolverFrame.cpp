@@ -21,6 +21,7 @@
 #include <wx/html/helpctrl.h>
 #include <wx/msgdlg.h>
 #include <wx/statline.h>
+#include <wxUI/wxUI.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
@@ -47,6 +48,13 @@ EVT_MENU(CALCHART__TRANSITION_SOLVER__CLOSE, TransitionSolverFrame::OnCloseWindo
 EVT_LISTBOX(CALCHART__TRANSITION_SOLVER__NULL, TransitionSolverFrame::OnNullEvent)
 END_EVENT_TABLE()
 
+constexpr auto Description = R"T(Welcome to the CalChart Transition Solver!
+The algorithms used by this solver are credited to the E7 class  of Spring 2016.
+Staff: (Professor) Tina Chow, and (GSIs) Lucas Bastien and Bradley Harken
+Algorithms were selected from three different student groups:
+(1) Chiu, Zamora, Malani (2) Namini Asl, Ramirez, Zhang (3) Sover, Eliceiri, Hershkovitz
+Additional thanks to professor Scott Moura for helping the Cal Band get support from the UC Berkeley
+Civil Engineering Department for developing these algorithms.)T";
 #pragma mark - TransitionSolverFrame Implementation
 
 TransitionSolverFrame::TransitionSolverFrame()
@@ -102,192 +110,137 @@ bool TransitionSolverFrame::Create(CalChartDoc* show, wxWindow* parent,
 
 void TransitionSolverFrame::CreateControls()
 {
-    // menu bar
-    auto cont_menu = new wxMenu;
-    cont_menu->Append(wxID_CLOSE, wxT("Close Window\tCTRL-W"), wxT("Close this window"));
-
-    auto menu_bar = new wxMenuBar;
-    menu_bar->Append(cont_menu, wxT("&File"));
-    SetMenuBar(menu_bar);
-
     // create a scrollable window to contain all of the frame's content
     auto scrolledWindow = new wxScrolledWindow(this, wxID_ANY);
 
-    // add all of the frame content to the scrollable window
-    scrolledWindow->SetSizer(VStack([this, scrolledWindow](auto sizer) {
-        HStack(sizer, [scrolledWindow](auto& sizer) {
-            CreateText(scrolledWindow, sizer, R"T(Welcome to the CalChart Transition Solver!
-The algorithms used by this solver are credited to the E7 class  of Spring 2016.
-Staff: (Professor) Tina Chow, and (GSIs) Lucas Bastien and Bradley Harken
-Algorithms were selected from three different student groups:
-(1) Chiu, Zamora, Malani (2) Namini Asl, Ramirez, Zhang (3) Sover, Eliceiri, Hershkovitz
-Additional thanks to professor Scott Moura for helping the Cal Band get support from the UC Berkeley
-Civil Engineering Department for developing these algorithms.)T");
-        });
-
-        CreateHLine(scrolledWindow, sizer);
-
-        HStack(sizer, [this, scrolledWindow](auto& sizer) {
-            CreateText(scrolledWindow, sizer, "Select an algorithm: ");
-
-            mAlgorithmChoiceControl = CreateChoiceWithHandler(scrolledWindow, sizer, std::vector<std::string>{
-                                                                                         "E7 Algorithm: Chiu, Zamora, Malani",
-                                                                                         "E7 Algorithm: Namini Asl, Ramirez, Zhang",
-                                                                                         "Ey Algorithm: Sover, Eliceiri, Hershkovitz",
-                                                                                     },
-                [this](wxCommandEvent& event) {
-                    ChooseAlgorithm((CalChart::TransitionSolverParams::AlgorithmIdentifier)event.GetSelection());
-                });
-        });
-
-        CreateHLine(scrolledWindow, sizer);
-
-        VStack(sizer, [this, scrolledWindow](auto& sizer) {
-            HStack(sizer, [this, scrolledWindow](auto& sizer) {
-                VStack(sizer, [this, scrolledWindow](auto& sizer) {
-                    CreateText(scrolledWindow, sizer, "Please select a set of marcher instructions to allow.\n (You may select up to 8)\n")->Wrap(180);
-                    CreateText(scrolledWindow, sizer, "Selected Instructions:");
-                    mNumSelectedInstructionsIndicator = CreateText(scrolledWindow, sizer, "0:");
-                });
-
-                mAvailableCommandsControl = new wxListBox(scrolledWindow, wxID_ANY, wxDefaultPosition, wxSize(400, 100), 0, NULL, wxLB_EXTENDED);
-                mAvailableCommandsControl->Bind(wxEVT_LISTBOX, [this](wxCommandEvent&) {
+    wxUI::VSizer{
+        wxSizerFlags{}.Border(wxALL, 2).Center(),
+        wxUI::Text{ Description },
+        wxUI::HLine(),
+        wxUI::HSizer{
+            wxUI::Text{ "Select an algorithm: " },
+            mAlgorithmChoiceControl = wxUI::Choice{ { "E7 Algorithm: Chiu, Zamora, Malani",
+                                                        "E7 Algorithm: Namini Asl, Ramirez, Zhang",
+                                                        "Ey Algorithm: Sover, Eliceiri, Hershkovitz" } }
+                                          .bind([this](wxCommandEvent& event) {
+                                              ChooseAlgorithm((CalChart::TransitionSolverParams::AlgorithmIdentifier)event.GetSelection());
+                                          }),
+        },
+        wxUI::HLine(),
+        wxUI::VSizer{
+            wxUI::HSizer{
+                wxUI::VSizer{
+                    wxUI::Text{ "Please select a set of marcher instructions to allow.\n (You may select up to 8)\n" }
+                        .withWrap(180),
+                    wxUI::Text{ "Selected Instructions:" },
+                    mNumSelectedInstructionsIndicator = wxUI::Text{ "0:" },
+                },
+                mAvailableCommandsControl = wxUI::ListBox{ wxSizerFlags{}.Expand() }.withSize({ 400, 100 }).setStyle(wxLB_EXTENDED).bind([this] {
                     EditAllowedCommands();
-                });
-                sizer->Add(mAvailableCommandsControl, 0, wxGROW | wxALL, 5);
-            });
-
-            CreateHLine(scrolledWindow, sizer);
-
-            VStack(sizer, [this, scrolledWindow](auto& sizer) {
-                HStack(sizer, [this, scrolledWindow](auto& sizer) {
-                    CreateText(scrolledWindow, sizer, "New Group:");
-
-                    mNewGroupNameControl = CreateTextCtrl(scrolledWindow, sizer);
-
-                    mAddGroupButton = CreateButtonWithHandler(scrolledWindow, sizer, VerticalSizerFlags(), "Add", [this]() {
-                        AddNewGroup(mNewGroupNameControl->GetValue().ToStdString());
-                        SyncGroupControlsWithCurrentState();
-                    });
-                });
-
-                HStack(sizer, [this, scrolledWindow](auto& sizer) {
-                    CreateText(scrolledWindow, sizer, "Viewing Group:");
-
-                    mCurrentGroupControl = new wxListBox(scrolledWindow, wxID_ANY, wxDefaultPosition, wxSize(400, 100));
-                    mCurrentGroupControl->Bind(wxEVT_LISTBOX, [this](wxCommandEvent&) {
-                        SelectGroup();
-                    });
-                    sizer->Add(mCurrentGroupControl, 0, wxGROW | wxALL, 5);
-
-                    mRemoveGroupControl = CreateButtonWithHandler(scrolledWindow, sizer, VerticalSizerFlags(), "Remove", [this]() {
-                        AddNewGroup(mNewGroupNameControl->GetValue().ToStdString());
-                        SyncGroupControlsWithCurrentState();
-                    });
-                });
-
-                HStack(sizer, [this, scrolledWindow](auto& sizer) {
-                    VStack(sizer, [this, scrolledWindow](auto& sizer) {
-                        CreateText(scrolledWindow, sizer, "Select marchers on the field to enable adding them as members or destinations of the current group.")->Wrap(150);
-
-                        CreateText(scrolledWindow, sizer, "Number of selected marchers:");
-
-                        mNumberOfSelectedPointsLabel = CreateText(scrolledWindow, sizer, "0");
-                    });
-
-                    VStack(sizer, [this, scrolledWindow](auto& sizer) {
-                        CreateText(scrolledWindow, sizer, "Group Members:");
-
-                        mCurrentGroupMembersList = new wxListBox(scrolledWindow, CALCHART__TRANSITION_SOLVER__NULL, wxDefaultPosition, wxSize(130, 100), 0, NULL, wxLB_EXTENDED);
-                        sizer->Add(mCurrentGroupMembersList, 0, wxGROW | wxALL, 5);
-
-                        VStack(sizer, [this, scrolledWindow](auto& sizer) {
-                            HStack(sizer, HorizontalSizerFlags(), [this, scrolledWindow](auto& sizer) {
-                                mClearMembersButton = CreateButtonWithHandler(scrolledWindow, sizer, "Clear", [this]() {
-                                    ClearMembers();
-                                    SyncGroupControlsWithCurrentState();
-                                });
-
-                                mSetMembersToSelectionButton = CreateButtonWithHandler(scrolledWindow, sizer, "Set", [this]() {
-                                    SetMembers(mDoc->GetSelectionList());
-                                    SyncGroupControlsWithCurrentState();
-                                });
-                            });
-
-                            HStack(sizer, HorizontalSizerFlags(), [this, scrolledWindow](auto& sizer) {
-                                mAddSelectionToMembersButton = CreateButtonWithHandler(scrolledWindow, sizer, "Add", [this]() {
-                                    AddMembers(mDoc->GetSelectionList());
-                                    SyncGroupControlsWithCurrentState();
-                                });
-
-                                mRemoveSelectionFromMembersButton = CreateButtonWithHandler(scrolledWindow, sizer, "Remove", [this]() {
-                                    RemoveMembers(mDoc->GetSelectionList());
-                                    SyncGroupControlsWithCurrentState();
-                                });
-                            });
-
-                            HStack(sizer, HorizontalSizerFlags(), [this, scrolledWindow](auto& sizer) {
-                                mSelectMembersButton = CreateButtonWithHandler(scrolledWindow, sizer, "Select", [this]() {
-                                    mView->SelectMarchers(mSolverParams.groups[mSelectedGroup].marchers);
-                                });
-                            });
-                        });
-                    });
-
-                    VStack(sizer, [this, scrolledWindow](auto& sizer) {
-                        CreateText(scrolledWindow, sizer, "Group Allowed Destinations:");
-
-                        mCurrentGroupDestinationsList = new wxListBox(scrolledWindow, CALCHART__TRANSITION_SOLVER__NULL, wxDefaultPosition, wxSize(130, 100), 0, NULL, wxLB_EXTENDED);
-                        sizer->Add(mCurrentGroupDestinationsList, 0, wxGROW | wxALL, 5);
-
-                        VStack(sizer, [this, scrolledWindow](auto& sizer) {
-                            HStack(sizer, [this, scrolledWindow](auto& sizer) {
-                                mClearDestinationsButton = CreateButtonWithHandler(scrolledWindow, sizer, "Clear", [this]() {
-                                    ClearDestinations();
-                                    SyncGroupControlsWithCurrentState();
-                                });
-
-                                mSetDestinationsToSelectionButton = CreateButtonWithHandler(scrolledWindow, sizer, "Set", [this]() {
-                                    SetDestinations(mDoc->GetSelectionList());
-                                    SyncGroupControlsWithCurrentState();
-                                });
-                            });
-
-                            HStack(sizer, [this, scrolledWindow](auto& sizer) {
-                                mAddSelectionToDestinationsButton = CreateButtonWithHandler(scrolledWindow, sizer, "Add", [this]() {
-                                    AddDestinations(mDoc->GetSelectionList());
-                                    SyncGroupControlsWithCurrentState();
-                                });
-
-                                mRemoveSelectionFromDestinationsButton = CreateButtonWithHandler(scrolledWindow, sizer, "Remove", [this]() {
-                                    RemoveDestinations(mDoc->GetSelectionList());
-                                    SyncGroupControlsWithCurrentState();
-                                });
-                            });
-
-                            HStack(sizer, HorizontalSizerFlags(), [this, scrolledWindow](auto& sizer) {
-                                mSelectDestinationsButton = CreateButtonWithHandler(scrolledWindow, sizer, "Select", [this]() {
-                                    mView->SelectMarchers(mSolverParams.groups[mSelectedGroup].allowedDestinations);
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-        });
-
-        CreateHLine(scrolledWindow, sizer);
-
-        HStack(sizer, HorizontalSizerFlags(), [this, scrolledWindow](auto& sizer) {
-            mCloseButton = CreateButtonWithHandler(scrolledWindow, sizer, "Close", [this]() {
+                }),
+            },
+            wxUI::HLine(),
+            wxUI::HSizer{
+                wxUI::Text{ "New Group:" },
+                mNewGroupNameControl = wxUI::TextCtrl{}.withWidthSize(100),
+                mAddGroupButton = wxUI::Button{ "Add" }.bind([this] {
+                    AddNewGroup(mNewGroupNameControl->GetValue().ToStdString());
+                    SyncGroupControlsWithCurrentState();
+                }),
+            },
+            wxUI::HSizer{
+                wxUI::Text{ "Viewing Group:" },
+                mCurrentGroupControl = wxUI::ListBox{ wxSizerFlags{}.Expand() }.withSize({ 400, 100 }).bind([this] {
+                    SelectGroup();
+                }),
+                mRemoveGroupControl = wxUI::Button{ "Remove" }.bind([this] {
+                    AddNewGroup(mNewGroupNameControl->GetValue().ToStdString());
+                    SyncGroupControlsWithCurrentState();
+                }),
+            },
+            wxUI::HSizer{
+                wxUI::VSizer{
+                    wxUI::Text{ "Select marchers on the field to enable adding them as members or destinations of the current group." }
+                        .withWrap(150),
+                    wxUI::Text{ "Number of selected marchers:" },
+                    mNumberOfSelectedPointsLabel = wxUI::Text{ "0" },
+                },
+                wxUI::VSizer{
+                    wxUI::Text{ "Group Members:" },
+                    mCurrentGroupMembersList = wxUI::ListBox{ wxSizerFlags{}.Expand(), CALCHART__TRANSITION_SOLVER__NULL }
+                                                   .setStyle(wxLB_EXTENDED)
+                                                   .withSize({ 130, 100 }),
+                    wxUI::HSizer{
+                        mClearMembersButton = wxUI::Button{ "Clear" }.bind([this] {
+                            ClearMembers();
+                            SyncGroupControlsWithCurrentState();
+                        }),
+                        mSetMembersToSelectionButton = wxUI::Button{ "Set" }.bind([this] {
+                            SetMembers(mDoc->GetSelectionList());
+                            SyncGroupControlsWithCurrentState();
+                        }),
+                    },
+                    wxUI::HSizer{
+                        mAddSelectionToMembersButton = wxUI::Button{ "Add" }.bind([this] {
+                            AddMembers(mDoc->GetSelectionList());
+                            SyncGroupControlsWithCurrentState();
+                        }),
+                        mRemoveSelectionFromMembersButton = wxUI::Button{ "Remove" }.bind([this] {
+                            RemoveMembers(mDoc->GetSelectionList());
+                            SyncGroupControlsWithCurrentState();
+                        }),
+                    },
+                    wxUI::HSizer{
+                        mSelectMembersButton = wxUI::Button{ "Select" }.bind([this] {
+                            mView->SelectMarchers(mSolverParams.groups[mSelectedGroup].marchers);
+                        }),
+                    },
+                },
+                wxUI::VSizer{
+                    wxUI::Text{ "Group Allowed Destinations:" },
+                    mCurrentGroupMembersList = wxUI::ListBox{ wxSizerFlags{}.Expand(), CALCHART__TRANSITION_SOLVER__NULL }
+                                                   .setStyle(wxLB_EXTENDED)
+                                                   .withSize({ 130, 100 }),
+                    wxUI::HSizer{
+                        mClearDestinationsButton = wxUI::Button{ "Clear" }.bind([this] {
+                            ClearDestinations();
+                            SyncGroupControlsWithCurrentState();
+                        }),
+                        mSetDestinationsToSelectionButton = wxUI::Button{ "Set" }.bind([this] {
+                            SetDestinations(mDoc->GetSelectionList());
+                            SyncGroupControlsWithCurrentState();
+                        }),
+                    },
+                    wxUI::HSizer{
+                        mAddSelectionToDestinationsButton = wxUI::Button{ "Add" }.bind([this] {
+                            AddDestinations(mDoc->GetSelectionList());
+                            SyncGroupControlsWithCurrentState();
+                        }),
+                        mRemoveSelectionFromDestinationsButton = wxUI::Button{ "Remove" }.bind([this] {
+                            RemoveDestinations(mDoc->GetSelectionList());
+                            SyncGroupControlsWithCurrentState();
+                        }),
+                    },
+                    wxUI::HSizer{
+                        mSelectDestinationsButton = wxUI::Button{ "Select" }.bind([this] {
+                            mView->SelectMarchers(mSolverParams.groups[mSelectedGroup].allowedDestinations);
+                        }),
+                    },
+                },
+            },
+        },
+        wxUI::HLine(),
+        wxUI::HSizer{
+            mCloseButton = wxUI::Button{ "Close" }.bind([this] {
                 Close();
-            });
-
-            mApplyButton = CreateButtonWithHandler(scrolledWindow, sizer, "Apply (Solve Transition from This Sheet to Next)", [this]() {
+            }),
+            mApplyButton = wxUI::Button{ "Apply (Solve Transition from This Sheet to Next)" }.bind([this] {
                 Apply();
-            });
-        });
-    }));
+            }),
+        },
+
+    }
+        .attachTo(scrolledWindow);
 
     {
         // configure the minimum size of the window, and then add scroll bars
@@ -412,6 +365,7 @@ void TransitionSolverFrame::SyncGroupControlsWithCurrentState()
         }
     }
 
+#if 0
     if (mSelectedGroup != -1) {
         mSelectMembersButton->Enable();
         mSelectDestinationsButton->Enable();
@@ -419,6 +373,7 @@ void TransitionSolverFrame::SyncGroupControlsWithCurrentState()
         mSelectMembersButton->Disable();
         mSelectDestinationsButton->Disable();
     }
+#endif
 }
 
 void TransitionSolverFrame::SyncControlsWithCurrentState()

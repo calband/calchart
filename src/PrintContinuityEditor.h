@@ -24,6 +24,7 @@
 #include <wx/dialog.h>
 #include <wx/docview.h>
 #include <wx/wx.h>
+#include <wxUI/wxUI.h>
 
 class CalChartConfiguration;
 class CalChartView;
@@ -88,11 +89,9 @@ private:
     void OnSizeEvent(wxSizeEvent& event);
 
     CalChartView* mView{};
-    FancyTextWin* mUserInput{};
-    PrintContinuityPreview* mPrintContDisplay{};
-    wxSplitterWindow* mSplitter{};
+    wxUI::Generic<FancyTextWin>::Proxy mUserInput{};
+    wxUI::Generic<PrintContinuityPreview>::Proxy mPrintContDisplay{};
     wxTimer* mTimer{};
-    std::vector<wxWindow*> mItemsToHide;
 
     wxString mPreviousText{};
     bool mInMiniMode{};

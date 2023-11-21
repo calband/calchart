@@ -26,6 +26,7 @@
 #include <set>
 #include <wx/dialog.h>
 #include <wx/wx.h>
+#include <wxUI/wxUI.h>
 
 class CalChartDoc;
 class CalChartConfiguration;
@@ -70,13 +71,22 @@ public:
 
 private:
     CalChartDoc const* mShow;
-    wxTextCtrl* text_cmd;
+    wxUI::TextCtrl::Proxy text_cmd;
 #ifdef PRINT__RUN_CMD
-    wxTextCtrl *text_opts, *text_view_cmd, *text_view_opts;
+    wxUI::TextCtrl::Proxy text_opts;
+    wxUI::TextCtrl::Proxy text_view_cmd;
+    wxUI::TextCtrl::Proxy text_view_opts;
 #endif
-    wxTextCtrl *text_x, *text_y, *text_width, *text_height, *text_length;
-    wxTextCtrl* text_minyards;
-    wxRadioBox *radio_orient, *radio_method;
-    wxCheckBox *check_cont, *check_pages, *check_overview;
+    wxUI::TextCtrl::Proxy text_x;
+    wxUI::TextCtrl::Proxy text_y;
+    wxUI::TextCtrl::Proxy text_width;
+    wxUI::TextCtrl::Proxy text_height;
+    wxUI::TextCtrl::Proxy text_length;
+    wxUI::TextCtrl::Proxy text_minyards;
+    wxUI::RadioBox::Proxy radio_orient;
+    wxUI::RadioBox::Proxy radio_method;
+    wxUI::CheckBox::Proxy check_cont;
+    wxUI::CheckBox::Proxy check_pages;
+    wxUI::CheckBox::Proxy check_overview;
     std::set<size_t> mIsSheetPicked;
 };

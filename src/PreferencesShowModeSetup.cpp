@@ -62,7 +62,7 @@ enum {
 
 IMPLEMENT_CLASS(ShowModeSetup, PreferencePage)
 
-auto convert(std::vector<std::string> const& input)
+static auto convert(std::vector<std::string> const& input)
 {
     std::vector<wxString> output;
     std::copy(input.begin(), input.end(), std::back_inserter(output));

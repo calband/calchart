@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <wx/wx.h>
+#include <wxUI/wxUI.h>
 
 namespace CalChart::Cont {
 class Procedure;
@@ -37,6 +38,5 @@ public:
     bool Validate() override;
 
 private:
-    ContinuityComposerPanel* mPanel{};
-    wxButton* mCloseButton{};
+    wxUI::Generic<ContinuityComposerPanel>::Proxy mPanel{};
 };
