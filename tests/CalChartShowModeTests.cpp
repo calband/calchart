@@ -24,7 +24,7 @@ static auto TestCreateOutline(auto cmds)
 TEST_CASE("Draw", "CalChartShowMode")
 {
     auto uut1 = CalChart::ShowMode::GetDefaultShowMode();
-    auto cmds = CalChart::Draw::toDrawCommands(CalChart::CreateFieldLayout(uut1, false) + CalChart::Coord{ 1, 2 });
+    auto cmds = CalChart::CreateFieldLayout(uut1, false) + CalChart::Coord{ 1, 2 };
     CHECK(cmds.size() == 105);
     TestCreateOutline(std::vector(cmds.begin(), cmds.begin() + 4));
 }

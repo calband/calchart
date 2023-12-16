@@ -170,5 +170,5 @@ void ContinuityBrowserPanel::DoSetFocus(wxFocusEvent&)
 
 void ContinuityBrowserPanel::DoKillFocus(wxFocusEvent&)
 {
-    SetSelection(-1);
+    SetSelection({});
 }

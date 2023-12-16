@@ -18,137 +18,220 @@
 #include "ContinuityBoxDrawer.h"
 #include "CalChartConfiguration.h"
 #include "CalChartContinuityToken.h"
+#include "CalChartDrawCommand.h"
 #include "CalChartDrawPrimativesHelper.h"
+#include "CalChartDrawing.h"
+#include "CalChartRanges.h"
 #include "DCSaveRestore.h"
 #include "basic_ui.h"
 
-#include <regex>
-
 // Draw each ContToken and then all the children at the right location.
-// Also handle
 class ContinuityBoxSubPartDrawer {
 public:
-    ContinuityBoxSubPartDrawer(CalChart::Cont::Drawable const& proc);
-    int GetTextBoxSize(wxDC const& dc, CalChartConfiguration const& config) const;
-    void DrawCell(wxDC& dc, CalChartConfiguration const& config, void const* highlight, int x_start, int y_start) const;
-    auto GetLastTextBoxSize() const { return std::pair<wxPoint, wxSize>(mRectStart, mRectSize); }
-    void OnClick(wxPoint const& point, std::function<void(CalChart::Cont::Drawable const&)> if_hit) const;
+    explicit ContinuityBoxSubPartDrawer(CalChart::Cont::Drawable const& proc);
+    [[nodiscard]] auto GetTextBoxSize(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent) const -> int;
+    [[nodiscard]] auto GetChildrenBeginSize(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent) const -> std::vector<std::tuple<int, int>>;
+    [[nodiscard]] auto GetDrawCommands(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent, void const* highlight) const
+    {
+        auto box_padding = fDIP(config.Get_ContCellBoxPadding());
+        return GetProcCellBoxDrawCommands(config, getTextExtent, highlight) + CalChart::Coord(box_padding, box_padding);
+    }
+
+    void OnClick(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent, wxPoint const& point, std::function<void(CalChart::Cont::Drawable const&)> if_hit) const;
 
 private:
-    void DrawProcCellBox(wxDC& dc, CalChartConfiguration const& config, void const* highlight, int x_start, int y_start) const;
+    auto GetProcCellBoxDrawCommands(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent, void const* highlight) const -> std::vector<CalChart::DrawCommand>;
+    void HandleOnClick(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent, wxPoint const& point, std::function<void(CalChart::Cont::Drawable const&)> if_hit) const;
 
     CalChart::Cont::Drawable mDrawCont;
     std::vector<ContinuityBoxSubPartDrawer> mChildren;
-    mutable wxPoint mRectStart;
-    mutable wxSize mRectSize;
 };
 
-auto GetBrush(CalChart::Cont::Type contType, CalChartConfiguration const& config)
+namespace {
+
+auto ContTypeToCellColors(CalChart::Cont::Type contType) -> CalChart::ContinuityCellColors
 {
     switch (contType) {
     case CalChart::Cont::Type::procedure:
-        return wxCalChart::toBrush(config.Get_ContCellBrushAndPen(CalChart::ContinuityCellColors::PROC));
+        return CalChart::ContinuityCellColors::PROC;
     case CalChart::Cont::Type::value:
-        return wxCalChart::toBrush(config.Get_ContCellBrushAndPen(CalChart::ContinuityCellColors::VALUE));
+        return CalChart::ContinuityCellColors::VALUE;
     case CalChart::Cont::Type::function:
-        return wxCalChart::toBrush(config.Get_ContCellBrushAndPen(CalChart::ContinuityCellColors::FUNCTION));
+        return CalChart::ContinuityCellColors::FUNCTION;
     case CalChart::Cont::Type::direction:
-        return wxCalChart::toBrush(config.Get_ContCellBrushAndPen(CalChart::ContinuityCellColors::DIRECTION));
+        return CalChart::ContinuityCellColors::DIRECTION;
     case CalChart::Cont::Type::steptype:
-        return wxCalChart::toBrush(config.Get_ContCellBrushAndPen(CalChart::ContinuityCellColors::STEPTYPE));
+        return CalChart::ContinuityCellColors::STEPTYPE;
     case CalChart::Cont::Type::point:
-        return wxCalChart::toBrush(config.Get_ContCellBrushAndPen(CalChart::ContinuityCellColors::POINT));
+        return CalChart::ContinuityCellColors::POINT;
     case CalChart::Cont::Type::unset:
-        return wxCalChart::toBrush(config.Get_ContCellBrushAndPen(CalChart::ContinuityCellColors::UNSET));
+        return CalChart::ContinuityCellColors::UNSET;
+    case CalChart::Cont::Type::outline:
+        return CalChart::ContinuityCellColors::OUTLINE;
+    case CalChart::Cont::Type::selected:
+        return CalChart::ContinuityCellColors::SELECTED;
     }
-    return wxCalChart::toBrush(config.Get_ContCellBrushAndPen(CalChart::ContinuityCellColors::PROC));
+    return CalChart::ContinuityCellColors::PROC;
+}
+
+auto GetBrush(CalChart::Cont::Type contType, CalChartConfiguration const& config)
+{
+    return CalChart::toBrush(config.Get_ContCellBrushAndPen(ContTypeToCellColors(contType)));
+}
+
+auto GetPen(CalChart::Cont::Type contType, bool highlighted, [[maybe_unused]] CalChartConfiguration const& config)
+{
+    if (highlighted) {
+        return CalChart::toPen(config.Get_ContCellBrushAndPen(ContTypeToCellColors(CalChart::Cont::Type::selected)));
+    }
+    auto pen = CalChart::toPen(config.Get_ContCellBrushAndPen(ContTypeToCellColors(CalChart::Cont::Type::outline)));
+    if (contType == CalChart::Cont::Type::unset) {
+        pen.style = CalChart::Pen::Style::ShortDash;
+    }
+    return pen;
+}
+
+static auto SplitString(std::string_view input, std::string_view delim)
+{
+    return CalChart::Ranges::ToVector<std::string>(std::views::split(input, delim)
+        | std::views::transform([](auto i) { return std::string{ i.begin(), i.end() }; }));
+}
+
 }
 
 ContinuityBoxSubPartDrawer::ContinuityBoxSubPartDrawer(CalChart::Cont::Drawable const& proc)
     : mDrawCont(proc)
+    , mChildren{ mDrawCont.args.begin(), mDrawCont.args.end() }
 {
-    std::copy(mDrawCont.args.begin(), mDrawCont.args.end(), std::back_inserter(mChildren));
 }
 
-int ContinuityBoxSubPartDrawer::GetTextBoxSize(wxDC const& dc, CalChartConfiguration const& config) const
+int ContinuityBoxSubPartDrawer::GetTextBoxSize(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent) const
 {
-    auto total_size = 0;
     auto text_padding = fDIP(config.Get_ContCellTextPadding());
 
-    auto format_sub_size = dc.GetTextExtent("%@").x;
-    for (auto&& i : mChildren) {
-        total_size += i.GetTextBoxSize(dc, config) + text_padding * 2;
-    }
-    total_size += dc.GetTextExtent(config.Get_ContCellLongForm() ? mDrawCont.description : mDrawCont.short_description).x;
+    auto format_sub_size = getTextExtent("%@").x;
+    auto total_size = std::accumulate(mChildren.begin(), mChildren.end(), 0, [&config, text_padding, getTextExtent](auto&& acc, auto&& child) { return acc + child.GetTextBoxSize(config, getTextExtent) + text_padding * 2; });
+    total_size += getTextExtent(config.Get_ContCellLongForm() ? mDrawCont.description : mDrawCont.short_description).x;
     total_size -= format_sub_size * mDrawCont.args.size();
 
     return total_size;
 }
 
-void ContinuityBoxSubPartDrawer::DrawProcCellBox(wxDC& dc, CalChartConfiguration const& config, void const* highlight, int x_start, int y_start) const
+// We determine where we are going to draw by parsing out the continuity string, substituting the children sizes,
+// and then laying out the text.  In order to know where things are, we determine where the children should be.
+//
+// Consider this example.  We are going to assume that strlen is the size for x, but in reality it is whatever the
+// text extent of the current device context:
+// "( %@ and %@ + %@ )"
+// That has 3 children, and imagine they had these sizes:
+// mChildren -> [ 8, 3, 6 ]
+//
+// if we were to "render" this text, it would be something like:
+// 0123456789012345678901234567890
+// ( cccccccc and ccc + cccccc )
+// or we would draw child0 at 2, and it would be 8 long, child1 at 15, and it would be 3 long, and child2 at 21,
+// and it would be 6.  So we would want to create the sequence of (start, size) that would look like:
+// [(2, 8), (15, 3), (21, 6)]
+//
+// So first what we would do is break the description into its parts, and create running sum using exclusive scan, and drop 1st:
+// "( %@ and %@ + %@ )" -> [ "( ", " and ", " + ", " )" ] -> [2, 5, 3, 2] -> [0, 2, 7, 10] -> [2, 7, 10]
+//
+// We then Calculate the mChildren sizes, and create an sum using exclusive scan:
+// mChildren -> [ 8, 3, 6 ]
+// Then what we do is  -> [8, 11, 17] or -> [0, 8, 11]
+// We now add that to the first sequence:
+// [2, 7, 10] + [0, 8, 11] -> [ 2, 15, 21 ]
+// And then we zip it up with the mChildren sizes:
+// [(2, 8), (15, 3), (21, 6)]
+//
+// so what we have is
+// zip_view(transform(exclusive_sum(words) -> drop_first, exclusive_scan(children),+), childSizes)
+auto ContinuityBoxSubPartDrawer::GetChildrenBeginSize(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent) const -> std::vector<std::tuple<int, int>>
 {
+    auto words = SplitString(config.Get_ContCellLongForm() ? mDrawCont.description : mDrawCont.short_description, "%@");
     auto text_padding = fDIP(config.Get_ContCellTextPadding());
-    auto rounding = fDIP(config.Get_ContCellRounding());
-    auto box_size_y = fDIP(config.Get_ContCellFontSize()) + 2 * text_padding;
-    // first draw the box of the total size
-    auto box_size_x = GetTextBoxSize(dc, config) + 2 * text_padding;
-    {
-        auto currentPen = dc.GetPen();
-        auto restore = SaveAndRestore::BrushAndPen(dc);
-        // fill with the color for this continuity
-        dc.SetBrush(GetBrush(mDrawCont.type, config));
-        if (mDrawCont.type == CalChart::Cont::Type::unset) {
-            dc.SetPen(*wxBLACK_DASHED_PEN);
-        } else {
-            dc.SetPen(*wxBLACK_PEN);
-        }
-        if (mDrawCont.self_ptr == highlight) {
-            dc.SetPen(wxPen(wxColour(wxT("PINK")), 3));
-        }
-        mRectStart = wxPoint(x_start, y_start);
-        mRectSize = wxSize(box_size_x, box_size_y);
-        dc.DrawRoundedRectangle(mRectStart, mRectSize, rounding);
-        dc.SetPen(currentPen);
-    }
-    auto AfterPen = dc.GetPen();
 
-    // then render everything from left to right, text, then descend, then text...
-    const static std::regex format_substr("%@");
-    std::smatch format_match;
-    auto string_to_print = config.Get_ContCellLongForm() ? mDrawCont.description : mDrawCont.short_description;
-    auto count = 0u;
-    auto textPoint = wxPoint{ x_start + text_padding, y_start + text_padding };
-    while (regex_search(string_to_print, format_match, format_substr)) {
-        auto t_str_to_print = wxString(format_match.prefix());
-        dc.DrawText(t_str_to_print, textPoint);
-        textPoint.x += dc.GetTextExtent(t_str_to_print).x;
-        mChildren.at(count).DrawProcCellBox(dc, config, highlight, textPoint.x, y_start);
-        textPoint.x += mChildren.at(count).GetTextBoxSize(dc, config) + 2 * text_padding;
-        ++count;
-        string_to_print = format_match.suffix();
-    }
-    dc.DrawText(string_to_print, textPoint);
+    auto exwordsStarts = std::vector<int>{};
+    std::exclusive_scan(words.begin(), words.end(), std::back_inserter(exwordsStarts), text_padding, [getTextExtent](auto acc, auto str) { return acc + getTextExtent(std::string{ str }).x; });
+
+    auto childrenSizes = CalChart::Ranges::ToVector<int>(mChildren | std::views::transform([&config, text_padding, getTextExtent](auto&& child) { return child.GetTextBoxSize(config, getTextExtent) + 2 * text_padding; }));
+
+    auto exchildrenSizes = std::vector<int>{};
+    std::exclusive_scan(childrenSizes.begin(), childrenSizes.end(), std::back_inserter(exchildrenSizes), 0);
+
+    return CalChart::Ranges::ToVector<std::tuple<int, int>>(CalChart::Ranges::zip_view(
+        CalChart::Ranges::zip_view(
+            exwordsStarts | std::views::drop(1),
+            exchildrenSizes)
+            | std::views::transform([](auto&& values) {
+                  return std::get<0>(values) + std::get<1>(values);
+              }),
+        childrenSizes));
 }
 
-void ContinuityBoxSubPartDrawer::DrawCell(wxDC& dc, CalChartConfiguration const& config, void const* highlight, int x_start, int y_start) const
+auto ContinuityBoxSubPartDrawer::GetProcCellBoxDrawCommands(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent, void const* highlight) const -> std::vector<CalChart::DrawCommand>
+{
+    auto text_padding = fDIP(config.Get_ContCellTextPadding());
+    CalChart::Coord::units rounding = config.Get_ContCellRounding();
+    auto box_size_y = fDIP(config.Get_ContCellFontSize()) + 2 * text_padding;
+    auto box_size_x = GetTextBoxSize(config, getTextExtent) + 2 * text_padding;
+
+    auto words = SplitString(config.Get_ContCellLongForm() ? mDrawCont.description : mDrawCont.short_description, "%@");
+
+    auto childInfo = GetChildrenBeginSize(config, getTextExtent);
+
+    auto drawCmds = std::vector{
+        CalChart::Draw::withBrush(
+            GetBrush(mDrawCont.type, config),
+            CalChart::Draw::withPen(
+                GetPen(mDrawCont.type, mDrawCont.self_ptr == highlight, config),
+                CalChart::Draw::Rectangle{ CalChart::Coord{}, CalChart::Coord(box_size_x, box_size_y), rounding }))
+    };
+
+    // The first text to draw is at the beginning
+    CalChart::append(drawCmds,
+        std::vector{ CalChart::Draw::Text{ CalChart::Coord(text_padding, text_padding), words.front() } });
+
+    // draw the rest of the text after each of the children.
+    CalChart::append(drawCmds,
+        CalChart::Ranges::zip_view(childInfo, words | std::views::drop(1))
+            | std::views::transform([text_padding](auto bundle) {
+                  auto where = std::get<0>(bundle);
+                  return CalChart::Draw::Text{ CalChart::Coord(std::get<0>(where) + std::get<1>(where), text_padding), std::string{ std::get<1>(bundle) } };
+              }));
+
+    // draw the children
+    for (auto bundle : CalChart::Ranges::zip_view(mChildren, childInfo)) {
+        CalChart::append(drawCmds, std::get<0>(bundle).GetProcCellBoxDrawCommands(config, getTextExtent, highlight) + CalChart::Coord(std::get<0>(std::get<1>(bundle)), 0));
+    }
+    return drawCmds;
+}
+
+void ContinuityBoxSubPartDrawer::OnClick(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent, wxPoint const& point, std::function<void(CalChart::Cont::Drawable const&)> onClickAction) const
 {
     auto box_padding = fDIP(config.Get_ContCellBoxPadding());
 
-    DrawProcCellBox(dc, config, highlight, x_start + box_padding, y_start + box_padding);
+    return HandleOnClick(config, getTextExtent, point - wxPoint(box_padding, box_padding), onClickAction);
 }
 
-void ContinuityBoxSubPartDrawer::OnClick(wxPoint const& point, std::function<void(CalChart::Cont::Drawable const&)> onClickAction) const
+void ContinuityBoxSubPartDrawer::HandleOnClick(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent, wxPoint const& point, std::function<void(CalChart::Cont::Drawable const&)> onClickAction) const
 {
-    for (auto&& i : mChildren) {
-        if ((point.x >= i.mRectStart.x && point.x < (i.mRectStart.x + i.mRectSize.x)) && (point.y >= i.mRectStart.y && point.y < (i.mRectStart.y + i.mRectSize.y))) {
-            i.OnClick(point, onClickAction);
+    auto text_padding = fDIP(config.Get_ContCellTextPadding());
+    auto box_size_y = fDIP(config.Get_ContCellFontSize()) + 2 * text_padding;
+    auto childInfo = GetChildrenBeginSize(config, getTextExtent);
+
+    for (auto bundle : CalChart::Ranges::zip_view(mChildren, childInfo)) {
+        auto [startx, sizex] = std::get<1>(bundle);
+        if ((point.x >= startx && point.x < (startx + sizex)) && (point.y >= 0 && point.y < box_size_y)) {
+            std::get<0>(bundle).HandleOnClick(config, getTextExtent, point - wxPoint(startx, 0), onClickAction);
             return;
         }
     }
-
-    if ((point.x >= mRectStart.x && point.x < (mRectStart.x + mRectSize.x)) && (point.y >= mRectStart.y && point.y < (mRectStart.y + mRectSize.y))) {
-        if (onClickAction)
-            onClickAction(mDrawCont);
+    auto box_size_x = GetTextBoxSize(config, getTextExtent) + 2 * text_padding;
+    auto rectStart = wxPoint(0, 0);
+    auto rectSize = wxSize(box_size_x, box_size_y);
+    if (onClickAction && (point.x >= rectStart.x && point.x < (rectStart.x + rectSize.x)) && (point.y >= rectStart.y && point.y < (rectStart.y + rectSize.y))) {
+        onClickAction(mDrawCont);
     }
 }
 
@@ -161,10 +244,12 @@ ContinuityBoxDrawer::ContinuityBoxDrawer(CalChart::Cont::Drawable const& proc, C
 
 ContinuityBoxDrawer::~ContinuityBoxDrawer() = default;
 
-void ContinuityBoxDrawer::DrawToDC(wxDC& dc)
+auto ContinuityBoxDrawer::GetDrawCommands(wxDC& dc) -> std::vector<CalChart::DrawCommand>
 {
+    // this is necessary so we calculate the correct text extents
     dc.SetFont(CreateFont(mConfig.Get_ContCellFontSize()));
-    mContToken->DrawCell(dc, mConfig, mHighlight, 0, 0);
+    auto getTextExtent = [&dc](std::string str) { return dc.GetTextExtent(str); };
+    return mContToken->GetDrawCommands(mConfig, getTextExtent, mHighlight);
 }
 
 int ContinuityBoxDrawer::Height() const
@@ -180,10 +265,13 @@ int ContinuityBoxDrawer::GetHeight(CalChartConfiguration const& config)
 int ContinuityBoxDrawer::Width() const
 {
     wxMemoryDC temp_dc;
-    return mContToken->GetTextBoxSize(temp_dc, mConfig) + fDIP(2 * mConfig.Get_ContCellBoxPadding() + 2 * mConfig.Get_ContCellTextPadding());
+    auto getTextExtent = [&temp_dc](std::string str) { return temp_dc.GetTextExtent(str); };
+    return mContToken->GetTextBoxSize(mConfig, getTextExtent) + fDIP(2 * mConfig.Get_ContCellBoxPadding() + 2 * mConfig.Get_ContCellTextPadding());
 }
 
-void ContinuityBoxDrawer::OnClick(wxPoint const& point)
+void ContinuityBoxDrawer::OnClick(wxDC& dc, wxPoint const& point)
 {
-    mContToken->OnClick(point, mClickAction);
+    dc.SetFont(CreateFont(mConfig.Get_ContCellFontSize()));
+    auto getTextExtent = [&dc](std::string const& str) { return dc.GetTextExtent(str); };
+    mContToken->OnClick(mConfig, getTextExtent, point, mClickAction);
 }

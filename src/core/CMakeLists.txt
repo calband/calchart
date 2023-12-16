@@ -49,6 +49,7 @@ add_library(
   CalChartMovePointsTool.h
   CalChartPoint.cpp
   CalChartPoint.h
+  CalChartRanges.h
   CalChartSelectTool.cpp
   CalChartSelectTool.h
   CalChartShapes.cpp

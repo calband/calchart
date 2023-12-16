@@ -95,9 +95,11 @@ enum class ContinuityCellColors {
     STEPTYPE,
     POINT,
     UNSET,
+    OUTLINE,
+    SELECTED,
     NUM,
 };
-using ContinuityCellColorsIterator = CalChart::Iterator<ContinuityCellColors, ContinuityCellColors::PROC, ContinuityCellColors::UNSET>;
+using ContinuityCellColorsIterator = CalChart::Iterator<ContinuityCellColors, ContinuityCellColors::PROC, ContinuityCellColors::SELECTED>;
 
 static const std::array<ColorInfoDefault_t, toUType(ContinuityCellColors::NUM)> ContCellColorInfoDefaults = {
     ColorInfoDefault_t{ "CONT CELL PROCEDURE", "LIME GREEN", 1 },
@@ -107,6 +109,8 @@ static const std::array<ColorInfoDefault_t, toUType(ContinuityCellColors::NUM)> 
     ColorInfoDefault_t{ "CONT CELL STEPTYPE", "SKY BLUE", 1 },
     ColorInfoDefault_t{ "CONT CELL POINT", "GOLD", 1 },
     ColorInfoDefault_t{ "CONT CELL UNSET", "WHITE", 1 },
+    ColorInfoDefault_t{ "CONT CELL OUTLINE", "BLACK", 1 },
+    ColorInfoDefault_t{ "CONT CELL SELECTED", "PINK", 3 },
 };
 
 enum class ShowModes {

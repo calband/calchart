@@ -32,12 +32,12 @@ class ContinuityBoxSubPartDrawer;
 class ContinuityBoxDrawer : public DrawableCell {
 public:
     ContinuityBoxDrawer(CalChart::Cont::Drawable const& proc, CalChartConfiguration const& config, std::function<void(CalChart::Cont::Drawable const&)> action = nullptr);
-    virtual ~ContinuityBoxDrawer();
+    ~ContinuityBoxDrawer() override;
     void SetHighlight(void const* ptr) override { mHighlight = ptr; }
-    virtual void DrawToDC(wxDC& dc) override;
-    virtual int Height() const override;
-    virtual int Width() const override;
-    virtual void OnClick(wxPoint const&) override;
+    auto GetDrawCommands(wxDC& dc) -> std::vector<CalChart::DrawCommand> override;
+    auto Height() const -> int override;
+    auto Width() const -> int override;
+    void OnClick(wxDC& dc, wxPoint const&) override;
 
     static int GetHeight(CalChartConfiguration const&);
 

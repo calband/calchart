@@ -233,8 +233,7 @@ namespace {
 
 auto Point::GetDrawCommands(unsigned ref, std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) const -> std::vector<CalChart::DrawCommand>
 {
-    return toDrawCommands(CreatePoint(*this, GetSymbol(), label, dotRatio, pLineRatio, sLineRatio)
-        + GetPos(ref));
+    return CreatePoint(*this, GetSymbol(), label, dotRatio, pLineRatio, sLineRatio) + GetPos(ref);
 }
 
 // Test Suite stuff

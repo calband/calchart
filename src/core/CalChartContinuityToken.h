@@ -149,6 +149,8 @@ enum class Type {
     steptype,
     point,
     unset,
+    outline,
+    selected,
 };
 
 class Token;

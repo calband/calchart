@@ -20,6 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#define _LIBCPP_ENABLE_EXPERIMENTAL 1
 #include "CalChartDrawing.h"
 
 #include "CalChartAnimation.h"
@@ -630,7 +631,7 @@ auto GeneratePhatomPointsDrawCommands(
                 config.Get_CalChartBrushAndPen(CalChart::Colors::GHOST_POINT),
                 CalChart::Draw::withTextForeground(
                     config.Get_CalChartBrushAndPen(CalChart::Colors::GHOST_POINT_TEXT),
-                    toDrawCommands(drawCmds + origin))))
+                    drawCmds + origin)))
     };
 }
 
@@ -701,6 +702,21 @@ void DrawCC_DrawCommandList(wxDC& dc, CalChart::DrawCommand const& cmd)
             }
             auto center = fDIP(wxCalChart::to_wxPoint(c.c1));
             dc.DrawCircle(center, fDIP(c.radius));
+        } else if constexpr (std::is_same_v<T, CalChart::Draw::Rectangle>) {
+            SaveAndRestore::Brush restore(dc);
+            if (!c.filled) {
+                dc.SetBrush(*wxTRANSPARENT_BRUSH);
+            }
+            if (c.rounding > 0) {
+                dc.DrawRoundedRectangle(
+                    fDIP(wxCalChart::to_wxPoint(c.start)),
+                    fDIP(wxCalChart::to_wxSize(c.size)),
+                    fDIP(c.rounding));
+            } else {
+                dc.DrawRectangle(
+                    fDIP(wxCalChart::to_wxPoint(c.start)),
+                    fDIP(wxCalChart::to_wxSize(c.size)));
+            }
         } else if constexpr (std::is_same_v<T, CalChart::Draw::Text>) {
             DrawText(dc, c.text, c.c1, c.anchor, c.withBackground);
         } else if constexpr (std::is_same_v<T, CalChart::Draw::Ignore>) {
@@ -756,7 +772,7 @@ auto GenerateModeDrawCommands(CalChartConfiguration const& config, CalChart::Sho
     }
 
     auto font = CalChart::Font{ .size = CalChart::Float2CoordUnits(config.Get_YardsSize()) };
-    auto brushAndPen = inBlackAndWhite ? CalChart::BrushAndPen{ .style = CalChart::Brush::Style::Transparent } : config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD);
+    auto brushAndPen = inBlackAndWhite ? CalChart::BrushAndPen{ .brushStyle = CalChart::Brush::Style::Transparent } : config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD);
     auto yardLabels = CalChart::CreateYardlineLayout(mode, howToDraw == ShowMode_kOmniView);
     CalChart::append(result,
         CalChart::Draw::withFont(
