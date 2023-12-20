@@ -63,6 +63,11 @@ struct Brush {
 
 struct Pen {
     Color color{};
+    enum class Style {
+        Solid,
+        ShortDash,
+    };
+    Style style = Pen::Style::Solid;
     int width = 1;
     friend auto operator==(Pen const&, Pen const&) -> bool = default;
 };
@@ -70,13 +75,14 @@ struct Pen {
 // for the cases where we share a color
 struct BrushAndPen {
     Color color{};
-    Brush::Style style = Brush::Style::Solid;
+    Brush::Style brushStyle = Brush::Style::Solid;
+    Pen::Style penStyle = Pen::Style::Solid;
     int width = 1;
     friend auto operator==(BrushAndPen const&, BrushAndPen const&) -> bool = default;
 };
 
-inline auto toBrush(BrushAndPen b) { return Brush{ b.color, b.style }; }
-inline auto toPen(BrushAndPen b) { return Pen{ b.color, b.width }; }
+inline auto toBrush(BrushAndPen b) { return Brush{ b.color, b.brushStyle }; }
+inline auto toPen(BrushAndPen b) { return Pen{ b.color, b.penStyle, b.width }; }
 
 struct Font {
     enum class Family {

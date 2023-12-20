@@ -20,10 +20,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartDrawCommand.h"
 #include <memory>
 #include <set>
 #include <vector>
-
 #include <wx/wx.h>
 
 // Drawable Cells are anything that is a small drawing surface
@@ -31,13 +31,15 @@ class DrawableCell {
 public:
     DrawableCell() = default;
     virtual ~DrawableCell() = default;
-    virtual void DrawToDC(wxDC&) = 0;
-    virtual int Height() const = 0;
-    virtual int Width() const = 0;
-    virtual void OnClick(wxPoint const&) = 0;
+    [[nodiscard]] virtual auto GetDrawCommands(wxDC&) -> std::vector<CalChart::DrawCommand> = 0;
+    [[nodiscard]] virtual auto Height() const -> int = 0;
+    [[nodiscard]] virtual auto Width() const -> int = 0;
+    virtual void OnClick(wxDC&, wxPoint const&) = 0;
     virtual void SetHighlight(void const*) = 0;
 };
 
+// A custom list view is a drawable item that has a number of cells in it that
+// can be manipulated.
 // the idea is that we will have a collection of smaller cells, that can be moved around.
 // View for linking CalChartDoc with ContinuityBrowser
 class CustomListViewPanel : public wxScrolledWindow {
@@ -47,9 +49,9 @@ class CustomListViewPanel : public wxScrolledWindow {
 public:
     // Basic functions
     CustomListViewPanel(wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxScrolledWindowStyle, wxString const& name = wxPanelNameStr);
-    virtual ~CustomListViewPanel() override = default;
+    ~CustomListViewPanel() override = default;
 
-    void SetSelection(int which) { m_selected = static_cast<size_t>(which); }
+    void SetSelection(std::optional<size_t> which) { m_selected = which; }
     auto GetSelection() const { return m_selected; }
     void SetCells(std::vector<std::unique_ptr<DrawableCell>> cells);
     void SetHighlight(void const* highlight);
@@ -69,12 +71,12 @@ private:
     virtual void OnEditEntry(int cell);
     virtual void OnDeleteEntry(int cell);
     virtual void OnMoveEntry(int start_cell, int end_cell);
-    size_t WhichCell(wxPoint const& point) const;
-    int HeightToCell(int which) const;
+    [[nodiscard]] auto WhichCell(wxPoint const& point) const -> std::optional<size_t>;
+    auto HeightToCell(int which) const -> int;
 
     std::vector<std::unique_ptr<DrawableCell>> mCells;
     wxPoint m_firstPress;
     wxPoint m_lastLocation;
-    size_t m_selected;
+    std::optional<size_t> m_selected;
     bool m_dragging;
 };

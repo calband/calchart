@@ -29,7 +29,6 @@
 #include "CalChartShowMode.h"
 #include "CalChartSizes.h"
 #include "ColorSetupCanvas.h"
-#include "ContinuityBrowserPanel.h"
 #include "ModeSetupDialog.h"
 #include "PreferencesUtils.h"
 #include "ShowModeSetupCanvas.h"

@@ -518,7 +518,7 @@ Get_BrushAndPen(Color c, Map& colorsAndWidth, InfoDefault const& InfoDefaultArra
             CalChartConfiguration::ColorWidth_t(wxCalChart::toColor(std::get<1>(InfoDefaultArray[toUType(c)])), std::get<2>(InfoDefaultArray[toUType(c)])));
     }
     auto colorAndWidth = colorsAndWidth[c];
-    return { std::get<0>(colorAndWidth), CalChart::Brush::Style::Solid, std::get<1>(colorAndWidth) };
+    return { std::get<0>(colorAndWidth), CalChart::Brush::Style::Solid, CalChart::Pen::Style::Solid, std::get<1>(colorAndWidth) };
 }
 
 template <typename Color, typename Map, typename InfoDefault, typename WriteQueue>

@@ -55,7 +55,7 @@ inline auto toBrush(CalChart::Brush b)
 
 inline auto toBrush(CalChart::BrushAndPen b)
 {
-    if (b.style == CalChart::Brush::Style::Transparent) {
+    if (b.brushStyle == CalChart::Brush::Style::Transparent) {
         return *wxTRANSPARENT_BRUSH;
     }
     return *wxTheBrushList->FindOrCreateBrush(toColour(b.color));
@@ -68,10 +68,13 @@ inline auto toPen(CalChart::Pen p)
 
 inline auto toPen(CalChart::BrushAndPen b)
 {
-    if (b.style == CalChart::Brush::Style::Transparent) {
+    if (b.brushStyle == CalChart::Brush::Style::Transparent) {
         return *wxTRANSPARENT_PEN;
     }
-    return *wxThePenList->FindOrCreatePen(toColour(b.color), b.width);
+    auto penStyle = b.penStyle == CalChart::Pen::Style::ShortDash ? wxPENSTYLE_SHORT_DASH
+                                                                  : wxPENSTYLE_SOLID;
+
+    return *wxThePenList->FindOrCreatePen(toColour(b.color), b.width, penStyle);
 }
 
 inline auto toColor(wxColour const& c)
@@ -91,22 +94,25 @@ inline auto toBrush(wxBrush const& b)
 
 inline auto toPen(wxPen const& p)
 {
-    return CalChart::Pen{ toColor(p.GetColour()), p.GetWidth() };
+    auto penStyle = p.GetStyle() == wxPENSTYLE_SHORT_DASH
+        ? CalChart::Pen::Style::ShortDash
+        : CalChart::Pen::Style::Solid;
+    return CalChart::Pen{ toColor(p.GetColour()), penStyle, p.GetWidth() };
 }
 
 inline auto toBrushAndPen(wxColour const& c, int width)
 {
-    return CalChart::BrushAndPen{ toColor(c), CalChart::Brush::Style::Solid, width };
+    return CalChart::BrushAndPen{ toColor(c), CalChart::Brush::Style::Solid, CalChart::Pen::Style::Solid, width };
 }
 
 inline auto toBrushAndPen(std::string_view s, int width)
 {
-    return CalChart::BrushAndPen{ toColor(s), CalChart::Brush::Style::Solid, width };
+    return CalChart::BrushAndPen{ toColor(s), CalChart::Brush::Style::Solid, CalChart::Pen::Style::Solid, width };
 }
 
 inline auto toBrushAndPen(wxPen const& p)
 {
-    return CalChart::BrushAndPen{ toColor(p.GetColour()), CalChart::Brush::Style::Solid, p.GetWidth() };
+    return CalChart::BrushAndPen{ toColor(p.GetColour()), CalChart::Brush::Style::Solid, CalChart::Pen::Style::Solid, p.GetWidth() };
 }
 
 inline auto setBackground(wxDC& dc, CalChart::Color color)

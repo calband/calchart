@@ -134,6 +134,40 @@ namespace Draw {
     inline constexpr auto operator-(Circle lhs, Coord rhs) { return Circle{ lhs.c1 - rhs, lhs.radius, lhs.filled }; }
     inline constexpr auto operator-(Coord lhs, Circle rhs) { return Circle{ lhs - rhs.c1, rhs.radius, rhs.filled }; }
 
+    struct Rectangle {
+        Coord start{};
+        Coord size{};
+        Coord::units rounding{};
+        bool filled = true;
+
+        constexpr Rectangle(Coord::units startx, Coord::units starty, Coord::units endx, Coord::units endy, bool filled = true)
+            : Rectangle({ startx, starty }, { static_cast<Coord::units>(endx - startx), static_cast<Coord::units>(endy - starty) }, 0, filled)
+        {
+        }
+
+        constexpr Rectangle(Coord start, Coord size, bool filled = true)
+            : Rectangle(start, size, 0, filled)
+        {
+        }
+        constexpr Rectangle(Coord::units startx, Coord::units starty, Coord::units endx, Coord::units endy, Coord::units rounding, bool filled = true)
+            : Rectangle({ startx, starty }, { static_cast<Coord::units>(endx - startx), static_cast<Coord::units>(endy - starty) }, rounding, filled)
+        {
+        }
+
+        constexpr Rectangle(Coord start, Coord size, Coord::units rounding, bool filled = true)
+            : start(start)
+            , size(size)
+            , rounding(rounding)
+            , filled(filled)
+        {
+        }
+        friend auto operator==(Rectangle const&, Rectangle const&) -> bool = default;
+    };
+    inline constexpr auto operator+(Rectangle lhs, Coord rhs) { return Rectangle{ lhs.start + rhs, lhs.size, lhs.rounding, lhs.filled }; }
+    inline constexpr auto operator+(Coord lhs, Rectangle rhs) { return Rectangle{ lhs + rhs.start, rhs.size, rhs.rounding, rhs.filled }; }
+    inline constexpr auto operator-(Rectangle lhs, Coord rhs) { return Rectangle{ lhs.start - rhs, lhs.size, lhs.rounding, lhs.filled }; }
+    inline constexpr auto operator-(Coord lhs, Rectangle rhs) { return Rectangle{ lhs - rhs.start, rhs.size, rhs.rounding, rhs.filled }; }
+
     struct Text {
         enum class TextAnchor : uint32_t {
             None = 0U,
@@ -196,6 +230,7 @@ using DrawCommand = std::variant<
     Draw::Arc,
     Draw::Ellipse,
     Draw::Circle,
+    Draw::Rectangle,
     Draw::Text,
     Draw::OverrideFont,
     Draw::OverrideBrush,
@@ -309,33 +344,33 @@ namespace Draw {
             rhs);
     }
 
-    // Type acts as a tag to find the correct operator+ overload
     template <std::ranges::range Range>
         requires std::convertible_to<std::ranges::range_value_t<Range>, DrawCommand>
     auto operator+(Range&& lhs, Coord rhs)
     {
-        return std::views::transform(lhs, [rhs](auto const& arg) { return arg + rhs; });
+        return toDrawCommands(std::views::transform(lhs, [rhs](auto const& arg) { return arg + rhs; }));
     }
     template <std::ranges::range Range>
         requires std::convertible_to<std::ranges::range_value_t<Range>, DrawCommand>
     auto operator+(Coord lhs, Range&& rhs)
     {
-        return std::views::transform(rhs, [lhs](auto const& arg) { return lhs + arg; });
+        return toDrawCommands(std::views::transform(rhs, [lhs](auto const& arg) { return lhs + arg; }));
     }
 
     template <std::ranges::range Range>
         requires std::convertible_to<std::ranges::range_value_t<Range>, DrawCommand>
     auto operator-(Range&& lhs, Coord rhs)
     {
-        return std::views::transform(lhs, [rhs](auto const& arg) { return arg - rhs; });
+        return toDrawCommands(std::views::transform(lhs, [rhs](auto const& arg) { return arg - rhs; }));
     }
     template <std::ranges::range Range>
         requires std::convertible_to<std::ranges::range_value_t<Range>, DrawCommand>
     inline auto operator-(Coord lhs, Range&& rhs)
     {
-        return std::views::transform(rhs, [lhs](auto const& arg) { return lhs - arg; });
+        return toDrawCommands(std::views::transform(rhs, [lhs](auto const& arg) { return lhs - arg; }));
     }
 
+    // Type acts as a tag to find the correct operator+ overload
     struct to_add_helper {
         Coord value;
     };
@@ -343,7 +378,7 @@ namespace Draw {
         requires std::convertible_to<std::ranges::range_value_t<R>, DrawCommand>
     auto operator+(R&& r, to_add_helper value)
     {
-        return std::views::transform(r, [value](auto const& arg) { return arg + value.value; });
+        return toDrawCommands(std::views::transform(r, [value](auto const& arg) { return arg + value.value; }));
     }
 
     // there must be a better way to do this?
@@ -356,26 +391,26 @@ namespace Draw {
         return result;
     }
 
-    inline auto operator+(OverrideFont const& lhs, Coord rhs) -> OverrideFont { return OverrideFont{ lhs.font, toDrawCommands(lhs.commands + rhs) }; }
-    inline auto operator+(Coord lhs, OverrideFont const& rhs) -> OverrideFont { return OverrideFont{ rhs.font, toDrawCommands(lhs + rhs.commands) }; }
-    inline auto operator-(OverrideFont const& lhs, Coord rhs) -> OverrideFont { return OverrideFont{ lhs.font, toDrawCommands(lhs.commands - rhs) }; }
-    inline auto operator-(Coord lhs, OverrideFont const& rhs) -> OverrideFont { return OverrideFont{ rhs.font, toDrawCommands(lhs - rhs.commands) }; }
-    inline auto operator+(OverrideBrush const& lhs, Coord rhs) -> OverrideBrush { return OverrideBrush{ lhs.brush, toDrawCommands(lhs.commands + rhs) }; }
-    inline auto operator+(Coord lhs, OverrideBrush const& rhs) -> OverrideBrush { return OverrideBrush{ rhs.brush, toDrawCommands(lhs + rhs.commands) }; }
-    inline auto operator-(OverrideBrush const& lhs, Coord rhs) -> OverrideBrush { return OverrideBrush{ lhs.brush, toDrawCommands(lhs.commands - rhs) }; }
-    inline auto operator-(Coord lhs, OverrideBrush const& rhs) -> OverrideBrush { return OverrideBrush{ rhs.brush, toDrawCommands(lhs - rhs.commands) }; }
-    inline auto operator+(OverridePen const& lhs, Coord rhs) -> OverridePen { return OverridePen{ lhs.pen, toDrawCommands(lhs.commands + rhs) }; }
-    inline auto operator+(Coord lhs, OverridePen const& rhs) -> OverridePen { return OverridePen{ rhs.pen, toDrawCommands(lhs + rhs.commands) }; }
-    inline auto operator-(OverridePen const& lhs, Coord rhs) -> OverridePen { return OverridePen{ lhs.pen, toDrawCommands(lhs.commands - rhs) }; }
-    inline auto operator-(Coord lhs, OverridePen const& rhs) -> OverridePen { return OverridePen{ rhs.pen, toDrawCommands(lhs - rhs.commands) }; }
-    inline auto operator+(OverrideBrushAndPen const& lhs, Coord rhs) -> OverrideBrushAndPen { return OverrideBrushAndPen{ lhs.brushAndPen, toDrawCommands(lhs.commands + rhs) }; }
-    inline auto operator+(Coord lhs, OverrideBrushAndPen const& rhs) -> OverrideBrushAndPen { return OverrideBrushAndPen{ rhs.brushAndPen, toDrawCommands(lhs + rhs.commands) }; }
-    inline auto operator-(OverrideBrushAndPen const& lhs, Coord rhs) -> OverrideBrushAndPen { return OverrideBrushAndPen{ lhs.brushAndPen, toDrawCommands(lhs.commands - rhs) }; }
-    inline auto operator-(Coord lhs, OverrideBrushAndPen const& rhs) -> OverrideBrushAndPen { return OverrideBrushAndPen{ rhs.brushAndPen, toDrawCommands(lhs - rhs.commands) }; }
-    inline auto operator+(OverrideTextForeground const& lhs, Coord rhs) -> OverrideTextForeground { return OverrideTextForeground{ lhs.brushAndPen, toDrawCommands(lhs.commands + rhs) }; }
-    inline auto operator+(Coord lhs, OverrideTextForeground const& rhs) -> OverrideTextForeground { return OverrideTextForeground{ rhs.brushAndPen, toDrawCommands(lhs + rhs.commands) }; }
-    inline auto operator-(OverrideTextForeground const& lhs, Coord rhs) -> OverrideTextForeground { return OverrideTextForeground{ lhs.brushAndPen, toDrawCommands(lhs.commands - rhs) }; }
-    inline auto operator-(Coord lhs, OverrideTextForeground const& rhs) -> OverrideTextForeground { return OverrideTextForeground{ rhs.brushAndPen, toDrawCommands(lhs - rhs.commands) }; }
+    inline auto operator+(OverrideFont const& lhs, Coord rhs) -> OverrideFont { return OverrideFont{ lhs.font, lhs.commands + rhs }; }
+    inline auto operator+(Coord lhs, OverrideFont const& rhs) -> OverrideFont { return OverrideFont{ rhs.font, lhs + rhs.commands }; }
+    inline auto operator-(OverrideFont const& lhs, Coord rhs) -> OverrideFont { return OverrideFont{ lhs.font, lhs.commands - rhs }; }
+    inline auto operator-(Coord lhs, OverrideFont const& rhs) -> OverrideFont { return OverrideFont{ rhs.font, lhs - rhs.commands }; }
+    inline auto operator+(OverrideBrush const& lhs, Coord rhs) -> OverrideBrush { return OverrideBrush{ lhs.brush, lhs.commands + rhs }; }
+    inline auto operator+(Coord lhs, OverrideBrush const& rhs) -> OverrideBrush { return OverrideBrush{ rhs.brush, lhs + rhs.commands }; }
+    inline auto operator-(OverrideBrush const& lhs, Coord rhs) -> OverrideBrush { return OverrideBrush{ lhs.brush, lhs.commands - rhs }; }
+    inline auto operator-(Coord lhs, OverrideBrush const& rhs) -> OverrideBrush { return OverrideBrush{ rhs.brush, lhs - rhs.commands }; }
+    inline auto operator+(OverridePen const& lhs, Coord rhs) -> OverridePen { return OverridePen{ lhs.pen, lhs.commands + rhs }; }
+    inline auto operator+(Coord lhs, OverridePen const& rhs) -> OverridePen { return OverridePen{ rhs.pen, lhs + rhs.commands }; }
+    inline auto operator-(OverridePen const& lhs, Coord rhs) -> OverridePen { return OverridePen{ lhs.pen, lhs.commands - rhs }; }
+    inline auto operator-(Coord lhs, OverridePen const& rhs) -> OverridePen { return OverridePen{ rhs.pen, lhs - rhs.commands }; }
+    inline auto operator+(OverrideBrushAndPen const& lhs, Coord rhs) -> OverrideBrushAndPen { return OverrideBrushAndPen{ lhs.brushAndPen, lhs.commands + rhs }; }
+    inline auto operator+(Coord lhs, OverrideBrushAndPen const& rhs) -> OverrideBrushAndPen { return OverrideBrushAndPen{ rhs.brushAndPen, lhs + rhs.commands }; }
+    inline auto operator-(OverrideBrushAndPen const& lhs, Coord rhs) -> OverrideBrushAndPen { return OverrideBrushAndPen{ lhs.brushAndPen, lhs.commands - rhs }; }
+    inline auto operator-(Coord lhs, OverrideBrushAndPen const& rhs) -> OverrideBrushAndPen { return OverrideBrushAndPen{ rhs.brushAndPen, lhs - rhs.commands }; }
+    inline auto operator+(OverrideTextForeground const& lhs, Coord rhs) -> OverrideTextForeground { return OverrideTextForeground{ lhs.brushAndPen, lhs.commands + rhs }; }
+    inline auto operator+(Coord lhs, OverrideTextForeground const& rhs) -> OverrideTextForeground { return OverrideTextForeground{ rhs.brushAndPen, lhs + rhs.commands }; }
+    inline auto operator-(OverrideTextForeground const& lhs, Coord rhs) -> OverrideTextForeground { return OverrideTextForeground{ lhs.brushAndPen, lhs.commands - rhs }; }
+    inline auto operator-(Coord lhs, OverrideTextForeground const& rhs) -> OverrideTextForeground { return OverrideTextForeground{ rhs.brushAndPen, lhs - rhs.commands }; }
 
     // how do we create draw hierarchies.  With DrawCommand.
     template <std::ranges::range Range>
