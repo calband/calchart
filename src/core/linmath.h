@@ -21,7 +21,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <math.h>
+#include <cmath>
+
+namespace CalChart {
 
 template <typename LinElem>
 class Vector {
@@ -315,8 +317,8 @@ public:
     XRotationMatrix(LinElem ang)
         : Matrix<LinElem>()
     {
-        LinElem c = cos(ang);
-        LinElem s = sin(ang);
+        LinElem c = std::cos(ang);
+        LinElem s = std::sin(ang);
         this->vect[1].SetY(c);
         this->vect[1].SetZ(-s);
         this->vect[2].SetY(s);
@@ -330,8 +332,8 @@ public:
     YRotationMatrix(LinElem ang)
         : Matrix<LinElem>()
     {
-        LinElem c = cos(ang);
-        LinElem s = sin(ang);
+        LinElem c = std::cos(ang);
+        LinElem s = std::sin(ang);
         this->vect[0].SetX(c);
         this->vect[0].SetZ(s);
         this->vect[2].SetX(-s);
@@ -345,8 +347,8 @@ public:
     ZRotationMatrix(LinElem ang)
         : Matrix<LinElem>()
     {
-        LinElem c = cos(ang);
-        LinElem s = sin(ang);
+        LinElem c = std::cos(ang);
+        LinElem s = std::sin(ang);
         this->vect[0].SetX(c);
         this->vect[0].SetY(-s);
         this->vect[1].SetX(s);
@@ -364,3 +366,5 @@ public:
         this->vect[3].SetZ(1.0 / d);
     }
 };
+
+}
