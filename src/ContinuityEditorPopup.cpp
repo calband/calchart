@@ -53,21 +53,19 @@ ContinuityEditorPopup::ContinuityEditorPopup(wxString const& whatError, wxWindow
 
 void ContinuityEditorPopup::CreateControls()
 {
-    SetSizer(VStack([this](auto sizer) {
-        CreateText(this, sizer, mWhatError);
-
-        mUserInput = new FancyTextWin(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(60, 100));
-        sizer->Add(mUserInput, 0, wxGROW | wxALL, 5);
-
+    wxUI::VSizer{
+        BasicSizerFlags(),
+        wxUI::Text{ mWhatError },
+        mUserInput = wxUI::TextCtrl{ wxSizerFlags{}.Expand().Border(wxALL, 5) }.withSize({ 60, 100 }),
         // add a horizontal bar to make things clear:
-        CreateHLine(this, sizer);
-
+        wxUI::HLine(),
         // add a discard, done
-        HStack(sizer, BasicSizerFlags(), [this](auto sizer) {
-            CreateButton(this, sizer, wxID_CANCEL, "&Cancel");
-            CreateButton(this, sizer, wxID_OK, "Done");
-        });
-    }));
+        wxUI::HSizer{
+            wxUI::Button{ wxID_CANCEL, "&Cancel" },
+            wxUI::Button{ wxID_OK, "Done" },
+        },
+    }
+        .attachTo(this);
 }
 
 void ContinuityEditorPopup::SetValue(wxString const& value, int line, int column)

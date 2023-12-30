@@ -49,21 +49,21 @@ void AnimationErrorsPanel::Init()
 void AnimationErrorsPanel::CreateControls()
 {
     // create a sizer and populate
-    SetSizer(VStack([this](auto sizer) {
-        // add a horizontal bar to make things clear:
-        mTreeCtrl = new wxTreeListCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
-        mTreeCtrl->AppendColumn("Errors", wxCOL_WIDTH_AUTOSIZE, wxALIGN_LEFT, wxCOL_RESIZABLE | wxCOL_SORTABLE);
-
-        wxSize iconSize = wxArtProvider::GetSizeHint(wxART_LIST);
-        if (iconSize == wxDefaultSize) {
-            iconSize = wxSize(16, 16);
-        }
-        auto mImageList = new wxImageList(iconSize.x, iconSize.y);
-        mImageList->Add(wxArtProvider::GetIcon(wxART_ERROR, wxART_LIST, iconSize));
-        mTreeCtrl->SetImageList(mImageList);
-
-        AddToSizerExpand(sizer, mTreeCtrl);
-    }));
+    wxUI::VSizer{
+        ExpandSizerFlags(),
+        mTreeCtrl = wxUI::Generic<wxTreeListCtrl>{ [](wxWindow* window) {
+            auto* treeList = new wxTreeListCtrl(window, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+            treeList->AppendColumn("Errors", wxCOL_WIDTH_AUTOSIZE, wxALIGN_LEFT, wxCOL_RESIZABLE | wxCOL_SORTABLE);
+            wxSize iconSize = wxArtProvider::GetSizeHint(wxART_LIST);
+            if (iconSize == wxDefaultSize) {
+                iconSize = wxSize(16, 16);
+            }
+            auto imageList = new wxImageList(iconSize.x, iconSize.y);
+            imageList->Add(wxArtProvider::GetIcon(wxART_ERROR, wxART_LIST, iconSize));
+            treeList->SetImageList(imageList);
+            return treeList;
+        } }
+    }.attachTo(this);
 }
 
 void AnimationErrorsPanel::OnUpdate()

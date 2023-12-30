@@ -27,8 +27,8 @@
 #include "CalChartDrawPrimativesHelper.h"
 #include "basic_ui.h"
 #include "ui_enums.h"
-
 #include <wx/dcbuffer.h>
+#include <wxUI/wxUI.h>
 
 BEGIN_EVENT_TABLE(AnimationCanvas, AnimationCanvas::super)
 EVT_CHAR(AnimationCanvas::OnChar)
@@ -54,7 +54,7 @@ void AnimationCanvas::Init()
 
 void AnimationCanvas::CreateControls()
 {
-    SetSizer(VStack([](auto) {}));
+    wxUI::VSizer{}.attachTo(this);
 }
 
 bool AnimationCanvas::GetUseSprites() const

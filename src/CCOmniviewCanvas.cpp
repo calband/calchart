@@ -37,6 +37,7 @@
 #include <wx/dcbuffer.h>
 #include <wx/filename.h>
 #include <wx/stdpaths.h>
+#include <wxUI/wxUI.h>
 
 #if !wxUSE_GLCANVAS
 #error "OpenGL required: set wxUSE_GLCANVAS to 1 and rebuild the library"
@@ -585,16 +586,16 @@ void CCOmniviewCanvas::Init()
 
 void CCOmniviewCanvas::CreateControls()
 {
-    SetSizer(VStack([](auto) {}));
+    wxUI::VSizer{}.attachTo(this);
 }
 
 void CCOmniviewCanvas::SetView(AnimationView* view)
 {
     mView = view;
     // line drawing for CCOmniView doesn't look right on Mac. See issue #305
-    //#if defined(__APPLE__) && (__APPLE__)
+    // #if defined(__APPLE__) && (__APPLE__)
     //    m_glContext->UseForLines(GetOmniLinesImage(config, mView->GetShowMode()));
-    //#endif
+    // #endif
 }
 
 // rolling my own gluperspective

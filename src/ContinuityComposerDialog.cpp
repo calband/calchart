@@ -23,6 +23,7 @@
 #include "ContinuityBoxDrawer.h"
 #include "CustomListViewPanel.h"
 #include "basic_ui.h"
+#include <wxUI/wxUI.h>
 
 class ContinuityComposerCanvas : public CustomListViewPanel {
     using super = CustomListViewPanel;
@@ -46,6 +47,7 @@ ContinuityComposerCanvas::ContinuityComposerCanvas(CalChartConfiguration& config
     auto current_size = GetMinSize();
     current_size.y = ContinuityBoxDrawer::GetHeight(config);
     current_size.y += wxSystemSettings::GetMetric(wxSYS_HSCROLL_Y);
+    current_size.x = ContinuityBoxDrawer::GetMinWidth(config);
     SetMinSize(current_size);
 }
 
@@ -84,8 +86,8 @@ private:
 
     std::unique_ptr<CalChart::Cont::Procedure> mCont;
     CalChart::Cont::Drawable mDrawableCont;
-    ContinuityComposerCanvas* mCanvas{};
-    wxComboBox* mComboSelection{};
+    wxUI::Generic<ContinuityComposerCanvas>::Proxy mCanvas{};
+    wxUI::ComboBox::Proxy mComboSelection{};
     CalChart::Cont::Token const* mCurrentSelected = nullptr;
     CalChart::Cont::Token* mCurrentParent = nullptr;
     std::function<void(CalChart::Cont::Drawable const& c)> const mAction;
@@ -134,22 +136,24 @@ void ContinuityComposerPanel::Init()
 
 void ContinuityComposerPanel::CreateControls()
 {
-    mCanvas = new ContinuityComposerCanvas(mConfig, this);
-    SetSizer(VStack([this](auto sizer) {
-        sizer->Add(mCanvas, 1, wxEXPAND);
-
-        mComboSelection = new wxComboBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, nullptr, (long)wxTE_PROCESS_ENTER);
-        sizer->Add(mComboSelection, 0, wxEXPAND | wxALL, 5);
-        mComboSelection->Bind(wxEVT_TEXT_ENTER, [this](auto const& event) {
-            this->OnCmdTextEnterKeyPressed(event);
-        });
-        mComboSelection->Bind(wxEVT_COMBOBOX, [this](auto const& event) {
-            this->OnComboPressed(event);
-        });
-        mComboSelection->Bind(wxEVT_TEXT, [this](auto const& event) {
-            this->OnComboText(event);
-        });
-    }));
+    wxUI::VSizer{
+        mCanvas = wxUI::Generic<ContinuityComposerCanvas>{
+            wxSizerFlags(1).Expand(),
+            [this](wxWindow* parent) {
+                return new ContinuityComposerCanvas(mConfig, parent);
+            },
+        },
+        mComboSelection = wxUI::ComboBox{ wxSizerFlags(1).Expand().Border(), {} }.withStyle(wxTE_PROCESS_ENTER).bind(wxEVT_TEXT_ENTER, [this](auto const& event) {
+                                                                                                                   OnCmdTextEnterKeyPressed(event);
+                                                                                                               })
+                              .bind(wxEVT_COMBOBOX, [this](auto const& event) {
+                                  OnComboPressed(event);
+                              })
+                              .bind(wxEVT_TEXT, [this](auto const& event) {
+                                  OnComboText(event);
+                              }),
+    }
+        .attachTo(this);
 
     if (!mCont) {
         mCont = std::make_unique<CalChart::Cont::ProcUnset>();
@@ -507,7 +511,7 @@ void ContinuityComposerPanel::OnCmdTextEnterKeyPressed(wxCommandEvent const& eve
     }
     auto the_string = event.GetString().ToStdString();
     if (the_string == "") {
-        the_string = mComboSelection->GetString(event.GetSelection()).ToStdString();
+        the_string = mComboSelection.control()->GetString(event.GetSelection()).ToStdString();
     }
     if (mCurrentSelected) {
         auto changed = false;
@@ -558,7 +562,7 @@ void ContinuityComposerPanel::OnCmdTextEnterKeyPressed(wxCommandEvent const& eve
             mDrawableCont = mCont->GetDrawable();
             std::tie(mCurrentSelected, mCurrentParent) = first_unset(mDrawableCont);
             // clear out the text
-            mComboSelection->SetValue("");
+            *mComboSelection = "";
         }
     }
     OnUpdate();
@@ -593,15 +597,15 @@ void ContinuityComposerPanel::OnUpdate()
     auto list_of_strings = GetCurrentList(mCurrentSelected);
 
     // filter out the selected
-    auto filteredStrings = findStringsThatMatchString(mComboSelection->GetValue(), std::vector(list_of_strings.begin(), list_of_strings.end()));
+    auto filteredStrings = findStringsThatMatchString(*mComboSelection, std::vector(list_of_strings.begin(), list_of_strings.end()));
     auto stringsCont = std::vector<wxString>(filteredStrings.begin(), filteredStrings.end());
     // if we *not* in the middle of browsing the list, or there's currently no strings, put in the culled list.
-    if (wxNOT_FOUND == mComboSelection->GetSelection() || mComboSelection->GetCount() == 0) {
-        while (mComboSelection->GetCount()) {
-            mComboSelection->Delete(0);
+    if (wxNOT_FOUND == mComboSelection.selection().get() || mComboSelection.control()->GetCount() == 0) {
+        while (mComboSelection.control()->GetCount()) {
+            mComboSelection.control()->Delete(0);
         }
         if (!stringsCont.empty()) {
-            mComboSelection->Insert(stringsCont, 0);
+            mComboSelection.control()->Insert(stringsCont, 0);
         }
     }
 
@@ -625,8 +629,8 @@ void ContinuityComposerPanel::OnComboPressed(wxCommandEvent const& /*event*/)
 void ContinuityComposerPanel::OnComboText(wxCommandEvent const& /*event*/)
 {
     // we only do updates when the text changes
-    if (mLastValue != mComboSelection->GetValue()) {
-        mLastValue = mComboSelection->GetValue();
+    if (mLastValue != static_cast<std::string>(*mComboSelection)) {
+        mLastValue = *mComboSelection;
         OnUpdate();
     }
 }
@@ -654,20 +658,25 @@ IMPLEMENT_CLASS(ContinuityComposerDialog, wxDialog)
 ContinuityComposerDialog::ContinuityComposerDialog(std::unique_ptr<CalChart::Cont::Procedure> starting_continuity, wxWindow* parent)
     : super(parent, wxID_ANY, "Compose Continuity")
 {
-    // create a sizer for laying things out top down:
-    mPanel = new ContinuityComposerPanel(std::move(starting_continuity), CalChartConfiguration::GetGlobalConfig(), this);
-    SetSizer(VStack([this](auto sizer) {
-        sizer->Add(mPanel, 0, wxEXPAND | wxALL, 5);
+    ContinuityComposerPanel* panel = new ContinuityComposerPanel(std::move(starting_continuity), CalChartConfiguration::GetGlobalConfig(), this);
+    wxUI::VSizer{
+        sRightBasicSizerFlags,
+        mPanel = wxUI::Generic<ContinuityComposerPanel>{
+            wxSizerFlags{ 0 }.Expand().Border(wxALL, 5),
+            panel },
+        wxUI::VSizer{
+            sRightBasicSizerFlags,
+            wxUI::HSizer{
+                wxSizerFlags{ 0 },
+                wxUI::Button{ wxID_CANCEL, "&Cancel" },
+                wxUI::Button{ wxID_OK, "&Done" }.setDefault().setEnabled(panel->Validate()),
+            },
+        },
+    }
+        .attachTo(this);
 
-        HStack(sizer, sRightBasicSizerFlags, [this](auto sizer) {
-            CreateButton(this, sizer, wxID_CANCEL, wxT("&Cancel"));
-            mCloseButton = CreateButton(this, sizer, wxID_OK, wxT("&Done"));
-            mCloseButton->SetDefault();
-            mCloseButton->Enable(mPanel->Validate());
-        });
-    }));
     mPanel->SetOnUpdateIsValid([this](bool enable) {
-        static_cast<wxButton*>(FindWindow(wxID_OK))->Enable(enable);
+        FindWindow(wxID_OK)->Enable(enable);
     });
 
     Update();

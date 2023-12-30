@@ -26,6 +26,7 @@
 #include <vector>
 #include <wx/treelist.h>
 #include <wx/wx.h>
+#include <wxUI/wxUI.h>
 
 class CalChartView;
 
@@ -53,7 +54,7 @@ private:
     void UpdateErrors(std::vector<CalChart::AnimationErrors> const& errors, std::map<int, CalChart::SelectionList> const& collisions);
 
     CalChartView* mView{};
-    wxTreeListCtrl* mTreeCtrl{};
+    wxUI::Generic<wxTreeListCtrl>::Proxy mTreeCtrl{};
     std::vector<CalChart::AnimationErrors> mCurrentErrors{};
     std::map<wxTreeListItem, std::tuple<int, CalChart::SelectionList>> mErrorLookup{};
 };

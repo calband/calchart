@@ -22,6 +22,7 @@
 */
 
 #include <wx/wx.h>
+#include <wxUI/wxUI.h>
 
 class CalChartView;
 class ContinuityBrowserPerCont;

@@ -9,6 +9,7 @@
 
 #include <wx/dialog.h>
 #include <wx/docview.h>
+#include <wxUI/wxUI.h>
 
 #include "CalChartDoc.h"
 #include "e7_transition_solver.h"
@@ -77,28 +78,28 @@ private:
     CalChartDoc* mDoc;
     TransitionSolverView* mView;
 
-    wxChoice* mAlgorithmChoiceControl;
-    wxButton* mCloseButton;
-    wxButton* mApplyButton;
-    wxListBox* mAvailableCommandsControl;
-    wxTextCtrl* mNewGroupNameControl;
-    wxButton* mAddGroupButton;
-    wxListBox* mCurrentGroupControl;
-    wxButton* mRemoveGroupControl;
-    wxStaticText* mNumberOfSelectedPointsLabel;
-    wxListBox* mCurrentGroupMembersList;
-    wxListBox* mCurrentGroupDestinationsList;
-    wxButton* mClearMembersButton;
-    wxButton* mSetMembersToSelectionButton;
-    wxButton* mAddSelectionToMembersButton;
-    wxButton* mRemoveSelectionFromMembersButton;
-    wxButton* mSelectMembersButton;
-    wxButton* mClearDestinationsButton;
-    wxButton* mSetDestinationsToSelectionButton;
-    wxButton* mAddSelectionToDestinationsButton;
-    wxButton* mRemoveSelectionFromDestinationsButton;
-    wxButton* mSelectDestinationsButton;
-    wxStaticText* mNumSelectedInstructionsIndicator;
+    wxUI::Choice::Proxy mAlgorithmChoiceControl;
+    wxUI::Button::Proxy mCloseButton;
+    wxUI::Button::Proxy mApplyButton;
+    wxUI::ListBox::Proxy mAvailableCommandsControl;
+    wxUI::TextCtrl::Proxy mNewGroupNameControl;
+    wxUI::Button::Proxy mAddGroupButton;
+    wxUI::ListBox::Proxy mCurrentGroupControl;
+    wxUI::Button::Proxy mRemoveGroupControl;
+    wxUI::Text::Proxy mNumberOfSelectedPointsLabel;
+    wxUI::ListBox::Proxy mCurrentGroupMembersList;
+    wxUI::ListBox::Proxy mCurrentGroupDestinationsList;
+    wxUI::Button::Proxy mClearMembersButton;
+    wxUI::Button::Proxy mSetMembersToSelectionButton;
+    wxUI::Button::Proxy mAddSelectionToMembersButton;
+    wxUI::Button::Proxy mRemoveSelectionFromMembersButton;
+    wxUI::Button::Proxy mSelectMembersButton;
+    wxUI::Button::Proxy mClearDestinationsButton;
+    wxUI::Button::Proxy mSetDestinationsToSelectionButton;
+    wxUI::Button::Proxy mAddSelectionToDestinationsButton;
+    wxUI::Button::Proxy mRemoveSelectionFromDestinationsButton;
+    wxUI::Button::Proxy mSelectDestinationsButton;
+    wxUI::Text::Proxy mNumSelectedInstructionsIndicator;
 
     DECLARE_EVENT_TABLE()
 };

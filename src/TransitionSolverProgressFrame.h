@@ -10,6 +10,7 @@
 #include <atomic>
 #include <wx/dialog.h>
 #include <wx/docview.h>
+#include <wxUI/wxUI.h>
 
 #include "CalChartDoc.h"
 #include "e7_transition_solver.h"
@@ -95,10 +96,10 @@ private:
 
     CalChart::TransitionSolverParams mSolverParams;
 
-    wxGauge* mProgressBar;
-    wxGauge* mSubtaskProgressBar;
-    wxStaticText* mBestSolutionDescription;
-    wxButton* mAcceptButton;
+    wxUI::Gauge::Proxy mProgressBar;
+    wxUI::Gauge::Proxy mSubtaskProgressBar;
+    wxUI::Text::Proxy mBestSolutionDescription;
+    wxUI::Button::Proxy mAcceptButton;
 
     DECLARE_EVENT_TABLE()
 };

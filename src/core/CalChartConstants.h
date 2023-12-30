@@ -185,7 +185,7 @@ enum SYMBOL_TYPE {
     MAX_NUM_SYMBOLS
 };
 
-static const SYMBOL_TYPE k_symbols[] = {
+static const auto k_symbols = std::array<SYMBOL_TYPE, MAX_NUM_SYMBOLS>{
     SYMBOL_PLAIN,
     SYMBOL_SOL,
     SYMBOL_BKSL,

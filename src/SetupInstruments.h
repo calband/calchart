@@ -21,14 +21,13 @@
 */
 
 #include "CalChartDoc.h"
+#include <vector>
 #include <wx/docview.h>
 #include <wx/wizard.h>
-
-#include <vector>
+#include <wxUI/wxUI.h>
 
 class SetupInstruments : public wxDialog {
     DECLARE_CLASS(SetupInstruments)
-    DECLARE_EVENT_TABLE()
 
 public:
     SetupInstruments(CalChartDoc const& shw, wxWindow* parent, wxWindowID id = wxID_ANY,
@@ -58,13 +57,17 @@ private:
     std::vector<std::string> mInstrumentChoices;
     std::vector<CalChart::SYMBOL_TYPE> mSymbols;
 
-    void SelectAll(wxCommandEvent&);
+    void SelectAll();
     void SelectAllPoints();
-    void Select(wxCommandEvent&);
+    void Select();
     void SelectNone();
     void SelectSymbol(CalChart::SYMBOL_TYPE);
     void SelectInstrument();
     void OnCmdChoice();
 
     void SelectionListChanged();
+
+    wxUI::ListBox::Proxy mSetupInstrumentList;
+    wxUI::Choice::Proxy mSelectInstrument;
+    wxUI::Choice::Proxy mInstrumentChoice;
 };

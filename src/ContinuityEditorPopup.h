@@ -23,6 +23,7 @@
 
 #include "CalChartDoc.h"
 #include "basic_ui.h"
+#include <wxUI/wxUI.h>
 
 class ContinuityBrowserPerCont;
 
@@ -45,5 +46,5 @@ private:
 
     wxString mWhatError;
     wxString mStartingValue;
-    FancyTextWin* mUserInput;
+    wxUI::TextCtrl::Proxy mUserInput;
 };

@@ -40,6 +40,7 @@ public:
     void OnClick(wxDC& dc, wxPoint const&) override;
 
     static int GetHeight(CalChartConfiguration const&);
+    static int GetMinWidth(CalChartConfiguration const&);
 
 private:
     CalChartConfiguration const& mConfig;

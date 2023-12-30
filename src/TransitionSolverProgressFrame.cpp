@@ -102,31 +102,27 @@ bool TransitionSolverProgressFrame::Create(CalChart::TransitionSolverParams para
 
 void TransitionSolverProgressFrame::CreateControls()
 {
-    SetSizer(VStack([this](auto sizer) {
-        CreateText(this, sizer, "Working on a solution...");
-
-        mProgressBar = new wxGauge(this, wxID_ANY, 500);
-        sizer->Add(mProgressBar, 0, wxGROW | wxALL, 5);
-
-        mSubtaskProgressBar = new wxGauge(this, wxID_ANY, 500);
-        sizer->Add(mSubtaskProgressBar, 0, wxGROW | wxALL, 5);
-
-        CreateText(this, sizer, "Best solution so far:");
-
-        mBestSolutionDescription = CreateText(this, sizer, "No solution found");
-
-        HStack(sizer, [this](auto sizer) {
-            CreateButtonWithHandler(this, sizer, "Cancel", [this]() {
-                mShouldAbortCalculation = true;
-                mShouldApplyResultOnCompletion = false;
-            });
-
-            mAcceptButton = CreateButtonWithHandler(this, sizer, "Finish Now and Apply", [this]() {
-                mShouldAbortCalculation = true;
-                mShouldApplyResultOnCompletion = true;
-            });
-        });
-    }));
+    wxUI::VSizer{
+        wxSizerFlags{}.Border(wxALL, 5).Expand(),
+        wxUI::Text{ "Working on a solution..." },
+        mProgressBar = wxUI::Gauge{},
+        mSubtaskProgressBar = wxUI::Gauge{},
+        wxUI::Text{ "Best solution so far:" },
+        mBestSolutionDescription = wxUI::Text{ "No solution found" },
+        wxUI::HSizer{
+            wxUI::Button{ "Cancel" }
+                .bind([this] {
+                    mShouldAbortCalculation = true;
+                    mShouldApplyResultOnCompletion = false;
+                }),
+            mAcceptButton = wxUI::Button{ "Finish Now and Apply" }
+                                .bind([this] {
+                                    mShouldAbortCalculation = true;
+                                    mShouldApplyResultOnCompletion = true;
+                                }),
+        },
+    }
+        .attachTo(this);
 
     SyncControlsWithCurrentState();
 }

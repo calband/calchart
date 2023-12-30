@@ -30,7 +30,9 @@ void TransitionSolverView::OnDraw(wxDC*) { }
 void TransitionSolverView::OnUpdate(wxView*, wxObject*)
 {
     TransitionSolverFrame* frame = static_cast<TransitionSolverFrame*>(GetFrame());
-    frame->Update();
+    if (frame) {
+        frame->Update();
+    }
 }
 
 void TransitionSolverView::ApplyTransitionSolution(CalChart::TransitionSolverResult solution)

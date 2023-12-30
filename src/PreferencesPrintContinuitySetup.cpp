@@ -64,23 +64,15 @@ static constexpr auto DefaultText
 
 void PrintContinuitySetup::CreateControls()
 {
-    mSplitter = new wxSplitterWindow(this, wxID_ANY);
-    mSplitter->SetSize(GetClientSize());
-    mSplitter->SetSashGravity(0.0);
-    mSplitter->SetMinimumPaneSize(300);
-    mSplitter->SetWindowStyleFlag(mSplitter->GetWindowStyleFlag() | wxSP_LIVE_UPDATE);
-
-    // create a sizer for laying things out top down:
-    SetSizer(VStack([this](auto sizer) {
-        mLandscape = CreateCheckboxWithCaption(this, sizer, PrintContinuitySetup_LandScapeChanged, "Landscape");
-        sizer->Add(mSplitter, wxSizerFlags(1).Expand());
-    }));
-
-    mUserInput = new FancyTextWin(mSplitter, PrintContinuitySetup_KeyPress);
-
-    mPrintContDisplay = new PrintContinuityPreview(mSplitter, mConfig);
-    mSplitter->Initialize(mPrintContDisplay);
-    mSplitter->SplitHorizontally(mPrintContDisplay, mUserInput);
+    wxUI::VSizer{
+        mLandscape = wxUI::CheckBox{ PrintContinuitySetup_LandScapeChanged, "Landscape" },
+        wxUI::HSplitter{
+            wxSizerFlags{ 1 }.Expand(),
+            mPrintContDisplay = [this](wxWindow* parent) { return new PrintContinuityPreview(parent, mConfig); },
+            mUserInput = [](wxWindow* parent) { return new FancyTextWin(parent, PrintContinuitySetup_KeyPress); } }
+            .withStashGravity(0.5),
+    }
+        .attachTo(this);
 
     mUserInput->SetValue(DefaultText);
 

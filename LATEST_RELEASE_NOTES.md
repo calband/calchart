@@ -8,4 +8,5 @@ Bugs addressed in this release:
 
 Other changes:
 
+* [#448](../../issues/448) Move over to using wxUI and remove VStack/HStack from the code.
 

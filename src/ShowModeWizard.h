@@ -23,9 +23,9 @@
 
 #include <vector>
 #include <wx/wizard.h>
+#include <wxUI/wxUI.h>
 
 class FancyTextWin;
-class wxChoice;
 
 // page for deciding the field type
 class ShowModeWizard : public wxWizardPageSimple {
@@ -34,6 +34,5 @@ public:
     wxString GetValue();
 
 private:
-    wxArrayString modeStrings;
-    wxChoice* mChoice;
+    wxUI::Choice::Proxy mChoice;
 };

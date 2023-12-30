@@ -45,8 +45,17 @@
 enum {
     CALCHART__CONT_NEW = 100,
     PrintContinuityEditor_KeyPress,
+    PrintContinuityEditor_PrintName,
     PrintContinuityEditor_PrintNumber,
     PrintContinuityEditor_TimerExpiration,
+};
+
+static constexpr int itemsToHide[] = {
+    CALCHART__prev_ss,
+    CALCHART__next_ss,
+    PrintContinuityEditor_PrintName,
+    PrintContinuityEditor_PrintNumber,
+    wxID_HELP,
 };
 
 BEGIN_EVENT_TABLE(PrintContinuityEditor, PrintContinuityEditor::super)
@@ -90,31 +99,22 @@ PrintContinuityEditor::~PrintContinuityEditor()
 
 void PrintContinuityEditor::CreateControls()
 {
-    // Add the field canvas here so that it gets the focus when we switch to
-    // frame.
-    mSplitter = new wxSplitterWindow(this, wxID_ANY);
-    mSplitter->SetSize(GetClientSize());
-    mSplitter->SetSashGravity(0.0);
-    mSplitter->SetMinimumPaneSize(20);
-    mSplitter->SetWindowStyleFlag(mSplitter->GetWindowStyleFlag() | wxSP_LIVE_UPDATE);
-
-    // create a sizer for laying things out top down:
-    SetSizer(VStack([this](auto sizer) {
-        HStack(sizer, [this](auto sizer) {
-            mItemsToHide.push_back(CreateBitmapButton(this, sizer, BasicSizerFlags(), CALCHART__prev_ss, wxArtProvider::GetBitmap(wxART_GO_BACK)));
-            mItemsToHide.push_back(CreateBitmapButton(this, sizer, BasicSizerFlags(), CALCHART__next_ss, wxArtProvider::GetBitmap(wxART_GO_FORWARD)));
-            mItemsToHide.push_back(CreateText(this, sizer, BasicSizerFlags(), "Name:"));
-            mItemsToHide.push_back(CreateTextCtrl(this, sizer, BasicSizerFlags(), PrintContinuityEditor_PrintNumber, wxTE_PROCESS_ENTER));
-            mItemsToHide.push_back(CreateButton(this, sizer, BasicSizerFlags(), wxID_HELP, wxT("&Help")));
-        });
-        sizer->Add(mSplitter, wxSizerFlags(1).Expand());
-    }));
-
-    mUserInput = new FancyTextWin(mSplitter, PrintContinuityEditor_KeyPress);
-
-    mPrintContDisplay = new PrintContinuityPreview(mSplitter, mConfig);
-    mSplitter->Initialize(mPrintContDisplay);
-    mSplitter->SplitHorizontally(mPrintContDisplay, mUserInput);
+    wxUI::VSizer{
+        BasicSizerFlags(),
+        wxUI::HSizer{
+            wxUI::BitmapButton{ CALCHART__prev_ss, wxArtProvider::GetBitmap(wxART_GO_BACK) },
+            wxUI::BitmapButton{ CALCHART__next_ss, wxArtProvider::GetBitmap(wxART_GO_FORWARD) },
+            wxUI::Text{ PrintContinuityEditor_PrintName, "Name:" },
+            wxUI::TextCtrl{ PrintContinuityEditor_PrintNumber }.withStyle(wxTE_PROCESS_ENTER),
+            wxUI::Button{ wxID_HELP, "&Help" },
+        },
+        wxUI::HSplitter{
+            wxSizerFlags{ 1 }.Expand(),
+            mPrintContDisplay = [this](wxWindow* parent) { return new PrintContinuityPreview(parent, mConfig); },
+            mUserInput = [](wxWindow* parent) { return new FancyTextWin(parent, PrintContinuityEditor_KeyPress); } }
+            .withStashGravity(0.5),
+    }
+        .attachTo(this);
 }
 
 void PrintContinuityEditor::OnCmdHelp(wxCommandEvent&)
@@ -241,8 +241,8 @@ void PrintContinuityEditor::OnNext(wxCommandEvent&)
 void PrintContinuityEditor::SetInMiniMode(bool miniMode)
 {
     mInMiniMode = miniMode;
-    for (auto&& i : mItemsToHide) {
-        i->Show(!mInMiniMode);
+    for (auto&& i : itemsToHide) {
+        FindWindow(i)->Show(!mInMiniMode);
     }
     Layout();
 }
