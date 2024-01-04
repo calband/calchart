@@ -94,11 +94,11 @@ ColorSetupCanvas::ColorSetupCanvas(CalChartConfiguration& config, wxWindow* pare
 }
 
 // Because we're not a real show, we have to make the path manually.
-auto GenerateFakePathDrawCommands(CalChart::ShowMode const& mode, CalChartConfiguration const& config) -> std::vector<CalChart::DrawCommand>
+auto GenerateFakePathDrawCommands(CalChart::ShowMode const& mode, CalChartConfiguration const& config) -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto field_offset = mode.FieldOffset();
     auto point_start = field_offset + Coord(Int2CoordUnits(4), Int2CoordUnits(2));
-    auto path = std::vector<CalChart::DrawCommand>{};
+    auto path = std::vector<CalChart::Draw::DrawCommand>{};
     auto pathEnd = point_start + Coord(Int2CoordUnits(0), Int2CoordUnits(2));
     path.emplace_back(Draw::Line{ point_start, pathEnd });
     point_start = pathEnd;
@@ -109,7 +109,7 @@ auto GenerateFakePathDrawCommands(CalChart::ShowMode const& mode, CalChartConfig
 }
 
 // Because we're not a real interaction, we have to make the select shape manually.
-auto GenerateFakeSelectShapeDrawCommands(CalChart::ShowMode const& mode) -> std::vector<CalChart::DrawCommand>
+auto GenerateFakeSelectShapeDrawCommands(CalChart::ShowMode const& mode) -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto field_offset = mode.FieldOffset();
     auto shape_start = field_offset + Coord(Int2CoordUnits(18), Int2CoordUnits(-2));
@@ -137,7 +137,7 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent&)
     list.insert(3);
 
     // Draw the field
-    auto drawCmds = std::vector<CalChart::DrawCommand>{};
+    auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
     auto tborder1 = mMode.Border1();
     auto offset = mMode.Offset();
     CalChart::append(drawCmds,
@@ -190,7 +190,7 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent&)
             CalChart::Draw::withPen(
                 toPen(mConfig.Get_CalChartBrushAndPen(CalChart::Colors::SHAPES)),
                 GenerateFakeSelectShapeDrawCommands(mMode))));
-    CalChartDraw::DrawCC_DrawCommandList(dc, drawCmds + offset);
+    wxCalChart::Draw::DrawCommandList(dc, drawCmds + offset);
 }
 
 // We have a empty erase background to improve redraw performance.

@@ -15,10 +15,10 @@ TEST_CASE("ShowModeBasics", "CalChartShowMode")
 static auto TestCreateOutline(auto cmds)
 {
     CHECK(cmds.size() == 4);
-    CHECK(cmds[0] == CalChart::DrawCommand{ CalChart::Draw::Line{ { 1, 2 }, { 2561, 2 } } });
-    CHECK(cmds[1] == CalChart::DrawCommand{ CalChart::Draw::Line{ { 2561, 2 }, { 2561, 1346 } } });
-    CHECK(cmds[2] == CalChart::DrawCommand{ CalChart::Draw::Line{ { 2561, 1346 }, { 1, 1346 } } });
-    CHECK(cmds[3] == CalChart::DrawCommand{ CalChart::Draw::Line{ { 1, 1346 }, { 1, 2 } } });
+    CHECK(cmds[0] == CalChart::Draw::DrawCommand{ CalChart::Draw::Line{ { 1, 2 }, { 2561, 2 } } });
+    CHECK(cmds[1] == CalChart::Draw::DrawCommand{ CalChart::Draw::Line{ { 2561, 2 }, { 2561, 1346 } } });
+    CHECK(cmds[2] == CalChart::Draw::DrawCommand{ CalChart::Draw::Line{ { 2561, 1346 }, { 1, 1346 } } });
+    CHECK(cmds[3] == CalChart::Draw::DrawCommand{ CalChart::Draw::Line{ { 1, 1346 }, { 1, 2 } } });
 }
 
 TEST_CASE("Draw", "CalChartShowMode")

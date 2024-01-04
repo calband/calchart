@@ -114,10 +114,10 @@ private:
 
 auto CreateFieldLayout(
     ShowMode const& mode,
-    bool withDetails) -> std::vector<CalChart::DrawCommand>;
+    bool withDetails) -> std::vector<Draw::DrawCommand>;
 
 auto CreateYardlineLayout(
     ShowMode const& mode,
-    bool largeOffset) -> std::vector<CalChart::DrawCommand>;
+    bool largeOffset) -> std::vector<Draw::DrawCommand>;
 
 }

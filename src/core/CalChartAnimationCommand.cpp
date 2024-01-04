@@ -37,7 +37,7 @@ AnimationCommand::AnimationCommand(unsigned beats)
 {
 }
 
-DrawCommand AnimationCommand::GenCC_DrawCommand(Coord /*pt*/) const
+Draw::DrawCommand AnimationCommand::GenCC_DrawCommand(Coord /*pt*/) const
 {
     return Draw::Ignore{};
 }
@@ -179,7 +179,7 @@ void AnimationCommandMove::ClipBeats(unsigned beats)
     AnimationCommand::ClipBeats(beats);
 }
 
-DrawCommand
+Draw::DrawCommand
 AnimationCommandMove::GenCC_DrawCommand(Coord pt) const
 {
     return Draw::Line{ pt, pt + mVector };
@@ -270,7 +270,7 @@ void AnimationCommandRotate::ClipBeats(unsigned beats)
     AnimationCommand::ClipBeats(beats);
 }
 
-DrawCommand
+Draw::DrawCommand
 AnimationCommandRotate::GenCC_DrawCommand(Coord /*pt*/) const
 {
     auto start = (mAngStart < mAngEnd) ? mAngStart : mAngEnd;

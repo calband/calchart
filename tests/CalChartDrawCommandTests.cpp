@@ -76,10 +76,10 @@ auto TestPointX(auto cmds, bool filled)
 auto TestCreateOutline(auto cmds)
 {
     CHECK(cmds.size() == 4);
-    CHECK(cmds[0] == CalChart::DrawCommand{ CalChart::Draw::Line{ { 1, 2 }, { 17, 2 } } });
-    CHECK(cmds[1] == CalChart::DrawCommand{ CalChart::Draw::Line{ { 17, 2 }, { 17, 7 } } });
-    CHECK(cmds[2] == CalChart::DrawCommand{ CalChart::Draw::Line{ { 17, 7 }, { 1, 7 } } });
-    CHECK(cmds[3] == CalChart::DrawCommand{ CalChart::Draw::Line{ { 1, 7 }, { 1, 2 } } });
+    CHECK(cmds[0] == CalChart::Draw::DrawCommand{ CalChart::Draw::Line{ { 1, 2 }, { 17, 2 } } });
+    CHECK(cmds[1] == CalChart::Draw::DrawCommand{ CalChart::Draw::Line{ { 17, 2 }, { 17, 7 } } });
+    CHECK(cmds[2] == CalChart::Draw::DrawCommand{ CalChart::Draw::Line{ { 17, 7 }, { 1, 7 } } });
+    CHECK(cmds[3] == CalChart::Draw::DrawCommand{ CalChart::Draw::Line{ { 1, 7 }, { 1, 2 } } });
 }
 
 TEST_CASE("DrawCommand")
@@ -302,7 +302,7 @@ TEST_CASE("DrawCommand")
 
     SECTION("TestCoordMinusVector")
     {
-        auto drawLines = std::vector<CalChart::DrawCommand>{
+        auto drawLines = std::vector<CalChart::Draw::DrawCommand>{
             CalChart::Draw::Line{ CalChart::Coord(0, 0), CalChart::Coord(10, 0) },
             CalChart::Draw::Line{ CalChart::Coord(3, 3), CalChart::Coord(1, 1) },
         };

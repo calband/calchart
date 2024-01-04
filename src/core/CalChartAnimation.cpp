@@ -330,11 +330,11 @@ AnimationCommand& Animation::GetCommand(unsigned whichSheet, unsigned whichPoint
     return *GetCommands(whichSheet, whichPoint).at(mCurrentCmdIndex.at(whichPoint));
 }
 
-auto Animation::GenPathToDraw(unsigned whichSheet, unsigned point, Coord::units endRadius) const -> std::vector<DrawCommand>
+auto Animation::GenPathToDraw(unsigned whichSheet, unsigned point, Coord::units endRadius) const -> std::vector<Draw::DrawCommand>
 {
     auto animation_commands = GetCommands(whichSheet, point);
     auto position = mSheets.at(whichSheet).GetPoints().at(point);
-    std::vector<DrawCommand> draw_commands;
+    std::vector<Draw::DrawCommand> draw_commands;
     for (auto&& commands : animation_commands) {
         draw_commands.push_back(commands->GenCC_DrawCommand(position));
         commands->ApplyForward(position);

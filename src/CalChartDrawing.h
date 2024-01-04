@@ -26,7 +26,7 @@
 // Reuse is done where possible.
 //
 // The CalChart module attempts to keep the "how to draw" separated from
-// the "what to draw" -- the CalChart::DrawCommand object contains the
+// the "what to draw" -- the CalChart::Draw::Command object contains the
 // primatives of what to draw, but the details are done within the wxWidgets
 // part of the code.
 
@@ -67,25 +67,29 @@ void DrawCont(wxDC& dc, CalChartConfiguration const& config, CalChart::Textline_
 void DrawForPrinting(wxDC* dc, CalChartConfiguration const& config, CalChartDoc const& show, CalChart::Sheet const& sheet, int ref, bool landscape);
 wxImage GetOmniLinesImage(const CalChartConfiguration& config, CalChart::ShowMode const& mode);
 
-auto GeneratePointsDrawCommands(CalChartConfiguration const& config, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, bool primary) -> std::vector<CalChart::DrawCommand>;
-auto GenerateGhostPointsDrawCommands(CalChartConfiguration const& config, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref) -> std::vector<CalChart::DrawCommand>;
-auto GeneratePhatomPointsDrawCommands(const CalChartConfiguration& config, CalChartDoc const& show, CalChart::Sheet const& sheet, std::map<int, CalChart::Coord> const& positions) -> std::vector<CalChart::DrawCommand>;
-auto GenerateModeDrawCommands(CalChartConfiguration const& config, CalChart::ShowMode const& mode, HowToDraw howToDraw) -> std::vector<CalChart::DrawCommand>;
+auto GeneratePointsDrawCommands(CalChartConfiguration const& config, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, bool primary) -> std::vector<CalChart::Draw::DrawCommand>;
+auto GenerateGhostPointsDrawCommands(CalChartConfiguration const& config, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref) -> std::vector<CalChart::Draw::DrawCommand>;
+auto GeneratePhatomPointsDrawCommands(const CalChartConfiguration& config, CalChartDoc const& show, CalChart::Sheet const& sheet, std::map<int, CalChart::Coord> const& positions) -> std::vector<CalChart::Draw::DrawCommand>;
+auto GenerateModeDrawCommands(CalChartConfiguration const& config, CalChart::ShowMode const& mode, HowToDraw howToDraw) -> std::vector<CalChart::Draw::DrawCommand>;
 
 void PrintStandard(std::ostream& buffer, CalChart::Sheet const& sheet);
 void PrintSpringshow(std::ostream& buffer, CalChart::Sheet const& sheet);
 void PrintOverview(std::ostream& buffer, CalChart::Sheet const& sheet);
 void PrintCont(std::ostream& buffer, CalChart::Sheet const& sheet);
 
+}
+
+namespace wxCalChart::Draw {
+
 // Give an list of commands, apply them to the DeviceContext
-void DrawCC_DrawCommandList(wxDC& dc, CalChart::DrawCommand const& cmd);
+void DrawCommandList(wxDC& dc, CalChart::Draw::DrawCommand const& cmd);
 
 template <std::ranges::range R>
-    requires std::convertible_to<std::ranges::range_value_t<R>, CalChart::DrawCommand>
-void DrawCC_DrawCommandList(wxDC& dc, R&& draw_commands)
+    requires std::convertible_to<std::ranges::range_value_t<R>, CalChart::Draw::DrawCommand>
+void DrawCommandList(wxDC& dc, R&& draw_commands)
 {
     for (auto&& cmd : draw_commands) {
-        DrawCC_DrawCommandList(dc, cmd);
+        DrawCommandList(dc, cmd);
     }
 }
 

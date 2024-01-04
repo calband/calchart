@@ -149,7 +149,7 @@ void FieldCanvas::PaintShapes(wxDC& dc, CalChartConfiguration const& config, Cal
         dc.SetBrush(*wxTRANSPARENT_BRUSH);
         wxCalChart::setPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::SHAPES));
         auto origin = mView->GetShowFieldOffset();
-        CalChartDraw::DrawCC_DrawCommandList(dc, shapeList->GetCC_DrawCommand() + origin);
+        wxCalChart::Draw::DrawCommandList(dc, shapeList->GetCC_DrawCommand() + origin);
     }
 }
 

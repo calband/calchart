@@ -185,9 +185,9 @@ static constexpr auto kStep1 = CalChart::Int2CoordUnits(1);
 
 auto CreateFieldLayout(
     ShowMode const& mode,
-    bool withDetails) -> std::vector<CalChart::DrawCommand>
+    bool withDetails) -> std::vector<Draw::DrawCommand>
 {
-    auto drawCmds = std::vector<CalChart::DrawCommand>{};
+    auto drawCmds = std::vector<Draw::DrawCommand>{};
     append(drawCmds, CalChart::Draw::Field::CreateOutline(mode.FieldSize()));
     append(drawCmds, CalChart::Draw::Field::CreateVerticalSolidLine(mode.FieldSize(), kStep1));
 
@@ -207,9 +207,9 @@ auto CreateFieldLayout(
 
 auto CreateYardlineLayout(
     ShowMode const& mode,
-    bool largeOffset) -> std::vector<CalChart::DrawCommand>
+    bool largeOffset) -> std::vector<Draw::DrawCommand>
 {
-    auto drawCmds = std::vector<CalChart::DrawCommand>{};
+    auto drawCmds = std::vector<Draw::DrawCommand>{};
     auto yard_text = mode.Get_yard_text();
     auto yard_text2 = std::vector<std::string>(yard_text.begin() + (-CalChart::CoordUnits2Int((mode.Offset() - mode.Border1()).x) + (CalChart::kYardTextValues - 1) * 4) / 8, yard_text.end());
     return CalChart::Draw::Field::CreateYardlineLabels(yard_text2, mode.FieldSize(), largeOffset ? kStep8 : 0, kStep1);

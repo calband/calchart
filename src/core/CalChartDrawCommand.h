@@ -222,23 +222,21 @@ namespace Draw {
     struct OverridePen;
     struct OverrideBrushAndPen;
     struct OverrideTextForeground;
-}
 
-using DrawCommand = std::variant<
-    Draw::Ignore,
-    Draw::Line,
-    Draw::Arc,
-    Draw::Ellipse,
-    Draw::Circle,
-    Draw::Rectangle,
-    Draw::Text,
-    Draw::OverrideFont,
-    Draw::OverrideBrush,
-    Draw::OverridePen,
-    Draw::OverrideBrushAndPen,
-    Draw::OverrideTextForeground>;
+    using DrawCommand = std::variant<
+        Draw::Ignore,
+        Draw::Line,
+        Draw::Arc,
+        Draw::Ellipse,
+        Draw::Circle,
+        Draw::Rectangle,
+        Draw::Text,
+        Draw::OverrideFont,
+        Draw::OverrideBrush,
+        Draw::OverridePen,
+        Draw::OverrideBrushAndPen,
+        Draw::OverrideTextForeground>;
 
-namespace Draw {
     struct OverrideFont {
         Font font;
         std::vector<DrawCommand> commands{};
@@ -315,31 +313,31 @@ namespace Draw {
             && lhs.commands == rhs.commands;
     }
 
-    inline auto operator+(CalChart::DrawCommand const& lhs, Coord rhs) -> CalChart::DrawCommand
+    inline auto operator+(DrawCommand const& lhs, Coord rhs) -> DrawCommand
     {
         return std::visit(overloaded{
-                              [rhs](auto arg) { return CalChart::DrawCommand{ arg + rhs }; },
+                              [rhs](auto arg) { return DrawCommand{ arg + rhs }; },
                           },
             lhs);
     }
-    inline auto operator+(Coord lhs, CalChart::DrawCommand const& rhs) -> CalChart::DrawCommand
+    inline auto operator+(Coord lhs, DrawCommand const& rhs) -> DrawCommand
     {
         return std::visit(overloaded{
-                              [lhs](auto arg) { return CalChart::DrawCommand{ lhs + arg }; },
+                              [lhs](auto arg) { return DrawCommand{ lhs + arg }; },
                           },
             rhs);
     }
-    inline auto operator-(CalChart::DrawCommand const& lhs, Coord rhs) -> CalChart::DrawCommand
+    inline auto operator-(DrawCommand const& lhs, Coord rhs) -> DrawCommand
     {
         return std::visit(overloaded{
-                              [rhs](auto arg) { return CalChart::DrawCommand{ arg - rhs }; },
+                              [rhs](auto arg) { return DrawCommand{ arg - rhs }; },
                           },
             lhs);
     }
-    inline auto operator-(Coord lhs, CalChart::DrawCommand const& rhs) -> CalChart::DrawCommand
+    inline auto operator-(Coord lhs, DrawCommand const& rhs) -> DrawCommand
     {
         return std::visit(overloaded{
-                              [lhs](auto arg) { return CalChart::DrawCommand{ lhs - arg }; },
+                              [lhs](auto arg) { return DrawCommand{ lhs - arg }; },
                           },
             rhs);
     }
@@ -460,22 +458,22 @@ namespace Draw {
     // What follows are a collection of functions to create different common "images" for CalChart.
     namespace Field {
         // Construct commands for the field outline
-        auto CreateOutline(CalChart::Coord const& fieldsize) -> std::vector<CalChart::DrawCommand>;
+        auto CreateOutline(CalChart::Coord const& fieldsize) -> std::vector<DrawCommand>;
 
         // Construct commands for the vertical solid line down from the top at 8 step spacing
-        auto CreateVerticalSolidLine(CalChart::Coord const& fieldsize, int step1) -> std::vector<CalChart::DrawCommand>;
+        auto CreateVerticalSolidLine(CalChart::Coord const& fieldsize, int step1) -> std::vector<DrawCommand>;
 
         // Construct commands for the vertical dotted lines in between the Solid lines
-        auto CreateVerticalDottedLine(CalChart::Coord const& fieldsize, int step1) -> std::vector<CalChart::DrawCommand>;
+        auto CreateVerticalDottedLine(CalChart::Coord const& fieldsize, int step1) -> std::vector<DrawCommand>;
 
         // Construct commands for the horizontal dotted lines
-        auto CreateHorizontalDottedLine(CalChart::Coord const& fieldsize, int mode_HashW, int mode_HashE, int step1) -> std::vector<CalChart::DrawCommand>;
+        auto CreateHorizontalDottedLine(CalChart::Coord const& fieldsize, int mode_HashW, int mode_HashE, int step1) -> std::vector<DrawCommand>;
 
         // Draw the hashes
-        auto CreateHashes(CalChart::Coord const& fieldsize, int mode_HashW, int mode_HashE, int step1) -> std::vector<CalChart::DrawCommand>;
-        auto CreateHashTicks(CalChart::Coord const& fieldsize, int mode_HashW, int mode_HashE, int step1) -> std::vector<CalChart::DrawCommand>;
+        auto CreateHashes(CalChart::Coord const& fieldsize, int mode_HashW, int mode_HashE, int step1) -> std::vector<DrawCommand>;
+        auto CreateHashTicks(CalChart::Coord const& fieldsize, int mode_HashW, int mode_HashE, int step1) -> std::vector<DrawCommand>;
 
-        auto CreateYardlineLabels(std::vector<std::string> const& yard_text, CalChart::Coord const& fieldsize, int offset, int step1) -> std::vector<CalChart::DrawCommand>;
+        auto CreateYardlineLabels(std::vector<std::string> const& yard_text, CalChart::Coord const& fieldsize, int offset, int step1) -> std::vector<DrawCommand>;
     }
 
 }
