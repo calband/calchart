@@ -156,7 +156,7 @@ void Point::SetPos(Coord c, unsigned ref)
 void Point::SetSymbol(SYMBOL_TYPE s) { mSym = s; }
 
 namespace {
-    auto CreatePointCircle(CalChart::SYMBOL_TYPE symbol, double dotRatio) -> std::vector<CalChart::DrawCommand>
+    auto CreatePointCircle(CalChart::SYMBOL_TYPE symbol, double dotRatio) -> std::vector<Draw::DrawCommand>
     {
         auto const filled = [](auto symbol) {
             switch (symbol) {
@@ -173,24 +173,24 @@ namespace {
 
         auto const circ_r = CalChart::Float2CoordUnits(dotRatio) / 2.0;
 
-        return { CalChart::Draw::Circle({ 0, 0 }, circ_r, filled) };
+        return { Draw::Circle({ 0, 0 }, circ_r, filled) };
     }
 
-    auto CreatePointCross(CalChart::SYMBOL_TYPE symbol, double dotRatio, double pLineRatio, double sLineRatio) -> std::vector<CalChart::DrawCommand>
+    auto CreatePointCross(CalChart::SYMBOL_TYPE symbol, double dotRatio, double pLineRatio, double sLineRatio) -> std::vector<Draw::DrawCommand>
     {
         auto const circ_r = CalChart::Float2CoordUnits(dotRatio) / 2.0;
         auto const plineoff = circ_r * pLineRatio;
         auto const slineoff = circ_r * sLineRatio;
 
-        auto drawCmds = std::vector<CalChart::DrawCommand>{};
+        auto drawCmds = std::vector<Draw::DrawCommand>{};
         switch (symbol) {
         case CalChart::SYMBOL_SL:
         case CalChart::SYMBOL_X:
-            drawCmds.push_back(CalChart::Draw::Line(-plineoff, plineoff, plineoff, -plineoff));
+            drawCmds.push_back(Draw::Line(-plineoff, plineoff, plineoff, -plineoff));
             break;
         case CalChart::SYMBOL_SOLSL:
         case CalChart::SYMBOL_SOLX:
-            drawCmds.push_back(CalChart::Draw::Line(-slineoff, slineoff, slineoff, -slineoff));
+            drawCmds.push_back(Draw::Line(-slineoff, slineoff, slineoff, -slineoff));
             break;
         default:
             break;
@@ -198,11 +198,11 @@ namespace {
         switch (symbol) {
         case CalChart::SYMBOL_BKSL:
         case CalChart::SYMBOL_X:
-            drawCmds.push_back(CalChart::Draw::Line(-plineoff, -plineoff, plineoff, plineoff));
+            drawCmds.push_back(Draw::Line(-plineoff, -plineoff, plineoff, plineoff));
             break;
         case CalChart::SYMBOL_SOLBKSL:
         case CalChart::SYMBOL_SOLX:
-            drawCmds.push_back(CalChart::Draw::Line(-slineoff, -slineoff, slineoff, slineoff));
+            drawCmds.push_back(Draw::Line(-slineoff, -slineoff, slineoff, slineoff));
             break;
         default:
             break;
@@ -210,18 +210,18 @@ namespace {
         return drawCmds;
     }
 
-    auto CreatePointLabel(CalChart::Point const& point, std::string const& label, double dotRatio) -> std::vector<CalChart::DrawCommand>
+    auto CreatePointLabel(CalChart::Point const& point, std::string const& label, double dotRatio) -> std::vector<Draw::DrawCommand>
     {
         if (!point.LabelIsVisible()) {
             return {};
         }
         auto const circ_r = CalChart::Float2CoordUnits(dotRatio) / 2.0;
-        auto anchor = CalChart::Draw::Text::TextAnchor::Bottom;
-        anchor = anchor | (point.GetFlip() ? CalChart::Draw::Text::TextAnchor::Left : CalChart::Draw::Text::TextAnchor::Right);
-        return { CalChart::Draw::Text(-CalChart::Coord(0, circ_r), label, anchor) };
+        auto anchor = Draw::Text::TextAnchor::Bottom;
+        anchor = anchor | (point.GetFlip() ? Draw::Text::TextAnchor::Left : Draw::Text::TextAnchor::Right);
+        return { Draw::Text(-CalChart::Coord(0, circ_r), label, anchor) };
     }
 
-    auto CreatePoint(CalChart::Point const& point, SYMBOL_TYPE sym, std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) -> std::vector<CalChart::DrawCommand>
+    auto CreatePoint(CalChart::Point const& point, SYMBOL_TYPE sym, std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) -> std::vector<Draw::DrawCommand>
     {
         return CalChart::append(
             CalChart::append(
@@ -231,7 +231,7 @@ namespace {
     }
 }
 
-auto Point::GetDrawCommands(unsigned ref, std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) const -> std::vector<CalChart::DrawCommand>
+auto Point::GetDrawCommands(unsigned ref, std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) const -> std::vector<Draw::DrawCommand>
 {
     return CreatePoint(*this, GetSymbol(), label, dotRatio, pLineRatio, sLineRatio) + GetPos(ref);
 }

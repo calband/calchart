@@ -29,77 +29,77 @@ namespace CalChart::Draw {
 
 namespace Field {
     // Construct commands for the field outline
-    auto CreateOutline(Coord const& fieldsize) -> std::vector<CalChart::DrawCommand>
+    auto CreateOutline(Coord const& fieldsize) -> std::vector<DrawCommand>
     {
-        return std::vector<CalChart::DrawCommand>{
-            CalChart::Draw::Line{ CalChart::Coord(0, 0), CalChart::Coord(fieldsize.x, 0) },
-            CalChart::Draw::Line{ CalChart::Coord(fieldsize.x, 0), CalChart::Coord(fieldsize.x, fieldsize.y) },
-            CalChart::Draw::Line{ CalChart::Coord(fieldsize.x, fieldsize.y), CalChart::Coord(0, fieldsize.y) },
-            CalChart::Draw::Line{ CalChart::Coord(0, fieldsize.y), CalChart::Coord(0, 0) },
+        return std::vector<DrawCommand>{
+            Line{ CalChart::Coord(0, 0), CalChart::Coord(fieldsize.x, 0) },
+            Line{ CalChart::Coord(fieldsize.x, 0), CalChart::Coord(fieldsize.x, fieldsize.y) },
+            Line{ CalChart::Coord(fieldsize.x, fieldsize.y), CalChart::Coord(0, fieldsize.y) },
+            Line{ CalChart::Coord(0, fieldsize.y), CalChart::Coord(0, 0) },
         };
     }
 
     // Construct commands for the vertical solid line down from the top
-    auto CreateVerticalSolidLine(CalChart::Coord const& fieldsize, int step1) -> std::vector<CalChart::DrawCommand>
+    auto CreateVerticalSolidLine(CalChart::Coord const& fieldsize, int step1) -> std::vector<DrawCommand>
     {
         auto step8 = 8 * step1;
-        std::vector<CalChart::DrawCommand> result;
+        std::vector<DrawCommand> result;
         for (auto j = 0; j <= fieldsize.x; j += step8) {
-            result.emplace_back(CalChart::Draw::Line{ CalChart::Coord(j, 0), CalChart::Coord(j, fieldsize.y) });
+            result.emplace_back(Line{ CalChart::Coord(j, 0), CalChart::Coord(j, fieldsize.y) });
         }
         return result;
     }
 
     // Construct commands for the vertical solid line down from the top
-    auto CreateVerticalDottedLine(CalChart::Coord const& fieldsize, int step1) -> std::vector<CalChart::DrawCommand>
+    auto CreateVerticalDottedLine(CalChart::Coord const& fieldsize, int step1) -> std::vector<DrawCommand>
     {
         auto step2 = 2 * step1;
         auto step4 = 4 * step1;
         auto step8 = 8 * step1;
-        std::vector<CalChart::DrawCommand> result;
+        std::vector<DrawCommand> result;
         for (auto j = step4; j < fieldsize.x; j += step8) {
             // draw mid-dotted lines
             for (auto k = 0; k < fieldsize.y; k += step2) {
-                result.emplace_back(CalChart::Draw::Line{ CalChart::Coord(j, k), CalChart::Coord(j, k + step1) });
+                result.emplace_back(Line{ CalChart::Coord(j, k), CalChart::Coord(j, k + step1) });
             }
         }
         return result;
     }
 
-    auto CreateHorizontalDottedLine(CalChart::Coord const& fieldsize, int mode_HashW, int mode_HashE, int step1) -> std::vector<CalChart::DrawCommand>
+    auto CreateHorizontalDottedLine(CalChart::Coord const& fieldsize, int mode_HashW, int mode_HashE, int step1) -> std::vector<DrawCommand>
     {
         auto step2 = 2 * step1;
         auto step4 = 4 * step1;
-        std::vector<CalChart::DrawCommand> result;
+        std::vector<DrawCommand> result;
         for (auto j = step4; j < fieldsize.y; j += step4) {
             if ((j == CalChart::Int2CoordUnits(mode_HashW)) || j == CalChart::Int2CoordUnits(mode_HashE))
                 continue;
             for (auto k = 0; k < fieldsize.x; k += step2) {
-                result.emplace_back(CalChart::Draw::Line{ CalChart::Coord(k, j), CalChart::Coord(k + step1, j) });
+                result.emplace_back(Line{ CalChart::Coord(k, j), CalChart::Coord(k + step1, j) });
             }
         }
         return result;
     }
 
     // Draw the hashes
-    auto CreateHashes(CalChart::Coord const& fieldsize, int mode_HashW, int mode_HashE, int step1) -> std::vector<CalChart::DrawCommand>
+    auto CreateHashes(CalChart::Coord const& fieldsize, int mode_HashW, int mode_HashE, int step1) -> std::vector<DrawCommand>
     {
         auto step8 = 8 * step1;
-        std::vector<CalChart::DrawCommand> result;
+        std::vector<DrawCommand> result;
         auto hashW = CalChart::Int2CoordUnits(mode_HashW);
         auto hashE = CalChart::Int2CoordUnits(mode_HashE);
         for (auto j = CalChart::Int2CoordUnits(0); j < fieldsize.x; j += step8) {
-            result.emplace_back(CalChart::Draw::Line{
+            result.emplace_back(Line{
                 CalChart::Coord(j + CalChart::Float2CoordUnits(0.0 * 8), hashW),
                 CalChart::Coord(j + CalChart::Float2CoordUnits(0.1 * 8), hashW) });
-            result.emplace_back(CalChart::Draw::Line{
+            result.emplace_back(Line{
                 CalChart::Coord(j + CalChart::Float2CoordUnits(0.9 * 8), hashW),
                 CalChart::Coord(j + CalChart::Float2CoordUnits(1.0 * 8), hashW) });
 
-            result.emplace_back(CalChart::Draw::Line{
+            result.emplace_back(Line{
                 CalChart::Coord(j + CalChart::Float2CoordUnits(0.0 * 8), hashE),
                 CalChart::Coord(j + CalChart::Float2CoordUnits(0.1 * 8), hashE) });
-            result.emplace_back(CalChart::Draw::Line{
+            result.emplace_back(Line{
                 CalChart::Coord(j + CalChart::Float2CoordUnits(0.9 * 8), hashE),
                 CalChart::Coord(j + CalChart::Float2CoordUnits(1.0 * 8), hashE) });
         }
@@ -107,18 +107,18 @@ namespace Field {
     }
 
     // Draw the hashes
-    auto CreateHashTicks(CalChart::Coord const& fieldsize, int mode_HashW, int mode_HashE, int step1) -> std::vector<CalChart::DrawCommand>
+    auto CreateHashTicks(CalChart::Coord const& fieldsize, int mode_HashW, int mode_HashE, int step1) -> std::vector<DrawCommand>
     {
         auto step8 = 8 * step1;
-        std::vector<CalChart::DrawCommand> result;
+        std::vector<DrawCommand> result;
         auto hashW = CalChart::Int2CoordUnits(mode_HashW);
         auto hashE = CalChart::Int2CoordUnits(mode_HashE);
         for (auto j = CalChart::Int2CoordUnits(0); j < fieldsize.x; j += step8) {
             for (size_t midhash = 1; midhash < 5; ++midhash) {
-                result.emplace_back(CalChart::Draw::Line{
+                result.emplace_back(Line{
                     CalChart::Coord(j + CalChart::Float2CoordUnits(midhash / 5.0 * 8), hashW),
                     CalChart::Coord(j + CalChart::Float2CoordUnits(midhash / 5.0 * 8), CalChart::Float2CoordUnits(mode_HashW - (0.2 * 8))) });
-                result.emplace_back(CalChart::Draw::Line{
+                result.emplace_back(Line{
                     CalChart::Coord(j + CalChart::Float2CoordUnits(midhash / 5.0 * 8), hashE),
                     CalChart::Coord(j + CalChart::Float2CoordUnits(midhash / 5.0 * 8), CalChart::Float2CoordUnits(mode_HashE + (0.2 * 8))) });
             }
@@ -126,16 +126,16 @@ namespace Field {
         return result;
     }
 
-    auto CreateYardlineLabels(std::vector<std::string> const& yard_text, CalChart::Coord const& fieldsize, int offset, int step1) -> std::vector<CalChart::DrawCommand>
+    auto CreateYardlineLabels(std::vector<std::string> const& yard_text, CalChart::Coord const& fieldsize, int offset, int step1) -> std::vector<DrawCommand>
     {
         auto step8 = 8 * step1;
-        std::vector<CalChart::DrawCommand> result;
+        std::vector<DrawCommand> result;
         for (int i = 0; i < CalChart::CoordUnits2Int(fieldsize.x) / 8 + 1; i++) {
             auto text = yard_text[i];
 
-            using TextAnchor = CalChart::Draw::Text::TextAnchor;
-            result.emplace_back(CalChart::Draw::Text{ CalChart::Coord(i * step8, offset), text, TextAnchor::Bottom | TextAnchor::HorizontalCenter | TextAnchor::ScreenTop, true });
-            result.emplace_back(CalChart::Draw::Text{ CalChart::Coord(i * step8, fieldsize.y - offset), text, TextAnchor::Top | TextAnchor::HorizontalCenter, true });
+            using TextAnchor = Text::TextAnchor;
+            result.emplace_back(Text{ CalChart::Coord(i * step8, offset), text, TextAnchor::Bottom | TextAnchor::HorizontalCenter | TextAnchor::ScreenTop, true });
+            result.emplace_back(Text{ CalChart::Coord(i * step8, fieldsize.y - offset), text, TextAnchor::Top | TextAnchor::HorizontalCenter, true });
         }
         return result;
     }

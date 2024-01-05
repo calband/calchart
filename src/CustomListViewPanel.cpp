@@ -36,7 +36,7 @@ auto PrepareToDraw(wxDC& dc)
     dc.Clear();
 }
 
-auto CreateCellLines(std::vector<int> const& whereToDraw) -> std::vector<CalChart::DrawCommand>
+auto CreateCellLines(std::vector<int> const& whereToDraw) -> std::vector<CalChart::Draw::DrawCommand>
 {
     if (whereToDraw.empty()) {
         return {};
@@ -57,7 +57,7 @@ auto CreateCellLines(std::vector<int> const& whereToDraw) -> std::vector<CalChar
     return drawCmds;
 }
 
-auto DrawNonSelected(wxDC& dc, std::vector<std::unique_ptr<DrawableCell>> const& cells, wxPoint lastLocation, std::optional<size_t> selected, bool dragging) -> std::vector<CalChart::DrawCommand>
+auto DrawNonSelected(wxDC& dc, std::vector<std::unique_ptr<DrawableCell>> const& cells, wxPoint lastLocation, std::optional<size_t> selected, bool dragging) -> std::vector<CalChart::Draw::DrawCommand>
 {
     // first generate the heights:
     auto heights = CalChart::Ranges::ToVector<int>(cells | std::views::transform([](auto&& cell) { return cell->Height(); }));
@@ -118,7 +118,7 @@ auto DrawNonSelected(wxDC& dc, std::vector<std::unique_ptr<DrawableCell>> const&
     }
 
     CalChart::append(drawCmds,
-        CalChart::Ranges::ToVector<CalChart::DrawCommand>(std::views::iota(0UL, cells.size())
+        CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(std::views::iota(0UL, cells.size())
             | std::views::filter([selected](auto which) { return selected != which; })
             | std::views::transform([&dc, &cells, exScanHeights](auto which) {
                   return cells.at(which)->GetDrawCommands(dc) + CalChart::Coord(0, exScanHeights.at(which));
@@ -127,7 +127,7 @@ auto DrawNonSelected(wxDC& dc, std::vector<std::unique_ptr<DrawableCell>> const&
     return drawCmds;
 }
 
-auto DrawSelected(wxDC& dc, std::vector<std::unique_ptr<DrawableCell>> const& cells, wxPoint firstPress, wxPoint lastLocation, std::optional<size_t> selected) -> std::vector<CalChart::DrawCommand>
+auto DrawSelected(wxDC& dc, std::vector<std::unique_ptr<DrawableCell>> const& cells, wxPoint firstPress, wxPoint lastLocation, std::optional<size_t> selected) -> std::vector<CalChart::Draw::DrawCommand>
 {
     if (!selected) {
         return {};
@@ -164,7 +164,7 @@ auto DrawSelected(wxDC& dc, std::vector<std::unique_ptr<DrawableCell>> const& ce
     return drawCmds + CalChart::Coord(0, whereToDraw);
 }
 
-auto CreateListViewDrawCommands(wxDC& dc, std::vector<std::unique_ptr<DrawableCell>> const& cells, wxPoint firstPress, wxPoint lastLocation, std::optional<size_t> selected, bool dragging, wxPoint offset) -> std::vector<CalChart::DrawCommand>
+auto CreateListViewDrawCommands(wxDC& dc, std::vector<std::unique_ptr<DrawableCell>> const& cells, wxPoint firstPress, wxPoint lastLocation, std::optional<size_t> selected, bool dragging, wxPoint offset) -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto drawCmds = DrawNonSelected(dc, cells, lastLocation, selected, dragging);
     CalChart::append(drawCmds, DrawSelected(dc, cells, firstPress, lastLocation, selected));
@@ -220,7 +220,7 @@ void CustomListViewPanel::OnPaint(wxPaintEvent&)
     PrepareDC(dc);
     PrepareToDraw(dc);
     auto offset = GetViewStart();
-    CalChartDraw::DrawCC_DrawCommandList(dc, CreateListViewDrawCommands(dc, mCells, m_firstPress, m_lastLocation, m_selected, m_dragging, offset));
+    wxCalChart::Draw::DrawCommandList(dc, CreateListViewDrawCommands(dc, mCells, m_firstPress, m_lastLocation, m_selected, m_dragging, offset));
 }
 
 auto CustomListViewPanel::WhichCell(wxPoint const& point) const -> std::optional<size_t>

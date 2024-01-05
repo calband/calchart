@@ -20,6 +20,33 @@ While CalChart is written in C++, it's architecture is more due to wxWidgets, wh
 
 There are different UI windowing systems (like Cocoa for Mac, or GNOME for linux, or QT for cross platform), but wxWidgets was chosen as a good balance of features, cross-platform, and support.  This allows one version to be built on Windows/MacOS/Linux, but also means that proprietary UI Kits like iOS would be difficult to support, requiring a complete rewrite.
 
+## CalChartCore vs wxCalChart
+
+In order to provide a separation between the wxWidgets UI framework part of the project and the generic part of CalChart, we try to maintain a difference between the UI Application specific code (wxCalChart) and the more generic Core functional code (CalChartCore).  Code specific that relies on the wxWidgets framework should not be in Core, and objects that can be pure C++ should be in Core.  This provides a distinction between the "How" and the "What".
+
+For example, "How to draw" a field with marchers on it is very different than the "What and Where to draw".  Drawing a continuity path or a shape can be described as a collection of lines and circles, so CalChartCore there is a `CalChart::Shape` object, which is interpreted by the varous `wxView` draw routines to draw to the screen or to PDF for printing.
+
+We can think of CalChartCore as a portable "library" that could be instantiated in any project to parse show files, to interpret continuities to develop the marcher's paths, and to give data structures that represent where a show layout should be.  A way to think about it is that CalChartCore is basically a `*.shw` to `json` converter -- that you should be able to create a simple commandline tool that wraps the CalChartCore library that reads in a `*.shw` file and then spits out a `json` file that describes where every point should be.
+
+To help with separation of the two parts of the code base, symbols and data structres of CalChartCore should generally be in the `CalChart` namespace.  Symbols, data structures, and general wxWidgets windows and dialogs should be in the `wxCalChart` namespace.  This helps keep the symbols distinct and makes it easier to understand what types of objects the program is using.
+
+## CalChartCore
+
+### `CalChart::Show`
+
+The `CalChart::Show` is a data object that holds the core parts of the Show.  It maintains the list of Marchers labels and instruments for the Show, as well as all the Stunt sheets.  A good model for thinking of the `CalChart::Show` is that it represents all that should be "Saved" and "Loaded" when you want to continue editing a Show.
+
+In principle all details needed to read or display a show can be done through the `CalChart::Show` interface.  For example, to determine what label is assigned to a particular point, you would call the `CalChart::Show::GetPointLabel` function.
+
+Modification of a show (or internal details of a show such as point positions on an individual sheet) should not be done directly by function calls, but instead you should construct an `CalChart::Show_command_pair` object, and then execute the first of the pair.  This feels awkward at first, but this layer greatly enhances the ability to have a Do/Undo system -- by having the modification and "un"-modification occur in pairs, you can always go back to a previous state.
+
+### `CalChart::Animation`
+
+The `CalChart::Animation` is an object that is created from a `CalChart::Show` and represents a fully Animated show.  It is used for the various Animation render views to see a top down or 3D version of the show.  It can also be used to show the paths a Marcher would travel in the Field view.
+
+
+## wxCalChart
+
 ### Document/View
 
 CalChart is a `wxApp` which heavily uses wxWidget's Document/View model described at  https://docs.wxwidgets.org/3.0/overview_docview.html:
@@ -32,16 +59,17 @@ The central object that maintains the data model for the CalChart Show is the `C
 
 ### `CalChartDoc`
 
-The `CalChartDoc` is the *document* in the CalChart Document/View model.  It holds the loaded `CalChartShow`, the corresponding `CalChartAnimation`, as well as any temporary data objects that are needed for maintaining the UI appearance.  All interactions with the `CalChartShow` object should go through `CalChartDoc`.
+The `CalChartDoc` is the *document* in the CalChart Document/View model.  It holds the loaded `CalChart::Show`, the corresponding `CalChart::Animation`, as well as any temporary data objects that are needed for maintaining the UI appearance.  All interactions with the `CalChart::Show` object should go through `CalChartDoc`.
 
-##### `CalChartShow`
-The `CalChartShow` is a data object that holds the core parts of the Show.  It maintains the list of Marchers labels and instruments for the Show, as well as all the Stunt sheets.  A good model for thinking of the `CalChartShow` is that it represents all that should be "Saved" and "Loaded" when you want to continue editing a Show.
+Whenever the `CalChart::Show` changes, the `CalChartDoc` will re-create the `CalChart::Animation` so that there is a fresh animation for the various *Views* to use.
 
-##### `CalChartAnimation`
-The `CalChartAnimation` is an object that is created from a `CalChartShow` and represents a fully Animated show.  It is used for the various Animation render views to see a top down or 3D version of the show.  It can also be used to show the paths a Marcher would travel in the Field view.
-Whenever the `CalChartShow` changes, the `CalChartDoc` will re-create the `CalChartAnimation` so that there is a fresh animation for the various *Views* to use.
+### `CalChartView`
+
+The `CalChartView` is the way that the various `wxDialog`, `wxFrame`, or `wxPanel` objects interact with the `CalChartDoc`.  This allows a central place where Drawing and Document manipulation can go through.
+A programming paradigm that CalChart frequently uses is to create a wxFrame object and then assign a wxView to that wxFrame.  This allows the frame to be "connected" to the *Document* so that it has a shared "View" into the data model.
 
 ### Modification via `wxCommand`
+
 CalChart utilizes the `wxCommand` objects as described in the  [Document/View](https://docs.wxwidgets.org/3.0/overview_docview.html) model:
 
 > When a user interface event occurs, the application submits a command to a wxCommandProcessor object to execute and store.
@@ -49,12 +77,10 @@ CalChart utilizes the `wxCommand` objects as described in the  [Document/View](h
 
 When a *View* wants to modify the CalChart Document, it would do so by creating the appropriate `wxCommand`, and then submits that command to the *Document's* command processor.  This will cause the *Document* to be modified, and all the appropriate *Views* to be updated.  It will also cause the correct "Do" and "Undo" history to be maintained.
 
-### `CalChartView`
-The `CalChartView` is the way that the various `wxDialog`, `wxFrame`, or `wxPanel` objects interact with the `CalChartDoc`.  This allows a central place where Drawing and Document manipulation can go through.
-A programming paradigm that CalChart frequently uses is to create a wxFrame object and then assign a wxView to that wxFrame.  This allows the frame to be "connected" to the *Document* so that it has a shared "View" into the data model.
-
 ### Drawing
+
 The wxWidgets has a concept of a "Device Context" called `wxDC` through which `wxFrame` objects can "Draw".  For CalChart, drawing is controlled via the `CalChartView` (and `AnimationView`) object.  The general flow is that when a redraw event needs to occur, the `CalChartView` will access the information on what to draw from the `CalChartDoc` (the Marcher position, dot type, direction, path) and use the `CalChartConfiguration` to determine the draw parameters and call the appropriate draw functions.
+
 
 ### CalChartConfiguration
 
@@ -76,11 +102,6 @@ To add a new config value, add `DECLARE_CONFIGURATION_FUNCTIONS` in the class de
 `CalChartPreferences` is the Dialog that is used to interact and manipulate values of `CalChartConfiguration`.  `CalChartPreferences` is a `wxNotebook` of different Dialogs that visualize the values in `CalChartConfiguration`, and provide controls for changing their values, as well as a way to visualize what that change would produce.  Because we need a way to manipulate the values without affecting the current values, the approach is to make a local copy of the current Global `CalChartConfiguration` and then manipulate that.  This is the reason for a "write-queue" in the `CalChartPreferences`; we can manipulate a copy of the Configuration to see the effect without affecting the current settings.
 
 So why use this copy/manipulate/assign paradigm than the Undo/Do approach used in other places of CalChart?  Because we don't want to "pollute" the undo stack with modifications of the Configuration.  It would be surprising that Undo would change the color of the background in calchart.
-
-
-### CalChart vs CalChart core 
-In order to provide a separation between the wxWidgets UI framework part of the project and the generic part of CalChart, we try to maintain a difference between the CalChart Application and the CalChart Core.  Code specific that relies on the wxWidgets framework should not be in Core, and objects that can be pure C++ should be in Core.
-What this does is should provide a place where the "How to draw" is distinct from the "What to draw".  For instance, drawing a continuity path or a shape can be described as a collection of lines and circles.  In the CalChart Core is a `CalChartShape` object, which is interpreted by the varous `wxView` draw routines to draw to the screen or to PDF for printing.
 
 
 # Style guide

@@ -31,7 +31,7 @@ class DrawableCell {
 public:
     DrawableCell() = default;
     virtual ~DrawableCell() = default;
-    [[nodiscard]] virtual auto GetDrawCommands(wxDC&) -> std::vector<CalChart::DrawCommand> = 0;
+    [[nodiscard]] virtual auto GetDrawCommands(wxDC&) -> std::vector<CalChart::Draw::DrawCommand> = 0;
     [[nodiscard]] virtual auto Height() const -> int = 0;
     [[nodiscard]] virtual auto Width() const -> int = 0;
     virtual void OnClick(wxDC&, wxPoint const&) = 0;

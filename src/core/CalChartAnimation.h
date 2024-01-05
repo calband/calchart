@@ -79,7 +79,7 @@ public:
     // collection of position of each point, for debugging purposes
     std::pair<std::string, std::vector<std::string>> GetCurrentInfo() const;
 
-    std::vector<DrawCommand> GenPathToDraw(unsigned whichSheet, unsigned point, Coord::units endRadius) const;
+    std::vector<Draw::DrawCommand> GenPathToDraw(unsigned whichSheet, unsigned point, Coord::units endRadius) const;
 
     std::vector<AnimationSheet>::const_iterator sheetsBegin() const;
     std::vector<AnimationSheet>::const_iterator sheetsEnd() const;

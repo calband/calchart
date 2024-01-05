@@ -66,7 +66,7 @@ public:
     [[nodiscard]] auto GetPos(unsigned ref = 0) const -> Coord;
     void SetPos(Coord c, unsigned ref = 0);
 
-    [[nodiscard]] auto GetDrawCommands(unsigned ref, std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) const -> std::vector<CalChart::DrawCommand>;
+    [[nodiscard]] auto GetDrawCommands(unsigned ref, std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) const -> std::vector<Draw::DrawCommand>;
     [[nodiscard]] auto GetDrawCommands(std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) const { return GetDrawCommands(0, label, dotRatio, pLineRatio, sLineRatio); }
 
 private:

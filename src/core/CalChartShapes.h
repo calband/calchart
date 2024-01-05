@@ -58,7 +58,7 @@ public:
     template <typename Function>
     void OnMove(Coord p, Function snapper) { OnMoveImpl(useSnap() ? snapper(p) : p); }
 
-    [[nodiscard]] virtual auto GetCC_DrawCommand() const -> std::vector<DrawCommand> = 0;
+    [[nodiscard]] virtual auto GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand> = 0;
     [[nodiscard]] virtual auto GetPolygon() const -> RawPolygon_t { return {}; }
 
 private:
@@ -94,7 +94,7 @@ public:
     {
     }
 
-    [[nodiscard]] auto GetCC_DrawCommand() const -> std::vector<DrawCommand> override;
+    [[nodiscard]] auto GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand> override;
 
 private:
     Coord::units crosshairs_width;
@@ -139,7 +139,7 @@ public:
     {
     }
 
-    [[nodiscard]] auto GetCC_DrawCommand() const -> std::vector<DrawCommand> override;
+    [[nodiscard]] auto GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand> override;
 
 private:
     void OnMoveImpl(Coord p) override { MovePoint(p); }
@@ -157,7 +157,7 @@ public:
     {
     }
 
-    [[nodiscard]] auto GetCC_DrawCommand() const -> std::vector<DrawCommand> override;
+    [[nodiscard]] auto GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand> override;
 
 private:
     void OnMoveImpl(Coord p) override { MovePoint(p); }
@@ -175,7 +175,7 @@ public:
     {
     }
 
-    [[nodiscard]] auto GetCC_DrawCommand() const -> std::vector<DrawCommand> override;
+    [[nodiscard]] auto GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand> override;
 
 private:
     void OnMoveImpl(Coord p) override { MovePoint(p); }
@@ -193,7 +193,7 @@ public:
     {
     }
 
-    [[nodiscard]] auto GetCC_DrawCommand() const -> std::vector<DrawCommand> override;
+    [[nodiscard]] auto GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand> override;
 
 private:
     void OnMoveImpl(Coord p) override { MovePoint(p); }
@@ -228,7 +228,7 @@ public:
     {
     }
 
-    [[nodiscard]] auto GetCC_DrawCommand() const -> std::vector<DrawCommand> override;
+    [[nodiscard]] auto GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand> override;
     [[nodiscard]] auto GetAngle() const { return angle - angle0; }
 
 private:
@@ -251,7 +251,7 @@ public:
     {
     }
 
-    [[nodiscard]] auto GetCC_DrawCommand() const -> std::vector<DrawCommand> override;
+    [[nodiscard]] auto GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand> override;
 };
 
 class Lasso : public Shape {
@@ -259,7 +259,7 @@ public:
     explicit Lasso(Coord p) { Append(p); }
 
     void Append(Coord p) { pntlist.push_back(p); }
-    [[nodiscard]] auto GetCC_DrawCommand() const -> std::vector<DrawCommand> override;
+    [[nodiscard]] auto GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand> override;
 
 protected:
     void Drag(Coord p);

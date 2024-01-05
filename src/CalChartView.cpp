@@ -76,7 +76,7 @@ void CalChartView::OnDraw(wxDC* dc)
     // draw the field
     auto origin = mShow->GetShowMode().Offset();
     auto tborder1 = mShow->GetShowMode().Border1();
-    auto drawCmds = std::vector<CalChart::DrawCommand>{};
+    auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
     CalChart::append(drawCmds,
         CalChartDraw::GenerateModeDrawCommands(
             mConfig,
@@ -118,12 +118,12 @@ void CalChartView::OnDraw(wxDC* dc)
         CalChart::append(drawCmds,
             GeneratePathsDrawCommands());
     }
-    CalChartDraw::DrawCC_DrawCommandList(*dc, drawCmds + origin);
+    wxCalChart::Draw::DrawCommandList(*dc, drawCmds + origin);
 }
 
 void CalChartView::DrawUncommitedMovePoints(wxDC& dc, std::map<int, CalChart::Coord> const& positions)
 {
-    CalChartDraw::DrawCC_DrawCommandList(dc, CalChartDraw::GeneratePhatomPointsDrawCommands(mConfig, *mShow, *mShow->GetCurrentSheet(), positions));
+    wxCalChart::Draw::DrawCommandList(dc, CalChartDraw::GeneratePhatomPointsDrawCommands(mConfig, *mShow, *mShow->GetCurrentSheet(), positions));
 }
 
 void CalChartView::OnDrawBackground(wxDC& dc)
@@ -564,7 +564,7 @@ auto TransformIndexToDrawPathCommands(CalChart::Animation const& animation, unsi
         | std::views::join;
 }
 
-auto CalChartView::GeneratePathsDrawCommands() -> std::vector<CalChart::DrawCommand>
+auto CalChartView::GeneratePathsDrawCommands() -> std::vector<CalChart::Draw::DrawCommand>
 {
     if (!mShow->GetDrawPaths()) {
         return {};

@@ -142,7 +142,7 @@ public:
     void OnBackgroundImageDelete();
 
 private:
-    auto GeneratePathsDrawCommands() -> std::vector<CalChart::DrawCommand>;
+    auto GeneratePathsDrawCommands() -> std::vector<CalChart::Draw::DrawCommand>;
     void GeneratePaths();
     void UpdateBackgroundImages();
 

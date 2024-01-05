@@ -239,7 +239,7 @@ namespace CalChartDraw::Point {
         CalChart::Colors unselectedColor,
         CalChart::Colors selectedColor,
         CalChart::Colors unselectedTextColor,
-        CalChart::Colors selectedTextColor) -> std::vector<CalChart::DrawCommand>
+        CalChart::Colors selectedTextColor) -> std::vector<CalChart::Draw::DrawCommand>
     {
         auto dotRatio = config.Get_DotRatio();
         auto pLineRatio = config.Get_PLineRatio();
@@ -262,7 +262,7 @@ namespace CalChartDraw::Point {
     }
 }
 
-auto GenerateGhostPointsDrawCommands(CalChartConfiguration const& config, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref) -> std::vector<CalChart::DrawCommand>
+auto GenerateGhostPointsDrawCommands(CalChartConfiguration const& config, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref) -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto unselectedColor = CalChart::Colors::GHOST_POINT;
     auto selectedColor = CalChart::Colors::GHOST_POINT_HLIT;
@@ -271,7 +271,7 @@ auto GenerateGhostPointsDrawCommands(CalChartConfiguration const& config, CalCha
     return CalChartDraw::Point::GenerateSheetPointsDrawCommands(config, selection_list, numberPoints, labels, sheet, ref, unselectedColor, selectedColor, unselectedTextColor, selectedTextColor);
 }
 
-auto GeneratePointsDrawCommands(CalChartConfiguration const& config, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, bool primary) -> std::vector<CalChart::DrawCommand>
+auto GeneratePointsDrawCommands(CalChartConfiguration const& config, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, bool primary) -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto unselectedColor = primary ? CalChart::Colors::POINT : CalChart::Colors::REF_POINT;
     auto selectedColor = primary ? CalChart::Colors::POINT_HILIT : CalChart::Colors::REF_POINT_HILIT;
@@ -513,11 +513,11 @@ void DrawForPrintingHelper(wxDC& dc, CalChartConfiguration const& config, CalCha
     dc.SetUserScale(scale, scale);
 
     // draw the field.
-    DrawCC_DrawCommandList(dc, GenerateModeDrawCommands(config, mode, ShowMode_kPrinting) + mode.Border1());
+    wxCalChart::Draw::DrawCommandList(dc, GenerateModeDrawCommands(config, mode, ShowMode_kPrinting) + mode.Border1());
 
     dc.SetFont(CreateFont(CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio())));
     for (auto i = 0u; i < pts.size(); i++) {
-        DrawCC_DrawCommandList(
+        wxCalChart::Draw::DrawCommandList(
             dc,
             CalChartDraw::Point::DrawPoint(
                 config,
@@ -602,7 +602,7 @@ auto GeneratePhatomPointsDrawCommands(
     const CalChartConfiguration& config,
     const CalChartDoc& show,
     const CalChart::Sheet& sheet,
-    const std::map<int, CalChart::Coord>& positions) -> std::vector<CalChart::DrawCommand>
+    const std::map<int, CalChart::Coord>& positions) -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto pointLabelFont = CalChart::Font{ .size = CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio()) };
     auto origin = show.GetShowMode().Offset();
@@ -611,7 +611,7 @@ auto GeneratePhatomPointsDrawCommands(
     auto pLineRatio = config.Get_PLineRatio();
     auto sLineRatio = config.Get_SLineRatio();
 
-    auto drawCmds = std::vector<CalChart::DrawCommand>{};
+    auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
     for (auto&& i : positions) {
         CalChart::append(
             drawCmds,
@@ -624,7 +624,7 @@ auto GeneratePhatomPointsDrawCommands(
                 + i.second
                 - sheet.GetPoint(i.first).GetPos());
     }
-    return std::vector<CalChart::DrawCommand>{
+    return std::vector<CalChart::Draw::DrawCommand>{
         CalChart::Draw::withFont(
             pointLabelFont,
             CalChart::Draw::withBrushAndPen(
@@ -634,6 +634,10 @@ auto GeneratePhatomPointsDrawCommands(
                     drawCmds + origin)))
     };
 }
+
+}
+
+namespace wxCalChart::Draw {
 
 namespace details {
     template <class>
@@ -678,7 +682,7 @@ static void DrawText(wxDC& dc, std::string text, CalChart::Coord c, CalChart::Dr
     dc.DrawText(text, where);
 }
 
-void DrawCC_DrawCommandList(wxDC& dc, CalChart::DrawCommand const& cmd)
+void DrawCommandList(wxDC& dc, CalChart::Draw::DrawCommand const& cmd)
 {
     std::visit([&dc](auto const& c) {
         using T = std::decay_t<decltype(c)>;
@@ -723,23 +727,23 @@ void DrawCC_DrawCommandList(wxDC& dc, CalChart::DrawCommand const& cmd)
         } else if constexpr (std::is_same_v<T, CalChart::Draw::OverrideFont>) {
             SaveAndRestore::Font restore(dc);
             wxCalChart::setFont(dc, c.font);
-            DrawCC_DrawCommandList(dc, c.commands);
+            DrawCommandList(dc, c.commands);
         } else if constexpr (std::is_same_v<T, CalChart::Draw::OverrideBrush>) {
             SaveAndRestore::Brush restore(dc);
             wxCalChart::setBrush(dc, c.brush);
-            DrawCC_DrawCommandList(dc, c.commands);
+            DrawCommandList(dc, c.commands);
         } else if constexpr (std::is_same_v<T, CalChart::Draw::OverridePen>) {
             SaveAndRestore::Pen restore(dc);
             wxCalChart::setPen(dc, c.pen);
-            DrawCC_DrawCommandList(dc, c.commands);
+            DrawCommandList(dc, c.commands);
         } else if constexpr (std::is_same_v<T, CalChart::Draw::OverrideBrushAndPen>) {
             SaveAndRestore::BrushAndPen restore(dc);
             wxCalChart::setBrushAndPen(dc, c.brushAndPen);
-            DrawCC_DrawCommandList(dc, c.commands);
+            DrawCommandList(dc, c.commands);
         } else if constexpr (std::is_same_v<T, CalChart::Draw::OverrideTextForeground>) {
             SaveAndRestore::TextForeground restore(dc);
             wxCalChart::setTextForeground(dc, c.brushAndPen);
-            DrawCC_DrawCommandList(dc, c.commands);
+            DrawCommandList(dc, c.commands);
         } else {
             static_assert(details::always_false_v<T>, "non-exhaustive visitor!");
         }
@@ -747,9 +751,13 @@ void DrawCC_DrawCommandList(wxDC& dc, CalChart::DrawCommand const& cmd)
         cmd);
 }
 
-auto GenerateModeDrawCommands(CalChartConfiguration const& config, CalChart::ShowMode const& mode, HowToDraw howToDraw) -> std::vector<CalChart::DrawCommand>
+}
+
+namespace CalChartDraw {
+
+auto GenerateModeDrawCommands(CalChartConfiguration const& config, CalChart::ShowMode const& mode, HowToDraw howToDraw) -> std::vector<CalChart::Draw::DrawCommand>
 {
-    auto result = std::vector<CalChart::DrawCommand>{};
+    auto result = std::vector<CalChart::Draw::DrawCommand>{};
     auto inBlackAndWhite = howToDraw == ShowMode_kPrinting;
 
     auto fieldPen = inBlackAndWhite ? wxCalChart::toPen(*wxBLACK_PEN) : CalChart::toPen(config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD_DETAIL));
@@ -792,7 +800,7 @@ wxImage GetOmniLinesImage(const CalChartConfiguration& config, const CalChart::S
     dc.SelectObject(bmp);
     dc.SetBackground(*wxTRANSPARENT_BRUSH);
     dc.Clear();
-    DrawCC_DrawCommandList(dc, GenerateModeDrawCommands(config, mode, ShowMode_kOmniView));
+    wxCalChart::Draw::DrawCommandList(dc, GenerateModeDrawCommands(config, mode, ShowMode_kOmniView));
     auto image = bmp.ConvertToImage();
     image.InitAlpha();
     for (auto x = 0; x < fieldsize.x; ++x) {

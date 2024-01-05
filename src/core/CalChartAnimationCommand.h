@@ -68,7 +68,7 @@ public:
     virtual MarchingStyle StepStyle() { return MarchingStyle::HighStep; }
 
     // when we want to have the path drawn:
-    virtual DrawCommand GenCC_DrawCommand(Coord pt) const;
+    virtual Draw::DrawCommand GenCC_DrawCommand(Coord pt) const;
 
     /*!
      * @brief json  that represent this movement in an Online Viewer '.viewer' file.
@@ -138,7 +138,7 @@ public:
     CalChart::Degree MotionDirection() const override;
     void ClipBeats(unsigned beats) override;
 
-    DrawCommand GenCC_DrawCommand(Coord pt) const override;
+    Draw::DrawCommand GenCC_DrawCommand(Coord pt) const override;
 
     nlohmann::json toOnlineViewerJSON(Coord start) const override;
 
@@ -180,7 +180,7 @@ public:
     CalChart::Degree FacingDirection() const override;
     void ClipBeats(unsigned beats) override;
 
-    DrawCommand GenCC_DrawCommand(Coord pt) const override;
+    Draw::DrawCommand GenCC_DrawCommand(Coord pt) const override;
 
     nlohmann::json toOnlineViewerJSON(Coord start) const override;
 

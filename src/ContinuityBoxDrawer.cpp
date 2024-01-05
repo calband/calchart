@@ -40,7 +40,7 @@ public:
     void OnClick(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent, wxPoint const& point, std::function<void(CalChart::Cont::Drawable const&)> if_hit) const;
 
 private:
-    auto GetProcCellBoxDrawCommands(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent, void const* highlight) const -> std::vector<CalChart::DrawCommand>;
+    auto GetProcCellBoxDrawCommands(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent, void const* highlight) const -> std::vector<CalChart::Draw::DrawCommand>;
     void HandleOnClick(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent, wxPoint const& point, std::function<void(CalChart::Cont::Drawable const&)> if_hit) const;
 
     CalChart::Cont::Drawable mDrawCont;
@@ -169,7 +169,7 @@ auto ContinuityBoxSubPartDrawer::GetChildrenBeginSize(CalChartConfiguration cons
         childrenSizes));
 }
 
-auto ContinuityBoxSubPartDrawer::GetProcCellBoxDrawCommands(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent, void const* highlight) const -> std::vector<CalChart::DrawCommand>
+auto ContinuityBoxSubPartDrawer::GetProcCellBoxDrawCommands(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent, void const* highlight) const -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto text_padding = fDIP(config.Get_ContCellTextPadding());
     CalChart::Coord::units rounding = config.Get_ContCellRounding();
@@ -244,7 +244,7 @@ ContinuityBoxDrawer::ContinuityBoxDrawer(CalChart::Cont::Drawable const& proc, C
 
 ContinuityBoxDrawer::~ContinuityBoxDrawer() = default;
 
-auto ContinuityBoxDrawer::GetDrawCommands(wxDC& dc) -> std::vector<CalChart::DrawCommand>
+auto ContinuityBoxDrawer::GetDrawCommands(wxDC& dc) -> std::vector<CalChart::Draw::DrawCommand>
 {
     // this is necessary so we calculate the correct text extents
     dc.SetFont(CreateFont(mConfig.Get_ContCellFontSize()));

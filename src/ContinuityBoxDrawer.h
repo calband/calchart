@@ -34,7 +34,7 @@ public:
     ContinuityBoxDrawer(CalChart::Cont::Drawable const& proc, CalChartConfiguration const& config, std::function<void(CalChart::Cont::Drawable const&)> action = nullptr);
     ~ContinuityBoxDrawer() override;
     void SetHighlight(void const* ptr) override { mHighlight = ptr; }
-    auto GetDrawCommands(wxDC& dc) -> std::vector<CalChart::DrawCommand> override;
+    auto GetDrawCommands(wxDC& dc) -> std::vector<CalChart::Draw::DrawCommand> override;
     auto Height() const -> int override;
     auto Width() const -> int override;
     void OnClick(wxDC& dc, wxPoint const&) override;
