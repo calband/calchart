@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -76,6 +76,7 @@ public:
     void SetPrintableContinuity(std::string const& name, std::string const& lines);
     Textline_list GetPrintableContinuity() const;
     std::string GetRawPrintContinuity() const;
+    auto GetPrintContinuity() const { return mPrintableContinuity; }
 
     // beats
     unsigned short GetBeats() const;

@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2013  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -66,16 +66,14 @@ Textline ParseTextLine(std::string line)
         // first take care of any tabs
         if (line.at(0) == '\t') {
             if (line.length() > 1) {
-                Textchunk new_text;
-                new_text.font = PSFONT::TAB;
-                result.chunks.push_back(new_text);
+                result.chunks.push_back(TabChunk{});
             }
             line.erase(0, 1);
             continue;
         }
         // now check to see if we have any special person marks
         if ((line.length() >= 3) && (line.at(0) == '\\') && ((tolower(line.at(1)) == 'p') || (tolower(line.at(1)) == 's'))) {
-            auto new_text = Textchunk{ "", PSFONT::SYMBOL };
+            auto new_text = TextChunk{ "", PSFONT::SYMBOL };
             if (tolower(line.at(1)) == 'p') {
                 switch (tolower(line.at(2))) {
                 case 'o':
@@ -146,7 +144,7 @@ Textline ParseTextLine(std::string line)
         }
         auto pos = line.find_first_of("\\\t", 1);
 
-        result.chunks.push_back({ line.substr(0, pos), currfontnum });
+        result.chunks.push_back(TextChunk{ line.substr(0, pos), currfontnum });
         line.erase(0, pos);
     }
     return result;

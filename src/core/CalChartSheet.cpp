@@ -637,25 +637,6 @@ void Sheet::SetPosition(Coord val, unsigned i, unsigned ref)
     }
 }
 
-/* This is the format for each sheet:
- * %%str      where str is the string printed for the stuntsheet number
- * normal ascii text possibly containing the following codes:
- * \bs \be \is \ie for bold start, bold end, italics start, italics end
- * \po plainman
- * \pb backslashman
- * \ps slashman
- * \px xman
- * \so solidman
- * \sb solidbackslashman
- * \ss solidslashman
- * \sx solidxman
- * a line may begin with these symbols in order: <>~
- * < don't print continuity on individual sheets
- * > don't print continuity on master sheet
- * ~ center this line
- * also, there are three tab stops set for standard continuity format
- */
-
 void Sheet::SetPrintableContinuity(std::string const& name, std::string const& lines)
 {
     mPrintableContinuity = PrintContinuity(name, lines);

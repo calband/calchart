@@ -3,7 +3,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@ static void EnableLetter(wxWindow& window, bool letters)
 // Layout is to give a consistent show layout to both wizard and dialog
 // layout requires a parent
 //  wxSlider *lettersize;
-static void LayoutShowInfo(wxWindow* parent, bool putLastRowButtons)
+static void LayoutShowInfo(wxWindow* parent, [[maybe_unused]] bool putLastRowButtons)
 {
     auto labels = std::vector<wxString>{};
     wxUI::ListBox::Proxy tlabels{};

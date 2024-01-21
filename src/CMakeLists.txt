@@ -44,6 +44,8 @@ add_executable(
   CalChartDocCommand.h
   CalChartDrawing.h
   CalChartDrawing.cpp
+  CalChartDrawingGetMinSize.h
+  CalChartDrawingLayout.h
   CalChartDrawPrimativesHelper.h
   CalChartFrame.cpp
   CalChartFrame.h
@@ -116,6 +118,8 @@ add_executable(
   ShowModeSetupCanvas.h
   ShowModeWizard.cpp
   ShowModeWizard.h
+  StackDrawPlayground.cpp
+  StackDrawPlayground.h
   TransitionSolverFrame.cpp
   TransitionSolverFrame.h
   TransitionSolverProgressFrame.cpp

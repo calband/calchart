@@ -169,8 +169,7 @@ enum class PSFONT {
     NORM,
     BOLD,
     ITAL,
-    BOLDITAL,
-    TAB
+    BOLDITAL
 };
 
 enum SYMBOL_TYPE {

@@ -39,16 +39,21 @@ add_library(
   CalChartContinuityToken.cpp
   CalChartContinuityToken.h
   CalChartCoord.h
+  CalChartCoroutine.h
   CalChartDrawCommand.cpp
   CalChartDrawCommand.h
   CalChartDrawPrimatives.h
   CalChartFileFormat.h
   CalChartImage.cpp
   CalChartImage.h
+  CalChartMeasure.h
   CalChartMovePointsTool.cpp
   CalChartMovePointsTool.h
   CalChartPoint.cpp
   CalChartPoint.h
+  CalChartPostScript.h
+  CalChartPrintContinuityLayout.cpp
+  CalChartPrintContinuityLayout.h
   CalChartRanges.h
   CalChartSelectTool.cpp
   CalChartSelectTool.h

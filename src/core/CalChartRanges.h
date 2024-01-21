@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2012  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -35,6 +35,10 @@ inline auto ToVector(Range&& range) -> std::vector<T>
     std::ranges::copy(range, std::back_inserter(result));
     return result;
 }
+
+}
+
+namespace CalChart::Ranges::details {
 
 // Basic zip_view implementation
 template <typename... Ranges>
@@ -122,10 +126,95 @@ private:
     std::tuple<Ranges...> ranges_;
 };
 
+// Basic enumerate_view implementation
+template <typename Range>
+    requires(std::ranges::viewable_range<Range>)
+class BasicEnumerateView {
+public:
+    BasicEnumerateView(Range&& range)
+        : range_{ std::forward<Range>(range) }
+    {
+    }
+
+    // Iterator type
+    class iterator {
+    public:
+        using difference_type = std::ptrdiff_t;
+        using value_type = std::tuple<difference_type, typename std::ranges::range_value_t<Range>>;
+        explicit iterator(std::ranges::iterator_t<Range> iter)
+            : iter_{ iter }
+        {
+        }
+        explicit iterator()
+            : iter_{}
+        {
+        }
+
+        // Increment operators
+        iterator& operator++()
+        {
+            ++value;
+            ++iter_;
+            return *this;
+        }
+
+        iterator operator++(int)
+        {
+            iterator tmp(*this);
+            ++(*this);
+            return tmp;
+        }
+
+        // Dereference operator
+        auto operator*() const
+        {
+            return std::tuple{ value, *iter_ };
+        }
+
+        // Equality comparison operator
+        bool operator==(const iterator& other) const
+        {
+            return iter_ == other.iter_;
+        }
+
+        bool operator!=(const iterator& other) const
+        {
+            return !(*this == other);
+        }
+
+    private:
+        difference_type value{};
+        std::ranges::iterator_t<Range> iter_;
+    };
+
+    iterator begin()
+    {
+        return iterator(std::ranges::begin(range_));
+    }
+
+    iterator end()
+    {
+        return iterator(std::ranges::end(range_));
+    }
+
+private:
+    Range range_;
+};
+
+}
+
+namespace CalChart::Ranges {
+
 template <typename... Ranges>
-BasicZipView<Ranges...> zip_view(Ranges&&... ranges)
+auto zip_view(Ranges&&... ranges)
 {
-    return BasicZipView<Ranges...>(std::forward<Ranges>(ranges)...);
+    return details::BasicZipView<Ranges...>(std::forward<Ranges>(ranges)...);
+}
+
+template <typename Range>
+auto enumerate_view(Range&& range)
+{
+    return details::BasicEnumerateView<Range>(std::forward<Range>(range));
 }
 
 }

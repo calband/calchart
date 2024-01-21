@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -110,7 +110,7 @@ void ContCellSetup::CreateControls()
                     .withStyle(wxSP_ARROW_KEYS) },
         },
 
-        wxUI::Generic{
+        wxUI::Generic<ContinuityBrowserPanel>{
             ExpandSizerFlags(),
             [this] {
                 auto canvas = new ContinuityBrowserPanel(CalChart::SYMBOL_PLAIN, mConfig, this);

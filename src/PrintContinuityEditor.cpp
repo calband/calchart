@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -152,7 +152,7 @@ void PrintContinuityEditor::UpdateText()
         mUserInput->WriteText(mView->GetCurrentSheet()->GetRawPrintContinuity());
         mUserInput->SetInsertionPoint(0);
     }
-    mPrintContDisplay->SetPrintContinuity(mView->GetCurrentSheet()->GetPrintableContinuity());
+    mPrintContDisplay->SetPrintContinuity(mView->GetCurrentSheet()->GetPrintContinuity());
     Refresh();
 }
 

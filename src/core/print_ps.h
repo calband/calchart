@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -66,8 +66,6 @@ private:
     void PrintStandard(std::ostream& buffer, const CalChart::Sheet& sheet,
         bool split_sheet) const;
     void PrintOverview(std::ostream& buffer, const CalChart::Sheet& sheet) const;
-    void gen_cont_line(std::ostream& buffer, const CalChart::Textline& line,
-        PSFONT currfontnum, float fontsize) const;
     void print_start_page(std::ostream& buffer, bool landscape,
         double translate_x, double translate_y) const;
     bool SplitSheet(const CalChart::Sheet& sheet) const;

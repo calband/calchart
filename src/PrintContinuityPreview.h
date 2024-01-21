@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -33,14 +33,17 @@ class PrintContinuityPreview : public wxScrolled<wxWindow> {
 public:
     PrintContinuityPreview(wxWindow* parent, CalChartConfiguration const& config);
 
-    void SetPrintContinuity(const CalChart::Textline_list& printContinuity)
+    void SetPrintContinuity(const CalChart::PrintContinuity& printContinuity)
     {
         mPrintContinuity = printContinuity;
     }
-    void SetOrientation(bool landscape) { m_landscape = landscape; }
+    void SetOrientation(bool landscape)
+    {
+        m_landscape = landscape;
+    }
 
 private:
-    CalChart::Textline_list mPrintContinuity{};
+    CalChart::PrintContinuity mPrintContinuity{};
     bool m_landscape{};
     CalChartConfiguration const& mConfig;
 

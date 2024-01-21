@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,11 +30,14 @@
 #include "CalChartDoc.h"
 #include "CalChartDrawCommand.h"
 #include "CalChartDrawPrimativesHelper.h"
+#include "CalChartDrawingGetMinSize.h"
+#include "CalChartDrawingLayout.h"
 #include "CalChartPoint.h"
 #include "CalChartSheet.h"
 #include "CalChartShow.h"
 #include "CalChartShowMode.h"
 #include "CalChartText.h"
+#include "CalChartUtils.h"
 #include "DCSaveRestore.h"
 #include "basic_ui.h"
 #include <memory>
@@ -280,8 +283,22 @@ auto GeneratePointsDrawCommands(CalChartConfiguration const& config, CalChart::S
     return CalChartDraw::Point::GenerateSheetPointsDrawCommands(config, selection_list, numberPoints, labels, sheet, ref, unselectedColor, selectedColor, unselectedTextColor, selectedTextColor);
 }
 
+struct DrawContFonts {
+    DrawContFonts(int fontSize = 12)
+        : plain(fontSize, CalChart::Font::Family::Modern)
+        , bold(fontSize, CalChart::Font::Family::Modern, CalChart::Font::Style::Normal, CalChart::Font::Weight::Bold)
+        , italics(fontSize, CalChart::Font::Family::Modern, CalChart::Font::Style::Italic)
+        , bolditalics(fontSize, CalChart::Font::Family::Modern, CalChart::Font::Style::Italic, CalChart::Font::Weight::Bold)
+    {
+    }
+    CalChart::Font const plain{};
+    CalChart::Font const bold{};
+    CalChart::Font const italics{};
+    CalChart::Font const bolditalics{};
+};
+
 // draw the continuity starting at a specific offset
-void DrawCont(wxDC& dc, CalChartConfiguration const& config, CalChart::Textline_list const& print_continuity, wxRect const& bounding, bool landscape)
+void DrawCont(wxDC& dc, [[maybe_unused]] CalChartConfiguration const& config, CalChart::Textline_list const& print_continuity, wxRect const& bounding, bool landscape)
 {
     SaveAndRestore::DeviceOrigin orig_dev(dc);
     SaveAndRestore::UserScale orig_scale(dc);
@@ -319,123 +336,130 @@ void DrawCont(wxDC& dc, CalChartConfiguration const& config, CalChart::Textline_
         if (cont.center) {
             x += pageMiddle;
             auto chunks = cont.chunks;
-            for (auto& c : chunks) {
-                bool do_tab = false;
-                switch (c.font) {
-                case CalChart::PSFONT::SYMBOL: {
-                    wxCoord textw, texth;
-                    dc.GetTextExtent(wxT("O"), &textw, &texth);
-                    x += textw * c.text.length();
-                } break;
-                case CalChart::PSFONT::NORM:
-                    dc.SetFont(contPlainFont);
-                    break;
-                case CalChart::PSFONT::BOLD:
-                    dc.SetFont(contBoldFont);
-                    break;
-                case CalChart::PSFONT::ITAL:
-                    dc.SetFont(contItalFont);
-                    break;
-                case CalChart::PSFONT::BOLDITAL:
-                    dc.SetFont(contBoldItalFont);
-                    break;
-                case CalChart::PSFONT::TAB:
-                    do_tab = true;
-                    break;
-                }
-                if (!do_tab && (c.font != CalChart::PSFONT::SYMBOL)) {
-                    wxCoord textw, texth;
-                    dc.GetTextExtent(c.text, &textw, &texth);
-                    x -= textw / 2;
-                }
+            for (auto& chunk : chunks) {
+                std::visit(
+                    CalChart::overloaded{
+                        [&dc, &x, contPlainFont, contBoldFont, contItalFont, contBoldItalFont]([[maybe_unused]] CalChart::TextChunk const& c) {
+                            switch (c.font) {
+                            case CalChart::PSFONT::SYMBOL: {
+                                wxCoord textw, texth;
+                                dc.GetTextExtent(wxT("O"), &textw, &texth);
+                                x += textw * c.text.length();
+                            } break;
+                            case CalChart::PSFONT::NORM:
+                                dc.SetFont(contPlainFont);
+                                break;
+                            case CalChart::PSFONT::BOLD:
+                                dc.SetFont(contBoldFont);
+                                break;
+                            case CalChart::PSFONT::ITAL:
+                                dc.SetFont(contItalFont);
+                                break;
+                            case CalChart::PSFONT::BOLDITAL:
+                                dc.SetFont(contBoldItalFont);
+                                break;
+                            }
+                            if (c.font != CalChart::PSFONT::SYMBOL) {
+                                wxCoord textw, texth;
+                                dc.GetTextExtent(c.text, &textw, &texth);
+                                x -= textw / 2;
+                            }
+                        },
+                        []([[maybe_unused]] auto const& arg) {},
+                    },
+                    chunk);
             }
         }
         // now draw the text
         unsigned tabnum = 0;
         auto chunks = cont.chunks;
-        for (auto& c : chunks) {
-            bool do_tab = false;
-            switch (c.font) {
-            case CalChart::PSFONT::NORM:
-            case CalChart::PSFONT::SYMBOL:
-                dc.SetFont(contPlainFont);
-                break;
-            case CalChart::PSFONT::BOLD:
-                dc.SetFont(contBoldFont);
-                break;
-            case CalChart::PSFONT::ITAL:
-                dc.SetFont(contItalFont);
-                break;
-            case CalChart::PSFONT::BOLDITAL:
-                dc.SetFont(contBoldItalFont);
-                break;
-            case CalChart::PSFONT::TAB: {
-                tabnum++;
-                wxCoord textw = bounding.GetLeft() + charWidth * TabStops(tabnum, landscape);
-                if (textw >= x)
-                    x = textw;
-                else
-                    x += charWidth;
-                do_tab = true;
-            } break;
-            default:
-                break;
-            }
-            if (c.font == CalChart::PSFONT::SYMBOL) {
-                wxCoord textw, texth, textd;
-                dc.GetTextExtent(wxT("O"), &textw, &texth, &textd);
-                const float d = textw;
-                const float top_y = y + texth - textd - textw;
+        for (auto& chunk : chunks) {
+            std::visit(
+                CalChart::overloaded{
+                    [&dc, &x, y, contPlainFont, contBoldFont, contItalFont, contBoldItalFont](CalChart::TextChunk const& c) {
+                        switch (c.font) {
+                        case CalChart::PSFONT::NORM:
+                        case CalChart::PSFONT::SYMBOL:
+                            dc.SetFont(contPlainFont);
+                            break;
+                        case CalChart::PSFONT::BOLD:
+                            dc.SetFont(contBoldFont);
+                            break;
+                        case CalChart::PSFONT::ITAL:
+                            dc.SetFont(contItalFont);
+                            break;
+                        case CalChart::PSFONT::BOLDITAL:
+                            dc.SetFont(contBoldItalFont);
+                            break;
+                        default:
+                            break;
+                        }
+                        if (c.font == CalChart::PSFONT::SYMBOL) {
+                            wxCoord textw, texth, textd;
+                            dc.GetTextExtent(wxT("O"), &textw, &texth, &textd);
+                            const float d = textw;
+                            const float top_y = y + texth - textd - textw;
 
-                for (std::string::const_iterator s = c.text.begin(); s != c.text.end();
-                     s++) {
-                    {
-                        dc.SetPen(*wxBLACK_PEN);
-                        CalChart::SYMBOL_TYPE sym = (CalChart::SYMBOL_TYPE)(*s - 'A');
-                        switch (sym) {
-                        case CalChart::SYMBOL_SOL:
-                        case CalChart::SYMBOL_SOLBKSL:
-                        case CalChart::SYMBOL_SOLSL:
-                        case CalChart::SYMBOL_SOLX:
-                            dc.SetBrush(*wxBLACK_BRUSH);
-                            break;
-                        default:
-                            dc.SetBrush(*wxTRANSPARENT_BRUSH);
+                            for (std::string::const_iterator s = c.text.begin(); s != c.text.end();
+                                 s++) {
+                                {
+                                    dc.SetPen(*wxBLACK_PEN);
+                                    CalChart::SYMBOL_TYPE sym = (CalChart::SYMBOL_TYPE)(*s - 'A');
+                                    switch (sym) {
+                                    case CalChart::SYMBOL_SOL:
+                                    case CalChart::SYMBOL_SOLBKSL:
+                                    case CalChart::SYMBOL_SOLSL:
+                                    case CalChart::SYMBOL_SOLX:
+                                        dc.SetBrush(*wxBLACK_BRUSH);
+                                        break;
+                                    default:
+                                        dc.SetBrush(*wxTRANSPARENT_BRUSH);
+                                    }
+                                    dc.DrawEllipse(x, top_y, d, d);
+                                    switch (sym) {
+                                    case CalChart::SYMBOL_SL:
+                                    case CalChart::SYMBOL_X:
+                                    case CalChart::SYMBOL_SOLSL:
+                                    case CalChart::SYMBOL_SOLX:
+                                        // 1 can be config
+                                        dc.DrawLine(x - 1, top_y + d + 1, x + d + 1, top_y - 1);
+                                        break;
+                                    default:
+                                        break;
+                                    }
+                                    switch (sym) {
+                                    case CalChart::SYMBOL_BKSL:
+                                    case CalChart::SYMBOL_X:
+                                    case CalChart::SYMBOL_SOLBKSL:
+                                    case CalChart::SYMBOL_SOLX:
+                                        // 1 can be config
+                                        dc.DrawLine(x - 1, top_y - 1, x + d + 1, top_y + d + 1);
+                                        break;
+                                    default:
+                                        break;
+                                    }
+                                }
+                                x += d;
+                            }
+                        } else {
+                            wxCoord textw, texth;
+                            dc.GetTextExtent(c.text, &textw, &texth);
+                            dc.DrawText(c.text, x, y);
+                            x += textw;
                         }
-                        dc.DrawEllipse(x, top_y, d, d);
-                        switch (sym) {
-                        case CalChart::SYMBOL_SL:
-                        case CalChart::SYMBOL_X:
-                        case CalChart::SYMBOL_SOLSL:
-                        case CalChart::SYMBOL_SOLX:
-                            // 1 can be config
-                            dc.DrawLine(x - 1, top_y + d + 1, x + d + 1, top_y - 1);
-                            break;
-                        default:
-                            break;
+                    },
+                    [&tabnum, &x, bounding, charWidth, landscape]([[maybe_unused]] CalChart::TabChunk const& arg) {
+                        tabnum++;
+                        wxCoord textw = bounding.GetLeft() + charWidth * TabStops(tabnum, landscape);
+                        if (textw >= x) {
+                            x = textw;
+                        } else {
+                            x += charWidth;
                         }
-                        switch (sym) {
-                        case CalChart::SYMBOL_BKSL:
-                        case CalChart::SYMBOL_X:
-                        case CalChart::SYMBOL_SOLBKSL:
-                        case CalChart::SYMBOL_SOLX:
-                            // 1 can be config
-                            dc.DrawLine(x - 1, top_y - 1, x + d + 1, top_y + d + 1);
-                            break;
-                        default:
-                            break;
-                        }
-                    }
-                    x += d;
-                }
-            } else {
-                if (!do_tab) {
-                    wxCoord textw, texth;
-                    dc.GetTextExtent(c.text, &textw, &texth);
-                    dc.DrawText(c.text, x, y);
-                    x += textw;
-                }
-            }
+                    },
+                    []([[maybe_unused]] auto const& arg) {},
+                },
+                chunk);
         }
         y += maxtexth;
     }
@@ -604,7 +628,7 @@ auto GeneratePhatomPointsDrawCommands(
     const CalChart::Sheet& sheet,
     const std::map<int, CalChart::Coord>& positions) -> std::vector<CalChart::Draw::DrawCommand>
 {
-    auto pointLabelFont = CalChart::Font{ .size = CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio()) };
+    auto pointLabelFont = CalChart::Font{ CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio()) };
     auto origin = show.GetShowMode().Offset();
 
     auto dotRatio = config.Get_DotRatio();
@@ -639,15 +663,9 @@ auto GeneratePhatomPointsDrawCommands(
 
 namespace wxCalChart::Draw {
 
-namespace details {
-    template <class>
-    inline constexpr bool always_false_v = false;
-}
-
 // this draws the yardline labels
-static void DrawText(wxDC& dc, std::string text, CalChart::Coord c, CalChart::Draw::Text::TextAnchor anchor, bool withBox)
+static void DrawText(wxDC& dc, std::string text, wxPoint where, CalChart::Draw::Text::TextAnchor anchor, bool withBox)
 {
-    auto where = fDIP(wxPoint{ c.x, c.y });
     auto textSize = dc.GetTextExtent(text);
     using TextAnchor = CalChart::Draw::Text::TextAnchor;
     if ((anchor & TextAnchor::VerticalCenter) == TextAnchor::VerticalCenter) {
@@ -682,78 +700,157 @@ static void DrawText(wxDC& dc, std::string text, CalChart::Coord c, CalChart::Dr
     dc.DrawText(text, where);
 }
 
-void DrawCommandList(wxDC& dc, CalChart::Draw::DrawCommand const& cmd)
-{
-    std::visit([&dc](auto const& c) {
-        using T = std::decay_t<decltype(c)>;
-        if constexpr (std::is_same_v<T, CalChart::Draw::Line>) {
-            auto start = fDIP(wxCalChart::to_wxPoint(c.c1));
-            auto end = fDIP(wxCalChart::to_wxPoint(c.c2));
-            dc.DrawLine(start, end);
-        } else if constexpr (std::is_same_v<T, CalChart::Draw::Arc>) {
-            auto start = fDIP(wxCalChart::to_wxPoint(c.c1));
-            auto end = fDIP(wxCalChart::to_wxPoint(c.c2));
-            auto center = fDIP(wxCalChart::to_wxPoint(c.cc));
-            dc.DrawArc(start, end, center);
-        } else if constexpr (std::is_same_v<T, CalChart::Draw::Ellipse>) {
-            auto start = fDIP(wxCalChart::to_wxPoint(c.c1));
-            auto end = fDIP(wxCalChart::to_wxSize(c.c2 - c.c1));
-            dc.DrawEllipse(start, end);
-        } else if constexpr (std::is_same_v<T, CalChart::Draw::Circle>) {
-            SaveAndRestore::Brush restore(dc);
-            if (!c.filled) {
-                dc.SetBrush(*wxTRANSPARENT_BRUSH);
-            }
-            auto center = fDIP(wxCalChart::to_wxPoint(c.c1));
-            dc.DrawCircle(center, fDIP(c.radius));
-        } else if constexpr (std::is_same_v<T, CalChart::Draw::Rectangle>) {
-            SaveAndRestore::Brush restore(dc);
-            if (!c.filled) {
-                dc.SetBrush(*wxTRANSPARENT_BRUSH);
-            }
-            if (c.rounding > 0) {
-                dc.DrawRoundedRectangle(
-                    fDIP(wxCalChart::to_wxPoint(c.start)),
-                    fDIP(wxCalChart::to_wxSize(c.size)),
-                    fDIP(c.rounding));
-            } else {
-                dc.DrawRectangle(
-                    fDIP(wxCalChart::to_wxPoint(c.start)),
-                    fDIP(wxCalChart::to_wxSize(c.size)));
-            }
-        } else if constexpr (std::is_same_v<T, CalChart::Draw::Text>) {
-            DrawText(dc, c.text, c.c1, c.anchor, c.withBackground);
-        } else if constexpr (std::is_same_v<T, CalChart::Draw::Ignore>) {
-        } else if constexpr (std::is_same_v<T, CalChart::Draw::OverrideFont>) {
-            SaveAndRestore::Font restore(dc);
-            wxCalChart::setFont(dc, c.font);
-            DrawCommandList(dc, c.commands);
-        } else if constexpr (std::is_same_v<T, CalChart::Draw::OverrideBrush>) {
-            SaveAndRestore::Brush restore(dc);
-            wxCalChart::setBrush(dc, c.brush);
-            DrawCommandList(dc, c.commands);
-        } else if constexpr (std::is_same_v<T, CalChart::Draw::OverridePen>) {
-            SaveAndRestore::Pen restore(dc);
-            wxCalChart::setPen(dc, c.pen);
-            DrawCommandList(dc, c.commands);
-        } else if constexpr (std::is_same_v<T, CalChart::Draw::OverrideBrushAndPen>) {
-            SaveAndRestore::BrushAndPen restore(dc);
-            wxCalChart::setBrushAndPen(dc, c.brushAndPen);
-            DrawCommandList(dc, c.commands);
-        } else if constexpr (std::is_same_v<T, CalChart::Draw::OverrideTextForeground>) {
-            SaveAndRestore::TextForeground restore(dc);
-            wxCalChart::setTextForeground(dc, c.brushAndPen);
-            DrawCommandList(dc, c.commands);
-        } else {
-            static_assert(details::always_false_v<T>, "non-exhaustive visitor!");
-        }
-    },
-        cmd);
-}
+// The CalChart::Draw::DrawCommand is a data structure that dictates "what to draw", but not how or where specficially.
+// The How is interpreted by the wxWidget's Device Context logic -- effectively we translate the `CalChart::Draw::DrawCommand`
+// type to the appropriate `wxDC` API call with the appropriate offsets from the `CalChart::Draw::DrawCommand` objects.
+// But Layout becomes a bit more trickly we have `CalChart::Draw::DrawStack` objects.  Stacking things stacking things
+// together, especially Text, becomes complicated because the size of the Text due to the font choice can change, the
+// "where" to draw becomes non-trivial.
+//
+// We solve this by introducing a new data structure, the `DrawingSurface` object.  We first parse out the DrawCommand
+// object to determine what the surface size should be, and then pass those DrawSurface objects to the command that then
+// draws them into that place.
 
+namespace details {
+
+    void DrawCommand(wxDC& dc, DrawSurface surface, CalChart::Draw::DrawItems const& cmd)
+    {
+        return std::visit(
+            CalChart::overloaded{
+                [&dc, layoutPoint = surface.origin](CalChart::Draw::Line const& c) {
+                    auto start = wxCalChart::to_wxPoint(c.c1) + layoutPoint;
+                    auto end = wxCalChart::to_wxPoint(c.c2) + layoutPoint;
+                    dc.DrawLine(fDIP(start), fDIP(end));
+                },
+                [&dc, layoutPoint = surface.origin](CalChart::Draw::Arc const& c) {
+                    // draw arc is always assumed to be radius (start to center) + center
+                    auto start = wxCalChart::to_wxPoint(c.c1) + layoutPoint;
+                    auto end = wxCalChart::to_wxPoint(c.c2) + layoutPoint;
+                    auto center = wxCalChart::to_wxPoint(c.cc) + layoutPoint;
+                    dc.DrawArc(fDIP(start), fDIP(end), fDIP(center));
+                },
+                [&dc, layoutPoint = surface.origin](CalChart::Draw::Ellipse const& c) {
+                    SaveAndRestore::Brush restore(dc);
+                    if (!c.filled) {
+                        dc.SetBrush(*wxTRANSPARENT_BRUSH);
+                    }
+                    auto start = wxCalChart::to_wxPoint(c.c1) + layoutPoint;
+                    auto end = wxCalChart::to_wxSize(c.c2 - c.c1);
+                    dc.DrawEllipse(fDIP(start), fDIP(end));
+                },
+                [&dc, layoutPoint = surface.origin](CalChart::Draw::Circle const& c) {
+                    SaveAndRestore::Brush restore(dc);
+                    if (!c.filled) {
+                        dc.SetBrush(*wxTRANSPARENT_BRUSH);
+                    }
+                    auto center = wxCalChart::to_wxPoint(c.c1) + layoutPoint;
+                    dc.DrawCircle(fDIP(center), fDIP(c.radius));
+                },
+                [&dc, layoutPoint = surface.origin](CalChart::Draw::Rectangle const& c) {
+                    SaveAndRestore::Brush restore(dc);
+                    if (!c.filled) {
+                        dc.SetBrush(*wxTRANSPARENT_BRUSH);
+                    }
+                    auto start = wxCalChart::to_wxPoint(c.start) + layoutPoint;
+                    auto size = wxCalChart::to_wxSize(c.size);
+                    if (c.rounding > 0) {
+                        auto rounding = c.rounding;
+                        dc.DrawRoundedRectangle(fDIP(start), fDIP(size), fDIP(rounding));
+                    } else {
+                        dc.DrawRectangle(fDIP(start), fDIP(size));
+                    }
+                },
+                [&dc, layoutPoint = surface.origin](CalChart::Draw::Text const& c) {
+                    auto where = wxCalChart::to_wxPoint(c.c1) + layoutPoint;
+                    DrawText(dc, c.text, fDIP(where), c.anchor, c.withBackground);
+                },
+                []([[maybe_unused]] CalChart::Draw::Ignore const& c) {
+                },
+                []([[maybe_unused]] CalChart::Draw::Tab const& c) {
+                },
+            },
+            cmd);
+    }
+
+    void DrawCommand(wxDC& dc, DrawSurface surface, CalChart::Draw::DrawManipulators const& cmd)
+    {
+        std::visit(
+            CalChart::overloaded{
+                [&dc, surface](CalChart::Draw::OverrideFont const& c) {
+                    SaveAndRestore::Font restore(dc);
+                    wxCalChart::setFont(dc, c.font);
+                    DrawCommandList(dc, surface, c.commands);
+                },
+                [&dc, surface](CalChart::Draw::OverrideBrush const& c) {
+                    SaveAndRestore::Brush restore(dc);
+                    wxCalChart::setBrush(dc, c.brush);
+                    DrawCommandList(dc, surface, c.commands);
+                },
+                [&dc, surface](CalChart::Draw::OverridePen const& c) {
+                    SaveAndRestore::Pen restore(dc);
+                    wxCalChart::setPen(dc, c.pen);
+                    DrawCommandList(dc, surface, c.commands);
+                },
+                [&dc, surface](CalChart::Draw::OverrideBrushAndPen const& c) {
+                    SaveAndRestore::BrushAndPen restore(dc);
+                    wxCalChart::setBrushAndPen(dc, c.brushAndPen);
+                    DrawCommandList(dc, surface, c.commands);
+                },
+                [&dc, surface](CalChart::Draw::OverrideTextForeground const& c) {
+                    SaveAndRestore::TextForeground restore(dc);
+                    wxCalChart::setTextForeground(dc, c.brushAndPen);
+                    DrawCommandList(dc, surface, c.commands);
+                },
+            },
+            cmd);
+    }
+
+    void DrawCommand(wxDC& dc, DrawSurface surface, CalChart::Draw::DrawStack const& cmd)
+    {
+        // first we need to get an array of the min sizes.
+        // Then we determine their layout.
+        // then we call draw on each.
+        std::visit(
+            CalChart::overloaded{
+                [&dc, surface](CalChart::Draw::VStack const& c) {
+                    auto layoutPoints = VLayout(GetMinSizes({ dc, surface }, c.commands), surface, c.align);
+                    for (auto i = static_cast<std::size_t>(0); i < c.commands.size(); ++i) {
+                        DrawCommand(dc, { layoutPoints[i], surface.size }, c.commands[i]);
+                    }
+                },
+                [&dc, surface](CalChart::Draw::HStack const& c) {
+                    auto layoutPoints = HLayout(GetMinSizes({ dc, surface }, c.commands), surface, c.align);
+                    for (auto i = static_cast<std::size_t>(0); i < c.commands.size(); ++i) {
+                        DrawCommand(dc, { layoutPoints[i], surface.size }, c.commands[i]);
+                    }
+                },
+                [&dc, surface](CalChart::Draw::ZStack const& c) {
+                    auto layoutPoints = ZLayout(GetMinSizes({ dc, surface }, c.commands), surface, c.align);
+                    for (auto i = static_cast<std::size_t>(0); i < c.commands.size(); ++i) {
+                        DrawCommand(dc, { layoutPoints[i], surface.size }, c.commands[i]);
+                    }
+                },
+            },
+            cmd);
+    }
+
+    void DrawCommand(wxDC& dc, DrawSurface surface, CalChart::Draw::DrawCommand const& cmd)
+    {
+        std::visit(
+            [&dc, surface](auto&& c) {
+                DrawCommand(dc, surface, c);
+            },
+            cmd);
+    }
+}
 }
 
 namespace CalChartDraw {
+void DrawPath(wxDC& dc, CalChartConfiguration const& config, std::vector<CalChart::Draw::DrawCommand> const& draw_commands)
+{
+    wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::PATHS));
+    wxCalChart::Draw::DrawCommandList(dc, draw_commands);
+}
 
 auto GenerateModeDrawCommands(CalChartConfiguration const& config, CalChart::ShowMode const& mode, HowToDraw howToDraw) -> std::vector<CalChart::Draw::DrawCommand>
 {
@@ -779,7 +876,7 @@ auto GenerateModeDrawCommands(CalChartConfiguration const& config, CalChart::Sho
         return result;
     }
 
-    auto font = CalChart::Font{ .size = CalChart::Float2CoordUnits(config.Get_YardsSize()) };
+    auto font = CalChart::Font{ CalChart::Float2CoordUnits(config.Get_YardsSize()) };
     auto brushAndPen = inBlackAndWhite ? CalChart::BrushAndPen{ .brushStyle = CalChart::Brush::Style::Transparent } : config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD);
     auto yardLabels = CalChart::CreateYardlineLayout(mode, howToDraw == ShowMode_kOmniView);
     CalChart::append(result,
