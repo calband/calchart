@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
 
 class CalChartView;
+class CalChartConfiguration;
 
 static constexpr auto kMultiple = "[multiple]";
 static constexpr auto kDefaultInstrument = "default";
@@ -109,7 +110,7 @@ class MouseMoveScrollCanvas : public ScrollZoomWindow {
     using super = ScrollZoomWindow;
 
 public:
-    MouseMoveScrollCanvas(wxWindow* parent, wxWindowID id = wxID_ANY,
+    MouseMoveScrollCanvas(CalChartConfiguration const& config, wxWindow* parent, wxWindowID id = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, long style = 0);
     virtual ~MouseMoveScrollCanvas() override;
@@ -127,6 +128,7 @@ protected:
 private:
     wxPoint mLastPos;
     bool mScrolledLastMove;
+    CalChartConfiguration const& mConfig;
 };
 
 /**
@@ -137,7 +139,7 @@ class ClickDragCtrlScrollCanvas : public MouseMoveScrollCanvas {
     using super = MouseMoveScrollCanvas;
 
 public:
-    ClickDragCtrlScrollCanvas(wxWindow* parent, wxWindowID id = wxID_ANY,
+    ClickDragCtrlScrollCanvas(CalChartConfiguration const& config, wxWindow* parent, wxWindowID id = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, long style = 0);
     virtual ~ClickDragCtrlScrollCanvas() override;

@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2012  Richard Michael Powell
+   Copyright (C) 1995-2024  Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ class wxStaticText;
 class wxSpinCtrl;
 class wxButton;
 class CCOmniviewCanvas;
+class CalChartConfiguration;
 
 // Animiation Panel is a little bit different because it has it's own view.
 // When we are animating a show we are taking an CalChart animation object
@@ -44,7 +45,7 @@ class AnimationPanel : public wxPanel {
     wxDECLARE_EVENT_TABLE();
 
 public:
-    AnimationPanel(wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, wxString const& name = wxPanelNameStr);
+    AnimationPanel(CalChartConfiguration& config, wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, wxString const& name = wxPanelNameStr);
     ~AnimationPanel() override;
 
     void OnUpdate(); // Refresh from the View
@@ -96,4 +97,5 @@ private:
     bool mInMiniMode{};
     bool mShowOmni{};
     std::vector<wxWindow*> mItemsToHide;
+    CalChartConfiguration& mConfig;
 };

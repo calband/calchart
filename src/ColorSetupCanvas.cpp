@@ -22,7 +22,6 @@
 
 #include "ColorSetupCanvas.h"
 #include "CalChartConfiguration.h"
-#include "CalChartDoc.h"
 #include "CalChartDrawCommand.h"
 #include "CalChartDrawPrimativesHelper.h"
 #include "CalChartDrawing.h"
@@ -41,14 +40,14 @@ EVT_ERASE_BACKGROUND(ColorSetupCanvas::OnEraseBackground)
 END_EVENT_TABLE()
 
 ColorSetupCanvas::ColorSetupCanvas(CalChartConfiguration& config, wxWindow* parent)
-    : super(parent, wxID_ANY, wxDefaultPosition, GetColorSetupCanvas())
+    : super(config, parent, wxID_ANY, wxDefaultPosition, GetColorSetupCanvas())
     , mShow(Show::Create(ShowMode::GetDefaultShowMode()))
     , mMode(ShowMode::CreateShowMode(
           Coord(Int2CoordUnits(160), Int2CoordUnits(84)),
           Coord(Int2CoordUnits(80), Int2CoordUnits(42)),
           Coord(Int2CoordUnits(4), Int2CoordUnits(4)),
           Coord(Int2CoordUnits(4), Int2CoordUnits(4)), Int2CoordUnits(32), Int2CoordUnits(52),
-          ShowMode::GetDefaultYardLines()))
+          kDefaultYardLines))
     , mConfig(config)
 {
     auto field_offset = mMode.FieldOffset();

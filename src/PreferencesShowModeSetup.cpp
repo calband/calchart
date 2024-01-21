@@ -24,6 +24,7 @@
 #include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
 #include "CalChartDrawCommand.h"
+#include "CalChartRanges.h"
 #include "CalChartShapes.h"
 #include "CalChartSheet.h"
 #include "CalChartShowMode.h"
@@ -62,11 +63,11 @@ enum {
 
 IMPLEMENT_CLASS(ShowModeSetup, PreferencePage)
 
-static auto convert(std::vector<std::string> const& input)
+template <std::ranges::input_range Range>
+    requires(std::is_convertible_v<std::ranges::range_value_t<Range>, wxString>)
+auto convert(Range&& input)
 {
-    std::vector<wxString> output;
-    std::copy(input.begin(), input.end(), std::back_inserter(output));
-    return output;
+    return CalChart::Ranges::ToVector<wxString>(input);
 }
 
 void ShowModeSetup::CreateControls()
@@ -108,7 +109,7 @@ void ShowModeSetup::CreateControls()
             wxUI::HSizer{
                 BasicSizerFlags(),
                 wxUI::Text{ "Adjust yardline marker" },
-                wxUI::Choice{ SHOW_LINE_MARKING, convert(mConfig.Get_yard_text_index()) }
+                wxUI::Choice{ SHOW_LINE_MARKING, convert(CalChart::kDefaultYardLines) }
                     .bind([this] {
                         OnCmdChoice();
                     }),

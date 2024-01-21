@@ -56,7 +56,7 @@ public:
         double YardsSize, double TextSize, double DotRatio,
         double NumRatio, double PLineRatio, double SLineRatio,
         double ContRatio,
-        ShowMode::YardLinesInfo_t yardText);
+        YardLinesInfo_t yardText);
 
     int operator()(std::ostream& buffer, std::set<size_t> const& isPicked, std::string const& title) const;
 
@@ -98,7 +98,7 @@ private:
     double mSLineRatio;
     double mContRatio;
 
-    ShowMode::YardLinesInfo_t mYardText;
+    YardLinesInfo_t mYardText;
 
     float width, height, real_width, real_height;
     float field_x, field_y, field_w, field_h;

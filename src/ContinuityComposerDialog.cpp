@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,16 +30,16 @@ class ContinuityComposerCanvas : public CustomListViewPanel {
 
 public:
     // Basic functions
-    ContinuityComposerCanvas(CalChartConfiguration& config, wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxScrolledWindowStyle, wxString const& name = wxPanelNameStr);
+    ContinuityComposerCanvas(CalChartConfiguration const& config, wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxScrolledWindowStyle, wxString const& name = wxPanelNameStr);
     ~ContinuityComposerCanvas() override = default;
     void DoSetContinuity(CalChart::Cont::Drawable const& drawableCont, std::function<void(CalChart::Cont::Drawable const&)> action);
 
 private:
-    CalChartConfiguration& mConfig;
+    CalChartConfiguration const& mConfig;
 };
 
 // Define a constructor for field canvas
-ContinuityComposerCanvas::ContinuityComposerCanvas(CalChartConfiguration& config, wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
+ContinuityComposerCanvas::ContinuityComposerCanvas(CalChartConfiguration const& config, wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
     : super(parent, winid, pos, size, style, name)
     , mConfig(config)
 {
@@ -64,7 +64,7 @@ class ContinuityComposerPanel : public wxPanel {
     DECLARE_CLASS(ContinuityComposerPanel)
 
 public:
-    ContinuityComposerPanel(std::unique_ptr<CalChart::Cont::Procedure> starting_continuity, CalChartConfiguration& config, wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, wxString const& name = wxPanelNameStr);
+    ContinuityComposerPanel(std::unique_ptr<CalChart::Cont::Procedure> starting_continuity, CalChartConfiguration const& config, wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, wxString const& name = wxPanelNameStr);
     ~ContinuityComposerPanel() override = default;
 
     std::unique_ptr<CalChart::Cont::Procedure> GetContinuity();
@@ -91,7 +91,7 @@ private:
     CalChart::Cont::Token const* mCurrentSelected = nullptr;
     CalChart::Cont::Token* mCurrentParent = nullptr;
     std::function<void(CalChart::Cont::Drawable const& c)> const mAction;
-    CalChartConfiguration& mConfig;
+    CalChartConfiguration const& mConfig;
     std::function<void(bool)> mOnUpdateIsValid{};
     std::string mLastValue;
 };
@@ -116,7 +116,7 @@ std::pair<CalChart::Cont::Token const*, CalChart::Cont::Token*> first_unset(CalC
     return { nullptr, nullptr };
 }
 
-ContinuityComposerPanel::ContinuityComposerPanel(std::unique_ptr<CalChart::Cont::Procedure> starting_continuity, CalChartConfiguration& config, wxWindow* parent,
+ContinuityComposerPanel::ContinuityComposerPanel(std::unique_ptr<CalChart::Cont::Procedure> starting_continuity, CalChartConfiguration const& config, wxWindow* parent,
     wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
     : wxPanel(parent, winid, pos, size, style, name)
     , mCont(std::move(starting_continuity))
@@ -655,10 +655,10 @@ ContinuityComposerPanel::GetContinuity()
 
 IMPLEMENT_CLASS(ContinuityComposerDialog, wxDialog)
 
-ContinuityComposerDialog::ContinuityComposerDialog(std::unique_ptr<CalChart::Cont::Procedure> starting_continuity, wxWindow* parent)
+ContinuityComposerDialog::ContinuityComposerDialog(std::unique_ptr<CalChart::Cont::Procedure> starting_continuity, CalChartConfiguration const& config, wxWindow* parent)
     : super(parent, wxID_ANY, "Compose Continuity")
 {
-    ContinuityComposerPanel* panel = new ContinuityComposerPanel(std::move(starting_continuity), CalChartConfiguration::GetGlobalConfig(), this);
+    ContinuityComposerPanel* panel = new ContinuityComposerPanel(std::move(starting_continuity), config, this);
     wxUI::VSizer{
         sRightBasicSizerFlags,
         mPanel = wxUI::Generic<ContinuityComposerPanel>{

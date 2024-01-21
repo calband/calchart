@@ -3,7 +3,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ IMPLEMENT_DYNAMIC_CLASS(CalChartDoc, CalChartDoc::super);
 
 // Create a new show
 CalChartDoc::CalChartDoc()
-    : mShow(Show::Create(GetConfigShowMode(std::get<0>(CalChart::kShowModeDefaultValues[0]))))
+    : mShow(Show::Create(GetConfigShowMode(CalChartConfiguration::GetGlobalConfig(), std::get<0>(CalChart::kShowModeDefaultValues[0]))))
     , mTimer(*this)
 {
     mTimer.Start(static_cast<int>(CalChartConfiguration::GetGlobalConfig().Get_AutosaveInterval()) * 1000);
@@ -219,7 +219,7 @@ T& CalChartDoc::LoadObjectGeneric(T& stream)
                 return ContinuityEditorPopup::ProcessEditContinuity(GetDocumentWindow(), description, what, line, column).ToStdString();
             }
         };
-        mShow = Show::Create(GetConfigShowMode(CalChart::GetShowModeNames()[0]), stream, &handlers);
+        mShow = Show::Create(GetConfigShowMode(CalChartConfiguration::GetGlobalConfig(), CalChart::GetShowModeNames()[0]), stream, &handlers);
     } catch (std::exception const& e) {
         wxString message = wxT("Error encountered:\n");
         message += e.what();

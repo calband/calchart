@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ class AnimationView : public wxView {
     using super = wxView;
 
 public:
-    AnimationView(CalChartView* view, wxWindow* frame);
+    AnimationView(CalChartView* view, CalChartConfiguration const& config, wxWindow* frame);
     ~AnimationView() override;
 
     void OnDraw(wxDC* dc) override;
@@ -100,6 +100,7 @@ private:
 
     // Yes, this view has a view...
     CalChartView* mView{};
+    CalChartConfiguration const& mConfig;
 
     std::unique_ptr<CalChart::Animation> mAnimation;
     bool mDrawCollisionWarning = true;

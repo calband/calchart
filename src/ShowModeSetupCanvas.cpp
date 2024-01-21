@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ END_EVENT_TABLE()
 IMPLEMENT_CLASS(ShowModeSetupCanvas, ClickDragCtrlScrollCanvas)
 
 ShowModeSetupCanvas::ShowModeSetupCanvas(CalChartConfiguration& config, wxWindow* parent, wxWindowID id)
-    : super(parent, id, wxDefaultPosition, wxSize(640, 240))
+    : super(config, parent, id, wxDefaultPosition, wxSize(640, 240))
     , mConfig(config)
     , mMode(CalChart::ShowMode::GetDefaultShowMode())
 {

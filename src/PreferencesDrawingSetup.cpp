@@ -95,7 +95,7 @@ void DrawingSetup::CreateControls()
     }
     auto colorNames = std::vector<std::tuple<wxString, wxBitmap>>{};
     for (auto i : CalChart::ColorsIterator{}) {
-        colorNames.push_back({ mConfig.GetColorNames().at(toUType(i)), CreateItemBitmap(wxCalChart::toBrush(mConfig.Get_CalChartBrushAndPen(i))) });
+        colorNames.push_back({ CalChart::GetColorNames().at(toUType(i)), CreateItemBitmap(wxCalChart::toBrush(mConfig.Get_CalChartBrushAndPen(i))) });
     }
     wxUI::VSizer{
         LeftBasicSizerFlags(),
@@ -317,7 +317,7 @@ void DrawingSetup::OnCmdSelectWidth(wxSpinEvent& e)
 void DrawingSetup::OnCmdResetColors()
 {
     int selection = mNameBox.selection();
-    SetColor(selection, mConfig.GetDefaultPenWidth()[selection], wxColour{ mConfig.GetDefaultColors()[selection] });
+    SetColor(selection, CalChart::GetDefaultPenWidth()[selection], wxColour{ CalChart::GetDefaultColors()[selection] });
     mConfig.Clear_CalChartConfigColor(static_cast<CalChart::Colors>(selection));
 }
 

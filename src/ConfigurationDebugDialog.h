@@ -1,11 +1,11 @@
 #pragma once
 /*
- * TransitionSolverView.h
- * CalChart
+ * ConfigurationDebugDialog.h
+ * Dialog for debugging configuration
  */
 
 /*
-   Copyright (C) 2017-2024  Kevin Durand , Richard Michael Powell
+   Copyright (C) 2024  Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,22 +21,19 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <wx/dialog.h>
-#include <wx/docview.h>
+#include <wx/wx.h>
+#include <wxUI/wxUI.h>
 
-#include "e7_transition_solver.h"
-
-// View for linking CalChartDoc with the Transition Solver
-class TransitionSolverView : public wxView {
-    using super = wxView;
+class wxConfigBase;
+class wxTreeListCtrl;
+class ConfigurationDebug : public wxDialog {
+    using super = wxDialog;
 
 public:
-    TransitionSolverView();
-    ~TransitionSolverView();
+    ConfigurationDebug(wxWindow* parent, wxConfigBase* config);
+    ~ConfigurationDebug() = default;
 
-    virtual void OnDraw(wxDC* dc) override;
-    virtual void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL) override;
-
-    void ApplyTransitionSolution(CalChart::TransitionSolverResult solution);
-    void SelectMarchers(std::set<unsigned> marchers);
+private:
+    wxConfigBase* mConfig;
+    wxUI::Generic<wxTreeListCtrl>::Proxy mTreeCtrl{};
 };

@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2012  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -26,10 +26,11 @@
 #include <wx/wx.h>
 
 class wxAuiToolBar;
+class CalChartConfiguration;
 
 namespace FieldControls {
 
-wxAuiToolBar* CreateToolBar(wxWindow* parent, wxWindowID id = wxID_ANY, long style = 0);
+wxAuiToolBar* CreateToolBar(wxWindow* parent, wxWindowID idenity, long style, CalChartConfiguration& config);
 std::pair<CalChart::Coord::units, CalChart::Coord::units> GridChoice(wxWindow* target);
 std::pair<CalChart::Coord::units, CalChart::Coord::units> ToolGridChoice(wxWindow* target);
 double GetZoomAmount(wxWindow* target);

@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -29,21 +29,25 @@
 #include <wx/wx.h>
 #include <wxUI/wxUI.h>
 
+class CalChartConfiguration;
+
+// Dialog effectively takes a configuration by reference, and then you manipulate the data members within it.
+// It is the caller's responsibility to flush the configuration out after the dialong is done.
 class ColorSetupDialog : public wxDialog {
     using super = wxDialog;
     DECLARE_EVENT_TABLE()
 
 public:
-    static std::unique_ptr<ColorSetupDialog> CreateDialog(wxWindow* parent, int palette)
+    static std::unique_ptr<ColorSetupDialog> CreateDialog(wxWindow* parent, int palette, CalChartConfiguration& config)
     {
-        auto dialog = std::unique_ptr<ColorSetupDialog>(new ColorSetupDialog{ parent, palette });
+        auto dialog = std::unique_ptr<ColorSetupDialog>(new ColorSetupDialog{ parent, palette, config });
         dialog->TransferDataToWindow();
         return dialog;
     }
 
 private:
     // private, use the CreateDialog method
-    ColorSetupDialog(wxWindow* parent, int palette);
+    ColorSetupDialog(wxWindow* parent, int palette, CalChartConfiguration& config);
 
 public:
     virtual ~ColorSetupDialog() = default;
@@ -83,5 +87,5 @@ private:
     std::array<std::array<wxPen, toUType(CalChart::Colors::NUM)>, kNumberPalettes> mCalChartPens;
     std::array<std::array<wxBrush, toUType(CalChart::Colors::NUM)>, kNumberPalettes> mCalChartBrushes;
 
-    CalChartConfiguration mConfig;
+    CalChartConfiguration& mConfig;
 };

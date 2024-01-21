@@ -63,7 +63,7 @@ void ContCellSetup::CreateControls()
 {
     auto colorNames = std::vector<std::tuple<wxString, wxBitmap>>{};
     for (auto i : CalChart::ContinuityCellColorsIterator{}) {
-        colorNames.push_back({ mConfig.GetContCellColorNames().at(toUType(i)), CreateItemBitmap(wxCalChart::toBrush(mConfig.Get_ContCellBrushAndPen(i))) });
+        colorNames.push_back({ CalChart::GetContCellColorNames().at(toUType(i)), CreateItemBitmap(wxCalChart::toBrush(mConfig.Get_ContCellBrushAndPen(i))) });
     }
     wxUI::VSizer{
         LeftBasicSizerFlags(),
@@ -155,7 +155,7 @@ bool ContCellSetup::ClearValuesToDefault()
     mConfig.Clear_ContCellBoxPadding();
 
     for (auto i = CalChart::ContinuityCellColors::PROC; i != CalChart::ContinuityCellColors::NUM; i = static_cast<CalChart::ContinuityCellColors>(static_cast<int>(i) + 1)) {
-        SetColor(toUType(i), wxColour{ mConfig.GetContCellDefaultColors()[toUType(i)] });
+        SetColor(toUType(i), wxColour{ CalChart::GetContCellDefaultColors()[toUType(i)] });
         mConfig.Clear_ContCellConfigColor(i);
     }
     InitFromConfig();
@@ -216,7 +216,7 @@ void ContCellSetup::OnCmdSelectColors()
 void ContCellSetup::OnCmdResetColors()
 {
     auto selection = static_cast<int>(mNameBox.selection());
-    SetColor(selection, wxColour{ mConfig.GetContCellDefaultColors()[selection] });
+    SetColor(selection, wxColour{ CalChart::GetContCellDefaultColors()[selection] });
     mConfig.Clear_ContCellConfigColor(static_cast<CalChart::ContinuityCellColors>(selection));
     Refresh();
 }

@@ -118,7 +118,7 @@ void PrintToPS(CalChart::Show const& show, CalChart::ShowMode const& mode, bool 
             bold_font_str, ital_font_str, bold_ital_font_str } },
         PageWidth, PageHeight, PageOffsetX, PageOffsetY, PaperLength, HeaderSize,
         YardsSize, TextSize, DotRatio, NumRatio, PLineRatio, SLineRatio,
-        ContRatio, CalChart::ShowMode::GetDefaultYardLines());
+        ContRatio, CalChart::kDefaultYardLines);
 
     std::set<size_t> picked;
     for (auto i = 0; i < show.GetNumSheets(); ++i)

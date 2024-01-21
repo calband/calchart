@@ -22,6 +22,7 @@
 #include "CalChartSplash.h"
 #include "CalChartApp.h"
 #include "CalChartPreferences.h"
+#include "ConfigurationDebugDialog.h"
 #include "StackDrawPlayground.h"
 #include "basic_ui.h"
 #include "ccvers.h"
@@ -82,8 +83,9 @@ auto BitmapWithBandIcon(wxSize const& size)
     return wxBitmap(BITMAP_NAME(calchart));
 }
 
-CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString const& title)
+CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString const& title, CalChartConfiguration& config)
     : super(manager, frame, wxID_ANY, title)
+    , mConfig(config)
 {
     // Give it an icon
     SetBandIcon(this);
@@ -93,15 +95,16 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString c
             "&File",
             wxUI::Item{ wxID_NEW, "&New Show\tCTRL-N", "Create a new show" },
             wxUI::Item{ wxID_OPEN, "&Open...\tCTRL-O", "Load a saved show" },
-            wxUI::Item{ wxID_PREFERENCES, "&Preferences\tCTRL-,", [this] {
-                           CalChartPreferences(this).ShowModal();
-                       } },
+            wxUI::Item{ wxID_PREFERENCES, "&Preferences\tCTRL-,", [this](wxCommandEvent& event) { OnCmdPreferences(event); } },
             wxUI::Item{ wxID_EXIT, "&Quit\tCTRL-Q", "Quit CalChart" },
         },
         wxUI::Menu{
             "&Debug",
             wxUI::Item{ "Stack Draw Playground", [this] {
                            StackDrawPlayground(this).ShowModal();
+                       } },
+            wxUI::Item{ "Debug Configuration", [this] {
+                           ConfigurationDebug(this, wxConfigBase::Get()).ShowModal();
                        } },
         },
         wxUI::Menu{
@@ -191,7 +194,9 @@ void CalChartSplash::Help()
 
 void CalChartSplash::OnCmdPreferences(wxCommandEvent&)
 {
-    CalChartPreferences dialog1(this);
-    if (dialog1.ShowModal() == wxID_OK) {
+    // here's where we flush out the configuration.
+    auto localConfig = mConfig;
+    if (CalChartPreferences(this, localConfig).ShowModal() == wxID_OK) {
+        CalChartConfiguration::AssignConfig(localConfig);
     }
 }

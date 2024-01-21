@@ -188,7 +188,7 @@ PrintShowToPS::PrintShowToPS(
     double PageWidth, double PageHeight, double PageOffsetX, double PageOffsetY,
     double PaperLength, double HeaderSize, double YardsSize, double TextSize,
     double DotRatio, double NumRatio, double PLineRatio, double SLineRatio,
-    double ContRatio, ShowMode::YardLinesInfo_t yardText)
+    double ContRatio, YardLinesInfo_t yardText)
     : mShow(show)
     , mPrintLandscape(PrintLandscape)
     , mPrintDoCont(PrintDoCont)

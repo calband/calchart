@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -40,8 +40,9 @@
 #include <wx/filename.h>
 #include <wx/stdpaths.h>
 
-AnimationView::AnimationView(CalChartView* view, wxWindow* frame)
+AnimationView::AnimationView(CalChartView* view, CalChartConfiguration const& config, wxWindow* frame)
     : mView(view)
+    , mConfig(config)
 {
     SetFrame(frame);
 
@@ -74,8 +75,7 @@ AnimationView::~AnimationView()
 
 void AnimationView::OnDraw(wxDC* dc)
 {
-    auto& config = CalChartConfiguration::GetGlobalConfig();
-    OnDraw(*dc, config);
+    OnDraw(*dc, mConfig);
 }
 
 void AnimationView::OnDraw(wxDC& dc, CalChartConfiguration const& config)
@@ -187,7 +187,7 @@ void AnimationView::OnUpdate(wxView* sender, wxObject* hint)
 
 void AnimationView::RefreshFrame()
 {
-    if (mPlayCollisionWarning && mAnimation && mAnimation->CurrentBeatHasCollision() && CalChartConfiguration::GetGlobalConfig().Get_BeepOnCollisions()) {
+    if (mPlayCollisionWarning && mAnimation && mAnimation->CurrentBeatHasCollision() && mConfig.Get_BeepOnCollisions()) {
         wxBell();
     }
     GetAnimationFrame()->UpdatePanel();

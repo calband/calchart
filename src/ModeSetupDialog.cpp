@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -22,10 +22,12 @@
 
 #include "ModeSetupDialog.h"
 #include "CalChartConfiguration.h"
+#include "CalChartRanges.h"
 #include "CalChartShowMode.h"
 #include "ShowModeSetupCanvas.h"
 #include "basic_ui.h"
 #include <algorithm>
+#include <ranges>
 #include <wxUI/wxUI.h>
 
 //////// Show Mode setup ////////
@@ -40,35 +42,34 @@ class ShowModeDialogSetup : public wxPanel {
     DECLARE_EVENT_TABLE()
 
 public:
-    static auto CreateDialog(CalChart::ShowMode const& current_mode, wxWindow* parent)
+    static auto CreateDialog(wxWindow* parent, CalChart::ShowMode const& current_mode, CalChartConfiguration& config)
     {
-        auto dialog = new ShowModeDialogSetup{ current_mode, parent };
+        auto dialog = new ShowModeDialogSetup{ parent, current_mode, config };
         dialog->TransferDataToWindow();
         return dialog;
     }
 
 private:
     // private, use the CreateDialog method
-    ShowModeDialogSetup(CalChart::ShowMode const& current_mode, wxWindow* parent);
+    ShowModeDialogSetup(wxWindow* parent, CalChart::ShowMode const& current_mode, CalChartConfiguration& config);
 
 public:
     ~ShowModeDialogSetup() = default;
 
-    void Init(CalChart::ShowMode const& current_mode);
     void CreateControls();
 
     // use these to get and set default values
-    bool TransferDataToWindow() override;
-    bool TransferDataFromWindow() override;
+    auto TransferDataToWindow() -> bool override;
+    auto TransferDataFromWindow() -> bool override;
 
-    CalChart::ShowMode GetShowMode() const;
+    auto GetShowMode() const -> CalChart::ShowMode;
 
 private:
     void OnCmdLineText(wxCommandEvent&);
     void OnCmdChoice();
 
     CalChart::ShowModeData_t mShowModeValues;
-    CalChart::ShowMode::YardLinesInfo_t mYardText;
+    CalChart::YardLinesInfo_t mYardText;
     int mWhichYardLine{};
     CalChartConfiguration mConfig;
 };
@@ -95,22 +96,24 @@ END_EVENT_TABLE()
 
 IMPLEMENT_CLASS(ShowModeDialogSetup, wxPanel)
 
-ShowModeDialogSetup::ShowModeDialogSetup(CalChart::ShowMode const& current_mode, wxWindow* parent)
+ShowModeDialogSetup::ShowModeDialogSetup(wxWindow* parent, CalChart::ShowMode const& current_mode, CalChartConfiguration& config)
     : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU, "Setup Modes")
-    , mConfig(CalChartConfiguration::GetGlobalConfig())
+    , mShowModeValues{ current_mode.GetShowModeData() }
+    , mYardText{ current_mode.Get_yard_text() }
+    , mWhichYardLine{ 0 }
+    , mConfig(config)
 {
-    Init(current_mode);
     CreateControls();
     GetSizer()->Fit(this);
     GetSizer()->SetSizeHints(this);
     Center();
 }
 
-static auto convert(std::vector<std::string> const& input)
+template <std::ranges::input_range Range>
+    requires(std::is_convertible_v<std::ranges::range_value_t<Range>, wxString>)
+auto convert(Range&& input)
 {
-    std::vector<wxString> output;
-    std::copy(input.begin(), input.end(), std::back_inserter(output));
-    return output;
+    return CalChart::Ranges::ToVector<wxString>(input);
 }
 
 void ShowModeDialogSetup::CreateControls()
@@ -152,7 +155,7 @@ void ShowModeDialogSetup::CreateControls()
             wxUI::HSizer{
                 BasicSizerFlags(),
                 wxUI::Text{ "Adjust yardline marker" },
-                wxUI::Choice{ SHOW_LINE_MARKING, convert(mConfig.Get_yard_text_index()) }
+                wxUI::Choice{ SHOW_LINE_MARKING, convert(CalChart::kDefaultYardLines) }
                     .bind([this] {
                         OnCmdChoice();
                     }),
@@ -183,13 +186,6 @@ void ShowModeDialogSetup::CreateControls()
             }() },
     }
         .attachTo(this);
-}
-
-void ShowModeDialogSetup::Init(CalChart::ShowMode const& current_mode)
-{
-    mWhichYardLine = 0;
-    mShowModeValues = current_mode.GetShowModeData();
-    mYardText = current_mode.Get_yard_text();
 }
 
 bool ShowModeDialogSetup::TransferDataToWindow()
@@ -250,13 +246,13 @@ END_EVENT_TABLE()
 
 IMPLEMENT_CLASS(ModeSetupDialog, wxDialog)
 
-ModeSetupDialog::ModeSetupDialog(CalChart::ShowMode const& current_mode, wxWindow* parent)
+ModeSetupDialog::ModeSetupDialog(wxWindow* parent, CalChart::ShowMode const& current_mode, CalChartConfiguration& config)
     : super(parent, wxID_ANY, "CalChart Preferences", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
 {
     wxUI::VSizer{
         BasicSizerFlags(),
-        m_setup = [current_mode](wxWindow* parent) {
-            return ShowModeDialogSetup::CreateDialog(current_mode, parent);
+        m_setup = [current_mode, &config](wxWindow* parent) {
+            return ShowModeDialogSetup::CreateDialog(parent, current_mode, config);
         },
         wxUI::HSizer{
             wxUI::Button{ wxID_CANCEL },

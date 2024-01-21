@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2012  Richard Michael Powell
+   Copyright (C) 1995-2024  Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -566,10 +566,10 @@ void CCOmniView_GLContext::Draw3dMarcher(AnimationView::MarcherInfo const& info,
     DrawTextureOnBox(points, 1, 1, m_textures[face]);
 }
 
-CCOmniviewCanvas::CCOmniviewCanvas(wxWindow* parent, CalChartConfiguration& config_, wxSize const& size)
-    : wxGLCanvas(parent, wxID_ANY, NULL, wxDefaultPosition, size, wxFULL_REPAINT_ON_RESIZE)
+CCOmniviewCanvas::CCOmniviewCanvas(wxWindow* parent, CalChartConfiguration& config, wxSize const& size)
+    : wxGLCanvas(parent, wxID_ANY, NULL, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE)
     , m_glContext(new CCOmniView_GLContext(this))
-    , config(config_)
+    , mConfig(config)
     , mViewPoint(kStartingViewPoint)
     , mViewAngle(kStartingViewAngle)
     , mViewAngleZ(kStartingViewAngleZ)
@@ -767,55 +767,55 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
 
     case '4':
         OnCmd_FollowMarcher(-1);
-        mViewPoint = ViewPoint{ config.Get_OmniViewPoint_X_4(),
-            config.Get_OmniViewPoint_Y_4(),
-            config.Get_OmniViewPoint_Z_4() };
-        mViewAngle = CalChart::Radian{ config.Get_OmniViewAngle_4() };
-        mViewAngleZ = CalChart::Radian{ config.Get_OmniViewAngle_Z_4() };
+        mViewPoint = ViewPoint{ mConfig.Get_OmniViewPoint_X_4(),
+            mConfig.Get_OmniViewPoint_Y_4(),
+            mConfig.Get_OmniViewPoint_Z_4() };
+        mViewAngle = CalChart::Radian{ mConfig.Get_OmniViewAngle_4() };
+        mViewAngleZ = CalChart::Radian{ mConfig.Get_OmniViewAngle_Z_4() };
         break;
     case '5':
-        mViewPoint = ViewPoint{ config.Get_OmniViewPoint_X_5(),
-            config.Get_OmniViewPoint_Y_5(),
-            config.Get_OmniViewPoint_Z_5() };
-        mViewAngle = CalChart::Radian{ config.Get_OmniViewAngle_5() };
-        mViewAngleZ = CalChart::Radian{ config.Get_OmniViewAngle_Z_5() };
+        mViewPoint = ViewPoint{ mConfig.Get_OmniViewPoint_X_5(),
+            mConfig.Get_OmniViewPoint_Y_5(),
+            mConfig.Get_OmniViewPoint_Z_5() };
+        mViewAngle = CalChart::Radian{ mConfig.Get_OmniViewAngle_5() };
+        mViewAngleZ = CalChart::Radian{ mConfig.Get_OmniViewAngle_Z_5() };
         break;
     case '6':
-        mViewPoint = ViewPoint{ config.Get_OmniViewPoint_X_6(),
-            config.Get_OmniViewPoint_Y_6(),
-            config.Get_OmniViewPoint_Z_6() };
-        mViewAngle = CalChart::Radian{ config.Get_OmniViewAngle_6() };
-        mViewAngleZ = CalChart::Radian{ config.Get_OmniViewAngle_Z_6() };
+        mViewPoint = ViewPoint{ mConfig.Get_OmniViewPoint_X_6(),
+            mConfig.Get_OmniViewPoint_Y_6(),
+            mConfig.Get_OmniViewPoint_Z_6() };
+        mViewAngle = CalChart::Radian{ mConfig.Get_OmniViewAngle_6() };
+        mViewAngleZ = CalChart::Radian{ mConfig.Get_OmniViewAngle_Z_6() };
         break;
 
     case '$':
         OnCmd_FollowMarcher(-1);
         if (wxMessageBox(wxT("Set Custom Viewpoint 4?"), wxT("Custom Viewpoint"), wxYES_NO) == wxYES) {
-            config.Set_OmniViewPoint_X_4(mViewPoint.x);
-            config.Set_OmniViewPoint_Y_4(mViewPoint.y);
-            config.Set_OmniViewPoint_Z_4(mViewPoint.z);
-            config.Set_OmniViewAngle_4(mViewAngle.getValue());
-            config.Set_OmniViewAngle_Z_4(mViewAngleZ.getValue());
+            mConfig.Set_OmniViewPoint_X_4(mViewPoint.x);
+            mConfig.Set_OmniViewPoint_Y_4(mViewPoint.y);
+            mConfig.Set_OmniViewPoint_Z_4(mViewPoint.z);
+            mConfig.Set_OmniViewAngle_4(mViewAngle.getValue());
+            mConfig.Set_OmniViewAngle_Z_4(mViewAngleZ.getValue());
         }
         break;
     case '%':
         OnCmd_FollowMarcher(-1);
         if (wxMessageBox(wxT("Set Custom Viewpoint 5?"), wxT("Custom Viewpoint"), wxYES_NO) == wxYES) {
-            config.Set_OmniViewPoint_X_5(mViewPoint.x);
-            config.Set_OmniViewPoint_Y_5(mViewPoint.y);
-            config.Set_OmniViewPoint_Z_5(mViewPoint.z);
-            config.Set_OmniViewAngle_5(mViewAngle.getValue());
-            config.Set_OmniViewAngle_Z_5(mViewAngleZ.getValue());
+            mConfig.Set_OmniViewPoint_X_5(mViewPoint.x);
+            mConfig.Set_OmniViewPoint_Y_5(mViewPoint.y);
+            mConfig.Set_OmniViewPoint_Z_5(mViewPoint.z);
+            mConfig.Set_OmniViewAngle_5(mViewAngle.getValue());
+            mConfig.Set_OmniViewAngle_Z_5(mViewAngleZ.getValue());
         }
         break;
     case '^':
         OnCmd_FollowMarcher(-1);
         if (wxMessageBox(wxT("Set Custom Viewpoint 6?"), wxT("Custom Viewpoint"), wxYES_NO) == wxYES) {
-            config.Set_OmniViewPoint_X_6(mViewPoint.x);
-            config.Set_OmniViewPoint_Y_6(mViewPoint.y);
-            config.Set_OmniViewPoint_Z_6(mViewPoint.z);
-            config.Set_OmniViewAngle_6(mViewAngle.getValue());
-            config.Set_OmniViewAngle_Z_6(mViewAngleZ.getValue());
+            mConfig.Set_OmniViewPoint_X_6(mViewPoint.x);
+            mConfig.Set_OmniViewPoint_Y_6(mViewPoint.y);
+            mConfig.Set_OmniViewPoint_Z_6(mViewPoint.z);
+            mConfig.Set_OmniViewAngle_6(mViewAngle.getValue());
+            mConfig.Set_OmniViewAngle_Z_6(mViewAngleZ.getValue());
         }
         break;
 

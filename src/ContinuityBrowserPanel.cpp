@@ -3,7 +3,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ EVT_KILL_FOCUS(ContinuityBrowserPanel::DoKillFocus)
 END_EVENT_TABLE()
 
 // Define a constructor for field canvas
-ContinuityBrowserPanel::ContinuityBrowserPanel(SYMBOL_TYPE sym, CalChartConfiguration& config, wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
+ContinuityBrowserPanel::ContinuityBrowserPanel(SYMBOL_TYPE sym, CalChartConfiguration const& config, wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
     : super(parent, winid, pos, size, style, name)
     , mSym(sym)
     , mConfig(config)
@@ -88,7 +88,7 @@ void ContinuityBrowserPanel::OnNewEntry(int cell)
         return;
     }
 
-    ContinuityComposerDialog dialog(nullptr, this);
+    ContinuityComposerDialog dialog(nullptr, mConfig, this);
 
     if (dialog.ShowModal() != wxID_OK) {
         return;
@@ -106,7 +106,7 @@ void ContinuityBrowserPanel::OnNewEntry(int cell)
 
 void ContinuityBrowserPanel::OnEditEntry(int cell)
 {
-    ContinuityComposerDialog dialog(mCont.GetParsedContinuity().at(cell)->clone(), this);
+    ContinuityComposerDialog dialog(mCont.GetParsedContinuity().at(cell)->clone(), mConfig, this);
 
     if (dialog.ShowModal() != wxID_OK) {
         return;

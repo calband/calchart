@@ -1,6 +1,6 @@
 #pragma once
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,13 +25,14 @@ class Procedure;
 }
 
 class ContinuityComposerPanel;
+class CalChartConfiguration;
 
 class ContinuityComposerDialog : public wxDialog {
     using super = wxDialog;
     DECLARE_CLASS(ContinuityComposerDialog)
 
 public:
-    ContinuityComposerDialog(std::unique_ptr<CalChart::Cont::Procedure> starting_continuity, wxWindow* parent);
+    ContinuityComposerDialog(std::unique_ptr<CalChart::Cont::Procedure> starting_continuity, CalChartConfiguration const& config, wxWindow* parent);
     ~ContinuityComposerDialog() override = default;
 
     std::unique_ptr<CalChart::Cont::Procedure> GetContinuity();
