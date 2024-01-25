@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 2017  Richard Michael Powell
+   Copyright (C) 2017-2024  Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,14 +28,18 @@ namespace CalChart {
 class Reader;
 
 struct ImageData {
-    int left, top;
-    int scaled_width, scaled_height;
     int image_width, image_height;
     std::vector<unsigned char> data;
     std::vector<unsigned char> alpha;
 };
 
-auto CreateImageData(Reader) -> std::pair<ImageData, Reader>;
-auto Serialize(ImageData const&) -> std::vector<std::byte>;
+struct ImageInfo {
+    int left, top;
+    int scaled_width, scaled_height;
+    ImageData data;
+};
+
+auto CreateImageInfo(Reader) -> std::pair<ImageInfo, Reader>;
+auto Serialize(ImageInfo const&) -> std::vector<std::byte>;
 
 }

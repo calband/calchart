@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -383,7 +383,7 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
     auto parse_INGL_BACK = [](Sheet* sheet, Reader reader) {
         auto num = reader.Get<int32_t>();
         while (num--) {
-            auto [image, new_reader] = CreateImageData(reader);
+            auto [image, new_reader] = CreateImageInfo(reader);
             sheet->mBackgroundImages.push_back(image);
             reader = new_reader;
         }
@@ -449,7 +449,7 @@ auto Sheet::SerializePrintContinuityData() const -> std::vector<std::byte>
     return result;
 }
 
-auto Sheet::SerializeBackgroundImageData() const -> std::vector<std::byte>
+auto Sheet::SerializeBackgroundImageInfo() const -> std::vector<std::byte>
 {
     std::vector<std::byte> result;
     Parser::Append(result, static_cast<uint32_t>(mBackgroundImages.size()));
@@ -486,7 +486,7 @@ auto Sheet::SerializeSheetData() const -> std::vector<std::byte>
             INGL_PCNT, SerializePrintContinuityData()));
 
     // Write Background
-    Parser::Append(result, Parser::Construct_block(INGL_BACK, SerializeBackgroundImageData()));
+    Parser::Append(result, Parser::Construct_block(INGL_BACK, SerializeBackgroundImageInfo()));
 
     return result;
 }
@@ -780,12 +780,12 @@ void Sheet::sheet_round_trip_test()
 
 void Sheet_UnitTests() { Sheet::sheet_round_trip_test(); }
 
-std::vector<ImageData> const& Sheet::GetBackgroundImages() const
+std::vector<ImageInfo> const& Sheet::GetBackgroundImages() const
 {
     return mBackgroundImages;
 }
 
-void Sheet::AddBackgroundImage(ImageData const& image, size_t where)
+void Sheet::AddBackgroundImage(ImageInfo const& image, size_t where)
 {
     auto insert_point = mBackgroundImages.begin() + std::min(where, mBackgroundImages.size());
     mBackgroundImages.insert(insert_point, image);

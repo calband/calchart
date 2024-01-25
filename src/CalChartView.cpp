@@ -30,6 +30,7 @@
 #include "CalChartDoc.h"
 #include "CalChartDocCommand.h"
 #include "CalChartDrawCommand.h"
+#include "CalChartDrawPrimativesHelper.h"
 #include "CalChartDrawing.h"
 #include "CalChartFrame.h"
 #include "CalChartShapes.h"
@@ -608,22 +609,7 @@ bool CalChartView::AddBackgroundImage(const wxImage& image)
     if (!image.IsOk()) {
         return false;
     }
-    auto x = 100;
-    auto y = 100;
-
-    auto width = image.GetWidth();
-    auto height = image.GetHeight();
-    std::vector<unsigned char> data(width * height * 3);
-    auto d = image.GetData();
-    std::copy(d, d + width * height * 3, data.data());
-    std::vector<unsigned char> alpha;
-    auto a = image.GetAlpha();
-    if (a) {
-        alpha.resize(width * height);
-        std::copy(a, a + width * height, alpha.data());
-    }
-
-    auto cmd = mShow->Create_AddNewBackgroundImageCommand(x, y, width, height, data, alpha);
+    auto cmd = mShow->Create_AddNewBackgroundImageCommand(wxCalChart::ConvertToImageInfo(image, 100, 100));
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }

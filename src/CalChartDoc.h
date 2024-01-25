@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -224,7 +224,7 @@ public:
     std::unique_ptr<wxCommand> Create_ToggleLabelFlipCommand();
     std::unique_ptr<wxCommand> Create_SetLabelVisibleCommand(bool isVisible);
     std::unique_ptr<wxCommand> Create_ToggleLabelVisibilityCommand();
-    std::unique_ptr<wxCommand> Create_AddNewBackgroundImageCommand(int left, int top, int image_width, int image_height, std::vector<unsigned char> const& data, std::vector<unsigned char> const& alpha);
+    std::unique_ptr<wxCommand> Create_AddNewBackgroundImageCommand(CalChart::ImageInfo const& image);
     std::unique_ptr<wxCommand> Create_RemoveBackgroundImageCommand(int which);
     std::unique_ptr<wxCommand> Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height);
     std::unique_ptr<wxCommand> Create_SetTransitionCommand(const std::vector<CalChart::Coord>& finalPositions, const std::map<CalChart::SYMBOL_TYPE, std::string>& continuities, const std::vector<CalChart::SYMBOL_TYPE>& marcherDotTypes);

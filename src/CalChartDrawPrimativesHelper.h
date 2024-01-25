@@ -27,6 +27,7 @@
  */
 
 #include "CalChartDrawPrimatives.h"
+#include "CalChartImage.h"
 #include "CalChartSizes.h"
 #include <wx/brush.h>
 #include <wx/colour.h>
@@ -204,6 +205,40 @@ inline auto setFont(wxDC& dc, CalChart::Font font)
 
     auto size = wxSize{ 0, fDIP(font.size) };
     dc.SetFont(wxFont(size, family, style, weight));
+}
+
+inline auto ConvertToImageData(wxImage const& image) -> CalChart::ImageData
+{
+    auto width = image.GetWidth();
+    auto height = image.GetHeight();
+    auto data = std::vector<unsigned char>(width * height * 3);
+    auto* d = image.GetData();
+    std::copy(d, d + width * height * 3, data.data());
+    auto alpha = std::vector<unsigned char>{};
+    auto* a = image.GetAlpha();
+    if (a) {
+        alpha.resize(width * height);
+        std::copy(a, a + width * height, alpha.data());
+    }
+
+    return { width, height, data, alpha };
+}
+
+inline auto ConvertToImageInfo(wxImage const& image, int x = 0, int y = 0) -> CalChart::ImageInfo
+{
+    auto width = image.GetWidth();
+    auto height = image.GetHeight();
+    return CalChart::ImageInfo{ x, y, width, height, ConvertToImageData(image) };
+}
+
+inline auto ConvertTowxImage(CalChart::ImageData const& image) -> wxImage
+{
+    auto data = image.data;
+    if (image.alpha.size()) {
+        auto alpha = image.alpha;
+        return { image.image_width, image.image_height, data.data(), alpha.data(), true };
+    }
+    return { image.image_width, image.image_height, data.data(), true };
 }
 
 }

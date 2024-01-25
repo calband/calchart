@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -112,7 +112,7 @@ public:
     Show_command_pair Create_SetLabelVisiblityCommand(std::map<int, bool> const& new_visibility) const;
     Show_command_pair Create_SetLabelVisibleCommand(bool isVisible) const;
     Show_command_pair Create_ToggleLabelVisibilityCommand() const;
-    Show_command_pair Create_AddNewBackgroundImageCommand(ImageData const& image) const;
+    Show_command_pair Create_AddNewBackgroundImageCommand(ImageInfo const& image) const;
     Show_command_pair Create_RemoveBackgroundImageCommand(int which) const;
     Show_command_pair Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height) const;
 

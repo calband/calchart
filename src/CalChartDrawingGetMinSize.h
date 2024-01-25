@@ -156,6 +156,12 @@ namespace details {
         return wxSize(width, metrics.height + text.linePad);
     }
 
+    inline auto GetMinSize([[maybe_unused]] Context context, CalChart::Draw::Image const& image) -> StackSize
+    {
+        // TODO: should this have scale in it?
+        return wxSize(image.mImage->image_width, image.mImage->image_width);
+    }
+
     inline auto GetMinSize(Context context, CalChart::Draw::DrawManipulators const& cmd) -> StackSize;
 
     inline auto GetMinSize(Context context, CalChart::Draw::DrawStack const& cmd) -> StackSize;
