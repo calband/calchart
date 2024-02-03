@@ -255,7 +255,7 @@ void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet,
             bold_font_str, ital_font_str, bold_ital_font_str } },
         PageWidth, PageHeight, PageOffsetX, PageOffsetY, PaperLength, HeaderSize,
         YardsSize, TextSize, DotRatio, NumRatio, PLineRatio, SLineRatio,
-        ContRatio, ShowMode::GetDefaultYardLines());
+        ContRatio, kDefaultYardLines);
 
     std::set<size_t> picked;
     for (auto i = 0; i < p->GetNumSheets(); ++i)

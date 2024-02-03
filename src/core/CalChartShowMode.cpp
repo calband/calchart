@@ -28,18 +28,6 @@
 
 namespace CalChart {
 
-auto ShowMode::GetDefaultYardLines() -> ShowMode::YardLinesInfo_t
-{
-    static auto kYardTextDefaults = std::array<std::string, kYardTextValues>{
-        "N", "M", "L", "K", "J", "I", "H", "G", "F", "E", "D", "C", "B", "A", "-10", "-5",
-        "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50",
-        "45", "40", "35", "30", "25", "20", "15", "10", "5", "0",
-        "-5", "-10", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N"
-    };
-
-    return kYardTextDefaults;
-}
-
 ShowMode::ShowMode(CalChart::Coord size,
     CalChart::Coord offset,
     CalChart::Coord border1,
@@ -165,7 +153,7 @@ auto ShowMode::Serialize() const -> std::vector<std::byte>
 auto ShowMode::GetDefaultShowMode() -> ShowMode
 {
     // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-    return ShowMode::CreateShowMode({ { 32, 52, 8, 8, 8, 8, -80, -42, 160, 84 } }, GetDefaultYardLines());
+    return ShowMode::CreateShowMode({ { 32, 52, 8, 8, 8, 8, -80, -42, 160, 84 } }, kDefaultYardLines);
     // NOLINTEND(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 }
 

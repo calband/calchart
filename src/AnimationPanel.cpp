@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2012  Richard Michael Powell
+   Copyright (C) 1995-2024  Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -49,15 +49,15 @@ EVT_COMMAND_SCROLL(CALCHART__anim_gotobeat, AnimationPanel::OnSlider_anim_gotobe
 EVT_TIMER(CALCHART__anim_next_beat_timer, AnimationPanel::OnCmd_anim_next_beat_timer)
 END_EVENT_TABLE()
 
-AnimationPanel::AnimationPanel(wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
+AnimationPanel::AnimationPanel(CalChartConfiguration& config, wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
     : super(parent, winid, pos, size, style, name)
-    , mCanvas(new AnimationCanvas(this, wxID_ANY, wxDefaultPosition, wxSize(-1, GetAnimationCanvasMinY())))
-    , mOmniCanvas(new CCOmniviewCanvas(this, CalChartConfiguration::GetGlobalConfig()))
+    , mCanvas(new AnimationCanvas(config, this, wxID_ANY, wxDefaultPosition, wxSize(-1, GetAnimationCanvasMinY())))
+    , mOmniCanvas(new CCOmniviewCanvas(this, config))
     , mTimer(new wxTimer(this, CALCHART__anim_next_beat_timer))
     , mTempo(120)
     , mTimerOn(false)
     , mInMiniMode(true)
-
+    , mConfig(config)
 {
     Init();
     CreateControls();
@@ -99,7 +99,7 @@ void AnimationPanel::CreateControls()
             wxUI::VSizer{
                 mSpritesCheckbox = wxUI::CheckBox{ "Sprites" }
                                        .bind([this](wxCommandEvent& event) {
-                                           mCanvas->SetUseSprites(event.IsChecked());
+                                           mConfig.Set_UseSprites(event.IsChecked());
                                        }),
                 mZoomCheckbox = wxUI::CheckBox{ "Zoom" }
                                     .bind([this](wxCommandEvent& event) {
@@ -286,7 +286,7 @@ void AnimationPanel::SetView(CalChartView* view)
         mView = nullptr;
         return;
     }
-    mView = new AnimationView(view, this);
+    mView = new AnimationView(view, mConfig, this);
     mView->SetDocument(view->GetDocument());
     // at this point the document is manging the view.
     mView->SetFrame(this);

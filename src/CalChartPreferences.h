@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ class CalChartPreferences : public wxDialog {
     DECLARE_EVENT_TABLE()
 
 public:
-    CalChartPreferences(wxWindow* parent);
+    CalChartPreferences(wxWindow* parent, CalChartConfiguration& config);
     ~CalChartPreferences() = default;
 
     bool TransferDataToWindow() override;
@@ -41,5 +41,5 @@ public:
 private:
     void OnCmdResetAll(wxCommandEvent&);
     wxNotebook* mNotebook;
-    CalChartConfiguration mConfig;
+    CalChartConfiguration& mConfig;
 };

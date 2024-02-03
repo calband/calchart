@@ -1114,7 +1114,7 @@ void Show::CC_show_round_trip_test_with_number_label_description()
 
 void Show::CC_show_round_trip_test_with_different_show_modes()
 {
-    Show show1(ShowMode::CreateShowMode({ { 36, 52, 8, 8, 8, 8, -80, -42, 160, 84 } }, ShowMode::GetDefaultYardLines()));
+    Show show1(ShowMode::CreateShowMode({ { 36, 52, 8, 8, 8, 8, -80, -42, 160, 84 } }, kDefaultYardLines));
     assert(show1.GetShowMode().HashW() == 36);
     auto show1_data = show1.SerializeShow();
     // eat header

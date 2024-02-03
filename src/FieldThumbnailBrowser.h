@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -23,13 +23,16 @@
 #include <wx/docview.h>
 
 class CalChartView;
+class CalChartConfiguration;
 
 class FieldThumbnailBrowser : public wxScrolledWindow {
     using super = wxScrolledWindow;
     DECLARE_EVENT_TABLE()
 
 public:
-    FieldThumbnailBrowser(wxWindow* parent,
+    FieldThumbnailBrowser(
+        CalChartConfiguration const& config,
+        wxWindow* parent,
         wxWindowID id = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
@@ -63,4 +66,5 @@ private:
     const int mYScrollPadding{};
 
     bool mLayoutHorizontal{ false };
+    CalChartConfiguration const& mConfig;
 };

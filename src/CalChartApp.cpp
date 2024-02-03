@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -107,7 +107,7 @@ void CalChartApp::InitAppAsServer()
     mPrintDialogData = std::make_unique<wxPrintDialogData>();
 
     //// Create the main frame window
-    auto frame = new CalChartSplash(mDocManager, nullptr, "CalChart");
+    auto frame = new CalChartSplash(mDocManager, nullptr, "CalChart", CalChartConfiguration::GetGlobalConfig());
 
     // Required for advanced HTML help
     wxFileSystem::AddHandler(new wxZipFSHandler);
@@ -129,7 +129,7 @@ void CalChartApp::InitAppAsServer()
     SetTopWindow(frame);
 
     // Get the file history
-    auto config = wxConfigBase::Get();
+    auto* config = wxConfigBase::Get();
     config->SetPath("/FileHistory");
     mDocManager->FileHistoryLoad(*config);
 
@@ -142,7 +142,10 @@ void CalChartApp::InitAppAsServer()
     ProcessArguments();
 }
 
-void CalChartApp::InitAppAsClient() { ProcessArguments(); }
+void CalChartApp::InitAppAsClient()
+{
+    ProcessArguments();
+}
 
 void CalChartApp::ProcessArguments()
 {

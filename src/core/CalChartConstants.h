@@ -152,6 +152,16 @@ static const std::array<ShowModeInfo_t, toUType(ShowModes::NUM)> kShowModeDefaul
     ShowModeInfo_t{ "Pro Field", { 36, 48, 8, 8, 8, 8, -80, -42, 160, 84 } },
 };
 
+static constexpr auto kYardTextValues = 53;
+using YardLinesInfo_t = std::array<std::string, kYardTextValues>;
+
+static const YardLinesInfo_t kDefaultYardLines = {
+    "N", "M", "L", "K", "J", "I", "H", "G", "F", "E", "D", "C", "B", "A", "-10", "-5",
+    "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50",
+    "45", "40", "35", "30", "25", "20", "15", "10", "5", "0",
+    "-5", "-10", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N"
+};
+
 // we lay out directions in clockwise order from North
 enum class Direction {
     North,
@@ -195,9 +205,9 @@ static const auto k_symbols = std::array<SYMBOL_TYPE, MAX_NUM_SYMBOLS>{
     SYMBOL_SOLX
 };
 
-std::string GetNameForSymbol(SYMBOL_TYPE which);
-std::string GetLongNameForSymbol(SYMBOL_TYPE which);
-SYMBOL_TYPE GetSymbolForName(const std::string& name);
+auto GetNameForSymbol(SYMBOL_TYPE which) -> std::string;
+auto GetLongNameForSymbol(SYMBOL_TYPE which) -> std::string;
+auto GetSymbolForName(std::string const& name) -> SYMBOL_TYPE;
 
 namespace details {
     template <std::size_t index, typename Array, std::size_t... I>
@@ -213,9 +223,45 @@ namespace details {
     }
 }
 
-inline std::vector<std::string> GetShowModeNames()
+inline auto GetShowModeNames() -> std::vector<std::string>
 {
     static auto result = details::vector_at_offset<0>(kShowModeDefaultValues);
+    return result;
+}
+
+inline auto GetColorNames() -> std::vector<std::string>
+{
+    static auto result = details::vector_at_offset<0>(CalChart::ColorInfoDefaults);
+    return result;
+}
+
+inline auto GetDefaultColors() -> std::vector<std::string>
+{
+    static auto result = details::vector_at_offset<1>(CalChart::ColorInfoDefaults);
+    return result;
+}
+
+inline auto GetDefaultPenWidth() -> std::vector<int>
+{
+    static auto result = details::vector_at_offset<2>(CalChart::ColorInfoDefaults);
+    return result;
+}
+
+inline auto GetContCellColorNames() -> std::vector<std::string>
+{
+    static auto result = details::vector_at_offset<0>(CalChart::ContCellColorInfoDefaults);
+    return result;
+}
+
+inline auto GetContCellDefaultColors() -> std::vector<std::string>
+{
+    static auto result = details::vector_at_offset<1>(CalChart::ContCellColorInfoDefaults);
+    return result;
+}
+
+inline auto GetContCellDefaultPenWidth() -> std::vector<int>
+{
+    static auto result = details::vector_at_offset<2>(CalChart::ContCellColorInfoDefaults);
     return result;
 }
 

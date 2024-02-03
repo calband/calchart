@@ -177,15 +177,6 @@ private:                                           \
     DECLARE_CONFIGURATION_FUNCTIONS(ContCellBoxPadding, long);
 
 public:
-    // helpers for displaying different config attributes
-    std::vector<std::string> GetColorNames() const;
-    std::vector<std::string> GetDefaultColors() const;
-    std::vector<int> GetDefaultPenWidth() const;
-    std::vector<std::string> GetContCellColorNames() const;
-    std::vector<std::string> GetContCellDefaultColors() const;
-    std::vector<int> GetContCellDefaultPenWidth() const;
-    std::vector<std::string> Get_yard_text_index() const;
-
     // color palettes:  The color Palettes allow you to set different "blocks" of
     // colors.
     // When a Palette is set all the sets and gets are treated against that palette
@@ -242,4 +233,4 @@ std::vector<std::string> GetColorPaletteNames(CalChartConfiguration const& confi
 std::array<std::string, CalChartConfiguration::kYardTextValues> Get_yard_text_all(CalChartConfiguration const& config);
 
 // to find a specific Show:
-CalChart::ShowMode GetConfigShowMode(std::string const& which);
+CalChart::ShowMode GetConfigShowMode(CalChartConfiguration const& config, std::string const& which);

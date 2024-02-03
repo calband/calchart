@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2012  Richard Michael Powell
+   Copyright (C) 1995-2024  Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include <wx/wx.h>
 
 class AnimationView;
+class CalChartConfiguration;
 
 // holds an instance of animation for the reference to draw.
 class AnimationCanvas : public wxPanel {
@@ -31,15 +32,13 @@ class AnimationCanvas : public wxPanel {
     wxDECLARE_EVENT_TABLE();
 
 public:
-    AnimationCanvas(wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize);
+    AnimationCanvas(CalChartConfiguration const& config, wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize);
     ~AnimationCanvas() override = default;
 
     void OnUpdate(); // Refresh from the View
     auto GetView() const { return mView; }
     void SetView(AnimationView* view) { mView = view; }
 
-    bool GetUseSprites() const;
-    void SetUseSprites(bool useSprites);
     auto GetZoomOnMarchers() const { return mZoomOnMarchers; }
     void SetZoomOnMarchers(bool zoomOnMarchers);
     auto GetStepsOutForMarchersZoom() const { return mStepsOutForMarcherZoom; }
@@ -71,4 +70,5 @@ private:
     bool mMouseDown{};
     wxPoint mMouseStart{};
     wxPoint mMouseEnd{};
+    CalChartConfiguration const& mConfig;
 };

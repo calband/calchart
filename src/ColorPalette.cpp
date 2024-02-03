@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2012  Richard Michael Powell
+   Copyright (C) 1995-2024  Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -40,8 +40,9 @@ EVT_LEFT_DCLICK(ColorPalettePanel::OnLeftDoubleClick)
 EVT_PAINT(ColorPalettePanel::OnPaint)
 END_EVENT_TABLE()
 
-ColorPalettePanel::ColorPalettePanel(wxWindow* parent, wxWindowID winid)
+ColorPalettePanel::ColorPalettePanel(CalChartConfiguration& config, wxWindow* parent, wxWindowID winid)
     : super(parent, winid)
+    , mConfig(config)
 {
     Init();
 }
@@ -54,7 +55,6 @@ void ColorPalettePanel::Init()
 void ColorPalettePanel::OnPaint(wxPaintEvent&)
 {
     auto dc = wxBufferedPaintDC{ this };
-    auto& config = CalChartConfiguration::GetGlobalConfig();
 
     dc.Clear();
 
@@ -62,12 +62,12 @@ void ColorPalettePanel::OnPaint(wxPaintEvent&)
     auto point = wxPoint{ kBoxBorder, kBoxBorder };
     auto size = wxSize{ kBoxSize, kBoxSize };
     for (auto i = 0; i < kNumberPalettes; ++i) {
-        if (config.GetActiveColorPalette() == i) {
+        if (mConfig.GetActiveColorPalette() == i) {
             dc.SetPen(*wxYELLOW_PEN);
         } else {
             dc.SetPen(*wxBLACK_PEN);
         }
-        wxCalChart::setBrush(dc, config.GetColorPaletteColor(i));
+        wxCalChart::setBrush(dc, mConfig.GetColorPaletteColor(i));
         dc.DrawRoundedRectangle(point, size, kBoxRadius);
         point.x += kBoxBorder + kBoxSize;
     }
@@ -81,8 +81,7 @@ void ColorPalettePanel::OnLeftClick(wxMouseEvent& event)
         return;
     }
     // now we switch to that color
-    auto& config = CalChartConfiguration::GetGlobalConfig();
-    config.SetActiveColorPalette(box);
+    mConfig.SetActiveColorPalette(box);
     // sort of sneaky, we act like a button has been pressed
     QueueEvent(new wxCommandEvent{ wxEVT_BUTTON, CALCHART__ChangedColorPalette });
 }
@@ -111,8 +110,11 @@ void ColorPalettePanel::OnLeftDoubleClick(wxMouseEvent& event)
         return;
     }
     // this opens the dialog that
-    auto dialog = ColorSetupDialog::CreateDialog(this, box);
+    auto localConfig = mConfig;
+    auto dialog = ColorSetupDialog::CreateDialog(this, box, localConfig);
     if (dialog->ShowModal() == wxID_OK) {
+        // here's where we flush out the configuration.
+        CalChartConfiguration::AssignConfig(localConfig);
         QueueEvent(new wxCommandEvent{ wxEVT_BUTTON, CALCHART__ChangedColorPalette });
     }
 }

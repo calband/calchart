@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2012  Richard Michael Powell
+   Copyright (C) 1995-2024  Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -38,8 +38,9 @@ EVT_MOTION(AnimationCanvas::OnMouseMove)
 EVT_PAINT(AnimationCanvas::OnPaint)
 END_EVENT_TABLE()
 
-AnimationCanvas::AnimationCanvas(wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size)
+AnimationCanvas::AnimationCanvas(CalChartConfiguration const& config, wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size)
     : super(parent, winid, pos, size, wxTAB_TRAVERSAL | wxNO_BORDER)
+    , mConfig(config)
 {
     SetBackgroundStyle(wxBG_STYLE_PAINT);
     Init();
@@ -55,17 +56,6 @@ void AnimationCanvas::Init()
 void AnimationCanvas::CreateControls()
 {
     wxUI::VSizer{}.attachTo(this);
-}
-
-bool AnimationCanvas::GetUseSprites() const
-{
-    return CalChartConfiguration::GetGlobalConfig().Get_UseSprites();
-}
-
-void AnimationCanvas::SetUseSprites(bool useSprites)
-{
-    CalChartConfiguration::GetGlobalConfig().Set_UseSprites(useSprites);
-    Refresh();
 }
 
 void AnimationCanvas::SetZoomOnMarchers(bool zoomOnMarchers)
@@ -125,9 +115,8 @@ void AnimationCanvas::OnPaint(wxPaintEvent&)
     UpdateScaleAndOrigin();
 
     wxBufferedPaintDC dc(this);
-    auto& config = CalChartConfiguration::GetGlobalConfig();
 
-    wxCalChart::setBackground(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD));
+    wxCalChart::setBackground(dc, mConfig.Get_CalChartBrushAndPen(CalChart::Colors::FIELD));
     dc.Clear();
     dc.SetUserScale(mUserScale, mUserScale);
     dc.SetDeviceOrigin(mUserOrigin.first, mUserOrigin.second);
@@ -135,7 +124,7 @@ void AnimationCanvas::OnPaint(wxPaintEvent&)
     // draw the box
     if (mMouseDown) {
         dc.SetBrush(*wxTRANSPARENT_BRUSH);
-        wxCalChart::setPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::SHAPES));
+        wxCalChart::setPen(dc, mConfig.Get_CalChartBrushAndPen(CalChart::Colors::SHAPES));
         dc.DrawRectangle(mMouseStart.x, mMouseStart.y, mMouseEnd.x - mMouseStart.x, mMouseEnd.y - mMouseStart.y);
     }
     // draw the view

@@ -37,7 +37,6 @@ class Reader;
 struct Font;
 struct BrushAndPen;
 
-static constexpr auto kYardTextValues = 53;
 static constexpr auto kSprLineTextValues = 5;
 
 static constexpr auto kFieldStepSizeNorthSouth = std::array{ 96, 160 };
@@ -50,9 +49,6 @@ static constexpr auto kFieldStepEastHashFromWestSideline = 52;
 class ShowMode {
 public:
     static auto GetDefaultShowMode() -> ShowMode;
-
-    using YardLinesInfo_t = std::array<std::string, kYardTextValues>;
-    static auto GetDefaultYardLines() -> YardLinesInfo_t;
 
     enum ShowModeArrayValues {
         kwhash,

@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -55,9 +55,9 @@ END_EVENT_TABLE()
 
 IMPLEMENT_CLASS(CalChartPreferences, wxDialog)
 
-CalChartPreferences::CalChartPreferences(wxWindow* parent)
+CalChartPreferences::CalChartPreferences(wxWindow* parent, CalChartConfiguration& config)
     : super(parent, wxID_ANY, "CalChart Preferences", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
-    , mConfig(CalChartConfiguration::GetGlobalConfig())
+    , mConfig(config)
 {
     wxUI::VSizer{
         BasicSizerFlags(),
@@ -95,7 +95,6 @@ bool CalChartPreferences::TransferDataFromWindow()
     for (auto i = 0ul; i < pages; ++i) {
         mNotebook->GetPage(i)->TransferDataFromWindow();
     }
-    CalChartConfiguration::AssignConfig(mConfig);
     return true;
 }
 
@@ -106,5 +105,4 @@ void CalChartPreferences::OnCmdResetAll(wxCommandEvent&)
     for (auto i = 0ul; i < pages; ++i) {
         static_cast<PreferencePage*>(mNotebook->GetPage(i))->ClearValuesToDefault();
     }
-    CalChartConfiguration::AssignConfig(mConfig);
 }

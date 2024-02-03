@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2012  Richard Michael Powell
+   Copyright (C) 1995-2024  Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -24,13 +24,15 @@
 #include <wx/wx.h>
 
 class CalChartView;
+class CalChartConfiguration;
+
 // holds an instance of animation for the reference to draw.
 class ColorPalettePanel : public wxControl {
     using super = wxControl;
     wxDECLARE_EVENT_TABLE();
 
 public:
-    ColorPalettePanel(wxWindow* parent, wxWindowID winid = wxID_ANY);
+    ColorPalettePanel(CalChartConfiguration& config, wxWindow* parent, wxWindowID winid = wxID_ANY);
     ~ColorPalettePanel() override = default;
 
     void OnUpdate(); // Refresh from the View
@@ -49,4 +51,5 @@ private:
     int WhichBox(wxPoint const& where);
 
     CalChartView* mView{};
+    CalChartConfiguration& mConfig;
 };

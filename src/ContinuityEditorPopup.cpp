@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -24,8 +24,6 @@
 #include "CalChartApp.h"
 #include "CalChartConfiguration.h"
 #include "CalChartContinuity.h"
-#include "CalChartDoc.h"
-#include "CalChartDocCommand.h"
 #include "CalChartSheet.h"
 #include "CalChartShow.h"
 #include "ContinuityBrowser.h"

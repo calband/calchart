@@ -67,7 +67,7 @@ private:
     void OnCmdLineText(wxCommandEvent&);
     void OnCmdChoice();
     std::array<CalChart::ShowModeData_t, toUType(CalChart::ShowModes::NUM)> mShowModeValues{};
-    CalChart::ShowMode::YardLinesInfo_t mYardText;
+    CalChart::YardLinesInfo_t mYardText;
     int mWhichMode{};
     int mWhichYardLine{};
 };

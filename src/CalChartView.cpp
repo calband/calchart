@@ -3,7 +3,7 @@
  */
 
 /*
-   Copyright (C) 1995-2012  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -194,7 +194,7 @@ void CalChartView::OnWizardSetup(CalChartDoc& show)
     if (wizard->RunWizard(page1)) {
         auto labels = page1->GetLabelsAndInstruments();
         auto columns = page1->GetNumberColumns();
-        auto newmode = GetConfigShowMode(page2->GetValue());
+        auto newmode = GetConfigShowMode(mConfig, page2->GetValue());
 
         show.WizardSetupNewShow(labels, columns, newmode);
         SetupInstruments dialog(show, mFrame);

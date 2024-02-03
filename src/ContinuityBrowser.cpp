@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ class ContinuityBrowserPerCont : public wxPanel {
     using super = wxPanel;
 
 public:
-    ContinuityBrowserPerCont(CalChart::SYMBOL_TYPE sym, wxWindow* parent);
+    ContinuityBrowserPerCont(wxWindow* parent, CalChart::SYMBOL_TYPE sym, CalChartConfiguration const& config);
     ~ContinuityBrowserPerCont() override = default;
 
     void DoSetContinuity(CalChart::Continuity const& new_cont);
@@ -50,8 +50,7 @@ public:
     auto GetView() const { return mView; }
 
 private:
-    void Init();
-    void CreateControls();
+    void CreateControls(CalChartConfiguration const& config);
 
     // Internals
     CalChartView* mView{};
@@ -59,22 +58,17 @@ private:
     CalChart::SYMBOL_TYPE mSym{};
 };
 
-ContinuityBrowserPerCont::ContinuityBrowserPerCont(CalChart::SYMBOL_TYPE sym, wxWindow* parent)
+ContinuityBrowserPerCont::ContinuityBrowserPerCont(wxWindow* parent, CalChart::SYMBOL_TYPE sym, CalChartConfiguration const& config)
     : super(parent)
     , mSym(sym)
 {
-    Init();
-    CreateControls();
+    CreateControls(config);
     GetSizer()->Fit(this);
     GetSizer()->SetSizeHints(this);
     OnUpdate();
 }
 
-void ContinuityBrowserPerCont::Init()
-{
-}
-
-void ContinuityBrowserPerCont::CreateControls()
+void ContinuityBrowserPerCont::CreateControls(CalChartConfiguration const& config)
 {
     wxUI::VSizer{
         BasicSizerFlags(),
@@ -87,8 +81,8 @@ void ContinuityBrowserPerCont::CreateControls()
         // here's a canvas
         mCanvas = wxUI::Generic<ContinuityBrowserPanel>{
             ExpandSizerFlags(),
-            [this](wxWindow* parent) {
-                return new ContinuityBrowserPanel(mSym, CalChartConfiguration::GetGlobalConfig(), parent);
+            [this, &config](wxWindow* parent) {
+                return new ContinuityBrowserPanel(mSym, config, parent);
             } },
     }
         .attachTo(this);
@@ -109,11 +103,10 @@ void ContinuityBrowserPerCont::SetView(CalChartView* view)
     mCanvas->SetView(view);
 }
 
-ContinuityBrowser::ContinuityBrowser(wxWindow* parent, wxWindowID id, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
-    : super(parent, id, pos, size, style, name)
+ContinuityBrowser::ContinuityBrowser(wxWindow* parent, wxSize const& size, CalChartConfiguration const& config)
+    : super(parent, wxID_ANY, wxDefaultPosition, size, wxScrolledWindowStyle)
 {
-    Init();
-    CreateControls();
+    CreateControls(config);
     GetSizer()->Fit(this);
     GetSizer()->SetSizeHints(this);
     OnUpdate();
@@ -125,21 +118,21 @@ void ContinuityBrowser::Init()
 {
 }
 
-void ContinuityBrowser::CreateControls()
+void ContinuityBrowser::CreateControls(CalChartConfiguration const& config)
 {
     wxUI::VSizer{
         wxUI::Line{}.withStyle(wxLI_HORIZONTAL),
         wxUI::ForEach{
             wxSizerFlags{ 1 }.Border(wxALL, 2).Expand(),
             CalChart::k_symbols,
-            [this](auto eachcont) { return wxUI::Generic{
-                                        [this, eachcont](wxWindow* parent) {
-                                            auto perCont = new ContinuityBrowserPerCont(eachcont, parent);
-                                            perCont->Show(false);
-                                            mPerCont.push_back(perCont);
-                                            return perCont;
-                                        }
-                                    }; } },
+            [this, &config](auto eachcont) { return wxUI::Generic{
+                                                 [this, eachcont, &config](wxWindow* parent) {
+                                                     auto perCont = new ContinuityBrowserPerCont(parent, eachcont, config);
+                                                     perCont->Show(false);
+                                                     mPerCont.push_back(perCont);
+                                                     return perCont;
+                                                 }
+                                             }; } },
 
         wxUI::HSizer{
             wxUI::Button{ wxID_HELP, "&Help" }

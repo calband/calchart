@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 
 class CalChartView;
 class ContinuityBrowserPerCont;
+class CalChartConfiguration;
 
 // ContinuityBrowser
 // The way you view the continuity for marchers
@@ -34,7 +35,7 @@ class ContinuityBrowser : public wxScrolledWindow {
     using super = wxScrolledWindow;
 
 public:
-    ContinuityBrowser(wxWindow* parent, wxWindowID id = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxScrolledWindowStyle, wxString const& name = wxPanelNameStr);
+    ContinuityBrowser(wxWindow* parent, wxSize const& size, CalChartConfiguration const& config);
     ~ContinuityBrowser() override;
 
     void OnUpdate(); // Refresh from the View
@@ -43,7 +44,7 @@ public:
 
 private:
     void Init();
-    void CreateControls();
+    void CreateControls(CalChartConfiguration const& config);
 
     // Internals
     CalChartView* mView{};

@@ -472,7 +472,7 @@ void DrawCont(wxDC& dc, [[maybe_unused]] CalChartConfiguration const& config, Ca
 #endif
 }
 
-auto CreateFieldForPrinting(int left_limit, int right_limit, bool landscape, CalChart::ShowMode::YardLinesInfo_t const& yardlines) -> CalChart::ShowMode
+auto CreateFieldForPrinting(int left_limit, int right_limit, bool landscape, CalChart::YardLinesInfo_t const& yardlines) -> CalChart::ShowMode
 {
     // extend the limit to the next largest 5 yard line
     left_limit = (left_limit / 8) * 8 + (left_limit % 8 ? (left_limit < 0 ? -8 : 8) : 0);

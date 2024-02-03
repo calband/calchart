@@ -3,7 +3,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -38,12 +38,13 @@ EVT_LEFT_DOWN(FieldThumbnailBrowser::HandleMouseDown)
 EVT_SIZE(FieldThumbnailBrowser::HandleSizeEvent)
 END_EVENT_TABLE()
 
-FieldThumbnailBrowser::FieldThumbnailBrowser(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+FieldThumbnailBrowser::FieldThumbnailBrowser(CalChartConfiguration const& config, wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
     : wxScrolledWindow(parent, id, pos, size, style, name)
     , mXScrollPadding(wxSystemSettings::GetMetric(wxSYS_VSCROLL_X))
     , mYNameSize(GetThumbnailFontSize())
     , mYScrollPadding(wxSystemSettings::GetMetric(wxSYS_HSCROLL_Y))
     , mLayoutHorizontal{ true }
+    , mConfig(config)
 {
     SetBackgroundStyle(wxBG_STYLE_PAINT);
     // now update the current screen
@@ -112,7 +113,6 @@ void FieldThumbnailBrowser::OnPaint(wxPaintEvent&)
 
     wxBufferedPaintDC dc(this);
     PrepareDC(dc);
-    auto& config = CalChartConfiguration::GetGlobalConfig();
     dc.SetBackgroundMode(wxTRANSPARENT);
     dc.Clear();
     dc.SetFont(ResizeFont(dc.GetFont(), mYNameSize));
@@ -124,7 +124,7 @@ void FieldThumbnailBrowser::OnPaint(wxPaintEvent&)
     for (auto sheet = mView->GetSheetBegin(); sheet != mView->GetSheetEnd(); ++sheet) {
 
         dc.SetUserScale(1, 1);
-        wxCalChart::setBrush(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD));
+        wxCalChart::setBrush(dc, mConfig.Get_CalChartBrushAndPen(CalChart::Colors::FIELD));
         dc.DrawText(sheet->GetName(), offset_x + mXLeftPadding, offset_y + mYUpperPadding);
         auto newOffsetX = offset_x + mXLeftPadding;
         auto newOffsetY = offset_y + mYUpperPadding + mYNameSize + mYNamePadding;
@@ -150,12 +150,12 @@ void FieldThumbnailBrowser::OnPaint(wxPaintEvent&)
         dc.SetUserScale(userScale, userScale);
         dc.SetDeviceOrigin(origin.x + newOffsetX, origin.y + newOffsetY);
 
-        wxCalChart::setPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD_DETAIL));
+        wxCalChart::setPen(dc, mConfig.Get_CalChartBrushAndPen(CalChart::Colors::FIELD_DETAIL));
         auto tborder1 = mView->GetShowMode().Border1();
 
-        wxCalChart::Draw::DrawCommandList(dc, CalChartDraw::GenerateModeDrawCommands(config, mView->GetShowMode(), ShowMode_kAnimation) + tborder1);
+        wxCalChart::Draw::DrawCommandList(dc, CalChartDraw::GenerateModeDrawCommands(mConfig, mView->GetShowMode(), ShowMode_kAnimation) + tborder1);
         for (auto i = 0; i < mView->GetNumPoints(); ++i) {
-            wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_FRONT));
+            wxCalChart::setBrushAndPen(dc, mConfig.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_FRONT));
             auto position = sheet->GetPoint(i).GetPos();
             auto x = position.x + mView->GetShowMode().Offset().x;
             auto y = position.y + mView->GetShowMode().Offset().y;

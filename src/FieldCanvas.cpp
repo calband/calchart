@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2012  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -65,9 +65,10 @@ EVT_MOUSEWHEEL(FieldCanvas::OnMouseWheel)
 END_EVENT_TABLE()
 
 // Define a constructor for field canvas
-FieldCanvas::FieldCanvas(wxWindow* parent, CalChartView* view, float def_zoom)
-    : super(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER)
+FieldCanvas::FieldCanvas(wxWindow* parent, CalChartView* view, float def_zoom, CalChartConfiguration const& config)
+    : super(config, parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER)
     , mView(view)
+    , mConfig(config)
 {
     Init();
     super::SetZoom(def_zoom);
@@ -87,7 +88,7 @@ void FieldCanvas::SetView(CalChartView* view)
 // across several different widgets
 void FieldCanvas::OnFieldPaint(wxPaintEvent& event)
 {
-    OnPaint(event, CalChartConfiguration::GetGlobalConfig());
+    OnPaint(event, mConfig);
 }
 
 void FieldCanvas::OnPaint(wxPaintEvent&, CalChartConfiguration const& config)

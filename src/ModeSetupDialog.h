@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include <wxUI/wxUI.h>
 
 class ShowModeDialogSetup;
+class CalChartConfiguration;
 namespace CalChart {
 class ShowMode;
 }
@@ -35,7 +36,7 @@ class ModeSetupDialog : public wxDialog {
     DECLARE_EVENT_TABLE()
 
 public:
-    ModeSetupDialog(CalChart::ShowMode const& current_mode, wxWindow* parent);
+    ModeSetupDialog(wxWindow* parent, CalChart::ShowMode const& current_mode, CalChartConfiguration& config);
     ~ModeSetupDialog() = default;
 
     CalChart::ShowMode GetShowMode() const;

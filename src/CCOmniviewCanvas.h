@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2012  Richard Michael Powell
+   Copyright (C) 1995-2024  Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ private:
 
     std::shared_ptr<CCOmniView_GLContext> m_glContext;
     AnimationView* mView{};
-    CalChartConfiguration& config;
+    CalChartConfiguration& mConfig;
 
     ViewPoint mViewPoint{};
 

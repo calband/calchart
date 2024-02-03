@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 
 #include <wx/docview.h>
 
+class CalChartConfiguration;
+
 // CalChartSplash
 // Serves as the top frame that gets displayed when CalChart starts
 class CalChartSplash : public wxDocParentFrame {
@@ -30,7 +32,7 @@ class CalChartSplash : public wxDocParentFrame {
     DECLARE_CLASS(CalChartSplash)
     DECLARE_EVENT_TABLE()
 public:
-    CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString const& title);
+    CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString const& title, CalChartConfiguration& config);
     ~CalChartSplash() = default;
 
     void OnCmdAbout(wxCommandEvent& event);
@@ -39,4 +41,7 @@ public:
 
     static void About();
     static void Help();
+
+private:
+    CalChartConfiguration& mConfig;
 };

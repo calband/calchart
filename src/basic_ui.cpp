@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -207,12 +207,17 @@ void ScrollZoomWindow::SetupSize()
     SetVirtualSize(wxSize(virtualSizeX, virtualSizeY));
 }
 
-MouseMoveScrollCanvas::MouseMoveScrollCanvas(wxWindow* parent, wxWindowID id,
+MouseMoveScrollCanvas::MouseMoveScrollCanvas(
+    CalChartConfiguration const& config,
+    wxWindow* parent,
+    wxWindowID id,
     const wxPoint& pos,
-    const wxSize& size, long style)
+    const wxSize& size,
+    long style)
     : super(parent, id, pos, size, wxHSCROLL | wxVSCROLL | style)
     , mLastPos(0, 0)
     , mScrolledLastMove(false)
+    , mConfig(config)
 {
 }
 
@@ -237,18 +242,27 @@ void MouseMoveScrollCanvas::OnMousePinchToZoom(wxMouseEvent& event)
 
 void MouseMoveScrollCanvas::OnMouseWheel(wxMouseEvent& event)
 {
-    auto pt = wxPoint(event.GetWheelAxis() == 1 ? event.GetWheelRotation() : 0, event.GetWheelAxis() == 0 ? (CalChartConfiguration::GetGlobalConfig().Get_ScrollDirectionNatural() ? -1 : 1) * event.GetWheelRotation() : 0);
+    auto scrollFactor = mConfig.Get_ScrollDirectionNatural() ? -1 : 1;
+    auto pt = wxPoint(
+        event.GetWheelAxis() == wxMOUSE_WHEEL_HORIZONTAL
+            ? event.GetWheelRotation()
+            : 0,
+        event.GetWheelAxis() == wxMOUSE_WHEEL_VERTICAL
+            ? scrollFactor * event.GetWheelRotation()
+            : 0);
     ChangeOffset(pt);
 }
 
 bool MouseMoveScrollCanvas::IsScrolling() const { return mScrolledLastMove; }
 
-ClickDragCtrlScrollCanvas::ClickDragCtrlScrollCanvas(wxWindow* parent,
+ClickDragCtrlScrollCanvas::ClickDragCtrlScrollCanvas(
+    CalChartConfiguration const& config,
+    wxWindow* parent,
     wxWindowID id,
     const wxPoint& pos,
     const wxSize& size,
     long style)
-    : super(parent, id, pos, size, wxHSCROLL | wxVSCROLL | style)
+    : super(config, parent, id, pos, size, wxHSCROLL | wxVSCROLL | style)
 {
 }
 

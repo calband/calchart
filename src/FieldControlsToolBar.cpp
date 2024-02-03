@@ -3,7 +3,7 @@
  */
 
 /*
-   Copyright (C) 1995-2012  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 */
 
 #include "FieldControlsToolBar.h"
+#include "CalChartConfiguration.h"
 #include "CalChartPoint.h"
 #include "CalChartSizes.h"
 #include "CalChartToolBar.h"
@@ -68,12 +69,12 @@ static constexpr std::pair<CalChart::Coord::units, CalChart::Coord::units> gridv
 
 namespace FieldControls {
 
-wxAuiToolBar* CreateToolBar(wxWindow* parent, wxWindowID id, long style)
+wxAuiToolBar* CreateToolBar(wxWindow* parent, wxWindowID id, long style, CalChartConfiguration& config)
 {
     auto tb = new wxAuiToolBar(parent, id, wxDefaultPosition, wxDefaultSize, style);
 
     // colors
-    tb->AddControl(new ColorPalettePanel(tb), "Colors");
+    tb->AddControl(new ColorPalettePanel(config, tb), "Colors");
 
     tb->AddSeparator();
 

@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ class ContinuityBrowserPanel : public CustomListViewPanel {
 
 public:
     // Basic functions
-    ContinuityBrowserPanel(CalChart::SYMBOL_TYPE sym, CalChartConfiguration& config, wxWindow* parent,
+    ContinuityBrowserPanel(CalChart::SYMBOL_TYPE sym, CalChartConfiguration const& config, wxWindow* parent,
         wxWindowID winid = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
@@ -68,5 +68,5 @@ private:
     CalChartView* mView{};
     CalChart::Continuity mCont{};
     CalChart::SYMBOL_TYPE mSym{};
-    CalChartConfiguration& mConfig;
+    CalChartConfiguration const& mConfig;
 };

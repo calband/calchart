@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -64,10 +64,10 @@ EVT_COMBOBOX(NEW_COLOR_CHOICE, ColorSetupDialog::OnCmdChooseNewColor)
 EVT_TEXT_ENTER(PALETTE_NAME, ColorSetupDialog::OnCmdTextChanged)
 END_EVENT_TABLE()
 
-ColorSetupDialog::ColorSetupDialog(wxWindow* parent, int palette)
+ColorSetupDialog::ColorSetupDialog(wxWindow* parent, int palette, CalChartConfiguration& config)
     : ColorSetupDialog::super(parent, wxID_ANY, "Color Setup")
     , mActiveColorPalette(palette)
-    , mConfig(CalChartConfiguration::GetGlobalConfig())
+    , mConfig(config)
 {
     Init();
     CreateControls();
@@ -89,7 +89,7 @@ void ColorSetupDialog::CreateControls()
 {
     auto colorNames = std::vector<std::tuple<wxString, wxBitmap>>{};
     for (auto i : CalChart::ColorsIterator{}) {
-        colorNames.push_back({ mConfig.GetColorNames().at(toUType(i)), CreateItemBitmap(wxCalChart::toBrush(mConfig.Get_CalChartBrushAndPen(i))) });
+        colorNames.push_back({ CalChart::GetColorNames().at(toUType(i)), CreateItemBitmap(wxCalChart::toBrush(mConfig.Get_CalChartBrushAndPen(i))) });
     }
     wxUI::VSizer{
         LeftBasicSizerFlags(),
@@ -167,7 +167,6 @@ bool ColorSetupDialog::TransferDataFromWindow()
 {
     auto text = static_cast<wxTextCtrl*>(FindWindow(PALETTE_NAME));
     mConfig.SetColorPaletteName(mActiveColorPalette, text->GetValue());
-    CalChartConfiguration::AssignConfig(mConfig);
     return true;
 }
 
@@ -179,7 +178,7 @@ bool ColorSetupDialog::ClearValuesToDefault()
     auto text = static_cast<wxTextCtrl*>(FindWindow(PALETTE_NAME));
     text->SetValue(mColorPaletteNames.at(mActiveColorPalette));
     for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM; i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
-        SetColor(toUType(i), mConfig.GetDefaultPenWidth()[toUType(i)], wxColour{ mConfig.GetDefaultColors()[toUType(i)] });
+        SetColor(toUType(i), CalChart::GetDefaultPenWidth()[toUType(i)], wxColour{ CalChart::GetDefaultColors()[toUType(i)] });
         mConfig.Clear_CalChartConfigColor(i);
     }
     return true;
@@ -259,7 +258,7 @@ void ColorSetupDialog::OnCmdSelectWidth(wxSpinEvent& e)
 void ColorSetupDialog::OnCmdResetColors(wxCommandEvent&)
 {
     auto selection = static_cast<int>(mNameBox.selection());
-    SetColor(selection, mConfig.GetDefaultPenWidth()[selection], wxColour{ mConfig.GetDefaultColors()[selection] });
+    SetColor(selection, CalChart::GetDefaultPenWidth()[selection], wxColour{ CalChart::GetDefaultColors()[selection] });
     mConfig.Clear_CalChartConfigColor(static_cast<CalChart::Colors>(selection));
 }
 
@@ -386,7 +385,6 @@ void ColorSetupDialog::OnCmdResetAll(wxCommandEvent&)
 {
     // transfer everything to the config...
     ClearValuesToDefault();
-    CalChartConfiguration::AssignConfig(mConfig);
     Init();
     TransferDataToWindow();
     Refresh();

@@ -65,6 +65,8 @@ add_executable(
   ColorSetupCanvas.h
   ColorSetupDialog.cpp
   ColorSetupDialog.h
+  ConfigurationDebugDialog.cpp
+  ConfigurationDebugDialog.h
   ContinuityBoxDrawer.cpp
   ContinuityBoxDrawer.h
   ContinuityBrowser.cpp

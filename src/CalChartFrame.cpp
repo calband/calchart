@@ -3,7 +3,7 @@
  */
 
 /*
-   Copyright (C) 1995-2012  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -323,22 +323,22 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChartConfiguratio
         }
     }
 
-    mCanvas = new FieldCanvas(this, static_cast<CalChartView*>(view), mConfig.Get_FieldFrameZoom_3_6_0());
+    mCanvas = new FieldCanvas(this, static_cast<CalChartView*>(view), mConfig.Get_FieldFrameZoom_3_6_0(), mConfig);
     // set scroll rate 1 to 1, so we can have even scrolling of whole field
     mCanvas->SetScrollRate(1, 1);
 
     // Create all the other things attached to the frame:
-    mControls = FieldControls::CreateToolBar(this, wxID_ANY, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW | wxAUI_TB_TEXT);
+    mControls = FieldControls::CreateToolBar(this, wxID_ANY, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW | wxAUI_TB_TEXT, mConfig);
     FieldControls::SetZoomAmount(this, mConfig.Get_FieldFrameZoom_3_6_0());
 
-    mContinuityBrowser = new ContinuityBrowser(this, wxID_ANY, wxDefaultPosition, GetContinuityBrowserConstructSize());
-    mFieldThumbnailBrowser = new FieldThumbnailBrowser(this, wxID_ANY, wxDefaultPosition, GetFieldThumbnailBrowserConstructSize());
+    mContinuityBrowser = new ContinuityBrowser(this, GetContinuityBrowserConstructSize(), mConfig);
+    mFieldThumbnailBrowser = new FieldThumbnailBrowser(mConfig, this, wxID_ANY, wxDefaultPosition, GetFieldThumbnailBrowserConstructSize());
     mAnimationErrorsPanel = new AnimationErrorsPanel(this);
-    mAnimationPanel = new AnimationPanel(this);
+    mAnimationPanel = new AnimationPanel(mConfig, this);
     mPrintContinuityEditor = new PrintContinuityEditor(this, mConfig);
 
     // for doing mini and main panels
-    mShadowAnimationPanel = new AnimationPanel(this);
+    mShadowAnimationPanel = new AnimationPanel(mConfig, this);
 
     // update our lookups:
     mLookupEnumToSubWindow[CALCHART__ViewFieldThumbnail] = mFieldThumbnailBrowser;
@@ -494,9 +494,11 @@ void CalChartFrame::OnCmdPageSetup(wxCommandEvent&)
 void CalChartFrame::OnCmdLegacyPrint(wxCommandEvent&)
 {
     if (GetShow()) {
-        PrintPostScriptDialog dialog(static_cast<CalChartDoc*>(GetDocument()), this);
+        auto localConfig = mConfig;
+        PrintPostScriptDialog dialog(static_cast<CalChartDoc*>(GetDocument()), localConfig, this);
         if (dialog.ShowModal() == wxID_OK) {
-            dialog.PrintShow(mConfig);
+            CalChartConfiguration::AssignConfig(localConfig);
+            dialog.PrintShow();
         }
     }
 }
@@ -518,8 +520,11 @@ void CalChartFrame::OnCmdExportViewerFile(wxCommandEvent&)
 
 void CalChartFrame::OnCmdPreferences(wxCommandEvent&)
 {
-    CalChartPreferences dialog1(this);
+    auto localConfig = mConfig;
+    CalChartPreferences dialog1(this, localConfig);
     if (dialog1.ShowModal() == wxID_OK) {
+        // here's where we flush out the configuration.
+        CalChartConfiguration::AssignConfig(localConfig);
         GetFieldView()->OnUpdate(nullptr);
     }
 }
@@ -1178,7 +1183,7 @@ void CalChartFrame::ToolBarSetCurrentMove(CalChart::MoveMode type)
 void CalChartFrame::SetMode()
 {
     if (GetShow()) {
-        ModeSetupDialog dialog(GetShow()->GetShowMode(), this);
+        ModeSetupDialog dialog(this, GetShow()->GetShowMode(), mConfig);
         if (dialog.ShowModal() == wxID_OK) {
             GetFieldView()->DoSetMode(dialog.GetShowMode());
         }

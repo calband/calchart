@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2012  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ class FieldCanvas : public ClickDragCtrlScrollCanvas {
 
 public:
     // Basic functions
-    FieldCanvas(wxWindow* parent, CalChartView* view, float def_zoom);
+    FieldCanvas(wxWindow* parent, CalChartView* view, float def_zoom, CalChartConfiguration const& config);
     ~FieldCanvas() override = default;
 
     void SetView(CalChartView* view);
@@ -119,4 +119,5 @@ private:
     std::unique_ptr<CalChart::MovePointsTool> mMovePointsTool;
     // A cached list of the place where the selection list will move
     std::map<int, CalChart::Coord> mUncommittedMovePoints;
+    CalChartConfiguration const& mConfig;
 };

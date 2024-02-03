@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2012  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -60,12 +60,17 @@ END_EVENT_TABLE()
 
 IMPLEMENT_CLASS(PrintPostScriptDialog, wxDialog)
 
-PrintPostScriptDialog::PrintPostScriptDialog() { Init(); }
-
 PrintPostScriptDialog::PrintPostScriptDialog(
-    const CalChartDoc* show, wxFrame* parent, wxWindowID id,
-    const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
+    const CalChartDoc* show,
+    CalChartConfiguration& config,
+    wxFrame* parent,
+    wxWindowID id,
+    const wxString& caption,
+    const wxPoint& pos,
+    const wxSize& size,
+    long style)
     : mShow(NULL)
+    , mConfig(config)
 {
     Init();
 
@@ -76,7 +81,7 @@ PrintPostScriptDialog::~PrintPostScriptDialog() { }
 
 void PrintPostScriptDialog::Init() { }
 
-void PrintPostScriptDialog::PrintShow(const CalChartConfiguration& config)
+void PrintPostScriptDialog::PrintShow()
 {
 #ifdef PRINT__RUN_CMD
     wxString buf;
@@ -88,14 +93,14 @@ void PrintPostScriptDialog::PrintShow(const CalChartConfiguration& config)
         wxLogError("Yards entered invalid.  Please enter a number between 10 and 100.");
         return;
     }
-    auto overview = config.Get_PrintPSOverview();
+    auto overview = mConfig.Get_PrintPSOverview();
 
     wxString s;
-    switch (config.Get_PrintPSModes()) {
+    switch (mConfig.Get_PrintPSModes()) {
     case CC_PRINT_ACTION_PREVIEW: {
 #ifdef PRINT__RUN_CMD
         s = wxFileName::CreateTempFileName("cc_");
-        buf.sprintf("%s %s \"%s\"", config.Get_PrintViewCmd().c_str(), config.Get_PrintViewCmd().c_str(), s.c_str());
+        buf.sprintf("%s %s \"%s\"", mConfig.Get_PrintViewCmd().c_str(), mConfig.Get_PrintViewCmd().c_str(), s.c_str());
 #endif
     } break;
     case CC_PRINT_ACTION_FILE:
@@ -106,7 +111,7 @@ void PrintPostScriptDialog::PrintShow(const CalChartConfiguration& config)
     case CC_PRINT_ACTION_PRINTER: {
 #ifdef PRINT__RUN_CMD
         s = wxFileName::CreateTempFileName("cc_");
-        buf.sprintf("%s %s \"%s\"", config.Get_PrintCmd().c_str(), config.Get_PrintOpts().c_str(), s.c_str());
+        buf.sprintf("%s %s \"%s\"", mConfig.Get_PrintCmd().c_str(), mConfig.Get_PrintOpts().c_str(), s.c_str());
 #else
 #endif
     } break;
@@ -115,12 +120,12 @@ void PrintPostScriptDialog::PrintShow(const CalChartConfiguration& config)
     }
 
     std::ostringstream buffer;
-    auto n = mShow->PrintToPS(buffer, overview, static_cast<int>(minyards), mIsSheetPicked, config);
+    auto n = mShow->PrintToPS(buffer, overview, static_cast<int>(minyards), mIsSheetPicked, mConfig);
     // stream to file:
     wxFFileOutputStream(s).Write(buffer.str().c_str(), buffer.str().size());
 
 #ifdef PRINT__RUN_CMD
-    switch (config.Get_PrintPSModes()) {
+    switch (mConfig.Get_PrintPSModes()) {
     case CC_PRINT_ACTION_FILE:
         break;
     default:
@@ -155,20 +160,19 @@ void PrintPostScriptDialog::ShowPrintSelect(wxCommandEvent&)
 
 void PrintPostScriptDialog::ResetDefaults(wxCommandEvent&)
 {
-    auto& config = CalChartConfiguration::GetGlobalConfig();
 #ifdef PRINT__RUN_CMD
-    config.Clear_PrintCmd();
-    config.Clear_PrintOpts();
+    mConfig.Clear_PrintCmd();
+    mConfig.Clear_PrintOpts();
 #else
-    config.Clear_PrintFile();
+    mConfig.Clear_PrintFile();
 #endif
-    config.Clear_PrintViewCmd();
-    config.Clear_PrintViewOpts();
+    mConfig.Clear_PrintViewCmd();
+    mConfig.Clear_PrintViewOpts();
 
-    config.Clear_PageOffsetX();
-    config.Clear_PageOffsetY();
-    config.Clear_PageWidth();
-    config.Clear_PageHeight();
+    mConfig.Clear_PageOffsetX();
+    mConfig.Clear_PageOffsetY();
+    mConfig.Clear_PageWidth();
+    mConfig.Clear_PageHeight();
 
     // re-read values
     TransferDataToWindow();
@@ -289,63 +293,61 @@ void PrintPostScriptDialog::CreateControls()
 
 bool PrintPostScriptDialog::TransferDataToWindow()
 {
-    auto& config = CalChartConfiguration::GetGlobalConfig();
 #ifdef PRINT__RUN_CMD
-    text_cmd->SetValue(config.Get_PrintCmd());
-    text_opts->SetValue(config.Get_PrintOpts());
-    text_view_cmd->SetValue(config.Get_PrintViewCmd());
-    text_view_opts->SetValue(config.Get_PrintViewOpts());
+    text_cmd->SetValue(mConfig.Get_PrintCmd());
+    text_opts->SetValue(mConfig.Get_PrintOpts());
+    text_view_cmd->SetValue(mConfig.Get_PrintViewCmd());
+    text_view_opts->SetValue(mConfig.Get_PrintViewOpts());
 #else
-    text_cmd->SetValue(config.Get_PrintFile());
+    text_cmd->SetValue(mConfig.Get_PrintFile());
 #endif
-    radio_orient->SetSelection(config.Get_PrintPSLandscape());
-    radio_method->SetSelection(static_cast<int>(config.Get_PrintPSModes()));
-    check_overview->SetValue(config.Get_PrintPSOverview());
-    check_cont->SetValue(config.Get_PrintPSDoCont());
-    check_pages->SetValue(config.Get_PrintPSDoContSheet());
+    radio_orient->SetSelection(mConfig.Get_PrintPSLandscape());
+    radio_method->SetSelection(static_cast<int>(mConfig.Get_PrintPSModes()));
+    check_overview->SetValue(mConfig.Get_PrintPSOverview());
+    check_cont->SetValue(mConfig.Get_PrintPSDoCont());
+    check_pages->SetValue(mConfig.Get_PrintPSDoContSheet());
 
     wxString buf;
-    buf.Printf("%.2f", config.Get_PageOffsetX());
+    buf.Printf("%.2f", mConfig.Get_PageOffsetX());
     text_x->SetValue(buf);
-    buf.Printf("%.2f", config.Get_PageOffsetY());
+    buf.Printf("%.2f", mConfig.Get_PageOffsetY());
     text_y->SetValue(buf);
-    buf.Printf("%.2f", config.Get_PageWidth());
+    buf.Printf("%.2f", mConfig.Get_PageWidth());
     text_width->SetValue(buf);
-    buf.Printf("%.2f", config.Get_PageHeight());
+    buf.Printf("%.2f", mConfig.Get_PageHeight());
     text_height->SetValue(buf);
-    buf.Printf("%.2f", config.Get_PaperLength());
+    buf.Printf("%.2f", mConfig.Get_PaperLength());
     text_length->SetValue(buf);
     return true;
 }
 
 bool PrintPostScriptDialog::TransferDataFromWindow()
 {
-    auto& config = CalChartConfiguration::GetGlobalConfig();
 #ifdef PRINT__RUN_CMD
-    config.Set_PrintCmd(text_cmd->GetValue());
-    config.Set_PrintOpts(text_opts->GetValue());
-    config.Set_PrintViewCmd(text_view_cmd->GetValue());
-    config.Set_PrintViewOpts(text_view_opts->GetValue());
+    mConfig.Set_PrintCmd(text_cmd->GetValue());
+    mConfig.Set_PrintOpts(text_opts->GetValue());
+    mConfig.Set_PrintViewCmd(text_view_cmd->GetValue());
+    mConfig.Set_PrintViewOpts(text_view_opts->GetValue());
 #else
-    config.Set_PrintFile(text_cmd->GetValue());
+    mConfig.Set_PrintFile(text_cmd->GetValue());
 #endif
-    config.Set_PrintPSLandscape(radio_orient->GetSelection() == CC_PRINT_ORIENT_LANDSCAPE);
-    config.Set_PrintPSModes(radio_method->GetSelection());
-    config.Set_PrintPSOverview(check_overview->GetValue());
-    config.Set_PrintPSDoCont(check_cont->GetValue());
-    config.Set_PrintPSDoContSheet(check_pages->GetValue());
+    mConfig.Set_PrintPSLandscape(radio_orient->GetSelection() == CC_PRINT_ORIENT_LANDSCAPE);
+    mConfig.Set_PrintPSModes(radio_method->GetSelection());
+    mConfig.Set_PrintPSOverview(check_overview->GetValue());
+    mConfig.Set_PrintPSDoCont(check_cont->GetValue());
+    mConfig.Set_PrintPSDoContSheet(check_pages->GetValue());
 
     double dval;
     text_x->GetValue().ToDouble(&dval);
-    config.Set_PageOffsetX(dval);
+    mConfig.Set_PageOffsetX(dval);
     text_y->GetValue().ToDouble(&dval);
-    config.Set_PageOffsetY(dval);
+    mConfig.Set_PageOffsetY(dval);
     text_width->GetValue().ToDouble(&dval);
-    config.Set_PageWidth(dval);
+    mConfig.Set_PageWidth(dval);
     text_height->GetValue().ToDouble(&dval);
-    config.Set_PageHeight(dval);
+    mConfig.Set_PageHeight(dval);
     text_length->GetValue().ToDouble(&dval);
-    config.Set_PaperLength(dval);
+    mConfig.Set_PaperLength(dval);
 
     return true;
 }

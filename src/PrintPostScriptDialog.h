@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2012  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -36,8 +36,9 @@ class PrintPostScriptDialog : public wxDialog {
     DECLARE_EVENT_TABLE()
 
 public:
-    PrintPostScriptDialog();
-    PrintPostScriptDialog(const CalChartDoc* doc,
+    PrintPostScriptDialog(
+        const CalChartDoc* doc,
+        CalChartConfiguration& config,
         wxFrame* parent,
         wxWindowID id = wxID_ANY,
         const wxString& caption = wxT("Print Dialog"),
@@ -67,10 +68,11 @@ public:
     virtual bool TransferDataFromWindow();
 
     // to print a show, call this function
-    void PrintShow(const CalChartConfiguration& config);
+    void PrintShow();
 
 private:
     CalChartDoc const* mShow;
+    CalChartConfiguration& mConfig;
     wxUI::TextCtrl::Proxy text_cmd;
 #ifdef PRINT__RUN_CMD
     wxUI::TextCtrl::Proxy text_opts;
