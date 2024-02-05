@@ -40,6 +40,7 @@ enum {
 };
 
 BEGIN_EVENT_TABLE(ContCellSetup, PreferencePage)
+EVT_SPINCTRL(SPIN_WIDTH, ContCellSetup::OnCmdSelectWidth)
 EVT_SPINCTRL(SPIN_Font_Size, ContCellSetup::OnCmdFontSize)
 EVT_SPINCTRL(SPIN_Rouding, ContCellSetup::OnCmdRounding)
 EVT_SPINCTRL(SPIN_Text_Padding, ContCellSetup::OnCmdTextPadding)
@@ -61,6 +62,11 @@ static auto do_cloning(T const& cont)
 
 void ContCellSetup::CreateControls()
 {
+    for (auto i = 0; i < toUType(CalChart::ContinuityCellColors::NUM); ++i) {
+        auto brushAndPen = mConfig.Get_ContCellBrushAndPen(static_cast<CalChart::ContinuityCellColors>(i));
+        mContCellPens[i] = wxCalChart::toPen(brushAndPen);
+        mContCellBrushes[i] = wxCalChart::toBrush(brushAndPen);
+    }
     auto colorNames = std::vector<std::tuple<wxString, wxBitmap>>{};
     for (auto i : CalChart::ContinuityCellColorsIterator{}) {
         colorNames.push_back({ CalChart::GetContCellColorNames().at(toUType(i)), CreateItemBitmap(wxCalChart::toBrush(mConfig.Get_ContCellBrushAndPen(i))) });
@@ -69,9 +75,13 @@ void ContCellSetup::CreateControls()
         LeftBasicSizerFlags(),
         wxUI::VSizer{
             "Color settings",
-            mNameBox = wxUI::BitmapComboBox(NEW_COLOR_CHOICE, colorNames)
-                           .withSize({ 200, -1 })
-                           .withStyle(wxCB_READONLY | wxCB_DROPDOWN),
+            wxUI::HSizer{
+                mNameBox = wxUI::BitmapComboBox(NEW_COLOR_CHOICE, colorNames)
+                               .withSize({ 200, -1 })
+                               .withStyle(wxCB_READONLY | wxCB_DROPDOWN),
+                mSpin = wxUI::SpinCtrl(SPIN_WIDTH, std::pair{ 1, 10 }, mContCellPens[0].GetWidth())
+                            .withStyle(wxSP_ARROW_KEYS),
+            },
 
             wxUI::HSizer{
                 wxUI::Button("&Change Color")
@@ -132,6 +142,7 @@ void ContCellSetup::InitFromConfig()
     // first read out the defaults:
     for (auto i = 0; i < toUType(CalChart::ContinuityCellColors::NUM); ++i) {
         auto brushAndPen = mConfig.Get_ContCellBrushAndPen(static_cast<CalChart::ContinuityCellColors>(i));
+        mContCellPens[i] = wxCalChart::toPen(brushAndPen);
         mContCellBrushes[i] = wxCalChart::toBrush(brushAndPen);
     }
 }
@@ -155,7 +166,7 @@ bool ContCellSetup::ClearValuesToDefault()
     mConfig.Clear_ContCellBoxPadding();
 
     for (auto i = CalChart::ContinuityCellColors::PROC; i != CalChart::ContinuityCellColors::NUM; i = static_cast<CalChart::ContinuityCellColors>(static_cast<int>(i) + 1)) {
-        SetColor(toUType(i), wxColour{ CalChart::GetContCellDefaultColors()[toUType(i)] });
+        SetColor(toUType(i), CalChart::GetContCellDefaultPenWidth()[toUType(i)], wxColour{ CalChart::GetContCellDefaultColors()[toUType(i)] });
         mConfig.Clear_ContCellConfigColor(i);
     }
     InitFromConfig();
@@ -187,14 +198,16 @@ void ContCellSetup::OnCmdBoxPadding(wxSpinEvent& e)
     Refresh();
 }
 
-void ContCellSetup::SetColor(int selection, const wxColour& color)
+void ContCellSetup::SetColor(int selection, int width, wxColour const& color)
 {
+    mContCellPens[selection] = *wxThePenList->FindOrCreatePen(color, width, wxPENSTYLE_SOLID);
     mContCellBrushes[selection] = *wxTheBrushList->FindOrCreateBrush(color, wxBRUSHSTYLE_SOLID);
 
-    mConfig.Set_ContCellBrushAndPen(static_cast<CalChart::ContinuityCellColors>(selection), wxCalChart::toBrushAndPen(color, 1));
+    mConfig.Set_ContCellBrushAndPen(static_cast<CalChart::ContinuityCellColors>(selection), wxCalChart::toBrushAndPen(color, width));
 
     // update the namebox list
     CreateAndSetItemBitmap(mNameBox.control(), selection, mContCellBrushes[selection]);
+    *mSpin = mContCellPens[mNameBox.selection()].GetWidth();
     Refresh();
 }
 
@@ -208,20 +221,27 @@ void ContCellSetup::OnCmdSelectColors()
     if (dialog.ShowModal() == wxID_OK) {
         auto retdata = dialog.GetColourData();
         auto c = retdata.GetColour();
-        SetColor(selection, c);
+        SetColor(selection, mContCellPens[selection].GetWidth(), c);
     }
     Refresh();
+}
+
+void ContCellSetup::OnCmdSelectWidth(wxSpinEvent& e)
+{
+    auto selection = static_cast<int>(mNameBox.selection());
+    SetColor(selection, e.GetPosition(), mContCellPens[selection].GetColour());
 }
 
 void ContCellSetup::OnCmdResetColors()
 {
     auto selection = static_cast<int>(mNameBox.selection());
-    SetColor(selection, wxColour{ CalChart::GetContCellDefaultColors()[selection] });
+    SetColor(selection, CalChart::GetContCellDefaultPenWidth()[selection], wxColour{ CalChart::GetContCellDefaultColors()[selection] });
     mConfig.Clear_ContCellConfigColor(static_cast<CalChart::ContinuityCellColors>(selection));
     Refresh();
 }
 
 void ContCellSetup::OnCmdChooseNewColor(wxCommandEvent&)
 {
+    *mSpin = mContCellPens[mNameBox.selection()].GetWidth();
     Refresh();
 }

@@ -27,25 +27,26 @@
  */
 
 #include <cstdint>
-#include <vector>
+#include <variant>
 
 namespace CalChart {
 
-struct Color {
+struct ColorRGB {
     uint8_t red = 0;
     uint8_t green = 0;
     uint8_t blue = 0;
     uint8_t alpha = std::numeric_limits<uint8_t>::max();
-    constexpr explicit Color(uint8_t red = 0, uint8_t green = 0, uint8_t blue = 0, uint8_t alpha = std::numeric_limits<uint8_t>::max())
+    constexpr explicit ColorRGB(uint8_t red = 0, uint8_t green = 0, uint8_t blue = 0, uint8_t alpha = std::numeric_limits<uint8_t>::max())
         : red(red)
         , green(green)
         , blue(blue)
         , alpha(alpha)
     {
     }
-    friend auto operator==(Color const&, Color const&) -> bool = default;
+    friend auto operator==(ColorRGB const&, ColorRGB const&) -> bool = default;
 };
 
+using Color = std::variant<std::string, ColorRGB>;
 struct Brush {
     Color color;
     enum class Style {

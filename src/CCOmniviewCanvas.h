@@ -40,7 +40,7 @@ public:
         float x, y, z;
     };
 
-    CCOmniviewCanvas(wxWindow* parent, CalChartConfiguration& config, wxSize const& size = wxDefaultSize);
+    CCOmniviewCanvas(wxWindow* parent, CalChartConfiguration& config);
     ~CCOmniviewCanvas() override = default;
 
     void OnUpdate(); // Refresh from the View

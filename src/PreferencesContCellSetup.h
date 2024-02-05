@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ class ContCellSetup : public PreferencePage {
     DECLARE_EVENT_TABLE()
 
 public:
-    static ContCellSetup* CreatePreference(CalChartConfiguration& config, wxWindow* parent)
+    static auto CreatePreference(CalChartConfiguration& config, wxWindow* parent) -> ContCellSetup*
     {
         auto pref = new ContCellSetup(config, parent);
         pref->Initialize();
@@ -54,9 +54,9 @@ private:
     ~ContCellSetup() override = default;
 
     // use these to get and set default values
-    bool TransferDataToWindow() override;
-    bool TransferDataFromWindow() override;
-    bool ClearValuesToDefault() override;
+    auto TransferDataToWindow() -> bool override;
+    auto TransferDataFromWindow() -> bool override;
+    auto ClearValuesToDefault() -> bool override;
 
 private:
     void InitFromConfig() override;
@@ -71,9 +71,11 @@ private:
     void OnCmdSelectColors();
     void OnCmdChooseNewColor(wxCommandEvent&);
     void OnCmdResetColors();
-    void SetColor(int selection, const wxColour& color);
+    void SetColor(int selection, int width, wxColour const& color);
 
     // we can set up the Font, colors, size.
     wxUI::BitmapComboBox::Proxy mNameBox{};
+    wxUI::SpinCtrl::Proxy mSpin{};
     std::array<wxBrush, toUType(CalChart::ContinuityCellColors::NUM)> mContCellBrushes{};
+    std::array<wxPen, toUType(CalChart::ContinuityCellColors::NUM)> mContCellPens{};
 };

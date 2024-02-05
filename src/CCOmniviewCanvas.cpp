@@ -566,7 +566,7 @@ void CCOmniView_GLContext::Draw3dMarcher(AnimationView::MarcherInfo const& info,
     DrawTextureOnBox(points, 1, 1, m_textures[face]);
 }
 
-CCOmniviewCanvas::CCOmniviewCanvas(wxWindow* parent, CalChartConfiguration& config, wxSize const& size)
+CCOmniviewCanvas::CCOmniviewCanvas(wxWindow* parent, CalChartConfiguration& config)
     : wxGLCanvas(parent, wxID_ANY, NULL, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE)
     , m_glContext(new CCOmniView_GLContext(this))
     , mConfig(config)
