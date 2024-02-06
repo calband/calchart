@@ -61,7 +61,7 @@ private:
     auto SerializeAllPoints() const -> std::vector<std::byte>;
     auto SerializeContinuityData() const -> std::vector<std::byte>;
     auto SerializePrintContinuityData() const -> std::vector<std::byte>;
-    auto SerializeBackgroundImageData() const -> std::vector<std::byte>;
+    auto SerializeBackgroundImageInfo() const -> std::vector<std::byte>;
     auto SerializeSheetData() const -> std::vector<std::byte>;
 
 public:
@@ -108,8 +108,8 @@ public:
     void SetNumber(std::string const& newnumber);
 
     // image
-    std::vector<ImageData> const& GetBackgroundImages() const;
-    void AddBackgroundImage(ImageData const& image, size_t where);
+    std::vector<ImageInfo> const& GetBackgroundImages() const;
+    void AddBackgroundImage(ImageInfo const& image, size_t where);
     void RemoveBackgroundImage(size_t which);
     void MoveBackgroundImage(size_t which, int left, int top, int scaled_width, int scaled_height);
 
@@ -132,7 +132,7 @@ private:
     unsigned short mBeats;
     std::vector<Point> mPoints;
     std::string mName;
-    std::vector<ImageData> mBackgroundImages;
+    std::vector<ImageInfo> mBackgroundImages;
 
     // unit tests
     friend void Sheet_UnitTests();

@@ -4,7 +4,7 @@
  */
 
 /*
- Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+ Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
  */
 
 #include "BackgroundImages.h"
+#include "CalChartDrawPrimativesHelper.h"
 #include "CalChartImage.h"
 #include "CalChartTypes.h"
 #include <algorithm>
@@ -314,24 +315,12 @@ wxRect BackgroundImage::CalculateScaleAndMove::operator()(wxCoord x, wxCoord y, 
 BackgroundImages::BackgroundImages() = default;
 BackgroundImages::~BackgroundImages() = default;
 
-void BackgroundImages::SetBackgroundImages(std::vector<CalChart::ImageData> const& images)
+void BackgroundImages::SetBackgroundImages(std::vector<CalChart::ImageInfo> const& images)
 {
     mBackgroundImages.clear();
     mWhichBackgroundIndex = -1;
     for (auto&& image : images) {
-        // ugh...  not sure if there's a better way to pass data to image.
-        auto d = static_cast<unsigned char*>(malloc(sizeof(unsigned char) * image.image_width * image.image_height * 3));
-        std::copy(image.data.begin(), image.data.end(), d);
-        auto a = static_cast<unsigned char*>(nullptr);
-        if (image.alpha.size()) {
-            a = static_cast<unsigned char*>(malloc(sizeof(unsigned char) * image.image_width * image.image_height));
-            std::copy(image.alpha.begin(), image.alpha.end(), a);
-            wxImage img(image.image_width, image.image_height, d, a);
-            mBackgroundImages.emplace_back(img, image.left, image.top, image.scaled_width, image.scaled_height);
-        } else {
-            wxImage img(image.image_width, image.image_height, d);
-            mBackgroundImages.emplace_back(img, image.left, image.top, image.scaled_width, image.scaled_height);
-        }
+        mBackgroundImages.emplace_back(wxCalChart::ConvertTowxImage(image.data), image.left, image.top, image.scaled_width, image.scaled_height);
     }
 }
 

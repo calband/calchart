@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -968,7 +968,7 @@ Show_command_pair Show::Create_ToggleLabelVisibilityCommand() const
     return Create_SetLabelVisiblityCommand(visible);
 }
 
-Show_command_pair Show::Create_AddNewBackgroundImageCommand(ImageData const& image) const
+Show_command_pair Show::Create_AddNewBackgroundImageCommand(ImageInfo const& image) const
 {
     auto sheet = GetCurrentSheet();
     auto action = [sheet_num = mSheetNum, image, where = sheet->GetBackgroundImages().size()](Show& show) {

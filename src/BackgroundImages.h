@@ -4,7 +4,7 @@
  * Maintains the background image data
  */
 /*
- Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+ Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #include <wx/event.h>
 
 namespace CalChart {
-struct ImageData;
+struct ImageInfo;
 }
 
 class BackgroundImage;
@@ -37,7 +37,7 @@ public:
     BackgroundImages();
     ~BackgroundImages();
 
-    void SetBackgroundImages(std::vector<CalChart::ImageData> const& images);
+    void SetBackgroundImages(std::vector<CalChart::ImageInfo> const& images);
 
     auto GetAdjustBackgroundMode() const { return mAdjustBackgroundMode; }
     void SetAdjustBackgroundMode(bool adjustBackgroundMode) { mAdjustBackgroundMode = adjustBackgroundMode; }

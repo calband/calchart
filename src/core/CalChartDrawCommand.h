@@ -24,9 +24,11 @@
 #include "CalChartConstants.h"
 #include "CalChartCoord.h"
 #include "CalChartDrawPrimatives.h"
+#include "CalChartImage.h"
 #include <algorithm>
 #include <compare>
 #include <functional>
+#include <memory>
 #include <numeric>
 #include <optional>
 #include <ranges>
@@ -74,6 +76,7 @@ namespace Draw {
     struct Circle;
     struct Rectangle;
     struct Text;
+    struct Image;
     struct Tab;
     using DrawItems = std::variant<
         Ignore,
@@ -83,6 +86,7 @@ namespace Draw {
         Circle,
         Rectangle,
         Text,
+        Image,
         Tab>;
 
     // meta manipulators
@@ -326,6 +330,29 @@ namespace Draw {
     inline auto operator+(Coord lhs, Text const& rhs) { return Text{ lhs + rhs.c1, rhs.text, rhs.anchor, rhs.withBackground, rhs.linePad }; }
     inline auto operator-(Text const& lhs, Coord rhs) { return Text{ lhs.c1 - rhs, lhs.text, lhs.anchor, lhs.withBackground, lhs.linePad }; }
     inline auto operator-(Coord lhs, Text const& rhs) { return Text{ lhs - rhs.c1, rhs.text, rhs.anchor, rhs.withBackground, rhs.linePad }; }
+
+    struct Image {
+        Coord mStart{};
+        std::shared_ptr<ImageData> mImage{};
+        bool mGreyscale{};
+
+        Image(Coord::units startx, Coord::units starty, std::shared_ptr<ImageData> image, bool greyscale = false)
+            : Image{ { startx, starty }, std::move(image), greyscale }
+        {
+        }
+
+        Image(Coord start, std::shared_ptr<ImageData> image, bool greyscale = false)
+            : mStart{ start }
+            , mImage{ std::move(image) }
+            , mGreyscale{ greyscale }
+        {
+        }
+        friend auto operator==(Image const&, Image const&) -> bool = default;
+    };
+    inline auto operator+(Image lhs, Coord rhs) { return Image{ lhs.mStart + rhs, lhs.mImage, lhs.mGreyscale }; }
+    inline auto operator+(Coord lhs, Image rhs) { return Image{ lhs + rhs.mStart, rhs.mImage, rhs.mGreyscale }; }
+    inline auto operator-(Image lhs, Coord rhs) { return Image{ lhs.mStart - rhs, lhs.mImage, lhs.mGreyscale }; }
+    inline auto operator-(Coord lhs, Image rhs) { return Image{ lhs - rhs.mStart, rhs.mImage, rhs.mGreyscale }; }
 
     struct OverrideFont {
         Font font;

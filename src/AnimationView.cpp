@@ -28,6 +28,7 @@
 #include "CalChartConfiguration.h"
 #include "CalChartDrawPrimativesHelper.h"
 #include "CalChartDrawing.h"
+#include "CalChartRanges.h"
 #include "CalChartShapes.h"
 #include "CalChartSheet.h"
 #include "CalChartShowMode.h"
@@ -35,17 +36,99 @@
 #include "CalChartUtils.h"
 #include "CalChartView.h"
 #include "platconf.h"
-
+#include <ranges>
 #include <wx/dcbuffer.h>
 #include <wx/filename.h>
 #include <wx/stdpaths.h>
 
+namespace {
+
+// split the source image into a number of horizontal images
+auto GenerateSpriteImages(wxImage const& image, int numberImages, int imageX, int imageY, double scale)
+{
+    return std::views::iota(0, numberImages) | std::views::transform([&image, imageX, imageY, scale](auto i) {
+        auto newImage = image.GetSubImage({ i * imageX + 0, 0, imageX, imageY });
+        return newImage.Scale(newImage.GetWidth() * scale, newImage.GetHeight() * scale);
+    });
+}
+
+auto FacingBack(CalChart::Animation::animate_info_t const& info)
+{
+    auto direction = CalChart::AngleToDirection(info.mFacingDirection);
+    return direction == CalChart::Direction::SouthWest
+        || direction == CalChart::Direction::West
+        || direction == CalChart::Direction::NorthWest;
+}
+
+auto FacingFront(CalChart::Animation::animate_info_t const& info)
+{
+    auto direction = CalChart::AngleToDirection(info.mFacingDirection);
+    return direction == CalChart::Direction::SouthEast
+        || direction == CalChart::Direction::East
+        || direction == CalChart::Direction::NorthEast;
+}
+
+auto FacingSide(CalChart::Animation::animate_info_t const& info)
+{
+    return !FacingBack(info) && !FacingFront(info);
+}
+
+auto CollisionWarning(CalChart::Animation::animate_info_t const& info)
+{
+    return info.mCollision == CalChart::Coord::CollisionType::warning;
+}
+
+auto CollisionIntersect(CalChart::Animation::animate_info_t const& info)
+{
+    return info.mCollision == CalChart::Coord::CollisionType::intersect;
+}
+
+template <std::ranges::input_range Range>
+    requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animation::animate_info_t>)
+auto GeneratePointDrawCommand(Range&& infos) -> std::vector<CalChart::Draw::DrawCommand>
+{
+    return CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(infos | std::views::transform([](auto&& info) {
+        auto size = CalChart::Coord{ CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(1) };
+        return CalChart::Draw::Rectangle{
+            info.mPosition - size / 2, { CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(1) }
+        };
+    }));
+}
+
+template <std::ranges::input_range Range, typename Function>
+    requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animation::animate_info_t>)
+auto GeneratePointDrawCommand(Range&& range, Function predicate, CalChart::BrushAndPen brushAndPen) -> CalChart::Draw::DrawCommand
+{
+    auto filteredRange = range | std::views::filter(predicate);
+    if (!filteredRange.empty()) {
+        return CalChart::Draw::withBrushAndPen(brushAndPen, GeneratePointDrawCommand(filteredRange));
+    }
+    return CalChart::Draw::Ignore{};
+}
+
+}
+
 AnimationView::AnimationView(CalChartView* view, CalChartConfiguration const& config, wxWindow* frame)
     : mView(view)
     , mConfig(config)
+    , mMeasure{ "AnimationViewDraw" }
 {
     SetFrame(frame);
 
+    RegenerateImages();
+}
+
+AnimationView::~AnimationView()
+{
+}
+
+void AnimationView::RegenerateImages() const
+{
+    auto spriteScale = CalChartConfiguration::GetGlobalConfig().Get_SpriteBitmapScale();
+    if (spriteScale == mScaleSize) {
+        return;
+    }
+    mScaleSize = spriteScale;
 #if defined(__APPLE__) && (__APPLE__)
     const static wxString kImageDir = "CalChart.app/Contents/Resources/default_sprite_strip.png";
 #else
@@ -60,118 +143,94 @@ AnimationView::AnimationView(CalChartView* view, CalChartConfiguration const& co
         return image;
     }();
     // now slice up all the images
-    auto points = std::vector<int>(mSpriteImages.size());
-    std::iota(points.begin(), points.end(), 0);
-    std::transform(points.begin(), points.end(), mSpriteImages.begin(), [&image](auto i) {
-        constexpr auto image_X = 64;
-        constexpr auto image_Y = 128;
-        return image.GetSubImage({ i * image_X + 0, 0, image_X, image_Y });
+    constexpr auto image_X = 64;
+    constexpr auto image_Y = 128;
+    auto images = GenerateSpriteImages(image, mSpriteCalChartImages.size(), image_X, image_Y, mScaleSize);
+    std::transform(images.begin(), images.end(), mSpriteCalChartImages.begin(), [](auto&& image) {
+        return std::make_shared<CalChart::ImageData>(wxCalChart::ConvertToImageData(image));
     });
-}
-
-AnimationView::~AnimationView()
-{
 }
 
 void AnimationView::OnDraw(wxDC* dc)
 {
-    OnDraw(*dc, mConfig);
+    // std::cout << mMeasure << "\n";
+    // auto snapshot = mMeasure.doMeasurement();
+    wxCalChart::Draw::DrawCommandList(*dc, GenerateDraw(mConfig));
 }
 
-void AnimationView::OnDraw(wxDC& dc, CalChartConfiguration const& config)
+auto AnimationView::GenerateDraw(CalChartConfiguration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
 {
     if (!mAnimation) {
         // no animation, our job is done.
-        return;
+        return {};
     }
-    wxCalChart::setPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD_DETAIL));
-    auto tborder1 = mView->GetShowMode().Border1();
 
-    wxCalChart::Draw::DrawCommandList(dc, CalChartDraw::GenerateModeDrawCommands(config, mView->GetShowMode(), ShowMode_kAnimation) + tborder1);
+    auto tborder1 = mView->GetShowMode().Border1();
+    auto drawCmds = CalChartDraw::GenerateModeDrawCommands(config, mView->GetShowMode(), ShowMode_kAnimation) + tborder1;
     auto useSprites = config.Get_UseSprites();
     if (useSprites) {
-        return OnDrawSprites(dc, config);
+        CalChart::append(drawCmds, GenerateDrawSprites(config));
+    } else {
+        CalChart::append(drawCmds, GenerateDrawDots(config));
     }
-    return OnDrawDots(dc, config);
+    return drawCmds;
 }
 
-void AnimationView::OnDrawDots(wxDC& dc, CalChartConfiguration const& config)
+auto AnimationView::GenerateDrawDots(CalChartConfiguration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
 {
-    auto checkForCollision = mDrawCollisionWarning;
-    for (auto info : mAnimation->GetAllAnimateInfo()) {
-        if (checkForCollision && (info.mCollision != CalChart::Coord::CollisionType::none)) {
-            if (info.mCollision == CalChart::Coord::CollisionType::warning) {
-                wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_COLLISION_WARNING));
-            } else if (info.mCollision == CalChart::Coord::CollisionType::intersect) {
-                wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_COLLISION));
-            }
-        } else if (mView->IsSelected(info.index)) {
-            switch (CalChart::AngleToDirection(info.mFacingDirection)) {
-            case CalChart::Direction::SouthWest:
-            case CalChart::Direction::West:
-            case CalChart::Direction::NorthWest: {
-                wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_HILIT_BACK));
-            } break;
-            case CalChart::Direction::SouthEast:
-            case CalChart::Direction::East:
-            case CalChart::Direction::NorthEast: {
-                wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_HILIT_FRONT));
-            } break;
-            default: {
-                wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_HILIT_SIDE));
-            }
-            }
-        } else {
-            switch (CalChart::AngleToDirection(info.mFacingDirection)) {
-            case CalChart::Direction::SouthWest:
-            case CalChart::Direction::West:
-            case CalChart::Direction::NorthWest: {
-                wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_BACK));
-            } break;
-            case CalChart::Direction::SouthEast:
-            case CalChart::Direction::East:
-            case CalChart::Direction::NorthEast: {
-                wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_FRONT));
-            } break;
-            default: {
-                wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_SIDE));
-            }
-            }
-        }
-        auto position = info.mPosition;
-        auto x = position.x + mView->GetShowMode().Offset().x;
-        auto y = position.y + mView->GetShowMode().Offset().y;
-        auto drawPosition = fDIP(wxPoint(x, y));
-        auto rectangleSize = fDIP(wxSize(CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(1)));
+    auto allInfo = mAnimation->GetAllAnimateInfo();
+    auto allSelected = allInfo | std::views::filter([this](auto&& info) { return mView->IsSelected(info.index); });
+    auto allNotSelected = allInfo | std::views::filter([this](auto&& info) { return !mView->IsSelected(info.index); });
 
-        dc.DrawRectangle(drawPosition - rectangleSize / 2, rectangleSize);
+    auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
+    CalChart::append(drawCmds,
+        GeneratePointDrawCommand(
+            allNotSelected, [](auto&& info) { return FacingBack(info); }, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_BACK)));
+    CalChart::append(drawCmds,
+        GeneratePointDrawCommand(
+            allNotSelected, [](auto&& info) { return FacingFront(info); }, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_FRONT)));
+    CalChart::append(drawCmds,
+        GeneratePointDrawCommand(
+            allNotSelected, [](auto&& info) { return FacingSide(info); }, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_SIDE)));
+    CalChart::append(drawCmds,
+        GeneratePointDrawCommand(
+            allSelected, [](auto&& info) { return FacingBack(info); }, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_HILIT_BACK)));
+    CalChart::append(drawCmds,
+        GeneratePointDrawCommand(
+            allSelected, [](auto&& info) { return FacingFront(info); }, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_HILIT_FRONT)));
+    CalChart::append(drawCmds,
+        GeneratePointDrawCommand(
+            allSelected, [](auto&& info) { return FacingSide(info); }, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_HILIT_SIDE)));
+
+    if (mDrawCollisionWarning) {
+        CalChart::append(drawCmds,
+            GeneratePointDrawCommand(
+                allInfo, [](auto&& info) { return CollisionWarning(info); }, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_COLLISION_WARNING)));
+        CalChart::append(drawCmds,
+            GeneratePointDrawCommand(
+                allInfo, [](auto&& info) { return CollisionIntersect(info); }, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_COLLISION)));
     }
+    return drawCmds + mView->GetShowMode().Offset();
 }
 
-void AnimationView::OnDrawSprites(wxDC& dc, CalChartConfiguration const& config)
+auto AnimationView::GenerateDrawSprites(CalChartConfiguration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
 {
-    auto scale = config.Get_SpriteBitmapScale();
+    RegenerateImages();
     constexpr auto comp_X = 0.5;
     auto comp_Y = config.Get_SpriteBitmapOffsetY();
 
-    for (auto info : mAnimation->GetAllAnimateInfo()) {
-        auto image_offset = !GetAnimationFrame()->TimerOn() ? 0 : OnBeat() ? 1
-                                                                           : 2;
-        auto image_index = CalChart::AngleToQuadrant(info.mFacingDirection) + image_offset * 8;
-        auto image = mSpriteImages[image_index];
-        image = image.Scale(image.GetWidth() * scale, image.GetHeight() * scale);
-        if (mView->IsSelected(info.index)) {
-            image = image.ConvertToGreyscale();
-        }
+    auto image_offset = !GetAnimationFrame()->TimerOn() ? 0 : OnBeat() ? 1
+                                                                       : 2;
+    auto drawCmds = CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(
+        mAnimation->GetAllAnimateInfo() | std::views::transform([this, image_offset, comp_Y](auto&& info) {
+            auto image_index = CalChart::AngleToQuadrant(info.mFacingDirection) + image_offset * 8;
+            auto image = mSpriteCalChartImages[image_index];
+            auto position = info.mPosition;
+            auto offset = CalChart::Coord(image->image_width * comp_X, image->image_height * comp_Y);
 
-        auto position = info.mPosition;
-        auto x = position.x + mView->GetShowMode().Offset().x;
-        auto y = position.y + mView->GetShowMode().Offset().y;
-        auto drawPosition = fDIP(wxPoint(x, y));
-        auto rectangleSize = fDIP(wxSize(image.GetWidth() * comp_X, image.GetHeight() * comp_Y));
-
-        dc.DrawBitmap(image, drawPosition - rectangleSize);
-    }
+            return CalChart::Draw::Image{ position, image, mView->IsSelected(info.index) } - offset;
+        }));
+    return drawCmds + mView->GetShowMode().Offset();
 }
 
 void AnimationView::OnUpdate(wxView* sender, wxObject* hint)
@@ -234,7 +293,7 @@ void AnimationView::GotoTotalBeat(unsigned i)
     }
 }
 
-bool AnimationView::AtEndOfShow() const
+auto AnimationView::AtEndOfShow() const -> bool
 {
     if (mAnimation) {
         return (mAnimation->GetCurrentBeat() == mAnimation->GetTotalNumberBeats());
@@ -248,7 +307,7 @@ static auto towxPoint(CalChart::Coord const& c)
 }
 
 // Return a bounding box of the show
-std::pair<wxPoint, wxPoint> AnimationView::GetShowSizeAndOffset() const
+auto AnimationView::GetShowSizeAndOffset() const -> std::pair<wxPoint, wxPoint>
 {
     auto size = mView->GetShowFieldSize();
     return { towxPoint(size), towxPoint({ 0, 0 }) };
@@ -256,7 +315,7 @@ std::pair<wxPoint, wxPoint> AnimationView::GetShowSizeAndOffset() const
 
 // Return a bounding box of the show of where the marchers are.  If they are
 // outside the show, we don't see them.
-std::pair<wxPoint, wxPoint> AnimationView::GetMarcherSizeAndOffset() const
+auto AnimationView::GetMarcherSizeAndOffset() const -> std::pair<wxPoint, wxPoint>
 {
     auto mode_size = towxPoint(mView->GetShowFieldSize());
     auto bounding_box_upper_left = mode_size;
@@ -297,24 +356,24 @@ void AnimationView::SelectMarchersInBox(wxPoint const& mouseStart, wxPoint const
 // lives in the Frame.  So we have this weird path...
 void AnimationView::ToggleTimer() { GetAnimationFrame()->ToggleTimer(); }
 
-bool AnimationView::OnBeat() const { return GetAnimationFrame()->OnBeat(); }
+auto AnimationView::OnBeat() const -> bool { return GetAnimationFrame()->OnBeat(); }
 
-AnimationPanel const* AnimationView::GetAnimationFrame() const
+auto AnimationView::GetAnimationFrame() const -> AnimationPanel const*
 {
     return static_cast<AnimationPanel const*>(GetFrame());
 }
 
-AnimationPanel* AnimationView::GetAnimationFrame()
+auto AnimationView::GetAnimationFrame() -> AnimationPanel*
 {
     return static_cast<AnimationPanel*>(GetFrame());
 }
 
-CalChart::ShowMode const& AnimationView::GetShowMode() const
+auto AnimationView::GetShowMode() const -> CalChart::ShowMode const&
 {
     return mView->GetShowMode();
 }
 
-AnimationView::MarcherInfo AnimationView::GetMarcherInfo(int which) const
+auto AnimationView::GetMarcherInfo(int which) const -> AnimationView::MarcherInfo
 {
     MarcherInfo info{};
     if (mAnimation) {
@@ -330,7 +389,7 @@ AnimationView::MarcherInfo AnimationView::GetMarcherInfo(int which) const
     return info;
 }
 
-std::multimap<double, AnimationView::MarcherInfo> AnimationView::GetMarchersByDistance(float fromX, float fromY) const
+auto AnimationView::GetMarchersByDistance(float fromX, float fromY) const -> std::multimap<double, AnimationView::MarcherInfo>
 {
     auto anySelected = !mView->GetSelectionList().empty();
     std::multimap<double, MarcherInfo> result;

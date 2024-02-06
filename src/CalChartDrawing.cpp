@@ -764,6 +764,14 @@ namespace details {
                     auto where = wxCalChart::to_wxPoint(c.c1) + layoutPoint;
                     DrawText(dc, c.text, fDIP(where), c.anchor, c.withBackground);
                 },
+                [&dc, layoutPoint = surface.origin](CalChart::Draw::Image const& c) {
+                    auto where = wxCalChart::to_wxPoint(c.mStart) + layoutPoint;
+                    auto image = wxCalChart::ConvertTowxImage(*c.mImage);
+                    if (c.mGreyscale) {
+                        image = image.ConvertToGreyscale();
+                    }
+                    dc.DrawBitmap(image, fDIP(where));
+                },
                 []([[maybe_unused]] CalChart::Draw::Ignore const& c) {
                 },
                 []([[maybe_unused]] CalChart::Draw::Tab const& c) {
