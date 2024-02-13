@@ -38,6 +38,8 @@
  *  Add DECLARE_CONFIGURATION_FUNCTIONS in the class declaration of the right type.  This
  *  will make the Get_, Set_ and Clear_ functions available.  Then in the implementation file, declare
  *  IMPLEMENT_CONFIGURATION_FUNCTIONS with the default.
+ *
+ * Brushes and Pens are cached as the individual Color and Width.
  */
 
 #include "CalChartConstants.h"
@@ -45,9 +47,8 @@
 #include <array>
 #include <functional>
 #include <map>
-#include <memory>
+#include <optional>
 #include <vector>
-#include <wx/gdicmn.h>
 
 // forward declare
 class wxPathList;
@@ -55,11 +56,9 @@ namespace CalChart {
 class ShowMode;
 }
 
-constexpr auto kNumberPalettes = 4; // arbitrary, could go more, but 4 is a good starting point
-
 class CalChartConfiguration {
 public:
-    static CalChartConfiguration& GetGlobalConfig();
+    static auto GetGlobalConfig() -> CalChartConfiguration&;
     static void AssignConfig(CalChartConfiguration const& config);
 
     // explicit flush
@@ -71,12 +70,12 @@ private:
 // macro for declaring configuration Get_, Set_, and Clear_
 #define DECLARE_CONFIGURATION_FUNCTIONS(Key, Type) \
 public:                                            \
-    Type Get_##Key() const;                        \
+    [[nodiscard]] auto Get_##Key() const -> Type;  \
     void Set_##Key(Type const& v);                 \
     void Clear_##Key();                            \
                                                    \
 private:                                           \
-    mutable std::pair<bool, Type> m##Key = { false, Type() };
+    mutable std::optional<Type> m##Key = {};
 
     DECLARE_CONFIGURATION_FUNCTIONS(AutosaveInterval, long);
 
@@ -176,61 +175,73 @@ private:                                           \
     DECLARE_CONFIGURATION_FUNCTIONS(ContCellTextPadding, long);
     DECLARE_CONFIGURATION_FUNCTIONS(ContCellBoxPadding, long);
 
+    DECLARE_CONFIGURATION_FUNCTIONS(ActiveColorPalette, long);
+
 public:
     // color palettes:  The color Palettes allow you to set different "blocks" of
     // colors.
     // When a Palette is set all the sets and gets are treated against that palette
-    long GetActiveColorPalette() const;
-    void SetActiveColorPalette(long);
-    void ClearActiveColorPalette();
+    [[nodiscard]] auto GetColorPaletteColor(int which) const -> CalChart::Color;
+    void SetColorPaletteColor(int which, CalChart::Color);
+    void ClearColorPaletteColor(int which);
 
-    CalChart::Color GetColorPaletteColor(long which) const;
-    void SetColorPaletteColor(long which, CalChart::Color);
-    void ClearColorPaletteColor(long which);
+private:
+    mutable std::array<std::optional<CalChart::Color>, CalChart::kNumberPalettes> mColorPaletteColor;
 
-    std::string GetColorPaletteName(long which) const;
-    void SetColorPaletteName(long which, std::string const&);
-    void ClearColorPaletteName(long which);
+public:
+    [[nodiscard]] auto GetColorPaletteName(int which) const -> std::string;
+    void SetColorPaletteName(int which, std::string const&);
+    void ClearColorPaletteName(int which);
 
+private:
+    mutable std::array<std::optional<std::string>, CalChart::kNumberPalettes> mColorPaletteName;
+
+public:
     // Colors
     using ColorWidth_t = std::pair<CalChart::Color, int>;
-    CalChart::BrushAndPen Get_CalChartBrushAndPen(CalChart::Colors c) const;
-    void Set_CalChartBrushAndPen(CalChart::Colors c, CalChart::BrushAndPen);
-    void Clear_CalChartConfigColor(CalChart::Colors selection);
-
-    CalChart::BrushAndPen Get_CalChartBrushAndPen(int palette, CalChart::Colors c) const;
+    // use the current Active Color Palette to get the Brush and Pen.
+    [[nodiscard]] auto Get_CalChartBrushAndPen(CalChart::Colors c) const
+    {
+        return Get_CalChartBrushAndPen(static_cast<int>(Get_ActiveColorPalette()), c);
+    }
+    [[nodiscard]] auto Get_CalChartBrushAndPen(int palette, CalChart::Colors c) const -> CalChart::BrushAndPen;
     void Set_CalChartBrushAndPen(int palette, CalChart::Colors c, CalChart::BrushAndPen);
     void Clear_CalChartConfigColor(int palette, CalChart::Colors selection);
 
-    CalChart::BrushAndPen Get_ContCellBrushAndPen(CalChart::ContinuityCellColors c) const;
+private:
+    mutable std::array<std::array<std::optional<ColorWidth_t>, toUType(CalChart::Colors::NUM)>, CalChart::kNumberPalettes> mColorsAndWidth;
+
+public:
+    [[nodiscard]] auto Get_ContCellBrushAndPen(CalChart::ContinuityCellColors c) const -> CalChart::BrushAndPen;
     void Set_ContCellBrushAndPen(CalChart::ContinuityCellColors c, CalChart::BrushAndPen);
     void Clear_ContCellConfigColor(CalChart::ContinuityCellColors selection);
 
+private:
+    mutable std::array<std::optional<ColorWidth_t>, toUType(CalChart::ContinuityCellColors::NUM)> mContCellColorsAndWidth;
+
+public:
     // Shows
-    CalChart::ShowModeData_t Get_ShowModeData(CalChart::ShowModes which) const;
+    [[nodiscard]] auto Get_ShowModeData(CalChart::ShowModes which) const -> CalChart::ShowModeData_t;
     void Set_ShowModeData(CalChart::ShowModes which, CalChart::ShowModeData_t const& values);
     void Clear_ShowModeData(CalChart::ShowModes which);
 
+private:
+    mutable std::array<std::optional<CalChart::ShowModeData_t>, toUType(CalChart::ShowModes::NUM)> mShowModeInfos;
+
+public:
     // Yard Lines
     static constexpr auto kYardTextValues = 53;
-    std::string Get_yard_text(size_t which) const;
+    [[nodiscard]] auto Get_yard_text(size_t which) const -> std::string;
     void Set_yard_text(size_t which, std::string const&);
     void Clear_yard_text(size_t which);
 
 private:
-    std::vector<CalChart::Color> GetDefaultColorPaletteColors() const;
-    std::vector<std::string> GetDefaultColorPaletteNames() const;
-
-    mutable int mActiveColorPalette = -1;
-    mutable std::map<CalChart::Colors, ColorWidth_t> mColorsAndWidth[kNumberPalettes];
-    mutable std::map<CalChart::ContinuityCellColors, ColorWidth_t> mContCellColorsAndWidth;
-    mutable std::map<CalChart::ShowModes, CalChart::ShowModeData_t> mShowModeInfos;
-    mutable std::map<size_t, std::string> mYardTextInfos;
+    mutable std::array<std::optional<std::string>, kYardTextValues> mYardTextInfos;
 };
 
-std::vector<CalChart::Color> GetColorPaletteColors(CalChartConfiguration const& config);
-std::vector<std::string> GetColorPaletteNames(CalChartConfiguration const& config);
-std::array<std::string, CalChartConfiguration::kYardTextValues> Get_yard_text_all(CalChartConfiguration const& config);
+auto GetColorPaletteColors(CalChartConfiguration const& config) -> std::vector<CalChart::Color>;
+auto GetColorPaletteNames(CalChartConfiguration const& config) -> std::vector<std::string>;
+auto Get_yard_text_all(CalChartConfiguration const& config) -> std::array<std::string, CalChartConfiguration::kYardTextValues>;
 
 // to find a specific Show:
-CalChart::ShowMode GetConfigShowMode(CalChartConfiguration const& config, std::string const& which);
+auto GetConfigShowMode(CalChartConfiguration const& config, std::string const& which) -> CalChart::ShowMode;

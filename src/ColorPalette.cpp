@@ -49,7 +49,7 @@ ColorPalettePanel::ColorPalettePanel(CalChartConfiguration& config, wxWindow* pa
 
 void ColorPalettePanel::Init()
 {
-    SetMinClientSize(wxSize(kBoxBorder + kNumberPalettes * (kBoxSize + kBoxBorder), 2 * kBoxBorder + kBoxSize));
+    SetMinClientSize(wxSize(kBoxBorder + CalChart::kNumberPalettes * (kBoxSize + kBoxBorder), 2 * kBoxBorder + kBoxSize));
 }
 
 void ColorPalettePanel::OnPaint(wxPaintEvent&)
@@ -61,8 +61,8 @@ void ColorPalettePanel::OnPaint(wxPaintEvent&)
     // draw the rounded rectangles
     auto point = wxPoint{ kBoxBorder, kBoxBorder };
     auto size = wxSize{ kBoxSize, kBoxSize };
-    for (auto i = 0; i < kNumberPalettes; ++i) {
-        if (mConfig.GetActiveColorPalette() == i) {
+    for (auto i = 0; i < CalChart::kNumberPalettes; ++i) {
+        if (mConfig.Get_ActiveColorPalette() == i) {
             dc.SetPen(*wxYELLOW_PEN);
         } else {
             dc.SetPen(*wxBLACK_PEN);
@@ -77,11 +77,11 @@ void ColorPalettePanel::OnLeftClick(wxMouseEvent& event)
 {
     // change the color.
     auto box = WhichBox(event.GetPosition());
-    if (box < 0 || box >= kNumberPalettes) {
+    if (box < 0 || box >= CalChart::kNumberPalettes) {
         return;
     }
     // now we switch to that color
-    mConfig.SetActiveColorPalette(box);
+    mConfig.Set_ActiveColorPalette(box);
     // sort of sneaky, we act like a button has been pressed
     QueueEvent(new wxCommandEvent{ wxEVT_BUTTON, CALCHART__ChangedColorPalette });
 }
@@ -106,7 +106,7 @@ void ColorPalettePanel::OnLeftDoubleClick(wxMouseEvent& event)
 {
     // change the color.
     auto box = WhichBox(event.GetPosition());
-    if (box < 0 || box >= kNumberPalettes) {
+    if (box < 0 || box >= CalChart::kNumberPalettes) {
         return;
     }
     // this opens the dialog that

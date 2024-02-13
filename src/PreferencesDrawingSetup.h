@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -77,8 +77,8 @@ private:
     int mActiveColorPalette{};
     std::vector<std::string> mColorPaletteNames;
     std::vector<CalChart::Color> mColorPaletteColors;
-    std::array<std::array<wxPen, toUType(CalChart::Colors::NUM)>, kNumberPalettes> mCalChartPens{};
-    std::array<std::array<wxBrush, toUType(CalChart::Colors::NUM)>, kNumberPalettes> mCalChartBrushes{};
+    std::array<std::array<wxPen, toUType(CalChart::Colors::NUM)>, CalChart::kNumberPalettes> mCalChartPens{};
+    std::array<std::array<wxBrush, toUType(CalChart::Colors::NUM)>, CalChart::kNumberPalettes> mCalChartBrushes{};
 
     std::array<double, 6> mDrawingValues{};
 };

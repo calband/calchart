@@ -43,9 +43,33 @@ inline auto operator<(wxSize const& p1, wxSize const& p2)
 namespace wxCalChart {
 
 inline auto make_wxSize(CalChart::Coord coord) { return wxSize{ coord.x, coord.y }; }
-inline auto toColour(CalChart::Color c)
+
+inline auto toColour(CalChart::ColorRGB c) -> wxColour
 {
-    return wxColour{ c.red, c.green, c.blue, c.alpha };
+    return { c.red, c.green, c.blue, c.alpha };
+}
+
+inline auto toColour(std::string const& str) -> wxColour
+{
+    return { wxString{ str.data() } };
+}
+
+inline auto toColour(CalChart::Color color) -> wxColour
+{
+    return std::visit(
+        CalChart::overloaded{
+            [](CalChart::ColorRGB c) { return toColour(c); },
+            [](std::string const& str) { return toColour(str); } },
+        color);
+}
+
+inline auto toRGB(CalChart::Color color) -> std::tuple<uint8_t, uint8_t, uint8_t>
+{
+    return std::visit(
+        CalChart::overloaded{
+            [](CalChart::ColorRGB c) { return std::tuple{ c.red, c.green, c.blue }; },
+            [](std::string const& str) { auto colour = toColour(str); return std::tuple{ colour.Red(), colour.Green(), colour.Blue()}; } },
+        color);
 }
 
 inline auto toBrush(CalChart::Color c)
@@ -85,14 +109,14 @@ inline auto toPen(CalChart::BrushAndPen b)
     return *wxThePenList->FindOrCreatePen(toColour(b.color), b.width, penStyle);
 }
 
-inline auto toColor(wxColour const& c)
+inline auto toColor(wxColour const& c) -> CalChart::Color
 {
-    return CalChart::Color{ c.Red(), c.Green(), c.Blue(), c.Alpha() };
+    return CalChart::ColorRGB{ c.Red(), c.Green(), c.Blue(), c.Alpha() };
 }
 
-inline auto toColor(std::string_view s)
+inline auto toColor(std::string_view s) -> CalChart::Color
 {
-    return toColor(wxColour(wxString(s.data())));
+    return std::string{ s };
 }
 
 inline auto toBrush(wxBrush const& b)
@@ -240,5 +264,4 @@ inline auto ConvertTowxImage(CalChart::ImageData const& image) -> wxImage
     }
     return { image.image_width, image.image_height, data.data(), true };
 }
-
 }

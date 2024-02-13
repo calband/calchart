@@ -138,7 +138,7 @@ void ColorSetupDialog::Init()
     mColorPaletteNames = GetColorPaletteNames(mConfig);
     mColorPaletteColors = GetColorPaletteColors(mConfig);
 
-    for (auto palette = 0; palette < kNumberPalettes; ++palette) {
+    for (auto palette = 0; palette < CalChart::kNumberPalettes; ++palette) {
         for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM; i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
             auto brushAndPen = mConfig.Get_CalChartBrushAndPen(palette, i);
             mCalChartPens[palette][toUType(i)] = wxCalChart::toPen(brushAndPen);
@@ -179,18 +179,18 @@ bool ColorSetupDialog::ClearValuesToDefault()
     text->SetValue(mColorPaletteNames.at(mActiveColorPalette));
     for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM; i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
         SetColor(toUType(i), CalChart::GetDefaultPenWidth()[toUType(i)], wxColour{ CalChart::GetDefaultColors()[toUType(i)] });
-        mConfig.Clear_CalChartConfigColor(i);
+        mConfig.Clear_CalChartConfigColor(mActiveColorPalette, i);
     }
     return true;
 }
 
-void ColorSetupDialog::SetColor(int selection, int width, const wxColour& color)
+void ColorSetupDialog::SetColor(int selection, int width, wxColour const& color)
 {
     mCalChartPens[mActiveColorPalette][selection] = *wxThePenList->FindOrCreatePen(color, width, wxPENSTYLE_SOLID);
     mCalChartBrushes[mActiveColorPalette][selection] = *wxTheBrushList->FindOrCreateBrush(color, wxBRUSHSTYLE_SOLID);
 
     // this is needed so we draw things out on the page correctly.
-    mConfig.Set_CalChartBrushAndPen(static_cast<CalChart::Colors>(selection), wxCalChart::toBrushAndPen(color, width));
+    mConfig.Set_CalChartBrushAndPen(mActiveColorPalette, static_cast<CalChart::Colors>(selection), wxCalChart::toBrushAndPen(color, width));
 
     CreateAndSetItemBitmap(mNameBox.control(), selection, mCalChartBrushes[mActiveColorPalette][selection]);
     Refresh();
@@ -259,7 +259,7 @@ void ColorSetupDialog::OnCmdResetColors(wxCommandEvent&)
 {
     auto selection = static_cast<int>(mNameBox.selection());
     SetColor(selection, CalChart::GetDefaultPenWidth()[selection], wxColour{ CalChart::GetDefaultColors()[selection] });
-    mConfig.Clear_CalChartConfigColor(static_cast<CalChart::Colors>(selection));
+    mConfig.Clear_CalChartConfigColor(mActiveColorPalette, static_cast<CalChart::Colors>(selection));
 }
 
 void ColorSetupDialog::OnCmdChooseNewColor(wxCommandEvent&)

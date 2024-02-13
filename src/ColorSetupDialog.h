@@ -84,8 +84,8 @@ private:
     int const mActiveColorPalette{};
     std::vector<std::string> mColorPaletteNames;
     std::vector<CalChart::Color> mColorPaletteColors;
-    std::array<std::array<wxPen, toUType(CalChart::Colors::NUM)>, kNumberPalettes> mCalChartPens;
-    std::array<std::array<wxBrush, toUType(CalChart::Colors::NUM)>, kNumberPalettes> mCalChartBrushes;
+    std::array<std::array<wxPen, toUType(CalChart::Colors::NUM)>, CalChart::kNumberPalettes> mCalChartPens;
+    std::array<std::array<wxBrush, toUType(CalChart::Colors::NUM)>, CalChart::kNumberPalettes> mCalChartBrushes;
 
     CalChartConfiguration& mConfig;
 };

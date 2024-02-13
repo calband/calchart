@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2022  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -203,6 +203,22 @@ static const auto k_symbols = std::array<SYMBOL_TYPE, MAX_NUM_SYMBOLS>{
     SYMBOL_SOLBKSL,
     SYMBOL_SOLSL,
     SYMBOL_SOLX
+};
+
+constexpr auto kNumberPalettes = 4; // arbitrary, could go more, but 4 is a good starting point
+
+const std::array<std::string, kNumberPalettes> kPaletteColorDefault = {
+    "FOREST GREEN",
+    "GREY",
+    "GREY",
+    "GREY",
+};
+
+const std::array<std::string, kNumberPalettes> kPaletteNameDefault = {
+    "Default",
+    "[Unset]",
+    "[Unset]",
+    "[Unset]",
 };
 
 auto GetNameForSymbol(SYMBOL_TYPE which) -> std::string;

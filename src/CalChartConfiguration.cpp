@@ -20,85 +20,95 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <array>
-#include <string>
-#include <wx/confbase.h>
-#include <wx/config.h>
-
-#include "CalChartApp.h"
 #include "CalChartConfiguration.h"
+#include "CalChartApp.h"
 #include "CalChartDrawPrimativesHelper.h"
 #include "CalChartShowMode.h"
 #include "cc_omniview_constants.h"
+#include <array>
+#include <string>
+#include <wx/config.h>
 
-const std::array<std::string, kNumberPalettes> kPaletteColorDefault = {
-    "FOREST GREEN",
-    "GREY",
-    "GREY",
-    "GREY",
-};
-
-const std::array<std::string, kNumberPalettes> kPaletteNameDefault = {
-    "Default",
-    "[Unset]",
-    "[Unset]",
-    "[Unset]",
-};
-
-static auto GetConfig() -> CalChartConfiguration&
+namespace {
+auto GetConfig() -> CalChartConfiguration&
 {
     static CalChartConfiguration sconfig;
     return sconfig;
 }
+}
 
-CalChartConfiguration& CalChartConfiguration::GetGlobalConfig()
+auto CalChartConfiguration::GetGlobalConfig() -> CalChartConfiguration&
 {
     return GetConfig();
 }
 
-void CalChartConfiguration::AssignConfig(const CalChartConfiguration& config)
+void CalChartConfiguration::AssignConfig(CalChartConfiguration const& config)
 {
     // now flush out the config
     GetConfig() = config;
     GetConfig().FlushWriteQueue();
 }
 
-// Get, Clear and Set PathKey are the primatives; do not use these directly.
-template <typename T>
-T GetConfigPathKey(const std::string& path, const std::string& key, const T& def)
+auto GetAndConfigureConfig(std::string const& path, std::string const& subpath) -> wxConfigBase*
 {
-    wxConfigBase* config = wxConfigBase::Get();
-    config->SetPath(path);
-    T value = def;
-    config->Read(key, &value);
+    auto* config = wxConfigBase::Get();
+    auto fullpath = "/" + path + "/" + subpath;
+    config->SetPath(fullpath);
+    return config;
+}
+
+// Get, Clear and Set PathKey are the primatives; do not use these directly.
+// we assume that path and subpath do not have leading/trailing "/"
+template <typename T>
+auto GetConfigPathKey(std::string const& path, std::string const& subpath, std::string const& key) -> std::optional<T>
+{
+    auto* config = GetAndConfigureConfig(path, subpath);
+    auto value = T{};
+    if (!config->Read(key, &value)) {
+        return {};
+    }
     return value;
 }
 
-// clear out the config if it matches
 template <typename T>
-void ClearConfigPathKey(const std::string& path, const std::string& key)
+auto GetConfigPathKey(std::string const& path, std::string const& key) -> std::optional<T>
 {
-    wxConfigBase* config = wxConfigBase::Get();
-    config->SetPath(path);
-    config->DeleteEntry(key);
-    config->Flush();
+    return GetConfigPathKey<T>(path, "", key);
 }
 
 // default value need to check if we need to set a value
 template <typename T>
-void SetConfigPathKey(const std::string& path, const std::string& key, const T& value)
+void SetConfigPathKey(std::string const& path, std::string const& subpath, std::string const& key, T const& value)
 {
-    wxConfigBase* config = wxConfigBase::Get();
-    config->SetPath(path);
+    auto* config = GetAndConfigureConfig(path, subpath);
     config->Write(key, value);
     config->Flush();
 }
 
+template <typename T>
+void SetConfigPathKey(std::string const& path, std::string const& key, T const& value)
+{
+    SetConfigPathKey(path, "", key, value);
+}
+
+// clear out the config if it matches
+void ClearConfigPathKey(std::string const& path, std::string const& subpath, std::string const& key)
+{
+    auto* config = GetAndConfigureConfig(path, subpath);
+    config->DeleteEntry(key);
+    config->Flush();
+}
+
+void ClearConfigPathKey(std::string const& path, std::string const& key)
+{
+    ClearConfigPathKey(path, "", key);
+}
+
 // functions for dealing with the wx config directly
 template <typename T>
-T GetConfigValue(const std::string& key, const T& def)
+auto GetConfigValue(std::string const& key, T const& def) -> T
 {
-    return GetConfigPathKey<T>("/CalChart", key, def);
+    return GetConfigPathKey<T>("CalChart", key).value_or(def);
 }
 
 // clear out the config if it matches
@@ -113,159 +123,185 @@ T GetConfigValue(const std::string& key, const T& def)
 
 // default value need to check if we need to set a value
 template <typename T>
-void SetConfigValue(const std::string& key, const T& value, const T& def)
+void SetConfigValue(std::string const& key, T const& value, T const& def)
 {
     // don't write if we don't have to
-    if (GetConfigValue<T>(key, def) == value)
-        return;
-    // clear out the value if it's the same as the default
-    if (def == value) {
-        ClearConfigPathKey<T>("/CalChart", key);
+    if (GetConfigValue<T>(key, def) == value) {
         return;
     }
-    SetConfigPathKey("/CalChart", key, value);
+    // clear out the value if it's the same as the default
+    if (def == value) {
+        ClearConfigPathKey("CalChart", key);
+        return;
+    }
+    SetConfigPathKey("CalChart", key, value);
 }
 
-static CalChartConfiguration::ColorWidth_t
-GetColorConfigValueForPalette(int palette, const std::string& key, const CalChartConfiguration::ColorWidth_t& def)
+namespace {
+
+auto GetColorWidthKeys(std::optional<int> palette, std::string key) -> std::array<std::string, 6>
 {
-    auto r = std::get<0>(def).red;
-    auto g = std::get<0>(def).green;
-    auto b = std::get<0>(def).blue;
     auto rkey = key + "_Red";
     auto gkey = key + "_Green";
     auto bkey = key + "_Blue";
-    auto palettekey = std::string("/PALETTE") + std::to_string(palette) + "/COLORS";
-    r = GetConfigPathKey<long>(palettekey, rkey, r);
-    g = GetConfigPathKey<long>(palettekey, gkey, g);
-    b = GetConfigPathKey<long>(palettekey, bkey, b);
-
-    auto w = std::get<1>(def);
-    w = GetConfigPathKey<long>(palettekey + "/WIDTH", key, w);
-
-    return CalChartConfiguration::ColorWidth_t(CalChart::Color(r, g, b), w);
+    auto wkey = key + "_Width";
+    auto path = "CalChart/COLORS";
+    auto subpath = palette ? "PALETTE" + std::to_string(*palette) : "";
+    return { rkey, gkey, bkey, wkey, path, subpath };
 }
 
-// Specialize on Color
-template <>
-CalChartConfiguration::ColorWidth_t
-GetConfigValue(std::string const& key, CalChartConfiguration::ColorWidth_t const& def)
+// if a palette is not supplied, we just use the Color path, otherwise, we look an a particular palette.
+auto GetColorConfigValueForPalette(std::optional<int> palette, std::string const& key, CalChartConfiguration::ColorWidth_t const& def) -> CalChartConfiguration::ColorWidth_t
 {
-    return GetColorConfigValueForPalette(GetConfigValue("ActiveColorPalette", 0), key, def);
+    auto [rkey, gkey, bkey, wkey, path, subpath] = GetColorWidthKeys(palette, key);
+    auto r = GetConfigPathKey<long>(path, subpath, rkey);
+    auto g = GetConfigPathKey<long>(path, subpath, gkey);
+    auto b = GetConfigPathKey<long>(path, subpath, bkey);
+    auto w = GetConfigPathKey<long>(path, subpath, wkey);
+
+    if (r && g && b && w) {
+        return { CalChart::ColorRGB(*r, *g, *b), *w };
+    }
+    return def;
 }
 
-static void SetColorConfigValueForPalette(int palette, std::string const& key, CalChartConfiguration::ColorWidth_t const& value, CalChartConfiguration::ColorWidth_t const& def)
+void SetColorConfigValueForPalette(std::optional<int> palette, std::string const& key, CalChartConfiguration::ColorWidth_t const& value, CalChartConfiguration::ColorWidth_t const& def)
 {
     // don't write if we don't have to
-    if (GetColorConfigValueForPalette(palette, key, def) == value)
+    if (GetColorConfigValueForPalette(palette, key, def) == value) {
         return;
-    auto rkey = key + "_Red";
-    auto gkey = key + "_Green";
-    auto bkey = key + "_Blue";
-
-    // TODO: fix this so it clears
-    // clear out the value if it's the same as the default
-    auto palettekey = std::string("/PALETTE") + std::to_string(palette) + "/COLORS";
+    }
+    auto [rkey, gkey, bkey, wkey, path, subpath] = GetColorWidthKeys(palette, key);
     if (def == value) {
-        ClearConfigPathKey<long>(palettekey, rkey);
-        ClearConfigPathKey<long>(palettekey, gkey);
-        ClearConfigPathKey<long>(palettekey, bkey);
-        ClearConfigPathKey<long>(palettekey + "/WIDTH", key);
+        ClearConfigPathKey(path, subpath, rkey);
+        ClearConfigPathKey(path, subpath, gkey);
+        ClearConfigPathKey(path, subpath, bkey);
+        ClearConfigPathKey(path, subpath, wkey);
         return;
     }
 
-    auto r = std::get<0>(value).red;
-    auto g = std::get<0>(value).green;
-    auto b = std::get<0>(value).blue;
+    auto [r, g, b] = wxCalChart::toRGB(std::get<0>(value));
     auto w = std::get<1>(value);
-    SetConfigPathKey<long>(palettekey, rkey, r);
-    SetConfigPathKey<long>(palettekey, gkey, g);
-    SetConfigPathKey<long>(palettekey, bkey, b);
-    SetConfigPathKey<long>(palettekey + "/WIDTH", key, w);
+    SetConfigPathKey(path, subpath, rkey, r);
+    SetConfigPathKey(path, subpath, gkey, g);
+    SetConfigPathKey(path, subpath, bkey, b);
+    SetConfigPathKey(path, subpath, wkey, w);
 }
 
-// Specialize on Color
-template <>
-void SetConfigValue(const std::string& key,
-    const CalChartConfiguration::ColorWidth_t& value,
-    const CalChartConfiguration::ColorWidth_t& def)
+void ClearColorConfigValueForPalette(std::optional<int> palette, std::string const& key)
 {
-    SetColorConfigValueForPalette(GetConfigValue("ActiveColorPalette", 0), key, value, def);
+    auto [rkey, gkey, bkey, wkey, path, subpath] = GetColorWidthKeys(palette, key);
+    ClearConfigPathKey(path, subpath, rkey);
+    ClearConfigPathKey(path, subpath, gkey);
+    ClearConfigPathKey(path, subpath, bkey);
+    ClearConfigPathKey(path, subpath, wkey);
+}
+
 }
 
 template <>
-CalChart::ShowModeData_t
-GetConfigValue(const std::string& key,
-    const CalChart::ShowModeData_t& def)
+auto GetConfigValue(
+    std::string const& key,
+    CalChartConfiguration::ColorWidth_t const& def) -> CalChartConfiguration::ColorWidth_t
+{
+    return GetColorConfigValueForPalette({}, key, def);
+}
+
+template <>
+void SetConfigValue(
+    std::string const& key,
+    CalChartConfiguration::ColorWidth_t const& value,
+    CalChartConfiguration::ColorWidth_t const& def)
+{
+    SetColorConfigValueForPalette({}, key, value, def);
+}
+
+// Color depends on a palette.  We use overloading instead of specialization here.
+auto GetConfigValue(
+    int palette,
+    std::string const& key,
+    CalChartConfiguration::ColorWidth_t const& def) -> CalChartConfiguration::ColorWidth_t
+{
+    return GetColorConfigValueForPalette(palette, key, def);
+}
+
+void SetConfigValue(
+    int palette,
+    std::string const& key,
+    CalChartConfiguration::ColorWidth_t const& value,
+    CalChartConfiguration::ColorWidth_t const& def)
+{
+    SetColorConfigValueForPalette(palette, key, value, def);
+}
+
+template <>
+auto GetConfigValue(std::string const& key, CalChart::ShowModeData_t const& def) -> CalChart::ShowModeData_t
 {
     auto values = def;
-    std::string path = "/SHOWMODES/" + key;
+    auto path = "SHOWMODES/" + key;
     for (auto i = 0; i < CalChart::kShowModeValues; ++i) {
-        values[i] = GetConfigPathKey<long>(path, CalChart::ShowModeKeys[i], values[i]);
+        values[i] = GetConfigPathKey<long>(path, CalChart::ShowModeKeys[i]).value_or(values[i]);
     }
     return values;
 }
 
 // Specialize on show mode
 template <>
-void SetConfigValue(const std::string& key,
-    const CalChart::ShowModeData_t& value,
-    const CalChart::ShowModeData_t& def)
+void SetConfigValue(std::string const& key,
+    CalChart::ShowModeData_t const& value,
+    CalChart::ShowModeData_t const& def)
 {
     // don't write if we don't have to
     if (GetConfigValue<CalChart::ShowModeData_t>(key, def) == value) {
         return;
     }
-    std::string path = "/SHOWMODES/" + key;
+    auto path = "/SHOWMODES/" + key;
 
     // TODO: fix this so it clears
     // clear out the value if it's the same as the default
     if (def == value) {
         for (auto i = 0; i < CalChart::kShowModeValues; ++i) {
-            ClearConfigPathKey<long>(path, CalChart::ShowModeKeys[i]);
+            ClearConfigPathKey(path, CalChart::ShowModeKeys.at(i));
         }
         return;
     }
 
     for (auto i = 0; i < CalChart::kShowModeValues; ++i) {
-        SetConfigPathKey<long>(path, CalChart::ShowModeKeys[i], value[i]);
+        SetConfigPathKey(path, CalChart::ShowModeKeys.at(i), value.at(i));
     }
 }
 
 // Specialize on std::string
 template <>
-std::string
-GetConfigValue(std::string const& key, std::string const& def)
+auto GetConfigValue(std::string const& key, std::string const& def) -> std::string
 {
-    return GetConfigPathKey<wxString>("/CalChart", key, def);
+    return GetConfigPathKey<wxString>("CalChart", key).value_or(def);
 }
 
 template <>
-void SetConfigValue(const std::string& key, std::string const& value, std::string const& def)
+void SetConfigValue(std::string const& key, std::string const& value, std::string const& def)
 {
     // don't write if we don't have to
     if (GetConfigValue<wxString>(key, def) == value) {
         return;
     }
-    SetConfigPathKey<wxString>("/CalChart", key, value);
+    SetConfigPathKey<wxString>("CalChart", key, value);
 }
 
 #define IMPLEMENT_CONFIGURATION_FUNCTIONS(KeyName, Type, TheValue)                                             \
-    static const std::string k##KeyName##Key = #KeyName;                                                       \
+    static const auto k##KeyName##Key = #KeyName;                                                              \
     static const Type k##KeyName##Value = (TheValue);                                                          \
-    Type CalChartConfiguration::Get_##KeyName() const                                                          \
+    auto CalChartConfiguration::Get_##KeyName() const -> Type                                                  \
     {                                                                                                          \
-        if (!m##KeyName.first) {                                                                               \
-            m##KeyName.second = GetConfigValue<Type>(k##KeyName##Key, k##KeyName##Value);                      \
-            m##KeyName.first = true;                                                                           \
+        if (!m##KeyName) {                                                                                     \
+            m##KeyName = GetConfigValue<Type>(k##KeyName##Key, k##KeyName##Value);                             \
         }                                                                                                      \
-        return m##KeyName.second;                                                                              \
+        return *m##KeyName;                                                                                    \
     }                                                                                                          \
-    void CalChartConfiguration::Set_##KeyName(const Type& v)                                                   \
+    void CalChartConfiguration::Set_##KeyName(Type const& v)                                                   \
     {                                                                                                          \
         mWriteQueue[k##KeyName##Key] = [v]() { SetConfigValue<Type>(k##KeyName##Key, v, k##KeyName##Value); }; \
-        m##KeyName.first = true;                                                                               \
-        m##KeyName.second = v;                                                                                 \
+        m##KeyName = v;                                                                                        \
     }                                                                                                          \
     void CalChartConfiguration::Clear_##KeyName()                                                              \
     {                                                                                                          \
@@ -371,6 +407,8 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS(ContCellRounding, long, 4);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(ContCellTextPadding, long, 4);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(ContCellBoxPadding, long, 4);
 
+IMPLEMENT_CONFIGURATION_FUNCTIONS(ActiveColorPalette, long, 0);
+
 // OBSOLETE Settings
 // "MainFrameZoom" now obsolete with version post 3.2, use "MainFrameZoom2"
 // IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameZoom, float, 0.5);
@@ -382,209 +420,190 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS(ContCellBoxPadding, long, 4);
 
 ///// Color Configuration /////
 
-long CalChartConfiguration::GetActiveColorPalette() const
+auto CalChartConfiguration::GetColorPaletteColor(int which) const -> CalChart::Color
 {
-    if (mActiveColorPalette == -1) {
-        mActiveColorPalette = GetConfigValue("ActiveColorPalette", 0);
-    }
-    return mActiveColorPalette;
-}
-
-void CalChartConfiguration::SetActiveColorPalette(long which)
-{
-    mActiveColorPalette = which;
-    SetConfigValue<long>("ActiveColorPalette", which, 0);
-}
-
-void CalChartConfiguration::ClearActiveColorPalette()
-{
-    SetActiveColorPalette(0);
-}
-
-CalChart::Color CalChartConfiguration::GetColorPaletteColor(long which) const
-{
-    auto colorWidth = GetColorConfigValueForPalette(which, std::string("PaletteColor"), { wxCalChart::toColor(wxColour{ kPaletteColorDefault[which] }), 1 });
-    return std::get<0>(colorWidth);
-}
-
-void CalChartConfiguration::SetColorPaletteColor(long which, CalChart::Color color)
-{
-    CalChartConfiguration::ColorWidth_t v{ color, 1 };
-    mWriteQueue[std::string("PaletteColor") + std::to_string(which)] = [which, v]() {
-        SetColorConfigValueForPalette(which, std::string("PaletteColor"), v, { wxCalChart::toColor(wxColour{ kPaletteColorDefault[which] }), 1 });
-    };
-}
-
-void CalChartConfiguration::ClearColorPaletteColor(long which)
-{
-    CalChartConfiguration::ColorWidth_t v{ wxCalChart::toColor(wxColour{ kPaletteColorDefault[which] }), 1 };
-    mWriteQueue[std::string("PaletteColor") + std::to_string(which)] = [which, v]() {
-        SetColorConfigValueForPalette(which, std::string("PaletteColor"), v, v);
-    };
-}
-
-std::vector<CalChart::Color> CalChartConfiguration::GetDefaultColorPaletteColors() const
-{
-    auto results = std::vector<CalChart::Color>{};
-    std::transform(std::begin(kPaletteColorDefault), std::end(kPaletteColorDefault), std::back_inserter(results), [](auto&& i) {
-        return wxCalChart::toColor(wxColour{ i });
-    });
-
-    return results;
-}
-
-std::string CalChartConfiguration::GetColorPaletteName(long which) const
-{
-    if (which > kNumberPalettes) {
+    if (which > CalChart::kNumberPalettes) {
         throw std::runtime_error("Error, exceeding kNumberPalettes size");
     }
-    return GetConfigValue<std::string>(std::string("PaletteName") + std::to_string(which), kPaletteNameDefault[which]);
-}
-
-void CalChartConfiguration::SetColorPaletteName(long which, std::string const& name)
-{
-    mWriteQueue[std::string("PaletteName") + std::to_string(which)] = [which, name]() {
-        SetConfigValue<std::string>(std::string("PaletteName") + std::to_string(which), name, kPaletteNameDefault[which]);
-    };
-}
-
-void CalChartConfiguration::ClearColorPaletteName(long which)
-{
-    mWriteQueue[std::string("PaletteName") + std::to_string(which)] = [which]() {
-        SetConfigValue<std::string>(std::string("PaletteName") + std::to_string(which), kPaletteNameDefault[which], kPaletteNameDefault[which]);
-    };
-}
-
-std::vector<std::string> CalChartConfiguration::GetDefaultColorPaletteNames() const
-{
-    return { std::begin(kPaletteNameDefault), std::end(kPaletteNameDefault) };
-}
-
-template <typename Color, typename Map, typename InfoDefault>
-CalChart::BrushAndPen
-Get_BrushAndPen(Color c, Map& colorsAndWidth, InfoDefault const& InfoDefaultArray)
-{
-    if (!colorsAndWidth.count(c)) {
-        colorsAndWidth[c] = GetConfigValue<CalChartConfiguration::ColorWidth_t>(
-            std::string(std::get<0>(InfoDefaultArray[toUType(c)])),
-            CalChartConfiguration::ColorWidth_t(wxCalChart::toColor(std::get<1>(InfoDefaultArray[toUType(c)])), std::get<2>(InfoDefaultArray[toUType(c)])));
+    if (!mColorPaletteColor.at(which)) {
+        auto colorWidth = GetColorConfigValueForPalette(which, "PaletteColor", { wxCalChart::toColor(wxColour{ CalChart::kPaletteColorDefault[which] }), 1 });
+        mColorPaletteColor.at(which) = std::get<0>(colorWidth);
     }
-    auto colorAndWidth = colorsAndWidth[c];
+    return *mColorPaletteColor.at(which);
+}
+
+void CalChartConfiguration::SetColorPaletteColor(int which, CalChart::Color color)
+{
+    if (which > CalChart::kNumberPalettes) {
+        throw std::runtime_error("Error, exceeding kNumberPalettes size");
+    }
+    auto v = CalChartConfiguration::ColorWidth_t{ color, 1 };
+    mWriteQueue[std::string("PaletteColor") + std::to_string(which)] = [which, v]() {
+        SetColorConfigValueForPalette(which, "PaletteColor", v, { CalChart::kPaletteColorDefault[which], 1 });
+    };
+    mColorPaletteColor.at(which) = color;
+}
+
+void CalChartConfiguration::ClearColorPaletteColor(int which)
+{
+    if (which > CalChart::kNumberPalettes) {
+        throw std::runtime_error("Error, exceeding kNumberPalettes size");
+    }
+    mWriteQueue[std::string("PaletteColor") + std::to_string(which)] = [which]() {
+        ClearColorConfigValueForPalette(which, "PaletteColor");
+    };
+    mColorPaletteColor.at(which).reset();
+}
+
+auto CalChartConfiguration::GetColorPaletteName(int which) const -> std::string
+{
+    if (which > CalChart::kNumberPalettes) {
+        throw std::runtime_error("Error, exceeding kNumberPalettes size");
+    }
+    if (!mColorPaletteName.at(which)) {
+        mColorPaletteName.at(which) = GetConfigValue<std::string>(std::string("PaletteName") + std::to_string(which), CalChart::kPaletteNameDefault[which]);
+    }
+    return *mColorPaletteName.at(which);
+}
+
+void CalChartConfiguration::SetColorPaletteName(int which, std::string const& name)
+{
+    if (which > CalChart::kNumberPalettes) {
+        throw std::runtime_error("Error, exceeding kNumberPalettes size");
+    }
+    mWriteQueue[std::string("PaletteName") + std::to_string(which)] = [which, name]() {
+        SetConfigValue<std::string>(std::string("PaletteName") + std::to_string(which), name, CalChart::kPaletteNameDefault[which]);
+    };
+    mColorPaletteName.at(which) = name;
+}
+
+void CalChartConfiguration::ClearColorPaletteName(int which)
+{
+    if (which > CalChart::kNumberPalettes) {
+        throw std::runtime_error("Error, exceeding kNumberPalettes size");
+    }
+    mWriteQueue[std::string("PaletteName") + std::to_string(which)] = [which]() {
+        SetConfigValue<std::string>(std::string("PaletteName") + std::to_string(which), CalChart::kPaletteNameDefault[which], CalChart::kPaletteNameDefault[which]);
+    };
+    mColorPaletteName.at(which).reset();
+}
+
+// Assumes the index is less than colorsAndWidth/InfoDefaultArray lengths
+template <typename Map, typename InfoDefault>
+auto Get_BrushAndPen(std::optional<int> palette, int index, Map& colorsAndWidth, InfoDefault const& InfoDefaultArray) -> CalChart::BrushAndPen
+{
+    if (!colorsAndWidth.at(index)) {
+        auto key = std::get<0>(InfoDefaultArray.at(index));
+        auto def = CalChartConfiguration::ColorWidth_t{ wxCalChart::toColor(std::get<1>(InfoDefaultArray.at(index))), std::get<2>(InfoDefaultArray.at(index)) };
+        colorsAndWidth.at(index) = palette ? GetConfigValue(*palette, key, def) : GetConfigValue(key, def);
+    }
+    auto colorAndWidth = *colorsAndWidth.at(index);
     return { std::get<0>(colorAndWidth), CalChart::Brush::Style::Solid, CalChart::Pen::Style::Solid, std::get<1>(colorAndWidth) };
 }
 
-template <typename Color, typename Map, typename InfoDefault, typename WriteQueue>
-void Set_BrushAndPen(Color c, CalChart::BrushAndPen brushAndPen, Map& colorsAndWidth, InfoDefault const& InfoDefaultArray, WriteQueue& writeQueue)
+template <typename Map, typename InfoDefault, typename WriteQueue>
+void Set_BrushAndPen(std::optional<int> palette, int index, CalChart::BrushAndPen brushAndPen, Map& colorsAndWidth, InfoDefault const& InfoDefaultArray, WriteQueue& writeQueue)
 {
     CalChartConfiguration::ColorWidth_t v{ brushAndPen.color, brushAndPen.width };
 
-    CalChartConfiguration::ColorWidth_t defaultValue{ wxCalChart::toColor(std::get<1>(InfoDefaultArray[toUType(c)])), std::get<2>(InfoDefaultArray[toUType(c)]) };
-    writeQueue[std::get<0>(InfoDefaultArray[toUType(c)])] = [info = std::get<0>(InfoDefaultArray[toUType(c)]), defaultValue, v]() {
-        SetConfigValue<CalChartConfiguration::ColorWidth_t>(info, v, defaultValue);
+    auto key = std::get<0>(InfoDefaultArray.at(index));
+    auto def = CalChartConfiguration::ColorWidth_t{ wxCalChart::toColor(std::get<1>(InfoDefaultArray.at(index))), std::get<2>(InfoDefaultArray.at(index)) };
+    writeQueue[std::get<0>(InfoDefaultArray.at(index))] = [palette, key, def, v]() {
+        if (palette) {
+            SetConfigValue(*palette, key, v, def);
+        } else {
+            SetConfigValue(key, v, def);
+        }
     };
-    colorsAndWidth[c] = v;
+    colorsAndWidth.at(index) = v;
 }
 
-template <typename Color, typename Map, typename InfoDefault>
-void Clear_ConfigColor(Color selection, Map& colorsAndWidth, InfoDefault const& InfoDefaultArray)
+template <typename Map, typename InfoDefault>
+void Clear_BrushAndPen(std::optional<int> palette, int index, Map& colorsAndWidth, InfoDefault const& InfoDefaultArray)
 {
-    auto default_value = CalChartConfiguration::ColorWidth_t(wxCalChart::toColor(std::get<1>(InfoDefaultArray[toUType(selection)])), std::get<2>(InfoDefaultArray[toUType(selection)]));
-    SetConfigValue<CalChartConfiguration::ColorWidth_t>(std::get<0>(InfoDefaultArray[toUType(selection)]), default_value, default_value);
+    auto key = std::get<0>(InfoDefaultArray.at(index));
+    auto def = CalChartConfiguration::ColorWidth_t{ wxCalChart::toColor(std::get<1>(InfoDefaultArray.at(index))), std::get<2>(InfoDefaultArray.at(index)) };
+    // TODO: This shouldn't clear right away, should wait.
+    if (palette) {
+        SetConfigValue(*palette, key, def, def);
+    } else {
+        SetConfigValue(key, def, def);
+    }
     // clear out the cached value
-    colorsAndWidth.erase(selection);
+    colorsAndWidth.at(index).reset();
 }
 
-CalChart::BrushAndPen
-CalChartConfiguration::Get_CalChartBrushAndPen(CalChart::Colors c) const
+auto CalChartConfiguration::Get_CalChartBrushAndPen(int palette, CalChart::Colors which) const -> CalChart::BrushAndPen
 {
-    return Get_CalChartBrushAndPen(GetActiveColorPalette(), c);
-}
-
-void CalChartConfiguration::Set_CalChartBrushAndPen(CalChart::Colors c, CalChart::BrushAndPen brushAndPen)
-{
-    return Set_CalChartBrushAndPen(GetActiveColorPalette(), c, brushAndPen);
-}
-
-void CalChartConfiguration::Clear_CalChartConfigColor(CalChart::Colors selection)
-{
-    return Clear_CalChartConfigColor(GetActiveColorPalette(), selection);
-}
-
-CalChart::BrushAndPen
-CalChartConfiguration::Get_CalChartBrushAndPen(int palette, CalChart::Colors c) const
-{
-    if (c >= CalChart::Colors::NUM)
-        throw std::runtime_error("Error, exceeding CalChart::Colors::NUM size");
-    if (palette >= kNumberPalettes)
-        throw std::runtime_error("Error, exceeding kNumberPalettes size");
-    return Get_BrushAndPen(c, mColorsAndWidth[palette], CalChart::ColorInfoDefaults);
-}
-
-void CalChartConfiguration::Set_CalChartBrushAndPen(int palette, CalChart::Colors c, CalChart::BrushAndPen brushAndPen)
-{
-    if (c >= CalChart::Colors::NUM) {
+    if (which >= CalChart::Colors::NUM) {
         throw std::runtime_error("Error, exceeding CalChart::Colors::NUM size");
     }
-    if (palette >= kNumberPalettes) {
+    if (palette >= CalChart::kNumberPalettes) {
         throw std::runtime_error("Error, exceeding kNumberPalettes size");
     }
-
-    Set_BrushAndPen(c, brushAndPen, mColorsAndWidth[palette], CalChart::ColorInfoDefaults, mWriteQueue);
+    return Get_BrushAndPen(palette, toUType(which), mColorsAndWidth[palette], CalChart::ColorInfoDefaults);
 }
 
-void CalChartConfiguration::Clear_CalChartConfigColor(int palette, CalChart::Colors selection)
+void CalChartConfiguration::Set_CalChartBrushAndPen(int palette, CalChart::Colors which, CalChart::BrushAndPen brushAndPen)
 {
-    if (selection >= CalChart::Colors::NUM) {
+    if (which >= CalChart::Colors::NUM) {
         throw std::runtime_error("Error, exceeding CalChart::Colors::NUM size");
     }
-    if (palette >= kNumberPalettes) {
+    if (palette >= CalChart::kNumberPalettes) {
         throw std::runtime_error("Error, exceeding kNumberPalettes size");
     }
-
-    Clear_ConfigColor(selection, mColorsAndWidth[palette], CalChart::ColorInfoDefaults);
+    Set_BrushAndPen(palette, toUType(which), brushAndPen, mColorsAndWidth[palette], CalChart::ColorInfoDefaults, mWriteQueue);
 }
 
-CalChart::BrushAndPen
-CalChartConfiguration::Get_ContCellBrushAndPen(CalChart::ContinuityCellColors c) const
+void CalChartConfiguration::Clear_CalChartConfigColor(int palette, CalChart::Colors which)
 {
-    if (c >= CalChart::ContinuityCellColors::NUM) {
-        throw std::runtime_error("Error, exceeding CalChart::ContinuityCellColors::NUM size");
+    if (which >= CalChart::Colors::NUM) {
+        throw std::runtime_error("Error, exceeding CalChart::Colors::NUM size");
     }
-    return Get_BrushAndPen(c, mContCellColorsAndWidth, CalChart::ContCellColorInfoDefaults);
+    if (palette >= CalChart::kNumberPalettes) {
+        throw std::runtime_error("Error, exceeding kNumberPalettes size");
+    }
+    Clear_BrushAndPen(palette, toUType(which), mColorsAndWidth[palette], CalChart::ColorInfoDefaults);
 }
 
-void CalChartConfiguration::Set_ContCellBrushAndPen(CalChart::ContinuityCellColors c, CalChart::BrushAndPen brushAndPen)
+auto CalChartConfiguration::Get_ContCellBrushAndPen(CalChart::ContinuityCellColors which) const -> CalChart::BrushAndPen
 {
-    if (c >= CalChart::ContinuityCellColors::NUM) {
+    if (which >= CalChart::ContinuityCellColors::NUM) {
         throw std::runtime_error("Error, exceeding CalChart::ContinuityCellColors::NUM size");
     }
-    Set_BrushAndPen(c, brushAndPen, mContCellColorsAndWidth, CalChart::ContCellColorInfoDefaults, mWriteQueue);
+    return Get_BrushAndPen({}, toUType(which), mContCellColorsAndWidth, CalChart::ContCellColorInfoDefaults);
 }
 
-void CalChartConfiguration::Clear_ContCellConfigColor(CalChart::ContinuityCellColors selection)
+void CalChartConfiguration::Set_ContCellBrushAndPen(CalChart::ContinuityCellColors which, CalChart::BrushAndPen brushAndPen)
 {
-    if (selection >= CalChart::ContinuityCellColors::NUM) {
+    if (which >= CalChart::ContinuityCellColors::NUM) {
         throw std::runtime_error("Error, exceeding CalChart::ContinuityCellColors::NUM size");
     }
-    Clear_ConfigColor(selection, mContCellColorsAndWidth, CalChart::ContCellColorInfoDefaults);
+    Set_BrushAndPen({}, toUType(which), brushAndPen, mContCellColorsAndWidth, CalChart::ContCellColorInfoDefaults, mWriteQueue);
+}
+
+void CalChartConfiguration::Clear_ContCellConfigColor(CalChart::ContinuityCellColors which)
+{
+    if (which >= CalChart::ContinuityCellColors::NUM) {
+        throw std::runtime_error("Error, exceeding CalChart::ContinuityCellColors::NUM size");
+    }
+    Clear_BrushAndPen({}, toUType(which), mContCellColorsAndWidth, CalChart::ContCellColorInfoDefaults);
 }
 
 ///// Show Configuration /////
 
-CalChart::ShowModeData_t
-CalChartConfiguration::Get_ShowModeData(CalChart::ShowModes which) const
+auto CalChartConfiguration::Get_ShowModeData(CalChart::ShowModes which) const -> CalChart::ShowModeData_t
 {
     auto twhich = toUType(which);
     if (twhich >= toUType(CalChart::ShowModes::NUM)) {
         throw std::runtime_error("Error, exceeding CalChart::ShowModes::NUM size");
     }
-
-    if (!mShowModeInfos.count(which)) {
+    if (!mShowModeInfos.at(twhich)) {
         auto& defaultValue = CalChart::kShowModeDefaultValues[twhich];
-        mShowModeInfos[which] = GetConfigValue<CalChart::ShowModeData_t>(
+        mShowModeInfos.at(twhich) = GetConfigValue<CalChart::ShowModeData_t>(
             std::string(std::get<0>(defaultValue)), CalChart::ShowModeData_t{ std::get<1>(defaultValue) });
     }
-    return mShowModeInfos[which];
+    return *mShowModeInfos.at(twhich);
 }
 
 void CalChartConfiguration::Set_ShowModeData(CalChart::ShowModes which, CalChart::ShowModeData_t const& values)
@@ -593,13 +612,12 @@ void CalChartConfiguration::Set_ShowModeData(CalChart::ShowModes which, CalChart
     if (twhich >= toUType(CalChart::ShowModes::NUM)) {
         throw std::runtime_error("Error, exceeding CalChart::ShowModes::NUM size");
     }
-
     auto& defaultValue = CalChart::kShowModeDefaultValues[twhich];
     mWriteQueue[std::string(std::get<0>(defaultValue))] = [defaultValue, values]() {
         SetConfigValue<CalChart::ShowModeData_t>(std::string(std::get<0>(defaultValue)), values,
             CalChart::ShowModeData_t{ std::get<1>(defaultValue) });
     };
-    mShowModeInfos[which] = values;
+    mShowModeInfos.at(twhich) = values;
 }
 
 void CalChartConfiguration::Clear_ShowModeData(CalChart::ShowModes which)
@@ -608,49 +626,49 @@ void CalChartConfiguration::Clear_ShowModeData(CalChart::ShowModes which)
     if (twhich >= toUType(CalChart::ShowModes::NUM)) {
         throw std::runtime_error("Error, exceeding CalChart::ShowModes::NUM size");
     }
-
     auto& defaultValue = CalChart::kShowModeDefaultValues[twhich];
     SetConfigValue<CalChart::ShowModeData_t>(std::string(std::get<0>(defaultValue)), CalChart::ShowModeData_t{ std::get<1>(defaultValue) },
         CalChart::ShowModeData_t{ std::get<1>(defaultValue) });
-    mShowModeInfos.erase(which);
+    mShowModeInfos.at(twhich).reset();
 }
 
 // Yard Lines
-std::string CalChartConfiguration::Get_yard_text(size_t which) const
+auto CalChartConfiguration::Get_yard_text(size_t which) const -> std::string
 {
-    if (which >= CalChart::kYardTextValues)
+    if (which >= CalChart::kYardTextValues) {
         throw std::runtime_error("Error, exceeding kYardTextValues size");
+    }
 
-    if (!mYardTextInfos.count(which)) {
+    if (!mYardTextInfos.at(which)) {
         auto key = std::string{ "YardLines_" } + std::to_string(which);
         auto default_value = CalChart::kDefaultYardLines[which];
-        mYardTextInfos[which] = GetConfigValue(key, CalChart::kDefaultYardLines[which]);
+        mYardTextInfos.at(which) = GetConfigValue(key, CalChart::kDefaultYardLines[which]);
     }
-    return mYardTextInfos[which];
+    return *mYardTextInfos.at(which);
 }
 
-void CalChartConfiguration::Set_yard_text(size_t which, const std::string& value)
+void CalChartConfiguration::Set_yard_text(size_t which, std::string const& value)
 {
-    if (which >= kYardTextValues)
+    if (which >= kYardTextValues) {
         throw std::runtime_error("Error, exceeding kYardTextValues size");
-
+    }
     auto key = std::string{ "YardLines_" } + std::to_string(which);
     auto default_value = CalChart::kDefaultYardLines[which];
     mWriteQueue[key] = [key, value, default_value]() {
         SetConfigValue(key, value, default_value);
     };
-    mYardTextInfos[which] = value;
+    mYardTextInfos.at(which) = value;
 }
 
 void CalChartConfiguration::Clear_yard_text(size_t which)
 {
-    if (which >= kYardTextValues)
+    if (which >= kYardTextValues) {
         throw std::runtime_error("Error, exceeding kYardTextValues size");
-
+    }
     auto key = std::string{ "YardLines_" } + std::to_string(which);
     auto default_value = CalChart::kDefaultYardLines[which];
     SetConfigValue(key, default_value, default_value);
-    mYardTextInfos.erase(which);
+    mYardTextInfos.at(which).reset();
 }
 
 // function technically const because it is changing a mutable value
@@ -662,7 +680,7 @@ void CalChartConfiguration::FlushWriteQueue() const
     mWriteQueue.clear();
 }
 
-CalChart::ShowMode GetConfigShowMode(CalChartConfiguration const& config, const std::string& which)
+auto GetConfigShowMode(CalChartConfiguration const& config, std::string const& which) -> CalChart::ShowMode
 {
     auto iter = std::find_if(std::begin(CalChart::kShowModeDefaultValues), std::end(CalChart::kShowModeDefaultValues), [which](auto&& t) {
         return std::get<0>(t) == which;
@@ -674,27 +692,27 @@ CalChart::ShowMode GetConfigShowMode(CalChartConfiguration const& config, const 
     throw std::runtime_error("No such show");
 }
 
-std::vector<CalChart::Color> GetColorPaletteColors(CalChartConfiguration const& config)
+auto GetColorPaletteColors(CalChartConfiguration const& config) -> std::vector<CalChart::Color>
 {
     auto result = std::vector<CalChart::Color>{};
-    for (auto i = 0; i < kNumberPalettes; ++i) {
+    for (auto i = 0; i < CalChart::kNumberPalettes; ++i) {
         result.push_back(config.GetColorPaletteColor(i));
     }
     return result;
 }
 
-std::vector<std::string> GetColorPaletteNames(CalChartConfiguration const& config)
+auto GetColorPaletteNames(CalChartConfiguration const& config) -> std::vector<std::string>
 {
     auto result = std::vector<std::string>{};
-    for (auto i = 0; i < kNumberPalettes; ++i) {
+    for (auto i = 0; i < CalChart::kNumberPalettes; ++i) {
         result.push_back(config.GetColorPaletteName(i));
     }
     return result;
 }
 
-std::array<std::string, CalChart::kYardTextValues> Get_yard_text_all(CalChartConfiguration const& config)
+auto Get_yard_text_all(CalChartConfiguration const& config) -> std::array<std::string, CalChart::kYardTextValues>
 {
-    std::array<std::string, CalChart::kYardTextValues> values;
+    auto values = std::array<std::string, CalChart::kYardTextValues>{};
     for (auto i = 0; i < CalChart::kYardTextValues; ++i) {
         values[i] = config.Get_yard_text(i);
     }
