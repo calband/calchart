@@ -40,7 +40,7 @@ class ContinuityBrowserPerCont : public wxPanel {
     using super = wxPanel;
 
 public:
-    ContinuityBrowserPerCont(wxWindow* parent, CalChart::SYMBOL_TYPE sym, CalChartConfiguration const& config);
+    ContinuityBrowserPerCont(wxWindow* parent, CalChart::SYMBOL_TYPE sym, CalChart::Configuration const& config);
     ~ContinuityBrowserPerCont() override = default;
 
     void DoSetContinuity(CalChart::Continuity const& new_cont);
@@ -50,7 +50,7 @@ public:
     auto GetView() const { return mView; }
 
 private:
-    void CreateControls(CalChartConfiguration const& config);
+    void CreateControls(CalChart::Configuration const& config);
 
     // Internals
     CalChartView* mView{};
@@ -58,7 +58,7 @@ private:
     CalChart::SYMBOL_TYPE mSym{};
 };
 
-ContinuityBrowserPerCont::ContinuityBrowserPerCont(wxWindow* parent, CalChart::SYMBOL_TYPE sym, CalChartConfiguration const& config)
+ContinuityBrowserPerCont::ContinuityBrowserPerCont(wxWindow* parent, CalChart::SYMBOL_TYPE sym, CalChart::Configuration const& config)
     : super(parent)
     , mSym(sym)
 {
@@ -68,7 +68,7 @@ ContinuityBrowserPerCont::ContinuityBrowserPerCont(wxWindow* parent, CalChart::S
     OnUpdate();
 }
 
-void ContinuityBrowserPerCont::CreateControls(CalChartConfiguration const& config)
+void ContinuityBrowserPerCont::CreateControls(CalChart::Configuration const& config)
 {
     wxUI::VSizer{
         BasicSizerFlags(),
@@ -103,7 +103,7 @@ void ContinuityBrowserPerCont::SetView(CalChartView* view)
     mCanvas->SetView(view);
 }
 
-ContinuityBrowser::ContinuityBrowser(wxWindow* parent, wxSize const& size, CalChartConfiguration const& config)
+ContinuityBrowser::ContinuityBrowser(wxWindow* parent, wxSize const& size, CalChart::Configuration const& config)
     : super(parent, wxID_ANY, wxDefaultPosition, size, wxScrolledWindowStyle)
 {
     CreateControls(config);
@@ -118,7 +118,7 @@ void ContinuityBrowser::Init()
 {
 }
 
-void ContinuityBrowser::CreateControls(CalChartConfiguration const& config)
+void ContinuityBrowser::CreateControls(CalChart::Configuration const& config)
 {
     wxUI::VSizer{
         wxUI::Line{}.withStyle(wxLI_HORIZONTAL),

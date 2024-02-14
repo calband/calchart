@@ -38,7 +38,7 @@ EVT_LEFT_DOWN(FieldThumbnailBrowser::HandleMouseDown)
 EVT_SIZE(FieldThumbnailBrowser::HandleSizeEvent)
 END_EVENT_TABLE()
 
-FieldThumbnailBrowser::FieldThumbnailBrowser(CalChartConfiguration const& config, wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+FieldThumbnailBrowser::FieldThumbnailBrowser(CalChart::Configuration const& config, wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
     : wxScrolledWindow(parent, id, pos, size, style, name)
     , mXScrollPadding(wxSystemSettings::GetMetric(wxSYS_VSCROLL_X))
     , mYNameSize(GetThumbnailFontSize())

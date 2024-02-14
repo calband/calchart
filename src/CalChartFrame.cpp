@@ -51,6 +51,7 @@
 #include "PrintPostScriptDialog.h"
 #include "SetupInstruments.h"
 #include "SetupMarchers.h"
+#include "SystemConfiguration.h"
 #include "TransitionSolverFrame.h"
 #include "TransitionSolverView.h"
 #include "ccvers.h"
@@ -180,7 +181,7 @@ END_EVENT_TABLE()
 
 class CalChartPrintout : public wxPrintout {
 public:
-    CalChartPrintout(wxString const& title, CalChartDoc const& show, CalChartConfiguration const& config_)
+    CalChartPrintout(wxString const& title, CalChartDoc const& show, CalChart::Configuration const& config_)
         : wxPrintout(title)
         , mShow(show)
         , mConfig(config_)
@@ -205,11 +206,11 @@ public:
         return true;
     }
     CalChartDoc const& mShow;
-    CalChartConfiguration const& mConfig;
+    CalChart::Configuration const& mConfig;
 };
 
 // Main frame constructor
-CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChartConfiguration& config, wxDocParentFrame* frame, wxPoint const& pos, wxSize const& size)
+CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configuration& config, wxDocParentFrame* frame, wxPoint const& pos, wxSize const& size)
     : wxDocChildFrame(doc, view, frame, -1, "CalChart", pos, size)
     , mConfig(config)
     , mAUIManager(new wxAuiManager(this))
@@ -494,10 +495,10 @@ void CalChartFrame::OnCmdPageSetup(wxCommandEvent&)
 void CalChartFrame::OnCmdLegacyPrint(wxCommandEvent&)
 {
     if (GetShow()) {
-        auto localConfig = mConfig;
+        auto localConfig = mConfig.Copy();
         PrintPostScriptDialog dialog(static_cast<CalChartDoc*>(GetDocument()), localConfig, this);
         if (dialog.ShowModal() == wxID_OK) {
-            CalChartConfiguration::AssignConfig(localConfig);
+            wxCalChart::AssignConfig(localConfig);
             dialog.PrintShow();
         }
     }
@@ -520,11 +521,11 @@ void CalChartFrame::OnCmdExportViewerFile(wxCommandEvent&)
 
 void CalChartFrame::OnCmdPreferences(wxCommandEvent&)
 {
-    auto localConfig = mConfig;
+    auto localConfig = mConfig.Copy();
     CalChartPreferences dialog1(this, localConfig);
     if (dialog1.ShowModal() == wxID_OK) {
         // here's where we flush out the configuration.
-        CalChartConfiguration::AssignConfig(localConfig);
+        wxCalChart::AssignConfig(localConfig);
         GetFieldView()->OnUpdate(nullptr);
     }
 }

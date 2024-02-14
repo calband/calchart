@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartAngles.h"
 #include "CalChartUtils.h"
 #include <array>
 #include <string>
@@ -162,18 +163,6 @@ static const YardLinesInfo_t kDefaultYardLines = {
     "-5", "-10", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N"
 };
 
-// we lay out directions in clockwise order from North
-enum class Direction {
-    North,
-    NorthEast,
-    East,
-    SouthEast,
-    South,
-    SouthWest,
-    West,
-    NorthWest,
-};
-
 enum class PSFONT {
     SYMBOL,
     NORM,
@@ -280,5 +269,23 @@ inline auto GetContCellDefaultPenWidth() -> std::vector<int>
     static auto result = details::vector_at_offset<2>(CalChart::ContCellColorInfoDefaults);
     return result;
 }
+
+inline constexpr auto kViewPoint_x_1 = 0.0;
+inline constexpr auto kViewPoint_y_1 = -60.0;
+inline constexpr auto kViewPoint_z_1 = 20.0;
+inline constexpr auto kViewAngle_1 = CalChart::pi / 2.0;
+inline constexpr auto kViewAngle_z_1 = -CalChart::pi / 8.0;
+
+inline constexpr auto kViewPoint_x_2 = 0.0;
+inline constexpr auto kViewPoint_y_2 = -16.0;
+inline constexpr auto kViewPoint_z_2 = 2.5;
+inline constexpr auto kViewAngle_2 = CalChart::pi / 2.0;
+inline constexpr auto kViewAngle_z_2 = CalChart::Radian{};
+
+inline constexpr auto kViewPoint_x_3 = 60.0;
+inline constexpr auto kViewPoint_y_3 = -55.0;
+inline constexpr auto kViewPoint_z_3 = 20.0;
+inline constexpr auto kViewAngle_3 = 11.0 * CalChart::pi / 16.0;
+inline constexpr auto kViewAngle_z_3 = -CalChart::pi / 8.0;
 
 }

@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2012  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ class CalChartConfiguration;
 
 class CalChartView : public wxView {
 public:
-    CalChartView();
+    CalChartView() = default;
     ~CalChartView() = default;
 
     bool OnCreate(wxDocument* doc, long flags) override;
@@ -52,7 +52,7 @@ public:
     void DrawUncommitedMovePoints(wxDC& dc, std::map<int, CalChart::Coord> const& positions);
     void OnDrawBackground(wxDC& dc);
 
-    void OnWizardSetup(CalChartDoc& show);
+    static void OnWizardSetup(CalChartDoc& show, wxWindow* parent);
 
     ///// Modify the show /////
     bool DoRotatePointPositions(int rotateAmount);
@@ -148,7 +148,6 @@ private:
 
     CalChartFrame* mFrame{};
     CalChartDoc* mShow{};
-    CalChartConfiguration& mConfig;
     // a cached version of the sheet background images for convenience.
     BackgroundImages mBackgroundImages;
 

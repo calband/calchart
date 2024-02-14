@@ -21,6 +21,7 @@
 */
 
 #include "PreferencesContCellSetup.h"
+#include "CalChartConfiguration.h"
 #include "CalChartContinuityToken.h"
 #include "CalChartDrawPrimativesHelper.h"
 #include "ContinuityBrowserPanel.h"

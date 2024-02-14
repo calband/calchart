@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2022  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,16 +21,28 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartConstants.h"
 #include "CalChartUtils.h"
 #include <cmath>
 #include <compare>
+#include <numbers>
 #include <ostream>
 
 namespace CalChart {
 
 struct Radian;
 struct Degree;
+
+// we lay out directions in clockwise order from North
+enum class Direction {
+    North,
+    NorthEast,
+    East,
+    SouthEast,
+    South,
+    SouthWest,
+    West,
+    NorthWest,
+};
 
 // we generally implement Degree related functions in Radian.
 struct Radian {

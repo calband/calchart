@@ -21,9 +21,11 @@
 
 #include "CalChartSplash.h"
 #include "CalChartApp.h"
+#include "CalChartConfiguration.h"
 #include "CalChartPreferences.h"
 #include "ConfigurationDebugDialog.h"
 #include "StackDrawPlayground.h"
+#include "SystemConfiguration.h"
 #include "basic_ui.h"
 #include "ccvers.h"
 
@@ -83,7 +85,7 @@ auto BitmapWithBandIcon(wxSize const& size)
     return wxBitmap(BITMAP_NAME(calchart));
 }
 
-CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString const& title, CalChartConfiguration& config)
+CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString const& title, CalChart::Configuration& config)
     : super(manager, frame, wxID_ANY, title)
     , mConfig(config)
 {
@@ -195,8 +197,8 @@ void CalChartSplash::Help()
 void CalChartSplash::OnCmdPreferences(wxCommandEvent&)
 {
     // here's where we flush out the configuration.
-    auto localConfig = mConfig;
+    auto localConfig = mConfig.Copy();
     if (CalChartPreferences(this, localConfig).ShowModal() == wxID_OK) {
-        CalChartConfiguration::AssignConfig(localConfig);
+        wxCalChart::AssignConfig(localConfig);
     }
 }

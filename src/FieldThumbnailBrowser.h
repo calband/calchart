@@ -23,7 +23,9 @@
 #include <wx/docview.h>
 
 class CalChartView;
-class CalChartConfiguration;
+namespace CalChart {
+class Configuration;
+}
 
 class FieldThumbnailBrowser : public wxScrolledWindow {
     using super = wxScrolledWindow;
@@ -31,7 +33,7 @@ class FieldThumbnailBrowser : public wxScrolledWindow {
 
 public:
     FieldThumbnailBrowser(
-        CalChartConfiguration const& config,
+        CalChart::Configuration const& config,
         wxWindow* parent,
         wxWindowID id = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
@@ -66,5 +68,5 @@ private:
     const int mYScrollPadding{};
 
     bool mLayoutHorizontal{ false };
-    CalChartConfiguration const& mConfig;
+    CalChart::Configuration const& mConfig;
 };

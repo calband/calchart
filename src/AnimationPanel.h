@@ -33,7 +33,10 @@ class wxStaticText;
 class wxSpinCtrl;
 class wxButton;
 class CCOmniviewCanvas;
-class CalChartConfiguration;
+
+namespace CalChart {
+class Configuration;
+}
 
 // Animiation Panel is a little bit different because it has it's own view.
 // When we are animating a show we are taking an CalChart animation object
@@ -45,7 +48,7 @@ class AnimationPanel : public wxPanel {
     wxDECLARE_EVENT_TABLE();
 
 public:
-    AnimationPanel(CalChartConfiguration& config, wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, wxString const& name = wxPanelNameStr);
+    AnimationPanel(CalChart::Configuration& config, wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, wxString const& name = wxPanelNameStr);
     ~AnimationPanel() override;
 
     void OnUpdate(); // Refresh from the View
@@ -97,5 +100,5 @@ private:
     bool mInMiniMode{};
     bool mShowOmni{};
     std::vector<wxWindow*> mItemsToHide;
-    CalChartConfiguration& mConfig;
+    CalChart::Configuration& mConfig;
 };

@@ -29,7 +29,9 @@
 #include <wxUI/wxUI.h>
 
 class CalChartDoc;
-class CalChartConfiguration;
+namespace CalChart {
+class Configuration;
+}
 
 class PrintPostScriptDialog : public wxDialog {
     DECLARE_CLASS(PrintPostScriptDialog)
@@ -38,7 +40,7 @@ class PrintPostScriptDialog : public wxDialog {
 public:
     PrintPostScriptDialog(
         const CalChartDoc* doc,
-        CalChartConfiguration& config,
+        CalChart::Configuration& config,
         wxFrame* parent,
         wxWindowID id = wxID_ANY,
         const wxString& caption = wxT("Print Dialog"),
@@ -72,7 +74,7 @@ public:
 
 private:
     CalChartDoc const* mShow;
-    CalChartConfiguration& mConfig;
+    CalChart::Configuration& mConfig;
     wxUI::TextCtrl::Proxy text_cmd;
 #ifdef PRINT__RUN_CMD
     wxUI::TextCtrl::Proxy text_opts;

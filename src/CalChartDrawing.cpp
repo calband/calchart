@@ -198,7 +198,7 @@ auto toCoord(wxPoint point)
 
 namespace CalChartDraw::Point {
 
-    auto DrawPoint(CalChartConfiguration const& config, CalChart::Point const& point, int reference, CalChart::Coord const& origin, wxString const& label)
+    auto DrawPoint(CalChart::Configuration const& config, CalChart::Point const& point, int reference, CalChart::Coord const& origin, wxString const& label)
     {
         return point.GetDrawCommands(
                    reference,
@@ -233,7 +233,7 @@ namespace CalChartDraw::Point {
     }
 
     auto GenerateSheetPointsDrawCommands(
-        CalChartConfiguration const& config,
+        CalChart::Configuration const& config,
         CalChart::SelectionList const& selection_list,
         int numberPoints,
         std::vector<std::string> const& labels,
@@ -265,7 +265,7 @@ namespace CalChartDraw::Point {
     }
 }
 
-auto GenerateGhostPointsDrawCommands(CalChartConfiguration const& config, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref) -> std::vector<CalChart::Draw::DrawCommand>
+auto GenerateGhostPointsDrawCommands(CalChart::Configuration const& config, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref) -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto unselectedColor = CalChart::Colors::GHOST_POINT;
     auto selectedColor = CalChart::Colors::GHOST_POINT_HLIT;
@@ -274,7 +274,7 @@ auto GenerateGhostPointsDrawCommands(CalChartConfiguration const& config, CalCha
     return CalChartDraw::Point::GenerateSheetPointsDrawCommands(config, selection_list, numberPoints, labels, sheet, ref, unselectedColor, selectedColor, unselectedTextColor, selectedTextColor);
 }
 
-auto GeneratePointsDrawCommands(CalChartConfiguration const& config, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, bool primary) -> std::vector<CalChart::Draw::DrawCommand>
+auto GeneratePointsDrawCommands(CalChart::Configuration const& config, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, bool primary) -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto unselectedColor = primary ? CalChart::Colors::POINT : CalChart::Colors::REF_POINT;
     auto selectedColor = primary ? CalChart::Colors::POINT_HILIT : CalChart::Colors::REF_POINT_HILIT;
@@ -298,7 +298,7 @@ struct DrawContFonts {
 };
 
 // draw the continuity starting at a specific offset
-void DrawCont(wxDC& dc, [[maybe_unused]] CalChartConfiguration const& config, CalChart::Textline_list const& print_continuity, wxRect const& bounding, bool landscape)
+void DrawCont(wxDC& dc, [[maybe_unused]] CalChart::Configuration const& config, CalChart::Textline_list const& print_continuity, wxRect const& bounding, bool landscape)
 {
     SaveAndRestore::DeviceOrigin orig_dev(dc);
     SaveAndRestore::UserScale orig_scale(dc);
@@ -510,7 +510,7 @@ GetMarcherBoundingBox(std::vector<CalChart::Point> const& pts)
     return { bounding_box_upper_left, bounding_box_low_right };
 }
 
-void DrawForPrintingHelper(wxDC& dc, CalChartConfiguration const& config, CalChartDoc const& show, CalChart::Sheet const& sheet, int ref, bool landscape)
+void DrawForPrintingHelper(wxDC& dc, CalChart::Configuration const& config, CalChartDoc const& show, CalChart::Sheet const& sheet, int ref, bool landscape)
 {
     // set up everything to be restored after we print
     SaveAndRestore::DeviceOrigin orig_dev(dc);
@@ -595,7 +595,7 @@ void DrawForPrintingHelper(wxDC& dc, CalChartConfiguration const& config, CalCha
     DrawCont(dc, config, sheet.GetPrintableContinuity(), wxRect(wxPoint(10, page.y * kContinuityStart[landscape]), wxSize(page.x - 20, page.y - page.y * kContinuityStart[landscape])), landscape);
 }
 
-void DrawForPrinting(wxDC* printerdc, CalChartConfiguration const& config, CalChartDoc const& show, CalChart::Sheet const& sheet, int ref, bool landscape)
+void DrawForPrinting(wxDC* printerdc, CalChart::Configuration const& config, CalChartDoc const& show, CalChart::Sheet const& sheet, int ref, bool landscape)
 {
     auto boundingBox = GetMarcherBoundingBox(sheet.GetPoints());
     auto forced_landscape = !landscape && (boundingBox.second.x - boundingBox.first.x) > CalChart::Int2CoordUnits(CalChart::kFieldStepSizeNorthSouth[0]);
@@ -623,7 +623,7 @@ void DrawForPrinting(wxDC* printerdc, CalChartConfiguration const& config, CalCh
 }
 
 auto GeneratePhatomPointsDrawCommands(
-    const CalChartConfiguration& config,
+    const CalChart::Configuration& config,
     const CalChartDoc& show,
     const CalChart::Sheet& sheet,
     const std::map<int, CalChart::Coord>& positions) -> std::vector<CalChart::Draw::DrawCommand>
@@ -854,13 +854,13 @@ namespace details {
 }
 
 namespace CalChartDraw {
-void DrawPath(wxDC& dc, CalChartConfiguration const& config, std::vector<CalChart::Draw::DrawCommand> const& draw_commands)
+void DrawPath(wxDC& dc, CalChart::Configuration const& config, std::vector<CalChart::Draw::DrawCommand> const& draw_commands)
 {
     wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::PATHS));
     wxCalChart::Draw::DrawCommandList(dc, draw_commands);
 }
 
-auto GenerateModeDrawCommands(CalChartConfiguration const& config, CalChart::ShowMode const& mode, HowToDraw howToDraw) -> std::vector<CalChart::Draw::DrawCommand>
+auto GenerateModeDrawCommands(CalChart::Configuration const& config, CalChart::ShowMode const& mode, HowToDraw howToDraw) -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto result = std::vector<CalChart::Draw::DrawCommand>{};
     auto inBlackAndWhite = howToDraw == ShowMode_kPrinting;
@@ -897,7 +897,7 @@ auto GenerateModeDrawCommands(CalChartConfiguration const& config, CalChart::Sho
     return result;
 }
 
-wxImage GetOmniLinesImage(const CalChartConfiguration& config, const CalChart::ShowMode& mode)
+wxImage GetOmniLinesImage(const CalChart::Configuration& config, const CalChart::ShowMode& mode)
 {
     auto fieldsize = mode.FieldSize();
     wxBitmap bmp(fieldsize.x, fieldsize.y, 32);

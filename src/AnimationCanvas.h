@@ -24,7 +24,9 @@
 #include <wx/wx.h>
 
 class AnimationView;
-class CalChartConfiguration;
+namespace CalChart {
+class Configuration;
+}
 
 // holds an instance of animation for the reference to draw.
 class AnimationCanvas : public wxPanel {
@@ -32,7 +34,7 @@ class AnimationCanvas : public wxPanel {
     wxDECLARE_EVENT_TABLE();
 
 public:
-    AnimationCanvas(CalChartConfiguration const& config, wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize);
+    AnimationCanvas(CalChart::Configuration const& config, wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize);
     ~AnimationCanvas() override = default;
 
     void OnUpdate(); // Refresh from the View
@@ -70,5 +72,5 @@ private:
     bool mMouseDown{};
     wxPoint mMouseStart{};
     wxPoint mMouseEnd{};
-    CalChartConfiguration const& mConfig;
+    CalChart::Configuration const& mConfig;
 };

@@ -24,14 +24,16 @@
 #include "CalChartText.h"
 #include <wx/wx.h>
 
-class CalChartConfiguration;
+namespace CalChart {
+class Configuration;
+}
 
 class PrintContinuityPreview : public wxScrolled<wxWindow> {
     using super = wxScrolled<wxWindow>;
     DECLARE_EVENT_TABLE()
 
 public:
-    PrintContinuityPreview(wxWindow* parent, CalChartConfiguration const& config);
+    PrintContinuityPreview(wxWindow* parent, CalChart::Configuration const& config);
 
     void SetPrintContinuity(const CalChart::PrintContinuity& printContinuity)
     {
@@ -45,7 +47,7 @@ public:
 private:
     CalChart::PrintContinuity mPrintContinuity{};
     bool m_landscape{};
-    CalChartConfiguration const& mConfig;
+    CalChart::Configuration const& mConfig;
 
     void OnPaint(wxPaintEvent& event);
     void OnSizeEvent(wxSizeEvent& event);

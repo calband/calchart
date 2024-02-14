@@ -26,6 +26,7 @@
 #include "CalChartSplash.h"
 #include "CalChartView.h"
 #include "HostAppInterface.h"
+#include "SystemConfiguration.h"
 #include "basic_ui.h"
 #include "platconf.h"
 
@@ -107,7 +108,7 @@ void CalChartApp::InitAppAsServer()
     mPrintDialogData = std::make_unique<wxPrintDialogData>();
 
     //// Create the main frame window
-    auto frame = new CalChartSplash(mDocManager, nullptr, "CalChart", CalChartConfiguration::GetGlobalConfig());
+    auto frame = new CalChartSplash(mDocManager, nullptr, "CalChart", wxCalChart::GetGlobalConfig());
 
     // Required for advanced HTML help
     wxFileSystem::AddHandler(new wxZipFSHandler);
@@ -157,7 +158,7 @@ void CalChartApp::ProcessArguments()
 void CalChartApp::ExitAppAsServer()
 {
     // Flush out the other commands
-    CalChartConfiguration::GetGlobalConfig().FlushWriteQueue();
+    wxCalChart::GetGlobalConfig().FlushWriteQueue();
     // Get the file history
     auto config = wxConfigBase::Get();
     config->SetPath("/FileHistory");

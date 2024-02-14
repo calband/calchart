@@ -29,6 +29,7 @@
 #include "CalChartDrawPrimatives.h"
 #include "CalChartImage.h"
 #include "CalChartSizes.h"
+#include <regex>
 #include <wx/brush.h>
 #include <wx/colour.h>
 #include <wx/font.h>
@@ -44,7 +45,7 @@ namespace wxCalChart {
 
 inline auto make_wxSize(CalChart::Coord coord) { return wxSize{ coord.x, coord.y }; }
 
-inline auto toColour(CalChart::ColorRGB c) -> wxColour
+inline auto toColour(CalChart::Color::ColorRGB c) -> wxColour
 {
     return { c.red, c.green, c.blue, c.alpha };
 }
@@ -58,18 +59,18 @@ inline auto toColour(CalChart::Color color) -> wxColour
 {
     return std::visit(
         CalChart::overloaded{
-            [](CalChart::ColorRGB c) { return toColour(c); },
+            [](CalChart::Color::ColorRGB c) { return toColour(c); },
             [](std::string const& str) { return toColour(str); } },
-        color);
+        color.mColor);
 }
 
 inline auto toRGB(CalChart::Color color) -> std::tuple<uint8_t, uint8_t, uint8_t>
 {
     return std::visit(
         CalChart::overloaded{
-            [](CalChart::ColorRGB c) { return std::tuple{ c.red, c.green, c.blue }; },
+            [](CalChart::Color::ColorRGB c) { return std::tuple{ c.red, c.green, c.blue }; },
             [](std::string const& str) { auto colour = toColour(str); return std::tuple{ colour.Red(), colour.Green(), colour.Blue()}; } },
-        color);
+        color.mColor);
 }
 
 inline auto toBrush(CalChart::Color c)
@@ -111,12 +112,12 @@ inline auto toPen(CalChart::BrushAndPen b)
 
 inline auto toColor(wxColour const& c) -> CalChart::Color
 {
-    return CalChart::ColorRGB{ c.Red(), c.Green(), c.Blue(), c.Alpha() };
+    return CalChart::Color{ c.Red(), c.Green(), c.Blue(), c.Alpha() };
 }
 
 inline auto toColor(std::string_view s) -> CalChart::Color
 {
-    return std::string{ s };
+    return CalChart::Color{ std::string{ s } };
 }
 
 inline auto toBrush(wxBrush const& b)

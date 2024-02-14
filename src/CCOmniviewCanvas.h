@@ -29,7 +29,9 @@
 
 class AnimationView;
 class CCOmniView_GLContext;
-class CalChartConfiguration;
+namespace CalChart {
+class Configuration;
+}
 
 class CCOmniviewCanvas : public wxGLCanvas {
     using super = wxGLCanvas;
@@ -40,7 +42,7 @@ public:
         float x, y, z;
     };
 
-    CCOmniviewCanvas(wxWindow* parent, CalChartConfiguration& config);
+    CCOmniviewCanvas(wxWindow* parent, CalChart::Configuration& config);
     ~CCOmniviewCanvas() override = default;
 
     void OnUpdate(); // Refresh from the View
@@ -66,7 +68,7 @@ private:
 
     std::shared_ptr<CCOmniView_GLContext> m_glContext;
     AnimationView* mView{};
-    CalChartConfiguration& mConfig;
+    CalChart::Configuration& mConfig;
 
     ViewPoint mViewPoint{};
 

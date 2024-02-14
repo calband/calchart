@@ -65,7 +65,7 @@ EVT_MOUSEWHEEL(FieldCanvas::OnMouseWheel)
 END_EVENT_TABLE()
 
 // Define a constructor for field canvas
-FieldCanvas::FieldCanvas(wxWindow* parent, CalChartView* view, float def_zoom, CalChartConfiguration const& config)
+FieldCanvas::FieldCanvas(wxWindow* parent, CalChartView* view, float def_zoom, CalChart::Configuration const& config)
     : super(config, parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER)
     , mView(view)
     , mConfig(config)
@@ -91,7 +91,7 @@ void FieldCanvas::OnFieldPaint(wxPaintEvent& event)
     OnPaint(event, mConfig);
 }
 
-void FieldCanvas::OnPaint(wxPaintEvent&, CalChartConfiguration const& config)
+void FieldCanvas::OnPaint(wxPaintEvent&, CalChart::Configuration const& config)
 {
     if (!mView) {
         return;
@@ -115,7 +115,7 @@ void FieldCanvas::OnPaint(wxPaintEvent&, CalChartConfiguration const& config)
     PaintMoveShapes(dc, config);
 }
 
-void FieldCanvas::PaintBackground(wxDC& dc, CalChartConfiguration const& config)
+void FieldCanvas::PaintBackground(wxDC& dc, CalChart::Configuration const& config)
 {
     // draw the background
     dc.SetBackgroundMode(wxTRANSPARENT);
@@ -123,28 +123,28 @@ void FieldCanvas::PaintBackground(wxDC& dc, CalChartConfiguration const& config)
     dc.Clear();
 }
 
-void FieldCanvas::PaintSelectShapes(wxDC& dc, CalChartConfiguration const& config)
+void FieldCanvas::PaintSelectShapes(wxDC& dc, CalChart::Configuration const& config)
 {
     if (mSelectTool) {
         PaintShapes(dc, config, mSelectTool->GetShapeList());
     }
 }
 
-void FieldCanvas::PaintMoveShapes(wxDC& dc, CalChartConfiguration const& config)
+void FieldCanvas::PaintMoveShapes(wxDC& dc, CalChart::Configuration const& config)
 {
     if (mMovePointsTool) {
         PaintShapes(dc, config, mMovePointsTool->GetShapeList());
     }
 }
 
-void FieldCanvas::PaintShapes(wxDC& dc, CalChartConfiguration const& config, ShapeList const& shapeList)
+void FieldCanvas::PaintShapes(wxDC& dc, CalChart::Configuration const& config, ShapeList const& shapeList)
 {
     for (auto&& i : shapeList) {
         PaintShapes(dc, config, i.get());
     }
 }
 
-void FieldCanvas::PaintShapes(wxDC& dc, CalChartConfiguration const& config, CalChart::Shape const* shapeList)
+void FieldCanvas::PaintShapes(wxDC& dc, CalChart::Configuration const& config, CalChart::Shape const* shapeList)
 {
     if (shapeList) {
         dc.SetBrush(*wxTRANSPARENT_BRUSH);

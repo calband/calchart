@@ -79,19 +79,19 @@ When a *View* wants to modify the CalChart Document, it would do so by creating 
 
 ### Drawing
 
-The wxWidgets has a concept of a "Device Context" called `wxDC` through which `wxFrame` objects can "Draw".  For CalChart, drawing is controlled via the `CalChartView` (and `AnimationView`) object.  The general flow is that when a redraw event needs to occur, the `CalChartView` will access the information on what to draw from the `CalChartDoc` (the Marcher position, dot type, direction, path) and use the `CalChartConfiguration` to determine the draw parameters and call the appropriate draw functions.
+The wxWidgets has a concept of a "Device Context" called `wxDC` through which `wxFrame` objects can "Draw".  For CalChart, drawing is controlled via the `CalChartView` (and `AnimationView`) object.  The general flow is that when a redraw event needs to occur, the `CalChartView` will access the information on what to draw from the `CalChartDoc` (the Marcher position, dot type, direction, path) and use the `CalChart::Configuration` to determine the draw parameters and call the appropriate draw functions.
 
 
-### CalChartConfiguration
+### CalChart::Configuration
 
-`CalChartConfiguration` interfaces with the system config for parameters that can tweak behavior and acts as a "cache" for the values.  For example, different colors or widths of texts that the user can manipulate for their taste preferences are stored in CalChartConfiguration.  Also, values that should be persist between executions of the CalChart program are stored in CalChartConfiguration.
+`CalChart::Configuration` interfaces with the system config for parameters that can tweak behavior and acts as a "cache" for the values.  For example, different colors or widths of texts that the user can manipulate for their taste preferences are stored in CalChart::Configuration.  Also, values that should be persist between executions of the CalChart program are stored in CalChart::Configuration.
 On `Get`, it reads the values from system config, and caches a local copy.
 On `Set` (or `Clear`), it updates it's cache, and puts the command into a write-queue.
 The write-queue needs to be explicitly flushed or the values will be lost.
 To use a config value, first get the Global config, and then `Get_` the value from it.  For example:
 
 ```
-auto save_interval = CalChartConfiguration::GetGlobalConfig().Get_AutosaveInterval();
+auto save_interval = wxCalChart::GetGlobalConfig().Get_AutosaveInterval();
 ```
 
 To add a new config value, add `DECLARE_CONFIGURATION_FUNCTIONS` in the class declaration of the right type.  This will make the `Get_`, `Set_` and `Clear_` functions available.  Then in the implementation file, declare `IMPLEMENT_CONFIGURATION_FUNCTIONS` with the default.
@@ -99,7 +99,7 @@ To add a new config value, add `DECLARE_CONFIGURATION_FUNCTIONS` in the class de
 
 ### CalChartPreferences
 
-`CalChartPreferences` is the Dialog that is used to interact and manipulate values of `CalChartConfiguration`.  `CalChartPreferences` is a `wxNotebook` of different Dialogs that visualize the values in `CalChartConfiguration`, and provide controls for changing their values, as well as a way to visualize what that change would produce.  Because we need a way to manipulate the values without affecting the current values, the approach is to make a local copy of the current Global `CalChartConfiguration` and then manipulate that.  This is the reason for a "write-queue" in the `CalChartPreferences`; we can manipulate a copy of the Configuration to see the effect without affecting the current settings.
+`CalChartPreferences` is the Dialog that is used to interact and manipulate values of `CalChart::Configuration`.  `CalChartPreferences` is a `wxNotebook` of different Dialogs that visualize the values in `CalChart::Configuration`, and provide controls for changing their values, as well as a way to visualize what that change would produce.  Because we need a way to manipulate the values without affecting the current values, the approach is to make a local copy of the current Global `CalChart::Configuration` and then manipulate that.  This is the reason for a "write-queue" in the `CalChartPreferences`; we can manipulate a copy of the Configuration to see the effect without affecting the current settings.
 
 So why use this copy/manipulate/assign paradigm than the Undo/Do approach used in other places of CalChart?  Because we don't want to "pollute" the undo stack with modifications of the Configuration.  It would be surprising that Undo would change the color of the background in calchart.
 

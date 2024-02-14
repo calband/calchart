@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2012  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -34,7 +34,6 @@
 
 class AnimationErrorsPanel;
 class AnimationPanel;
-class CalChartConfiguration;
 class CalChartDoc;
 class CalChartView;
 class ContinuityBrowser;
@@ -43,6 +42,9 @@ class FieldFrameControls;
 class FieldThumbnailBrowser;
 class PrintContinuityEditor;
 class wxAuiToolBar;
+namespace CalChart {
+class Configuration;
+}
 
 // Define the main editing frame
 class CalChartFrame : public wxDocChildFrame {
@@ -50,7 +52,7 @@ class CalChartFrame : public wxDocChildFrame {
 
 public:
     // CalChartFrame will own the show that is passed in
-    CalChartFrame(wxDocument* doc, wxView* view, CalChartConfiguration& config_, wxDocParentFrame* frame, const wxPoint& pos, const wxSize& size);
+    CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configuration& config_, wxDocParentFrame* frame, const wxPoint& pos, const wxSize& size);
     ~CalChartFrame() override;
 
     void OnCmdAppend(wxCommandEvent& event);
@@ -205,7 +207,7 @@ private:
     std::map<int, wxWindow*> mLookupEnumToSubWindow;
     std::map<wxWindow*, int> mLookupSubWindowToEnum;
 
-    CalChartConfiguration& mConfig;
+    CalChart::Configuration& mConfig;
     wxAuiManager* mAUIManager;
 
     bool mMainFieldVisible = true;

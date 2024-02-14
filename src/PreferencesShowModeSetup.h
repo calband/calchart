@@ -23,12 +23,15 @@
 
 #include "PreferencesUtils.h"
 
-#include "CalChartConfiguration.h"
 #include "CalChartShowMode.h"
 #include <wx/bmpcbox.h>
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>
 #include <wx/wx.h>
+
+namespace CalChart {
+class Configuration;
+}
 
 const int zoom_amounts[] = { 500, 200, 150, 100, 75, 50, 25, 10 };
 constexpr auto defaultZoom = 3;
@@ -38,7 +41,7 @@ class ShowModeSetup : public PreferencePage {
     DECLARE_CLASS(ShowModeSetup)
 
 public:
-    static ShowModeSetup* CreatePreference(CalChartConfiguration& config, wxWindow* parent)
+    static ShowModeSetup* CreatePreference(CalChart::Configuration& config, wxWindow* parent)
     {
         auto pref = new ShowModeSetup(config, parent);
         pref->Initialize();
@@ -47,7 +50,7 @@ public:
 
 private:
     // private, use the CreatePreference method
-    ShowModeSetup(CalChartConfiguration& config, wxWindow* parent)
+    ShowModeSetup(CalChart::Configuration& config, wxWindow* parent)
         : super(config, parent, "Setup Modes")
     {
     }

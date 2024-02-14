@@ -31,6 +31,7 @@
 #include "CalChartShowMode.h"
 #include "CalChartUtils.h"
 #include "ContinuityEditorPopup.h"
+#include "SystemConfiguration.h"
 #include "platconf.h"
 #include "print_ps.h"
 
@@ -50,10 +51,11 @@ IMPLEMENT_DYNAMIC_CLASS(CalChartDoc, CalChartDoc::super);
 
 // Create a new show
 CalChartDoc::CalChartDoc()
-    : mShow(Show::Create(GetConfigShowMode(CalChartConfiguration::GetGlobalConfig(), std::get<0>(CalChart::kShowModeDefaultValues[0]))))
+    : mConfig{ wxCalChart::GetGlobalConfig() }
+    , mShow(Show::Create(GetConfigShowMode(mConfig, std::get<0>(CalChart::kShowModeDefaultValues[0]))))
     , mTimer(*this)
 {
-    mTimer.Start(static_cast<int>(CalChartConfiguration::GetGlobalConfig().Get_AutosaveInterval()) * 1000);
+    mTimer.Start(static_cast<int>(mConfig.Get_AutosaveInterval()) * 1000);
 }
 
 // When a file is opened, we first check to see if there is a temporary
@@ -219,7 +221,7 @@ T& CalChartDoc::LoadObjectGeneric(T& stream)
                 return ContinuityEditorPopup::ProcessEditContinuity(GetDocumentWindow(), description, what, line, column).ToStdString();
             }
         };
-        mShow = Show::Create(GetConfigShowMode(CalChartConfiguration::GetGlobalConfig(), CalChart::GetShowModeNames()[0]), stream, &handlers);
+        mShow = Show::Create(GetConfigShowMode(mConfig, CalChart::GetShowModeNames()[0]), stream, &handlers);
     } catch (std::exception const& e) {
         wxString message = wxT("Error encountered:\n");
         message += e.what();
@@ -388,7 +390,7 @@ const ShowMode& CalChartDoc::GetShowMode() const { return mShow->GetShowMode(); 
 
 int CalChartDoc::PrintToPS(std::ostream& buffer, bool overview,
     int min_yards, const std::set<size_t>& isPicked,
-    const CalChartConfiguration& config_) const
+    const CalChart::Configuration& config_) const
 {
     auto doLandscape = config_.Get_PrintPSLandscape();
     auto doCont = config_.Get_PrintPSDoCont();

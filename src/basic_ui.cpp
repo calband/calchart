@@ -208,7 +208,7 @@ void ScrollZoomWindow::SetupSize()
 }
 
 MouseMoveScrollCanvas::MouseMoveScrollCanvas(
-    CalChartConfiguration const& config,
+    CalChart::Configuration const& config,
     wxWindow* parent,
     wxWindowID id,
     const wxPoint& pos,
@@ -256,7 +256,7 @@ void MouseMoveScrollCanvas::OnMouseWheel(wxMouseEvent& event)
 bool MouseMoveScrollCanvas::IsScrolling() const { return mScrolledLastMove; }
 
 ClickDragCtrlScrollCanvas::ClickDragCtrlScrollCanvas(
-    CalChartConfiguration const& config,
+    CalChart::Configuration const& config,
     wxWindow* parent,
     wxWindowID id,
     const wxPoint& pos,

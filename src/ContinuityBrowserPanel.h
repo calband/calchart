@@ -28,7 +28,9 @@
 #include <wx/wx.h>
 
 class CalChartView;
-class CalChartConfiguration;
+namespace CalChart {
+class Configuration;
+}
 
 class ContinuityBrowserPanel : public CustomListViewPanel {
     using super = CustomListViewPanel;
@@ -36,7 +38,7 @@ class ContinuityBrowserPanel : public CustomListViewPanel {
 
 public:
     // Basic functions
-    ContinuityBrowserPanel(CalChart::SYMBOL_TYPE sym, CalChartConfiguration const& config, wxWindow* parent,
+    ContinuityBrowserPanel(CalChart::SYMBOL_TYPE sym, CalChart::Configuration const& config, wxWindow* parent,
         wxWindowID winid = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
@@ -68,5 +70,5 @@ private:
     CalChartView* mView{};
     CalChart::Continuity mCont{};
     CalChart::SYMBOL_TYPE mSym{};
-    CalChartConfiguration const& mConfig;
+    CalChart::Configuration const& mConfig;
 };
