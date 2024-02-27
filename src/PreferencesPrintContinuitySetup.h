@@ -23,7 +23,6 @@
 
 #include "PreferencesUtils.h"
 
-#include "CalChartConfiguration.h"
 #include <wx/bmpcbox.h>
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>
@@ -32,6 +31,9 @@
 
 class FancyTextWin;
 class PrintContinuityPreview;
+namespace CalChart {
+class Configuration;
+}
 
 class PrintContinuitySetup : public PreferencePage {
     using super = PreferencePage;
@@ -39,7 +41,7 @@ class PrintContinuitySetup : public PreferencePage {
     DECLARE_EVENT_TABLE()
 
 public:
-    static PrintContinuitySetup* CreatePreference(CalChartConfiguration& config, wxWindow* parent)
+    static PrintContinuitySetup* CreatePreference(CalChart::Configuration& config, wxWindow* parent)
     {
         auto pref = new PrintContinuitySetup(config, parent);
         pref->Initialize();
@@ -48,7 +50,7 @@ public:
 
 private:
     // private, use the CreatePreference method
-    PrintContinuitySetup(CalChartConfiguration& config, wxWindow* parent)
+    PrintContinuitySetup(CalChart::Configuration& config, wxWindow* parent)
         : super(config, parent, "Print Continuity")
     {
     }

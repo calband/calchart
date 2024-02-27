@@ -24,7 +24,9 @@
 #include <wx/wx.h>
 
 class CalChartView;
-class CalChartConfiguration;
+namespace CalChart {
+class Configuration;
+}
 
 // holds an instance of animation for the reference to draw.
 class ColorPalettePanel : public wxControl {
@@ -32,7 +34,7 @@ class ColorPalettePanel : public wxControl {
     wxDECLARE_EVENT_TABLE();
 
 public:
-    ColorPalettePanel(CalChartConfiguration& config, wxWindow* parent, wxWindowID winid = wxID_ANY);
+    ColorPalettePanel(CalChart::Configuration& config, wxWindow* parent, wxWindowID winid = wxID_ANY);
     ~ColorPalettePanel() override = default;
 
     void OnUpdate(); // Refresh from the View
@@ -51,5 +53,5 @@ private:
     int WhichBox(wxPoint const& where);
 
     CalChartView* mView{};
-    CalChartConfiguration& mConfig;
+    CalChart::Configuration& mConfig;
 };

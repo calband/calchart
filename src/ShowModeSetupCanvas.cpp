@@ -21,6 +21,7 @@
 */
 
 #include "ShowModeSetupCanvas.h"
+#include "CalChartConfiguration.h"
 #include "CalChartDrawPrimativesHelper.h"
 #include "CalChartDrawing.h"
 #include "CalChartShowMode.h"
@@ -41,7 +42,7 @@ END_EVENT_TABLE()
 
 IMPLEMENT_CLASS(ShowModeSetupCanvas, ClickDragCtrlScrollCanvas)
 
-ShowModeSetupCanvas::ShowModeSetupCanvas(CalChartConfiguration& config, wxWindow* parent, wxWindowID id)
+ShowModeSetupCanvas::ShowModeSetupCanvas(CalChart::Configuration const& config, wxWindow* parent, wxWindowID id)
     : super(config, parent, id, wxDefaultPosition, wxSize(640, 240))
     , mConfig(config)
     , mMode(CalChart::ShowMode::GetDefaultShowMode())

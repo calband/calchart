@@ -21,18 +21,20 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartConfiguration.h"
 #include <wx/wx.h>
 
 class wxNotebook;
 
+namespace CalChart {
+class Configuration;
+}
 class CalChartPreferences : public wxDialog {
     using super = wxDialog;
     DECLARE_CLASS(CalChartPreferences)
     DECLARE_EVENT_TABLE()
 
 public:
-    CalChartPreferences(wxWindow* parent, CalChartConfiguration& config);
+    CalChartPreferences(wxWindow* parent, CalChart::Configuration& config);
     ~CalChartPreferences() = default;
 
     bool TransferDataToWindow() override;
@@ -41,5 +43,5 @@ public:
 private:
     void OnCmdResetAll(wxCommandEvent&);
     wxNotebook* mNotebook;
-    CalChartConfiguration& mConfig;
+    CalChart::Configuration& mConfig;
 };

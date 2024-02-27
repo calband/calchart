@@ -108,7 +108,7 @@ auto GeneratePointDrawCommand(Range&& range, Function predicate, CalChart::Brush
 
 }
 
-AnimationView::AnimationView(CalChartView* view, CalChartConfiguration const& config, wxWindow* frame)
+AnimationView::AnimationView(CalChartView* view, CalChart::Configuration const& config, wxWindow* frame)
     : mView(view)
     , mConfig(config)
     , mMeasure{ "AnimationViewDraw" }
@@ -124,7 +124,7 @@ AnimationView::~AnimationView()
 
 void AnimationView::RegenerateImages() const
 {
-    auto spriteScale = CalChartConfiguration::GetGlobalConfig().Get_SpriteBitmapScale();
+    auto spriteScale = mConfig.Get_SpriteBitmapScale();
     if (spriteScale == mScaleSize) {
         return;
     }
@@ -158,7 +158,7 @@ void AnimationView::OnDraw(wxDC* dc)
     wxCalChart::Draw::DrawCommandList(*dc, GenerateDraw(mConfig));
 }
 
-auto AnimationView::GenerateDraw(CalChartConfiguration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
+auto AnimationView::GenerateDraw(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
 {
     if (!mAnimation) {
         // no animation, our job is done.
@@ -176,7 +176,7 @@ auto AnimationView::GenerateDraw(CalChartConfiguration const& config) const -> s
     return drawCmds;
 }
 
-auto AnimationView::GenerateDrawDots(CalChartConfiguration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
+auto AnimationView::GenerateDrawDots(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto allInfo = mAnimation->GetAllAnimateInfo();
     auto allSelected = allInfo | std::views::filter([this](auto&& info) { return mView->IsSelected(info.index); });
@@ -213,7 +213,7 @@ auto AnimationView::GenerateDrawDots(CalChartConfiguration const& config) const 
     return drawCmds + mView->GetShowMode().Offset();
 }
 
-auto AnimationView::GenerateDrawSprites(CalChartConfiguration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
+auto AnimationView::GenerateDrawSprites(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
 {
     RegenerateImages();
     constexpr auto comp_X = 0.5;

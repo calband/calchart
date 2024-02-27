@@ -26,7 +26,9 @@
 #include <wx/wx.h>
 #include <wxUI/wxUI.h>
 
-class CalChartConfiguration;
+namespace CalChart {
+class Configuration;
+}
 class CalChartView;
 class PrintContinuityEditor;
 class FancyTextWin;
@@ -43,7 +45,7 @@ class PrintContinuityEditor : public wxPanel {
 
 public:
     PrintContinuityEditor(wxWindow* parent,
-        CalChartConfiguration const& config,
+        CalChart::Configuration const& config,
         wxWindowID winid = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
@@ -95,5 +97,5 @@ private:
 
     wxString mPreviousText{};
     bool mInMiniMode{};
-    CalChartConfiguration const& mConfig;
+    CalChart::Configuration const& mConfig;
 };

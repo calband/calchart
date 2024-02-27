@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartConstants.h"
 #include "PreferencesUtils.h"
 #include <wxUI/wxUI.h>
 
@@ -36,7 +37,7 @@ class ContCellSetup : public PreferencePage {
     DECLARE_EVENT_TABLE()
 
 public:
-    static auto CreatePreference(CalChartConfiguration& config, wxWindow* parent) -> ContCellSetup*
+    static auto CreatePreference(CalChart::Configuration& config, wxWindow* parent) -> ContCellSetup*
     {
         auto pref = new ContCellSetup(config, parent);
         pref->Initialize();
@@ -45,7 +46,7 @@ public:
 
 private:
     // private, use the CreatePreference method
-    ContCellSetup(CalChartConfiguration& config, wxWindow* parent)
+    ContCellSetup(CalChart::Configuration& config, wxWindow* parent)
         : super(config, parent, "ContCell Setup")
     {
     }

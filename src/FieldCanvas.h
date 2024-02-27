@@ -40,9 +40,9 @@ namespace CalChart {
 class Shape;
 class Shape_2point;
 class MovePoints;
+class Configuration;
 }
 class Matrix;
-class CalChartConfiguration;
 
 using ShapeList = std::vector<std::unique_ptr<CalChart::Shape>>;
 
@@ -53,7 +53,7 @@ class FieldCanvas : public ClickDragCtrlScrollCanvas {
 
 public:
     // Basic functions
-    FieldCanvas(wxWindow* parent, CalChartView* view, float def_zoom, CalChartConfiguration const& config);
+    FieldCanvas(wxWindow* parent, CalChartView* view, float def_zoom, CalChart::Configuration const& config);
     ~FieldCanvas() override = default;
 
     void SetView(CalChartView* view);
@@ -102,12 +102,12 @@ private:
     CalChart::Coord SnapToolToGrid(CalChart::Coord c);
 
     // Background Picture
-    void OnPaint(wxPaintEvent& event, const CalChartConfiguration& config);
-    void PaintBackground(wxDC& dc, const CalChartConfiguration& config);
-    void PaintShapes(wxDC& dc, CalChartConfiguration const& config, ShapeList const&);
-    void PaintShapes(wxDC& dc, CalChartConfiguration const& config, CalChart::Shape const*);
-    void PaintSelectShapes(wxDC& dc, CalChartConfiguration const& config);
-    void PaintMoveShapes(wxDC& dc, CalChartConfiguration const& config);
+    void OnPaint(wxPaintEvent& event, const CalChart::Configuration& config);
+    void PaintBackground(wxDC& dc, const CalChart::Configuration& config);
+    void PaintShapes(wxDC& dc, CalChart::Configuration const& config, ShapeList const&);
+    void PaintShapes(wxDC& dc, CalChart::Configuration const& config, CalChart::Shape const*);
+    void PaintSelectShapes(wxDC& dc, CalChart::Configuration const& config);
+    void PaintMoveShapes(wxDC& dc, CalChart::Configuration const& config);
 
     void OnMouseLeftDown_NormalMove(CalChart::Coord pos, bool shiftDown, bool altDown);
     void OnMouseLeftDown_Swap(CalChart::Coord pos);
@@ -119,5 +119,5 @@ private:
     std::unique_ptr<CalChart::MovePointsTool> mMovePointsTool;
     // A cached list of the place where the selection list will move
     std::map<int, CalChart::Coord> mUncommittedMovePoints;
-    CalChartConfiguration const& mConfig;
+    CalChart::Configuration const& mConfig;
 };

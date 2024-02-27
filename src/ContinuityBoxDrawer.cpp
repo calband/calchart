@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -29,19 +29,19 @@
 class ContinuityBoxSubPartDrawer {
 public:
     explicit ContinuityBoxSubPartDrawer(CalChart::Cont::Drawable const& proc);
-    [[nodiscard]] auto GetTextBoxSize(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent) const -> int;
-    [[nodiscard]] auto GetChildrenBeginSize(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent) const -> std::vector<std::tuple<int, int>>;
-    [[nodiscard]] auto GetDrawCommands(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent, void const* highlight) const
+    [[nodiscard]] auto GetTextBoxSize(CalChart::Configuration const& config, std::function<wxSize(std::string const&)> getTextExtent) const -> int;
+    [[nodiscard]] auto GetChildrenBeginSize(CalChart::Configuration const& config, std::function<wxSize(std::string const&)> getTextExtent) const -> std::vector<std::tuple<int, int>>;
+    [[nodiscard]] auto GetDrawCommands(CalChart::Configuration const& config, std::function<wxSize(std::string const&)> getTextExtent, void const* highlight) const
     {
         auto box_padding = fDIP(config.Get_ContCellBoxPadding());
         return GetProcCellBoxDrawCommands(config, getTextExtent, highlight) + CalChart::Coord(box_padding, box_padding);
     }
 
-    void OnClick(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent, wxPoint const& point, std::function<void(CalChart::Cont::Drawable const&)> if_hit) const;
+    void OnClick(CalChart::Configuration const& config, std::function<wxSize(std::string const&)> getTextExtent, wxPoint const& point, std::function<void(CalChart::Cont::Drawable const&)> if_hit) const;
 
 private:
-    auto GetProcCellBoxDrawCommands(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent, void const* highlight) const -> std::vector<CalChart::Draw::DrawCommand>;
-    void HandleOnClick(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent, wxPoint const& point, std::function<void(CalChart::Cont::Drawable const&)> if_hit) const;
+    auto GetProcCellBoxDrawCommands(CalChart::Configuration const& config, std::function<wxSize(std::string const&)> getTextExtent, void const* highlight) const -> std::vector<CalChart::Draw::DrawCommand>;
+    void HandleOnClick(CalChart::Configuration const& config, std::function<wxSize(std::string const&)> getTextExtent, wxPoint const& point, std::function<void(CalChart::Cont::Drawable const&)> if_hit) const;
 
     CalChart::Cont::Drawable mDrawCont;
     std::vector<ContinuityBoxSubPartDrawer> mChildren;
@@ -74,12 +74,12 @@ auto ContTypeToCellColors(CalChart::Cont::Type contType) -> CalChart::Continuity
     return CalChart::ContinuityCellColors::PROC;
 }
 
-auto GetBrush(CalChart::Cont::Type contType, CalChartConfiguration const& config)
+auto GetBrush(CalChart::Cont::Type contType, CalChart::Configuration const& config)
 {
     return CalChart::toBrush(config.Get_ContCellBrushAndPen(ContTypeToCellColors(contType)));
 }
 
-auto GetPen(CalChart::Cont::Type contType, bool highlighted, [[maybe_unused]] CalChartConfiguration const& config)
+auto GetPen(CalChart::Cont::Type contType, bool highlighted, [[maybe_unused]] CalChart::Configuration const& config)
 {
     if (highlighted) {
         return CalChart::toPen(config.Get_ContCellBrushAndPen(ContTypeToCellColors(CalChart::Cont::Type::selected)));
@@ -105,7 +105,7 @@ ContinuityBoxSubPartDrawer::ContinuityBoxSubPartDrawer(CalChart::Cont::Drawable 
 {
 }
 
-int ContinuityBoxSubPartDrawer::GetTextBoxSize(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent) const
+int ContinuityBoxSubPartDrawer::GetTextBoxSize(CalChart::Configuration const& config, std::function<wxSize(std::string const&)> getTextExtent) const
 {
     auto text_padding = fDIP(config.Get_ContCellTextPadding());
 
@@ -146,7 +146,7 @@ int ContinuityBoxSubPartDrawer::GetTextBoxSize(CalChartConfiguration const& conf
 //
 // so what we have is
 // zip_view(transform(exclusive_sum(words) -> drop_first, exclusive_scan(children),+), childSizes)
-auto ContinuityBoxSubPartDrawer::GetChildrenBeginSize(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent) const -> std::vector<std::tuple<int, int>>
+auto ContinuityBoxSubPartDrawer::GetChildrenBeginSize(CalChart::Configuration const& config, std::function<wxSize(std::string const&)> getTextExtent) const -> std::vector<std::tuple<int, int>>
 {
     auto words = SplitString(config.Get_ContCellLongForm() ? mDrawCont.description : mDrawCont.short_description, "%@");
     auto text_padding = fDIP(config.Get_ContCellTextPadding());
@@ -169,7 +169,7 @@ auto ContinuityBoxSubPartDrawer::GetChildrenBeginSize(CalChartConfiguration cons
         childrenSizes));
 }
 
-auto ContinuityBoxSubPartDrawer::GetProcCellBoxDrawCommands(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent, void const* highlight) const -> std::vector<CalChart::Draw::DrawCommand>
+auto ContinuityBoxSubPartDrawer::GetProcCellBoxDrawCommands(CalChart::Configuration const& config, std::function<wxSize(std::string const&)> getTextExtent, void const* highlight) const -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto text_padding = fDIP(config.Get_ContCellTextPadding());
     CalChart::Coord::units rounding = config.Get_ContCellRounding();
@@ -207,14 +207,14 @@ auto ContinuityBoxSubPartDrawer::GetProcCellBoxDrawCommands(CalChartConfiguratio
     return drawCmds;
 }
 
-void ContinuityBoxSubPartDrawer::OnClick(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent, wxPoint const& point, std::function<void(CalChart::Cont::Drawable const&)> onClickAction) const
+void ContinuityBoxSubPartDrawer::OnClick(CalChart::Configuration const& config, std::function<wxSize(std::string const&)> getTextExtent, wxPoint const& point, std::function<void(CalChart::Cont::Drawable const&)> onClickAction) const
 {
     auto box_padding = fDIP(config.Get_ContCellBoxPadding());
 
     return HandleOnClick(config, getTextExtent, point - wxPoint(box_padding, box_padding), onClickAction);
 }
 
-void ContinuityBoxSubPartDrawer::HandleOnClick(CalChartConfiguration const& config, std::function<wxSize(std::string const&)> getTextExtent, wxPoint const& point, std::function<void(CalChart::Cont::Drawable const&)> onClickAction) const
+void ContinuityBoxSubPartDrawer::HandleOnClick(CalChart::Configuration const& config, std::function<wxSize(std::string const&)> getTextExtent, wxPoint const& point, std::function<void(CalChart::Cont::Drawable const&)> onClickAction) const
 {
     auto text_padding = fDIP(config.Get_ContCellTextPadding());
     auto box_size_y = fDIP(config.Get_ContCellFontSize()) + 2 * text_padding;
@@ -235,7 +235,7 @@ void ContinuityBoxSubPartDrawer::HandleOnClick(CalChartConfiguration const& conf
     }
 }
 
-ContinuityBoxDrawer::ContinuityBoxDrawer(CalChart::Cont::Drawable const& proc, CalChartConfiguration const& config, std::function<void(CalChart::Cont::Drawable const&)> action)
+ContinuityBoxDrawer::ContinuityBoxDrawer(CalChart::Cont::Drawable const& proc, CalChart::Configuration const& config, std::function<void(CalChart::Cont::Drawable const&)> action)
     : mConfig(config)
     , mContToken(std::make_unique<ContinuityBoxSubPartDrawer>(proc))
     , mClickAction(action)
@@ -257,12 +257,12 @@ int ContinuityBoxDrawer::Height() const
     return GetHeight(mConfig);
 }
 
-int ContinuityBoxDrawer::GetHeight(CalChartConfiguration const& config)
+int ContinuityBoxDrawer::GetHeight(CalChart::Configuration const& config)
 {
     return fDIP(config.Get_ContCellFontSize() + 2 * config.Get_ContCellBoxPadding() + 2 * config.Get_ContCellTextPadding());
 }
 
-int ContinuityBoxDrawer::GetMinWidth(CalChartConfiguration const& config)
+int ContinuityBoxDrawer::GetMinWidth(CalChart::Configuration const& config)
 {
     return fDIP(config.Get_ContCellFontSize() * 32 + 2 * config.Get_ContCellBoxPadding() + 2 * config.Get_ContCellTextPadding());
 }

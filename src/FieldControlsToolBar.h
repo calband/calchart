@@ -26,11 +26,13 @@
 #include <wx/wx.h>
 
 class wxAuiToolBar;
-class CalChartConfiguration;
+namespace CalChart {
+class Configuration;
+}
 
 namespace FieldControls {
 
-wxAuiToolBar* CreateToolBar(wxWindow* parent, wxWindowID idenity, long style, CalChartConfiguration& config);
+wxAuiToolBar* CreateToolBar(wxWindow* parent, wxWindowID idenity, long style, CalChart::Configuration& config);
 std::pair<CalChart::Coord::units, CalChart::Coord::units> GridChoice(wxWindow* target);
 std::pair<CalChart::Coord::units, CalChart::Coord::units> ToolGridChoice(wxWindow* target);
 double GetZoomAmount(wxWindow* target);

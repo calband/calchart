@@ -38,7 +38,7 @@ EVT_MOTION(AnimationCanvas::OnMouseMove)
 EVT_PAINT(AnimationCanvas::OnPaint)
 END_EVENT_TABLE()
 
-AnimationCanvas::AnimationCanvas(CalChartConfiguration const& config, wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size)
+AnimationCanvas::AnimationCanvas(CalChart::Configuration const& config, wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size)
     : super(parent, winid, pos, size, wxTAB_TRAVERSAL | wxNO_BORDER)
     , mConfig(config)
 {

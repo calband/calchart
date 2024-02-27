@@ -69,7 +69,7 @@ EVT_SIZE(PrintContinuityEditor::OnSizeEvent)
 END_EVENT_TABLE()
 
 PrintContinuityEditor::PrintContinuityEditor(wxWindow* parent,
-    CalChartConfiguration const& config,
+    CalChart::Configuration const& config,
     wxWindowID id,
     const wxPoint& pos,
     const wxSize& size,

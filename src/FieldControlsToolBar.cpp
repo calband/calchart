@@ -69,7 +69,7 @@ static constexpr std::pair<CalChart::Coord::units, CalChart::Coord::units> gridv
 
 namespace FieldControls {
 
-wxAuiToolBar* CreateToolBar(wxWindow* parent, wxWindowID id, long style, CalChartConfiguration& config)
+wxAuiToolBar* CreateToolBar(wxWindow* parent, wxWindowID id, long style, CalChart::Configuration& config)
 {
     auto tb = new wxAuiToolBar(parent, id, wxDefaultPosition, wxDefaultSize, style);
 

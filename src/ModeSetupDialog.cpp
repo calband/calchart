@@ -42,7 +42,7 @@ class ShowModeDialogSetup : public wxPanel {
     DECLARE_EVENT_TABLE()
 
 public:
-    static auto CreateDialog(wxWindow* parent, CalChart::ShowMode const& current_mode, CalChartConfiguration& config)
+    static auto CreateDialog(wxWindow* parent, CalChart::ShowMode const& current_mode, CalChart::Configuration& config)
     {
         auto dialog = new ShowModeDialogSetup{ parent, current_mode, config };
         dialog->TransferDataToWindow();
@@ -51,7 +51,7 @@ public:
 
 private:
     // private, use the CreateDialog method
-    ShowModeDialogSetup(wxWindow* parent, CalChart::ShowMode const& current_mode, CalChartConfiguration& config);
+    ShowModeDialogSetup(wxWindow* parent, CalChart::ShowMode const& current_mode, CalChart::Configuration& config);
 
 public:
     ~ShowModeDialogSetup() = default;
@@ -71,7 +71,7 @@ private:
     CalChart::ShowModeData_t mShowModeValues;
     CalChart::YardLinesInfo_t mYardText;
     int mWhichYardLine{};
-    CalChartConfiguration mConfig;
+    CalChart::Configuration const& mConfig;
 };
 
 enum {
@@ -96,7 +96,7 @@ END_EVENT_TABLE()
 
 IMPLEMENT_CLASS(ShowModeDialogSetup, wxPanel)
 
-ShowModeDialogSetup::ShowModeDialogSetup(wxWindow* parent, CalChart::ShowMode const& current_mode, CalChartConfiguration& config)
+ShowModeDialogSetup::ShowModeDialogSetup(wxWindow* parent, CalChart::ShowMode const& current_mode, CalChart::Configuration& config)
     : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU, "Setup Modes")
     , mShowModeValues{ current_mode.GetShowModeData() }
     , mYardText{ current_mode.Get_yard_text() }
@@ -246,7 +246,7 @@ END_EVENT_TABLE()
 
 IMPLEMENT_CLASS(ModeSetupDialog, wxDialog)
 
-ModeSetupDialog::ModeSetupDialog(wxWindow* parent, CalChart::ShowMode const& current_mode, CalChartConfiguration& config)
+ModeSetupDialog::ModeSetupDialog(wxWindow* parent, CalChart::ShowMode const& current_mode, CalChart::Configuration& config)
     : super(parent, wxID_ANY, "CalChart Preferences", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
 {
     wxUI::VSizer{

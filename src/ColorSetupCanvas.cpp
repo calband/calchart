@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ EVT_PAINT(ColorSetupCanvas::OnPaint)
 EVT_ERASE_BACKGROUND(ColorSetupCanvas::OnEraseBackground)
 END_EVENT_TABLE()
 
-ColorSetupCanvas::ColorSetupCanvas(CalChartConfiguration& config, wxWindow* parent)
+ColorSetupCanvas::ColorSetupCanvas(CalChart::Configuration& config, wxWindow* parent)
     : super(config, parent, wxID_ANY, wxDefaultPosition, GetColorSetupCanvas())
     , mShow(Show::Create(ShowMode::GetDefaultShowMode()))
     , mMode(ShowMode::CreateShowMode(
@@ -93,7 +93,7 @@ ColorSetupCanvas::ColorSetupCanvas(CalChartConfiguration& config, wxWindow* pare
 }
 
 // Because we're not a real show, we have to make the path manually.
-auto GenerateFakePathDrawCommands(CalChart::ShowMode const& mode, CalChartConfiguration const& config) -> std::vector<CalChart::Draw::DrawCommand>
+auto GenerateFakePathDrawCommands(CalChart::ShowMode const& mode, CalChart::Configuration const& config) -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto field_offset = mode.FieldOffset();
     auto point_start = field_offset + Coord(Int2CoordUnits(4), Int2CoordUnits(2));

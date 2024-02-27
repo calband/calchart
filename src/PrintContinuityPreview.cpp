@@ -21,6 +21,7 @@
 */
 
 #include "PrintContinuityPreview.h"
+#include "CalChartConfiguration.h"
 #include "CalChartDrawPrimativesHelper.h"
 #include "CalChartDrawing.h"
 #include "CalChartMeasure.h"
@@ -33,7 +34,7 @@ END_EVENT_TABLE()
 
 static constexpr auto kPrintContinuityPreviewMinX = 256;
 static constexpr auto kPrintContinuityPreviewMinY = 734 - 606;
-PrintContinuityPreview::PrintContinuityPreview(wxWindow* parent, CalChartConfiguration const& config)
+PrintContinuityPreview::PrintContinuityPreview(wxWindow* parent, CalChart::Configuration const& config)
     : wxScrolled<wxWindow>(parent, wxID_ANY)
     , m_landscape(false)
     , mConfig(config)
@@ -56,7 +57,7 @@ auto CalculatePointsPerLine(
 }
 
 static auto GenerateDrawCommands(wxDC& dc,
-    CalChartConfiguration const& config,
+    CalChart::Configuration const& config,
     CalChart::PrintContinuityLayout::VStack const& printLayout,
     wxRect const& bounding,
     bool landscape) -> CalChart::Draw::DrawCommand

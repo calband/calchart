@@ -25,8 +25,8 @@
 #include <wxUI/wxUI.h>
 
 class ShowModeDialogSetup;
-class CalChartConfiguration;
 namespace CalChart {
+class Configuration;
 class ShowMode;
 }
 
@@ -36,7 +36,7 @@ class ModeSetupDialog : public wxDialog {
     DECLARE_EVENT_TABLE()
 
 public:
-    ModeSetupDialog(wxWindow* parent, CalChart::ShowMode const& current_mode, CalChartConfiguration& config);
+    ModeSetupDialog(wxWindow* parent, CalChart::ShowMode const& current_mode, CalChart::Configuration& config);
     ~ModeSetupDialog() = default;
 
     CalChart::ShowMode GetShowMode() const;

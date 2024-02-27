@@ -39,6 +39,7 @@
 #include "SetupInstruments.h"
 #include "SetupMarchers.h"
 #include "ShowModeWizard.h"
+#include "SystemConfiguration.h"
 
 #include <memory>
 #include <ranges>
@@ -48,19 +49,15 @@
 
 IMPLEMENT_DYNAMIC_CLASS(CalChartView, wxView)
 
-CalChartView::CalChartView()
-    : mConfig(CalChartConfiguration::GetGlobalConfig())
-{
-}
-
 // What to do when a view is created. Creates actual windows for displaying the view.
 bool CalChartView::OnCreate(wxDocument* doc, long WXUNUSED(flags))
 {
     mShow = static_cast<CalChartDoc*>(doc);
     mShow->SetCurrentSheet(0);
-    mFrame = new CalChartFrame(doc, this, mConfig,
+    auto& config = mShow->GetConfiguration();
+    mFrame = new CalChartFrame(doc, this, config,
         wxStaticCast(wxGetApp().GetTopWindow(), wxDocParentFrame),
-        wxPoint(mConfig.Get_FieldFramePositionX(), mConfig.Get_FieldFramePositionY()), wxSize(static_cast<int>(mConfig.Get_FieldFrameWidth()), static_cast<int>(mConfig.Get_FieldFrameHeight())));
+        wxPoint(config.Get_FieldFramePositionX(), config.Get_FieldFramePositionY()), wxSize(static_cast<int>(config.Get_FieldFrameWidth()), static_cast<int>(config.Get_FieldFrameHeight())));
 
     UpdateBackgroundImages();
     mFrame->Show(true);
@@ -78,9 +75,10 @@ void CalChartView::OnDraw(wxDC* dc)
     auto origin = mShow->GetShowMode().Offset();
     auto tborder1 = mShow->GetShowMode().Border1();
     auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
+    auto& config = mShow->GetConfiguration();
     CalChart::append(drawCmds,
         CalChartDraw::GenerateModeDrawCommands(
-            mConfig,
+            config,
             mShow->GetShowMode(),
             ShowMode_kFieldView)
             + tborder1 - origin);
@@ -88,7 +86,7 @@ void CalChartView::OnDraw(wxDC* dc)
     if (auto ghostSheet = mShow->GetGhostSheet(GetCurrentSheetNum()); ghostSheet != nullptr) {
         CalChart::append(drawCmds,
             CalChartDraw::GenerateGhostPointsDrawCommands(
-                mConfig,
+                config,
                 CalChart::SelectionList(),
                 mShow->GetNumPoints(),
                 mShow->GetPointsLabel(),
@@ -100,7 +98,7 @@ void CalChartView::OnDraw(wxDC* dc)
         if (mShow->GetCurrentReferencePoint() > 0) {
             // if we are editing a ref point other than 0, draw the 0 one in a different color.
             CalChart::append(drawCmds,
-                CalChartDraw::GeneratePointsDrawCommands(mConfig,
+                CalChartDraw::GeneratePointsDrawCommands(config,
                     mShow->GetSelectionList(),
                     mShow->GetNumPoints(),
                     mShow->GetPointsLabel(),
@@ -109,7 +107,7 @@ void CalChartView::OnDraw(wxDC* dc)
                     false));
         }
         CalChart::append(drawCmds,
-            CalChartDraw::GeneratePointsDrawCommands(mConfig,
+            CalChartDraw::GeneratePointsDrawCommands(config,
                 mShow->GetSelectionList(),
                 mShow->GetNumPoints(),
                 mShow->GetPointsLabel(),
@@ -124,7 +122,8 @@ void CalChartView::OnDraw(wxDC* dc)
 
 void CalChartView::DrawUncommitedMovePoints(wxDC& dc, std::map<int, CalChart::Coord> const& positions)
 {
-    wxCalChart::Draw::DrawCommandList(dc, CalChartDraw::GeneratePhatomPointsDrawCommands(mConfig, *mShow, *mShow->GetCurrentSheet(), positions));
+    auto& config = mShow->GetConfiguration();
+    wxCalChart::Draw::DrawCommandList(dc, CalChartDraw::GeneratePhatomPointsDrawCommands(config, *mShow, *mShow->GetCurrentSheet(), positions));
 }
 
 void CalChartView::OnDrawBackground(wxDC& dc)
@@ -142,7 +141,7 @@ void CalChartView::OnUpdate(wxView* WXUNUSED(sender), wxObject* hint)
         CalChartDoc* show = static_cast<CalChartDoc*>(GetDocument());
 
         // Set up everything else
-        OnWizardSetup(*show);
+        OnWizardSetup(*show, mFrame);
 
         // make the show modified so it gets repainted
         show->Modify(true);
@@ -177,9 +176,10 @@ bool CalChartView::OnClose(bool deleteWindow)
     return true;
 }
 
-void CalChartView::OnWizardSetup(CalChartDoc& show)
+void CalChartView::OnWizardSetup(CalChartDoc& show, wxWindow* parent)
 {
-    auto wizard = new wxWizard(mFrame, wxID_ANY, wxT("New Show Setup Wizard"));
+    auto& config = show.GetConfiguration();
+    auto wizard = new wxWizard(parent, wxID_ANY, wxT("New Show Setup Wizard"));
     // page 1:
     // set the number of points and the labels
     auto page1 = new SetupMarchersWizard(wizard);
@@ -195,10 +195,10 @@ void CalChartView::OnWizardSetup(CalChartDoc& show)
     if (wizard->RunWizard(page1)) {
         auto labels = page1->GetLabelsAndInstruments();
         auto columns = page1->GetNumberColumns();
-        auto newmode = GetConfigShowMode(mConfig, page2->GetValue());
+        auto newmode = GetConfigShowMode(config, page2->GetValue());
 
         show.WizardSetupNewShow(labels, columns, newmode);
-        SetupInstruments dialog(show, mFrame);
+        SetupInstruments dialog(show, parent);
         if (dialog.ShowModal() == wxID_OK) {
             auto instrumentMapping = dialog.GetInstruments();
             for (auto& i : instrumentMapping) {
@@ -393,11 +393,12 @@ void CalChartView::DoSetPrintContinuity(int which_sheet, const wxString& number,
 
 bool CalChartView::DoRelabel()
 {
+    auto& config = mShow->GetConfiguration();
     auto sheet_num = GetCurrentSheetNum();
     auto current_sheet = mShow->GetNthSheet(GetCurrentSheetNum());
     auto next_sheet = current_sheet + 1;
     // get a relabel mapping based on the current sheet.
-    auto result = mShow->GetRelabelMapping(current_sheet, next_sheet, CalChart::Float2CoordUnits(mConfig.Get_DotRatio()));
+    auto result = mShow->GetRelabelMapping(current_sheet, next_sheet, CalChart::Float2CoordUnits(config.Get_DotRatio()));
     // check to see if there's a valid remapping
     if (!result.first) {
         return false;
@@ -411,17 +412,18 @@ bool CalChartView::DoRelabel()
 // append is an insert with a relabel
 std::pair<bool, std::string> CalChartView::DoAppendShow(std::unique_ptr<CalChartDoc> other_show)
 {
+    auto& config = mShow->GetConfiguration();
     if (other_show->GetNumPoints() != mShow->GetNumPoints()) {
         return { false, "The blocksize doesn't match" };
     }
     auto last_sheet = mShow->GetNthSheet(GetNumSheets() - 1);
     auto next_sheet = other_show->GetSheetBegin();
-    auto result = mShow->GetRelabelMapping(last_sheet, next_sheet, CalChart::Float2CoordUnits(mConfig.Get_DotRatio()));
+    auto result = mShow->GetRelabelMapping(last_sheet, next_sheet, CalChart::Float2CoordUnits(config.Get_DotRatio()));
     // check to see if there's a valid remapping
     if (!result.first) {
         return { false, "Last sheet doesn't match first sheet of other show" };
     }
-    auto cmd = mShow->Create_AppendShow(std::move(other_show), CalChart::Float2CoordUnits(mConfig.Get_DotRatio()));
+    auto cmd = mShow->Create_AppendShow(std::move(other_show), CalChart::Float2CoordUnits(config.Get_DotRatio()));
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return { true, "" };
 }
@@ -436,7 +438,8 @@ bool CalChartView::DoSetContinuityCommand(CalChart::SYMBOL_TYPE sym, CalChart::C
 
 int CalChartView::FindPoint(CalChart::Coord pos) const
 {
-    return mShow->GetCurrentSheet()->FindPoint(pos, CalChart::Float2CoordUnits(mConfig.Get_DotRatio()), mShow->GetCurrentReferencePoint());
+    auto& config = mShow->GetConfiguration();
+    return mShow->GetCurrentSheet()->FindPoint(pos, CalChart::Float2CoordUnits(config.Get_DotRatio()), mShow->GetCurrentReferencePoint());
 }
 
 CalChart::Coord CalChartView::PointPosition(int which) const
@@ -480,9 +483,10 @@ std::unique_ptr<CalChart::Animation> CalChartView::GetAnimationInstance() const
 
 void CalChartView::GoToSheet(int which)
 {
+    auto& config = mShow->GetConfiguration();
     if (which >= 0 && which < mShow->GetNumSheets()) {
         // This *could* be run through a command or run directly...
-        if (mConfig.Get_CommandUndoSetSheet()) {
+        if (config.Get_CommandUndoSetSheet()) {
             auto cmd = mShow->Create_SetCurrentSheetCommand(which);
             GetDocument()->GetCommandProcessor()->Submit(cmd.release());
         } else {
@@ -511,11 +515,12 @@ void CalChartView::SelectWithinPolygon(CalChart::RawPolygon_t const& lasso, bool
 
 void CalChartView::SetSelectionList(const CalChart::SelectionList& sl)
 {
+    auto& config = mShow->GetConfiguration();
     auto current_sl = mShow->GetSelectionList();
     if (std::equal(current_sl.begin(), current_sl.end(), sl.begin(), sl.end()))
         return;
     // This *could* be run through a command or run directly...
-    if (mConfig.Get_CommandUndoSelection()) {
+    if (config.Get_CommandUndoSelection()) {
         auto cmd = mShow->Create_SetSelectionListCommand(sl);
         GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     } else {
@@ -534,6 +539,7 @@ void CalChartView::SetSelect(CalChart::Select select)
 
 void CalChartView::GoToSheetAndSetSelectionList(int which, const CalChart::SelectionList& sl)
 {
+    auto& config = mShow->GetConfiguration();
     if (which < 0 || which >= mShow->GetNumSheets()) {
         return;
     }
@@ -542,7 +548,7 @@ void CalChartView::GoToSheetAndSetSelectionList(int which, const CalChart::Selec
         return;
     }
     // This *could* be run through a command or run directly...
-    if (mConfig.Get_CommandUndoSelection()) {
+    if (config.Get_CommandUndoSelection()) {
         auto cmd = mShow->Create_SetCurrentSheetAndSelectionCommand(which, sl);
         GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     } else {
@@ -567,6 +573,7 @@ auto TransformIndexToDrawPathCommands(CalChart::Animation const& animation, unsi
 
 auto CalChartView::GeneratePathsDrawCommands() -> std::vector<CalChart::Draw::DrawCommand>
 {
+    auto& config = mShow->GetConfiguration();
     if (!mShow->GetDrawPaths()) {
         return {};
     }
@@ -574,11 +581,11 @@ auto CalChartView::GeneratePathsDrawCommands() -> std::vector<CalChart::Draw::Dr
     if (!animation || animation->GetNumberSheets() == 0 || (animation->GetNumberSheets() <= mShow->GetCurrentSheetNum())) {
         return {};
     }
-    auto endRadius = CalChart::Float2CoordUnits(mConfig.Get_DotRatio()) / 2;
+    auto endRadius = CalChart::Float2CoordUnits(config.Get_DotRatio()) / 2;
     auto currentSheet = mShow->GetCurrentSheetNum();
     return {
         CalChart::Draw::withBrushAndPen(
-            mConfig.Get_CalChartBrushAndPen(CalChart::Colors::PATHS),
+            config.Get_CalChartBrushAndPen(CalChart::Colors::PATHS),
             mShow->GetSelectionList()
                 | TransformIndexToDrawPathCommands(*animation, currentSheet, endRadius))
     };

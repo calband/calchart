@@ -33,7 +33,7 @@ EVT_KILL_FOCUS(ContinuityBrowserPanel::DoKillFocus)
 END_EVENT_TABLE()
 
 // Define a constructor for field canvas
-ContinuityBrowserPanel::ContinuityBrowserPanel(SYMBOL_TYPE sym, CalChartConfiguration const& config, wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
+ContinuityBrowserPanel::ContinuityBrowserPanel(SYMBOL_TYPE sym, CalChart::Configuration const& config, wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
     : super(parent, winid, pos, size, style, name)
     , mSym(sym)
     , mConfig(config)

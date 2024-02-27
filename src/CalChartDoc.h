@@ -41,8 +41,8 @@ class Show;
 class Sheet;
 class Lasso;
 class Animation;
+class Configuration;
 }
-class CalChartConfiguration;
 
 enum class GhostSource {
     disabled,
@@ -192,12 +192,13 @@ public:
     void SetGhostSource(GhostSource source, int which = 0);
 
     CalChart::ShowMode const& GetShowMode() const;
+    CalChart::Configuration& GetConfiguration() const { return mConfig; }
     // nullptr if there is no animation
     CalChart::Animation const* GetAnimation() const;
 
     auto AlreadyHasPrintContinuity() const { return mShow->AlreadyHasPrintContinuity(); }
     auto WillMovePoints(std::map<int, CalChart::Coord> const& new_positions) const { return mShow->WillMovePoints(new_positions, mCurrentReferencePoint); }
-    int PrintToPS(std::ostream& buffer, bool overview, int min_yards, const std::set<size_t>& isPicked, const CalChartConfiguration& config_) const;
+    int PrintToPS(std::ostream& buffer, bool overview, int min_yards, const std::set<size_t>& isPicked, const CalChart::Configuration& config_) const;
 
     // create a set of commands to apply to the document.  This is the best way to interact with the doc.
     std::unique_ptr<wxCommand> Create_SetCurrentSheetCommand(int n);
@@ -234,7 +235,6 @@ private:
     std::vector<CC_doc_command_pair> Create_SetSheetPair() const;
     std::vector<CC_doc_command_pair> Create_SetSheetAndSelectionPair() const;
 
-private:
     // Autosaving:
     // goal is to allow the user to have a recoverable file.
     //
@@ -266,6 +266,7 @@ private:
     // CalChart doc contains the state of the show and all ancillary data objects for displaying/manipulating the show
     // This include temporary non-saved aspects like what configuration tools are in (select mode), or what reference
     // points are currently being moved.
+    CalChart::Configuration& mConfig;
     std::unique_ptr<CalChart::Show> mShow;
     std::unique_ptr<CalChart::Animation> mAnimation;
     CalChart::Select mSelect = CalChart::Select::Box;

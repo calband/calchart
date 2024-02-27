@@ -33,7 +33,7 @@ class PSPrintingSetUp : public PreferencePage {
     DECLARE_EVENT_TABLE()
 
 public:
-    static PSPrintingSetUp* CreatePreference(CalChartConfiguration& config, wxWindow* parent)
+    static PSPrintingSetUp* CreatePreference(CalChart::Configuration& config, wxWindow* parent)
     {
         auto pref = new PSPrintingSetUp(config, parent);
         pref->Initialize();
@@ -42,7 +42,7 @@ public:
 
 private:
     // private, use the CreatePreference method
-    PSPrintingSetUp(CalChartConfiguration& config, wxWindow* parent)
+    PSPrintingSetUp(CalChart::Configuration& config, wxWindow* parent)
         : super(config, parent, "Printing Values")
     {
     }

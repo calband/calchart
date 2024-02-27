@@ -26,6 +26,7 @@
 #include "CalChartSizes.h"
 #include "CalChartView.h"
 #include "ColorSetupDialog.h"
+#include "SystemConfiguration.h"
 #include "ui_enums.h"
 
 #include <wx/dcbuffer.h>
@@ -40,7 +41,7 @@ EVT_LEFT_DCLICK(ColorPalettePanel::OnLeftDoubleClick)
 EVT_PAINT(ColorPalettePanel::OnPaint)
 END_EVENT_TABLE()
 
-ColorPalettePanel::ColorPalettePanel(CalChartConfiguration& config, wxWindow* parent, wxWindowID winid)
+ColorPalettePanel::ColorPalettePanel(CalChart::Configuration& config, wxWindow* parent, wxWindowID winid)
     : super(parent, winid)
     , mConfig(config)
 {
@@ -110,11 +111,11 @@ void ColorPalettePanel::OnLeftDoubleClick(wxMouseEvent& event)
         return;
     }
     // this opens the dialog that
-    auto localConfig = mConfig;
+    auto localConfig = mConfig.Copy();
     auto dialog = ColorSetupDialog::CreateDialog(this, box, localConfig);
     if (dialog->ShowModal() == wxID_OK) {
         // here's where we flush out the configuration.
-        CalChartConfiguration::AssignConfig(localConfig);
+        wxCalChart::AssignConfig(localConfig);
         QueueEvent(new wxCommandEvent{ wxEVT_BUTTON, CALCHART__ChangedColorPalette });
     }
 }

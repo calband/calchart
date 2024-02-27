@@ -21,6 +21,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartConstants.h"
+#include "CalChartDrawPrimatives.h"
 #include "PreferencesUtils.h"
 #include <wx/bmpcbox.h>
 #include <wx/notebook.h>
@@ -34,7 +36,7 @@ class DrawingSetup : public PreferencePage {
     DECLARE_EVENT_TABLE()
 
 public:
-    static DrawingSetup* CreatePreference(CalChartConfiguration& config, wxWindow* parent)
+    static DrawingSetup* CreatePreference(CalChart::Configuration& config, wxWindow* parent)
     {
         auto pref = new DrawingSetup(config, parent);
         pref->Initialize();
@@ -43,7 +45,7 @@ public:
 
 private:
     // private, use the CreatePreference method
-    DrawingSetup(CalChartConfiguration& config, wxWindow* parent);
+    DrawingSetup(CalChart::Configuration& config, wxWindow* parent);
 
 public:
     ~DrawingSetup() override = default;

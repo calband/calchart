@@ -64,7 +64,7 @@ EVT_COMBOBOX(NEW_COLOR_CHOICE, ColorSetupDialog::OnCmdChooseNewColor)
 EVT_TEXT_ENTER(PALETTE_NAME, ColorSetupDialog::OnCmdTextChanged)
 END_EVENT_TABLE()
 
-ColorSetupDialog::ColorSetupDialog(wxWindow* parent, int palette, CalChartConfiguration& config)
+ColorSetupDialog::ColorSetupDialog(wxWindow* parent, int palette, CalChart::Configuration& config)
     : ColorSetupDialog::super(parent, wxID_ANY, "Color Setup")
     , mActiveColorPalette(palette)
     , mConfig(config)

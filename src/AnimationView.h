@@ -31,8 +31,8 @@
 
 class AnimationPanel;
 class CalChartView;
-class CalChartConfiguration;
 namespace CalChart {
+class Configuration;
 class Continuity;
 class Animation;
 class ShowMode;
@@ -44,7 +44,7 @@ class AnimationView : public wxView {
     using super = wxView;
 
 public:
-    AnimationView(CalChartView* view, CalChartConfiguration const& config, wxWindow* frame);
+    AnimationView(CalChartView* view, CalChart::Configuration const& config, wxWindow* frame);
     ~AnimationView() override;
     AnimationView(AnimationView const&) = delete;
     auto operator=(AnimationView const&) = delete;
@@ -97,16 +97,16 @@ private:
     void RefreshFrame();
 
     void RegenerateImages() const;
-    [[nodiscard]] auto GenerateDraw(CalChartConfiguration const& config) const -> std::vector<CalChart::Draw::DrawCommand>;
-    [[nodiscard]] auto GenerateDrawDots(CalChartConfiguration const& config) const -> std::vector<CalChart::Draw::DrawCommand>;
-    [[nodiscard]] auto GenerateDrawSprites(CalChartConfiguration const& config) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateDraw(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateDrawDots(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateDrawSprites(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>;
 
     [[nodiscard]] auto GetAnimationFrame() const -> AnimationPanel const*;
     [[nodiscard]] auto GetAnimationFrame() -> AnimationPanel*;
 
     // Yes, this view has a view...
     CalChartView* mView{};
-    CalChartConfiguration const& mConfig;
+    CalChart::Configuration const& mConfig;
 
     std::unique_ptr<CalChart::Animation> mAnimation;
     bool mDrawCollisionWarning = true;

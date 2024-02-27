@@ -1,7 +1,7 @@
 #pragma once
 /*
- * ContinuityBrowser
- * Header for continuity editors
+ * SystemConfiguration.h
+ * Functions for manipulating configuration Settings
  */
 
 /*
@@ -21,34 +21,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <wx/wx.h>
-#include <wxUI/wxUI.h>
-
-class CalChartView;
-class ContinuityBrowserPerCont;
 namespace CalChart {
 class Configuration;
 }
 
-// ContinuityBrowser
-// The way you view the continuity for marchers
+namespace wxCalChart {
 
-class ContinuityBrowser : public wxScrolledWindow {
-    using super = wxScrolledWindow;
+auto GetGlobalConfig() -> CalChart::Configuration&;
+void AssignConfig(CalChart::Configuration const& config);
 
-public:
-    ContinuityBrowser(wxWindow* parent, wxSize const& size, CalChart::Configuration const& config);
-    ~ContinuityBrowser() override;
-
-    void OnUpdate(); // Refresh from the View
-    void SetView(CalChartView* view);
-    auto GetView() const { return mView; }
-
-private:
-    void Init();
-    void CreateControls(CalChart::Configuration const& config);
-
-    // Internals
-    CalChartView* mView{};
-    std::vector<ContinuityBrowserPerCont*> mPerCont;
-};
+}

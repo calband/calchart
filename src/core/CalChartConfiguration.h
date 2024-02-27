@@ -22,24 +22,40 @@
 */
 
 /**
- * CalChartConfiguration
+ * CalChart::Configuration
  *
- * CalChartConfiguration interfaces with the system config and acts as a "cache" for the values.
+ * There are many configurable values for CalChart, such as the size some elements are drawn, the
+ * default layout of windows, click behaviors, etc.  CalChart::Configuration interfaces with the
+ * system config and acts as a "cache" for the values.  By caching the values it allows modification
+ * of the configuration -- and to preview what changing a value would look like -- without modifying
+ * the system configuration.  On Get, it reads the values from system config, and caches a local copy.
+ * On Set (or clear), it updates it's cache, and puts the command into a write-queue. The write-queue
+ * needs to be explicitly flushed or the values will be lost.
  *
- * On Get, it reads the values from system config, and caches a local copy.
- * On Set (or clear), it updates it's cache, and puts the command into a write-queue.
- * The write-queue needs to be explicitly flushed or the values will be lost.
+ * CalChart::Configuration takes a `ConfigurationDetails` object which provides the specialization
+ * of writing values out to the system.  The implementation needs to implement a "key/value" interface
+ * that operates on 4 fundamental types: Booleans, Integers, Reals, and Strings, along with one
+ * specialized value, "Color".
  *
- * To use a config value, first get the Global config, and then Get_ the value from it.  For example:
+ * Color is the odd one out.  The reason being is that CalChart Core attempts to stay away from RGB
+ * specific values, but instead has a table of default color descriptions.  That means the details of
+ * how to translate "Forest Green" into actual RBG needs to be determined by the system.  So details
+ * about how to "Serialize" the value is left to the System Implementation.
  *
- * auto save_interval = CalChartConfiguration::GetGlobalConfig().Get_AutosaveInterval();
+ * "Simple" configuration values are accessible by a "Get_", "Set_", and "Clear_" API.  For example,
+ * to reac the AutosaveInterval value:
+ *
+ * CalChart::Configuration& mConfig; // (set somewhere else)
+ *
+ * auto save_interval = mConfig.Get_AutosaveInterval();
  *
  * To add a new config value:
  *  Add DECLARE_CONFIGURATION_FUNCTIONS in the class declaration of the right type.  This
  *  will make the Get_, Set_ and Clear_ functions available.  Then in the implementation file, declare
  *  IMPLEMENT_CONFIGURATION_FUNCTIONS with the default.
  *
- * Brushes and Pens are cached as the individual Color and Width.
+ * Brushes and Pens are cached as the individual Color and Width, and as such require a more
+ * specialized API.
  */
 
 #include "CalChartConstants.h"
@@ -51,21 +67,60 @@
 #include <vector>
 
 // forward declare
-class wxPathList;
 namespace CalChart {
 class ShowMode;
 }
 
-class CalChartConfiguration {
+namespace CalChart {
+
+// Color/Width is a type that combines color and width.
+using ColorWidth_t = std::pair<CalChart::Color, int>;
+using ConfigurationType = std::variant<bool, int64_t, double, std::string, CalChart::Color>;
+
+inline auto operator<<(std::ostream& os, ConfigurationType const& type) -> std::ostream&
+{
+    return std::visit(
+        [&os](auto&& v) -> std::ostream& {
+            return os << v;
+        },
+        type);
+}
+
+// Default is supplied to allow implementation to switch on type
+class ConfigurationDetails {
 public:
-    static auto GetGlobalConfig() -> CalChartConfiguration&;
-    static void AssignConfig(CalChartConfiguration const& config);
+    virtual ~ConfigurationDetails() = default;
+    [[nodiscard]] virtual auto Read(std::string_view key, ConfigurationType const& defaultValue) const -> ConfigurationType = 0;
+    virtual void Write(std::string_view key, ConfigurationType const& value) = 0;
+    virtual void Clear(std::string_view key) = 0;
+};
+
+class Configuration {
+public:
+    explicit Configuration(std::shared_ptr<ConfigurationDetails> details)
+        : mDetails{ details }
+    {
+    }
+    ~Configuration() = default;
+
+    // we make the copy/assign explicit to avoid unintential copies of configurations.
+    [[nodiscard]] auto Copy() const -> Configuration
+    {
+        return *this;
+    }
+    auto Assign(Configuration const& config) -> Configuration&
+    {
+        return *this = config;
+    }
 
     // explicit flush
     void FlushWriteQueue() const;
 
 private:
-    mutable std::map<std::string, std::function<void()>> mWriteQueue;
+    std::shared_ptr<ConfigurationDetails> mDetails;
+    Configuration(Configuration const&) = default;
+    auto operator=(Configuration const&) -> Configuration& = default;
+    mutable std::map<std::string, std::function<void(ConfigurationDetails&)>> mWriteQueue;
 
 // macro for declaring configuration Get_, Set_, and Clear_
 #define DECLARE_CONFIGURATION_FUNCTIONS(Key, Type) \
@@ -182,11 +237,11 @@ public:
     // colors.
     // When a Palette is set all the sets and gets are treated against that palette
     [[nodiscard]] auto GetColorPaletteColor(int which) const -> CalChart::Color;
-    void SetColorPaletteColor(int which, CalChart::Color);
+    void SetColorPaletteColor(int which, CalChart::Color const&);
     void ClearColorPaletteColor(int which);
 
 private:
-    mutable std::array<std::optional<CalChart::Color>, CalChart::kNumberPalettes> mColorPaletteColor;
+    mutable std::array<std::optional<ColorWidth_t>, CalChart::kNumberPalettes> mColorPaletteColor;
 
 public:
     [[nodiscard]] auto GetColorPaletteName(int which) const -> std::string;
@@ -198,7 +253,6 @@ private:
 
 public:
     // Colors
-    using ColorWidth_t = std::pair<CalChart::Color, int>;
     // use the current Active Color Palette to get the Brush and Pen.
     [[nodiscard]] auto Get_CalChartBrushAndPen(CalChart::Colors c) const
     {
@@ -239,9 +293,11 @@ private:
     mutable std::array<std::optional<std::string>, kYardTextValues> mYardTextInfos;
 };
 
-auto GetColorPaletteColors(CalChartConfiguration const& config) -> std::vector<CalChart::Color>;
-auto GetColorPaletteNames(CalChartConfiguration const& config) -> std::vector<std::string>;
-auto Get_yard_text_all(CalChartConfiguration const& config) -> std::array<std::string, CalChartConfiguration::kYardTextValues>;
+auto GetColorPaletteColors(Configuration const& config) -> std::vector<CalChart::Color>;
+auto GetColorPaletteNames(Configuration const& config) -> std::vector<std::string>;
+auto Get_yard_text_all(Configuration const& config) -> std::array<std::string, Configuration::kYardTextValues>;
 
 // to find a specific Show:
-auto GetConfigShowMode(CalChartConfiguration const& config, std::string const& which) -> CalChart::ShowMode;
+auto GetConfigShowMode(Configuration const& config, std::string const& which) -> CalChart::ShowMode;
+
+}

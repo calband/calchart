@@ -35,8 +35,6 @@ add_executable(
   CCOmniviewCanvas.h
   CalChartApp.cpp
   CalChartApp.h
-  CalChartConfiguration.cpp
-  CalChartConfiguration.h
   CalChartCoordHelper.h
   CalChartDoc.cpp
   CalChartDoc.h
@@ -122,6 +120,8 @@ add_executable(
   ShowModeWizard.h
   StackDrawPlayground.cpp
   StackDrawPlayground.h
+  SystemConfiguration.cpp
+  SystemConfiguration.h
   TransitionSolverFrame.cpp
   TransitionSolverFrame.h
   TransitionSolverProgressFrame.cpp
@@ -131,7 +131,6 @@ add_executable(
   basic_ui.cpp
   basic_ui.h
   calchart.rc
-  cc_omniview_constants.h
   platconf.h
   ui_enums.h
   ${CalChartDocs}

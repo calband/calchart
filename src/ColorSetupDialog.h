@@ -21,7 +21,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartConfiguration.h"
+#include "CalChartConstants.h"
+#include "CalChartDrawPrimatives.h"
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <wx/bmpcbox.h>
@@ -29,7 +30,9 @@
 #include <wx/wx.h>
 #include <wxUI/wxUI.h>
 
-class CalChartConfiguration;
+namespace CalChart {
+class Configuration;
+}
 
 // Dialog effectively takes a configuration by reference, and then you manipulate the data members within it.
 // It is the caller's responsibility to flush the configuration out after the dialong is done.
@@ -38,7 +41,7 @@ class ColorSetupDialog : public wxDialog {
     DECLARE_EVENT_TABLE()
 
 public:
-    static std::unique_ptr<ColorSetupDialog> CreateDialog(wxWindow* parent, int palette, CalChartConfiguration& config)
+    static std::unique_ptr<ColorSetupDialog> CreateDialog(wxWindow* parent, int palette, CalChart::Configuration& config)
     {
         auto dialog = std::unique_ptr<ColorSetupDialog>(new ColorSetupDialog{ parent, palette, config });
         dialog->TransferDataToWindow();
@@ -47,7 +50,7 @@ public:
 
 private:
     // private, use the CreateDialog method
-    ColorSetupDialog(wxWindow* parent, int palette, CalChartConfiguration& config);
+    ColorSetupDialog(wxWindow* parent, int palette, CalChart::Configuration& config);
 
 public:
     virtual ~ColorSetupDialog() = default;
@@ -87,5 +90,5 @@ private:
     std::array<std::array<wxPen, toUType(CalChart::Colors::NUM)>, CalChart::kNumberPalettes> mCalChartPens;
     std::array<std::array<wxBrush, toUType(CalChart::Colors::NUM)>, CalChart::kNumberPalettes> mCalChartBrushes;
 
-    CalChartConfiguration& mConfig;
+    CalChart::Configuration& mConfig;
 };

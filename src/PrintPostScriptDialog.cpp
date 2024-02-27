@@ -62,7 +62,7 @@ IMPLEMENT_CLASS(PrintPostScriptDialog, wxDialog)
 
 PrintPostScriptDialog::PrintPostScriptDialog(
     const CalChartDoc* show,
-    CalChartConfiguration& config,
+    CalChart::Configuration& config,
     wxFrame* parent,
     wxWindowID id,
     const wxString& caption,

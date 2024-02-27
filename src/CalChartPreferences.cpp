@@ -55,7 +55,7 @@ END_EVENT_TABLE()
 
 IMPLEMENT_CLASS(CalChartPreferences, wxDialog)
 
-CalChartPreferences::CalChartPreferences(wxWindow* parent, CalChartConfiguration& config)
+CalChartPreferences::CalChartPreferences(wxWindow* parent, CalChart::Configuration& config)
     : super(parent, wxID_ANY, "CalChart Preferences", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
     , mConfig(config)
 {

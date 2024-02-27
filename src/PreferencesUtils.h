@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,10 +21,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartConfiguration.h"
 #include "basic_ui.h"
 #include <wx/wx.h>
 
+namespace CalChart {
+class Configuration;
+}
 // the basic class panel we use for all the pages.
 // Each page gets a references to the CalChartConfig which will be used for
 // getting and setting.
@@ -37,7 +39,7 @@ class PreferencePage : public wxPanel {
     using super = wxPanel;
     DECLARE_ABSTRACT_CLASS(GeneralSetup)
 public:
-    PreferencePage(CalChartConfiguration& config, wxWindow* parent, const wxString& caption)
+    PreferencePage(CalChart::Configuration& config, wxWindow* parent, const wxString& caption)
         : super(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU, caption)
         , mConfig(config)
     {
@@ -64,5 +66,5 @@ private:
 protected:
     // force a readread of the config
     virtual void InitFromConfig() = 0;
-    CalChartConfiguration& mConfig;
+    CalChart::Configuration& mConfig;
 };

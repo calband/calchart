@@ -21,7 +21,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartConfiguration.h"
 #include "CalChartShowMode.h"
 #include "basic_ui.h"
 #include <wx/bmpcbox.h>
@@ -29,13 +28,17 @@
 #include <wx/spinctrl.h>
 #include <wx/wx.h>
 
+namespace CalChart {
+class Configuration;
+}
+
 class ShowModeSetupCanvas : public ClickDragCtrlScrollCanvas {
     DECLARE_CLASS(ShowModeSetupCanvas)
     DECLARE_EVENT_TABLE()
     using super = ClickDragCtrlScrollCanvas;
 
 public:
-    ShowModeSetupCanvas(CalChartConfiguration& config, wxWindow* parent,
+    ShowModeSetupCanvas(CalChart::Configuration const& config, wxWindow* parent,
         wxWindowID id = wxID_ANY);
 
     void OnPaint(wxPaintEvent& event);
@@ -43,6 +46,6 @@ public:
     virtual void SetZoom(float factor);
 
 private:
-    CalChartConfiguration& mConfig;
+    CalChart::Configuration const& mConfig;
     CalChart::ShowMode mMode;
 };

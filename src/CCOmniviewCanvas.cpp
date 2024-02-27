@@ -31,7 +31,6 @@
 #include "CalChartShowMode.h"
 #include "CalChartUtils.h"
 #include "basic_ui.h"
-#include "cc_omniview_constants.h"
 #include "platconf.h"
 
 #include <wx/dcbuffer.h>
@@ -72,9 +71,9 @@ auto GetImageDir()
     return kImageDir;
 }
 
-static constexpr auto kStartingViewPoint = CCOmniviewCanvas::ViewPoint{ kViewPoint_x_1, kViewPoint_y_1, kViewPoint_z_1 };
-static constexpr auto kStartingViewAngle = kViewAngle_1;
-static constexpr auto kStartingViewAngleZ = kViewAngle_z_1;
+static constexpr auto kStartingViewPoint = CCOmniviewCanvas::ViewPoint{ CalChart::kViewPoint_x_1, CalChart::kViewPoint_y_1, CalChart::kViewPoint_z_1 };
+static constexpr auto kStartingViewAngle = CalChart::kViewAngle_1;
+static constexpr auto kStartingViewAngleZ = CalChart::kViewAngle_z_1;
 
 enum WhichImage {
     kImageFirst = 0,
@@ -566,7 +565,7 @@ void CCOmniView_GLContext::Draw3dMarcher(AnimationView::MarcherInfo const& info,
     DrawTextureOnBox(points, 1, 1, m_textures[face]);
 }
 
-CCOmniviewCanvas::CCOmniviewCanvas(wxWindow* parent, CalChartConfiguration& config)
+CCOmniviewCanvas::CCOmniviewCanvas(wxWindow* parent, CalChart::Configuration& config)
     : wxGLCanvas(parent, wxID_ANY, NULL, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE)
     , m_glContext(new CCOmniView_GLContext(this))
     , mConfig(config)
@@ -731,9 +730,9 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
     case '1':
     case '!':
         OnCmd_FollowMarcher(-1);
-        mViewPoint = ViewPoint{ kViewPoint_x_1, kViewPoint_y_1, kViewPoint_z_1 };
-        mViewAngle = kViewAngle_1;
-        mViewAngleZ = kViewAngle_z_1;
+        mViewPoint = ViewPoint{ CalChart::kViewPoint_x_1, CalChart::kViewPoint_y_1, CalChart::kViewPoint_z_1 };
+        mViewAngle = CalChart::kViewAngle_1;
+        mViewAngleZ = CalChart::kViewAngle_z_1;
         if (event.GetKeyCode() == '!') {
             mViewPoint.y *= -1;
             mViewPoint.x *= -1;
@@ -743,9 +742,9 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
     case '2':
     case '@':
         OnCmd_FollowMarcher(-1);
-        mViewPoint = ViewPoint{ kViewPoint_x_2, kViewPoint_y_2, kViewPoint_z_2 };
-        mViewAngle = kViewAngle_2;
-        mViewAngleZ = kViewAngle_z_2;
+        mViewPoint = ViewPoint{ CalChart::kViewPoint_x_2, CalChart::kViewPoint_y_2, CalChart::kViewPoint_z_2 };
+        mViewAngle = CalChart::kViewAngle_2;
+        mViewAngleZ = CalChart::kViewAngle_z_2;
         if (event.GetKeyCode() == '@') {
             mViewPoint.y *= -1;
             mViewPoint.x *= -1;
@@ -755,9 +754,9 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
     case '3':
     case '#':
         OnCmd_FollowMarcher(-1);
-        mViewPoint = ViewPoint{ kViewPoint_x_3, kViewPoint_y_3, kViewPoint_z_3 };
-        mViewAngle = kViewAngle_3;
-        mViewAngleZ = kViewAngle_z_3;
+        mViewPoint = ViewPoint{ CalChart::kViewPoint_x_3, CalChart::kViewPoint_y_3, CalChart::kViewPoint_z_3 };
+        mViewAngle = CalChart::kViewAngle_3;
+        mViewAngleZ = CalChart::kViewAngle_z_3;
         if (event.GetKeyCode() == '#') {
             mViewPoint.y *= -1;
             mViewPoint.x *= -1;

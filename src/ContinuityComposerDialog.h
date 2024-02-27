@@ -25,14 +25,16 @@ class Procedure;
 }
 
 class ContinuityComposerPanel;
-class CalChartConfiguration;
+namespace CalChart {
+class Configuration;
+}
 
 class ContinuityComposerDialog : public wxDialog {
     using super = wxDialog;
     DECLARE_CLASS(ContinuityComposerDialog)
 
 public:
-    ContinuityComposerDialog(std::unique_ptr<CalChart::Cont::Procedure> starting_continuity, CalChartConfiguration const& config, wxWindow* parent);
+    ContinuityComposerDialog(std::unique_ptr<CalChart::Cont::Procedure> starting_continuity, CalChart::Configuration const& config, wxWindow* parent);
     ~ContinuityComposerDialog() override = default;
 
     std::unique_ptr<CalChart::Cont::Procedure> GetContinuity();

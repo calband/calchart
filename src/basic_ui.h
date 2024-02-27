@@ -35,7 +35,9 @@
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
 
 class CalChartView;
-class CalChartConfiguration;
+namespace CalChart {
+class Configuration;
+}
 
 static constexpr auto kMultiple = "[multiple]";
 static constexpr auto kDefaultInstrument = "default";
@@ -110,7 +112,7 @@ class MouseMoveScrollCanvas : public ScrollZoomWindow {
     using super = ScrollZoomWindow;
 
 public:
-    MouseMoveScrollCanvas(CalChartConfiguration const& config, wxWindow* parent, wxWindowID id = wxID_ANY,
+    MouseMoveScrollCanvas(CalChart::Configuration const& config, wxWindow* parent, wxWindowID id = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, long style = 0);
     virtual ~MouseMoveScrollCanvas() override;
@@ -128,7 +130,7 @@ protected:
 private:
     wxPoint mLastPos;
     bool mScrolledLastMove;
-    CalChartConfiguration const& mConfig;
+    CalChart::Configuration const& mConfig;
 };
 
 /**
@@ -139,7 +141,7 @@ class ClickDragCtrlScrollCanvas : public MouseMoveScrollCanvas {
     using super = MouseMoveScrollCanvas;
 
 public:
-    ClickDragCtrlScrollCanvas(CalChartConfiguration const& config, wxWindow* parent, wxWindowID id = wxID_ANY,
+    ClickDragCtrlScrollCanvas(CalChart::Configuration const& config, wxWindow* parent, wxWindowID id = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, long style = 0);
     virtual ~ClickDragCtrlScrollCanvas() override;

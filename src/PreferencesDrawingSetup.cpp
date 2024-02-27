@@ -71,7 +71,7 @@ END_EVENT_TABLE()
 IMPLEMENT_CLASS(DrawingSetup, PreferencePage)
 
 // private, use the CreatePreference method
-DrawingSetup::DrawingSetup(CalChartConfiguration& config, wxWindow* parent)
+DrawingSetup::DrawingSetup(CalChart::Configuration& config, wxWindow* parent)
     : super(config, parent, "Drawing Setup")
 {
     // first read out the defaults:

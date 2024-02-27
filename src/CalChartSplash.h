@@ -23,7 +23,9 @@
 
 #include <wx/docview.h>
 
-class CalChartConfiguration;
+namespace CalChart {
+class Configuration;
+}
 
 // CalChartSplash
 // Serves as the top frame that gets displayed when CalChart starts
@@ -32,7 +34,7 @@ class CalChartSplash : public wxDocParentFrame {
     DECLARE_CLASS(CalChartSplash)
     DECLARE_EVENT_TABLE()
 public:
-    CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString const& title, CalChartConfiguration& config);
+    CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString const& title, CalChart::Configuration& config);
     ~CalChartSplash() = default;
 
     void OnCmdAbout(wxCommandEvent& event);
@@ -43,5 +45,5 @@ public:
     static void Help();
 
 private:
-    CalChartConfiguration& mConfig;
+    CalChart::Configuration& mConfig;
 };
