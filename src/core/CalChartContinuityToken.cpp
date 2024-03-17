@@ -1191,7 +1191,7 @@ float FuncDir::Get(AnimationCompile const& anim) const
     if (c == anim.GetPointPosition()) {
         anim.RegisterError(AnimateError::UNDEFINED, this);
     }
-    return anim.GetPointPosition().Direction(c).getValue();
+    return CalChart::Degree{ anim.GetPointPosition().Direction(c) }.getValue();
 }
 
 std::ostream& FuncDir::Print(std::ostream& os) const
@@ -1242,7 +1242,7 @@ float FuncDirFrom::Get(AnimationCompile const& anim) const
     if (start == end) {
         anim.RegisterError(AnimateError::UNDEFINED, this);
     }
-    return start.Direction(end).getValue();
+    return CalChart::Degree{ start.Direction(end) }.getValue();
 }
 
 std::ostream& FuncDirFrom::Print(std::ostream& os) const
