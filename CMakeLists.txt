@@ -54,8 +54,9 @@ add_subdirectory(src)
 if(NOT MSVC)
   add_subdirectory(tests)
   include(CTest)
-  add_test(NAME TutorialRuns COMMAND $<TARGET_FILE:calchart_cmd> --version)
+  add_test(NAME CalChartVersion COMMAND $<TARGET_FILE:calchart_cmd> --version)
   add_test(NAME CalChartTests COMMAND $<TARGET_FILE:CalChartTests>)
+  add_test(NAME SanityTest COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/sanity_tester.py -d ${CMAKE_CURRENT_SOURCE_DIR}/shows -g ${CMAKE_CURRENT_SOURCE_DIR}/tests/gold.zip -c $<TARGET_FILE:calchart_cmd>)
 endif()
 
 # CPack section
