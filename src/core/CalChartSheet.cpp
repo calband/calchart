@@ -170,7 +170,9 @@ Sheet::Sheet(Version_3_3_and_earlier, size_t numPoints, Reader& reader, ParseErr
     {
         auto reader = CalChart::Reader({ data.data(), data.size() });
         for (unsigned i = 0; i < mPoints.size(); ++i) {
-            auto c = Coord(reader.Get<uint16_t>(), reader.Get<uint16_t>());
+            auto x = reader.Get<uint16_t>();
+            auto y = reader.Get<uint16_t>();
+            auto c = Coord(x, y);
             for (unsigned j = 0; j <= Point::kNumRefPoints; j++) {
                 mPoints[i].SetPos(c, j);
             }
