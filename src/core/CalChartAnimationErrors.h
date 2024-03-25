@@ -26,8 +26,10 @@
 #include "CalChartContinuityToken.h"
 #include "CalChartTypes.h"
 #include <array>
+#include <iosfwd>
 #include <map>
 #include <ostream>
+#include <ranges>
 
 /**
  * Animation Errors
@@ -63,6 +65,14 @@ struct ErrorMarker {
         return pntgroup == rhs.pntgroup && contsymbol == rhs.contsymbol && line == rhs.line && col == rhs.col;
     }
 };
+
+inline auto operator<<(std::ostream& os, ErrorMarker const& em) -> std::ostream&
+{
+    os << "ErrorMarker {";
+    std::ranges::copy(em.pntgroup, std::ostream_iterator<int>(os, ", "));
+    os << " }, sym " << em.contsymbol << ", where (" << em.line << ", " << em.col << ")";
+    return os;
+}
 
 class AnimationErrors {
 public:

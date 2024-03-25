@@ -11,6 +11,7 @@
 #include "CalChartAnimationErrors.h"
 #include "CalChartContinuity.h"
 #include "CalChartContinuityToken.h"
+#include "CalChartRanges.h"
 #include "CalChartSheet.h"
 #include "CalChartShow.h"
 #include "CalChartShowMode.h"
@@ -50,9 +51,9 @@ void AnimateShow(const char* show)
     std::ifstream input(show);
     std::unique_ptr<Show> p(Show::Create(ShowMode::GetDefaultShowMode(), input));
     Animation a(*p);
-    for (auto&& errors : a.GetAnimationErrors()) {
+    for (auto&& [which, errors] : CalChart::Ranges::enumerate_view(a.GetAnimationErrors())) {
         for (auto&& [key, value] : errors.GetErrors()) {
-            std::cout << "error " << key << "\n";
+            std::cout << "sheet " << which << ": error " << key << ": " << value << "\n";
         };
     };
 }
@@ -62,9 +63,9 @@ void PrintShow(const char* show)
     std::ifstream input(show);
     std::unique_ptr<Show> p(Show::Create(ShowMode::GetDefaultShowMode(), input));
     Animation a(*p);
-    for (auto&& errors : a.GetAnimationErrors()) {
+    for (auto&& [which, errors] : CalChart::Ranges::enumerate_view(a.GetAnimationErrors())) {
         for (auto&& [key, value] : errors.GetErrors()) {
-            std::cout << "error " << key << "\n";
+            std::cout << "sheet " << which << ": error " << key << ": " << value << "\n";
         };
     };
     a.GotoSheet(0);
