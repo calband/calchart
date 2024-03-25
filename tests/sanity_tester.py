@@ -47,13 +47,16 @@ def run_command(command_location, file, output_file, option, extension):
         output.write(filter_output(result.stdout, dir_name))
 
 def compare_files(file1, file2, custom_comparison_function):
+    num_errors = 0
+    line_num = 0
     with open(file1, 'r') as f1, open(file2, 'r') as f2:
         for line1, line2 in zip(f1, f2):
+            line_num = line_num + 1
             # Apply custom comparison function to each line
             if not custom_comparison_function(line1, line2):
-                print(f"Failed: \"{line1}\" \"{line2}\"")
-                return False
-    return True
+                print(f"Failed.  Line {line_num} \"{line1}\" \"{line2}\"")
+                num_errors = num_errors + 1
+    return num_errors
 
 def extractValues(input_string):
     import re
@@ -93,10 +96,10 @@ def compare_directories(dir1, dir2):
                 print(f"comparing files {file1} with {file2}")
             if not os.path.exists(file2):
                 print(f"File {file2} does not exist in {dir2}")
-                continue
+                return False
 
             # Compare files using custom comparison function
-            if not compare_files(file1, file2, custom_comparison_function):
+            if compare_files(file1, file2, custom_comparison_function) > 0:
                 print(f"Differences found between {file1} and {file2}")
                 return False
     return True
