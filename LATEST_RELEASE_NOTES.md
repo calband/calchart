@@ -1,8 +1,8 @@
-## Release notes for 3.6.6
+## Release notes for 3.6.7
 
 Bugs addressed in this release:
 
-* [#404](../../issues/404) Crash when sheet has zero beats.
+* [#467](../../issues/467) Shows with Parse Continuity and references points are incorrect in 3.6
 
 Other changes:
 
