@@ -7,11 +7,13 @@ on:
   push:
     branches:
     - main
+    - calchart-3.6
     tags:
     - '*'
   pull_request:
     branches:
     - main
+    - calchart-3.6
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
