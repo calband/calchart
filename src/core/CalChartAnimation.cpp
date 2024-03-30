@@ -352,7 +352,7 @@ Animation::GetCurrentInfo() const
         std::ostringstream each_string;
         auto info = GetAnimateInfo(i);
         each_string << "pt " << i << ": (" << info.mPosition.x << ", "
-                    << info.mPosition.y << "), dir=" << info.mFacingDirection
+                    << info.mPosition.y << "), dir=" << CalChart::Degree{ info.mFacingDirection }.getValue()
                     << ((info.mCollision != CalChart::Coord::CollisionType::none) ? ", collision!" : "");
         each.push_back(each_string.str());
     }
