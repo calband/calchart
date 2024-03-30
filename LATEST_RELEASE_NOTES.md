@@ -7,4 +7,6 @@ Bugs addressed in this release:
 
 Other changes:
 
+* [#464](../../issues/464) Need a test suite to sanity check releases
+
 
