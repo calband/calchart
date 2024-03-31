@@ -156,7 +156,7 @@ point
 	| rwNP
 		{ $$ = new CalChart::Cont::NextPoint(); }
 	| rwR FLOATCONST
-		{ $$ = new CalChart::Cont::RefPoint((unsigned)$2 - 1); }
+		{ $$ = new CalChart::Cont::RefPoint((unsigned)$2 - 0); }
 	;
 
 value
