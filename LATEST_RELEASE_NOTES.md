@@ -5,6 +5,7 @@ Bugs addressed in this release:
 * [#404](../../issues/404) Crash when sheet has zero beats.
 * [#444](../../issues/444) Continuity view on main frame looks wrong
 * [#446](../../issues/446) Transition solver crashes
+* [#463](../../issues/463) Animation incorrect on Arena for TOT build
 * [#467](../../issues/467) Shows with Parse Continuity and references points are incorrect in 3.6
 
 Other changes:
