@@ -56,6 +56,18 @@ If you need to regenerate the help documentation, see the [README-docs.txt](READ
 
 
 # Release notes
+## Release notes for 3.6.7
+
+Bugs addressed in this release:
+
+* [#467](../../issues/467) Shows with Parse Continuity and references points are incorrect in 3.6
+* [#468](../../issues/468) Fix Linux reading of older files 
+
+Other changes:
+
+* [#464](../../issues/464) Need a test suite to sanity check releases
+
+
 ## Release notes for 3.6.6
 
 Bugs addressed in this release:
