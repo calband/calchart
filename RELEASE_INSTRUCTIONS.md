@@ -13,7 +13,7 @@ Checklist
 
 CalChart uses CMake and Github actions to automate the release process.  When you push a tag for the repository, github will build and package the release.
 
-The current calchart version is 3.6.6.  In all commands below, substitute that number for `$CCVER` (meaning when you read `$CCVER`, type 3.6.6)
+The current calchart version is 3.6.7.  In all commands below, substitute that number for `$CCVER` (meaning when you read `$CCVER`, type 3.6.7)
 
  1. Prebuild the project to make sure its working
 
@@ -28,8 +28,8 @@ awk '//; /^# Release notes/{while(getline<"LATEST_RELEASE_NOTES.md"){print}}' RE
  4. Tag the depot
 
 ```
-$ git tag -a v3.6.6 -m "calchart-3.6.6"
-$ git push origin v3.6.6
+$ git tag -a v3.6.7 -m "calchart-3.6.7"
+$ git push origin v3.6.7
 ```
 
 This should trigger the github action, which should publish release notes in Draft form.
