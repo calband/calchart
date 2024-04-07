@@ -192,6 +192,8 @@ enum class ContProc {
     NSEW,
     Rotate,
     Set,
+    Stand,
+    StandRM,
     LAST
 };
 
@@ -215,6 +217,8 @@ const std::pair<std::string, std::function<std::unique_ptr<CalChart::Cont::Proce
     { "North/South East/West", []() { return std::make_unique<CalChart::Cont::ProcNSEW>(std::make_unique<CalChart::Cont::PointUnset>()); } },
     { "ROTATE", []() { return std::make_unique<CalChart::Cont::ProcRotate>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::PointUnset>()); } },
     { "SET", []() { return std::make_unique<CalChart::Cont::ProcSet>(std::make_unique<CalChart::Cont::ValueVarUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()); } },
+    { "Stand", []() { return std::make_unique<CalChart::Cont::ProcStand>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()); } },
+    { "Stand ReMaining", []() { return std::make_unique<CalChart::Cont::ProcStandRM>(std::make_unique<CalChart::Cont::ValueUnset>()); } },
 };
 
 static_assert(sizeof(ContMap) / sizeof(ContMap[0]) == static_cast<int>(ContProc::LAST), "");
@@ -229,6 +233,8 @@ const ContProc ContUsageOrder[] = {
     ContProc::March,
     ContProc::DMHS,
     ContProc::HSDM,
+    ContProc::StandRM,
+    ContProc::Stand,
     ContProc::Rotate,
     ContProc::Even,
     ContProc::Set,

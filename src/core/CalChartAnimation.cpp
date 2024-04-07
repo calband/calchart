@@ -279,11 +279,13 @@ bool Animation::CurrentBeatHasCollision() const
 
 Animation::animate_info_t Animation::GetAnimateInfo(int which) const
 {
+    auto const& cmd = GetCommand(mCurrentSheetNumber, which);
     return {
         which,
         mCollisions.count({ which, mCurrentSheetNumber, mCurrentBeatNumber }) ? mCollisions.find({ which, mCurrentSheetNumber, mCurrentBeatNumber })->second : Coord::CollisionType::none,
-        CalChart::Radian{ GetCommand(mCurrentSheetNumber, which).FacingDirection() },
-        mPoints.at(which)
+        CalChart::Radian{ cmd.FacingDirection() },
+        mPoints.at(which),
+        cmd.StepStyle()
     };
 }
 
@@ -293,12 +295,7 @@ std::vector<Animation::animate_info_t> Animation::GetAllAnimateInfo() const
     std::iota(points.begin(), points.end(), 0);
     auto animates = std::vector<Animation::animate_info_t>();
     std::transform(points.begin(), points.end(), std::back_inserter(animates), [this](auto which) -> Animation::animate_info_t {
-        return {
-            which,
-            mCollisions.count({ which, mCurrentSheetNumber, mCurrentBeatNumber }) ? mCollisions.find({ which, mCurrentSheetNumber, mCurrentBeatNumber })->second : Coord::CollisionType::none,
-            CalChart::Radian{ GetCommand(mCurrentSheetNumber, which).FacingDirection() },
-            mPoints.at(which)
-        };
+        return GetAnimateInfo(which);
     });
     std::sort(animates.begin(), animates.end(), [](auto& a, auto& b) {
         return a.mPosition < b.mPosition;

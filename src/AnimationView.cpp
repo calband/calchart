@@ -219,10 +219,15 @@ auto AnimationView::GenerateDrawSprites(CalChart::Configuration const& config) c
     constexpr auto comp_X = 0.5;
     auto comp_Y = config.Get_SpriteBitmapOffsetY();
 
-    auto image_offset = !GetAnimationFrame()->TimerOn() ? 0 : OnBeat() ? 1
-                                                                       : 2;
     auto drawCmds = CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(
-        mAnimation->GetAllAnimateInfo() | std::views::transform([this, image_offset, comp_Y](auto&& info) {
+        mAnimation->GetAllAnimateInfo() | std::views::transform([this, comp_Y, timerOn = GetAnimationFrame()->TimerOn()](auto&& info) {
+            auto image_offset = [&]() {
+                if (info.mStepStyle == CalChart::MarchingStyle::Close) {
+                    return 0;
+                }
+                return !timerOn ? 0 : OnBeat() ? 1
+                                               : 2;
+            }();
             auto image_index = CalChart::AngleToQuadrant(info.mFacingDirection) + image_offset * 8;
             auto image = mSpriteCalChartImages[image_index];
             auto position = info.mPosition;

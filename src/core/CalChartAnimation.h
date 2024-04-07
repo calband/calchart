@@ -55,10 +55,11 @@ public:
 
     // For drawing:
     struct animate_info_t {
-        int index;
-        CalChart::Coord::CollisionType mCollision;
-        CalChart::Radian mFacingDirection;
-        Coord mPosition;
+        int index{};
+        CalChart::Coord::CollisionType mCollision = CalChart::Coord::CollisionType::none;
+        CalChart::Radian mFacingDirection{};
+        Coord mPosition{};
+        MarchingStyle mStepStyle = MarchingStyle::HighStep;
     };
     animate_info_t GetAnimateInfo(int which) const;
 
