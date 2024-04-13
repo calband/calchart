@@ -1,12 +1,9 @@
-## Release notes for 3.6.7
+## Release notes for 3.6.8
 
 Bugs addressed in this release:
 
-* [#467](../../issues/467) Shows with Parse Continuity and references points are incorrect in 3.6
-* [#468](../../issues/468) Fix Linux reading of older files 
-
 Other changes:
 
-* [#464](../../issues/464) Need a test suite to sanity check releases
+* [#478](../../issues/478) Include something to let users know when they are opening an new version of show
 
 

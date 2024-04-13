@@ -78,9 +78,11 @@ SYMBOL_TYPE GetSymbolForName(const std::string& name);
 // error occurred on parsing.  First arg is what went wrong, second is the values that need to be fixed.
 // return a string of what to try parsing.
 using ContinuityParseCorrection_t = std::function<std::string(std::string const&, std::string const&, int line, int column)>;
+using VersionMismatchNotice_t = std::function<bool(int, int)>;
 
 struct ParseErrorHandlers {
-    ContinuityParseCorrection_t mContinuityParseCorrectionHandler;
+    ContinuityParseCorrection_t mContinuityParseCorrectionHandler{};
+    VersionMismatchNotice_t mVersionMismatchHandler{};
 };
 
 typedef std::set<int> SelectionList;
