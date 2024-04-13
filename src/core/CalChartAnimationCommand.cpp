@@ -20,14 +20,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
-#include "CalChartAnimation.h"
 #include "CalChartAnimationCommand.h"
+#include "CalChartAngles.h"
+#include "CalChartAnimation.h"
+#include "CalChartCoord.h"
 #include "CalChartDrawCommand.h"
-#include "CalChartUtils.h"
 #include "viewer_translate.h"
+#include <memory>
+#include <nlohmann/json.hpp>
 
 namespace CalChart {
 
@@ -37,12 +37,12 @@ AnimationCommand::AnimationCommand(unsigned beats)
 {
 }
 
-Draw::DrawCommand AnimationCommand::GenCC_DrawCommand(Coord /*pt*/) const
+auto AnimationCommand::GenCC_DrawCommand(Coord /*pt*/) const -> Draw::DrawCommand
 {
     return Draw::Ignore{};
 }
 
-bool AnimationCommand::Begin(Coord& pt)
+auto AnimationCommand::Begin(Coord& pt) -> bool
 {
     mBeat = 0;
     if (mNumBeats == 0) {
@@ -52,7 +52,7 @@ bool AnimationCommand::Begin(Coord& pt)
     return true;
 }
 
-bool AnimationCommand::End(Coord& pt)
+auto AnimationCommand::End(Coord& pt) -> bool
 {
     mBeat = mNumBeats;
     if (mNumBeats == 0) {
@@ -62,31 +62,53 @@ bool AnimationCommand::End(Coord& pt)
     return true;
 }
 
-bool AnimationCommand::NextBeat(Coord&)
+auto AnimationCommand::NextBeat([[maybe_unused]] Coord& pt) -> bool
 {
     ++mBeat;
-    if (mBeat >= mNumBeats)
+    return mBeat < mNumBeats;
+}
+
+auto AnimationCommand::PrevBeat([[maybe_unused]] Coord& pt) -> bool
+{
+    if (mBeat == 0) {
         return false;
+    }
+    --mBeat;
     return true;
 }
 
-bool AnimationCommand::PrevBeat(Coord&)
-{
-    if (mBeat == 0)
-        return false;
-    else {
-        --mBeat;
-        return true;
-    }
-}
+void AnimationCommand::ApplyForward([[maybe_unused]] Coord& pt) { mBeat = mNumBeats; }
 
-void AnimationCommand::ApplyForward(Coord&) { mBeat = mNumBeats; }
+void AnimationCommand::ApplyBackward([[maybe_unused]] Coord& pt) { mBeat = 0; }
 
-void AnimationCommand::ApplyBackward(Coord&) { mBeat = 0; }
-
-CalChart::Degree AnimationCommand::MotionDirection() const { return FacingDirection(); }
+auto AnimationCommand::MotionDirection() const -> CalChart::Degree { return FacingDirection(); }
 
 void AnimationCommand::ClipBeats(unsigned beats) { mNumBeats = beats; }
+
+AnimationCommandStand::AnimationCommandStand(unsigned beats, CalChart::Degree direction)
+    : AnimationCommand(beats)
+    , dir(direction)
+{
+}
+
+auto AnimationCommandStand::clone() const -> std::unique_ptr<AnimationCommand>
+{
+    return std::make_unique<AnimationCommandStand>(*this);
+}
+
+auto AnimationCommandStand::FacingDirection() const -> CalChart::Degree { return dir; }
+
+auto AnimationCommandStand::toOnlineViewerJSON(Coord start) const -> nlohmann::json
+{
+    nlohmann::json j;
+
+    j["type"] = "stand";
+    j["beats"] = static_cast<double>(NumBeats());
+    j["facing"] = ToOnlineViewer::angle(FacingDirection());
+    j["x"] = ToOnlineViewer::xPosition(start.x);
+    j["y"] = ToOnlineViewer::yPosition(start.y);
+    return j;
+}
 
 AnimationCommandMT::AnimationCommandMT(unsigned beats, CalChart::Degree direction)
     : AnimationCommand(beats)
@@ -94,14 +116,14 @@ AnimationCommandMT::AnimationCommandMT(unsigned beats, CalChart::Degree directio
 {
 }
 
-std::unique_ptr<AnimationCommand> AnimationCommandMT::clone() const
+auto AnimationCommandMT::clone() const -> std::unique_ptr<AnimationCommand>
 {
     return std::make_unique<AnimationCommandMT>(*this);
 }
 
-CalChart::Degree AnimationCommandMT::FacingDirection() const { return dir; }
+auto AnimationCommandMT::FacingDirection() const -> CalChart::Degree { return dir; }
 
-nlohmann::json AnimationCommandMT::toOnlineViewerJSON(Coord start) const
+auto AnimationCommandMT::toOnlineViewerJSON(Coord start) const -> nlohmann::json
 {
     nlohmann::json j;
 
@@ -119,7 +141,7 @@ AnimationCommandMove::AnimationCommandMove(unsigned beats, Coord movement)
 {
 }
 
-std::unique_ptr<AnimationCommand> AnimationCommandMove::clone() const
+auto AnimationCommandMove::clone() const -> std::unique_ptr<AnimationCommand>
 {
     return std::make_unique<AnimationCommandMove>(*this);
 }
@@ -130,9 +152,12 @@ AnimationCommandMove::AnimationCommandMove(unsigned beats, Coord movement, CalCh
 {
 }
 
-bool AnimationCommandMove::NextBeat(Coord& pt)
+auto AnimationCommandMove::NextBeat(Coord& pt) -> bool
 {
-    bool b = AnimationCommand::NextBeat(pt);
+    auto b = AnimationCommand::NextBeat(pt);
+    if (mNumBeats == 0) {
+        return b;
+    }
     pt.x += static_cast<Coord::units>((mNumBeats)
             ? ((long)mBeat * mVector.x / (short)mNumBeats) - ((long)(mBeat - 1) * mVector.x / (short)mNumBeats)
             : 0);
@@ -142,7 +167,7 @@ bool AnimationCommandMove::NextBeat(Coord& pt)
     return b;
 }
 
-bool AnimationCommandMove::PrevBeat(Coord& pt)
+auto AnimationCommandMove::PrevBeat(Coord& pt) -> bool
 {
     if (AnimationCommand::PrevBeat(pt)) {
         pt.x += static_cast<Coord::units>(mNumBeats
@@ -152,9 +177,8 @@ bool AnimationCommandMove::PrevBeat(Coord& pt)
                 ? ((long)mBeat * mVector.y / (short)mNumBeats) - ((long)(mBeat + 1) * mVector.y / (short)mNumBeats)
                 : 0);
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
 
 void AnimationCommandMove::ApplyForward(Coord& pt)
@@ -169,7 +193,7 @@ void AnimationCommandMove::ApplyBackward(Coord& pt)
     pt -= mVector;
 }
 
-CalChart::Degree AnimationCommandMove::MotionDirection() const
+auto AnimationCommandMove::MotionDirection() const -> CalChart::Degree
 {
     return CalChart::Degree{ mVector.Direction() };
 }
@@ -179,13 +203,12 @@ void AnimationCommandMove::ClipBeats(unsigned beats)
     AnimationCommand::ClipBeats(beats);
 }
 
-Draw::DrawCommand
-AnimationCommandMove::GenCC_DrawCommand(Coord pt) const
+auto AnimationCommandMove::GenCC_DrawCommand(Coord pt) const -> Draw::DrawCommand
 {
     return Draw::Line{ pt, pt + mVector };
 }
 
-nlohmann::json AnimationCommandMove::toOnlineViewerJSON(Coord start) const
+auto AnimationCommandMove::toOnlineViewerJSON(Coord start) const -> nlohmann::json
 {
     nlohmann::json j;
 
@@ -216,30 +239,29 @@ AnimationCommandRotate::AnimationCommandRotate(
 {
 }
 
-std::unique_ptr<AnimationCommand> AnimationCommandRotate::clone() const
+auto AnimationCommandRotate::clone() const -> std::unique_ptr<AnimationCommand>
 {
     return std::make_unique<AnimationCommandRotate>(*this);
 }
 
-bool AnimationCommandRotate::NextBeat(Coord& pt)
+auto AnimationCommandRotate::NextBeat(Coord& pt) -> bool
 {
-    bool b = AnimationCommand::NextBeat(pt);
-    auto curr_ang = mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart) : mAngStart;
+    auto b = AnimationCommand::NextBeat(pt);
+    auto curr_ang = mNumBeats > 0 ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart) : mAngStart;
     pt.x = RoundToCoordUnits(mOrigin.x + cos(curr_ang) * mRadius);
     pt.y = RoundToCoordUnits(mOrigin.y - sin(curr_ang) * mRadius);
     return b;
 }
 
-bool AnimationCommandRotate::PrevBeat(Coord& pt)
+auto AnimationCommandRotate::PrevBeat(Coord& pt) -> bool
 {
     if (AnimationCommand::PrevBeat(pt)) {
-        auto curr_ang = mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart) : mAngStart;
+        auto curr_ang = mNumBeats > 0 ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart) : mAngStart;
         pt.x = RoundToCoordUnits(mOrigin.x + cos(curr_ang) * mRadius);
         pt.y = RoundToCoordUnits(mOrigin.y - sin(curr_ang) * mRadius);
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
 
 void AnimationCommandRotate::ApplyForward(Coord& pt)
@@ -256,9 +278,9 @@ void AnimationCommandRotate::ApplyBackward(Coord& pt)
     pt.y = RoundToCoordUnits(mOrigin.y - sin(mAngStart) * mRadius);
 }
 
-CalChart::Degree AnimationCommandRotate::FacingDirection() const
+auto AnimationCommandRotate::FacingDirection() const -> CalChart::Degree
 {
-    auto curr_ang = mNumBeats ? (mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart : mAngStart;
+    auto curr_ang = mNumBeats > 0 ? (mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart : mAngStart;
     if (mAngEnd > mAngStart) {
         return curr_ang + mFace;
     }
@@ -270,8 +292,7 @@ void AnimationCommandRotate::ClipBeats(unsigned beats)
     AnimationCommand::ClipBeats(beats);
 }
 
-Draw::DrawCommand
-AnimationCommandRotate::GenCC_DrawCommand(Coord /*pt*/) const
+auto AnimationCommandRotate::GenCC_DrawCommand([[maybe_unused]] Coord pt) const -> Draw::DrawCommand
 {
     auto start = (mAngStart < mAngEnd) ? mAngStart : mAngEnd;
     auto end = (mAngStart < mAngEnd) ? mAngEnd : mAngStart;
@@ -287,7 +308,7 @@ AnimationCommandRotate::GenCC_DrawCommand(Coord /*pt*/) const
     };
 }
 
-nlohmann::json AnimationCommandRotate::toOnlineViewerJSON(Coord start) const
+auto AnimationCommandRotate::toOnlineViewerJSON(Coord start) const -> nlohmann::json
 {
     nlohmann::json j;
 

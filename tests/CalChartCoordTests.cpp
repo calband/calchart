@@ -3,7 +3,7 @@
 #include <map>
 #include <random>
 
-// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers, readability-function-cognitive-complexity)
+// NOLINTBEGIN(cppcoreguidelines-avoid-do-while, misc-use-anonymous-namespace, cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers, readability-function-cognitive-complexity)
 TEST_CASE("Basic", "CalChartCoord")
 {
     CalChart::Coord const undertest;
@@ -154,4 +154,17 @@ TEST_CASE("CoordMath", "CalChartCoord")
     CHECK(CalChart::CoordUnits2Int(static_cast<int>(-17)) == -1);
 }
 
-// NOLINTEND(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers, readability-function-cognitive-complexity)
+TEST_CASE("CalChartCoord", "division")
+{
+    REQUIRE(CalChart::Coord{ 16, 5 } == CalChart::Coord{ 192, 64 } / 12);
+    REQUIRE(CalChart::Coord{ -16, 5 } == CalChart::Coord{ -192, 64 } / 12);
+    REQUIRE(CalChart::Coord{ 16, -5 } == CalChart::Coord{ 192, -64 } / 12);
+    REQUIRE(CalChart::Coord{ -16, -5 } == CalChart::Coord{ -192, -64 } / 12);
+    REQUIRE(CalChart::Coord{ 16, 5 } == CalChart::Coord{ 192, 64 } / 12UL);
+    REQUIRE(CalChart::Coord{ -16, 5 } == CalChart::Coord{ -192, 64 } / 12UL);
+    REQUIRE(CalChart::Coord{ 16, -5 } == CalChart::Coord{ 192, -64 } / 12UL);
+    REQUIRE(CalChart::Coord{ -16, -5 } == CalChart::Coord{ -192, -64 } / 12UL);
+    REQUIRE(CalChart::Coord{ -16, 0 } == CalChart::Coord{ -192, 0 } / 12UL);
+}
+
+// NOLINTEND(cppcoreguidelines-avoid-do-while, misc-use-anonymous-namespace, cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers, readability-function-cognitive-complexity)

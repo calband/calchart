@@ -141,7 +141,7 @@ template <Arithmetic T>
 [[nodiscard]] constexpr auto operator*(T v, Coord c) -> Coord { return Coord(c.x * v, c.y * v); }
 
 template <Arithmetic T>
-[[nodiscard]] constexpr auto operator/(Coord a, T s) -> Coord { return Coord(a.x / s, a.y / s); }
+[[nodiscard]] constexpr auto operator/(Coord a, T s) -> Coord { return Coord(a.x / static_cast<Coord::units>(s), a.y / static_cast<Coord::units>(s)); }
 
 [[nodiscard]] constexpr auto operator-(Coord c) -> Coord { return -1 * c; }
 
