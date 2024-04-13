@@ -235,7 +235,7 @@ inline void put_big_word(void* p, uint16_t v)
 {
     uint8_t* ptr = static_cast<uint8_t*>(p);
     ptr[0] = (v >> 8) & 0xFF;
-    ptr[1] = (v)&0xFF;
+    ptr[1] = (v) & 0xFF;
 }
 
 inline void put_big_long(void* p, uint32_t v)
@@ -244,7 +244,7 @@ inline void put_big_long(void* p, uint32_t v)
     ptr[0] = (v >> 24) & 0xFF;
     ptr[1] = (v >> 16) & 0xFF;
     ptr[2] = (v >> 8) & 0xFF;
-    ptr[3] = (v)&0xFF;
+    ptr[3] = (v) & 0xFF;
 }
 
 class CC_FileException : public std::runtime_error {
@@ -461,12 +461,17 @@ public:
         }
         if ((((name >> 24) & 0xFF) == ((inname >> 24) & 0xFF)) && (((name >> 16) & 0xFF) == ((inname >> 16) & 0xFF))) {
             char major_vers = (name >> 8) & 0xFF;
-            char minor_vers = (name)&0xFF;
+            char minor_vers = (name) & 0xFF;
             if (isdigit(major_vers) && isdigit(minor_vers)) {
                 return ((major_vers - '0') << 8) | (minor_vers - '0');
             }
         }
         throw CC_FileException(inname);
+    }
+
+    static auto parseVersion(int version) -> std::tuple<int, int>
+    {
+        return { version >> 8, version & 0xFF };
     }
 
 private:
