@@ -35,7 +35,6 @@
 #include "platconf.h"
 #include "print_ps.h"
 
-#include <format>
 #include <fstream>
 #include <iomanip>
 #include <wx/textfile.h>
@@ -222,9 +221,10 @@ T& CalChartDoc::LoadObjectGeneric(T& stream)
                 return ContinuityEditorPopup::ProcessEditContinuity(GetDocumentWindow(), description, what, line, column).ToStdString();
             },
             [this](int majorVersion, int minorVersion) {
-                auto message = std::format(
+                wxString message;
+                message.Printf(
                     "Warning: Current version of CalChart is older than show file.\n"
-                    "Current Version {}.{}, show file: {}.{}.\n"
+                    "Current Version %d.%d, show file: %d.%d.\n"
                     "Please consider upgrade to a newer version of CalChart by checking https://sourceforge.net/projects/calchart.\n"
                     "Continue trying to open this file?",
                     CC_MAJOR_VERSION,
