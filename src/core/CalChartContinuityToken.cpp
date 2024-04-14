@@ -80,8 +80,8 @@ enum class SerializationToken {
     ProcMTRM,
     ProcNSEW,
     ProcRotate,
-    ProcStand,
-    ProcStandRM,
+    ProcClose,
+    ProcStandAndPlay,
 };
 
 const std::string s_var_names[] = {
@@ -248,6 +248,9 @@ std::tuple<std::unique_ptr<Procedure>, Reader> DeserializeProcedure(Reader reade
     case SerializationToken::ProcBlam:
         v = std::make_unique<ProcBlam>();
         break;
+    case SerializationToken::ProcClose:
+        v = std::make_unique<ProcClose>();
+        break;
     case SerializationToken::ProcCM:
         v = std::make_unique<ProcCM>();
         break;
@@ -299,11 +302,8 @@ std::tuple<std::unique_ptr<Procedure>, Reader> DeserializeProcedure(Reader reade
     case SerializationToken::ProcRotate:
         v = std::make_unique<ProcRotate>();
         break;
-    case SerializationToken::ProcStand:
-        v = std::make_unique<ProcStand>();
-        break;
-    case SerializationToken::ProcStandRM:
-        v = std::make_unique<ProcStandRM>();
+    case SerializationToken::ProcStandAndPlay:
+        v = std::make_unique<ProcStandAndPlay>();
         break;
     default:
         throw std::runtime_error("Error, did not find Point");
@@ -1720,6 +1720,52 @@ Reader ProcBlam::Deserialize(Reader reader)
     return super::Deserialize(reader);
 }
 
+// ProcClose
+void ProcClose::Compile(AnimationCompile& anim)
+{
+    anim.Append(std::make_unique<AnimationCommandStill>(AnimationCommandStill::Style::Close, anim.GetBeatsRemaining(), CalChart::Degree{ dir->Get(anim) }), this);
+}
+
+std::ostream& ProcClose::Print(std::ostream& os) const
+{
+    super::Print(os);
+    os << "[CPrClose]";
+    return os << "Close facing " << *dir;
+}
+
+Drawable ProcClose::GetDrawable() const
+{
+    return {
+        this, parent_ptr,
+        Type::procedure,
+        "Close %@",
+        "Close %@",
+        { dir->GetDrawable() }
+    };
+}
+
+void ProcClose::replace(Token const* which, std::unique_ptr<Token> v)
+{
+    replace_helper<NumParts>(this, which, v, dir);
+}
+
+auto ProcClose::Serialize() const -> std::vector<std::byte>
+{
+    auto result = std::vector<std::byte>{};
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcClose));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, dir->Serialize());
+    return result;
+}
+
+Reader ProcClose::Deserialize(Reader reader)
+{
+    reader = CheckForToken(reader, 1, SerializationToken::ProcClose);
+    reader = super::Deserialize(reader);
+    std::tie(dir, reader) = DeserializeValue(reader);
+    return reader;
+}
+
 // ProcCM
 void ProcCM::Compile(AnimationCompile& anim)
 {
@@ -2673,7 +2719,7 @@ void ProcMT::Compile(AnimationCompile& anim)
 {
     auto b = float2int(this, anim, numbeats->Get(anim));
     if (b != 0) {
-        anim.Append(std::make_unique<AnimationCommandMT>((unsigned)std::abs(b), CalChart::Degree{ dir->Get(anim) }), this);
+        anim.Append(std::make_unique<AnimationCommandStill>(AnimationCommandStill::Style::MarkTime, (unsigned)std::abs(b), CalChart::Degree{ dir->Get(anim) }), this);
     }
 }
 
@@ -2722,7 +2768,7 @@ Reader ProcMT::Deserialize(Reader reader)
 // ProcMTRM
 void ProcMTRM::Compile(AnimationCompile& anim)
 {
-    anim.Append(std::make_unique<AnimationCommandMT>(anim.GetBeatsRemaining(), CalChart::Degree{ dir->Get(anim) }), this);
+    anim.Append(std::make_unique<AnimationCommandStill>(AnimationCommandStill::Style::MarkTime, anim.GetBeatsRemaining(), CalChart::Degree{ dir->Get(anim) }), this);
 }
 
 std::ostream& ProcMTRM::Print(std::ostream& os) const
@@ -2899,99 +2945,53 @@ Reader ProcRotate::Deserialize(Reader reader)
     return reader;
 }
 
-// ProcStand
-void ProcStand::Compile(AnimationCompile& anim)
+// ProcStandAndPlay
+void ProcStandAndPlay::Compile(AnimationCompile& anim)
 {
     auto b = float2int(this, anim, numbeats->Get(anim));
     if (b != 0) {
-        anim.Append(std::make_unique<AnimationCommandStand>((unsigned)std::abs(b), CalChart::Degree{ dir->Get(anim) }), this);
+        anim.Append(std::make_unique<AnimationCommandStill>(AnimationCommandStill::Style::StandAndPlay, (unsigned)std::abs(b), CalChart::Degree{ dir->Get(anim) }), this);
     }
 }
 
-std::ostream& ProcStand::Print(std::ostream& os) const
+std::ostream& ProcStandAndPlay::Print(std::ostream& os) const
 {
     super::Print(os);
-    os << "[CPrStand]";
-    return os << "Stand for " << *numbeats << " facing " << *dir;
+    os << "[CPrStandAndPlay]";
+    return os << "Stand & Play for " << *numbeats << " facing " << *dir;
 }
 
-Drawable ProcStand::GetDrawable() const
+Drawable ProcStandAndPlay::GetDrawable() const
 {
     return {
         this, parent_ptr,
         Type::procedure,
-        "Stand %@ %@",
+        "Stand & Play %@ %@",
         "Stand %@ %@",
         { numbeats->GetDrawable(), dir->GetDrawable() }
     };
 }
 
-void ProcStand::replace(Token const* which, std::unique_ptr<Token> v)
+void ProcStandAndPlay::replace(Token const* which, std::unique_ptr<Token> v)
 {
     replace_helper<NumParts>(this, which, v, numbeats, dir);
 }
 
-auto ProcStand::Serialize() const -> std::vector<std::byte>
+auto ProcStandAndPlay::Serialize() const -> std::vector<std::byte>
 {
     auto result = std::vector<std::byte>{};
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcStand));
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcStandAndPlay));
     Parser::Append(result, super::Serialize());
     Parser::Append(result, numbeats->Serialize());
     Parser::Append(result, dir->Serialize());
     return result;
 }
 
-Reader ProcStand::Deserialize(Reader reader)
+Reader ProcStandAndPlay::Deserialize(Reader reader)
 {
-    reader = CheckForToken(reader, 1, SerializationToken::ProcStand);
+    reader = CheckForToken(reader, 1, SerializationToken::ProcStandAndPlay);
     reader = super::Deserialize(reader);
     std::tie(numbeats, reader) = DeserializeValue(reader);
-    std::tie(dir, reader) = DeserializeValue(reader);
-    return reader;
-}
-
-// ProcStandRM
-void ProcStandRM::Compile(AnimationCompile& anim)
-{
-    anim.Append(std::make_unique<AnimationCommandStand>(anim.GetBeatsRemaining(), CalChart::Degree{ dir->Get(anim) }), this);
-}
-
-std::ostream& ProcStandRM::Print(std::ostream& os) const
-{
-    super::Print(os);
-    os << "[CPrStandRM]";
-    return os << "Stand for Remaining Beats facing " << *dir;
-}
-
-Drawable ProcStandRM::GetDrawable() const
-{
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "Stand for Remaining %@",
-        "StandRM %@",
-        { dir->GetDrawable() }
-    };
-}
-
-void ProcStandRM::replace(Token const* which, std::unique_ptr<Token> v)
-{
-    replace_helper<NumParts>(this, which, v, dir);
-}
-
-auto ProcStandRM::Serialize() const -> std::vector<std::byte>
-{
-    auto result = std::vector<std::byte>{};
-    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ProcStandRM));
-    Parser::Append(result, super::Serialize());
-    Parser::Append(result, dir->Serialize());
-    return result;
-}
-
-Reader ProcStandRM::Deserialize(Reader reader)
-{
-    reader = CheckForToken(reader, 1, SerializationToken::ProcStandRM);
-    reader = super::Deserialize(reader);
     std::tie(dir, reader) = DeserializeValue(reader);
     return reader;
 }

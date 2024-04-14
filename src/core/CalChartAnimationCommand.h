@@ -97,26 +97,34 @@ inline auto operator==(AnimationCommand const& lhs, AnimationCommand const& rhs)
     return (typeid(lhs) == typeid(rhs)) && lhs.is_equal(rhs);
 }
 
-class AnimationCommandStand : public AnimationCommand {
+class AnimationCommandStill : public AnimationCommand {
     using super = AnimationCommand;
 
 public:
-    AnimationCommandStand(unsigned beats, CalChart::Degree direction);
-    ~AnimationCommandStand() override = default;
-    AnimationCommandStand(AnimationCommandStand const&) = default;
-    auto operator=(AnimationCommandStand const&) -> AnimationCommandStand& = default;
-    AnimationCommandStand(AnimationCommandStand&&) = default;
-    auto operator=(AnimationCommandStand&&) -> AnimationCommandStand& = default;
+    enum class Style {
+        MarkTime,
+        StandAndPlay,
+        Close,
+    };
+    AnimationCommandStill(Style style, unsigned beats, CalChart::Degree direction);
+    ~AnimationCommandStill() override = default;
+    AnimationCommandStill(AnimationCommandStill const&) = default;
+    auto operator=(AnimationCommandStill const&) -> AnimationCommandStill& = default;
+    AnimationCommandStill(AnimationCommandStill&&) = default;
+    auto operator=(AnimationCommandStill&&) -> AnimationCommandStill& = default;
 
     [[nodiscard]] auto clone() const -> std::unique_ptr<AnimationCommand> override;
     [[nodiscard]] auto FacingDirection() const -> CalChart::Degree override;
     [[nodiscard]] auto toOnlineViewerJSON(Coord start) const -> nlohmann::json override;
-    [[nodiscard]] auto StepStyle() const -> MarchingStyle override { return MarchingStyle::Close; }
+    [[nodiscard]] auto StepStyle() const -> MarchingStyle override
+    {
+        return mStyle == Style::MarkTime ? MarchingStyle::HighStep : MarchingStyle::Close;
+    }
 
-protected:
+private:
     [[nodiscard]] auto is_equal(AnimationCommand const& other) const -> bool override
     {
-        auto const* ptr = dynamic_cast<AnimationCommandStand const*>(&other);
+        auto const* ptr = dynamic_cast<AnimationCommandStill const*>(&other);
         if (ptr == nullptr) {
             return false;
         }
@@ -124,38 +132,11 @@ protected:
     }
 
     CalChart::Degree dir;
+    Style mStyle = Style::MarkTime;
 };
 
-class AnimationCommandMT : public AnimationCommand {
+class AnimationCommandMove : public AnimationCommand {
     using super = AnimationCommand;
-
-public:
-    AnimationCommandMT(unsigned beats, CalChart::Degree direction);
-    ~AnimationCommandMT() override = default;
-    AnimationCommandMT(AnimationCommandMT const&) = default;
-    auto operator=(AnimationCommandMT const&) -> AnimationCommandMT& = default;
-    AnimationCommandMT(AnimationCommandMT&&) = default;
-    auto operator=(AnimationCommandMT&&) -> AnimationCommandMT& = default;
-
-    [[nodiscard]] auto clone() const -> std::unique_ptr<AnimationCommand> override;
-    [[nodiscard]] auto FacingDirection() const -> CalChart::Degree override;
-    [[nodiscard]] auto toOnlineViewerJSON(Coord start) const -> nlohmann::json override;
-
-protected:
-    [[nodiscard]] auto is_equal(AnimationCommand const& other) const -> bool override
-    {
-        auto const* ptr = dynamic_cast<AnimationCommandMT const*>(&other);
-        if (ptr == nullptr) {
-            return false;
-        }
-        return super::is_equal(other) && dir.IsEqual(ptr->dir);
-    }
-
-    CalChart::Degree dir;
-};
-
-class AnimationCommandMove : public AnimationCommandMT {
-    using super = AnimationCommandMT;
 
 public:
     AnimationCommandMove(unsigned beats, Coord movement);
@@ -174,6 +155,7 @@ public:
     void ApplyForward(Coord& pt) override;
     void ApplyBackward(Coord& pt) override;
 
+    [[nodiscard]] auto FacingDirection() const -> CalChart::Degree override;
     [[nodiscard]] auto MotionDirection() const -> CalChart::Degree override;
     void ClipBeats(unsigned beats) override;
 
@@ -191,6 +173,7 @@ private:
         return super::is_equal(other) && mVector == ptr->mVector;
     }
 
+    CalChart::Degree dir;
     Coord mVector;
 };
 

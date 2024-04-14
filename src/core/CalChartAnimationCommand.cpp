@@ -85,49 +85,34 @@ auto AnimationCommand::MotionDirection() const -> CalChart::Degree { return Faci
 
 void AnimationCommand::ClipBeats(unsigned beats) { mNumBeats = beats; }
 
-AnimationCommandStand::AnimationCommandStand(unsigned beats, CalChart::Degree direction)
+AnimationCommandStill::AnimationCommandStill(Style style, unsigned beats, CalChart::Degree direction)
     : AnimationCommand(beats)
     , dir(direction)
+    , mStyle{ style }
 {
 }
 
-auto AnimationCommandStand::clone() const -> std::unique_ptr<AnimationCommand>
+auto AnimationCommandStill::clone() const -> std::unique_ptr<AnimationCommand>
 {
-    return std::make_unique<AnimationCommandStand>(*this);
+    return std::make_unique<AnimationCommandStill>(*this);
 }
 
-auto AnimationCommandStand::FacingDirection() const -> CalChart::Degree { return dir; }
+auto AnimationCommandStill::FacingDirection() const -> CalChart::Degree { return dir; }
 
-auto AnimationCommandStand::toOnlineViewerJSON(Coord start) const -> nlohmann::json
+auto AnimationCommandStill::toOnlineViewerJSON(Coord start) const -> nlohmann::json
 {
     nlohmann::json j;
 
-    j["type"] = "stand";
-    j["beats"] = static_cast<double>(NumBeats());
-    j["facing"] = ToOnlineViewer::angle(FacingDirection());
-    j["x"] = ToOnlineViewer::xPosition(start.x);
-    j["y"] = ToOnlineViewer::yPosition(start.y);
-    return j;
-}
-
-AnimationCommandMT::AnimationCommandMT(unsigned beats, CalChart::Degree direction)
-    : AnimationCommand(beats)
-    , dir(direction)
-{
-}
-
-auto AnimationCommandMT::clone() const -> std::unique_ptr<AnimationCommand>
-{
-    return std::make_unique<AnimationCommandMT>(*this);
-}
-
-auto AnimationCommandMT::FacingDirection() const -> CalChart::Degree { return dir; }
-
-auto AnimationCommandMT::toOnlineViewerJSON(Coord start) const -> nlohmann::json
-{
-    nlohmann::json j;
-
-    j["type"] = "mark";
+    j["type"] = [&]() {
+        switch (mStyle) {
+        case Style::MarkTime:
+            return "mark";
+        case Style::StandAndPlay:
+            return "stand";
+        case Style::Close:
+            return "close";
+        }
+    }();
     j["beats"] = static_cast<double>(NumBeats());
     j["facing"] = ToOnlineViewer::angle(FacingDirection());
     j["x"] = ToOnlineViewer::xPosition(start.x);
@@ -136,7 +121,8 @@ auto AnimationCommandMT::toOnlineViewerJSON(Coord start) const -> nlohmann::json
 }
 
 AnimationCommandMove::AnimationCommandMove(unsigned beats, Coord movement)
-    : AnimationCommandMT(beats, CalChart::Degree{ movement.Direction() })
+    : AnimationCommand(beats)
+    , dir{ movement.Direction() }
     , mVector(movement)
 {
 }
@@ -147,7 +133,8 @@ auto AnimationCommandMove::clone() const -> std::unique_ptr<AnimationCommand>
 }
 
 AnimationCommandMove::AnimationCommandMove(unsigned beats, Coord movement, CalChart::Degree direction)
-    : AnimationCommandMT(beats, direction)
+    : AnimationCommand(beats)
+    , dir{ direction }
     , mVector(movement)
 {
 }
@@ -192,6 +179,8 @@ void AnimationCommandMove::ApplyBackward(Coord& pt)
     AnimationCommand::ApplyBackward(pt);
     pt -= mVector;
 }
+
+auto AnimationCommandMove::FacingDirection() const -> CalChart::Degree { return dir; }
 
 auto AnimationCommandMove::MotionDirection() const -> CalChart::Degree
 {
