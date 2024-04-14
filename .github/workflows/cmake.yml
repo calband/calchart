@@ -34,10 +34,10 @@ jobs:
             os: ubuntu-latest,
           }
         - {
-            name: "macOS 13 Clang",
+            name: "macOS Latest Clang",
             artifact: "CalChart-*.dmg",
             artifact_name: "CalChart-macOS",
-            os: macos-13,
+            os: macos-latest,
           }
         - {
             name: "Windows Latest MSVC",
@@ -57,7 +57,7 @@ jobs:
       run: git submodule update --init --recursive
 
     - name: Installing Xcode (MacOS)
-      if: matrix.config.os == 'macos-13'
+      if: matrix.config.os == 'macos-latest'
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: '15.2'
