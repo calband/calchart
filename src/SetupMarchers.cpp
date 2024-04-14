@@ -76,7 +76,7 @@ static void EnableLetter(wxWindow& window, bool letters)
 // Layout is to give a consistent show layout to both wizard and dialog
 // layout requires a parent
 //  wxSlider *lettersize;
-static void LayoutShowInfo(wxWindow* parent, [[maybe_unused]] bool putLastRowButtons)
+static void LayoutShowInfo(wxWindow* parent, bool putLastRowButtons)
 {
     auto labels = std::vector<wxString>{};
     wxUI::ListBox::Proxy tlabels{};
@@ -124,9 +124,21 @@ static void LayoutShowInfo(wxWindow* parent, [[maybe_unused]] bool putLastRowBut
                                   .withStyle(wxLB_EXTENDED)
                                   .withEnsureVisible(0),
                 },
-
             },
         },
+        // How do we do this with an wxUI::If?
+        wxUI::Custom{
+            [putLastRowButtons](wxWindow* window, wxSizer* sizer, wxSizerFlags flags) {
+                if (!putLastRowButtons) {
+                    return;
+                }
+                wxUI::HSizer{
+                    wxUI::Button{ wxID_RESET, "&Reset" },
+                    wxUI::Button{ wxID_OK },
+                    wxUI::Button{ wxID_CANCEL },
+                }
+                    .createAndAdd(window, sizer, flags);
+            } },
     }
         .attachTo(parent);
 }

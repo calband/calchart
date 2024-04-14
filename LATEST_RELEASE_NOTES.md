@@ -8,6 +8,7 @@ Bugs addressed in this release:
 * [#463](../../issues/463) Animation incorrect on Arena for TOT build
 * [#467](../../issues/467) Shows with Parse Continuity and references points are incorrect in 3.6
 * [#468](../../issues/468) Fix Linux reading of older files 
+* [#485](../../issues/485) Cannot setup marchers
 
 Other changes:
 
