@@ -239,7 +239,7 @@ namespace details {
     static inline void put_big_word(std::byte* ptr, uint16_t v)
     {
         ptr[0] = static_cast<std::byte>((v >> 8) & 0xFF);
-        ptr[1] = static_cast<std::byte>((v)&0xFF);
+        ptr[1] = static_cast<std::byte>((v) & 0xFF);
     }
 
     inline void put_big_long(std::byte* ptr, uint32_t v)
@@ -247,7 +247,7 @@ namespace details {
         ptr[0] = static_cast<std::byte>((v >> 24) & 0xFF);
         ptr[1] = static_cast<std::byte>((v >> 16) & 0xFF);
         ptr[2] = static_cast<std::byte>((v >> 8) & 0xFF);
-        ptr[3] = static_cast<std::byte>((v)&0xFF);
+        ptr[3] = static_cast<std::byte>((v) & 0xFF);
     }
 
 }
@@ -492,12 +492,17 @@ public:
         }
         if ((((name >> 24) & 0xFF) == ((inname >> 24) & 0xFF)) && (((name >> 16) & 0xFF) == ((inname >> 16) & 0xFF))) {
             auto major_vers = static_cast<char>((name >> 8) & 0xFF);
-            auto minor_vers = static_cast<char>((name)&0xFF);
+            auto minor_vers = static_cast<char>((name) & 0xFF);
             if (isdigit(major_vers) && isdigit(minor_vers)) {
                 return ((major_vers - '0') << 8) | (minor_vers - '0');
             }
         }
         throw CC_FileException(inname);
+    }
+
+    static auto parseVersion(int version) -> std::tuple<int, int>
+    {
+        return { version >> 8, version & 0xFF };
     }
 
 private:

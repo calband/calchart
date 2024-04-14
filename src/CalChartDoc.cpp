@@ -219,7 +219,22 @@ T& CalChartDoc::LoadObjectGeneric(T& stream)
                 // if we got here, then the user is forced to make a change to their show.  We set it as modified
                 modified = true;
                 return ContinuityEditorPopup::ProcessEditContinuity(GetDocumentWindow(), description, what, line, column).ToStdString();
-            }
+            },
+            [this](int majorVersion, int minorVersion) {
+                wxString message;
+                message.Printf(
+                    "Warning: Current version of CalChart is older than show file.\n"
+                    "Current Version %d.%d, show file: %d.%d.\n"
+                    "Please consider upgrade to a newer version of CalChart by checking https://sourceforge.net/projects/calchart.\n"
+                    "Continue trying to open this file?",
+                    CC_MAJOR_VERSION,
+                    CC_MINOR_VERSION,
+                    majorVersion,
+                    minorVersion);
+                auto userchoice = wxMessageBox(message, wxT("Warning!"), wxYES_NO);
+                // if we got here, then the user is forced to make a change to their show.  We set it as modified
+                return userchoice == wxYES;
+            },
         };
         mShow = Show::Create(GetConfigShowMode(mConfig, CalChart::GetShowModeNames()[0]), stream, &handlers);
     } catch (std::exception const& e) {

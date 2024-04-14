@@ -69,7 +69,14 @@ std::unique_ptr<Show> Show::Create(ShowMode const& mode, std::istream& stream, P
 
     reader.ReadAndCheckID(INGL_INGL);
     auto version = reader.ReadGurkSymbolAndGetVersion(INGL_GURK);
+    auto [majorVersion, minorVersion] = Reader::parseVersion(version);
 
+    if (currentVersionCompare(majorVersion, minorVersion) < 0
+        && correction
+        && correction->mVersionMismatchHandler
+        && !correction->mVersionMismatchHandler(majorVersion, minorVersion)) {
+        throw std::runtime_error("Not able to parse older shows");
+    }
     if (version <= 0x303) {
         return std::unique_ptr<Show>(new Show(Version_3_3_and_earlier{}, mode, reader, correction));
     }
