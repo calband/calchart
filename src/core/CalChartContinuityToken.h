@@ -995,6 +995,42 @@ private:
     static constexpr auto NumParts = 0;
 };
 
+class ProcClose : public Procedure {
+    using super = Procedure;
+
+public:
+    ProcClose() = default;
+    ProcClose(Value* d)
+        : ProcClose(uniquify(d))
+    {
+    }
+    ProcClose(std::unique_ptr<Value> d)
+        : dir(mv(d))
+    {
+        SetParentPtr_helper(this, dir);
+    }
+    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcClose>(dir->clone()); }
+
+    virtual void Compile(AnimationCompile& anim) override;
+    virtual std::ostream& Print(std::ostream&) const override;
+    virtual Drawable GetDrawable() const override;
+    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
+    virtual Reader Deserialize(Reader) override;
+
+protected:
+    virtual bool is_equal(Token const& other) const override
+    {
+        auto&& der_other = dynamic_cast<ProcClose const&>(other);
+        return super::is_equal(other) && (*dir == *der_other.dir);
+    }
+
+private:
+    static constexpr auto NumParts = 1;
+    std::unique_ptr<Value> dir;
+};
+
 class ProcCM : public Procedure {
     using super = Procedure;
 
@@ -1661,22 +1697,22 @@ private:
     std::unique_ptr<Point> pnt;
 };
 
-class ProcStand : public Procedure {
+class ProcStandAndPlay : public Procedure {
     using super = Procedure;
 
 public:
-    ProcStand() = default;
-    ProcStand(Value* beats, Value* d)
-        : ProcStand(uniquify(beats), uniquify(d))
+    ProcStandAndPlay() = default;
+    ProcStandAndPlay(Value* beats, Value* d)
+        : ProcStandAndPlay(uniquify(beats), uniquify(d))
     {
     }
-    ProcStand(std::unique_ptr<Value> beats, std::unique_ptr<Value> d)
+    ProcStandAndPlay(std::unique_ptr<Value> beats, std::unique_ptr<Value> d)
         : numbeats(mv(beats))
         , dir(mv(d))
     {
         SetParentPtr_helper(this, numbeats, dir);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcStand>(numbeats->clone(), dir->clone()); }
+    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcStandAndPlay>(numbeats->clone(), dir->clone()); }
 
     virtual void Compile(AnimationCompile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
@@ -1689,49 +1725,13 @@ public:
 protected:
     virtual bool is_equal(Token const& other) const override
     {
-        auto&& der_other = dynamic_cast<ProcStand const&>(other);
+        auto&& der_other = dynamic_cast<ProcStandAndPlay const&>(other);
         return super::is_equal(other) && (*numbeats == *der_other.numbeats) && (*dir == *der_other.dir);
     }
 
 private:
     static constexpr auto NumParts = 2;
     std::unique_ptr<Value> numbeats, dir;
-};
-
-class ProcStandRM : public Procedure {
-    using super = Procedure;
-
-public:
-    ProcStandRM() = default;
-    ProcStandRM(Value* d)
-        : ProcStandRM(uniquify(d))
-    {
-    }
-    ProcStandRM(std::unique_ptr<Value> d)
-        : dir(mv(d))
-    {
-        SetParentPtr_helper(this, dir);
-    }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcStandRM>(dir->clone()); }
-
-    virtual void Compile(AnimationCompile& anim) override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
-
-    [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
-
-protected:
-    virtual bool is_equal(Token const& other) const override
-    {
-        auto&& der_other = dynamic_cast<ProcStandRM const&>(other);
-        return super::is_equal(other) && (*dir == *der_other.dir);
-    }
-
-private:
-    static constexpr auto NumParts = 1;
-    std::unique_ptr<Value> dir;
 };
 
 // this is the top level Deserialization function

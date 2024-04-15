@@ -174,6 +174,7 @@ enum class TokenType {
 
 enum class ContProc {
     Blam,
+    Close,
     CM,
     DMCM,
     DMHS,
@@ -192,13 +193,13 @@ enum class ContProc {
     NSEW,
     Rotate,
     Set,
-    Stand,
-    StandRM,
+    StandAndPlay,
     LAST
 };
 
 const std::pair<std::string, std::function<std::unique_ptr<CalChart::Cont::Procedure>()>> ContMap[] = {
     { "BLAM", []() { return std::make_unique<CalChart::Cont::ProcBlam>(); } },
+    { "Close", []() { return std::make_unique<CalChart::Cont::ProcClose>(std::make_unique<CalChart::Cont::ValueUnset>()); } },
     { "Counter March", []() { return std::make_unique<CalChart::Cont::ProcCM>(std::make_unique<CalChart::Cont::PointUnset>(), std::make_unique<CalChart::Cont::PointUnset>(), std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()); } },
     { "Diagonal Military Counter March", []() { return std::make_unique<CalChart::Cont::ProcDMCM>(std::make_unique<CalChart::Cont::PointUnset>(), std::make_unique<CalChart::Cont::PointUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()); } },
     { "Diagonal Military High Step", []() { return std::make_unique<CalChart::Cont::ProcDMHS>(std::make_unique<CalChart::Cont::PointUnset>()); } },
@@ -217,8 +218,7 @@ const std::pair<std::string, std::function<std::unique_ptr<CalChart::Cont::Proce
     { "North/South East/West", []() { return std::make_unique<CalChart::Cont::ProcNSEW>(std::make_unique<CalChart::Cont::PointUnset>()); } },
     { "ROTATE", []() { return std::make_unique<CalChart::Cont::ProcRotate>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::PointUnset>()); } },
     { "SET", []() { return std::make_unique<CalChart::Cont::ProcSet>(std::make_unique<CalChart::Cont::ValueVarUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()); } },
-    { "Stand", []() { return std::make_unique<CalChart::Cont::ProcStand>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()); } },
-    { "Stand ReMaining", []() { return std::make_unique<CalChart::Cont::ProcStandRM>(std::make_unique<CalChart::Cont::ValueUnset>()); } },
+    { "Stand & Play", []() { return std::make_unique<CalChart::Cont::ProcStandAndPlay>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()); } },
 };
 
 static_assert(sizeof(ContMap) / sizeof(ContMap[0]) == static_cast<int>(ContProc::LAST), "");
@@ -233,8 +233,8 @@ const ContProc ContUsageOrder[] = {
     ContProc::March,
     ContProc::DMHS,
     ContProc::HSDM,
-    ContProc::StandRM,
-    ContProc::Stand,
+    ContProc::Close,
+    ContProc::StandAndPlay,
     ContProc::Rotate,
     ContProc::Even,
     ContProc::Set,

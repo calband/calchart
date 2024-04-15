@@ -6,7 +6,7 @@
 
 TEST_CASE("AnimationCommandStand", "AnimationCommand")
 {
-    auto item1 = CalChart::AnimationCommandStand{ 4, CalChart::Degree{ 90 } };
+    auto item1 = CalChart::AnimationCommandStill{ CalChart::AnimationCommandStill::Style::StandAndPlay, 4, CalChart::Degree{ 90 } };
     auto pt1 = CalChart::Coord{ 16, 16 };
     REQUIRE(4 == item1.NumBeats());
     REQUIRE(CalChart::MarchingStyle::Close == item1.StepStyle());
@@ -59,9 +59,64 @@ TEST_CASE("AnimationCommandStand", "AnimationCommand")
     }
 }
 
+TEST_CASE("AnimationCommandClose", "AnimationCommand")
+{
+    auto item1 = CalChart::AnimationCommandStill{ CalChart::AnimationCommandStill::Style::Close, 4, CalChart::Degree{ 90 } };
+    auto pt1 = CalChart::Coord{ 16, 16 };
+    REQUIRE(4 == item1.NumBeats());
+    REQUIRE(CalChart::MarchingStyle::Close == item1.StepStyle());
+    SECTION("CheckGoForward")
+    {
+        auto item2 = item1;
+        auto pt2 = pt1;
+        REQUIRE(item1 == item2);
+        REQUIRE(CalChart::Degree{ 90 } == item1.FacingDirection());
+        REQUIRE(CalChart::Degree{ 90 } == item1.MotionDirection());
+
+        REQUIRE(item1.NextBeat(pt1));
+        REQUIRE(item1 != item2);
+
+        REQUIRE(CalChart::Coord{ 16, 16 } == pt1);
+        REQUIRE(CalChart::Degree{ 90 } == item1.FacingDirection());
+        REQUIRE(CalChart::Degree{ 90 } == item1.MotionDirection());
+
+        REQUIRE(item1.PrevBeat(pt1));
+        REQUIRE(pt2 == pt1);
+        REQUIRE(CalChart::Degree{ 90 } == item1.FacingDirection());
+        REQUIRE(CalChart::Degree{ 90 } == item1.MotionDirection());
+        REQUIRE(item1 == item2);
+
+        REQUIRE(item1.NextBeat(pt1));
+        REQUIRE(item1.NextBeat(pt1));
+        REQUIRE(item1.NextBeat(pt1));
+        REQUIRE(!item1.NextBeat(pt1));
+        item2.ApplyForward(pt2);
+        REQUIRE(item1 == item2);
+        REQUIRE(pt1 == pt2);
+    }
+    SECTION("CheckDrawCommand")
+    {
+        auto drawCmd = item1.GenCC_DrawCommand(pt1);
+        auto goldCmd = CalChart::Draw::DrawCommand{ CalChart::Draw::Ignore{} };
+        REQUIRE(goldCmd == drawCmd);
+    }
+    SECTION("CheckJSON")
+    {
+        auto json = item1.toOnlineViewerJSON(pt1);
+        auto goldjson = nlohmann::json{
+            { "type", "close" },
+            { "beats", 4.0 },
+            { "facing", 180.0 },
+            { "x", 81.0 },
+            { "y", 43.0 }
+        };
+        REQUIRE(json == goldjson);
+    }
+}
+
 TEST_CASE("AnimationCommandMT", "AnimationCommand")
 {
-    auto item1 = CalChart::AnimationCommandMT{ 4, CalChart::Degree{ 90 } };
+    auto item1 = CalChart::AnimationCommandStill{ CalChart::AnimationCommandStill::Style::MarkTime, 4, CalChart::Degree{ 90 } };
     auto pt1 = CalChart::Coord{ 16, 16 };
     REQUIRE(4 == item1.NumBeats());
     REQUIRE(CalChart::MarchingStyle::HighStep == item1.StepStyle());
@@ -384,7 +439,7 @@ TEST_CASE("AnimationCommandRotateBackward", "AnimationCommand")
 
 TEST_CASE("AnimationCommandStand0", "AnimationCommand")
 {
-    auto item1 = CalChart::AnimationCommandStand{ 0, CalChart::Degree{ 90 } };
+    auto item1 = CalChart::AnimationCommandStill{ CalChart::AnimationCommandStill::Style::StandAndPlay, 0, CalChart::Degree{ 90 } };
     auto pt1 = CalChart::Coord{ 16, 16 };
     SECTION("CheckGoForward")
     {
@@ -396,7 +451,7 @@ TEST_CASE("AnimationCommandStand0", "AnimationCommand")
 
 TEST_CASE("AnimationCommandMT0", "AnimationCommand")
 {
-    auto item1 = CalChart::AnimationCommandMT{ 0, CalChart::Degree{ 90 } };
+    auto item1 = CalChart::AnimationCommandStill{ CalChart::AnimationCommandStill::Style::MarkTime, 0, CalChart::Degree{ 90 } };
     auto pt1 = CalChart::Coord{ 16, 16 };
     SECTION("CheckGoForward")
     {

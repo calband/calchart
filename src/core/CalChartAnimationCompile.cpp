@@ -103,7 +103,7 @@ Compile(
     // report if we have extra time.
     if (ac.GetBeatsRemaining()) {
         ac.RegisterError(AnimateError::EXTRATIME, NULL);
-        ac.Append(std::make_unique<AnimationCommandMT>(ac.GetBeatsRemaining(), CalChart::Degree{ 90 }), NULL);
+        ac.Append(std::make_unique<AnimationCommandStill>(AnimationCommandStill::Style::MarkTime, ac.GetBeatsRemaining(), CalChart::Degree{ 90 }), NULL);
     }
 
     return ac.GetCommands();
