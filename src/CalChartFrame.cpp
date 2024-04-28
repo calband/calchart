@@ -215,7 +215,6 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
     , mConfig(config)
     , mAUIManager(new wxAuiManager(this))
 {
-    SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENU));
     // Give it an icon
     SetBandIcon(this);
 
@@ -315,7 +314,6 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
     mMarcherToolBar = CreateDotModifiers(this, wxID_ANY, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW);
     mMarcherToolBar->SetFont(ResizeFont(mMarcherToolBar->GetFont(), GetToolBarFontSize()));
 
-    SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENU));
     // sanity: Don't let the user zoom too low
     {
         auto zoom_size = mConfig.Get_FieldFrameZoom_3_6_0();
