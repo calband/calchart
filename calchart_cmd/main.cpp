@@ -7,6 +7,7 @@
 //
 
 #include "calchart_cmd_parse.hpp"
+#include "calchart_cmd_parse_continuity_text.hpp"
 #include "ccvers.h"
 #include "docopt.h"
 #include "print_ps.h"
@@ -20,6 +21,7 @@ constexpr auto USAGE =
 Usage:
     calchart_cmd parse [options] <shows>...
     calchart_cmd print_to_postscript [--landscape --cont --contsheet --overview] <show> <ps_file>
+    calchart_cmd parse_continuity_text <text>
     calchart_cmd (-h | --help)
     calchart_cmd --version
 
@@ -27,7 +29,6 @@ Options:
     --print_show            Parse option to print out the show.
     --check_flag            Parse option to perform check and print results.
     --dump_continuity       Parse option to dump the continuting.
-    --dump_continuity_text  Parse option to dump the continuity text.
     --animate_show          Parse option to print the animation.
     --json                  Parse option to dump the JSON for the viewer.
     -h, --help              Show this screen.
@@ -92,6 +93,9 @@ auto main(int argc, char* argv[]) -> int
     }
     if (args["print_to_postscript"].asBool()) {
         PrintToPS(args["<show>"].asString(), args["--landscape"].asBool(), args["--cont"].asBool(), args["--contsheet"].asBool(), args["--overview"].asBool(), args["<ps_file>"].asString());
+    }
+    if (args["parse_continuity_text"].asBool()) {
+        ParseContinuityText(args["<text>"].asString(), std::cout);
     }
 
     return 0;
