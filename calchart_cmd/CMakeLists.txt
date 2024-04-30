@@ -2,6 +2,7 @@
 
 add_executable(
   calchart_cmd
+  calchart_cmd_parse_continuity_text.hpp
   calchart_cmd_parse.hpp
   main.cpp
 )

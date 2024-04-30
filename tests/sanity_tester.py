@@ -141,7 +141,7 @@ def main():
                 output_file = os.path.join(output_dir, os.path.splitext(file)[0] + '.output')
 
                 # Run the command with different combinations of flags asynchronously
-                for [options, extension] in [["--print_show", "print"], ["--dump_continuity", "dump"], ["--dump_continuity_text", "dumpprintcont"], ["--check_flag", "check"], ["--animate_show", "animate"]]:
+                for [options, extension] in [["--print_show", "print"], ["--dump_continuity", "dump"], ["--check_flag", "check"], ["--animate_show", "animate"]]:
                     process = multiprocessing.Process(target=run_command, args=(calchart_cmd, file_path, output_file, options, extension))
                     process.start()
                     processes.append(process)

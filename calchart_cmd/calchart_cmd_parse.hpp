@@ -13,6 +13,7 @@
 #include <fstream>
 
 namespace {
+
 auto OpenShow(std::string_view showPath) -> std::unique_ptr<CalChart::Show const>
 {
     auto input = std::ifstream(std::string(showPath));
@@ -31,18 +32,16 @@ auto DumpAnimationErrors(CalChart::Animation const& animation, std::ostream& os)
     }
 }
 
-auto AnimateShow(std::string_view showPath, std::ostream& os)
+auto AnimateShow(CalChart::Show const& show, std::ostream& os)
 {
-    auto show = OpenShow(showPath);
-    auto animation = CalChart::Animation{ *show };
-    DumpAnimationErrors(*show, os);
+    auto animation = CalChart::Animation{ show };
+    DumpAnimationErrors(show, os);
 }
 
-auto DumpContinuity(std::string_view showPath, std::ostream& os)
+auto DumpContinuity(CalChart::Show const& show, std::ostream& os)
 {
-    auto show = OpenShow(showPath);
     auto sheet_num = 0;
-    for (auto i = show->GetSheetBegin(); i != show->GetSheetEnd(); ++i, ++sheet_num) {
+    for (auto i = show.GetSheetBegin(); i != show.GetSheetEnd(); ++i, ++sheet_num) {
         for (auto symbol : {
                  CalChart::SYMBOL_PLAIN, CalChart::SYMBOL_SOL, CalChart::SYMBOL_BKSL, CalChart::SYMBOL_SL,
                  CalChart::SYMBOL_X, CalChart::SYMBOL_SOLBKSL, CalChart::SYMBOL_SOLSL, CalChart::SYMBOL_SOLX }) {
@@ -73,29 +72,15 @@ auto DumpContinuity(std::string_view showPath, std::ostream& os)
     }
 }
 
-void DumpContinuityText(std::string const& text, std::ostream& os)
+auto DumpFileCheck(std::ostream& os)
 {
-    try {
-        auto&& continuity = CalChart::Continuity(text);
-        for (auto& proc : continuity.GetParsedContinuity()) {
-            os << *proc << "\n";
-        }
-    } catch (std::runtime_error const& error) {
-        os << "Errors during compile: " << error.what() << "\n";
-    }
-}
-
-auto DumpFileCheck(std::string_view showPath, std::ostream& os)
-{
-    auto show = OpenShow(showPath);
     os << "ContinuityCountDifferentThanSymbol ? 0\n";
 }
 
-auto PrintShow(std::string_view showPath, std::ostream& os)
+auto PrintShow(CalChart::Show const& show, std::ostream& os)
 {
-    auto show = OpenShow(showPath);
-    auto animation = CalChart::Animation{ *show };
-    DumpAnimationErrors(*show, os);
+    auto animation = CalChart::Animation{ show };
+    DumpAnimationErrors(show, os);
     animation.GotoSheet(0);
     auto currentInfo = animation.GetCurrentInfo();
     os << currentInfo.first << "\n";
@@ -116,11 +101,10 @@ auto PrintShow(std::string_view showPath, std::ostream& os)
     }
 }
 
-auto DumpJSON(std::string_view showPath, std::ostream& os)
+auto DumpJSON(CalChart::Show const& show, std::ostream& os)
 {
-    auto show = OpenShow(showPath);
-    auto animation = CalChart::Animation{ *show };
-    auto json = show->toOnlineViewerJSON(animation);
+    auto animation = CalChart::Animation{ show };
+    auto json = show.toOnlineViewerJSON(animation);
     os << std::setw(4) << json << "\n";
 }
 
@@ -132,23 +116,22 @@ constexpr auto Parse = [](auto args, auto& os) {
     auto list_of_files = args["<shows>"].asStringList();
 
     for (auto&& file : list_of_files) {
+        auto show = OpenShow(file);
+
         if (args["--print_show"].asBool()) {
-            PrintShow(file.c_str(), os);
+            PrintShow(*show, os);
         }
         if (args["--animate_show"].asBool()) {
-            AnimateShow(file.c_str(), os);
+            AnimateShow(*show, os);
         }
         if (args["--dump_continuity"].asBool()) {
-            DumpContinuity(file.c_str(), os);
-        }
-        if (args["--dump_continuity_text"].asBool()) {
-            DumpContinuityText(file.c_str(), os);
+            DumpContinuity(*show, os);
         }
         if (args["--check_flag"].asBool()) {
-            DumpFileCheck(file.c_str(), os);
+            DumpFileCheck(os);
         }
         if (args["--json"].asBool()) {
-            DumpJSON(file.c_str(), os);
+            DumpJSON(*show, os);
         }
     }
 };
