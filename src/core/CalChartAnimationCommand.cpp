@@ -25,11 +25,26 @@
 #include "CalChartAnimation.h"
 #include "CalChartCoord.h"
 #include "CalChartDrawCommand.h"
+#include "CalChartRanges.h"
 #include "viewer_translate.h"
 #include <memory>
 #include <nlohmann/json.hpp>
 
 namespace CalChart {
+
+namespace {
+    auto ToAnimateStillStyle(AnimationCommandStill::Style style) -> Animate::CommandStill::Style
+    {
+        switch (style) {
+        case AnimationCommandStill::Style::MarkTime:
+            return Animate::CommandStill::Style::MarkTime;
+        case AnimationCommandStill::Style::StandAndPlay:
+            return Animate::CommandStill::Style::StandAndPlay;
+        case AnimationCommandStill::Style::Close:
+            return Animate::CommandStill::Style::Close;
+        }
+    }
+}
 
 AnimationCommand::AnimationCommand(unsigned beats)
     : mNumBeats(beats)
@@ -118,6 +133,11 @@ auto AnimationCommandStill::toOnlineViewerJSON(Coord start) const -> nlohmann::j
     j["x"] = ToOnlineViewer::xPosition(start.x);
     j["y"] = ToOnlineViewer::yPosition(start.y);
     return j;
+}
+
+auto AnimationCommandStill::ToAnimateCommand(Coord start) const -> Animate::Command
+{
+    return Animate::CommandStill{ start, mNumBeats, ToAnimateStillStyle(mStyle), FacingDirection() };
 }
 
 AnimationCommandMove::AnimationCommandMove(unsigned beats, Coord movement)
@@ -210,6 +230,11 @@ auto AnimationCommandMove::toOnlineViewerJSON(Coord start) const -> nlohmann::js
     j["y2"] = ToOnlineViewer::yPosition(start.y + mVector.y);
     j["facing"] = ToOnlineViewer::angle(MotionDirection());
     return j;
+}
+
+auto AnimationCommandMove::ToAnimateCommand(Coord start) const -> Animate::Command
+{
+    return Animate::CommandMove{ start, NumBeats(), mVector, FacingDirection() };
 }
 
 AnimationCommandRotate::AnimationCommandRotate(
@@ -312,4 +337,202 @@ auto AnimationCommandRotate::toOnlineViewerJSON(Coord start) const -> nlohmann::
     j["facing_offset"] = (-mFace + CalChart::Degree{ 90 }).getValue();
     return j;
 }
+
+auto AnimationCommandRotate::ToAnimateCommand(Coord start) const -> Animate::Command
+{
+    return Animate::CommandRotate{ start, mNumBeats, mOrigin, mRadius, mAngStart, mAngEnd, mFace };
+}
+
+}
+
+namespace CalChart::Animate {
+
+auto CommandStill::GenCC_DrawCommand() const -> Draw::DrawCommand
+{
+    return Draw::Ignore{};
+}
+
+auto CommandStill::toOnlineViewerJSON() const -> nlohmann::json
+{
+    auto start = Start();
+
+    nlohmann::json j;
+    j["type"] = [&]() {
+        switch (mStyle) {
+        case Style::MarkTime:
+            return "mark";
+        case Style::StandAndPlay:
+            return "stand";
+        case Style::Close:
+            return "close";
+        }
+    }();
+    j["beats"] = static_cast<double>(NumBeats());
+    j["facing"] = ToOnlineViewer::angle(FacingDirectionAtBeat(0));
+    j["x"] = ToOnlineViewer::xPosition(start.x);
+    j["y"] = ToOnlineViewer::yPosition(start.y);
+    return j;
+}
+
+auto CommandMove::PositionAtBeat(unsigned beat) -> Coord
+{
+    auto start = Start();
+    auto numBeats = NumBeats();
+
+    if (numBeats == 0) {
+        return start;
+    }
+    return start + (mMovement * beat) / numBeats;
+}
+
+auto CommandMove::GenCC_DrawCommand() const -> Draw::DrawCommand
+{
+    auto start = Start();
+    return Draw::Line{ start, start + mMovement };
+}
+
+auto CommandMove::toOnlineViewerJSON() const -> nlohmann::json
+{
+    auto start = Start();
+    nlohmann::json j;
+
+    j["type"] = "even";
+    j["beats"] = static_cast<double>(NumBeats());
+    j["beats_per_step"] = static_cast<double>(1);
+    j["x1"] = ToOnlineViewer::xPosition(start.x);
+    j["y1"] = ToOnlineViewer::yPosition(start.y);
+    j["x2"] = ToOnlineViewer::xPosition(start.x + mMovement.x);
+    j["y2"] = ToOnlineViewer::yPosition(start.y + mMovement.y);
+    j["facing"] = ToOnlineViewer::angle(MotionDirectionAtBeat(0));
+    return j;
+}
+
+CommandRotate::CommandRotate(
+    unsigned beats,
+    Coord cntr,
+    float radius,
+    CalChart::Degree ang1,
+    CalChart::Degree ang2,
+    bool backwards)
+    : CommandRotate{
+        Coord{ RoundToCoordUnits(cntr.x + cos(ang1) * radius), RoundToCoordUnits(cntr.y - sin(ang1) * radius) },
+        beats,
+        cntr,
+        radius,
+        ang1,
+        ang2,
+        backwards ? CalChart::Degree{ -90 } : CalChart::Degree{ 90 }
+    }
+{
+}
+
+auto CommandRotate::End() const -> Coord
+{
+    auto start = Coord{};
+    start.x += RoundToCoordUnits(mOrigin.x + cos(mAngEnd) * mRadius);
+    start.y += RoundToCoordUnits(mOrigin.y - sin(mAngEnd) * mRadius);
+    return start;
+}
+
+auto CommandRotate::PositionAtBeat(unsigned beat) -> Coord
+{
+    auto numBeats = NumBeats();
+    auto curr_ang = numBeats > 0 ? ((mAngEnd - mAngStart) * beat / numBeats + mAngStart) : mAngStart;
+    return Coord{ RoundToCoordUnits(mOrigin.x + cos(curr_ang) * mRadius), RoundToCoordUnits(mOrigin.y - sin(curr_ang) * mRadius) };
+}
+
+auto CommandRotate::FacingDirectionAtBeat(unsigned beat) const -> CalChart::Degree
+{
+    auto numBeats = NumBeats();
+    auto curr_ang = numBeats > 0 ? (mAngEnd - mAngStart) * beat / numBeats + mAngStart : mAngStart;
+    if (mAngEnd > mAngStart) {
+        return curr_ang + mFace;
+    }
+    return curr_ang - mFace;
+}
+
+auto CommandRotate::GenCC_DrawCommand() const -> Draw::DrawCommand
+{
+    auto start = (mAngStart < mAngEnd) ? mAngStart : mAngEnd;
+    auto end = (mAngStart < mAngEnd) ? mAngEnd : mAngStart;
+    auto x_start = static_cast<CalChart::Coord::units>(RoundToCoordUnits(mOrigin.x + cos(start) * mRadius));
+    auto y_start = static_cast<CalChart::Coord::units>(RoundToCoordUnits(mOrigin.y - sin(start) * mRadius));
+    auto x_end = static_cast<CalChart::Coord::units>(RoundToCoordUnits(mOrigin.x + cos(end) * mRadius));
+    auto y_end = static_cast<CalChart::Coord::units>(RoundToCoordUnits(mOrigin.y - sin(end) * mRadius));
+
+    return Draw::Arc{
+        { x_start, y_start },
+        { x_end, y_end },
+        mOrigin
+    };
+}
+
+auto CommandRotate::toOnlineViewerJSON() const -> nlohmann::json
+{
+    auto start = Start();
+    nlohmann::json j;
+    j["type"] = "arc";
+    j["start_x"] = ToOnlineViewer::xPosition(start.x);
+    j["start_y"] = ToOnlineViewer::yPosition(start.y);
+    j["center_x"] = ToOnlineViewer::xPosition(mOrigin.x);
+    j["center_y"] = ToOnlineViewer::yPosition(mOrigin.y);
+    j["angle"] = (-(mAngEnd - mAngStart)).getValue();
+    j["beats"] = static_cast<double>(NumBeats());
+    j["beats_per_step"] = static_cast<double>(1);
+    j["facing_offset"] = (-mFace + CalChart::Degree{ 90 }).getValue();
+    return j;
+}
+
+namespace {
+    template <std::ranges::input_range Range>
+        requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Command>)
+    auto GetBeatsPerCont(Range&& range)
+    {
+        return range | std::views::transform([](auto cmd) { return NumBeats(cmd); });
+    }
+
+    template <std::ranges::input_range Range>
+        requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Command>)
+    auto GetRunningBeats(Range&& range)
+    {
+        auto allBeats = CalChart::Ranges::ToVector<beats_t>(GetBeatsPerCont(range));
+        auto running = std::vector<beats_t>(allBeats.size());
+        std::inclusive_scan(allBeats.begin(), allBeats.end(), running.begin());
+        return running;
+    }
+}
+
+Commands::Commands(std::vector<Command> const& commands)
+    : mCommands(commands)
+    , mRunningBeatCount{ GetRunningBeats(commands) }
+{
+}
+
+auto Commands::TotalBeats() const -> beats_t
+{
+    if (mRunningBeatCount.empty()) {
+        return 0;
+    }
+    return mRunningBeatCount.back();
+}
+
+auto Commands::BeatToCommandOffsetAndBeat(unsigned beat) const -> std::tuple<size_t, beats_t>
+{
+    auto where = std::ranges::find_if(mRunningBeatCount, [beat](auto thisBeat) { return beat < thisBeat; });
+    if (where == mRunningBeatCount.end()) {
+        return { mRunningBeatCount.size(), beat - TotalBeats() };
+    }
+    auto index = std::distance(mRunningBeatCount.begin(), where);
+    return { index, beat - (*where - NumBeats(mCommands.at(index))) };
+}
+
+auto Commands::MarcherInfoAtBeat(unsigned beat) const -> MarcherInfo
+{
+    auto [which, newBeat] = BeatToCommandOffsetAndBeat(beat);
+    if (which >= mCommands.size()) {
+        return {};
+    }
+    return Animate::MarcherInfoAtBeat(mCommands.at(which), newBeat);
+}
+
 }

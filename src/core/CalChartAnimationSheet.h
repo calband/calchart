@@ -21,12 +21,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartAnimationCommand.h"
 #include "CalChartAnimationTypes.h"
 #include "CalChartCoord.h"
 #include "CalChartPoint.h"
 
 #include <memory>
 #include <nlohmann/json.hpp>
+#include <ranges>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -105,6 +108,48 @@ private:
     std::vector<AnimationCommands> mCommands;
     std::string name;
     unsigned numbeats;
+};
+
+}
+
+namespace CalChart::Animate {
+
+using beats_t = unsigned;
+
+// A sheet is a collection of all the Marcher's Commands.
+// The Commands are the positions, directions, and style of each marcher at their beats.
+// Because a Sheet sees all the points and where they are, the sheet can calculate all the
+// collisions that exist.
+class Sheet {
+public:
+    Sheet(std::string name, unsigned numBeats, std::vector<std::vector<Animate::Command>> const& commands);
+    ~Sheet() = default;
+    Sheet(Sheet const&) = default;
+    auto operator=(Sheet const&) -> Sheet& = default;
+    Sheet(Sheet&&) noexcept = default;
+    auto operator=(Sheet&&) noexcept -> Sheet& = default;
+
+    [[nodiscard]] auto GetName() const { return mName; }
+    [[nodiscard]] auto GetNumBeats() const { return mNumBeats; }
+
+    [[nodiscard]] auto GetMarcherInfoAtBeat(size_t whichMarcher, beats_t beat) const -> CalChart::Animate::MarcherInfo;
+
+    [[nodiscard]] auto GetAllMarcherInfoAtBeat(beats_t beat) const
+    {
+        return std::views::iota(0UL, mCommands.size()) | std::views::transform([this, beat](auto whichMarcher) {
+            return GetMarcherInfoAtBeat(whichMarcher, beat);
+        });
+    }
+
+    [[nodiscard]] auto GetAllBeatsWithCollisions() const -> std::set<beats_t>;
+    [[nodiscard]] auto GetAllMarchersWithCollisionAtBeat(beats_t beat) const -> std::set<size_t>;
+
+private:
+    [[nodiscard]] auto FindAllCollisions() const -> std::map<std::tuple<size_t, beats_t>, Coord::CollisionType>;
+    std::string mName;
+    beats_t mNumBeats;
+    std::vector<Animate::Commands> mCommands;
+    std::map<std::tuple<size_t, beats_t>, Coord::CollisionType> mCollisions;
 };
 
 }

@@ -34,7 +34,7 @@ auto GetCompiledResults(Sheets const& sheets, Conts const& proc)
     AnimationVariables vars{};
     AnimationErrors errors{};
 
-    auto compiledResults = Compile(vars, errors, sheets.begin(), sheets.end(), 0, SYMBOL_PLAIN, proc);
+    auto compiledResults = Compile(vars, errors, sheets.begin(), sheets.end(), 0, SYMBOL_PLAIN, proc).first;
     for (auto&& i : compiledResults) {
         auto c = Coord{ 0, 0 };
         i->Begin(c);

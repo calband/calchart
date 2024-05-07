@@ -494,4 +494,395 @@ TEST_CASE("AnimationCommandRotate0", "AnimationCommand")
     }
 }
 
+TEST_CASE("Animate::CommandStand", "Animate::Command")
+{
+    auto item1 = CalChart::Animate::CommandStill{ CalChart::Coord{ 16, 16 }, 4, CalChart::Animate::CommandStill::Style::StandAndPlay, CalChart::Degree{ 90 } };
+    REQUIRE(4 == NumBeats(item1));
+    REQUIRE(CalChart::MarchingStyle::Close == StepStyle(item1));
+    SECTION("CheckGoForward")
+    {
+        auto item2 = item1;
+        REQUIRE(item1 == item2);
+        REQUIRE(CalChart::Degree{ 90 } == FacingDirectionAtBeat(item1, 0));
+        REQUIRE(CalChart::Degree{ 90 } == MotionDirectionAtBeat(item1, 0));
+        REQUIRE(CalChart::Degree{ 90 } == FacingDirectionAtBeat(item1, 1));
+        REQUIRE(CalChart::Degree{ 90 } == MotionDirectionAtBeat(item1, 1));
+        REQUIRE(CalChart::Coord{ 16, 16 } == Start(item1));
+        REQUIRE(CalChart::Coord{ 16, 16 } == PositionAtBeat(item1, 0));
+        REQUIRE(CalChart::Coord{ 16, 16 } == PositionAtBeat(item1, 1));
+        REQUIRE(CalChart::Coord{ 16, 16 } == End(item1));
+    }
+    SECTION("CheckDrawCommand")
+    {
+        auto drawCmd = GenCC_DrawCommand(item1);
+        auto goldCmd = CalChart::Draw::DrawCommand{ CalChart::Draw::Ignore{} };
+        REQUIRE(goldCmd == drawCmd);
+    }
+    SECTION("CheckJSON")
+    {
+        auto json = toOnlineViewerJSON(item1);
+        auto goldjson = nlohmann::json{
+            { "type", "stand" },
+            { "beats", 4.0 },
+            { "facing", 180.0 },
+            { "x", 81.0 },
+            { "y", 43.0 }
+        };
+        REQUIRE(json == goldjson);
+    }
+}
+
+TEST_CASE("Animate::CommandClose", "Animate::Command")
+{
+    auto item1 = CalChart::Animate::CommandStill{ CalChart::Coord{ 16, 16 }, 4, CalChart::Animate::CommandStill::Style::Close, CalChart::Degree{ 90 } };
+    REQUIRE(4 == NumBeats(item1));
+    REQUIRE(CalChart::MarchingStyle::Close == StepStyle(item1));
+    SECTION("CheckGoForward")
+    {
+        auto item2 = item1;
+        REQUIRE(item1 == item2);
+        REQUIRE(CalChart::Degree{ 90 } == FacingDirectionAtBeat(item1, 0));
+        REQUIRE(CalChart::Degree{ 90 } == FacingDirectionAtBeat(item1, 1));
+        REQUIRE(CalChart::Degree{ 90 } == MotionDirectionAtBeat(item1, 0));
+        REQUIRE(CalChart::Degree{ 90 } == MotionDirectionAtBeat(item1, 1));
+        REQUIRE(CalChart::Coord{ 16, 16 } == Start(item1));
+        REQUIRE(CalChart::Coord{ 16, 16 } == PositionAtBeat(item1, 0));
+        REQUIRE(CalChart::Coord{ 16, 16 } == PositionAtBeat(item1, 1));
+        REQUIRE(CalChart::Coord{ 16, 16 } == End(item1));
+    }
+    SECTION("CheckDrawCommand")
+    {
+        auto drawCmd = GenCC_DrawCommand(item1);
+        auto goldCmd = CalChart::Draw::DrawCommand{ CalChart::Draw::Ignore{} };
+        REQUIRE(goldCmd == drawCmd);
+    }
+    SECTION("CheckJSON")
+    {
+        auto json = toOnlineViewerJSON(item1);
+        auto goldjson = nlohmann::json{
+            { "type", "close" },
+            { "beats", 4.0 },
+            { "facing", 180.0 },
+            { "x", 81.0 },
+            { "y", 43.0 }
+        };
+        REQUIRE(json == goldjson);
+    }
+}
+
+TEST_CASE("Animate::CommandMT", "Animate::Command")
+{
+    auto item1 = CalChart::Animate::CommandStill{ CalChart::Coord{ 16, 16 }, 4, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree{ 90 } };
+    REQUIRE(4 == NumBeats(item1));
+    REQUIRE(CalChart::MarchingStyle::HighStep == StepStyle(item1));
+    SECTION("CheckGoForward")
+    {
+        auto item2 = item1;
+        REQUIRE(item1 == item2);
+        REQUIRE(CalChart::Degree{ 90 } == FacingDirectionAtBeat(item1, 0));
+        REQUIRE(CalChart::Degree{ 90 } == FacingDirectionAtBeat(item1, 1));
+        REQUIRE(CalChart::Degree{ 90 } == MotionDirectionAtBeat(item1, 0));
+        REQUIRE(CalChart::Degree{ 90 } == MotionDirectionAtBeat(item1, 1));
+        REQUIRE(CalChart::Coord{ 16, 16 } == Start(item1));
+        REQUIRE(CalChart::Coord{ 16, 16 } == PositionAtBeat(item1, 0));
+        REQUIRE(CalChart::Coord{ 16, 16 } == PositionAtBeat(item1, 1));
+        REQUIRE(CalChart::Coord{ 16, 16 } == End(item1));
+    }
+    SECTION("CheckDrawCommand")
+    {
+        auto drawCmd = GenCC_DrawCommand(item1);
+        auto goldCmd = CalChart::Draw::DrawCommand{ CalChart::Draw::Ignore{} };
+        REQUIRE(goldCmd == drawCmd);
+    }
+    SECTION("CheckJSON")
+    {
+        auto json = toOnlineViewerJSON(item1);
+        auto goldjson = nlohmann::json{
+            { "type", "mark" },
+            { "beats", 4.0 },
+            { "facing", 180.0 },
+            { "x", 81.0 },
+            { "y", 43.0 }
+        };
+        REQUIRE(json == goldjson);
+    }
+}
+
+TEST_CASE("Animate::CommandMove", "Animate::Command")
+{
+    auto item1 = CalChart::Animate::CommandMove{ CalChart::Coord{ 16, 16 }, 4, CalChart::Coord{ 64, 64 }, CalChart::Degree{ 90 } };
+    REQUIRE(4 == NumBeats(item1));
+    REQUIRE(CalChart::MarchingStyle::HighStep == StepStyle(item1));
+    SECTION("CheckGoForward")
+    {
+        auto item2 = item1;
+        REQUIRE(item1 == item2);
+        REQUIRE(CalChart::Degree{ 90 } == FacingDirectionAtBeat(item1, 0));
+        REQUIRE(CalChart::Degree{ -45 }.IsEqual(MotionDirectionAtBeat(item1, 0)));
+        REQUIRE(CalChart::Coord{ 16, 16 } == Start(item1));
+        REQUIRE(CalChart::Coord{ 16, 16 } == PositionAtBeat(item1, 0));
+        REQUIRE(CalChart::Coord{ 32, 32 } == PositionAtBeat(item1, 1));
+        REQUIRE(CalChart::Degree{ 90 } == FacingDirectionAtBeat(item1, 1));
+        REQUIRE(CalChart::Degree{ -45 }.IsEqual(MotionDirectionAtBeat(item1, 1)));
+        REQUIRE(CalChart::Coord{ 80, 80 } == End(item1));
+    }
+    SECTION("CheckDrawCommand")
+    {
+        auto drawCmd = GenCC_DrawCommand(item1);
+        auto goldCmd = CalChart::Draw::DrawCommand{ CalChart::Draw::Line{ CalChart::Coord{ 16, 16 }, CalChart::Coord{ 80, 80 } } };
+        REQUIRE(goldCmd == drawCmd);
+    }
+    SECTION("CheckJSON")
+    {
+        auto json = toOnlineViewerJSON(item1);
+        auto goldjson = nlohmann::json{
+            { "type", "even" },
+            { "beats", 4.0 },
+            { "beats_per_step", 1.0 },
+            { "facing", 315.0 },
+            { "x1", 81.0 },
+            { "y1", 43.0 },
+            { "x2", 85.0 },
+            { "y2", 47.0 },
+        };
+        REQUIRE(json == goldjson);
+    }
+}
+
+TEST_CASE("Animate::CommandMoveNegative", "Animate::Command")
+{
+    auto item1 = CalChart::Animate::CommandMove{ CalChart::Coord{ 16, 16 }, 4, CalChart::Coord{ -64, -64 }, CalChart::Degree{ 90 } };
+    REQUIRE(4 == NumBeats(item1));
+    REQUIRE(CalChart::MarchingStyle::HighStep == StepStyle(item1));
+    SECTION("CheckGoForward")
+    {
+        auto item2 = item1;
+        REQUIRE(item1 == item2);
+        REQUIRE(CalChart::Degree{ 90 } == FacingDirectionAtBeat(item1, 0));
+        REQUIRE(CalChart::Degree{ 135 }.IsEqual(MotionDirectionAtBeat(item1, 0)));
+        REQUIRE(CalChart::Coord{ 16, 16 } == Start(item1));
+        REQUIRE(CalChart::Coord{ 16, 16 } == PositionAtBeat(item1, 0));
+        REQUIRE(CalChart::Coord{ 0, 0 } == PositionAtBeat(item1, 1));
+        REQUIRE(CalChart::Degree{ 90 } == FacingDirectionAtBeat(item1, 1));
+        REQUIRE(CalChart::Degree{ 135 }.IsEqual(MotionDirectionAtBeat(item1, 1)));
+        REQUIRE(CalChart::Coord{ -48, -48 } == End(item1));
+    }
+    SECTION("CheckDrawCommand")
+    {
+        auto drawCmd = GenCC_DrawCommand(item1);
+        auto goldCmd = CalChart::Draw::DrawCommand{ CalChart::Draw::Line{ CalChart::Coord{ 16, 16 }, CalChart::Coord{ -48, -48 } } };
+        REQUIRE(goldCmd == drawCmd);
+    }
+    SECTION("CheckJSON")
+    {
+        auto json = toOnlineViewerJSON(item1);
+        auto goldjson = nlohmann::json{
+            { "type", "even" },
+            { "beats", 4.0 },
+            { "beats_per_step", 1.0 },
+            { "facing", 135.0 },
+            { "x1", 81.0 },
+            { "y1", 43.0 },
+            { "x2", 77.0 },
+            { "y2", 39.0 },
+        };
+        REQUIRE(json == goldjson);
+    }
+}
+
+TEST_CASE("Animate::CommandRotate", "Animate::Command")
+{
+    auto item1 = CalChart::Animate::CommandRotate{ 4, CalChart::Coord{ 64, 64 }, 64, CalChart::Degree{ 90 }, CalChart::Degree{ 180 } };
+    REQUIRE(4 == NumBeats(item1));
+    REQUIRE(CalChart::MarchingStyle::HighStep == StepStyle(item1));
+    SECTION("CheckGoForward")
+    {
+        auto item2 = item1;
+        REQUIRE(item1 == item2);
+        CHECK(CalChart::Coord{ 64, 0 } == Start(item1));
+        CHECK(CalChart::Coord{ 64, 0 } == PositionAtBeat(item1, 0));
+        REQUIRE(CalChart::Degree{ 180 } == FacingDirectionAtBeat(item1, 0));
+        REQUIRE(CalChart::Degree{ 180 }.IsEqual(MotionDirectionAtBeat(item1, 0)));
+        CHECK(CalChart::Coord{ 40, 5 } == PositionAtBeat(item1, 1));
+        REQUIRE(CalChart::Degree{ 202.5 }.IsEqual(FacingDirectionAtBeat(item1, 1)));
+        REQUIRE(CalChart::Degree{ 202.5 }.IsEqual(MotionDirectionAtBeat(item1, 1)));
+        CHECK(CalChart::Coord{ 19, 19 } == PositionAtBeat(item1, 2));
+        REQUIRE(CalChart::Degree{ 225 }.IsEqual(FacingDirectionAtBeat(item1, 2)));
+        REQUIRE(CalChart::Degree{ 225 }.IsEqual(MotionDirectionAtBeat(item1, 2)));
+        CHECK(CalChart::Coord{ 5, 40 } == PositionAtBeat(item1, 3));
+        REQUIRE(CalChart::Degree{ 247.5 }.IsEqual(FacingDirectionAtBeat(item1, 3)));
+        REQUIRE(CalChart::Degree{ 247.5 }.IsEqual(MotionDirectionAtBeat(item1, 3)));
+        CHECK(CalChart::Coord{ 0, 64 } == PositionAtBeat(item1, 4));
+        CHECK(CalChart::Coord{ 0, 64 } == End(item1));
+        REQUIRE(CalChart::Degree{ 270 }.IsEqual(FacingDirectionAtBeat(item1, 4)));
+        REQUIRE(CalChart::Degree{ 270 }.IsEqual(MotionDirectionAtBeat(item1, 4)));
+    }
+    SECTION("CheckDrawCommand")
+    {
+        auto drawCmd = GenCC_DrawCommand(item1);
+        auto goldCmd = CalChart::Draw::DrawCommand{
+            CalChart::Draw::Arc{
+                { 64, 0 },
+                { 0, 64 },
+                { 64, 64 } }
+        };
+        REQUIRE(goldCmd == drawCmd);
+    }
+    SECTION("CheckJSON")
+    {
+        auto json = toOnlineViewerJSON(item1);
+        auto goldjson = nlohmann::json{
+            { "type", "arc" },
+            { "start_x", 84.0 },
+            { "start_y", 42.0 },
+            { "center_x", 84.0 },
+            { "center_y", 46.0 },
+            { "angle", -90.0 },
+            { "beats", 4.0 },
+            { "beats_per_step", 1.0 },
+            { "facing_offset", 0.0 },
+        };
+        REQUIRE(json == goldjson);
+    }
+}
+
+TEST_CASE("Animate::CommandRotateBackward", "Animate::Command")
+{
+    auto item1 = CalChart::Animate::CommandRotate{ 4, CalChart::Coord{ 64, 64 }, 64, CalChart::Degree{ 90 }, CalChart::Degree{ 180 }, true };
+    REQUIRE(4 == NumBeats(item1));
+    REQUIRE(CalChart::MarchingStyle::HighStep == StepStyle(item1));
+    SECTION("CheckGoForward")
+    {
+        auto item2 = item1;
+        REQUIRE(item1 == item2);
+        REQUIRE(CalChart::Coord{ 64, 0 } == Start(item1));
+        REQUIRE(CalChart::Coord{ 64, 0 } == PositionAtBeat(item1, 0));
+        REQUIRE(CalChart::Degree{ 0 } == FacingDirectionAtBeat(item1, 0));
+        REQUIRE(CalChart::Degree{ 0 }.IsEqual(MotionDirectionAtBeat(item1, 0)));
+        REQUIRE(CalChart::Coord{ 40, 5 } == PositionAtBeat(item1, 1));
+        REQUIRE(CalChart::Degree{ 22.5 }.IsEqual(FacingDirectionAtBeat(item1, 1)));
+        REQUIRE(CalChart::Degree{ 22.5 }.IsEqual(MotionDirectionAtBeat(item1, 1)));
+        REQUIRE(CalChart::Coord{ 19, 19 } == PositionAtBeat(item1, 2));
+        REQUIRE(CalChart::Degree{ 45 }.IsEqual(FacingDirectionAtBeat(item1, 2)));
+        REQUIRE(CalChart::Degree{ 45 }.IsEqual(MotionDirectionAtBeat(item1, 2)));
+        REQUIRE(CalChart::Coord{ 5, 40 } == PositionAtBeat(item1, 3));
+        REQUIRE(CalChart::Degree{ 67.5 }.IsEqual(FacingDirectionAtBeat(item1, 3)));
+        REQUIRE(CalChart::Degree{ 67.5 }.IsEqual(MotionDirectionAtBeat(item1, 3)));
+        REQUIRE(CalChart::Coord{ 0, 64 } == PositionAtBeat(item1, 4));
+        REQUIRE(CalChart::Coord{ 0, 64 } == End(item1));
+        REQUIRE(CalChart::Degree{ 90 }.IsEqual(FacingDirectionAtBeat(item1, 4)));
+        REQUIRE(CalChart::Degree{ 90 }.IsEqual(MotionDirectionAtBeat(item1, 4)));
+    }
+    SECTION("CheckDrawCommand")
+    {
+        auto drawCmd = GenCC_DrawCommand(item1);
+        auto goldCmd = CalChart::Draw::DrawCommand{
+            CalChart::Draw::Arc{
+                { 64, 0 },
+                { 0, 64 },
+                { 64, 64 } }
+        };
+        REQUIRE(goldCmd == drawCmd);
+    }
+    SECTION("CheckJSON")
+    {
+        auto json = toOnlineViewerJSON(item1);
+        auto goldjson = nlohmann::json{
+            { "type", "arc" },
+            { "start_x", 84.0 },
+            { "start_y", 42.0 },
+            { "center_x", 84.0 },
+            { "center_y", 46.0 },
+            { "angle", -90.0 },
+            { "beats", 4.0 },
+            { "beats_per_step", 1.0 },
+            { "facing_offset", 180.0 },
+        };
+        REQUIRE(json == goldjson);
+    }
+}
+
+TEST_CASE("Animate::CommandStill0", "Animate::Command")
+{
+    auto item1 = CalChart::Animate::CommandStill{ CalChart::Coord{ 16, 16 }, 0, CalChart::Animate::CommandStill::Style::StandAndPlay, CalChart::Degree{ 90 } };
+    SECTION("CheckGoForward")
+    {
+        REQUIRE(CalChart::Coord{ 16, 16 } == Start(item1));
+        REQUIRE(Start(item1) == End(item1));
+    }
+}
+
+TEST_CASE("Animate::CommandMT0", "Animate::Command")
+{
+    auto item1 = CalChart::Animate::Command{ CalChart::Animate::CommandStill{ CalChart::Coord{ 16, 16 }, 0, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree{ 90 } } };
+    SECTION("CheckGoForward")
+    {
+        REQUIRE(CalChart::Coord{ 16, 16 } == Start(item1));
+        REQUIRE(Start(item1) == End(item1));
+    }
+}
+
+TEST_CASE("Animate::CommandMove0", "Animate::Command")
+{
+    auto item1 = CalChart::Animate::CommandMove{ CalChart::Coord{ 16, 16 }, 0, CalChart::Coord{ 64, 64 }, CalChart::Degree{ 90 } };
+    SECTION("CheckGoForward")
+    {
+        REQUIRE(CalChart::Coord{ 16, 16 } == Start(item1));
+        REQUIRE(Start(item1) == PositionAtBeat(item1, 0));
+        REQUIRE(Start(item1) == PositionAtBeat(item1, 1));
+        REQUIRE(CalChart::Coord{ 80, 80 } == End(item1));
+    }
+}
+
+TEST_CASE("Animate::CommandRotate0", "Animate::Command")
+{
+    auto item1 = CalChart::Animate::CommandRotate{ 0, CalChart::Coord{ 64, 64 }, 64, CalChart::Degree{ 90 }, CalChart::Degree{ 180 } };
+    SECTION("CheckGoForward")
+    {
+        REQUIRE(CalChart::Coord{ 64, 0 } == Start(item1));
+        REQUIRE(Start(item1) == PositionAtBeat(item1, 0));
+        REQUIRE(Start(item1) == PositionAtBeat(item1, 1));
+        REQUIRE(CalChart::Coord{ 0, 64 } == End(item1));
+    }
+}
+
+TEST_CASE("Animate::Commands", "Animate::Commands")
+{
+    using beats_t = CalChart::Animate::beats_t;
+    auto uut = CalChart::Animate::Commands(std::vector<CalChart::Animate::Command>{
+        CalChart::Animate::CommandStill{ { 16, 16 }, 3, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree{ 0 } },
+        CalChart::Animate::CommandMove{ { 16, 16 }, 4, { 0, 64 } },
+        CalChart::Animate::CommandStill{ { 16, 80 }, 5, CalChart::Animate::CommandStill::Style::Close, CalChart::Degree{ 180 } },
+    });
+    CHECK(12 == uut.TotalBeats());
+    CHECK(std::tuple<size_t, beats_t>{ 0, 0 } == uut.BeatToCommandOffsetAndBeat(0));
+    CHECK(std::tuple<size_t, beats_t>{ 0, 1 } == uut.BeatToCommandOffsetAndBeat(1));
+    CHECK(std::tuple<size_t, beats_t>{ 0, 2 } == uut.BeatToCommandOffsetAndBeat(2));
+    CHECK(std::tuple<size_t, beats_t>{ 1, 0 } == uut.BeatToCommandOffsetAndBeat(3));
+    CHECK(std::tuple<size_t, beats_t>{ 1, 1 } == uut.BeatToCommandOffsetAndBeat(4));
+    CHECK(std::tuple<size_t, beats_t>{ 1, 2 } == uut.BeatToCommandOffsetAndBeat(5));
+    CHECK(std::tuple<size_t, beats_t>{ 1, 3 } == uut.BeatToCommandOffsetAndBeat(6));
+    CHECK(std::tuple<size_t, beats_t>{ 2, 0 } == uut.BeatToCommandOffsetAndBeat(7));
+    CHECK(std::tuple<size_t, beats_t>{ 2, 1 } == uut.BeatToCommandOffsetAndBeat(8));
+    CHECK(std::tuple<size_t, beats_t>{ 2, 2 } == uut.BeatToCommandOffsetAndBeat(9));
+    CHECK(std::tuple<size_t, beats_t>{ 2, 3 } == uut.BeatToCommandOffsetAndBeat(10));
+    CHECK(std::tuple<size_t, beats_t>{ 2, 4 } == uut.BeatToCommandOffsetAndBeat(11));
+    CHECK(std::tuple<size_t, beats_t>{ 3, 0 } == uut.BeatToCommandOffsetAndBeat(12));
+    CHECK(std::tuple<size_t, beats_t>{ 3, 1 } == uut.BeatToCommandOffsetAndBeat(13));
+    CHECK(uut.MarcherInfoAtBeat(0) == CalChart::Animate::MarcherInfo{ { 16, 16 }, CalChart::Degree{ 0 }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(1) == CalChart::Animate::MarcherInfo{ { 16, 16 }, CalChart::Degree{ 0 }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(2) == CalChart::Animate::MarcherInfo{ { 16, 16 }, CalChart::Degree{ 0 }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(3) == CalChart::Animate::MarcherInfo{ { 16, 16 }, CalChart::Degree{ -90 }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(4) == CalChart::Animate::MarcherInfo{ { 16, 32 }, CalChart::Degree{ -90 }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(5) == CalChart::Animate::MarcherInfo{ { 16, 48 }, CalChart::Degree{ -90 }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(6) == CalChart::Animate::MarcherInfo{ { 16, 64 }, CalChart::Degree{ -90 }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(7) == CalChart::Animate::MarcherInfo{ { 16, 80 }, CalChart::Degree{ 180 }, CalChart::MarchingStyle::Close });
+    CHECK(uut.MarcherInfoAtBeat(8) == CalChart::Animate::MarcherInfo{ { 16, 80 }, CalChart::Degree{ 180 }, CalChart::MarchingStyle::Close });
+    CHECK(uut.MarcherInfoAtBeat(9) == CalChart::Animate::MarcherInfo{ { 16, 80 }, CalChart::Degree{ 180 }, CalChart::MarchingStyle::Close });
+    CHECK(uut.MarcherInfoAtBeat(10) == CalChart::Animate::MarcherInfo{ { 16, 80 }, CalChart::Degree{ 180 }, CalChart::MarchingStyle::Close });
+    CHECK(uut.MarcherInfoAtBeat(11) == CalChart::Animate::MarcherInfo{ { 16, 80 }, CalChart::Degree{ 180 }, CalChart::MarchingStyle::Close });
+    CHECK(uut.MarcherInfoAtBeat(12) == CalChart::Animate::MarcherInfo{});
+    CHECK(uut.MarcherInfoAtBeat(13) == CalChart::Animate::MarcherInfo{});
+}
+
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers, cppcoreguidelines-avoid-do-while, readability-magic-numbers, readability-function-cognitive-complexity)
