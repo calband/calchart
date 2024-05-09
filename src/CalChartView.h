@@ -96,7 +96,7 @@ public:
     std::vector<CalChart::AnimationErrors> GetAnimationErrors() const;
     // Sheet -> all collisions
     std::map<int, CalChart::SelectionList> GetAnimationCollisions() const;
-    std::unique_ptr<CalChart::Animation> GetAnimationInstance() const;
+    std::optional<CalChart::Animation> GenerateAnimation() const;
 
     auto ClipPositionToShowMode(CalChart::Coord const& pos) const { return mShow->GetShowMode().ClipPosition(pos); }
 

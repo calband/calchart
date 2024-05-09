@@ -19,7 +19,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#define _LIBCPP_ENABLE_EXPERIMENTAL 1
 #include "CalChartDoc.h"
+#include "CalChartAnimationErrors.h"
 #include "CalChartApp.h"
 #include "CalChartConfiguration.h"
 #include "CalChartConstants.h"
@@ -220,7 +222,7 @@ T& CalChartDoc::LoadObjectGeneric(T& stream)
                 modified = true;
                 return ContinuityEditorPopup::ProcessEditContinuity(GetDocumentWindow(), description, what, line, column).ToStdString();
             },
-            [this](int majorVersion, int minorVersion) {
+            [](int majorVersion, int minorVersion) {
                 wxString message;
                 message.Printf(
                     "Warning: Current version of CalChart is older than show file.\n"
@@ -245,7 +247,7 @@ T& CalChartDoc::LoadObjectGeneric(T& stream)
         modified = false;
     }
     super::Modify(modified);
-    mAnimation = std::make_unique<Animation>(*mShow);
+    mAnimation = Animation{ *mShow };
     CalChartDoc_FinishedLoading finishedLoading;
     UpdateAllViews(NULL, &finishedLoading);
     return stream;
@@ -286,7 +288,7 @@ void CalChartDoc::Modify(bool b)
     // generate a new animation
     // uncomment below to see how long it takes to print
     //    std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-    mAnimation = std::make_unique<Animation>(*mShow);
+    mAnimation = Animation{ *mShow };
     //    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     //    std::cout << "generation "
     //             << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
@@ -327,10 +329,61 @@ void CalChartDoc::SetCurrentSheet(int n)
     UpdateAllViews();
 }
 
-Animation const*
-CalChartDoc::GetAnimation() const
+auto CalChartDoc::GenerateAnimation() const -> std::optional<CalChart::Animation>
 {
-    return mAnimation ? mAnimation.get() : nullptr;
+    return mAnimation;
+}
+
+auto CalChartDoc::GetAnimationErrors() const -> std::vector<CalChart::AnimationErrors>
+{
+    if (!mAnimation) {
+        return {};
+    }
+    return mAnimation->GetAnimationErrors();
+}
+
+auto CalChartDoc::GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>
+{
+    if (!mAnimation) {
+        return {};
+    }
+    auto result = std::map<int, CalChart::SelectionList>{};
+    // first map all the collisions to a sheet with a point group.
+    for (auto&& i : mAnimation->GetCollisions()) {
+        result[std::get<1>(i.first)].insert(std::get<0>(i.first));
+    }
+    return result;
+}
+
+namespace {
+// Returns a view adaptor that will transform a range of point indices to the Path DrawCommands.
+auto TransformIndexToDrawPathCommands(CalChart::Animation const& animation, unsigned whichSheet, CalChart::Coord::units endRadius)
+{
+    return std::views::transform([&animation, whichSheet, endRadius](int i) {
+        return animation.GenPathToDraw(whichSheet, i, endRadius);
+    })
+        | std::views::join;
+}
+
+}
+
+auto CalChartDoc::GeneratePathsDrawCommands() -> std::vector<CalChart::Draw::DrawCommand>
+{
+    auto& config = GetConfiguration();
+    if (!GetDrawPaths()) {
+        return {};
+    }
+    if (!mAnimation || mAnimation->GetNumberSheets() == 0 || (mAnimation->GetNumberSheets() <= GetCurrentSheetNum())) {
+        return {};
+    }
+    auto endRadius = CalChart::Float2CoordUnits(config.Get_DotRatio()) / 2;
+    auto currentSheet = GetCurrentSheetNum();
+    return {
+        CalChart::Draw::withBrushAndPen(
+            config.Get_CalChartBrushAndPen(CalChart::Colors::PATHS),
+            mShow->GetSelectionList()
+                | TransformIndexToDrawPathCommands(*mAnimation, currentSheet, endRadius))
+    };
 }
 
 void CalChartDoc::WizardSetupNewShow(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int columns, ShowMode const& newmode)

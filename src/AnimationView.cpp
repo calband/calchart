@@ -273,7 +273,7 @@ int AnimationView::GetTotalCurrentBeat() const { return (mAnimation) ? mAnimatio
 
 void AnimationView::Generate()
 {
-    mAnimation = mView->GetAnimationInstance();
+    mAnimation = mView->GenerateAnimation();
 }
 
 void AnimationView::PrevBeat()
