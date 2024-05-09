@@ -35,7 +35,7 @@ auto DumpAnimationErrors(CalChart::Animation const& animation, std::ostream& os)
 auto AnimateShow(CalChart::Show const& show, std::ostream& os)
 {
     auto animation = CalChart::Animation{ show };
-    DumpAnimationErrors(show, os);
+    DumpAnimationErrors(animation, os);
 }
 
 auto DumpContinuity(CalChart::Show const& show, std::ostream& os)
@@ -80,7 +80,7 @@ auto DumpFileCheck(std::ostream& os)
 auto PrintShow(CalChart::Show const& show, std::ostream& os)
 {
     auto animation = CalChart::Animation{ show };
-    DumpAnimationErrors(show, os);
+    DumpAnimationErrors(animation, os);
     animation.GotoSheet(0);
     auto currentInfo = animation.GetCurrentInfo();
     os << currentInfo.first << "\n";

@@ -3,6 +3,7 @@
 Bugs addressed in this release:
 
 * [#443](../../issues/443) Dark Mode doesn't show status bar on Mac
+* [#497](../../issues/497) Animate ctor should be explicit
 
 Other changes:
 

@@ -40,7 +40,7 @@ class AnimationErrors;
 
 class Animation {
 public:
-    Animation(const Show& show);
+    explicit Animation(const Show& show);
     ~Animation();
 
     void GotoSheet(unsigned i);
