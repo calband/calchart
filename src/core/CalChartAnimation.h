@@ -22,6 +22,7 @@
 */
 
 #include "CalChartAngles.h"
+#include "CalChartAnimationErrors.h"
 #include "CalChartAnimationSheet.h"
 #include "CalChartAnimationTypes.h"
 #include "CalChartCoord.h"
@@ -36,7 +37,6 @@ namespace CalChart {
 class AnimationCommand;
 class AnimationSheet;
 class Show;
-class AnimationErrors;
 
 class Animation {
 public:

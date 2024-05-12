@@ -22,6 +22,7 @@
 */
 
 #include "CalChartAngles.h"
+#include "CalChartAnimation.h"
 #include "CalChartDrawCommand.h"
 #include "CalChartMeasure.h"
 #include <array>
@@ -34,7 +35,6 @@ class CalChartView;
 namespace CalChart {
 class Configuration;
 class Continuity;
-class Animation;
 class ShowMode;
 }
 
@@ -108,7 +108,7 @@ private:
     CalChartView* mView{};
     CalChart::Configuration const& mConfig;
 
-    std::unique_ptr<CalChart::Animation> mAnimation;
+    std::optional<CalChart::Animation> mAnimation;
     bool mDrawCollisionWarning = true;
     bool mPlayCollisionWarning = false;
 

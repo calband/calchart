@@ -452,33 +452,23 @@ std::vector<CalChart::AnimationErrors> CalChartView::GetAnimationErrors() const
     if (!mShow) {
         return {};
     }
-    auto animation = mShow->GetAnimation();
-    return animation ? animation->GetAnimationErrors() : std::vector<CalChart::AnimationErrors>{};
+    return mShow->GetAnimationErrors();
 }
 
 std::map<int, CalChart::SelectionList> CalChartView::GetAnimationCollisions() const
 {
-    auto result = std::map<int, CalChart::SelectionList>{};
     if (!mShow) {
-        return result;
+        return {};
     }
-    if (!mShow->GetAnimation()) {
-        return result;
-    }
-    // first map all the collisions to a sheet with a point group.
-    for (auto&& i : mShow->GetAnimation()->GetCollisions()) {
-        result[std::get<1>(i.first)].insert(std::get<0>(i.first));
-    }
-    return result;
+    return mShow->GetAnimationCollisions();
 }
 
-std::unique_ptr<CalChart::Animation> CalChartView::GetAnimationInstance() const
+std::optional<CalChart::Animation> CalChartView::GenerateAnimation() const
 {
     if (!mShow) {
         return {};
     }
-    auto animation = mShow->GetAnimation();
-    return animation ? std::make_unique<CalChart::Animation>(*animation) : std::unique_ptr<CalChart::Animation>{};
+    return mShow->GenerateAnimation();
 }
 
 void CalChartView::GoToSheet(int which)
@@ -562,33 +552,12 @@ void CalChartView::OnEnableDrawPaths(bool enable)
     mShow->SetDrawPaths(enable);
 }
 
-// Returns a view adaptor that will transform a range of point indices to the Path DrawCommands.
-auto TransformIndexToDrawPathCommands(CalChart::Animation const& animation, unsigned whichSheet, CalChart::Coord::units endRadius)
-{
-    return std::views::transform([&animation, whichSheet, endRadius](int i) {
-        return animation.GenPathToDraw(whichSheet, i, endRadius);
-    })
-        | std::views::join;
-}
-
 auto CalChartView::GeneratePathsDrawCommands() -> std::vector<CalChart::Draw::DrawCommand>
 {
-    auto& config = mShow->GetConfiguration();
-    if (!mShow->GetDrawPaths()) {
+    if (!mShow) {
         return {};
     }
-    auto animation = mShow->GetAnimation();
-    if (!animation || animation->GetNumberSheets() == 0 || (animation->GetNumberSheets() <= mShow->GetCurrentSheetNum())) {
-        return {};
-    }
-    auto endRadius = CalChart::Float2CoordUnits(config.Get_DotRatio()) / 2;
-    auto currentSheet = mShow->GetCurrentSheetNum();
-    return {
-        CalChart::Draw::withBrushAndPen(
-            config.Get_CalChartBrushAndPen(CalChart::Colors::PATHS),
-            mShow->GetSelectionList()
-                | TransformIndexToDrawPathCommands(*animation, currentSheet, endRadius))
-    };
+    return mShow->GeneratePathsDrawCommands();
 }
 
 void CalChartView::DoDrawBackground(bool enable)

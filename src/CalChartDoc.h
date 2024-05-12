@@ -193,8 +193,11 @@ public:
 
     CalChart::ShowMode const& GetShowMode() const;
     CalChart::Configuration& GetConfiguration() const { return mConfig; }
-    // nullptr if there is no animation
-    CalChart::Animation const* GetAnimation() const;
+
+    auto GenerateAnimation() const -> std::optional<CalChart::Animation>;
+    auto GetAnimationErrors() const -> std::vector<CalChart::AnimationErrors>;
+    auto GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>;
+    auto GeneratePathsDrawCommands() -> std::vector<CalChart::Draw::DrawCommand>;
 
     auto AlreadyHasPrintContinuity() const { return mShow->AlreadyHasPrintContinuity(); }
     auto WillMovePoints(std::map<int, CalChart::Coord> const& new_positions) const { return mShow->WillMovePoints(new_positions, mCurrentReferencePoint); }
@@ -268,7 +271,7 @@ private:
     // points are currently being moved.
     CalChart::Configuration& mConfig;
     std::unique_ptr<CalChart::Show> mShow;
-    std::unique_ptr<CalChart::Animation> mAnimation;
+    std::optional<CalChart::Animation> mAnimation;
     CalChart::Select mSelect = CalChart::Select::Box;
     CalChart::MoveMode mCurrentMove = CalChart::MoveMode::Normal;
     int mCurrentReferencePoint{};
