@@ -10,4 +10,5 @@ Other changes:
 * [#492](../../issues/492) calchart_cmd should have an option for dumping json
 * [#494](../../issues/494) Refine the calchart_cmd for dump_continuity_text
 * [#498](../../issues/498) remove GetAnimation
+* [#500](../../issues/500) Add JSON tests to sanity tests
 
