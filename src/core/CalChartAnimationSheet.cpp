@@ -22,6 +22,7 @@
 
 #include "CalChartAnimation.h"
 #include "CalChartAnimationCommand.h"
+#include "CalChartRanges.h"
 
 namespace CalChart {
 
@@ -69,6 +70,16 @@ void AnimationSheet::swap(AnimationSheet& other) noexcept
     swap(mCommands, other.mCommands);
     swap(name, other.name);
     swap(numbeats, other.numbeats);
+}
+
+auto AnimationSheet::toOnlineViewerJSON(int whichMarcher, Coord startPosition) const -> std::vector<nlohmann::json>
+{
+    return CalChart::Ranges::ToVector<nlohmann::json>(
+        mCommands.at(whichMarcher) | std::views::transform([&startPosition](auto command) mutable {
+            auto result = command->toOnlineViewerJSON(startPosition);
+            command->ApplyForward(startPosition);
+            return result;
+        }));
 }
 
 }

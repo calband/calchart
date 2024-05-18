@@ -360,18 +360,18 @@ Animation::GetCurrentInfo() const
     return std::pair<std::string, std::vector<std::string>>(output.str(), each);
 }
 
-std::vector<AnimationSheet>::const_iterator Animation::sheetsBegin() const
-{
-    return mSheets.begin();
-}
-
-std::vector<AnimationSheet>::const_iterator Animation::sheetsEnd() const
-{
-    return mSheets.end();
-}
-
 std::vector<AnimationErrors> Animation::GetAnimationErrors() const
 {
     return mAnimationErrors;
 }
+
+auto Animation::toOnlineViewerJSON(std::vector<std::vector<CalChart::Point>> const& pointsOverSheets) const -> std::vector<std::vector<std::vector<nlohmann::json>>>
+{
+    auto results = std::vector<std::vector<std::vector<nlohmann::json>>>{};
+    for (auto i : std::views::iota(0UL, pointsOverSheets.size())) {
+        results.push_back(mSheets.at(i).toOnlineViewerJSON(pointsOverSheets.at(i)));
+    }
+    return results;
+}
+
 }
