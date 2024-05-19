@@ -23,8 +23,10 @@
 
 #include "CalChartAnimationTypes.h"
 #include "CalChartCoord.h"
+#include "CalChartPoint.h"
 
 #include <memory>
+#include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
 
@@ -86,6 +88,16 @@ public:
     auto GetCommandsAt(int which, int index) const
     {
         return mCommands.at(which).at(index);
+    }
+
+    auto toOnlineViewerJSON(int whichMarcher, Coord startPosition) const -> std::vector<nlohmann::json>;
+    auto toOnlineViewerJSON(std::vector<CalChart::Point> const& points) const -> std::vector<std::vector<nlohmann::json>>
+    {
+        auto results = std::vector<std::vector<nlohmann::json>>{};
+        for (unsigned ptIndex = 0; ptIndex < points.size(); ptIndex++) {
+            results.push_back(toOnlineViewerJSON(ptIndex, points[ptIndex].GetPos()));
+        }
+        return results;
     }
 
 private:

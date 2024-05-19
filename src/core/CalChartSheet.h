@@ -124,7 +124,7 @@ public:
      * @return A JSON which could represent this sheet in
      * a '.viewer' file.
      */
-    nlohmann::json toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, AnimationSheet const& compiledSheet) const;
+    nlohmann::json toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, std::map<std::string, std::vector<nlohmann::json>> const& movements) const;
 
 private:
     std::vector<Continuity> mAnimationContinuity;

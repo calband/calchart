@@ -25,6 +25,7 @@
 #include "CalChartContinuity.h"
 #include "CalChartFileFormat.h"
 #include "CalChartPoint.h"
+#include "CalChartRanges.h"
 #include "CalChartShapes.h"
 #include "CalChartSheet.h"
 #include "ccvers.h"
@@ -599,6 +600,27 @@ SelectionList Show::MakeSelectByLabel(std::string const& label) const
     return sl;
 }
 
+namespace {
+    // In 'movements', make a series of commands to describe how a point should be animated over time in the Online Viewer
+    // This is effectively a reduce, except the dotLabels make this challenging.
+    auto GetMovement(std::vector<std::string> dotLabels, std::vector<std::vector<nlohmann::json>> const& allMovements) -> std::map<std::string, std::vector<nlohmann::json>>
+    {
+        auto movements = std::map<std::string, std::vector<nlohmann::json>>{};
+        for (auto ptIndex : std::views::iota(0UL, dotLabels.size())) {
+            movements[dotLabels[ptIndex]] = allMovements.at(ptIndex);
+        }
+
+        return movements;
+    }
+
+    template <std::ranges::input_range Range>
+        requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Sheet>)
+    auto GetAllPointPositions(Range&& sheets)
+    {
+        return sheets | std::views::transform([](auto&& sheet) { return sheet.GetPoints(); });
+    }
+}
+
 nlohmann::json Show::toOnlineViewerJSON(const Animation& compiledShow) const
 {
     nlohmann::json j;
@@ -612,12 +634,11 @@ nlohmann::json Show::toOnlineViewerJSON(const Animation& compiledShow) const
     j["labels"] = ptLabels;
 
     std::vector<nlohmann::json> sheetData;
-    auto animationSheetIter = compiledShow.sheetsBegin();
-    auto sheetIndex = 0;
-    for (auto showSheetIter = GetSheetBegin(); showSheetIter != GetSheetEnd(); ++showSheetIter) {
-        sheetData.push_back(showSheetIter->toOnlineViewerJSON(sheetIndex + 1, ptLabels, *animationSheetIter));
-        ++animationSheetIter;
-        ++sheetIndex;
+    auto allPoints = CalChart::Ranges::ToVector<std::vector<Point>>(GetAllPointPositions(mSheets));
+    auto allMovements = compiledShow.toOnlineViewerJSON(allPoints);
+    for (auto index : std::views::iota(0UL, mSheets.size())) {
+        auto thisMovement = GetMovement(ptLabels, allMovements.at(index));
+        sheetData.push_back(mSheets.at(index).toOnlineViewerJSON(index + 1, ptLabels, thisMovement));
     }
 
     j["sheets"] = sheetData;

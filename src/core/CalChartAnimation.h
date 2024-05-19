@@ -82,8 +82,12 @@ public:
 
     std::vector<Draw::DrawCommand> GenPathToDraw(unsigned whichSheet, unsigned point, Coord::units endRadius) const;
 
-    std::vector<AnimationSheet>::const_iterator sheetsBegin() const;
-    std::vector<AnimationSheet>::const_iterator sheetsEnd() const;
+    /*!
+     * @brief Generates JSON that could represent of all the marchers in an Online Viewer '.viewer' file.
+     * @param pointsOverSheets All of the points in all of the sheets.
+     * @return A JSON which could represent all the animations in a '.viewer' file.
+     */
+    [[nodiscard]] auto toOnlineViewerJSON(std::vector<std::vector<CalChart::Point>> const& pointsOverSheets) const -> std::vector<std::vector<std::vector<nlohmann::json>>>;
 
 private:
     void BeginCmd(unsigned i);

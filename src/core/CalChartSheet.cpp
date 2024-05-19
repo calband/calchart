@@ -24,6 +24,7 @@
 
 #include "CalChartAnimationCommand.h"
 #include "CalChartFileFormat.h"
+#include "CalChartRanges.h"
 #include "CalChartShow.h"
 #include "viewer_translate.h"
 
@@ -671,7 +672,7 @@ std::vector<SYMBOL_TYPE> Sheet::GetSymbols() const
     return result;
 }
 
-nlohmann::json Sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, AnimationSheet const& compiledSheet) const
+nlohmann::json Sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, std::map<std::string, std::vector<nlohmann::json>> const& movements) const
 {
     nlohmann::json j;
     // TODO; add printed continuities to viewer file manually for now
@@ -699,18 +700,6 @@ nlohmann::json Sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::str
     j["field_type"] = "college";
     j["continuities"] = continuities;
 
-    // In 'movements', make a series of commands to describe how a point should be animated over time in the Online Viewer
-    std::map<std::string, std::vector<nlohmann::json>> movements;
-    for (unsigned ptIndex = 0; ptIndex < mPoints.size(); ptIndex++) {
-        auto currPos = Coord(mPoints[ptIndex].GetPos().x, mPoints[ptIndex].GetPos().y);
-
-        for (auto commandIter = compiledSheet.GetCommandsBegin(ptIndex); commandIter != compiledSheet.GetCommandsEnd(ptIndex); commandIter++) {
-
-            movements[dotLabels[ptIndex]].push_back((*commandIter)->toOnlineViewerJSON(currPos));
-
-            (*commandIter)->ApplyForward(currPos);
-        }
-    }
     j["movements"] = movements;
     return j;
 }
