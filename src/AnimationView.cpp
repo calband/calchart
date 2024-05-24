@@ -52,39 +52,8 @@ auto GenerateSpriteImages(wxImage const& image, int numberImages, int imageX, in
     });
 }
 
-auto FacingBack(CalChart::Animation::animate_info_t const& info)
-{
-    auto direction = CalChart::AngleToDirection(info.mFacingDirection);
-    return direction == CalChart::Direction::SouthWest
-        || direction == CalChart::Direction::West
-        || direction == CalChart::Direction::NorthWest;
-}
-
-auto FacingFront(CalChart::Animation::animate_info_t const& info)
-{
-    auto direction = CalChart::AngleToDirection(info.mFacingDirection);
-    return direction == CalChart::Direction::SouthEast
-        || direction == CalChart::Direction::East
-        || direction == CalChart::Direction::NorthEast;
-}
-
-auto FacingSide(CalChart::Animation::animate_info_t const& info)
-{
-    return !FacingBack(info) && !FacingFront(info);
-}
-
-auto CollisionWarning(CalChart::Animation::animate_info_t const& info)
-{
-    return info.mCollision == CalChart::Coord::CollisionType::warning;
-}
-
-auto CollisionIntersect(CalChart::Animation::animate_info_t const& info)
-{
-    return info.mCollision == CalChart::Coord::CollisionType::intersect;
-}
-
 template <std::ranges::input_range Range>
-    requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animation::animate_info_t>)
+    requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Info>)
 auto GeneratePointDrawCommand(Range&& infos) -> std::vector<CalChart::Draw::DrawCommand>
 {
     return CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(infos | std::views::transform([](auto&& info) {
@@ -96,7 +65,7 @@ auto GeneratePointDrawCommand(Range&& infos) -> std::vector<CalChart::Draw::Draw
 }
 
 template <std::ranges::input_range Range, typename Function>
-    requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animation::animate_info_t>)
+    requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Info>)
 auto GeneratePointDrawCommand(Range&& range, Function predicate, CalChart::BrushAndPen brushAndPen) -> CalChart::Draw::DrawCommand
 {
     auto filteredRange = range | std::views::filter(predicate);
@@ -278,14 +247,25 @@ void AnimationView::Generate()
 
 void AnimationView::PrevBeat()
 {
-    if (mAnimation && mAnimation->PrevBeat()) {
+    if (mAnimation) {
+        auto currentBeat = mAnimation->GetTotalCurrentBeat();
+        if (currentBeat == 0) {
+            return;
+        }
+        GotoTotalBeat(currentBeat - 1);
         RefreshFrame();
     }
 }
 
 void AnimationView::NextBeat()
 {
-    if (mAnimation && mAnimation->NextBeat()) {
+    if (mAnimation) {
+        auto totalBeats = mAnimation->GetTotalNumberBeats();
+        auto currentBeat = mAnimation->GetTotalCurrentBeat();
+        if (currentBeat == (totalBeats - 1)) {
+            return;
+        }
+        GotoTotalBeat(currentBeat + 1);
         RefreshFrame();
     }
 }

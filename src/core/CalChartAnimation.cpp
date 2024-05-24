@@ -185,7 +185,7 @@ bool Animation::NextBeat()
     return true;
 }
 
-void Animation::GotoBeat(unsigned i)
+void Animation::GotoBeat(beats_t i)
 {
     while (mCurrentBeatNumber > i) {
         PrevBeat();
@@ -201,7 +201,7 @@ void Animation::GotoSheet(unsigned i)
     RefreshSheet();
 }
 
-void Animation::GotoTotalBeat(int i)
+void Animation::GotoTotalBeat(beats_t i)
 {
     while (GetTotalCurrentBeat() > i) {
         PrevBeat();
@@ -277,7 +277,7 @@ bool Animation::CurrentBeatHasCollision() const
     return false;
 }
 
-Animation::animate_info_t Animation::GetAnimateInfo(int which) const
+auto Animation::GetAnimateInfo(int which) const -> Animate::Info
 {
     auto const& cmd = GetCommand(mCurrentSheetNumber, which);
     return {
@@ -289,12 +289,12 @@ Animation::animate_info_t Animation::GetAnimateInfo(int which) const
     };
 }
 
-std::vector<Animation::animate_info_t> Animation::GetAllAnimateInfo() const
+auto Animation::GetAllAnimateInfo() const -> std::vector<Animate::Info>
 {
     auto points = std::vector<int>(mPoints.size());
     std::iota(points.begin(), points.end(), 0);
-    auto animates = std::vector<Animation::animate_info_t>();
-    std::transform(points.begin(), points.end(), std::back_inserter(animates), [this](auto which) -> Animation::animate_info_t {
+    auto animates = std::vector<Animate::Info>{};
+    std::transform(points.begin(), points.end(), std::back_inserter(animates), [this](auto which) {
         return GetAnimateInfo(which);
     });
     std::sort(animates.begin(), animates.end(), [](auto& a, auto& b) {
@@ -305,14 +305,14 @@ std::vector<Animation::animate_info_t> Animation::GetAllAnimateInfo() const
 
 int Animation::GetNumberSheets() const { return static_cast<int>(mSheets.size()); }
 
-unsigned Animation::GetTotalNumberBeatsUpTo(int sheet) const
+auto Animation::GetTotalNumberBeatsUpTo(int sheet) const -> beats_t
 {
     return std::accumulate(mSheets.cbegin(), mSheets.cbegin() + sheet, 0, [](auto&& a, auto&& b) {
         return a + b.GetNumBeats();
     });
 }
 
-int Animation::GetTotalCurrentBeat() const
+auto Animation::GetTotalCurrentBeat() const -> beats_t
 {
     return GetTotalNumberBeatsUpTo(mCurrentSheetNumber) + mCurrentBeatNumber;
 }

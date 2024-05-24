@@ -38,40 +38,70 @@ class AnimationCommand;
 class AnimationSheet;
 class Show;
 
-class Animation {
-public:
-    explicit Animation(const Show& show);
-    ~Animation();
-
-    void GotoSheet(unsigned i);
-    // Returns true if changes made
-    bool PrevSheet();
-    bool NextSheet();
-
-    void GotoBeat(unsigned i);
-    bool PrevBeat();
-    bool NextBeat();
-    void GotoTotalBeat(int i);
-
+namespace Animate {
     // For drawing:
-    struct animate_info_t {
+    struct Info {
         int index{};
         CalChart::Coord::CollisionType mCollision = CalChart::Coord::CollisionType::none;
         CalChart::Radian mFacingDirection{};
         Coord mPosition{};
         MarchingStyle mStepStyle = MarchingStyle::HighStep;
     };
-    animate_info_t GetAnimateInfo(int which) const;
 
-    std::vector<animate_info_t> GetAllAnimateInfo() const;
+    inline auto FacingBack(Info const& info)
+    {
+        auto direction = CalChart::AngleToDirection(info.mFacingDirection);
+        return direction == CalChart::Direction::SouthWest
+            || direction == CalChart::Direction::West
+            || direction == CalChart::Direction::NorthWest;
+    }
+
+    inline auto FacingFront(Info const& info)
+    {
+        auto direction = CalChart::AngleToDirection(info.mFacingDirection);
+        return direction == CalChart::Direction::SouthEast
+            || direction == CalChart::Direction::East
+            || direction == CalChart::Direction::NorthEast;
+    }
+
+    inline auto FacingSide(Info const& info)
+    {
+        return !FacingBack(info) && !FacingFront(info);
+    }
+
+    inline auto CollisionWarning(Info const& info)
+    {
+        return info.mCollision == CalChart::Coord::CollisionType::warning;
+    }
+
+    inline auto CollisionIntersect(Info const& info)
+    {
+        return info.mCollision == CalChart::Coord::CollisionType::intersect;
+    }
+
+}
+
+using beats_t = unsigned;
+
+class Animation {
+public:
+    explicit Animation(const Show& show);
+    ~Animation();
+
+    void GotoSheet(unsigned i);
+    void GotoTotalBeat(beats_t i);
+
+    auto GetAnimateInfo(int which) const -> Animate::Info;
+
+    auto GetAllAnimateInfo() const -> std::vector<Animate::Info>;
 
     int GetNumberSheets() const;
     auto GetCurrentSheet() const { return mCurrentSheetNumber; }
     auto GetNumberBeats() const { return mSheets.at(mCurrentSheetNumber).GetNumBeats(); }
     auto GetCurrentBeat() const { return mCurrentBeatNumber; }
-    unsigned GetTotalNumberBeatsUpTo(int sheet) const;
+    auto GetTotalNumberBeatsUpTo(int sheet) const -> beats_t;
     auto GetTotalNumberBeats() const { return GetTotalNumberBeatsUpTo(static_cast<int>(mSheets.size())); }
-    int GetTotalCurrentBeat() const;
+    auto GetTotalCurrentBeat() const -> beats_t;
     auto GetCurrentSheetName() const { return mSheets.at(mCurrentSheetNumber).GetName(); }
     std::vector<AnimationErrors> GetAnimationErrors() const;
     std::map<std::tuple<int, int, int>, Coord::CollisionType> GetCollisions() const { return mCollisions; }
@@ -90,6 +120,14 @@ public:
     [[nodiscard]] auto toOnlineViewerJSON(std::vector<std::vector<CalChart::Point>> const& pointsOverSheets) const -> std::vector<std::vector<std::vector<nlohmann::json>>>;
 
 private:
+    // Returns true if changes made
+    bool PrevSheet();
+    bool NextSheet();
+
+    void GotoBeat(unsigned i);
+    bool PrevBeat();
+    bool NextBeat();
+
     void BeginCmd(unsigned i);
     void EndCmd(unsigned i);
 
@@ -107,7 +145,7 @@ private:
     // mapping of Which, Sheet, Beat to a collision
     std::map<std::tuple<int, int, int>, Coord::CollisionType> mCollisions;
     unsigned mCurrentSheetNumber{};
-    unsigned mCurrentBeatNumber{};
+    beats_t mCurrentBeatNumber{};
     std::vector<int> mAnimSheetIndices;
     std::vector<AnimationErrors> mAnimationErrors;
 };

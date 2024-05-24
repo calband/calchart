@@ -12,4 +12,5 @@ Other changes:
 * [#498](../../issues/498) remove GetAnimation
 * [#500](../../issues/500) Add JSON tests to sanity tests
 * [#502](../../issues/502) remove get animation sheet iterator
+* [#504](../../issues/504) Make Animation::NextBeat private
 
