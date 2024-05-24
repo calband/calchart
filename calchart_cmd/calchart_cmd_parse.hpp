@@ -11,6 +11,7 @@
 #include "CalChartShow.h"
 #include "print_ps.h"
 #include <fstream>
+#include <ranges>
 
 namespace {
 
@@ -86,7 +87,8 @@ auto PrintShow(CalChart::Show const& show, std::ostream& os)
     os << currentInfo.first << "\n";
     std::ranges::copy(currentInfo.second, std::ostream_iterator<std::string>(os, "\n"));
     auto oldInfo = currentInfo;
-    while (animation.NextBeat()) {
+    for (auto beat : std::views::iota(0UL, animation.GetTotalNumberBeats())) {
+        animation.GotoTotalBeat(beat);
         auto currentInfo = animation.GetCurrentInfo();
         if (currentInfo.first != oldInfo.first) {
             os << currentInfo.first << "\n";
