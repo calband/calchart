@@ -136,6 +136,7 @@ private:
 
     // There are two types of data, the ones that are set when we are created, and the ones that modify over time.
     std::vector<AnimationSheet> mSheets;
+    std::vector<Animate::Sheet> mSheets2;
     std::vector<Coord> mPoints; // current position of these points
     std::vector<size_t> mCurrentCmdIndex; // pointer to the current command in the sheet
 

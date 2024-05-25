@@ -65,6 +65,7 @@ Animation::Animation(const Show& show)
         // Now parse continuity
         AnimationErrors errors;
         std::vector<AnimationCommands> theCommands(mPoints.size());
+        std::vector<std::vector<Animate::Command>> theCommands2(mPoints.size());
         for (auto& current_symbol : k_symbols) {
             if (curr_sheet->ContinuityInUse(current_symbol)) {
                 auto& current_continuity = curr_sheet->GetContinuityBySymbol(current_symbol);
@@ -78,7 +79,9 @@ Animation::Animation(const Show& show)
 #endif
                 for (unsigned j = 0; j < mPoints.size(); j++) {
                     if (curr_sheet->GetSymbol(j) == current_symbol) {
-                        theCommands[j] = CalChart::Compile(variablesStates, errors, curr_sheet, show.GetSheetEnd(), j, current_symbol, continuity).first;
+                        auto compileResults = CalChart::Compile(variablesStates, errors, curr_sheet, show.GetSheetEnd(), j, current_symbol, continuity);
+                        theCommands[j] = compileResults.first;
+                        theCommands2[j] = compileResults.second;
                     }
                 }
             }
@@ -86,7 +89,9 @@ Animation::Animation(const Show& show)
         // Handle points that don't have continuity (shouldn't happen)
         for (unsigned j = 0; j < mPoints.size(); j++) {
             if (theCommands[j].empty()) {
-                theCommands[j] = CalChart::Compile(variablesStates, errors, curr_sheet, show.GetSheetEnd(), j, MAX_NUM_SYMBOLS, {}).first;
+                auto compileResults = CalChart::Compile(variablesStates, errors, curr_sheet, show.GetSheetEnd(), j, MAX_NUM_SYMBOLS, {});
+                theCommands[j] = compileResults.first;
+                theCommands2[j] = compileResults.second;
             }
         }
         if (errors.AnyErrors()) {
@@ -97,6 +102,7 @@ Animation::Animation(const Show& show)
             thePoints.at(i) = curr_sheet->GetPosition(i);
         }
         mSheets.emplace_back(thePoints, theCommands, curr_sheet->GetName(), curr_sheet->GetBeats());
+        mSheets2.emplace_back(curr_sheet->GetName(), curr_sheet->GetBeats(), theCommands2);
         // here's where we would put in another sheet, and compare to see if all the positions are the same,
         // if it makes the same json movements.
     }
