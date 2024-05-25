@@ -281,7 +281,6 @@ auto Animation::GetAnimateInfo(int which) const -> Animate::Info
 {
     auto const& cmd = GetCommand(mCurrentSheetNumber, which);
     return {
-        which,
         mCollisions.count({ which, mCurrentSheetNumber, mCurrentBeatNumber }) ? mCollisions.find({ which, mCurrentSheetNumber, mCurrentBeatNumber })->second : Coord::CollisionType::none,
         CalChart::Radian{ cmd.FacingDirection() },
         mPoints.at(which),

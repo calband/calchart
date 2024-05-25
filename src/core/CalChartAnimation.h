@@ -41,7 +41,6 @@ class Show;
 namespace Animate {
     // For drawing:
     struct Info {
-        int index{};
         CalChart::Coord::CollisionType mCollision = CalChart::Coord::CollisionType::none;
         CalChart::Radian mFacingDirection{};
         Coord mPosition{};
