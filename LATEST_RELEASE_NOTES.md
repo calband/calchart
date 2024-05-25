@@ -13,4 +13,5 @@ Other changes:
 * [#500](../../issues/500) Add JSON tests to sanity tests
 * [#502](../../issues/502) remove get animation sheet iterator
 * [#504](../../issues/504) Make Animation::NextBeat private
+* [#506](../../issues/506) remove index from AnimateInfo
 

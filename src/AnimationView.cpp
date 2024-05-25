@@ -147,9 +147,15 @@ auto AnimationView::GenerateDraw(CalChart::Configuration const& config) const ->
 
 auto AnimationView::GenerateDrawDots(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
 {
-    auto allInfo = mAnimation->GetAllAnimateInfo();
-    auto allSelected = allInfo | std::views::filter([this](auto&& info) { return mView->IsSelected(info.index); });
-    auto allNotSelected = allInfo | std::views::filter([this](auto&& info) { return !mView->IsSelected(info.index); });
+    auto allEnumeratedInfo = CalChart::Ranges::enumerate_view(mAnimation->GetAllAnimateInfo());
+    auto allInfo = allEnumeratedInfo
+        | std::views::transform([](auto&& info) { return std::get<1>(info); });
+    auto allSelected = allEnumeratedInfo
+        | std::views::filter([this](auto&& info) { return mView->IsSelected(std::get<0>(info)); })
+        | std::views::transform([](auto&& info) { return std::get<1>(info); });
+    auto allNotSelected = allEnumeratedInfo
+        | std::views::filter([this](auto&& info) { return !mView->IsSelected(std::get<0>(info)); })
+        | std::views::transform([](auto&& info) { return std::get<1>(info); });
 
     auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
     CalChart::append(drawCmds,
@@ -189,7 +195,8 @@ auto AnimationView::GenerateDrawSprites(CalChart::Configuration const& config) c
     auto comp_Y = config.Get_SpriteBitmapOffsetY();
 
     auto drawCmds = CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(
-        mAnimation->GetAllAnimateInfo() | std::views::transform([this, comp_Y, timerOn = GetAnimationFrame()->TimerOn()](auto&& info) {
+        CalChart::Ranges::enumerate_view(mAnimation->GetAllAnimateInfo()) | std::views::transform([this, comp_Y, timerOn = GetAnimationFrame()->TimerOn()](auto&& enum_info) {
+            auto&& [index, info] = enum_info;
             auto image_offset = [&]() {
                 if (info.mStepStyle == CalChart::MarchingStyle::Close) {
                     return 0;
@@ -202,7 +209,7 @@ auto AnimationView::GenerateDrawSprites(CalChart::Configuration const& config) c
             auto position = info.mPosition;
             auto offset = CalChart::Coord(image->image_width * comp_X, image->image_height * comp_Y);
 
-            return CalChart::Draw::Image{ position, image, mView->IsSelected(info.index) } - offset;
+            return CalChart::Draw::Image{ position, image, mView->IsSelected(index) } - offset;
         }));
     return drawCmds + mView->GetShowMode().Offset();
 }
