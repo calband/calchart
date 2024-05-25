@@ -127,7 +127,7 @@ void AnimationView::OnDraw(wxDC* dc)
     wxCalChart::Draw::DrawCommandList(*dc, GenerateDraw(mConfig));
 }
 
-auto AnimationView::GenerateDraw(CalChart::Configuration const& config) -> std::vector<CalChart::Draw::DrawCommand>
+auto AnimationView::GenerateDraw(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
 {
     if (!mAnimation) {
         // no animation, our job is done.
@@ -237,7 +237,6 @@ void AnimationView::RefreshFrame()
 void AnimationView::RefreshAnimationSheet()
 {
     if (mAnimation) {
-        // todo, update this
         mCurrentBeat = mAnimation->GetTotalNumberBeatsUpTo(mView->GetCurrentSheetNum());
         RefreshFrame();
     }
@@ -307,7 +306,7 @@ auto AnimationView::GetShowSizeAndOffset() const -> std::pair<wxPoint, wxPoint>
 
 // Return a bounding box of the show of where the marchers are.  If they are
 // outside the show, we don't see them.
-auto AnimationView::GetMarcherSizeAndOffset() -> std::pair<wxPoint, wxPoint>
+auto AnimationView::GetMarcherSizeAndOffset() const -> std::pair<wxPoint, wxPoint>
 {
     auto mode_size = towxPoint(mView->GetShowFieldSize());
     auto bounding_box_upper_left = mode_size;
@@ -365,7 +364,7 @@ auto AnimationView::GetShowMode() const -> CalChart::ShowMode const&
     return mView->GetShowMode();
 }
 
-auto AnimationView::GetMarcherInfo(int which) -> AnimationView::MarcherInfo
+auto AnimationView::GetMarcherInfo(int which) const -> AnimationView::MarcherInfo
 {
     MarcherInfo info{};
     if (mAnimation) {
@@ -381,7 +380,7 @@ auto AnimationView::GetMarcherInfo(int which) -> AnimationView::MarcherInfo
     return info;
 }
 
-auto AnimationView::GetMarchersByDistance(float fromX, float fromY) -> std::multimap<double, AnimationView::MarcherInfo>
+auto AnimationView::GetMarchersByDistance(float fromX, float fromY) const -> std::multimap<double, AnimationView::MarcherInfo>
 {
     auto anySelected = !mView->GetSelectionList().empty();
     std::multimap<double, MarcherInfo> result;

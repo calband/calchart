@@ -199,16 +199,6 @@ bool Animation::NextBeat()
     return true;
 }
 
-void Animation::GotoTotalBeat(beats_t i)
-{
-    while (GetTotalCurrentBeat() > i) {
-        PrevBeat();
-    }
-    while (GetTotalCurrentBeat() < i) {
-        NextBeat();
-    }
-}
-
 void Animation::BeginCmd(unsigned i)
 {
     while (!GetCommand(mCurrentSheetNumber, i).Begin(mPoints[i])) {

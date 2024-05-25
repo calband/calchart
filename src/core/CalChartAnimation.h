@@ -85,12 +85,7 @@ public:
     explicit Animation(const Show& show);
     ~Animation();
 
-private:
-    void GotoTotalBeat(beats_t i);
-
-public:
     auto GetAnimateInfo(beats_t whichBeat, int which) const -> Animate::Info;
-
     auto GetAllAnimateInfo(beats_t whichBeat) const -> std::vector<Animate::Info>;
 
     int GetNumberSheets() const;
@@ -109,8 +104,6 @@ private:
     auto GetCurrentSheetName() const { return mSheets.at(mCurrentSheetNumber).GetName(); }
 
 public:
-    auto GetSheetName(int which) const;
-
     std::vector<AnimationErrors> GetAnimationErrors() const;
     std::map<std::tuple<int, int, int>, Coord::CollisionType> GetCollisions() const { return mCollisions; }
 
