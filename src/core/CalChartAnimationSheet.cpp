@@ -116,7 +116,7 @@ Sheet::Sheet(std::string name, unsigned numBeats, std::vector<std::vector<Animat
     mCollisions = FindAllCollisions();
 }
 
-auto Sheet::GetMarcherInfoAtBeat(size_t whichMarcher, unsigned beat) const -> CalChart::Animate::MarcherInfo
+auto Sheet::MarcherInfoAtBeat(size_t whichMarcher, beats_t beat) const -> CalChart::Animate::MarcherInfo
 {
     return mCommands.at(whichMarcher).MarcherInfoAtBeat(beat);
 }
@@ -173,7 +173,7 @@ auto Sheet::FindAllCollisions() const -> std::map<std::tuple<size_t, beats_t>, C
 {
     auto results = std::map<std::tuple<size_t, beats_t>, Coord::CollisionType>{};
     for (auto beat : std::views::iota(0U, GetNumBeats())) {
-        auto allCollisions = Animate::FindAllCollisions(GetAllMarcherInfoAtBeat(beat) | std::views::transform([](auto info) { return info.mPosition; }));
+        auto allCollisions = Animate::FindAllCollisions(AllMarcherInfoAtBeat(beat) | std::views::transform([](auto info) { return info.mPosition; }));
         results = std::reduce(allCollisions.begin(), allCollisions.end(), results, [beat](auto acc, auto item) {
             auto [where, collision] = item;
             acc[{ where, beat }] = collision;
@@ -181,6 +181,58 @@ auto Sheet::FindAllCollisions() const -> std::map<std::tuple<size_t, beats_t>, C
         });
     }
     return results;
+}
+
+namespace {
+    template <std::ranges::input_range Range>
+        requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Sheet>)
+    auto GetBeatsPerSheet(Range&& range)
+    {
+        return range | std::views::transform([](auto sheet) { return sheet.GetNumBeats(); });
+    }
+
+    template <std::ranges::input_range Range>
+        requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Sheet>)
+    auto GetRunningBeats(Range&& range)
+    {
+        auto allBeats = CalChart::Ranges::ToVector<beats_t>(GetBeatsPerSheet(range));
+        auto running = std::vector<beats_t>(allBeats.size());
+        std::inclusive_scan(allBeats.begin(), allBeats.end(), running.begin());
+        return running;
+    }
+}
+
+Sheets::Sheets(std::vector<Sheet> const& sheets)
+    : mSheets(sheets)
+    , mRunningBeatCount{ GetRunningBeats(sheets) }
+{
+}
+
+auto Sheets::TotalBeats() const -> beats_t
+{
+    if (mRunningBeatCount.empty()) {
+        return 0;
+    }
+    return mRunningBeatCount.back();
+}
+
+auto Sheets::BeatToSheetOffsetAndBeat(beats_t beat) const -> std::tuple<size_t, beats_t>
+{
+    auto where = std::ranges::find_if(mRunningBeatCount, [beat](auto thisBeat) { return beat < thisBeat; });
+    if (where == mRunningBeatCount.end()) {
+        return { mRunningBeatCount.size(), beat - TotalBeats() };
+    }
+    auto index = std::distance(mRunningBeatCount.begin(), where);
+    return { index, beat - (*where - mSheets.at(index).GetNumBeats()) };
+}
+
+auto Sheets::MarcherInfoAtBeat(beats_t beat, int whichMarcher) const -> MarcherInfo
+{
+    auto [which, newBeat] = BeatToSheetOffsetAndBeat(beat);
+    if (which >= mSheets.size()) {
+        return {};
+    }
+    return mSheets.at(which).MarcherInfoAtBeat(whichMarcher, newBeat);
 }
 
 }

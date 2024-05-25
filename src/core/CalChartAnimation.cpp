@@ -41,7 +41,8 @@
 namespace CalChart {
 
 Animation::Animation(const Show& show)
-    : mPoints(show.GetNumPoints())
+    : mSheets2({})
+    , mPoints(show.GetNumPoints())
     , mCurrentCmdIndex(mPoints.size())
     , mCurrentSheetNumber(0)
     , mAnimationErrors(show.GetNumSheets())
@@ -51,6 +52,8 @@ Animation::Animation(const Show& show)
 
     int newSheetIndex = 0;
     int prevSheetIndex = 0;
+    auto sheets2 = std::vector<Animate::Sheet>{};
+
     for (auto curr_sheet = show.GetSheetBegin(); curr_sheet != show.GetSheetEnd(); ++curr_sheet) {
 
         if (!curr_sheet->IsInAnimation()) {
@@ -102,10 +105,13 @@ Animation::Animation(const Show& show)
             thePoints.at(i) = curr_sheet->GetPosition(i);
         }
         mSheets.emplace_back(thePoints, theCommands, curr_sheet->GetName(), curr_sheet->GetBeats());
-        mSheets2.emplace_back(curr_sheet->GetName(), curr_sheet->GetBeats(), theCommands2);
+        sheets2.emplace_back(curr_sheet->GetName(), curr_sheet->GetBeats(), theCommands2);
         // here's where we would put in another sheet, and compare to see if all the positions are the same,
         // if it makes the same json movements.
     }
+
+    mSheets2 = Animate::Sheets{ sheets2 };
+
     FindAllCollisions();
     RefreshSheet();
 }
@@ -193,22 +199,6 @@ bool Animation::NextBeat()
     return true;
 }
 
-void Animation::GotoBeat(beats_t i)
-{
-    while (mCurrentBeatNumber > i) {
-        PrevBeat();
-    }
-    while (mCurrentBeatNumber < i) {
-        NextBeat();
-    }
-}
-
-void Animation::GotoSheet(unsigned i)
-{
-    mCurrentSheetNumber = mAnimSheetIndices.at(i);
-    RefreshSheet();
-}
-
 void Animation::GotoTotalBeat(beats_t i)
 {
     while (GetTotalCurrentBeat() > i) {
@@ -285,24 +275,28 @@ bool Animation::CurrentBeatHasCollision() const
     return false;
 }
 
-auto Animation::GetAnimateInfo(int which) const -> Animate::Info
+bool Animation::BeatHasCollision(beats_t whichBeat)
 {
-    auto const& cmd = GetCommand(mCurrentSheetNumber, which);
+    GotoTotalBeat(whichBeat);
+    return CurrentBeatHasCollision();
+}
+
+auto Animation::GetAnimateInfo(beats_t whichBeat, int which) const -> Animate::Info
+{
+    auto [sheet, beat] = mSheets2.BeatToSheetOffsetAndBeat(whichBeat);
     return {
-        mCollisions.count({ which, mCurrentSheetNumber, mCurrentBeatNumber }) ? mCollisions.find({ which, mCurrentSheetNumber, mCurrentBeatNumber })->second : Coord::CollisionType::none,
-        { mPoints.at(which),
-            cmd.FacingDirection(),
-            cmd.StepStyle() }
+        mCollisions.count({ which, sheet, beat }) ? mCollisions.find({ which, sheet, beat })->second : Coord::CollisionType::none,
+        mSheets2.MarcherInfoAtBeat(whichBeat, which)
     };
 }
 
-auto Animation::GetAllAnimateInfo() const -> std::vector<Animate::Info>
+auto Animation::GetAllAnimateInfo(beats_t whichBeat) const -> std::vector<Animate::Info>
 {
     auto points = std::vector<int>(mPoints.size());
     std::iota(points.begin(), points.end(), 0);
     auto animates = std::vector<Animate::Info>{};
-    std::transform(points.begin(), points.end(), std::back_inserter(animates), [this](auto which) {
-        return GetAnimateInfo(which);
+    std::transform(points.begin(), points.end(), std::back_inserter(animates), [this, whichBeat](auto which) {
+        return GetAnimateInfo(whichBeat, which);
     });
     std::sort(animates.begin(), animates.end(), [](auto& a, auto& b) {
         return a.mMarcherInfo.mPosition < b.mMarcherInfo.mPosition;
@@ -349,12 +343,12 @@ auto Animation::GenPathToDraw(unsigned whichSheet, unsigned point, Coord::units 
 }
 
 std::pair<std::string, std::vector<std::string>>
-Animation::GetCurrentInfo() const
+Animation::GetCurrentInfo(beats_t whichBeat) const
 {
     std::vector<std::string> each;
     for (auto i = 0; i < static_cast<int>(mPoints.size()); ++i) {
         std::ostringstream each_string;
-        auto info = GetAnimateInfo(i);
+        auto info = GetAnimateInfo(whichBeat, i);
         each_string << "pt " << i << ": (" << info.mMarcherInfo.mPosition.x << ", "
                     << info.mMarcherInfo.mPosition.y << "), dir=" << CalChart::Degree{ info.mMarcherInfo.mFacingDirection }.getValue()
                     << ((info.mCollision != CalChart::Coord::CollisionType::none) ? ", collision!" : "");

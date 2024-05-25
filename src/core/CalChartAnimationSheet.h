@@ -132,12 +132,12 @@ public:
     [[nodiscard]] auto GetName() const { return mName; }
     [[nodiscard]] auto GetNumBeats() const { return mNumBeats; }
 
-    [[nodiscard]] auto GetMarcherInfoAtBeat(size_t whichMarcher, beats_t beat) const -> CalChart::Animate::MarcherInfo;
+    [[nodiscard]] auto MarcherInfoAtBeat(size_t whichMarcher, beats_t beat) const -> CalChart::Animate::MarcherInfo;
 
-    [[nodiscard]] auto GetAllMarcherInfoAtBeat(beats_t beat) const
+    [[nodiscard]] auto AllMarcherInfoAtBeat(beats_t beat) const
     {
         return std::views::iota(0UL, mCommands.size()) | std::views::transform([this, beat](auto whichMarcher) {
-            return GetMarcherInfoAtBeat(whichMarcher, beat);
+            return MarcherInfoAtBeat(whichMarcher, beat);
         });
     }
 
@@ -150,6 +150,18 @@ private:
     beats_t mNumBeats;
     std::vector<Animate::Commands> mCommands;
     std::map<std::tuple<size_t, beats_t>, Coord::CollisionType> mCollisions;
+};
+
+class Sheets {
+public:
+    explicit Sheets(std::vector<Sheet> const& sheets);
+    [[nodiscard]] auto TotalBeats() const -> beats_t;
+    [[nodiscard]] auto BeatToSheetOffsetAndBeat(beats_t beat) const -> std::tuple<size_t, beats_t>;
+    [[nodiscard]] auto MarcherInfoAtBeat(beats_t beat, int whichMarcher) const -> MarcherInfo;
+
+private:
+    std::vector<Sheet> mSheets;
+    std::vector<beats_t> mRunningBeatCount;
 };
 
 }

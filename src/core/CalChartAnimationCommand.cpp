@@ -526,7 +526,7 @@ auto Commands::BeatToCommandOffsetAndBeat(unsigned beat) const -> std::tuple<siz
     return { index, beat - (*where - NumBeats(mCommands.at(index))) };
 }
 
-auto Commands::MarcherInfoAtBeat(unsigned beat) const -> MarcherInfo
+auto Commands::MarcherInfoAtBeat(beats_t beat) const -> MarcherInfo
 {
     auto [which, newBeat] = BeatToCommandOffsetAndBeat(beat);
     if (which >= mCommands.size()) {

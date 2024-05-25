@@ -85,27 +85,43 @@ public:
     explicit Animation(const Show& show);
     ~Animation();
 
-    void GotoSheet(unsigned i);
+private:
     void GotoTotalBeat(beats_t i);
 
-    auto GetAnimateInfo(int which) const -> Animate::Info;
+public:
+    auto GetAnimateInfo(beats_t whichBeat, int which) const -> Animate::Info;
 
-    auto GetAllAnimateInfo() const -> std::vector<Animate::Info>;
+    auto GetAllAnimateInfo(beats_t whichBeat) const -> std::vector<Animate::Info>;
 
     int GetNumberSheets() const;
+
+private:
     auto GetCurrentSheet() const { return mCurrentSheetNumber; }
     auto GetNumberBeats() const { return mSheets.at(mCurrentSheetNumber).GetNumBeats(); }
     auto GetCurrentBeat() const { return mCurrentBeatNumber; }
+
+public:
     auto GetTotalNumberBeatsUpTo(int sheet) const -> beats_t;
     auto GetTotalNumberBeats() const { return GetTotalNumberBeatsUpTo(static_cast<int>(mSheets.size())); }
     auto GetTotalCurrentBeat() const -> beats_t;
+
+private:
     auto GetCurrentSheetName() const { return mSheets.at(mCurrentSheetNumber).GetName(); }
+
+public:
+    auto GetSheetName(int which) const;
+
     std::vector<AnimationErrors> GetAnimationErrors() const;
     std::map<std::tuple<int, int, int>, Coord::CollisionType> GetCollisions() const { return mCollisions; }
+
+private:
     bool CurrentBeatHasCollision() const;
 
+public:
+    bool BeatHasCollision(beats_t whichBeat);
+
     // collection of position of each point, for debugging purposes
-    std::pair<std::string, std::vector<std::string>> GetCurrentInfo() const;
+    std::pair<std::string, std::vector<std::string>> GetCurrentInfo(beats_t whichBeat) const;
 
     std::vector<Draw::DrawCommand> GenPathToDraw(unsigned whichSheet, unsigned point, Coord::units endRadius) const;
 
@@ -121,7 +137,6 @@ private:
     bool PrevSheet();
     bool NextSheet();
 
-    void GotoBeat(unsigned i);
     bool PrevBeat();
     bool NextBeat();
 
@@ -136,14 +151,14 @@ private:
 
     // There are two types of data, the ones that are set when we are created, and the ones that modify over time.
     std::vector<AnimationSheet> mSheets;
-    std::vector<Animate::Sheet> mSheets2;
+    Animate::Sheets mSheets2;
     std::vector<Coord> mPoints; // current position of these points
     std::vector<size_t> mCurrentCmdIndex; // pointer to the current command in the sheet
 
     // mapping of Which, Sheet, Beat to a collision
     std::map<std::tuple<int, int, int>, Coord::CollisionType> mCollisions;
-    unsigned mCurrentSheetNumber{};
-    beats_t mCurrentBeatNumber{};
+    mutable unsigned mCurrentSheetNumber{};
+    mutable beats_t mCurrentBeatNumber{};
     std::vector<int> mAnimSheetIndices;
     std::vector<AnimationErrors> mAnimationErrors;
 };
