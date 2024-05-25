@@ -158,6 +158,7 @@ public:
     [[nodiscard]] auto TotalBeats() const -> beats_t;
     [[nodiscard]] auto BeatToSheetOffsetAndBeat(beats_t beat) const -> std::tuple<size_t, beats_t>;
     [[nodiscard]] auto MarcherInfoAtBeat(beats_t beat, int whichMarcher) const -> MarcherInfo;
+    [[nodiscard]] auto BeatHasCollision(beats_t whichBeat) const -> bool;
 
 private:
     std::vector<Sheet> mSheets;

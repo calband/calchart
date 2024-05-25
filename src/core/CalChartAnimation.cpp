@@ -265,20 +265,9 @@ void Animation::FindAllCollisions()
     RefreshSheet();
 }
 
-bool Animation::CurrentBeatHasCollision() const
+auto Animation::BeatHasCollision(beats_t whichBeat) const -> bool
 {
-    for (unsigned i = 0; i < mPoints.size(); i++) {
-        if (mCollisions.count({ i, mCurrentSheetNumber, mCurrentBeatNumber })) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool Animation::BeatHasCollision(beats_t whichBeat)
-{
-    GotoTotalBeat(whichBeat);
-    return CurrentBeatHasCollision();
+    return mSheets2.BeatHasCollision(whichBeat);
 }
 
 auto Animation::GetAnimateInfo(beats_t whichBeat, int which) const -> Animate::Info

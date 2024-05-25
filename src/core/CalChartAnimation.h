@@ -114,11 +114,8 @@ public:
     std::vector<AnimationErrors> GetAnimationErrors() const;
     std::map<std::tuple<int, int, int>, Coord::CollisionType> GetCollisions() const { return mCollisions; }
 
-private:
-    bool CurrentBeatHasCollision() const;
-
 public:
-    bool BeatHasCollision(beats_t whichBeat);
+    [[nodiscard]] auto BeatHasCollision(beats_t whichBeat) const -> bool;
 
     // collection of position of each point, for debugging purposes
     std::pair<std::string, std::vector<std::string>> GetCurrentInfo(beats_t whichBeat) const;

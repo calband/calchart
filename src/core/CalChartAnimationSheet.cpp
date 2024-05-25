@@ -235,4 +235,13 @@ auto Sheets::MarcherInfoAtBeat(beats_t beat, int whichMarcher) const -> MarcherI
     return mSheets.at(which).MarcherInfoAtBeat(whichMarcher, newBeat);
 }
 
+auto Sheets::BeatHasCollision(beats_t beat) const -> bool
+{
+    auto [which, newBeat] = BeatToSheetOffsetAndBeat(beat);
+    if (which >= mSheets.size()) {
+        return false;
+    }
+    return mSheets.at(which).GetAllBeatsWithCollisions().contains(beat);
+}
+
 }

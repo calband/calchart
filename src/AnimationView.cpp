@@ -145,7 +145,7 @@ auto AnimationView::GenerateDraw(CalChart::Configuration const& config) -> std::
     return drawCmds;
 }
 
-auto AnimationView::GenerateDrawDots(CalChart::Configuration const& config) -> std::vector<CalChart::Draw::DrawCommand>
+auto AnimationView::GenerateDrawDots(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto allEnumeratedInfo = CalChart::Ranges::enumerate_view(mAnimation->GetAllAnimateInfo(mCurrentBeat));
     auto allInfo = allEnumeratedInfo
@@ -188,7 +188,7 @@ auto AnimationView::GenerateDrawDots(CalChart::Configuration const& config) -> s
     return drawCmds + mView->GetShowMode().Offset();
 }
 
-auto AnimationView::GenerateDrawSprites(CalChart::Configuration const& config) -> std::vector<CalChart::Draw::DrawCommand>
+auto AnimationView::GenerateDrawSprites(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
 {
     RegenerateImages();
     constexpr auto comp_X = 0.5;

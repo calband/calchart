@@ -98,8 +98,8 @@ private:
 
     void RegenerateImages() const;
     [[nodiscard]] auto GenerateDraw(CalChart::Configuration const& config) -> std::vector<CalChart::Draw::DrawCommand>;
-    [[nodiscard]] auto GenerateDrawDots(CalChart::Configuration const& config) -> std::vector<CalChart::Draw::DrawCommand>;
-    [[nodiscard]] auto GenerateDrawSprites(CalChart::Configuration const& config) -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateDrawDots(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateDrawSprites(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>;
 
     [[nodiscard]] auto GetAnimationFrame() const -> AnimationPanel const*;
     [[nodiscard]] auto GetAnimationFrame() -> AnimationPanel*;
