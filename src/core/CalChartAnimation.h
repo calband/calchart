@@ -42,14 +42,12 @@ namespace Animate {
     // For drawing:
     struct Info {
         CalChart::Coord::CollisionType mCollision = CalChart::Coord::CollisionType::none;
-        CalChart::Radian mFacingDirection{};
-        Coord mPosition{};
-        MarchingStyle mStepStyle = MarchingStyle::HighStep;
+        MarcherInfo mMarcherInfo{};
     };
 
     inline auto FacingBack(Info const& info)
     {
-        auto direction = CalChart::AngleToDirection(info.mFacingDirection);
+        auto direction = CalChart::AngleToDirection(info.mMarcherInfo.mFacingDirection);
         return direction == CalChart::Direction::SouthWest
             || direction == CalChart::Direction::West
             || direction == CalChart::Direction::NorthWest;
@@ -57,7 +55,7 @@ namespace Animate {
 
     inline auto FacingFront(Info const& info)
     {
-        auto direction = CalChart::AngleToDirection(info.mFacingDirection);
+        auto direction = CalChart::AngleToDirection(info.mMarcherInfo.mFacingDirection);
         return direction == CalChart::Direction::SouthEast
             || direction == CalChart::Direction::East
             || direction == CalChart::Direction::NorthEast;
@@ -152,11 +150,6 @@ private:
 }
 
 namespace CalChart::Animate {
-
-struct Info {
-    CalChart::Coord::CollisionType mCollision = CalChart::Coord::CollisionType::none;
-    CalChart::Animate::MarcherInfo mMarcherInfo{};
-};
 
 class Show {
 public:

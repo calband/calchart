@@ -59,7 +59,7 @@ auto GeneratePointDrawCommand(Range&& infos) -> std::vector<CalChart::Draw::Draw
     return CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(infos | std::views::transform([](auto&& info) {
         auto size = CalChart::Coord{ CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(1) };
         return CalChart::Draw::Rectangle{
-            info.mPosition - size / 2, { CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(1) }
+            info.mMarcherInfo.mPosition - size / 2, { CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(1) }
         };
     }));
 }
@@ -198,15 +198,15 @@ auto AnimationView::GenerateDrawSprites(CalChart::Configuration const& config) c
         CalChart::Ranges::enumerate_view(mAnimation->GetAllAnimateInfo()) | std::views::transform([this, comp_Y, timerOn = GetAnimationFrame()->TimerOn()](auto&& enum_info) {
             auto&& [index, info] = enum_info;
             auto image_offset = [&]() {
-                if (info.mStepStyle == CalChart::MarchingStyle::Close) {
+                if (info.mMarcherInfo.mStepStyle == CalChart::MarchingStyle::Close) {
                     return 0;
                 }
                 return !timerOn ? 0 : OnBeat() ? 1
                                                : 2;
             }();
-            auto image_index = CalChart::AngleToQuadrant(info.mFacingDirection) + image_offset * 8;
+            auto image_index = CalChart::AngleToQuadrant(info.mMarcherInfo.mFacingDirection) + image_offset * 8;
             auto image = mSpriteCalChartImages[image_index];
-            auto position = info.mPosition;
+            auto position = info.mMarcherInfo.mPosition;
             auto offset = CalChart::Coord(image->image_width * comp_X, image->image_height * comp_Y);
 
             return CalChart::Draw::Image{ position, image, mView->IsSelected(index) } - offset;
@@ -314,7 +314,7 @@ auto AnimationView::GetMarcherSizeAndOffset() const -> std::pair<wxPoint, wxPoin
     auto bounding_box_low_right = towxPoint({ 0, 0 });
 
     for (auto i = 0; mAnimation && i < mView->GetNumPoints(); ++i) {
-        auto position = towxPoint(mAnimation->GetAnimateInfo(i).mPosition);
+        auto position = towxPoint(mAnimation->GetAnimateInfo(i).mMarcherInfo.mPosition);
         bounding_box_upper_left = wxPoint(std::min(bounding_box_upper_left.x, position.x), std::min(bounding_box_upper_left.y, position.y));
         bounding_box_low_right = wxPoint(std::max(bounding_box_low_right.x, position.x), std::max(bounding_box_low_right.y, position.y));
     }
@@ -370,9 +370,9 @@ auto AnimationView::GetMarcherInfo(int which) const -> AnimationView::MarcherInf
     MarcherInfo info{};
     if (mAnimation) {
         auto anim_info = mAnimation->GetAnimateInfo(which);
-        info.direction = CalChart::NormalizeAngle(anim_info.mFacingDirection);
+        info.direction = CalChart::Radian{ CalChart::NormalizeAngle(anim_info.mMarcherInfo.mFacingDirection) };
 
-        auto position = anim_info.mPosition;
+        auto position = anim_info.mMarcherInfo.mPosition;
         info.x = CalChart::CoordUnits2Float(position.x);
         // because the coordinate system for continuity and OpenGL are different,
         // correct here.

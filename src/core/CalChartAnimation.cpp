@@ -284,9 +284,9 @@ auto Animation::GetAnimateInfo(int which) const -> Animate::Info
     auto const& cmd = GetCommand(mCurrentSheetNumber, which);
     return {
         mCollisions.count({ which, mCurrentSheetNumber, mCurrentBeatNumber }) ? mCollisions.find({ which, mCurrentSheetNumber, mCurrentBeatNumber })->second : Coord::CollisionType::none,
-        CalChart::Radian{ cmd.FacingDirection() },
-        mPoints.at(which),
-        cmd.StepStyle()
+        { mPoints.at(which),
+            cmd.FacingDirection(),
+            cmd.StepStyle() }
     };
 }
 
@@ -299,7 +299,7 @@ auto Animation::GetAllAnimateInfo() const -> std::vector<Animate::Info>
         return GetAnimateInfo(which);
     });
     std::sort(animates.begin(), animates.end(), [](auto& a, auto& b) {
-        return a.mPosition < b.mPosition;
+        return a.mMarcherInfo.mPosition < b.mMarcherInfo.mPosition;
     });
     return animates;
 }
@@ -349,8 +349,8 @@ Animation::GetCurrentInfo() const
     for (auto i = 0; i < static_cast<int>(mPoints.size()); ++i) {
         std::ostringstream each_string;
         auto info = GetAnimateInfo(i);
-        each_string << "pt " << i << ": (" << info.mPosition.x << ", "
-                    << info.mPosition.y << "), dir=" << CalChart::Degree{ info.mFacingDirection }.getValue()
+        each_string << "pt " << i << ": (" << info.mMarcherInfo.mPosition.x << ", "
+                    << info.mMarcherInfo.mPosition.y << "), dir=" << CalChart::Degree{ info.mMarcherInfo.mFacingDirection }.getValue()
                     << ((info.mCollision != CalChart::Coord::CollisionType::none) ? ", collision!" : "");
         each.push_back(each_string.str());
     }
