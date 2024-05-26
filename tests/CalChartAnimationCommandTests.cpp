@@ -885,4 +885,22 @@ TEST_CASE("Animate::Commands", "Animate::Commands")
     CHECK(uut.MarcherInfoAtBeat(13) == CalChart::Animate::MarcherInfo{});
 }
 
+TEST_CASE("Animate::CommandMove64", "Animate::Command")
+{
+    auto item1 = CalChart::Animate::CommandMove{ CalChart::Coord{ 0, 0 }, 64, CalChart::Coord{ 1024, 0 }, CalChart::Degree{ 90 } };
+    SECTION("CheckGoForward")
+    {
+        REQUIRE(CalChart::Coord{ 0, 0 } == Start(item1));
+        REQUIRE(CalChart::Coord{ 0, 0 } == PositionAtBeat(item1, 0));
+        REQUIRE(CalChart::Coord{ 16, 0 } == PositionAtBeat(item1, 1));
+        REQUIRE(CalChart::Coord{ 32, 0 } == PositionAtBeat(item1, 2));
+        REQUIRE(CalChart::Coord{ 64, 0 } == PositionAtBeat(item1, 4));
+        REQUIRE(CalChart::Coord{ 128, 0 } == PositionAtBeat(item1, 8));
+        REQUIRE(CalChart::Coord{ 256, 0 } == PositionAtBeat(item1, 16));
+        REQUIRE(CalChart::Coord{ 512, 0 } == PositionAtBeat(item1, 32));
+        REQUIRE(CalChart::Coord{ 640, 0 } == PositionAtBeat(item1, 40));
+        REQUIRE(CalChart::Coord{ 1008, 0 } == PositionAtBeat(item1, 63));
+    }
+}
+
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers, cppcoreguidelines-avoid-do-while, readability-magic-numbers, readability-function-cognitive-complexity)
