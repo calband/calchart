@@ -44,16 +44,16 @@ Point::Point(Coord const& p, SYMBOL_TYPE sym)
 auto ReadPositionData(Reader& reader)
 {
     auto pos = Coord{};
-    pos.x = static_cast<Coord::units>(reader.Get<uint16_t>());
-    pos.y = static_cast<Coord::units>(reader.Get<uint16_t>());
+    pos.x = static_cast<Coord::units>(reader.Get<int16_t>());
+    pos.y = static_cast<Coord::units>(reader.Get<int16_t>());
     return pos;
 }
 
 auto WritePositionData(Coord pos)
 {
     auto result = std::vector<std::byte>{};
-    Parser::Append(result, static_cast<uint16_t>(pos.x));
-    Parser::Append(result, static_cast<uint16_t>(pos.y));
+    Parser::Append(result, static_cast<int16_t>(pos.x));
+    Parser::Append(result, static_cast<int16_t>(pos.y));
     return result;
 }
 

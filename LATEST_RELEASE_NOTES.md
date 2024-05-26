@@ -14,4 +14,5 @@ Other changes:
 * [#502](../../issues/502) remove get animation sheet iterator
 * [#504](../../issues/504) Make Animation::NextBeat private
 * [#506](../../issues/506) remove index from AnimateInfo
+* [#510](../../issues/510) Switch the underlying Coord system to int32
 

@@ -119,7 +119,7 @@ struct CoordBasic {
     units y{};
 };
 
-using Coord = CoordBasic<int16_t>;
+using Coord = CoordBasic<int>;
 
 template <Arithmetic T>
 [[nodiscard]] constexpr auto operator+(CoordBasic<T> lhs, CoordBasic<T> rhs) -> CoordBasic<T>
