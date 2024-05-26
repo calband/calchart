@@ -225,6 +225,7 @@ void AnimationPanel::UpdatePanel()
     if (!mView) {
         return;
     }
+    // TODO Update this.
     auto num = mView->GetTotalNumberBeats() - 1;
     auto curr = mView->GetTotalCurrentBeat();
 

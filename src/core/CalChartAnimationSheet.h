@@ -157,8 +157,10 @@ public:
     explicit Sheets(std::vector<Sheet> const& sheets);
     [[nodiscard]] auto TotalBeats() const -> beats_t;
     [[nodiscard]] auto BeatToSheetOffsetAndBeat(beats_t beat) const -> std::tuple<size_t, beats_t>;
+    [[nodiscard]] auto BeatForSheet(int whichSheet) const -> beats_t { return mSheets.at(whichSheet).GetNumBeats(); }
     [[nodiscard]] auto MarcherInfoAtBeat(beats_t beat, int whichMarcher) const -> MarcherInfo;
     [[nodiscard]] auto BeatHasCollision(beats_t whichBeat) const -> bool;
+    [[nodiscard]] auto GetSheetName(int whichSheet) const { return mSheets.at(whichSheet).GetName(); }
 
 private:
     std::vector<Sheet> mSheets;

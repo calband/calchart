@@ -85,7 +85,9 @@ public:
     explicit Animation(const Show& show);
     ~Animation();
 
+public:
     auto GetAnimateInfo(beats_t whichBeat, int which) const -> Animate::Info;
+
     auto GetAllAnimateInfo(beats_t whichBeat) const -> std::vector<Animate::Info>;
 
     int GetNumberSheets() const;
@@ -98,6 +100,8 @@ private:
 public:
     auto GetTotalNumberBeatsUpTo(int sheet) const -> beats_t;
     auto GetTotalNumberBeats() const { return GetTotalNumberBeatsUpTo(static_cast<int>(mSheets.size())); }
+
+private:
     auto GetTotalCurrentBeat() const -> beats_t;
 
 private:

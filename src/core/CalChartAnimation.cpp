@@ -277,9 +277,6 @@ auto Animation::GetAllAnimateInfo(beats_t whichBeat) const -> std::vector<Animat
     std::transform(points.begin(), points.end(), std::back_inserter(animates), [this, whichBeat](auto which) {
         return GetAnimateInfo(whichBeat, which);
     });
-    std::sort(animates.begin(), animates.end(), [](auto& a, auto& b) {
-        return a.mMarcherInfo.mPosition < b.mMarcherInfo.mPosition;
-    });
     return animates;
 }
 
@@ -334,9 +331,10 @@ Animation::GetCurrentInfo(beats_t whichBeat) const
         each.push_back(each_string.str());
     }
     std::ostringstream output;
-    output << GetCurrentSheetName() << " (" << GetCurrentSheet() << " of "
+    auto [sheet, beat] = mSheets2.BeatToSheetOffsetAndBeat(whichBeat);
+    output << mSheets2.GetSheetName(sheet) << " (" << sheet << " of "
            << GetNumberSheets() << ")\n";
-    output << "beat " << GetCurrentBeat() << " of " << GetNumberBeats() << "\n";
+    output << "beat " << beat << " of " << mSheets2.BeatForSheet(sheet) << "\n";
     return std::pair<std::string, std::vector<std::string>>(output.str(), each);
 }
 
