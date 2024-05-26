@@ -171,8 +171,8 @@ Sheet::Sheet(Version_3_3_and_earlier, size_t numPoints, Reader& reader, ParseErr
     {
         auto reader = CalChart::Reader({ data.data(), data.size() });
         for (unsigned i = 0; i < mPoints.size(); ++i) {
-            auto x = reader.Get<uint16_t>();
-            auto y = reader.Get<uint16_t>();
+            auto x = reader.Get<int16_t>();
+            auto y = reader.Get<int16_t>();
             auto c = Coord(x, y);
             for (unsigned j = 0; j <= Point::kNumRefPoints; j++) {
                 mPoints[i].SetPos(c, j);
@@ -189,8 +189,8 @@ Sheet::Sheet(Version_3_3_and_earlier, size_t numPoints, Reader& reader, ParseErr
         }
         auto ref = reader.Get<uint16_t>();
         for (unsigned i = 0; i < mPoints.size(); i++) {
-            auto x = reader.Get<uint16_t>();
-            auto y = reader.Get<uint16_t>();
+            auto x = reader.Get<int16_t>();
+            auto y = reader.Get<int16_t>();
             auto c = Coord(x, y);
             mPoints[i].SetPos(c, ref);
         }
