@@ -828,8 +828,8 @@ TEST_CASE("Animate::CommandMove0", "Animate::Command")
     SECTION("CheckGoForward")
     {
         REQUIRE(CalChart::Coord{ 16, 16 } == Start(item1));
-        REQUIRE(Start(item1) == PositionAtBeat(item1, 0));
-        REQUIRE(Start(item1) == PositionAtBeat(item1, 1));
+        REQUIRE(End(item1) == PositionAtBeat(item1, 0));
+        REQUIRE(End(item1) == PositionAtBeat(item1, 1));
         REQUIRE(CalChart::Coord{ 80, 80 } == End(item1));
     }
 }
@@ -869,18 +869,18 @@ TEST_CASE("Animate::Commands", "Animate::Commands")
     CHECK(std::tuple<size_t, beats_t>{ 2, 4 } == uut.BeatToCommandOffsetAndBeat(11));
     CHECK(std::tuple<size_t, beats_t>{ 3, 0 } == uut.BeatToCommandOffsetAndBeat(12));
     CHECK(std::tuple<size_t, beats_t>{ 3, 1 } == uut.BeatToCommandOffsetAndBeat(13));
-    CHECK(uut.MarcherInfoAtBeat(0) == CalChart::Animate::MarcherInfo{ { 16, 16 }, CalChart::Degree{ 0 }, CalChart::MarchingStyle::HighStep });
-    CHECK(uut.MarcherInfoAtBeat(1) == CalChart::Animate::MarcherInfo{ { 16, 16 }, CalChart::Degree{ 0 }, CalChart::MarchingStyle::HighStep });
-    CHECK(uut.MarcherInfoAtBeat(2) == CalChart::Animate::MarcherInfo{ { 16, 16 }, CalChart::Degree{ 0 }, CalChart::MarchingStyle::HighStep });
-    CHECK(uut.MarcherInfoAtBeat(3) == CalChart::Animate::MarcherInfo{ { 16, 16 }, CalChart::Degree{ -90 }, CalChart::MarchingStyle::HighStep });
-    CHECK(uut.MarcherInfoAtBeat(4) == CalChart::Animate::MarcherInfo{ { 16, 32 }, CalChart::Degree{ -90 }, CalChart::MarchingStyle::HighStep });
-    CHECK(uut.MarcherInfoAtBeat(5) == CalChart::Animate::MarcherInfo{ { 16, 48 }, CalChart::Degree{ -90 }, CalChart::MarchingStyle::HighStep });
-    CHECK(uut.MarcherInfoAtBeat(6) == CalChart::Animate::MarcherInfo{ { 16, 64 }, CalChart::Degree{ -90 }, CalChart::MarchingStyle::HighStep });
-    CHECK(uut.MarcherInfoAtBeat(7) == CalChart::Animate::MarcherInfo{ { 16, 80 }, CalChart::Degree{ 180 }, CalChart::MarchingStyle::Close });
-    CHECK(uut.MarcherInfoAtBeat(8) == CalChart::Animate::MarcherInfo{ { 16, 80 }, CalChart::Degree{ 180 }, CalChart::MarchingStyle::Close });
-    CHECK(uut.MarcherInfoAtBeat(9) == CalChart::Animate::MarcherInfo{ { 16, 80 }, CalChart::Degree{ 180 }, CalChart::MarchingStyle::Close });
-    CHECK(uut.MarcherInfoAtBeat(10) == CalChart::Animate::MarcherInfo{ { 16, 80 }, CalChart::Degree{ 180 }, CalChart::MarchingStyle::Close });
-    CHECK(uut.MarcherInfoAtBeat(11) == CalChart::Animate::MarcherInfo{ { 16, 80 }, CalChart::Degree{ 180 }, CalChart::MarchingStyle::Close });
+    CHECK(uut.MarcherInfoAtBeat(0) == CalChart::Animate::MarcherInfo{ { 16, 16 }, CalChart::Radian{ CalChart::Degree{ 0 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(1) == CalChart::Animate::MarcherInfo{ { 16, 16 }, CalChart::Radian{ CalChart::Degree{ 0 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(2) == CalChart::Animate::MarcherInfo{ { 16, 16 }, CalChart::Radian{ CalChart::Degree{ 0 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(3) == CalChart::Animate::MarcherInfo{ { 16, 16 }, CalChart::Radian{ CalChart::Degree{ -90 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(4) == CalChart::Animate::MarcherInfo{ { 16, 32 }, CalChart::Radian{ CalChart::Degree{ -90 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(5) == CalChart::Animate::MarcherInfo{ { 16, 48 }, CalChart::Radian{ CalChart::Degree{ -90 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(6) == CalChart::Animate::MarcherInfo{ { 16, 64 }, CalChart::Radian{ CalChart::Degree{ -90 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(7) == CalChart::Animate::MarcherInfo{ { 16, 80 }, CalChart::Radian{ CalChart::Degree{ 180 } }, CalChart::MarchingStyle::Close });
+    CHECK(uut.MarcherInfoAtBeat(8) == CalChart::Animate::MarcherInfo{ { 16, 80 }, CalChart::Radian{ CalChart::Degree{ 180 } }, CalChart::MarchingStyle::Close });
+    CHECK(uut.MarcherInfoAtBeat(9) == CalChart::Animate::MarcherInfo{ { 16, 80 }, CalChart::Radian{ CalChart::Degree{ 180 } }, CalChart::MarchingStyle::Close });
+    CHECK(uut.MarcherInfoAtBeat(10) == CalChart::Animate::MarcherInfo{ { 16, 80 }, CalChart::Radian{ CalChart::Degree{ 180 } }, CalChart::MarchingStyle::Close });
+    CHECK(uut.MarcherInfoAtBeat(11) == CalChart::Animate::MarcherInfo{ { 16, 80 }, CalChart::Radian{ CalChart::Degree{ 180 } }, CalChart::MarchingStyle::Close });
     CHECK(uut.MarcherInfoAtBeat(12) == CalChart::Animate::MarcherInfo{});
     CHECK(uut.MarcherInfoAtBeat(13) == CalChart::Animate::MarcherInfo{});
 }
@@ -903,4 +903,59 @@ TEST_CASE("Animate::CommandMove64", "Animate::Command")
     }
 }
 
+TEST_CASE("Animate::CommandWith0", "Animate::Commands")
+{
+    using beats_t = CalChart::Animate::beats_t;
+    auto uut = CalChart::Animate::Commands(std::vector<CalChart::Animate::Command>{
+        CalChart::Animate::CommandMove{ { -416, -416 }, 2, { 0, 46 } },
+        CalChart::Animate::CommandMove{ { -416, -370 }, 0, { 2, 2 } },
+        CalChart::Animate::CommandStill{ { -414, -368 }, 6, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree{ 270 } },
+    });
+    CHECK(8 == uut.TotalBeats());
+    CHECK(std::tuple<size_t, beats_t>{ 0, 0 } == uut.BeatToCommandOffsetAndBeat(0));
+    CHECK(std::tuple<size_t, beats_t>{ 0, 1 } == uut.BeatToCommandOffsetAndBeat(1));
+    CHECK(std::tuple<size_t, beats_t>{ 1, 0 } == uut.BeatToCommandOffsetAndBeat(2));
+    CHECK(std::tuple<size_t, beats_t>{ 2, 1 } == uut.BeatToCommandOffsetAndBeat(3));
+    CHECK(std::tuple<size_t, beats_t>{ 2, 2 } == uut.BeatToCommandOffsetAndBeat(4));
+    CHECK(std::tuple<size_t, beats_t>{ 2, 3 } == uut.BeatToCommandOffsetAndBeat(5));
+    CHECK(std::tuple<size_t, beats_t>{ 2, 4 } == uut.BeatToCommandOffsetAndBeat(6));
+    CHECK(std::tuple<size_t, beats_t>{ 2, 5 } == uut.BeatToCommandOffsetAndBeat(7));
+    CHECK(std::tuple<size_t, beats_t>{ 3, 0 } == uut.BeatToCommandOffsetAndBeat(8));
+    CHECK(uut.MarcherInfoAtBeat(0) == CalChart::Animate::MarcherInfo{ { -416, -416 }, CalChart::Radian{ CalChart::Degree{ -90 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(1) == CalChart::Animate::MarcherInfo{ { -416, -393 }, CalChart::Radian{ CalChart::Degree{ -90 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(2) == CalChart::Animate::MarcherInfo{ { -414, -368 }, CalChart::Radian{ CalChart::Degree{ -45 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(3) == CalChart::Animate::MarcherInfo{ { -414, -368 }, CalChart::Radian{ CalChart::Degree{ 270 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(4) == CalChart::Animate::MarcherInfo{ { -414, -368 }, CalChart::Radian{ CalChart::Degree{ 270 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(5) == CalChart::Animate::MarcherInfo{ { -414, -368 }, CalChart::Radian{ CalChart::Degree{ 270 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(6) == CalChart::Animate::MarcherInfo{ { -414, -368 }, CalChart::Radian{ CalChart::Degree{ 270 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(7) == CalChart::Animate::MarcherInfo{ { -414, -368 }, CalChart::Radian{ CalChart::Degree{ 270 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(8) == CalChart::Animate::MarcherInfo{});
+    CHECK(uut.MarcherInfoAtBeat(9) == CalChart::Animate::MarcherInfo{});
+}
+
+TEST_CASE("Animate::CommandWith0.2", "Animate::Commands")
+{
+    using beats_t = CalChart::Animate::beats_t;
+    auto uut = CalChart::Animate::Commands(std::vector<CalChart::Animate::Command>{
+        CalChart::Animate::CommandMove{ { 960, 64 }, 0, { 0, 4 } },
+        CalChart::Animate::CommandMove{ { 896, 68 }, 4, { -64, 0 } },
+        CalChart::Animate::CommandStill{ { 896, 68 }, 2, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree{ 90 } },
+    });
+    CHECK(6 == uut.TotalBeats());
+    CHECK(std::tuple<size_t, beats_t>{ 0, 0 } == uut.BeatToCommandOffsetAndBeat(0));
+    CHECK(std::tuple<size_t, beats_t>{ 1, 0 } == uut.BeatToCommandOffsetAndBeat(1));
+    CHECK(std::tuple<size_t, beats_t>{ 1, 1 } == uut.BeatToCommandOffsetAndBeat(2));
+    CHECK(std::tuple<size_t, beats_t>{ 1, 2 } == uut.BeatToCommandOffsetAndBeat(3));
+    CHECK(std::tuple<size_t, beats_t>{ 1, 3 } == uut.BeatToCommandOffsetAndBeat(4));
+    CHECK(std::tuple<size_t, beats_t>{ 2, 0 } == uut.BeatToCommandOffsetAndBeat(5));
+    CHECK(std::tuple<size_t, beats_t>{ 3, 0 } == uut.BeatToCommandOffsetAndBeat(6));
+    CHECK(uut.MarcherInfoAtBeat(0) == CalChart::Animate::MarcherInfo{ { 960, 68 }, CalChart::Radian{ CalChart::Degree{ -90 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(1) == CalChart::Animate::MarcherInfo{ { 960, 68 }, CalChart::Radian{ CalChart::Degree{ 180 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(2) == CalChart::Animate::MarcherInfo{ { 944, 68 }, CalChart::Radian{ CalChart::Degree{ 180 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(3) == CalChart::Animate::MarcherInfo{ { 928, 68 }, CalChart::Radian{ CalChart::Degree{ 180 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(4) == CalChart::Animate::MarcherInfo{ { 912, 68 }, CalChart::Radian{ CalChart::Degree{ 180 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(5) == CalChart::Animate::MarcherInfo{ { 896, 68 }, CalChart::Radian{ CalChart::Degree{ 90 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(6) == CalChart::Animate::MarcherInfo{});
+    CHECK(uut.MarcherInfoAtBeat(7) == CalChart::Animate::MarcherInfo{});
+}
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers, cppcoreguidelines-avoid-do-while, readability-magic-numbers, readability-function-cognitive-complexity)

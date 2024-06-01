@@ -380,7 +380,7 @@ auto CommandMove::PositionAtBeat(unsigned beat) -> Coord
     auto numBeats = NumBeats();
 
     if (numBeats == 0) {
-        return start;
+        return start + mMovement;
     }
     return start + (mMovement * beat) / numBeats;
 }
@@ -523,12 +523,21 @@ auto Commands::BeatToCommandOffsetAndBeat(unsigned beat) const -> std::tuple<siz
         return { mRunningBeatCount.size(), beat - TotalBeats() };
     }
     auto index = std::distance(mRunningBeatCount.begin(), where);
-    return { index, beat - (*where - NumBeats(mCommands.at(index))) };
+    auto thisBeat = beat - (*where - NumBeats(mCommands.at(index)));
+    // any sort of index makeup, we do here.
+    if (thisBeat == 0 && index > 0) {
+        if (NumBeats(mCommands.at(index - 1)) == 0) {
+            index -= 1;
+        }
+    }
+
+    return { index, thisBeat };
 }
 
 auto Commands::MarcherInfoAtBeat(beats_t beat) const -> MarcherInfo
 {
     auto [which, newBeat] = BeatToCommandOffsetAndBeat(beat);
+    // std::cout << "beat " << beat << " which " << which << " beat " << newBeat << "\n";
     if (which >= mCommands.size()) {
         return {};
     }

@@ -21,13 +21,13 @@ TEST_CASE("AnimationSheetTest", "Animate::Sheet")
     auto uut = CalChart::Animate::Sheet{ "test", 16, { cont1, cont2 } };
     CHECK("test" == uut.GetName());
     CHECK(16 == uut.GetNumBeats());
-    CHECK(uut.MarcherInfoAtBeat(0, 0) == CalChart::Animate::MarcherInfo{ { 16, 16 }, CalChart::Degree{ 0 }, CalChart::MarchingStyle::HighStep });
-    CHECK(uut.MarcherInfoAtBeat(0, 4) == CalChart::Animate::MarcherInfo{ { 16, 16 }, CalChart::Degree{ -90 }, CalChart::MarchingStyle::HighStep });
-    CHECK(uut.MarcherInfoAtBeat(0, 6) == CalChart::Animate::MarcherInfo{ { 16, 48 }, CalChart::Degree{ -90 }, CalChart::MarchingStyle::HighStep });
-    CHECK(uut.MarcherInfoAtBeat(1, 0) == CalChart::Animate::MarcherInfo{ { 16, 144 }, CalChart::Degree{ 90 }, CalChart::MarchingStyle::HighStep });
-    CHECK(uut.MarcherInfoAtBeat(1, 1) == CalChart::Animate::MarcherInfo{ { 16, 128 }, CalChart::Degree{ 90 }, CalChart::MarchingStyle::HighStep });
-    CHECK(uut.MarcherInfoAtBeat(1, 6) == CalChart::Animate::MarcherInfo{ { 16, 48 }, CalChart::Degree{ 90 }, CalChart::MarchingStyle::HighStep });
-    CHECK(uut.MarcherInfoAtBeat(1, 8) == CalChart::Animate::MarcherInfo{ { 16, 16 }, CalChart::Degree{ 0 }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(0, 0) == CalChart::Animate::MarcherInfo{ { 16, 16 }, CalChart::Radian{ CalChart::Degree{ 0 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(0, 4) == CalChart::Animate::MarcherInfo{ { 16, 16 }, CalChart::Radian{ CalChart::Degree{ -90 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(0, 6) == CalChart::Animate::MarcherInfo{ { 16, 48 }, CalChart::Radian{ CalChart::Degree{ -90 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(1, 0) == CalChart::Animate::MarcherInfo{ { 16, 144 }, CalChart::Radian{ CalChart::Degree{ 90 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(1, 1) == CalChart::Animate::MarcherInfo{ { 16, 128 }, CalChart::Radian{ CalChart::Degree{ 90 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(1, 6) == CalChart::Animate::MarcherInfo{ { 16, 48 }, CalChart::Radian{ CalChart::Degree{ 90 } }, CalChart::MarchingStyle::HighStep });
+    CHECK(uut.MarcherInfoAtBeat(1, 8) == CalChart::Animate::MarcherInfo{ { 16, 16 }, CalChart::Radian{ CalChart::Degree{ 0 } }, CalChart::MarchingStyle::HighStep });
 
     auto collisions = uut.GetAllBeatsWithCollisions();
     auto collided = uut.GetAllMarchersWithCollisionAtBeat(6);

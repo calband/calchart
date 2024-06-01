@@ -384,7 +384,7 @@ auto AnimationView::GetMarcherInfo(int which) const -> AnimationView::MarcherInf
     MarcherInfo info{};
     if (mAnimation) {
         auto anim_info = mAnimation->GetAnimateInfo(mCurrentBeat, which);
-        info.direction = CalChart::Radian{ CalChart::NormalizeAngle(anim_info.mMarcherInfo.mFacingDirection) };
+        info.direction = CalChart::NormalizeAngle(anim_info.mMarcherInfo.mFacingDirection);
 
         auto position = anim_info.mMarcherInfo.mPosition;
         info.x = CalChart::CoordUnits2Float(position.x);

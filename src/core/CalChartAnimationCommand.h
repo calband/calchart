@@ -272,9 +272,12 @@ using beats_t = unsigned;
 
 struct MarcherInfo {
     CalChart::Coord mPosition{};
-    CalChart::Degree mFacingDirection{};
+    CalChart::Radian mFacingDirection{};
     CalChart::MarchingStyle mStepStyle = CalChart::MarchingStyle::HighStep;
-    friend auto operator==(MarcherInfo const&, MarcherInfo const&) -> bool = default;
+    friend auto operator==(MarcherInfo const& lhs, MarcherInfo const& rhs) -> bool
+    {
+        return lhs.mPosition == rhs.mPosition && lhs.mFacingDirection.IsEqual(rhs.mFacingDirection) && lhs.mStepStyle == rhs.mStepStyle;
+    };
 };
 
 template <typename Command>
@@ -339,7 +342,11 @@ public:
     [[nodiscard]] auto Start() const -> Coord { return mStart; }
     [[nodiscard]] auto End() const -> Coord { return mStart; }
     [[nodiscard]] auto PositionAtBeat([[maybe_unused]] beats_t beat) -> Coord { return mStart; }
-    [[nodiscard]] auto FacingDirectionAtBeat([[maybe_unused]] beats_t beat) const { return mDirection; }
+    [[nodiscard]] auto FacingDirectionAtBeat([[maybe_unused]] beats_t beat) const
+    {
+        //        std::cout << "Asking for still facing at beat " << beat << " dir " << mDirection << " in radian: " << CalChart::Radian{ mDirection } << "\n";
+        return mDirection;
+    }
     [[nodiscard]] auto MotionDirectionAtBeat([[maybe_unused]] beats_t beat) const { return mDirection; }
 
     [[nodiscard]] auto NumBeats() const -> beats_t { return mNumBeats; }
@@ -388,7 +395,11 @@ public:
     [[nodiscard]] auto End() const -> Coord { return mStart + mMovement; }
 
     [[nodiscard]] auto PositionAtBeat(beats_t beat) -> Coord;
-    [[nodiscard]] auto FacingDirectionAtBeat([[maybe_unused]] beats_t beat) const { return mDirection; }
+    [[nodiscard]] auto FacingDirectionAtBeat([[maybe_unused]] beats_t beat) const
+    {
+        //        std::cout << "Asking for move facing at beat " << beat << " dir " << mDirection << " in radian: " << CalChart::Radian{ mDirection } << "\n";
+        return mDirection;
+    }
     [[nodiscard]] auto MotionDirectionAtBeat([[maybe_unused]] beats_t beat) const { return CalChart::Degree{ mMovement.Direction() }; }
 
     [[nodiscard]] auto NumBeats() const -> beats_t { return mNumBeats; }
@@ -523,7 +534,7 @@ inline auto MarcherInfoAtBeat(Command const& cmd, beats_t beat) -> MarcherInfo
 {
     return {
         PositionAtBeat(cmd, beat),
-        FacingDirectionAtBeat(cmd, beat),
+        CalChart::Radian{ FacingDirectionAtBeat(cmd, beat) },
         StepStyle(cmd)
     };
 }
