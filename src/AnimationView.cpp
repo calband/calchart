@@ -188,20 +188,6 @@ auto AnimationView::GenerateDrawDots(CalChart::Configuration const& config) cons
     return drawCmds + mView->GetShowMode().Offset();
 }
 
-namespace {
-// Because we need to draw sprites so they don't overlapp, sort them so the "closer" ones are first
-template <std::ranges::input_range Range>
-    requires(std::is_convertible_v<std::ranges::range_value_t<Range>, std::tuple<long, CalChart::Animate::Info>>)
-auto SortForSprites(Range&& input)
-{
-    std::ranges::sort(input, [](auto&& a, auto&& b) {
-        return std::get<1>(a).mMarcherInfo.mPosition < std::get<1>(b).mMarcherInfo.mPosition;
-    });
-    return input;
-}
-
-}
-
 auto AnimationView::GenerateDrawSprites(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
 {
     RegenerateImages();
@@ -209,25 +195,22 @@ auto AnimationView::GenerateDrawSprites(CalChart::Configuration const& config) c
     auto comp_Y = config.Get_SpriteBitmapOffsetY();
 
     auto drawCmds = CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(
-        SortForSprites(
-            CalChart::Ranges::ToVector<std::tuple<long, CalChart::Animate::Info>>(
-                CalChart::Ranges::enumerate_view(mAnimation->GetAllAnimateInfo(mCurrentBeat))))
-        | std::views::transform([this, comp_Y, timerOn = GetAnimationFrame()->TimerOn()](auto&& enum_info) {
-              auto&& [index, info] = enum_info;
-              auto image_offset = [&]() {
-                  if (info.mMarcherInfo.mStepStyle == CalChart::MarchingStyle::Close) {
-                      return 0;
-                  }
-                  return !timerOn ? 0 : OnBeat() ? 1
-                                                 : 2;
-              }();
-              auto image_index = CalChart::AngleToQuadrant(info.mMarcherInfo.mFacingDirection) + image_offset * 8;
-              auto image = mSpriteCalChartImages[image_index];
-              auto position = info.mMarcherInfo.mPosition;
-              auto offset = CalChart::Coord(image->image_width * comp_X, image->image_height * comp_Y);
+        CalChart::Ranges::enumerate_view(mAnimation->GetAllAnimateInfo(mCurrentBeat)) | std::views::transform([this, comp_Y, timerOn = GetAnimationFrame()->TimerOn()](auto&& enum_info) {
+            auto&& [index, info] = enum_info;
+            auto image_offset = [&]() {
+                if (info.mMarcherInfo.mStepStyle == CalChart::MarchingStyle::Close) {
+                    return 0;
+                }
+                return !timerOn ? 0 : OnBeat() ? 1
+                                               : 2;
+            }();
+            auto image_index = CalChart::AngleToQuadrant(info.mMarcherInfo.mFacingDirection) + image_offset * 8;
+            auto image = mSpriteCalChartImages[image_index];
+            auto position = info.mMarcherInfo.mPosition;
+            auto offset = CalChart::Coord(image->image_width * comp_X, image->image_height * comp_Y);
 
-              return CalChart::Draw::Image{ position, image, mView->IsSelected(index) } - offset;
-          }));
+            return CalChart::Draw::Image{ position, image, mView->IsSelected(index) } - offset;
+        }));
     return drawCmds + mView->GetShowMode().Offset();
 }
 

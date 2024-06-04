@@ -27,6 +27,7 @@
 #include "CalChartContinuity.h"
 #include "CalChartDrawCommand.h"
 #include "CalChartPoint.h"
+#include "CalChartRanges.h"
 #include "CalChartSheet.h"
 #include "CalChartShow.h"
 #include "CalChartUtils.h"
@@ -269,6 +270,20 @@ auto Animation::GetAnimateInfo(beats_t whichBeat, int which) const -> Animate::I
     };
 }
 
+namespace {
+    // Because we need to draw sprites and other animations without overlap, sort them so the "closer" ones are first
+    template <std::ranges::input_range Range>
+        requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Info>)
+    auto SortForSprites(Range&& input)
+    {
+        std::ranges::sort(input, [](auto&& a, auto&& b) {
+            return a.mMarcherInfo.mPosition < b.mMarcherInfo.mPosition;
+        });
+        return input;
+    }
+
+}
+
 auto Animation::GetAllAnimateInfo(beats_t whichBeat) const -> std::vector<Animate::Info>
 {
     auto points = std::vector<int>(mPoints.size());
@@ -277,7 +292,7 @@ auto Animation::GetAllAnimateInfo(beats_t whichBeat) const -> std::vector<Animat
     std::transform(points.begin(), points.end(), std::back_inserter(animates), [this, whichBeat](auto which) {
         return GetAnimateInfo(whichBeat, which);
     });
-    return animates;
+    return CalChart::Ranges::ToVector<Animate::Info>(SortForSprites(animates));
 }
 
 int Animation::GetNumberSheets() const { return static_cast<int>(mSheets.size()); }
@@ -350,67 +365,6 @@ auto Animation::toOnlineViewerJSON(std::vector<std::vector<CalChart::Point>> con
         results.push_back(mSheets.at(i).toOnlineViewerJSON(pointsOverSheets.at(i)));
     }
     return results;
-}
-
-}
-
-namespace CalChart::Animate {
-
-Show::Show(const CalChart::Show& show)
-{
-    // the variables are persistant through the entire compile process.
-    AnimationVariables variablesStates;
-
-    //     int newSheetIndex = 0;
-    //     int prevSheetIndex = 0;
-    //     for (auto curr_sheet = show.GetSheetBegin(); curr_sheet != show.GetSheetEnd(); ++curr_sheet) {
-
-    //         if (!curr_sheet->IsInAnimation()) {
-    //             mAnimSheetIndices.push_back(prevSheetIndex);
-    //             continue;
-    //         }
-
-    //         mAnimSheetIndices.push_back(newSheetIndex);
-    //         prevSheetIndex = newSheetIndex;
-    //         newSheetIndex++;
-
-    //         // Now parse continuity
-    //         AnimationErrors errors;
-    //         std::vector<AnimationCommands> theCommands(mPoints.size());
-    //         for (auto& current_symbol : k_symbols) {
-    //             if (curr_sheet->ContinuityInUse(current_symbol)) {
-    //                 auto& current_continuity = curr_sheet->GetContinuityBySymbol(current_symbol);
-    //                 auto& continuity = current_continuity.GetParsedContinuity();
-    // #if 0 // enable to see dump of continuity
-    //                 {
-    //                     for (auto& proc : continuity) {
-    //                         std::cout << *proc << "\n";
-    //                     }
-    //                 }
-    // #endif
-    //                 for (unsigned j = 0; j < mPoints.size(); j++) {
-    //                     if (curr_sheet->GetSymbol(j) == current_symbol) {
-    //                         theCommands[j] = CalChart::Compile(variablesStates, errors, curr_sheet, show.GetSheetEnd(), j, current_symbol, continuity);
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         // Handle points that don't have continuity (shouldn't happen)
-    //         for (unsigned j = 0; j < mPoints.size(); j++) {
-    //             if (theCommands[j].empty()) {
-    //                 theCommands[j] = CalChart::Compile(variablesStates, errors, curr_sheet, show.GetSheetEnd(), j, MAX_NUM_SYMBOLS, {});
-    //             }
-    //         }
-    //         if (errors.AnyErrors()) {
-    //             mAnimationErrors[std::distance(show.GetSheetBegin(), curr_sheet)] = errors;
-    //         }
-    //         std::vector<Coord> thePoints(mPoints.size());
-    //         for (unsigned i = 0; i < mPoints.size(); i++) {
-    //             thePoints.at(i) = curr_sheet->GetPosition(i);
-    //         }
-    //         mSheets.emplace_back(thePoints, theCommands, curr_sheet->GetName(), curr_sheet->GetBeats());
-    //     }
-    //     FindAllCollisions();
 }
 
 }
