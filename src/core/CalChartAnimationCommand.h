@@ -530,15 +530,6 @@ inline auto toOnlineViewerJSON(Command const& cmd) -> nlohmann::json
     return std::visit([](auto arg) { return arg.toOnlineViewerJSON(); }, cmd);
 }
 
-inline auto MarcherInfoAtBeat(Command const& cmd, beats_t beat) -> MarcherInfo
-{
-    return {
-        PositionAtBeat(cmd, beat),
-        CalChart::Radian{ FacingDirectionAtBeat(cmd, beat) },
-        StepStyle(cmd)
-    };
-}
-
 inline auto WithBeats(Command const& cmd, beats_t beats) -> Command
 {
     return std::visit([beats](auto arg) { return Command{ arg.WithBeats(beats) }; }, cmd);
@@ -548,7 +539,8 @@ class Commands {
 public:
     explicit Commands(std::vector<Command> const& commands);
     [[nodiscard]] auto TotalBeats() const -> beats_t;
-    [[nodiscard]] auto BeatToCommandOffsetAndBeat(beats_t beat) const -> std::tuple<size_t, beats_t>;
+    // which command, beat for position/step and which command,beat for facing
+    [[nodiscard]] auto BeatToCommandOffsetAndBeat(beats_t beat) const -> std::pair<std::pair<size_t, beats_t>, std::pair<size_t, beats_t>>;
     [[nodiscard]] auto MarcherInfoAtBeat(beats_t beat) const -> MarcherInfo;
 
 private:

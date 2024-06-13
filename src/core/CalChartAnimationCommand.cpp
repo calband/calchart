@@ -380,7 +380,7 @@ auto CommandMove::PositionAtBeat(unsigned beat) -> Coord
     auto numBeats = NumBeats();
 
     if (numBeats == 0) {
-        return start + mMovement;
+        return start;
     }
     return start + (mMovement * beat) / numBeats;
 }
@@ -516,32 +516,78 @@ auto Commands::TotalBeats() const -> beats_t
     return mRunningBeatCount.back();
 }
 
-auto Commands::BeatToCommandOffsetAndBeat(unsigned beat) const -> std::tuple<size_t, beats_t>
+namespace {
+    auto LeadingBeatsAre0(std::vector<Command> const& commands) -> size_t
+    {
+        return std::distance(
+            commands.begin(),
+            std::ranges::find_if(commands.begin(), commands.end(), [](auto&& cmd) {
+                return NumBeats(cmd) != 0;
+            }));
+    }
+
+}
+auto Commands::BeatToCommandOffsetAndBeat(unsigned beat) const -> std::pair<std::pair<size_t, beats_t>, std::pair<size_t, beats_t>>
 {
+    // count the number of 0s
+    auto leadingBeats = LeadingBeatsAre0(mCommands);
+    if (LeadingBeatsAre0(mCommands) > 0 && beat == 0) {
+        return { { 1, 0 }, { 0, 0 } };
+    }
+    beat -= leadingBeats;
     auto where = std::ranges::find_if(mRunningBeatCount, [beat](auto thisBeat) { return beat < thisBeat; });
     if (where == mRunningBeatCount.end()) {
-        return { mRunningBeatCount.size(), beat - TotalBeats() };
+        return { { mRunningBeatCount.size(), beat - TotalBeats() }, { mRunningBeatCount.size(), beat - TotalBeats() } };
     }
     auto index = std::distance(mRunningBeatCount.begin(), where);
+    auto sheetIndex = std::distance(mRunningBeatCount.begin(), where);
     auto thisBeat = beat - (*where - NumBeats(mCommands.at(index)));
     // any sort of index makeup, we do here.
-    if (thisBeat == 0 && index > 0) {
+    if (thisBeat == 0 && index > 0 && leadingBeats == 0) {
         if (NumBeats(mCommands.at(index - 1)) == 0) {
-            index -= 1;
+            sheetIndex -= 1;
         }
     }
 
-    return { index, thisBeat };
+    return { { index, thisBeat }, { sheetIndex, thisBeat } };
+}
+
+namespace {
+    // We treat position and facing because of very odd 0 beat continuities
+    // These are artifacts of micro-position inconsistencies, where what can
+    // happen is that to make up where the marcher is there can be 0 beat
+    // continuities.  CalChart treats this like you've pivoted that direction --
+    // that the direction you are facing is of the next beat but the position
+    // is of the previous beat.
+    auto MarcherInfoAtBeat(
+        Command const& cmd,
+        beats_t beat,
+        Command const& facingCmd,
+        beats_t facingBeat)
+        -> MarcherInfo
+    {
+        return {
+            PositionAtBeat(cmd, beat),
+            CalChart::Radian{ FacingDirectionAtBeat(facingCmd, facingBeat) },
+            StepStyle(cmd)
+        };
+    }
 }
 
 auto Commands::MarcherInfoAtBeat(beats_t beat) const -> MarcherInfo
 {
-    auto [which, newBeat] = BeatToCommandOffsetAndBeat(beat);
+    auto [position, facing] = BeatToCommandOffsetAndBeat(beat);
+    auto [which, newBeat] = position;
+    auto [whichFacing, newBeatFacing] = facing;
     // std::cout << "beat " << beat << " which " << which << " beat " << newBeat << "\n";
     if (which >= mCommands.size()) {
         return {};
     }
-    return Animate::MarcherInfoAtBeat(mCommands.at(which), newBeat);
+    return Animate::MarcherInfoAtBeat(
+        mCommands.at(which),
+        newBeat,
+        mCommands.at(whichFacing),
+        newBeatFacing);
 }
 
 }
