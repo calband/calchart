@@ -119,18 +119,6 @@ Animation::Animation(const Show& show)
 
 Animation::~Animation() { }
 
-bool Animation::PrevSheet()
-{
-    if (mCurrentBeatNumber == 0) {
-        if (mCurrentSheetNumber > 0) {
-            mCurrentSheetNumber--;
-        }
-    }
-    RefreshSheet();
-    FindAllCollisions();
-    return true;
-}
-
 bool Animation::NextSheet()
 {
     if ((mCurrentSheetNumber + 1) != mSheets.size()) {
@@ -146,37 +134,6 @@ bool Animation::NextSheet()
         }
         return false;
     }
-    return true;
-}
-
-bool Animation::PrevBeat()
-{
-    unsigned i;
-
-    if (mCurrentBeatNumber == 0) {
-        if (mCurrentSheetNumber == 0)
-            return false;
-        mCurrentSheetNumber--;
-        for (i = 0; i < mPoints.size(); i++) {
-            mCurrentCmdIndex[i] = mSheets.at(mCurrentSheetNumber).GetCommandsEndIndex(i) - 1;
-            EndCmd(i);
-        }
-        mCurrentBeatNumber = mSheets.at(mCurrentSheetNumber).GetNumBeats();
-    }
-    for (i = 0; i < mPoints.size(); i++) {
-        if (!GetCommand(mCurrentSheetNumber, i).PrevBeat(mPoints[i])) {
-            // Advance to prev command, skipping zero beat commands
-            if (mCurrentCmdIndex[i] != mSheets.at(mCurrentSheetNumber).GetCommandsBeginIndex(i)) {
-                --mCurrentCmdIndex[i];
-                EndCmd(i);
-                // Set to next-to-last beat of this command
-                // Should always return true
-                GetCommand(mCurrentSheetNumber, i).PrevBeat(mPoints[i]);
-            }
-        }
-    }
-    if (mCurrentBeatNumber > 0)
-        mCurrentBeatNumber--;
     return true;
 }
 
@@ -209,15 +166,6 @@ void Animation::BeginCmd(unsigned i)
     }
 }
 
-void Animation::EndCmd(unsigned i)
-{
-    while (!GetCommand(mCurrentSheetNumber, i).End(mPoints[i])) {
-        if ((mCurrentCmdIndex[i]) == mSheets.at(mCurrentSheetNumber).GetCommandsBeginIndex(i))
-            return;
-        --mCurrentCmdIndex[i];
-    }
-}
-
 void Animation::RefreshSheet()
 {
     mPoints = mSheets.at(mCurrentSheetNumber).GetPoints();
@@ -240,6 +188,10 @@ void Animation::FindAllCollisions()
         for (unsigned i = 0; i < mPoints.size(); i++) {
             for (unsigned j = i + 1; j < mPoints.size(); j++) {
                 auto collisionResult = mPoints[i].DetectCollision(mPoints[j]);
+                // if (collisionResult == Coord::CollisionType::warning) {
+                //     collisionResult = Coord::CollisionType::none;
+                // }
+
                 if (collisionResult != Coord::CollisionType::none) {
                     if (!mCollisions.count({ i, mCurrentSheetNumber, mCurrentBeatNumber }) || mCollisions[{ i, mCurrentSheetNumber, mCurrentBeatNumber }] < collisionResult) {
                         mCollisions[{ i, mCurrentSheetNumber, mCurrentBeatNumber }] = collisionResult;
@@ -265,7 +217,8 @@ auto Animation::GetAnimateInfo(beats_t whichBeat, int which) const -> Animate::I
 {
     auto [sheet, beat] = mSheets2.BeatToSheetOffsetAndBeat(whichBeat);
     return {
-        mCollisions.count({ which, sheet, beat }) ? mCollisions.find({ which, sheet, beat })->second : Coord::CollisionType::none,
+        mSheets2.CollisionAtBeat(whichBeat, which),
+        //        mCollisions.count({ which, sheet, beat }) ? mCollisions.find({ which, sheet, beat })->second : Coord::CollisionType::none,
         mSheets2.MarcherInfoAtBeat(whichBeat, which)
     };
 }

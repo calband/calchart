@@ -116,6 +116,11 @@ namespace CalChart::Animate {
 
 using beats_t = unsigned;
 
+struct Info {
+    CalChart::Coord::CollisionType mCollision = CalChart::Coord::CollisionType::none;
+    MarcherInfo mMarcherInfo{};
+};
+
 // A sheet is a collection of all the Marcher's Commands.
 // The Commands are the positions, directions, and style of each marcher at their beats.
 // Because a Sheet sees all the points and where they are, the sheet can calculate all the
@@ -143,6 +148,7 @@ public:
 
     [[nodiscard]] auto GetAllBeatsWithCollisions() const -> std::set<beats_t>;
     [[nodiscard]] auto GetAllMarchersWithCollisionAtBeat(beats_t beat) const -> std::set<size_t>;
+    [[nodiscard]] auto CollisionAtBeat(size_t whichMarcher, beats_t beat) const -> Coord::CollisionType;
 
 private:
     [[nodiscard]] auto FindAllCollisions() const -> std::map<std::tuple<size_t, beats_t>, Coord::CollisionType>;
@@ -159,6 +165,7 @@ public:
     [[nodiscard]] auto BeatToSheetOffsetAndBeat(beats_t beat) const -> std::tuple<size_t, beats_t>;
     [[nodiscard]] auto BeatForSheet(int whichSheet) const -> beats_t { return mSheets.at(whichSheet).GetNumBeats(); }
     [[nodiscard]] auto MarcherInfoAtBeat(beats_t beat, int whichMarcher) const -> MarcherInfo;
+    [[nodiscard]] auto CollisionAtBeat(beats_t beat, int whichMarcher) const -> Coord::CollisionType;
     [[nodiscard]] auto BeatHasCollision(beats_t whichBeat) const -> bool;
     [[nodiscard]] auto GetSheetName(int whichSheet) const { return mSheets.at(whichSheet).GetName(); }
 

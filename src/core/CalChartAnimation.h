@@ -39,12 +39,6 @@ class AnimationSheet;
 class Show;
 
 namespace Animate {
-    // For drawing:
-    struct Info {
-        CalChart::Coord::CollisionType mCollision = CalChart::Coord::CollisionType::none;
-        MarcherInfo mMarcherInfo{};
-    };
-
     inline auto FacingBack(Info const& info)
     {
         auto direction = CalChart::AngleToDirection(info.mMarcherInfo.mFacingDirection);
@@ -128,14 +122,11 @@ public:
 
 private:
     // Returns true if changes made
-    bool PrevSheet();
     bool NextSheet();
 
-    bool PrevBeat();
     bool NextBeat();
 
     void BeginCmd(unsigned i);
-    void EndCmd(unsigned i);
 
     void RefreshSheet();
     void FindAllCollisions();

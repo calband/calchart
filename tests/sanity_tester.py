@@ -58,16 +58,30 @@ def compare_files(file1, file2, custom_comparison_function):
                 num_errors = num_errors + 1
     return num_errors
 
+def extractTrailing(input_string):
+    import re
+    # input_string = ".*$" -> 0
+    # input_string = ".*, collision!$" -> 1
+    pattern = r".*, collision!"
+    match = re.match(pattern, input_string)
+    if match:
+        return 1
+    else:
+        return 0
+
 def extractValues(input_string):
     import re
     # input_string = "pt 98: (448, 672), dir=-168.7"
     # -> 
-    # [98, 448, 672, -168.7]
+    # [98, 448, 672, -168.7, 0]
+    # input_string = "pt 98: (448, 672), dir=-168.7, collision!"
+    # -> 
+    # [98, 448, 672, -168.7, 1]
 
     pattern = r"pt (\d+): \((-?\d+), (-?\d+)\), dir=(-?\d+(\.\d+)?([eE]-?\d+)?)"
     match = re.match(pattern, input_string)
     if match:
-        return [ int(match.group(1)), int(match.group(2)), int(match.group(3)), float(match.group(4)) ]
+        return [ int(match.group(1)), int(match.group(2)), int(match.group(3)), float(match.group(4)), extractTrailing(input_string) ]
     else:
         return None
 
@@ -80,7 +94,7 @@ def custom_comparison_function(line1, line2):
         return line1.strip() == line2.strip()
     # Adjust tolerance as needed
     tolerance = 1e-2
-    result = value1[0] == value2[0] and value1[1] == value2[1] and value1[2] == value2[2] and abs(value1[3] - value2[3]) < tolerance
+    result = value1[0] == value2[0] and value1[1] == value2[1] and value1[2] == value2[2] and abs(value1[3] - value2[3]) < tolerance and value1[4] == value2[4]
     if Debug:
         print(f"comparing {value1} and {value2} -> {result}")
     return result

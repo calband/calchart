@@ -121,6 +121,14 @@ auto Sheet::MarcherInfoAtBeat(size_t whichMarcher, beats_t beat) const -> CalCha
     return mCommands.at(whichMarcher).MarcherInfoAtBeat(beat);
 }
 
+auto Sheet::CollisionAtBeat(size_t whichMarcher, beats_t beat) const -> CalChart::Coord::CollisionType
+{
+    if (auto where = mCollisions.find({ whichMarcher, beat }); where != mCollisions.end()) {
+        return where->second;
+    }
+    return Coord::CollisionType::none;
+}
+
 namespace {
     // get all the positions at a beat:
 
@@ -233,6 +241,19 @@ auto Sheets::MarcherInfoAtBeat(beats_t beat, int whichMarcher) const -> MarcherI
         return {};
     }
     return mSheets.at(which).MarcherInfoAtBeat(whichMarcher, newBeat);
+}
+
+auto Sheets::CollisionAtBeat(beats_t beat, int whichMarcher) const -> Coord::CollisionType
+{
+    // this is because Calchart-3.7 and earlier would skip the first beat for collision detection.
+    if (beat == 0) {
+        return {};
+    }
+    auto [which, newBeat] = BeatToSheetOffsetAndBeat(beat);
+    if (which >= mSheets.size()) {
+        return {};
+    }
+    return mSheets.at(which).CollisionAtBeat(whichMarcher, newBeat);
 }
 
 auto Sheets::BeatHasCollision(beats_t beat) const -> bool
