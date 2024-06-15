@@ -32,7 +32,7 @@ TEST_CASE("AnimationSheetTest", "Animate::Sheet")
     auto collisions = uut.GetAllBeatsWithCollisions();
     auto collided = uut.GetAllMarchersWithCollisionAtBeat(6);
     CHECK(collisions == std::set<CalChart::Animate::beats_t>{ 6 });
-    CHECK(collided == std::set<size_t>{ 0, 1 });
+    CHECK(collided == CalChart::SelectionList{ 0, 1 });
 }
 
 TEST_CASE("NoCollision", "Animate::Sheet")

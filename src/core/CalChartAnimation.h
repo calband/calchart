@@ -103,7 +103,8 @@ private:
 
 public:
     std::vector<AnimationErrors> GetAnimationErrors() const;
-    std::map<std::tuple<int, int, int>, Coord::CollisionType> GetCollisions() const { return mCollisions; }
+    // Sheet -> selection of marchers who collided
+    auto GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>;
 
 public:
     [[nodiscard]] auto BeatHasCollision(beats_t whichBeat) const -> bool;
@@ -146,37 +147,6 @@ private:
     mutable beats_t mCurrentBeatNumber{};
     std::vector<int> mAnimSheetIndices;
     std::vector<AnimationErrors> mAnimationErrors;
-};
-
-}
-
-namespace CalChart::Animate {
-
-class Show {
-public:
-    explicit Show(const CalChart::Show& show);
-    ~Show() = default;
-
-    // For drawing:
-    [[nodiscard]] auto GetInfoForMarcherAtBeat(int which, unsigned beat) const -> Info;
-
-    [[nodiscard]] auto GetTotalNumberSheets() const -> size_t;
-    [[nodiscard]] auto GetTotalNumberBeats() const -> beats_t;
-    [[nodiscard]] auto GetTotalNumberBeatsUpToSheet(size_t sheet) const -> beats_t;
-    [[nodiscard]] auto GetSheetForBeat(beats_t beat) const -> int;
-    [[nodiscard]] auto GetCurrentSheetName() const -> std::string;
-    [[nodiscard]] auto GetAnimationErrors() const -> std::vector<CalChart::AnimationErrors>;
-    [[nodiscard]] auto GetCollisions() const -> std::map<std::tuple<int, int, int>, CalChart::Coord::CollisionType> { return mCollisions; }
-
-    [[nodiscard]] auto GenPathToDraw(unsigned whichSheet, unsigned point, CalChart::Coord::units endRadius) const -> std::vector<CalChart::Draw::DrawCommand>;
-
-private:
-    // There are two types of data, the ones that are set when we are created, and the ones that modify over time.
-    std::vector<CalChart::Animate::Sheet> mSheets;
-
-    // mapping of Which, Sheet, Beat to a collision
-    std::map<std::tuple<int, int, int>, CalChart::Coord::CollisionType> mCollisions;
-    std::vector<CalChart::AnimationErrors> mAnimationErrors;
 };
 
 }

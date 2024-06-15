@@ -188,10 +188,6 @@ void Animation::FindAllCollisions()
         for (unsigned i = 0; i < mPoints.size(); i++) {
             for (unsigned j = i + 1; j < mPoints.size(); j++) {
                 auto collisionResult = mPoints[i].DetectCollision(mPoints[j]);
-                // if (collisionResult == Coord::CollisionType::warning) {
-                //     collisionResult = Coord::CollisionType::none;
-                // }
-
                 if (collisionResult != Coord::CollisionType::none) {
                     if (!mCollisions.count({ i, mCurrentSheetNumber, mCurrentBeatNumber }) || mCollisions[{ i, mCurrentSheetNumber, mCurrentBeatNumber }] < collisionResult) {
                         mCollisions[{ i, mCurrentSheetNumber, mCurrentBeatNumber }] = collisionResult;
@@ -215,10 +211,8 @@ auto Animation::BeatHasCollision(beats_t whichBeat) const -> bool
 
 auto Animation::GetAnimateInfo(beats_t whichBeat, int which) const -> Animate::Info
 {
-    auto [sheet, beat] = mSheets2.BeatToSheetOffsetAndBeat(whichBeat);
     return {
         mSheets2.CollisionAtBeat(whichBeat, which),
-        //        mCollisions.count({ which, sheet, beat }) ? mCollisions.find({ which, sheet, beat })->second : Coord::CollisionType::none,
         mSheets2.MarcherInfoAtBeat(whichBeat, which)
     };
 }
@@ -227,7 +221,7 @@ namespace {
     // Because we need to draw sprites and other animations without overlap, sort them so the "closer" ones are first
     template <std::ranges::input_range Range>
         requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Info>)
-    auto SortForSprites(Range&& input)
+    auto SortForSprites(Range input)
     {
         std::ranges::sort(input, [](auto&& a, auto&& b) {
             return a.mMarcherInfo.mPosition < b.mMarcherInfo.mPosition;
@@ -318,6 +312,20 @@ auto Animation::toOnlineViewerJSON(std::vector<std::vector<CalChart::Point>> con
         results.push_back(mSheets.at(i).toOnlineViewerJSON(pointsOverSheets.at(i)));
     }
     return results;
+}
+
+auto Animation::GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>
+{
+    return mSheets2.SheetsToMarchersWhoCollided();
+    // first map all the collisions to a sheet with a point group.
+    auto result = std::map<int, CalChart::SelectionList>{};
+    for (auto [marcherInfo, collisionType] : mCollisions) {
+        (void)collisionType;
+        auto [whichMarcher, whichSheet, whichBeat] = marcherInfo;
+        (void)whichBeat;
+        result[whichSheet].insert(whichMarcher);
+    }
+    return result;
 }
 
 }

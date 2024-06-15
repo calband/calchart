@@ -147,7 +147,14 @@ public:
     }
 
     [[nodiscard]] auto GetAllBeatsWithCollisions() const -> std::set<beats_t>;
-    [[nodiscard]] auto GetAllMarchersWithCollisionAtBeat(beats_t beat) const -> std::set<size_t>;
+    [[nodiscard]] auto GetAllMarchersWithCollisionAtBeat(beats_t beat) const -> CalChart::SelectionList;
+    [[nodiscard]] auto GetAllMarchersWithCollisions() const -> CalChart::SelectionList
+    {
+        return std::reduce(mCollisions.begin(), mCollisions.end(), CalChart::SelectionList{}, [](auto acc, auto item) {
+            acc.insert(std::get<0>(std::get<0>(item)));
+            return acc;
+        });
+    }
     [[nodiscard]] auto CollisionAtBeat(size_t whichMarcher, beats_t beat) const -> Coord::CollisionType;
 
 private:
@@ -168,6 +175,16 @@ public:
     [[nodiscard]] auto CollisionAtBeat(beats_t beat, int whichMarcher) const -> Coord::CollisionType;
     [[nodiscard]] auto BeatHasCollision(beats_t whichBeat) const -> bool;
     [[nodiscard]] auto GetSheetName(int whichSheet) const { return mSheets.at(whichSheet).GetName(); }
+    // Sheet -> selection of marchers who collided
+    [[nodiscard]] auto SheetsToMarchersWhoCollided() const -> std::map<int, CalChart::SelectionList>
+    {
+        auto result = std::map<int, CalChart::SelectionList>{};
+        for (auto whichSheet : std::views::iota(0UL, mSheets.size())) {
+            auto marchersWithCollisions = mSheets[whichSheet].GetAllMarchersWithCollisions();
+            result[whichSheet] = marchersWithCollisions;
+        }
+        return result;
+    }
 
 private:
     std::vector<Sheet> mSheets;

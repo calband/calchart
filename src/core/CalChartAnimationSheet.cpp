@@ -142,9 +142,9 @@ auto Sheet::GetAllBeatsWithCollisions() const -> std::set<beats_t>
     });
 }
 
-auto Sheet::GetAllMarchersWithCollisionAtBeat(beats_t beat) const -> std::set<size_t>
+auto Sheet::GetAllMarchersWithCollisionAtBeat(beats_t beat) const -> CalChart::SelectionList
 {
-    return std::reduce(mCollisions.begin(), mCollisions.end(), std::set<size_t>{}, [beat](auto acc, auto item) {
+    return std::reduce(mCollisions.begin(), mCollisions.end(), CalChart::SelectionList{}, [beat](auto acc, auto item) {
         if (std::get<1>(std::get<0>(item)) == beat) {
             acc.insert(std::get<0>(std::get<0>(item)));
         }
