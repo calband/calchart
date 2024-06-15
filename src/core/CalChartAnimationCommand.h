@@ -542,6 +542,7 @@ public:
     // which command, beat for position/step and which command,beat for facing
     [[nodiscard]] auto BeatToCommandOffsetAndBeat(beats_t beat) const -> std::pair<std::pair<size_t, beats_t>, std::pair<size_t, beats_t>>;
     [[nodiscard]] auto MarcherInfoAtBeat(beats_t beat) const -> MarcherInfo;
+    [[nodiscard]] auto GeneratePathToDraw(Coord::units endRadius) const -> std::vector<Draw::DrawCommand>;
 
 private:
     std::vector<Command> mCommands;

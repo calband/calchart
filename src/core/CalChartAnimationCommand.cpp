@@ -590,4 +590,16 @@ auto Commands::MarcherInfoAtBeat(beats_t beat) const -> MarcherInfo
         newBeatFacing);
 }
 
+auto Commands::GeneratePathToDraw(Coord::units endRadius) const -> std::vector<Draw::DrawCommand>
+{
+    auto drawCommands = CalChart::Ranges::ToVector<Draw::DrawCommand>(
+        mCommands | std::views::transform([](auto&& cmd) {
+            return GenCC_DrawCommand(cmd);
+        }));
+    auto position = End(mCommands.back());
+    // now at this point we should put in a circle for end point
+    drawCommands.push_back(CalChart::Draw::Circle{ position, endRadius, true });
+    return drawCommands;
+}
+
 }

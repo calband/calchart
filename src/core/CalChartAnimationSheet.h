@@ -156,6 +156,10 @@ public:
         });
     }
     [[nodiscard]] auto CollisionAtBeat(size_t whichMarcher, beats_t beat) const -> Coord::CollisionType;
+    [[nodiscard]] auto GeneratePathToDraw(int whichMarcher, Coord::units endRadius) const -> std::vector<Draw::DrawCommand>
+    {
+        return mCommands.at(whichMarcher).GeneratePathToDraw(endRadius);
+    }
 
 private:
     [[nodiscard]] auto FindAllCollisions() const -> std::map<std::tuple<size_t, beats_t>, Coord::CollisionType>;
@@ -184,6 +188,11 @@ public:
             result[whichSheet] = marchersWithCollisions;
         }
         return result;
+    }
+
+    [[nodiscard]] auto GeneratePathToDraw(int whichSheet, int whichMarcher, Coord::units endRadius) const -> std::vector<Draw::DrawCommand>
+    {
+        return mSheets.at(whichSheet).GeneratePathToDraw(whichMarcher, endRadius);
     }
 
 private:
