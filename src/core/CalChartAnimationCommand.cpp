@@ -602,4 +602,9 @@ auto Commands::GeneratePathToDraw(Coord::units endRadius) const -> std::vector<D
     return drawCommands;
 }
 
+auto Commands::toOnlineViewerJSON() const -> std::vector<nlohmann::json>
+{
+    return CalChart::Ranges::ToVector<nlohmann::json>(
+        mCommands | std::views::transform([](auto&& cmd) { return CalChart::Animate::toOnlineViewerJSON(cmd); }));
+}
 }

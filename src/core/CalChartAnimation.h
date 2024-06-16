@@ -86,31 +86,17 @@ public:
 
     int GetNumberSheets() const;
 
-private:
-    auto GetCurrentSheet() const { return mCurrentSheetNumber; }
-    auto GetNumberBeats() const { return mSheets.at(mCurrentSheetNumber).GetNumBeats(); }
-    auto GetCurrentBeat() const { return mCurrentBeatNumber; }
-
-public:
     auto GetTotalNumberBeatsUpTo(int sheet) const -> beats_t;
-    auto GetTotalNumberBeats() const { return GetTotalNumberBeatsUpTo(static_cast<int>(mSheets.size())); }
+    auto GetTotalNumberBeats() const { return mSheets2.TotalBeats(); }
 
-private:
-    auto GetTotalCurrentBeat() const -> beats_t;
-
-private:
-    auto GetCurrentSheetName() const { return mSheets.at(mCurrentSheetNumber).GetName(); }
-
-public:
     std::vector<AnimationErrors> GetAnimationErrors() const;
     // Sheet -> selection of marchers who collided
     auto GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>;
 
-public:
     [[nodiscard]] auto BeatHasCollision(beats_t whichBeat) const -> bool;
 
     // collection of position of each point, for debugging purposes
-    std::pair<std::string, std::vector<std::string>> GetCurrentInfo(beats_t whichBeat) const;
+    auto GetCurrentInfo(beats_t whichBeat) const -> std::pair<std::string, std::vector<std::string>>;
 
     std::vector<Draw::DrawCommand> GenPathToDraw(unsigned whichSheet, unsigned point, Coord::units endRadius) const;
 
@@ -122,30 +108,12 @@ public:
     [[nodiscard]] auto toOnlineViewerJSON(std::vector<std::vector<CalChart::Point>> const& pointsOverSheets) const -> std::vector<std::vector<std::vector<nlohmann::json>>>;
 
 private:
-    // Returns true if changes made
-    bool NextSheet();
-
-    bool NextBeat();
-
-    void BeginCmd(unsigned i);
-
-    void RefreshSheet();
-    void FindAllCollisions();
-
-    std::vector<std::shared_ptr<AnimationCommand>> GetCommands(unsigned whichSheet, unsigned whichPoint) const;
-    AnimationCommand& GetCommand(unsigned whichSheet, unsigned whichPoint) const;
-
     // There are two types of data, the ones that are set when we are created, and the ones that modify over time.
     std::vector<AnimationSheet> mSheets;
     Animate::Sheets mSheets2;
     std::vector<Coord> mPoints; // current position of these points
-    std::vector<size_t> mCurrentCmdIndex; // pointer to the current command in the sheet
 
     // mapping of Which, Sheet, Beat to a collision
-    std::map<std::tuple<int, int, int>, Coord::CollisionType> mCollisions;
-    mutable unsigned mCurrentSheetNumber{};
-    mutable beats_t mCurrentBeatNumber{};
-    std::vector<int> mAnimSheetIndices;
     std::vector<AnimationErrors> mAnimationErrors;
 };
 

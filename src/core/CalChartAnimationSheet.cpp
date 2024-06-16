@@ -152,6 +152,14 @@ auto Sheet::GetAllMarchersWithCollisionAtBeat(beats_t beat) const -> CalChart::S
     });
 }
 
+auto Sheet::toOnlineViewerJSON() const -> std::vector<std::vector<nlohmann::json>>
+{
+    return CalChart::Ranges::ToVector<std::vector<nlohmann::json>>(
+        mCommands | std::views::transform([](auto&& which) {
+            return which.toOnlineViewerJSON();
+        }));
+}
+
 namespace {
 
     template <std::ranges::input_range Range>
@@ -189,6 +197,48 @@ auto Sheet::FindAllCollisions() const -> std::map<std::tuple<size_t, beats_t>, C
         });
     }
     return results;
+}
+
+auto Sheet::DebugAnimateInfoAtBeat(beats_t beat, bool ignoreCollision) const -> std::vector<std::string>
+{
+    return CalChart::Ranges::ToVector<std::string>(
+        std::views::iota(0UL, mCommands.size()) | std::views::transform([this, beat, ignoreCollision](auto whichMarcher) {
+            auto marcherInfo = MarcherInfoAtBeat(whichMarcher, beat);
+            auto collision = CollisionAtBeat(whichMarcher, beat);
+            if (ignoreCollision) {
+                collision = CalChart::Coord::CollisionType::none;
+            }
+            std::ostringstream each_string;
+            each_string << "pt " << whichMarcher << ": (" << marcherInfo.mPosition.x << ", "
+                        << marcherInfo.mPosition.y << "), dir=" << CalChart::Degree{ marcherInfo.mFacingDirection }.getValue()
+                        << ((collision != CalChart::Coord::CollisionType::none) ? ", collision!" : "");
+            return each_string.str();
+        }));
+}
+
+namespace {
+    // Because we need to draw sprites and other animations without overlap, sort them so the "closer" ones are first
+    template <std::ranges::input_range Range>
+        requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Info>)
+    auto SortForSprites(Range input)
+    {
+        std::ranges::sort(input, [](auto&& a, auto&& b) {
+            return a.mMarcherInfo.mPosition < b.mMarcherInfo.mPosition;
+        });
+        return input;
+    }
+
+}
+
+auto Sheet::AllAnimateInfoAtBeat(beats_t beat) const -> std::vector<Info>
+{
+    auto animates = CalChart::Ranges::ToVector<Info>(std::views::iota(0UL, mCommands.size()) | std::views::transform([this, beat](auto whichMarcher) -> Animate::Info {
+        return {
+            CollisionAtBeat(beat, whichMarcher),
+            MarcherInfoAtBeat(beat, whichMarcher)
+        };
+    }));
+    return SortForSprites(animates);
 }
 
 namespace {
@@ -263,6 +313,22 @@ auto Sheets::BeatHasCollision(beats_t beat) const -> bool
         return false;
     }
     return mSheets.at(which).GetAllBeatsWithCollisions().contains(beat);
+}
+
+auto Sheets::DebugAnimateInfoAtBeat(beats_t beat) const -> std::pair<std::string, std::vector<std::string>>
+{
+    auto [whichSheet, newBeat] = BeatToSheetOffsetAndBeat(beat);
+    std::ostringstream output;
+    output << GetSheetName(whichSheet) << " (" << whichSheet << " of " << mSheets.size() << ")\n";
+    output << "beat " << newBeat << " of " << BeatForSheet(whichSheet) << "\n";
+    auto each = mSheets.at(whichSheet).DebugAnimateInfoAtBeat(newBeat, beat == 0);
+    return { output.str(), each };
+}
+
+auto Sheets::AllAnimateInfoAtBeat(beats_t whichBeat) const -> std::vector<Info>
+{
+    auto [whichSheet, newBeat] = BeatToSheetOffsetAndBeat(whichBeat);
+    return mSheets.at(whichSheet).AllAnimateInfoAtBeat(newBeat);
 }
 
 }

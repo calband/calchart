@@ -543,6 +543,7 @@ public:
     [[nodiscard]] auto BeatToCommandOffsetAndBeat(beats_t beat) const -> std::pair<std::pair<size_t, beats_t>, std::pair<size_t, beats_t>>;
     [[nodiscard]] auto MarcherInfoAtBeat(beats_t beat) const -> MarcherInfo;
     [[nodiscard]] auto GeneratePathToDraw(Coord::units endRadius) const -> std::vector<Draw::DrawCommand>;
+    [[nodiscard]] auto toOnlineViewerJSON() const -> std::vector<nlohmann::json>;
 
 private:
     std::vector<Command> mCommands;
