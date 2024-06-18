@@ -77,35 +77,31 @@ using beats_t = unsigned;
 class Animation {
 public:
     explicit Animation(const Show& show);
-    ~Animation();
 
-public:
-    auto GetAnimateInfo(beats_t whichBeat, int which) const -> Animate::Info;
+    [[nodiscard]] auto GetAnimateInfo(beats_t whichBeat, int which) const { return mSheets.AnimateInfoAtBeat(whichBeat, which); }
+    [[nodiscard]] auto GetAllAnimateInfo(beats_t whichBeat) const { return mSheets.AllAnimateInfoAtBeat(whichBeat); }
 
-    auto GetAllAnimateInfo(beats_t whichBeat) const -> std::vector<Animate::Info>;
+    [[nodiscard]] auto GetNumberSheets() const { return mSheets.TotalSheets(); }
+    [[nodiscard]] auto GetTotalNumberBeatsUpTo(int sheet) const -> beats_t { return mSheets.GetTotalNumberBeatsUpTo(sheet); }
+    [[nodiscard]] auto GetTotalNumberBeats() const { return mSheets.TotalBeats(); }
 
-    int GetNumberSheets() const;
+    [[nodiscard]] auto GetAnimationErrors() const { return mAnimationErrors; }
 
-    auto GetTotalNumberBeatsUpTo(int sheet) const -> beats_t;
-    auto GetTotalNumberBeats() const { return mSheets.TotalBeats(); }
-
-    std::vector<AnimationErrors> GetAnimationErrors() const;
     // Sheet -> selection of marchers who collided
-    auto GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>;
-
-    [[nodiscard]] auto BeatHasCollision(beats_t whichBeat) const -> bool;
+    [[nodiscard]] auto GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList> { return mSheets.SheetsToMarchersWhoCollided(); }
+    [[nodiscard]] auto BeatHasCollision(beats_t whichBeat) const { return mSheets.BeatHasCollision(whichBeat); }
 
     // collection of position of each point, for debugging purposes
-    auto GetCurrentInfo(beats_t whichBeat) const -> std::pair<std::string, std::vector<std::string>>;
+    [[nodiscard]] auto GetCurrentInfo(beats_t whichBeat) const -> std::pair<std::string, std::vector<std::string>> { return mSheets.DebugAnimateInfoAtBeat(whichBeat); }
 
-    std::vector<Draw::DrawCommand> GenPathToDraw(unsigned whichSheet, unsigned point, Coord::units endRadius) const;
+    [[nodiscard]] auto GenPathToDraw(unsigned whichSheet, unsigned point, Coord::units endRadius) const { return mSheets.GeneratePathToDraw(whichSheet, point, endRadius); }
 
     /*!
      * @brief Generates JSON that could represent of all the marchers in an Online Viewer '.viewer' file.
      * @param pointsOverSheets All of the points in all of the sheets.
      * @return A JSON which could represent all the animations in a '.viewer' file.
      */
-    [[nodiscard]] auto toOnlineViewerJSON() const -> std::vector<std::vector<std::vector<nlohmann::json>>>;
+    [[nodiscard]] auto toOnlineViewerJSON() const { return mSheets.toOnlineViewerJSON(); }
 
 private:
     // There are two types of data, the ones that are set when we are created, and the ones that modify over time.
