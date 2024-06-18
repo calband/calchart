@@ -42,14 +42,14 @@
 namespace CalChart {
 
 Animation::Animation(const Show& show)
-    : mSheets2({})
-    , mPoints(show.GetNumPoints())
+    : mSheets({})
     , mAnimationErrors(show.GetNumSheets())
 {
+    auto points = std::vector<Coord>(show.GetNumPoints());
     // the variables are persistant through the entire compile process.
     AnimationVariables variablesStates;
 
-    auto sheets2 = std::vector<Animate::Sheet>{};
+    auto sheets = std::vector<Animate::Sheet>{};
 
     for (auto curr_sheet = show.GetSheetBegin(); curr_sheet != show.GetSheetEnd(); ++curr_sheet) {
 
@@ -59,8 +59,8 @@ Animation::Animation(const Show& show)
 
         // Now parse continuity
         AnimationErrors errors;
-        std::vector<AnimationCommands> theCommands(mPoints.size());
-        std::vector<std::vector<Animate::Command>> theCommands2(mPoints.size());
+        std::vector<AnimationCommands> theCommands(points.size());
+        std::vector<std::vector<Animate::Command>> theCommands2(points.size());
         for (auto& current_symbol : k_symbols) {
             if (curr_sheet->ContinuityInUse(current_symbol)) {
                 auto& current_continuity = curr_sheet->GetContinuityBySymbol(current_symbol);
@@ -72,7 +72,7 @@ Animation::Animation(const Show& show)
                     }
                 }
 #endif
-                for (unsigned j = 0; j < mPoints.size(); j++) {
+                for (unsigned j = 0; j < points.size(); j++) {
                     if (curr_sheet->GetSymbol(j) == current_symbol) {
                         auto compileResults = CalChart::Compile(variablesStates, errors, curr_sheet, show.GetSheetEnd(), j, current_symbol, continuity);
                         theCommands[j] = compileResults.first;
@@ -82,7 +82,7 @@ Animation::Animation(const Show& show)
             }
         }
         // Handle points that don't have continuity (shouldn't happen)
-        for (unsigned j = 0; j < mPoints.size(); j++) {
+        for (unsigned j = 0; j < points.size(); j++) {
             if (theCommands[j].empty()) {
                 auto compileResults = CalChart::Compile(variablesStates, errors, curr_sheet, show.GetSheetEnd(), j, MAX_NUM_SYMBOLS, {});
                 theCommands[j] = compileResults.first;
@@ -92,29 +92,28 @@ Animation::Animation(const Show& show)
         if (errors.AnyErrors()) {
             mAnimationErrors[std::distance(show.GetSheetBegin(), curr_sheet)] = errors;
         }
-        std::vector<Coord> thePoints(mPoints.size());
-        for (unsigned i = 0; i < mPoints.size(); i++) {
+        std::vector<Coord> thePoints(points.size());
+        for (unsigned i = 0; i < points.size(); i++) {
             thePoints.at(i) = curr_sheet->GetPosition(i);
         }
-        mSheets.emplace_back(thePoints, theCommands, curr_sheet->GetName(), curr_sheet->GetBeats());
-        sheets2.emplace_back(curr_sheet->GetName(), curr_sheet->GetBeats(), theCommands2);
+        sheets.emplace_back(curr_sheet->GetName(), curr_sheet->GetBeats(), theCommands2);
         // here's where we would put in another sheet, and compare to see if all the positions are the same,
         // if it makes the same json movements.
     }
 
-    mSheets2 = Animate::Sheets{ sheets2 };
+    mSheets = Animate::Sheets{ sheets };
 }
 
 Animation::~Animation() = default;
 
 auto Animation::BeatHasCollision(beats_t whichBeat) const -> bool
 {
-    return mSheets2.BeatHasCollision(whichBeat);
+    return mSheets.BeatHasCollision(whichBeat);
 }
 
 auto Animation::GetAnimateInfo(beats_t whichBeat, int which) const -> Animate::Info
 {
-    return mSheets2.AnimateInfoAtBeat(whichBeat, which);
+    return mSheets.AnimateInfoAtBeat(whichBeat, which);
 }
 
 namespace {
@@ -133,24 +132,24 @@ namespace {
 
 auto Animation::GetAllAnimateInfo(beats_t whichBeat) const -> std::vector<Animate::Info>
 {
-    return mSheets2.AllAnimateInfoAtBeat(whichBeat);
+    return mSheets.AllAnimateInfoAtBeat(whichBeat);
 }
 
-int Animation::GetNumberSheets() const { return static_cast<int>(mSheets2.TotalSheets()); }
+int Animation::GetNumberSheets() const { return static_cast<int>(mSheets.TotalSheets()); }
 
 auto Animation::GetTotalNumberBeatsUpTo(int sheet) const -> beats_t
 {
-    return mSheets2.GetTotalNumberBeatsUpTo(sheet);
+    return mSheets.GetTotalNumberBeatsUpTo(sheet);
 }
 
 auto Animation::GenPathToDraw(unsigned whichSheet, unsigned point, Coord::units endRadius) const -> std::vector<Draw::DrawCommand>
 {
-    return mSheets2.GeneratePathToDraw(whichSheet, point, endRadius);
+    return mSheets.GeneratePathToDraw(whichSheet, point, endRadius);
 }
 
 auto Animation::GetCurrentInfo(beats_t whichBeat) const -> std::pair<std::string, std::vector<std::string>>
 {
-    return mSheets2.DebugAnimateInfoAtBeat(whichBeat);
+    return mSheets.DebugAnimateInfoAtBeat(whichBeat);
 }
 
 std::vector<AnimationErrors> Animation::GetAnimationErrors() const
@@ -158,18 +157,14 @@ std::vector<AnimationErrors> Animation::GetAnimationErrors() const
     return mAnimationErrors;
 }
 
-auto Animation::toOnlineViewerJSON(std::vector<std::vector<CalChart::Point>> const& pointsOverSheets) const -> std::vector<std::vector<std::vector<nlohmann::json>>>
+auto Animation::toOnlineViewerJSON() const -> std::vector<std::vector<std::vector<nlohmann::json>>>
 {
-    auto results = std::vector<std::vector<std::vector<nlohmann::json>>>{};
-    for (auto i : std::views::iota(0UL, pointsOverSheets.size())) {
-        results.push_back(mSheets.at(i).toOnlineViewerJSON(pointsOverSheets.at(i)));
-    }
-    return results;
+    return mSheets.toOnlineViewerJSON();
 }
 
 auto Animation::GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>
 {
-    return mSheets2.SheetsToMarchersWhoCollided();
+    return mSheets.SheetsToMarchersWhoCollided();
 }
 
 }

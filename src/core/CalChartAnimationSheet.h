@@ -224,6 +224,8 @@ public:
         return mSheets.at(whichSheet).GeneratePathToDraw(whichMarcher, endRadius);
     }
 
+    auto toOnlineViewerJSON() const -> std::vector<std::vector<std::vector<nlohmann::json>>>;
+
 private:
     std::vector<Sheet> mSheets;
     std::vector<beats_t> mRunningBeatCount;

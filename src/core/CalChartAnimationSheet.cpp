@@ -331,4 +331,12 @@ auto Sheets::AllAnimateInfoAtBeat(beats_t whichBeat) const -> std::vector<Info>
     return mSheets.at(whichSheet).AllAnimateInfoAtBeat(newBeat);
 }
 
+auto Sheets::toOnlineViewerJSON() const -> std::vector<std::vector<std::vector<nlohmann::json>>>
+{
+    return CalChart::Ranges::ToVector<std::vector<std::vector<nlohmann::json>>>(
+        mSheets | std::views::transform([](auto&& sheet) {
+            return sheet.toOnlineViewerJSON();
+        }));
+}
+
 }

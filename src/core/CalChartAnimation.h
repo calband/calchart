@@ -87,7 +87,7 @@ public:
     int GetNumberSheets() const;
 
     auto GetTotalNumberBeatsUpTo(int sheet) const -> beats_t;
-    auto GetTotalNumberBeats() const { return mSheets2.TotalBeats(); }
+    auto GetTotalNumberBeats() const { return mSheets.TotalBeats(); }
 
     std::vector<AnimationErrors> GetAnimationErrors() const;
     // Sheet -> selection of marchers who collided
@@ -105,13 +105,11 @@ public:
      * @param pointsOverSheets All of the points in all of the sheets.
      * @return A JSON which could represent all the animations in a '.viewer' file.
      */
-    [[nodiscard]] auto toOnlineViewerJSON(std::vector<std::vector<CalChart::Point>> const& pointsOverSheets) const -> std::vector<std::vector<std::vector<nlohmann::json>>>;
+    [[nodiscard]] auto toOnlineViewerJSON() const -> std::vector<std::vector<std::vector<nlohmann::json>>>;
 
 private:
     // There are two types of data, the ones that are set when we are created, and the ones that modify over time.
-    std::vector<AnimationSheet> mSheets;
-    Animate::Sheets mSheets2;
-    std::vector<Coord> mPoints; // current position of these points
+    Animate::Sheets mSheets;
 
     // mapping of Which, Sheet, Beat to a collision
     std::vector<AnimationErrors> mAnimationErrors;
