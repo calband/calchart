@@ -30,7 +30,7 @@ namespace CalChart {
 struct AnimationCompileState : public AnimationCompile {
     AnimationCompileState(SYMBOL_TYPE cont_symbol, unsigned pt_num, Show::const_Sheet_iterator_t c_sheet, Show::const_Sheet_iterator_t endSheet, AnimationVariables& variablesStates, AnimationErrors& errors);
 
-    bool Append(std::unique_ptr<AnimationCommand> cmd, Coord startPoint, Cont::Token const* token) override;
+    bool Append(Animate::Command cmd, Cont::Token const* token) override;
     void RegisterError(AnimateError err, Cont::Token const* token) const override { mErrors.RegisterError(err, token, mWhichPoint, contsymbol); }
 
     float GetVarValue(Cont::Variable varnum, Cont::Token const* token) const override;
@@ -44,7 +44,6 @@ struct AnimationCompileState : public AnimationCompile {
     virtual unsigned GetBeatsRemaining() const override { return mBeatsRem; }
 
     auto GetCommands() const { return mCmds; }
-    auto GetAnimateCommands() const { return mCmds2; }
 
 private:
     SYMBOL_TYPE contsymbol;
@@ -55,8 +54,7 @@ private:
     Show::const_Sheet_iterator_t mEndSheet;
     AnimationVariables& mVars;
     AnimationErrors& mErrors;
-    AnimationCommands mCmds{};
-    std::vector<Animate::Command> mCmds2{};
+    std::vector<Animate::Command> mCmds{};
 };
 
 auto Compile(
@@ -97,17 +95,17 @@ auto Compile(
         if (ac.GetPointPosition() != next_point) {
             auto c = next_point - ac.GetPointPosition();
             ac.RegisterError(AnimateError::WRONGPLACE, NULL);
-            ac.Append(std::make_unique<AnimationCommandMove>(ac.GetBeatsRemaining(), c), ac.GetPointPosition(), NULL);
+            ac.Append(Animate::CommandMove{ ac.GetPointPosition(), ac.GetBeatsRemaining(), c }, NULL);
         }
     }
 
     // report if we have extra time.
     if (ac.GetBeatsRemaining()) {
         ac.RegisterError(AnimateError::EXTRATIME, NULL);
-        ac.Append(std::make_unique<AnimationCommandStill>(AnimationCommandStill::Style::MarkTime, ac.GetBeatsRemaining(), CalChart::Degree{ 90 }), ac.GetPointPosition(), NULL);
+        ac.Append(Animate::CommandStill{ ac.GetPointPosition(), ac.GetBeatsRemaining(), Animate::CommandStill::Style::MarkTime, CalChart::Degree{ 90 } }, NULL);
     }
 
-    return { ac.GetCommands(), ac.GetAnimateCommands() };
+    return ac.GetCommands();
 }
 
 AnimationCompileState::AnimationCompileState(SYMBOL_TYPE cont_symbol, unsigned pt_num, Show::const_Sheet_iterator_t c_sheet, Show::const_Sheet_iterator_t endSheet, AnimationVariables& variablesStates, AnimationErrors& errors)
@@ -122,22 +120,22 @@ AnimationCompileState::AnimationCompileState(SYMBOL_TYPE cont_symbol, unsigned p
 {
 }
 
-bool AnimationCompileState::Append(std::unique_ptr<AnimationCommand> cmd, Coord starPosition, Cont::Token const* token)
+bool AnimationCompileState::Append(Animate::Command cmd, Cont::Token const* token)
 {
-    if (mBeatsRem < cmd->NumBeats()) {
+    if (mBeatsRem < NumBeats(cmd)) {
         RegisterError(AnimateError::OUTOFTIME, token);
         if (mBeatsRem == 0) {
             return false;
         }
-        cmd->ClipBeats(mBeatsRem);
+        cmd = WithBeats(cmd, mBeatsRem);
     }
-    mBeatsRem -= cmd->NumBeats();
+    auto numBeats = NumBeats(cmd);
+    mBeatsRem -= numBeats;
 
-    cmd->ApplyForward(mWhichPos); // Move current point to new position
-    SetVarValue(Cont::Variable::DOF, CalChart::Degree{ cmd->MotionDirection() }.getValue());
-    SetVarValue(Cont::Variable::DOH, CalChart::Degree{ cmd->FacingDirection() }.getValue());
-    mCmds2.push_back(cmd->ToAnimateCommand(starPosition));
-    mCmds.emplace_back(cmd.release());
+    mWhichPos = End(cmd); // Move current point to new position
+    SetVarValue(Cont::Variable::DOF, MotionDirectionAtBeat(cmd, numBeats).getValue());
+    SetVarValue(Cont::Variable::DOH, FacingDirectionAtBeat(cmd, numBeats).getValue());
+    mCmds.push_back(cmd);
     return true;
 }
 

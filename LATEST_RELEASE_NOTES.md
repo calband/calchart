@@ -15,4 +15,5 @@ Other changes:
 * [#504](../../issues/504) Make Animation::NextBeat private
 * [#506](../../issues/506) remove index from AnimateInfo
 * [#510](../../issues/510) Switch the underlying Coord system to int32
+* [#512](../../issues/512) Animation commands should contain the position, not the beat
 

@@ -27,66 +27,6 @@
 #include <format>
 #include <iostream>
 
-namespace CalChart {
-
-// make things copiable
-AnimationSheet::AnimationSheet(AnimationSheet const& other)
-    : mPoints(other.mPoints)
-    , mCommands(other.mCommands.size())
-    , name(other.name)
-    , numbeats(other.numbeats)
-{
-    std::transform(other.mCommands.cbegin(), other.mCommands.cend(), mCommands.begin(), [](auto&& a) {
-        AnimationCommands result(a.size());
-        std::transform(a.cbegin(), a.cend(), result.begin(), [](auto&& b) {
-            return b->clone();
-        });
-        return result;
-    });
-}
-
-AnimationSheet& AnimationSheet::operator=(AnimationSheet other)
-{
-    swap(other);
-    return *this;
-}
-
-AnimationSheet::AnimationSheet(AnimationSheet&& other) noexcept
-    : mPoints(std::move(other.mPoints))
-    , mCommands(std::move(other.mCommands))
-    , name(std::move(other.name))
-    , numbeats(std::move(other.numbeats))
-{
-}
-
-AnimationSheet& AnimationSheet::operator=(AnimationSheet&& other) noexcept
-{
-    AnimationSheet tmp{ std::move(other) };
-    swap(tmp);
-    return *this;
-}
-
-void AnimationSheet::swap(AnimationSheet& other) noexcept
-{
-    using std::swap;
-    swap(mPoints, other.mPoints);
-    swap(mCommands, other.mCommands);
-    swap(name, other.name);
-    swap(numbeats, other.numbeats);
-}
-
-auto AnimationSheet::toOnlineViewerJSON(int whichMarcher, Coord startPosition) const -> std::vector<nlohmann::json>
-{
-    return CalChart::Ranges::ToVector<nlohmann::json>(
-        mCommands.at(whichMarcher) | std::views::transform([&startPosition](auto command) mutable {
-            auto result = command->toOnlineViewerJSON(startPosition);
-            command->ApplyForward(startPosition);
-            return result;
-        }));
-}
-
-}
-
 namespace CalChart::Animate {
 
 namespace {
@@ -127,11 +67,6 @@ auto Sheet::CollisionAtBeat(size_t whichMarcher, beats_t beat) const -> CalChart
         return where->second;
     }
     return Coord::CollisionType::none;
-}
-
-namespace {
-    // get all the positions at a beat:
-
 }
 
 auto Sheet::GetAllBeatsWithCollisions() const -> std::set<beats_t>
