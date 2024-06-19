@@ -82,14 +82,12 @@ auto PrintShow(CalChart::Show const& show, std::ostream& os)
 {
     auto animation = CalChart::Animation{ show };
     DumpAnimationErrors(animation, os);
-    animation.GotoSheet(0);
-    auto currentInfo = animation.GetCurrentInfo();
+    auto currentInfo = animation.GetCurrentInfo(0);
     os << currentInfo.first << "\n";
     std::ranges::copy(currentInfo.second, std::ostream_iterator<std::string>(os, "\n"));
     auto oldInfo = currentInfo;
     for (auto beat : std::views::iota(0UL, animation.GetTotalNumberBeats())) {
-        animation.GotoTotalBeat(beat);
-        auto currentInfo = animation.GetCurrentInfo();
+        auto currentInfo = animation.GetCurrentInfo(beat);
         if (currentInfo.first != oldInfo.first) {
             os << currentInfo.first << "\n";
         }

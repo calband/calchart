@@ -347,12 +347,7 @@ auto CalChartDoc::GetAnimationCollisions() const -> std::map<int, CalChart::Sele
     if (!mAnimation) {
         return {};
     }
-    auto result = std::map<int, CalChart::SelectionList>{};
-    // first map all the collisions to a sheet with a point group.
-    for (auto&& i : mAnimation->GetCollisions()) {
-        result[std::get<1>(i.first)].insert(std::get<0>(i.first));
-    }
-    return result;
+    return mAnimation->GetAnimationCollisions();
 }
 
 namespace {

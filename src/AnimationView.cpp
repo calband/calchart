@@ -59,7 +59,7 @@ auto GeneratePointDrawCommand(Range&& infos) -> std::vector<CalChart::Draw::Draw
     return CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(infos | std::views::transform([](auto&& info) {
         auto size = CalChart::Coord{ CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(1) };
         return CalChart::Draw::Rectangle{
-            info.mPosition - size / 2, { CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(1) }
+            info.mMarcherInfo.mPosition - size / 2, { CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(1) }
         };
     }));
 }
@@ -147,7 +147,7 @@ auto AnimationView::GenerateDraw(CalChart::Configuration const& config) const ->
 
 auto AnimationView::GenerateDrawDots(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
 {
-    auto allEnumeratedInfo = CalChart::Ranges::enumerate_view(mAnimation->GetAllAnimateInfo());
+    auto allEnumeratedInfo = CalChart::Ranges::enumerate_view(mAnimation->GetAllAnimateInfo(mCurrentBeat));
     auto allInfo = allEnumeratedInfo
         | std::views::transform([](auto&& info) { return std::get<1>(info); });
     auto allSelected = allEnumeratedInfo
@@ -195,18 +195,18 @@ auto AnimationView::GenerateDrawSprites(CalChart::Configuration const& config) c
     auto comp_Y = config.Get_SpriteBitmapOffsetY();
 
     auto drawCmds = CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(
-        CalChart::Ranges::enumerate_view(mAnimation->GetAllAnimateInfo()) | std::views::transform([this, comp_Y, timerOn = GetAnimationFrame()->TimerOn()](auto&& enum_info) {
+        CalChart::Ranges::enumerate_view(mAnimation->GetAllAnimateInfo(mCurrentBeat)) | std::views::transform([this, comp_Y, timerOn = GetAnimationFrame()->TimerOn()](auto&& enum_info) {
             auto&& [index, info] = enum_info;
             auto image_offset = [&]() {
-                if (info.mStepStyle == CalChart::MarchingStyle::Close) {
+                if (info.mMarcherInfo.mStepStyle == CalChart::MarchingStyle::Close) {
                     return 0;
                 }
                 return !timerOn ? 0 : OnBeat() ? 1
                                                : 2;
             }();
-            auto image_index = CalChart::AngleToQuadrant(info.mFacingDirection) + image_offset * 8;
+            auto image_index = CalChart::AngleToQuadrant(info.mMarcherInfo.mFacingDirection) + image_offset * 8;
             auto image = mSpriteCalChartImages[image_index];
-            auto position = info.mPosition;
+            auto position = info.mMarcherInfo.mPosition;
             auto offset = CalChart::Coord(image->image_width * comp_X, image->image_height * comp_Y);
 
             return CalChart::Draw::Image{ position, image, mView->IsSelected(index) } - offset;
@@ -227,7 +227,7 @@ void AnimationView::OnUpdate(wxView* sender, wxObject* hint)
 
 void AnimationView::RefreshFrame()
 {
-    if (mPlayCollisionWarning && mAnimation && mAnimation->CurrentBeatHasCollision() && mConfig.Get_BeepOnCollisions()) {
+    if (mPlayCollisionWarning && mAnimation && mAnimation->BeatHasCollision(mCurrentBeat) && mConfig.Get_BeepOnCollisions()) {
         wxBell();
     }
     GetAnimationFrame()->UpdatePanel();
@@ -237,29 +237,29 @@ void AnimationView::RefreshFrame()
 void AnimationView::RefreshAnimationSheet()
 {
     if (mAnimation) {
-        mAnimation->GotoSheet(mView->GetCurrentSheetNum());
+        mCurrentBeat = mAnimation->GetTotalNumberBeatsUpTo(mView->GetCurrentSheetNum());
         RefreshFrame();
     }
 }
 
 int AnimationView::GetTotalNumberBeats() const { return (mAnimation) ? mAnimation->GetTotalNumberBeats() : 0; }
-int AnimationView::GetTotalCurrentBeat() const { return (mAnimation) ? mAnimation->GetTotalCurrentBeat() : 0; }
+int AnimationView::GetTotalCurrentBeat() const { return mCurrentBeat; }
 
 // #define GENERATE_SHOW_DUMP 1
 
 void AnimationView::Generate()
 {
     mAnimation = mView->GenerateAnimation();
+    mCurrentBeat = 0;
 }
 
 void AnimationView::PrevBeat()
 {
     if (mAnimation) {
-        auto currentBeat = mAnimation->GetTotalCurrentBeat();
-        if (currentBeat == 0) {
+        if (mCurrentBeat == 0) {
             return;
         }
-        GotoTotalBeat(currentBeat - 1);
+        mCurrentBeat -= 1;
         RefreshFrame();
     }
 }
@@ -268,27 +268,24 @@ void AnimationView::NextBeat()
 {
     if (mAnimation) {
         auto totalBeats = mAnimation->GetTotalNumberBeats();
-        auto currentBeat = mAnimation->GetTotalCurrentBeat();
-        if (currentBeat == (totalBeats - 1)) {
+        if (mCurrentBeat == (totalBeats - 1)) {
             return;
         }
-        GotoTotalBeat(currentBeat + 1);
+        mCurrentBeat += 1;
         RefreshFrame();
     }
 }
 
-void AnimationView::GotoTotalBeat(unsigned i)
+void AnimationView::GotoTotalBeat(CalChart::beats_t whichBeat)
 {
-    if (mAnimation) {
-        mAnimation->GotoTotalBeat(i);
-        RefreshFrame();
-    }
+    mCurrentBeat = whichBeat;
+    RefreshFrame();
 }
 
 auto AnimationView::AtEndOfShow() const -> bool
 {
     if (mAnimation) {
-        return (mAnimation->GetCurrentBeat() == mAnimation->GetTotalNumberBeats());
+        return (mCurrentBeat == mAnimation->GetTotalNumberBeats());
     }
     return false;
 }
@@ -314,7 +311,7 @@ auto AnimationView::GetMarcherSizeAndOffset() const -> std::pair<wxPoint, wxPoin
     auto bounding_box_low_right = towxPoint({ 0, 0 });
 
     for (auto i = 0; mAnimation && i < mView->GetNumPoints(); ++i) {
-        auto position = towxPoint(mAnimation->GetAnimateInfo(i).mPosition);
+        auto position = towxPoint(mAnimation->GetAnimateInfo(mCurrentBeat, i).mMarcherInfo.mPosition);
         bounding_box_upper_left = wxPoint(std::min(bounding_box_upper_left.x, position.x), std::min(bounding_box_upper_left.y, position.y));
         bounding_box_low_right = wxPoint(std::max(bounding_box_low_right.x, position.x), std::max(bounding_box_low_right.y, position.y));
     }
@@ -369,10 +366,10 @@ auto AnimationView::GetMarcherInfo(int which) const -> AnimationView::MarcherInf
 {
     MarcherInfo info{};
     if (mAnimation) {
-        auto anim_info = mAnimation->GetAnimateInfo(which);
-        info.direction = CalChart::NormalizeAngle(anim_info.mFacingDirection);
+        auto anim_info = mAnimation->GetAnimateInfo(mCurrentBeat, which);
+        info.direction = CalChart::NormalizeAngle(anim_info.mMarcherInfo.mFacingDirection);
 
-        auto position = anim_info.mPosition;
+        auto position = anim_info.mMarcherInfo.mPosition;
         info.x = CalChart::CoordUnits2Float(position.x);
         // because the coordinate system for continuity and OpenGL are different,
         // correct here.

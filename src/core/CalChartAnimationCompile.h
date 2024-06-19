@@ -54,34 +54,34 @@ namespace Cont {
 
 class AnimationCommand;
 using AnimationVariables = std::array<std::map<unsigned, float>, Cont::kNumVariables>;
-using AnimationCommands = std::vector<std::shared_ptr<AnimationCommand>>;
+using AnimationCompileResult = std::pair<std::vector<std::shared_ptr<AnimationCommand>>, std::vector<Animate::Command>>;
 
 // Compile a point into the Animation Commands
 // Variables and Errors are passed as references as they maintain state over all the compiles,
 // and unfortunately, it is faster to pass them this way.
-AnimationCommands
-Compile(
+auto Compile(
     AnimationVariables& variablesStates,
     AnimationErrors& errors,
     Show::const_Sheet_iterator_t c_sheet,
     Show::const_Sheet_iterator_t endSheet,
     unsigned pt_num,
     SYMBOL_TYPE cont_symbol,
-    std::vector<std::unique_ptr<Cont::Procedure>> const& proc);
+    std::vector<std::unique_ptr<Cont::Procedure>> const& proc) -> AnimationCompileResult;
 
 struct AnimationCompile {
-    virtual bool Append(std::unique_ptr<AnimationCommand> cmd, Cont::Token const* token) = 0;
+    virtual ~AnimationCompile() = default;
+    virtual auto Append(std::unique_ptr<AnimationCommand> cmd, Coord startPoint, Cont::Token const* token) -> bool = 0;
     virtual void RegisterError(AnimateError err, Cont::Token const* token) const = 0;
 
-    virtual float GetVarValue(Cont::Variable varnum, Cont::Token const* token) const = 0;
+    [[nodiscard]] virtual auto GetVarValue(Cont::Variable varnum, Cont::Token const* token) const -> float = 0;
     virtual void SetVarValue(Cont::Variable varnum, float value) = 0;
 
     // helper functions to get information for building a command
-    virtual Coord GetPointPosition() const = 0;
-    virtual Coord GetStartingPosition() const = 0;
-    virtual Coord GetEndingPosition(Cont::Token const* token) const = 0;
-    virtual Coord GetReferencePointPosition(unsigned refnum) const = 0;
-    virtual unsigned GetCurrentPoint() const = 0;
-    virtual unsigned GetBeatsRemaining() const = 0;
+    [[nodiscard]] virtual auto GetPointPosition() const -> Coord = 0;
+    [[nodiscard]] virtual auto GetStartingPosition() const -> Coord = 0;
+    [[nodiscard]] virtual auto GetEndingPosition(Cont::Token const* token) const -> Coord = 0;
+    [[nodiscard]] virtual auto GetReferencePointPosition(unsigned refnum) const -> Coord = 0;
+    [[nodiscard]] virtual auto GetCurrentPoint() const -> unsigned = 0;
+    [[nodiscard]] virtual auto GetBeatsRemaining() const -> unsigned = 0;
 };
 }
