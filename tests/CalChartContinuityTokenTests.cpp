@@ -34,12 +34,7 @@ auto GetCompiledResults(Sheets const& sheets, Conts const& proc)
     AnimationVariables vars{};
     AnimationErrors errors{};
 
-    auto compiledResults = Compile(vars, errors, sheets.begin(), sheets.end(), 0, SYMBOL_PLAIN, proc).first;
-    for (auto&& i : compiledResults) {
-        auto c = Coord{ 0, 0 };
-        i->Begin(c);
-    }
-    return compiledResults;
+    return Compile(vars, errors, sheets.begin(), sheets.end(), 0, SYMBOL_PLAIN, proc);
 }
 
 auto CreateSheetsForTest(Coord begin, Coord end, int beats)
@@ -66,7 +61,7 @@ template <typename T>
 auto Compare(T const& test, T const& gold)
 {
     auto whereMiss = std::mismatch(test.begin(), test.end(), gold.begin(), gold.end(), [](auto&& a, auto&& b) {
-        return *a == *b;
+        return a == b;
     });
     return (whereMiss.first == test.end()) && (whereMiss.second == gold.end());
 }
@@ -85,9 +80,9 @@ TEST_CASE("Fountain", "CalChartContinuityToken")
     auto sheets = CreateSheetsForTest({ 0, 0 }, { 8, 16 }, 14);
     auto compiledResults = GetCompiledResults(sheets, procs);
 
-    auto goldCompile = AnimationCommands{
-        std::make_shared<AnimationCommandMove>(6, Coord{ 128, 128 }),
-        std::make_shared<AnimationCommandMove>(8, Coord{ 0, 128 }),
+    auto goldCompile = std::vector<Animate::Command>{
+        Animate::CommandMove{ Coord{ 0, 0 }, 6, Coord{ 128, 128 } },
+        Animate::CommandMove{ Coord{ 128, 128 }, 8, Coord{ 0, 128 } },
     };
     CHECK(Compare(compiledResults, goldCompile));
 }
@@ -106,9 +101,9 @@ TEST_CASE("Fountain with nulls", "CalChartContinuityToken")
     auto sheets = CreateSheetsForTest({ 0, 0 }, { 8, 16 }, 16);
     auto compiledResults = GetCompiledResults(sheets, procs);
 
-    auto goldCompile = AnimationCommands{
-        std::make_shared<AnimationCommandMove>(8, Coord{ 128, 128 }),
-        std::make_shared<AnimationCommandMove>(8, Coord{ 0, 128 }),
+    auto goldCompile = std::vector<Animate::Command>{
+        Animate::CommandMove{ Coord{ 0, 0 }, 8, Coord{ 128, 128 } },
+        Animate::CommandMove{ Coord{ 128, 128 }, 8, Coord{ 0, 128 } },
     };
 
     CHECK(Compare(compiledResults, goldCompile));
@@ -128,12 +123,12 @@ TEST_CASE("HSCM", "CalChartContinuityToken")
     auto sheets = CreateSheetsForTest({ 0, 0 }, { -8, 0 }, { 8, -2 }, { 0, 0 }, 40);
     auto compiledResults = GetCompiledResults(sheets, procs);
 
-    auto goldCompile = AnimationCommands{
-        std::make_shared<AnimationCommandMove>(9, Coord{ -16 * 9, 0 }),
-        std::make_shared<AnimationCommandMove>(2, Coord{ 0, -16 * 2 }),
-        std::make_shared<AnimationCommandMove>(18, Coord{ 16 * 18, 0 }),
-        std::make_shared<AnimationCommandMove>(2, Coord{ 0, 16 * 2 }),
-        std::make_shared<AnimationCommandMove>(9, Coord{ -16 * 9, 0 }),
+    auto goldCompile = std::vector<Animate::Command>{
+        Animate::CommandMove{ Coord{ 0, 0 }, 9, Coord{ -16 * 9, 0 } },
+        Animate::CommandMove{ Coord{ -144, 0 }, 2, Coord{ 0, -16 * 2 } },
+        Animate::CommandMove{ Coord{ -144, -32 }, 18, Coord{ 16 * 18, 0 } },
+        Animate::CommandMove{ Coord{ 144, -32 }, 2, Coord{ 0, 16 * 2 } },
+        Animate::CommandMove{ Coord{ 144, 0 }, 9, Coord{ -16 * 9, 0 } },
     };
     CHECK(Compare(compiledResults, goldCompile));
 }
@@ -152,12 +147,12 @@ TEST_CASE("DMCM", "CalChartContinuityToken")
     auto sheets = CreateSheetsForTest({ 0, 0 }, { -8, 8 }, { 8, -10 }, { 0, 0 }, 40);
     auto compiledResults = GetCompiledResults(sheets, procs);
 
-    auto goldCompile = AnimationCommands{
-        std::make_shared<AnimationCommandMove>(9, Coord{ -16 * 9, 16 * 9 }),
-        std::make_shared<AnimationCommandMove>(2, Coord{ 0, -16 * 2 }),
-        std::make_shared<AnimationCommandMove>(18, Coord{ 16 * 18, -16 * 18 }),
-        std::make_shared<AnimationCommandMove>(2, Coord{ 0, 16 * 2 }),
-        std::make_shared<AnimationCommandMove>(9, Coord{ -16 * 9, 16 * 9 }),
+    auto goldCompile = std::vector<Animate::Command>{
+        Animate::CommandMove{ Coord{ 0, 0 }, 9, Coord{ -16 * 9, 16 * 9 } },
+        Animate::CommandMove{ Coord{ -144, 144 }, 2, Coord{ 0, -16 * 2 } },
+        Animate::CommandMove{ Coord{ -144, 112 }, 18, Coord{ 16 * 18, -16 * 18 } },
+        Animate::CommandMove{ Coord{ 144, -176 }, 2, Coord{ 0, 16 * 2 } },
+        Animate::CommandMove{ Coord{ 144, -144 }, 9, Coord{ -16 * 9, 16 * 9 } },
     };
     CHECK(Compare(compiledResults, goldCompile));
 }

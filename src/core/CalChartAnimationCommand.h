@@ -21,233 +21,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/**
- * Animation Commands
- * Continuities can be broken down into 3 distinct types:
- *  MarkTime: A direction to be facing
- *  Moving: A vector along which to be moving (indicating how far to move each point)
- *  Rotate: A point which to rotate, radius, start and end angles
- * AnimationCommand is an object that represents a particular part of a continuity.  When we decompose
- * continuities into these parts, we can then "transform" a point from a starting position to the end of the
- * Animation by "stepping" it along each AnimationCommand
- */
-
 #include "CalChartAngles.h"
 #include "CalChartAnimationTypes.h"
 #include "CalChartCoord.h"
 #include "CalChartDrawCommand.h"
-#include "CalChartUtils.h"
-#include <memory>
 #include <nlohmann/json.hpp>
-#include <type_traits>
-
-namespace CalChart {
-
-namespace Animate {
-    class CommandStill;
-    class CommandMove;
-    class CommandRotate;
-    using Command = std::variant<CommandStill, CommandMove, CommandRotate>;
-}
-
-class AnimationCommand {
-public:
-    explicit AnimationCommand(unsigned beats);
-    virtual ~AnimationCommand() = default;
-    AnimationCommand(AnimationCommand const&) = default;
-    auto operator=(AnimationCommand const&) -> AnimationCommand& = default;
-    AnimationCommand(AnimationCommand&&) = default;
-    auto operator=(AnimationCommand&&) -> AnimationCommand& = default;
-
-    [[nodiscard]] virtual auto clone() const -> std::unique_ptr<AnimationCommand> = 0;
-
-    // returns false if end of command
-    virtual auto Begin(Coord& pt) -> bool;
-    virtual auto End(Coord& pt) -> bool;
-    virtual auto NextBeat(Coord& pt) -> bool;
-    virtual auto PrevBeat(Coord& pt) -> bool;
-
-    // go through all beats at once
-    virtual void ApplyForward(Coord& pt);
-    virtual void ApplyBackward(Coord& pt);
-
-    [[nodiscard]] virtual auto FacingDirection() const -> CalChart::Degree = 0;
-    [[nodiscard]] virtual auto MotionDirection() const -> CalChart::Degree;
-    virtual void ClipBeats(unsigned beats);
-
-    [[nodiscard]] virtual auto NumBeats() const -> unsigned { return mNumBeats; }
-
-    // What style to display
-    [[nodiscard]] virtual auto StepStyle() const -> MarchingStyle { return MarchingStyle::HighStep; }
-
-    // when we want to have the path drawn:
-    [[nodiscard]] virtual auto GenCC_DrawCommand(Coord pt) const -> Draw::DrawCommand;
-
-    /*!
-     * @brief json  that represent this movement in an Online Viewer '.viewer' file.
-     * @param start The position at which this movement begins.
-     */
-    [[nodiscard]] virtual auto toOnlineViewerJSON(Coord start) const -> nlohmann::json = 0;
-
-    [[nodiscard]] virtual auto ToAnimateCommand(Coord start) const -> Animate::Command = 0;
-
-protected:
-    friend auto operator==(AnimationCommand const& lhs, AnimationCommand const& rhs) -> bool;
-    [[nodiscard]] virtual auto is_equal(AnimationCommand const& other) const -> bool
-    {
-        return mNumBeats == other.mNumBeats && mBeat == other.mBeat;
-    }
-
-    unsigned mNumBeats;
-    unsigned mBeat;
-};
-
-inline auto operator==(AnimationCommand const& lhs, AnimationCommand const& rhs) -> bool
-{
-    return (typeid(lhs) == typeid(rhs)) && lhs.is_equal(rhs);
-}
-
-class AnimationCommandStill : public AnimationCommand {
-    using super = AnimationCommand;
-
-public:
-    enum class Style {
-        MarkTime,
-        StandAndPlay,
-        Close,
-    };
-    AnimationCommandStill(Style style, unsigned beats, CalChart::Degree direction);
-    ~AnimationCommandStill() override = default;
-    AnimationCommandStill(AnimationCommandStill const&) = default;
-    auto operator=(AnimationCommandStill const&) -> AnimationCommandStill& = default;
-    AnimationCommandStill(AnimationCommandStill&&) = default;
-    auto operator=(AnimationCommandStill&&) -> AnimationCommandStill& = default;
-
-    [[nodiscard]] auto clone() const -> std::unique_ptr<AnimationCommand> override;
-    [[nodiscard]] auto FacingDirection() const -> CalChart::Degree override;
-    [[nodiscard]] auto toOnlineViewerJSON(Coord start) const -> nlohmann::json override;
-    [[nodiscard]] auto StepStyle() const -> MarchingStyle override
-    {
-        return mStyle == Style::MarkTime ? MarchingStyle::HighStep : MarchingStyle::Close;
-    }
-
-    [[nodiscard]] virtual auto ToAnimateCommand(Coord start) const -> Animate::Command override;
-
-private:
-    [[nodiscard]] auto is_equal(AnimationCommand const& other) const -> bool override
-    {
-        auto const* ptr = dynamic_cast<AnimationCommandStill const*>(&other);
-        if (ptr == nullptr) {
-            return false;
-        }
-        return super::is_equal(other) && dir.IsEqual(ptr->dir);
-    }
-
-    CalChart::Degree dir;
-    Style mStyle = Style::MarkTime;
-};
-
-class AnimationCommandMove : public AnimationCommand {
-    using super = AnimationCommand;
-
-public:
-    AnimationCommandMove(unsigned beats, Coord movement);
-    AnimationCommandMove(unsigned beats, Coord movement, CalChart::Degree direction);
-    ~AnimationCommandMove() override = default;
-    AnimationCommandMove(AnimationCommandMove const&) = default;
-    auto operator=(AnimationCommandMove const&) -> AnimationCommandMove& = default;
-    AnimationCommandMove(AnimationCommandMove&&) = default;
-    auto operator=(AnimationCommandMove&&) -> AnimationCommandMove& = default;
-
-    [[nodiscard]] auto clone() const -> std::unique_ptr<AnimationCommand> override;
-
-    auto NextBeat(Coord& pt) -> bool override;
-    auto PrevBeat(Coord& pt) -> bool override;
-
-    void ApplyForward(Coord& pt) override;
-    void ApplyBackward(Coord& pt) override;
-
-    [[nodiscard]] auto FacingDirection() const -> CalChart::Degree override;
-    [[nodiscard]] auto MotionDirection() const -> CalChart::Degree override;
-    void ClipBeats(unsigned beats) override;
-
-    [[nodiscard]] auto GenCC_DrawCommand(Coord pt) const -> Draw::DrawCommand override;
-
-    [[nodiscard]] auto toOnlineViewerJSON(Coord start) const -> nlohmann::json override;
-
-    [[nodiscard]] virtual auto ToAnimateCommand(Coord start) const -> Animate::Command override;
-
-private:
-    [[nodiscard]] auto is_equal(AnimationCommand const& other) const -> bool override
-    {
-        auto const* ptr = dynamic_cast<AnimationCommandMove const*>(&other);
-        if (ptr == nullptr) {
-            return false;
-        }
-        return super::is_equal(other) && mVector == ptr->mVector;
-    }
-
-    CalChart::Degree dir;
-    Coord mVector;
-};
-
-class AnimationCommandRotate : public AnimationCommand {
-    using super = AnimationCommand;
-
-public:
-    AnimationCommandRotate(
-        unsigned beats,
-        Coord cntr,
-        float radius,
-        CalChart::Degree ang1,
-        CalChart::Degree ang2,
-        bool backwards = false);
-    ~AnimationCommandRotate() override = default;
-    AnimationCommandRotate(AnimationCommandRotate const&) = default;
-    auto operator=(AnimationCommandRotate const&) -> AnimationCommandRotate& = default;
-    AnimationCommandRotate(AnimationCommandRotate&&) = default;
-    auto operator=(AnimationCommandRotate&&) -> AnimationCommandRotate& = default;
-
-    [[nodiscard]] auto clone() const -> std::unique_ptr<AnimationCommand> override;
-
-    auto NextBeat(Coord& pt) -> bool override;
-    auto PrevBeat(Coord& pt) -> bool override;
-
-    void ApplyForward(Coord& pt) override;
-    void ApplyBackward(Coord& pt) override;
-
-    [[nodiscard]] auto FacingDirection() const -> CalChart::Degree override;
-    void ClipBeats(unsigned beats) override;
-
-    [[nodiscard]] auto GenCC_DrawCommand(Coord pt) const -> Draw::DrawCommand override;
-
-    [[nodiscard]] auto toOnlineViewerJSON(Coord start) const -> nlohmann::json override;
-
-    [[nodiscard]] virtual auto ToAnimateCommand(Coord start) const -> Animate::Command override;
-
-private:
-    [[nodiscard]] auto is_equal(AnimationCommand const& other) const -> bool override
-    {
-        auto const* ptr = dynamic_cast<AnimationCommandRotate const*>(&other);
-        if (ptr == nullptr) {
-            return false;
-        }
-        return super::is_equal(other)
-            && mOrigin == ptr->mOrigin
-            && IS_EQUAL(mRadius, ptr->mRadius)
-            && mAngStart.IsEqual(ptr->mAngStart)
-            && mAngEnd.IsEqual(ptr->mAngEnd)
-            && mFace.IsEqual(ptr->mFace);
-    }
-
-    Coord mOrigin;
-    float mRadius;
-    CalChart::Degree mAngStart;
-    CalChart::Degree mAngEnd;
-    CalChart::Degree mFace;
-};
-
-}
 
 /**
  * Animate::Command
@@ -268,6 +46,11 @@ private:
 
 namespace CalChart::Animate {
 
+class CommandStill;
+class CommandMove;
+class CommandRotate;
+using Command = std::variant<CommandStill, CommandMove, CommandRotate>;
+
 using beats_t = unsigned;
 
 struct MarcherInfo {
@@ -282,9 +65,6 @@ struct MarcherInfo {
 
 template <typename Command>
 concept CommandT = requires(Command cmd, beats_t beats) {
-    {
-        cmd.Start()
-    } -> std::convertible_to<Coord>;
     {
         cmd.End()
     } -> std::convertible_to<Coord>;
@@ -328,25 +108,15 @@ public:
         , mStyle{ style }
     {
     }
-    ~CommandStill() = default;
-    CommandStill(CommandStill const&) = default;
-    auto operator=(CommandStill const&) -> CommandStill& = default;
-    CommandStill(CommandStill&&) = default;
-    auto operator=(CommandStill&&) -> CommandStill& = default;
 
-    CommandStill WithBeats(beats_t beats) const
+    [[nodiscard]] auto WithBeats(beats_t beats) const -> CommandStill
     {
         return CommandStill{ mStart, beats, mStyle, mDirection };
     }
 
-    [[nodiscard]] auto Start() const -> Coord { return mStart; }
     [[nodiscard]] auto End() const -> Coord { return mStart; }
-    [[nodiscard]] auto PositionAtBeat([[maybe_unused]] beats_t beat) -> Coord { return mStart; }
-    [[nodiscard]] auto FacingDirectionAtBeat([[maybe_unused]] beats_t beat) const
-    {
-        //        std::cout << "Asking for still facing at beat " << beat << " dir " << mDirection << " in radian: " << CalChart::Radian{ mDirection } << "\n";
-        return mDirection;
-    }
+    [[nodiscard]] auto PositionAtBeat([[maybe_unused]] beats_t beat) const -> Coord { return mStart; }
+    [[nodiscard]] auto FacingDirectionAtBeat([[maybe_unused]] beats_t beat) const { return mDirection; }
     [[nodiscard]] auto MotionDirectionAtBeat([[maybe_unused]] beats_t beat) const { return mDirection; }
 
     [[nodiscard]] auto NumBeats() const -> beats_t { return mNumBeats; }
@@ -380,21 +150,15 @@ public:
         , mDirection{ direction }
     {
     }
-    ~CommandMove() = default;
-    CommandMove(CommandMove const&) = default;
-    auto operator=(CommandMove const&) -> CommandMove& = default;
-    CommandMove(CommandMove&&) = default;
-    auto operator=(CommandMove&&) -> CommandMove& = default;
 
-    CommandMove WithBeats(beats_t beats) const
+    [[nodiscard]] auto WithBeats(beats_t beats) const -> CommandMove
     {
         return CommandMove{ mStart, beats, mMovement, mDirection };
     }
 
-    [[nodiscard]] auto Start() const -> Coord { return mStart; }
     [[nodiscard]] auto End() const -> Coord { return mStart + mMovement; }
 
-    [[nodiscard]] auto PositionAtBeat(beats_t beat) -> Coord;
+    [[nodiscard]] auto PositionAtBeat(beats_t beat) const -> Coord;
     [[nodiscard]] auto FacingDirectionAtBeat([[maybe_unused]] beats_t beat) const
     {
         //        std::cout << "Asking for move facing at beat " << beat << " dir " << mDirection << " in radian: " << CalChart::Radian{ mDirection } << "\n";
@@ -444,20 +208,13 @@ public:
     {
     }
 
-    ~CommandRotate() = default;
-    CommandRotate(CommandRotate const&) = default;
-    auto operator=(CommandRotate const&) -> CommandRotate& = default;
-    CommandRotate(CommandRotate&&) = default;
-    auto operator=(CommandRotate&&) -> CommandRotate& = default;
-
-    CommandRotate WithBeats(beats_t beats) const
+    [[nodiscard]] auto WithBeats(beats_t beats) const -> CommandRotate
     {
         return CommandRotate{ mStart, beats, mOrigin, mRadius, mAngStart, mAngEnd, mFace };
     }
 
-    [[nodiscard]] auto Start() const -> Coord { return mStart; }
     [[nodiscard]] auto End() const -> Coord;
-    [[nodiscard]] auto PositionAtBeat([[maybe_unused]] beats_t beat) -> Coord;
+    [[nodiscard]] auto PositionAtBeat([[maybe_unused]] beats_t beat) const -> Coord;
     [[nodiscard]] auto FacingDirectionAtBeat(beats_t beat) const -> CalChart::Degree;
     [[nodiscard]] auto MotionDirectionAtBeat(beats_t beat) const { return FacingDirectionAtBeat(beat); }
 
@@ -484,11 +241,6 @@ static_assert(CommandT<CommandMove>);
 static_assert(CommandT<CommandRotate>);
 
 using Command = std::variant<CommandStill, CommandMove, CommandRotate>;
-
-inline auto Start(Command const& cmd) -> Coord
-{
-    return std::visit([](auto arg) { return arg.Start(); }, cmd);
-}
 
 inline auto End(Command const& cmd) -> Coord
 {

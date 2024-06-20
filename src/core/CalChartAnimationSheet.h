@@ -26,91 +26,11 @@
 #include "CalChartCoord.h"
 #include "CalChartPoint.h"
 
-#include <memory>
 #include <nlohmann/json.hpp>
 #include <ranges>
 #include <set>
 #include <string>
 #include <vector>
-
-/**
- * Animation Sheet
- * Continuities can be broken down into 3 distinct types:
- *  MarkTime: A direction to be facing
- *  Moving: A vector along which to be moving (indicating how far to move each point)
- *  Rotate: A point which to rotate, radius, start and end angles
- * AnimationCommand is an object that represents a particular part of a continuity.  When we decompose
- * continuities into these parts, we can then "transform" a point from a starting position to the end of the
- * Animation by "stepping" it along each AnimationCommand
- */
-
-namespace CalChart {
-
-class AnimationCommand;
-
-using AnimationCommands = std::vector<std::shared_ptr<AnimationCommand>>;
-
-// AnimationSheet is a snapshot of CalChartSheet
-class AnimationSheet {
-public:
-    AnimationSheet(std::vector<Coord> const& thePoints, std::vector<AnimationCommands> const& theCommands, std::string const& s, unsigned beats)
-        : mPoints(thePoints)
-        , mCommands(theCommands)
-        , name(s)
-        , numbeats(beats)
-    {
-    }
-
-    // make things copiable
-    AnimationSheet(AnimationSheet const&);
-    AnimationSheet& operator=(AnimationSheet);
-    AnimationSheet(AnimationSheet&&) noexcept;
-    AnimationSheet& operator=(AnimationSheet&&) noexcept;
-    void swap(AnimationSheet&) noexcept;
-
-    auto GetName() const { return name; }
-    auto GetNumBeats() const { return numbeats; }
-    auto GetPoints() const { return mPoints; }
-    auto GetCommands(int which) const { return mCommands.at(which); }
-    auto GetCommandsBegin(int which) const
-    {
-        return mCommands.at(which).begin();
-    }
-    auto GetCommandsBeginIndex(int /*which*/) const
-    {
-        return std::vector<AnimationCommands>::size_type(0);
-    }
-    auto GetCommandsEnd(int which) const
-    {
-        return mCommands.at(which).end();
-    }
-    auto GetCommandsEndIndex(int which) const
-    {
-        return mCommands.at(which).size();
-    }
-    auto GetCommandsAt(int which, int index) const
-    {
-        return mCommands.at(which).at(index);
-    }
-
-    auto toOnlineViewerJSON(int whichMarcher, Coord startPosition) const -> std::vector<nlohmann::json>;
-    auto toOnlineViewerJSON(std::vector<CalChart::Point> const& points) const -> std::vector<std::vector<nlohmann::json>>
-    {
-        auto results = std::vector<std::vector<nlohmann::json>>{};
-        for (unsigned ptIndex = 0; ptIndex < points.size(); ptIndex++) {
-            results.push_back(toOnlineViewerJSON(ptIndex, points[ptIndex].GetPos()));
-        }
-        return results;
-    }
-
-private:
-    std::vector<Coord> mPoints; // should probably be const
-    std::vector<AnimationCommands> mCommands;
-    std::string name;
-    unsigned numbeats;
-};
-
-}
 
 namespace CalChart::Animate {
 
@@ -128,11 +48,6 @@ struct Info {
 class Sheet {
 public:
     Sheet(std::string name, unsigned numBeats, std::vector<std::vector<Animate::Command>> const& commands);
-    ~Sheet() = default;
-    Sheet(Sheet const&) = default;
-    auto operator=(Sheet const&) -> Sheet& = default;
-    Sheet(Sheet&&) noexcept = default;
-    auto operator=(Sheet&&) noexcept -> Sheet& = default;
 
     [[nodiscard]] auto GetName() const { return mName; }
     [[nodiscard]] auto GetNumBeats() const { return mNumBeats; }
@@ -224,7 +139,7 @@ public:
         return mSheets.at(whichSheet).GeneratePathToDraw(whichMarcher, endRadius);
     }
 
-    auto toOnlineViewerJSON() const -> std::vector<std::vector<std::vector<nlohmann::json>>>;
+    [[nodiscard]] auto toOnlineViewerJSON() const -> std::vector<std::vector<std::vector<nlohmann::json>>>;
 
 private:
     std::vector<Sheet> mSheets;

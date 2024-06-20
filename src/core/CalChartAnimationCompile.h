@@ -52,9 +52,8 @@ namespace Cont {
     class Token;
 }
 
-class AnimationCommand;
 using AnimationVariables = std::array<std::map<unsigned, float>, Cont::kNumVariables>;
-using AnimationCompileResult = std::pair<std::vector<std::shared_ptr<AnimationCommand>>, std::vector<Animate::Command>>;
+using AnimationCompileResult = std::vector<Animate::Command>;
 
 // Compile a point into the Animation Commands
 // Variables and Errors are passed as references as they maintain state over all the compiles,
@@ -70,7 +69,7 @@ auto Compile(
 
 struct AnimationCompile {
     virtual ~AnimationCompile() = default;
-    virtual auto Append(std::unique_ptr<AnimationCommand> cmd, Coord startPoint, Cont::Token const* token) -> bool = 0;
+    virtual auto Append(Animate::Command cmd, Cont::Token const* token) -> bool = 0;
     virtual void RegisterError(AnimateError err, Cont::Token const* token) const = 0;
 
     [[nodiscard]] virtual auto GetVarValue(Cont::Variable varnum, Cont::Token const* token) const -> float = 0;

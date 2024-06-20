@@ -184,10 +184,7 @@ void DoCounterMarch(const Procedure& proc, AnimationCompile& anim,
         c = v1.DM_Magnitude();
         if (c <= beats) {
             beats -= c;
-            if (!anim.Append(std::make_unique<AnimationCommandMove>(
-                                 float2unsigned(&proc, anim, c), v1),
-                    anim.GetPointPosition(),
-                    &proc)) {
+            if (!anim.Append(Animate::CommandMove{ anim.GetPointPosition(), float2unsigned(&proc, anim, c), v1 }, &proc)) {
                 return;
             }
         } else {
@@ -205,10 +202,7 @@ void DoCounterMarch(const Procedure& proc, AnimationCompile& anim,
                 v1 = CreateCalChartVector(d1 + CalChart::Degree{ 180.0 }, beats);
                 break;
             }
-            anim.Append(std::make_unique<AnimationCommandMove>(
-                            float2unsigned(&proc, anim, beats), v1),
-                anim.GetPointPosition(),
-                &proc);
+            anim.Append(Animate::CommandMove{ anim.GetPointPosition(), float2unsigned(&proc, anim, beats), v1 }, &proc);
             return;
         }
         leg++;
@@ -1686,9 +1680,7 @@ void ProcBlam::Compile(AnimationCompile& anim)
 {
     NextPoint np;
     auto c = np.Get(anim) - anim.GetPointPosition();
-    anim.Append(std::make_unique<AnimationCommandMove>(anim.GetBeatsRemaining(), c),
-        anim.GetPointPosition(),
-        this);
+    anim.Append(Animate::CommandMove{ anim.GetPointPosition(), anim.GetBeatsRemaining(), c }, this);
 }
 
 std::ostream& ProcBlam::Print(std::ostream& os) const
@@ -1726,9 +1718,7 @@ Reader ProcBlam::Deserialize(Reader reader)
 // ProcClose
 void ProcClose::Compile(AnimationCompile& anim)
 {
-    anim.Append(std::make_unique<AnimationCommandStill>(AnimationCommandStill::Style::Close, anim.GetBeatsRemaining(), CalChart::Degree{ dir->Get(anim) }),
-        anim.GetPointPosition(),
-        this);
+    anim.Append(Animate::CommandStill{ anim.GetPointPosition(), anim.GetBeatsRemaining(), Animate::CommandStill::Style::Close, CalChart::Degree{ dir->Get(anim) } }, this);
 }
 
 std::ostream& ProcClose::Print(std::ostream& os) const
@@ -1940,16 +1930,12 @@ void ProcDMHS::Compile(AnimationCompile& anim)
     }
     if (c_dm != Coord{ 0 }) {
         auto b = CoordUnits2Int(c_dm.x);
-        if (!anim.Append(std::make_unique<AnimationCommandMove>(std::abs(b), c_dm),
-                anim.GetPointPosition(),
-                this)) {
+        if (!anim.Append(Animate::CommandMove(anim.GetPointPosition(), std::abs(b), c_dm), this)) {
             return;
         }
     }
     if (c_hs != Coord{ 0 }) {
-        anim.Append(std::make_unique<AnimationCommandMove>(std::abs(b_hs), c_hs),
-            anim.GetPointPosition(),
-            this);
+        anim.Append(Animate::CommandMove(anim.GetPointPosition(), std::abs(b_hs), c_hs), this);
     }
 }
 
@@ -1999,9 +1985,9 @@ void ProcEven::Compile(AnimationCompile& anim)
     auto c = pnt->Get(anim) - anim.GetPointPosition();
     auto steps = float2int(this, anim, stps->Get(anim));
     if (steps < 0) {
-        anim.Append(std::make_unique<AnimationCommandMove>((unsigned)-steps, c, -CalChart::Degree{ c.Direction() }), anim.GetPointPosition(), this);
+        anim.Append(Animate::CommandMove(anim.GetPointPosition(), (unsigned)-steps, c, -CalChart::Degree{ c.Direction() }), this);
     } else {
-        anim.Append(std::make_unique<AnimationCommandMove>((unsigned)steps, c), anim.GetPointPosition(), this);
+        anim.Append(Animate::CommandMove(anim.GetPointPosition(), (unsigned)steps, c), this);
     }
 }
 
@@ -2054,18 +2040,14 @@ void ProcEWNS::Compile(AnimationCompile& anim)
     if (c1.y != 0) {
         Coord c2{ 0, c1.y };
         auto b = CoordUnits2Int(c2.y);
-        if (!anim.Append(std::make_unique<AnimationCommandMove>(std::abs(b), c2),
-                anim.GetPointPosition(),
-                this)) {
+        if (!anim.Append(Animate::CommandMove(anim.GetPointPosition(), std::abs(b), c2), this)) {
             return;
         }
     }
     if (c1.x != 0) {
         Coord c2{ c1.x, 0 };
         auto b = CoordUnits2Int(c2.x);
-        if (!anim.Append(std::make_unique<AnimationCommandMove>(std::abs(b), c2),
-                anim.GetPointPosition(),
-                this)) {
+        if (!anim.Append(Animate::CommandMove(anim.GetPointPosition(), std::abs(b), c2), this)) {
             return;
         }
     }
@@ -2142,10 +2124,7 @@ void ProcFountain::Compile(AnimationCompile& anim)
             } else {
                 f1 = e / a;
             }
-            if (!anim.Append(std::make_unique<AnimationCommandMove>(
-                                 float2unsigned(this, anim, f1), v),
-                    anim.GetPointPosition(),
-                    this)) {
+            if (!anim.Append(Animate::CommandMove(anim.GetPointPosition(), float2unsigned(this, anim, f1), v), this)) {
                 return;
             }
         } else {
@@ -2157,10 +2136,7 @@ void ProcFountain::Compile(AnimationCompile& anim)
         if (!IS_ZERO(f2)) {
             v.x = Float2CoordUnits(f2 * a);
             v.y = Float2CoordUnits(f2 * c);
-            if (!anim.Append(std::make_unique<AnimationCommandMove>(
-                                 float2unsigned(this, anim, f2), v),
-                    anim.GetPointPosition(),
-                    this)) {
+            if (!anim.Append(Animate::CommandMove(anim.GetPointPosition(), float2unsigned(this, anim, f2), v), this)) {
                 return;
             }
         }
@@ -2168,10 +2144,7 @@ void ProcFountain::Compile(AnimationCompile& anim)
         if (!IS_ZERO(f2)) {
             v.x = Float2CoordUnits(f2 * b);
             v.y = Float2CoordUnits(f2 * d);
-            if (!anim.Append(std::make_unique<AnimationCommandMove>(
-                                 float2unsigned(this, anim, f2), v),
-                    anim.GetPointPosition(),
-                    this)) {
+            if (!anim.Append(Animate::CommandMove(anim.GetPointPosition(), float2unsigned(this, anim, f2), v), this)) {
                 return;
             }
         }
@@ -2278,9 +2251,9 @@ void ProcFM::Compile(AnimationCompile& anim)
         auto c = CreateCalChartVector(CalChart::Degree{ dir->Get(anim) }, stps->Get(anim));
         if (c != Coord{ 0 }) {
             if (b < 0) {
-                anim.Append(std::make_unique<AnimationCommandMove>((unsigned)-b, c, -CalChart::Degree{ c.Direction() }), anim.GetPointPosition(), this);
+                anim.Append(Animate::CommandMove(anim.GetPointPosition(), (unsigned)-b, c, -CalChart::Degree{ c.Direction() }), this);
             } else {
-                anim.Append(std::make_unique<AnimationCommandMove>((unsigned)b, c), anim.GetPointPosition(), this);
+                anim.Append(Animate::CommandMove(anim.GetPointPosition(), (unsigned)b, c), this);
             }
         }
     }
@@ -2334,9 +2307,7 @@ void ProcFMTO::Compile(AnimationCompile& anim)
     auto c = pnt->Get(anim) - anim.GetPointPosition();
     if (c != Coord{ 0 }) {
         anim.Append(
-            std::make_unique<AnimationCommandMove>((unsigned)c.DM_Magnitude(), c),
-            anim.GetPointPosition(),
-            this);
+            Animate::CommandMove(anim.GetPointPosition(), (unsigned)c.DM_Magnitude(), c), this);
     }
 }
 
@@ -2405,7 +2376,7 @@ void ProcGrid::Compile(AnimationCompile& anim)
 
     c -= anim.GetPointPosition();
     if (c != Coord{ 0 }) {
-        anim.Append(std::make_unique<AnimationCommandMove>(0, c), anim.GetPointPosition(), this);
+        anim.Append(Animate::CommandMove(anim.GetPointPosition(), 0, c), this);
     }
 }
 
@@ -2544,15 +2515,13 @@ void ProcHSDM::Compile(AnimationCompile& anim)
         b = CoordUnits2Int(c_hs.y);
     }
     if (c_hs != Coord{ 0 }) {
-        if (!anim.Append(std::make_unique<AnimationCommandMove>(std::abs(b), c_hs),
-                anim.GetPointPosition(),
-                this)) {
+        if (!anim.Append(Animate::CommandMove(anim.GetPointPosition(), std::abs(b), c_hs), this)) {
             return;
         }
     }
     if (c_dm != Coord{ 0 }) {
         b = CoordUnits2Int(c_dm.x);
-        anim.Append(std::make_unique<AnimationCommandMove>(std::abs(b), c_dm), anim.GetPointPosition(), this);
+        anim.Append(Animate::CommandMove(anim.GetPointPosition(), std::abs(b), c_dm), this);
     }
 }
 
@@ -2600,7 +2569,7 @@ Reader ProcHSDM::Deserialize(Reader reader)
 void ProcMagic::Compile(AnimationCompile& anim)
 {
     auto c = pnt->Get(anim) - anim.GetPointPosition();
-    anim.Append(std::make_unique<AnimationCommandMove>(0, c), anim.GetPointPosition(), this);
+    anim.Append(Animate::CommandMove(anim.GetPointPosition(), 0, c), this);
 }
 
 std::ostream& ProcMagic::Print(std::ostream& os) const
@@ -2653,11 +2622,11 @@ void ProcMarch::Compile(AnimationCompile& anim)
         Coord c{ Float2CoordUnits(cos(angle) * mag), static_cast<Coord::units>(-Float2CoordUnits(sin(angle) * mag)) };
         if (c != Coord{ 0 }) {
             if (facedir)
-                anim.Append(std::make_unique<AnimationCommandMove>((unsigned)std::abs(b), c, CalChart::Degree{ facedir->Get(anim) }), anim.GetPointPosition(), this);
+                anim.Append(Animate::CommandMove(anim.GetPointPosition(), (unsigned)std::abs(b), c, CalChart::Degree{ facedir->Get(anim) }), this);
             else if (b < 0) {
-                anim.Append(std::make_unique<AnimationCommandMove>((unsigned)-b, c, -CalChart::Degree{ c.Direction() }), anim.GetPointPosition(), this);
+                anim.Append(Animate::CommandMove(anim.GetPointPosition(), (unsigned)-b, c, -CalChart::Degree{ c.Direction() }), this);
             } else {
-                anim.Append(std::make_unique<AnimationCommandMove>((unsigned)b, c), anim.GetPointPosition(), this);
+                anim.Append(Animate::CommandMove(anim.GetPointPosition(), (unsigned)b, c), this);
             }
         }
     }
@@ -2733,7 +2702,7 @@ void ProcMT::Compile(AnimationCompile& anim)
 {
     auto b = float2int(this, anim, numbeats->Get(anim));
     if (b != 0) {
-        anim.Append(std::make_unique<AnimationCommandStill>(AnimationCommandStill::Style::MarkTime, (unsigned)std::abs(b), CalChart::Degree{ dir->Get(anim) }), anim.GetPointPosition(), this);
+        anim.Append(Animate::CommandStill(anim.GetPointPosition(), (unsigned)std::abs(b), Animate::CommandStill::Style::MarkTime, CalChart::Degree{ dir->Get(anim) }), this);
     }
 }
 
@@ -2782,7 +2751,7 @@ Reader ProcMT::Deserialize(Reader reader)
 // ProcMTRM
 void ProcMTRM::Compile(AnimationCompile& anim)
 {
-    anim.Append(std::make_unique<AnimationCommandStill>(AnimationCommandStill::Style::MarkTime, anim.GetBeatsRemaining(), CalChart::Degree{ dir->Get(anim) }), anim.GetPointPosition(), this);
+    anim.Append(Animate::CommandStill(anim.GetPointPosition(), anim.GetBeatsRemaining(), Animate::CommandStill::Style::MarkTime, CalChart::Degree{ dir->Get(anim) }), this);
 }
 
 std::ostream& ProcMTRM::Print(std::ostream& os) const
@@ -2832,18 +2801,14 @@ void ProcNSEW::Compile(AnimationCompile& anim)
     if (c1.x != 0) {
         Coord c2{ c1.x, 0 };
         auto b = CoordUnits2Int(c2.x);
-        if (!anim.Append(std::make_unique<AnimationCommandMove>(std::abs(b), c2),
-                anim.GetPointPosition(),
-                this)) {
+        if (!anim.Append(Animate::CommandMove(anim.GetPointPosition(), std::abs(b), c2), this)) {
             return;
         }
     }
     if (c1.y != 0) {
         Coord c2{ 0, c1.y };
         auto b = CoordUnits2Int(c2.y);
-        if (!anim.Append(std::make_unique<AnimationCommandMove>(std::abs(b), c2),
-                anim.GetPointPosition(),
-                this)) {
+        if (!anim.Append(Animate::CommandMove(anim.GetPointPosition(), std::abs(b), c2), this)) {
             return;
         }
     }
@@ -2907,13 +2872,12 @@ void ProcRotate::Compile(AnimationCompile& anim)
     if (b < 0) {
         backwards = true;
     }
-    anim.Append(std::make_unique<AnimationCommandRotate>(
+    anim.Append(Animate::CommandRotate(
                     (unsigned)std::abs(b), c,
                     // Don't use Magnitude() because
                     // we want Coord numbers
                     sqrt(static_cast<float>(rad.x * rad.x + rad.y * rad.y)),
                     start_ang, start_ang + angle, backwards),
-        anim.GetPointPosition(),
         this);
 }
 
@@ -2967,7 +2931,7 @@ void ProcStandAndPlay::Compile(AnimationCompile& anim)
 {
     auto b = float2int(this, anim, numbeats->Get(anim));
     if (b != 0) {
-        anim.Append(std::make_unique<AnimationCommandStill>(AnimationCommandStill::Style::StandAndPlay, (unsigned)std::abs(b), CalChart::Degree{ dir->Get(anim) }), anim.GetPointPosition(), this);
+        anim.Append(Animate::CommandStill(anim.GetPointPosition(), (unsigned)std::abs(b), Animate::CommandStill::Style::StandAndPlay, CalChart::Degree{ dir->Get(anim) }), this);
     }
 }
 
@@ -3012,5 +2976,4 @@ Reader ProcStandAndPlay::Deserialize(Reader reader)
     std::tie(dir, reader) = DeserializeValue(reader);
     return reader;
 }
-
 }

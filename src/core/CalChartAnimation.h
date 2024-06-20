@@ -29,13 +29,10 @@
 #include "CalChartDrawCommand.h"
 
 #include <map>
-#include <memory>
 #include <vector>
 
 namespace CalChart {
 
-class AnimationCommand;
-class AnimationSheet;
 class Show;
 
 namespace Animate {

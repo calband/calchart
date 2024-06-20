@@ -25,19 +25,8 @@
 #include "CalChartAnimationCompile.h"
 #include "CalChartAnimationErrors.h"
 #include "CalChartContinuity.h"
-#include "CalChartDrawCommand.h"
-#include "CalChartPoint.h"
-#include "CalChartRanges.h"
 #include "CalChartSheet.h"
 #include "CalChartShow.h"
-#include "CalChartUtils.h"
-
-#define _USE_MATH_DEFINES
-#include <cmath>
-#include <iostream>
-#include <numeric>
-#include <sstream>
-#include <string>
 
 namespace CalChart {
 
@@ -59,8 +48,7 @@ Animation::Animation(const Show& show)
 
         // Now parse continuity
         AnimationErrors errors;
-        std::vector<AnimationCommands> theCommands(points.size());
-        std::vector<std::vector<Animate::Command>> theCommands2(points.size());
+        std::vector<std::vector<Animate::Command>> theCommands(points.size());
         for (auto& current_symbol : k_symbols) {
             if (curr_sheet->ContinuityInUse(current_symbol)) {
                 auto& current_continuity = curr_sheet->GetContinuityBySymbol(current_symbol);
@@ -74,9 +62,7 @@ Animation::Animation(const Show& show)
 #endif
                 for (unsigned j = 0; j < points.size(); j++) {
                     if (curr_sheet->GetSymbol(j) == current_symbol) {
-                        auto compileResults = CalChart::Compile(variablesStates, errors, curr_sheet, show.GetSheetEnd(), j, current_symbol, continuity);
-                        theCommands[j] = compileResults.first;
-                        theCommands2[j] = compileResults.second;
+                        theCommands[j] = CalChart::Compile(variablesStates, errors, curr_sheet, show.GetSheetEnd(), j, current_symbol, continuity);
                     }
                 }
             }
@@ -84,9 +70,7 @@ Animation::Animation(const Show& show)
         // Handle points that don't have continuity (shouldn't happen)
         for (unsigned j = 0; j < points.size(); j++) {
             if (theCommands[j].empty()) {
-                auto compileResults = CalChart::Compile(variablesStates, errors, curr_sheet, show.GetSheetEnd(), j, MAX_NUM_SYMBOLS, {});
-                theCommands[j] = compileResults.first;
-                theCommands2[j] = compileResults.second;
+                theCommands[j] = CalChart::Compile(variablesStates, errors, curr_sheet, show.GetSheetEnd(), j, MAX_NUM_SYMBOLS, {});
             }
         }
         if (errors.AnyErrors()) {
@@ -96,9 +80,7 @@ Animation::Animation(const Show& show)
         for (unsigned i = 0; i < points.size(); i++) {
             thePoints.at(i) = curr_sheet->GetPosition(i);
         }
-        sheets.emplace_back(curr_sheet->GetName(), curr_sheet->GetBeats(), theCommands2);
-        // here's where we would put in another sheet, and compare to see if all the positions are the same,
-        // if it makes the same json movements.
+        sheets.emplace_back(curr_sheet->GetName(), curr_sheet->GetBeats(), theCommands);
     }
 
     mSheets = Animate::Sheets{ sheets };
