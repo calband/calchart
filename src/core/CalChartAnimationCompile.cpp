@@ -28,30 +28,30 @@
 namespace CalChart {
 
 struct AnimationCompileState : public AnimationCompile {
-    AnimationCompileState(SYMBOL_TYPE cont_symbol, unsigned pt_num, Show::const_Sheet_iterator_t c_sheet, Show::const_Sheet_iterator_t endSheet, AnimationVariables& variablesStates, AnimationErrors& errors);
+    AnimationCompileState(SYMBOL_TYPE cont_symbol, unsigned whichMarcher, Point point, beats_t beats, std::optional<Coord> endPosition, AnimationVariables& variablesStates, AnimationErrors& errors);
 
-    bool Append(Animate::Command cmd, Cont::Token const* token) override;
-    void RegisterError(AnimateError err, Cont::Token const* token) const override { mErrors.RegisterError(err, token, mWhichPoint, contsymbol); }
+    [[nodiscard]] auto Append(Animate::Command cmd, Cont::Token const* token) -> bool override;
+    void RegisterError(AnimateError err, Cont::Token const* token) const override { mErrors.RegisterError(err, token, mWhichMarcher, contsymbol); }
 
-    float GetVarValue(Cont::Variable varnum, Cont::Token const* token) const override;
-    void SetVarValue(Cont::Variable varnum, float value) override { mVars[toUType(varnum)][mWhichPoint] = value; }
+    [[nodiscard]] auto GetVarValue(Cont::Variable varnum, Cont::Token const* token) const -> float override;
+    void SetVarValue(Cont::Variable varnum, float value) override { mVars.at(toUType(varnum))[mWhichMarcher] = value; }
 
-    virtual Coord GetPointPosition() const override { return mWhichPos; }
-    virtual Coord GetStartingPosition() const override { return mCurrentSheet->GetPosition(GetCurrentPoint()); }
-    virtual Coord GetEndingPosition(Cont::Token const* token) const override;
-    virtual Coord GetReferencePointPosition(unsigned refnum) const override { return mCurrentSheet->GetPosition(GetCurrentPoint(), refnum); }
-    virtual unsigned GetCurrentPoint() const override { return mWhichPoint; }
-    virtual unsigned GetBeatsRemaining() const override { return mBeatsRem; }
+    [[nodiscard]] auto GetPointPosition() const -> Coord override { return mWhichPos; }
+    [[nodiscard]] auto GetStartingPosition() const -> Coord override { return mPoint.GetPos(0); }
+    [[nodiscard]] auto GetEndingPosition(Cont::Token const* token) const -> Coord override;
+    [[nodiscard]] auto GetReferencePointPosition(unsigned refnum) const -> Coord override { return mPoint.GetPos(refnum); }
+    [[nodiscard]] auto GetCurrentPoint() const -> unsigned override { return mWhichMarcher; }
+    [[nodiscard]] auto GetBeatsRemaining() const -> unsigned override { return mBeatsRem; }
 
-    auto GetCommands() const { return mCmds; }
+    [[nodiscard]] auto GetCommands() const { return mCmds; }
 
 private:
     SYMBOL_TYPE contsymbol;
-    unsigned mWhichPoint;
+    unsigned mWhichMarcher;
+    Point mPoint;
     Coord mWhichPos;
     unsigned mBeatsRem;
-    Show::const_Sheet_iterator_t mCurrentSheet;
-    Show::const_Sheet_iterator_t mEndSheet;
+    std::optional<Coord> mEndPosition;
     AnimationVariables& mVars;
     AnimationErrors& mErrors;
     std::vector<Animate::Command> mCmds{};
@@ -60,20 +60,20 @@ private:
 auto Compile(
     AnimationVariables& variablesStates,
     AnimationErrors& errors,
-    Show::const_Sheet_iterator_t c_sheet,
-    Show::const_Sheet_iterator_t endSheet,
-    unsigned pt_num,
+    unsigned whichMarcher,
     SYMBOL_TYPE cont_symbol,
+    Point point,
+    beats_t beats,
+    bool isLastAnimationSheet,
+    std::optional<Coord> endPosition,
+    std::optional<Coord> nextPosition,
     std::vector<std::unique_ptr<Cont::Procedure>> const& procs) -> AnimationCompileResult
 {
-    AnimationCompileState ac(cont_symbol, pt_num, c_sheet, endSheet, variablesStates, errors);
+    AnimationCompileState ac(cont_symbol, whichMarcher, point, beats, endPosition, variablesStates, errors);
 
     // no continuity was specified
     if (procs.empty()) {
-        // find the first animation sheet.
-        auto s = std::find_if(c_sheet + 1, endSheet, [](auto& sheet) { return sheet.IsInAnimation(); });
-
-        if (s == endSheet) {
+        if (isLastAnimationSheet) {
             // use MTRM E
             Cont::ProcMTRM defcont(std::make_unique<Cont::ValueDefined>(Cont::CC_E));
             defcont.Compile(ac);
@@ -85,36 +85,36 @@ auto Compile(
     }
 
     // compile all the commands
-    for (auto& proc : procs) {
+    for (auto const& proc : procs) {
         proc->Compile(ac);
     }
 
     // report if the point didn't make it
-    if ((c_sheet + 1) != endSheet) {
-        auto next_point = (c_sheet + 1)->GetPosition(pt_num);
+    if (nextPosition) {
+        auto next_point = *nextPosition;
         if (ac.GetPointPosition() != next_point) {
             auto c = next_point - ac.GetPointPosition();
-            ac.RegisterError(AnimateError::WRONGPLACE, NULL);
-            ac.Append(Animate::CommandMove{ ac.GetPointPosition(), ac.GetBeatsRemaining(), c }, NULL);
+            ac.RegisterError(AnimateError::WRONGPLACE, nullptr);
+            ac.Append(Animate::CommandMove{ ac.GetPointPosition(), ac.GetBeatsRemaining(), c }, nullptr);
         }
     }
 
     // report if we have extra time.
     if (ac.GetBeatsRemaining()) {
-        ac.RegisterError(AnimateError::EXTRATIME, NULL);
+        ac.RegisterError(AnimateError::EXTRATIME, nullptr);
         ac.Append(Animate::CommandStill{ ac.GetPointPosition(), ac.GetBeatsRemaining(), Animate::CommandStill::Style::MarkTime, CalChart::Degree::East() }, NULL);
     }
 
     return ac.GetCommands();
 }
 
-AnimationCompileState::AnimationCompileState(SYMBOL_TYPE cont_symbol, unsigned pt_num, Show::const_Sheet_iterator_t c_sheet, Show::const_Sheet_iterator_t endSheet, AnimationVariables& variablesStates, AnimationErrors& errors)
+AnimationCompileState::AnimationCompileState(SYMBOL_TYPE cont_symbol, unsigned whichMarcher, Point point, beats_t beats, std::optional<Coord> endPosition, AnimationVariables& variablesStates, AnimationErrors& errors)
     : contsymbol(cont_symbol)
-    , mWhichPoint(pt_num)
-    , mWhichPos(c_sheet->GetPosition(pt_num))
-    , mBeatsRem(c_sheet->GetBeats())
-    , mCurrentSheet(c_sheet)
-    , mEndSheet(endSheet)
+    , mWhichMarcher(whichMarcher)
+    , mPoint{ point }
+    , mWhichPos(mPoint.GetPos(0))
+    , mBeatsRem(beats)
+    , mEndPosition{ endPosition }
     , mVars(variablesStates)
     , mErrors(errors)
 {
@@ -141,7 +141,7 @@ bool AnimationCompileState::Append(Animate::Command cmd, Cont::Token const* toke
 
 float AnimationCompileState::GetVarValue(Cont::Variable varnum, Cont::Token const* token) const
 {
-    auto i = mVars[toUType(varnum)].find(mWhichPoint);
+    auto i = mVars[toUType(varnum)].find(mWhichMarcher);
     if (i != mVars[toUType(varnum)].end()) {
         return i->second;
     }
@@ -151,18 +151,11 @@ float AnimationCompileState::GetVarValue(Cont::Variable varnum, Cont::Token cons
 
 Coord AnimationCompileState::GetEndingPosition(Cont::Token const* token) const
 {
-    auto sheet = mCurrentSheet + 1;
-
-    while (1) {
-        if (sheet == mEndSheet) {
-            RegisterError(AnimateError::UNDEFINED, token);
-            return GetPointPosition();
-        }
-        if (sheet->IsInAnimation()) {
-            return sheet->GetPosition(GetCurrentPoint());
-        }
-        ++sheet;
+    if (mEndPosition) {
+        return *mEndPosition;
+    } else {
+        RegisterError(AnimateError::UNDEFINED, token);
+        return GetPointPosition();
     }
 }
-
 }

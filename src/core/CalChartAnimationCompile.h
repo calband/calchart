@@ -58,13 +58,20 @@ using AnimationCompileResult = std::vector<Animate::Command>;
 // Compile a point into the Animation Commands
 // Variables and Errors are passed as references as they maintain state over all the compiles,
 // and unfortunately, it is faster to pass them this way.
+// endPosition and nextPosition are a little odd.
+// end is the position to go that's the next valid animation -- the shee has at least 1 beat
+// next position is the position of the marcher on the next sheet, regardless of number of beats.
+// is optional because if there is no next sheet (this is the last sheet), then it's null.
 auto Compile(
     AnimationVariables& variablesStates,
     AnimationErrors& errors,
-    Show::const_Sheet_iterator_t c_sheet,
-    Show::const_Sheet_iterator_t endSheet,
-    unsigned pt_num,
+    unsigned whichMarcher,
     SYMBOL_TYPE cont_symbol,
+    Point point,
+    beats_t beats,
+    bool isLastAnimationSheet,
+    std::optional<Coord> endPosition,
+    std::optional<Coord> nextPosition,
     std::vector<std::unique_ptr<Cont::Procedure>> const& proc) -> AnimationCompileResult;
 
 struct AnimationCompile {

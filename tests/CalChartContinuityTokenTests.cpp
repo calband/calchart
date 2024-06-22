@@ -34,7 +34,17 @@ auto GetCompiledResults(Sheets const& sheets, Conts const& proc)
     AnimationVariables vars{};
     AnimationErrors errors{};
 
-    return Compile(vars, errors, sheets.begin(), sheets.end(), 0, SYMBOL_PLAIN, proc);
+    return Compile(
+        vars,
+        errors,
+        0,
+        SYMBOL_PLAIN,
+        sheets.begin()->GetPoint(0),
+        sheets.begin()->GetBeats(),
+        true,
+        (sheets.begin() + 1)->GetPoint(0).GetPos(),
+        (sheets.begin() + 1)->GetPoint(0).GetPos(),
+        proc);
 }
 
 auto CreateSheetsForTest(Coord begin, Coord end, int beats)
