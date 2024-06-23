@@ -44,6 +44,15 @@ enum class Direction {
     NorthWest,
 };
 
+constexpr auto DegreesNorth = 0.0;
+constexpr auto DegreesNorthEast = 45.0;
+constexpr auto DegreesEast = 90.0;
+constexpr auto DegreesSouthEast = 135.0;
+constexpr auto DegreesSouth = 180.0;
+constexpr auto DegreesSouthWest = 225.0;
+constexpr auto DegreesWest = 270.0;
+constexpr auto DegreesNorthWest = 315.0;
+
 // we generally implement Degree related functions in Radian.
 struct Radian {
     template <typename T>
@@ -110,6 +119,15 @@ struct Degree {
     {
     }
     explicit constexpr Degree(Radian v);
+
+    static constexpr auto North() -> Degree { return Degree{ DegreesNorth }; }
+    static constexpr auto NorthEast() -> Degree { return Degree{ DegreesNorthEast }; }
+    static constexpr auto East() -> Degree { return Degree{ DegreesEast }; }
+    static constexpr auto SouthEast() -> Degree { return Degree{ DegreesSouthEast }; }
+    static constexpr auto South() -> Degree { return Degree{ DegreesSouth }; }
+    static constexpr auto SouthWest() -> Degree { return Degree{ DegreesSouthWest }; }
+    static constexpr auto West() -> Degree { return Degree{ DegreesWest }; }
+    static constexpr auto NorthWest() -> Degree { return Degree{ DegreesNorthWest }; }
 
     [[nodiscard]] explicit operator Radian() const;
     [[nodiscard]] constexpr auto getValue() const { return value; }
@@ -320,5 +338,6 @@ namespace details {
     static_assert(Degree(1.0) == (Degree(point5) * 2));
     static_assert(Degree(1.0) == (2 * Degree(point5)));
     static_assert(Degree(point5) == (Degree(1.0) / 2));
+    static_assert(Degree{ 90 } == Degree::East());
 }
 }

@@ -102,7 +102,7 @@ auto Compile(
     // report if we have extra time.
     if (ac.GetBeatsRemaining()) {
         ac.RegisterError(AnimateError::EXTRATIME, NULL);
-        ac.Append(Animate::CommandStill{ ac.GetPointPosition(), ac.GetBeatsRemaining(), Animate::CommandStill::Style::MarkTime, CalChart::Degree{ 90 } }, NULL);
+        ac.Append(Animate::CommandStill{ ac.GetPointPosition(), ac.GetBeatsRemaining(), Animate::CommandStill::Style::MarkTime, CalChart::Degree::East() }, NULL);
     }
 
     return ac.GetCommands();
