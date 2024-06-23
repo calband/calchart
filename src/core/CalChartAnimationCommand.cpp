@@ -101,7 +101,7 @@ CommandRotate::CommandRotate(
         radius,
         ang1,
         ang2,
-        backwards ? CalChart::Degree{ -90 } : CalChart::Degree{ 90 }
+        backwards ? CalChart::Degree::West() : CalChart::Degree::East()
     }
 {
 }
@@ -159,7 +159,7 @@ auto CommandRotate::toOnlineViewerJSON() const -> nlohmann::json
     j["angle"] = (-(mAngEnd - mAngStart)).getValue();
     j["beats"] = static_cast<double>(NumBeats());
     j["beats_per_step"] = static_cast<double>(1);
-    j["facing_offset"] = (-mFace + CalChart::Degree{ 90 }).getValue();
+    j["facing_offset"] = (-mFace + CalChart::Degree::East()).getValue();
     return j;
 }
 

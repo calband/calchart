@@ -20,7 +20,7 @@ float ToOnlineViewer::yPosition(CalChart::Coord::units coord)
 
 float ToOnlineViewer::angle(CalChart::Degree angle)
 {
-    angle = -(angle - CalChart::Degree{ 270 });
+    angle = -(angle - CalChart::Degree::West());
     angle = BoundDirection(angle);
     return angle.getValue();
 }

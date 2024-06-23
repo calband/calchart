@@ -126,7 +126,14 @@ TEST_CASE("BasicsDegrees", "AnglesTest")
     CHECK(CalChart::AngleToQuadrant(Degree{ 315 }) == 1);
     CHECK(CalChart::AngleToQuadrant(Degree{ 350 }) == 0);
     CHECK(CalChart::AngleToQuadrant(Degree{ 360 }) == 0);
-    CHECK(CalChart::AngleToQuadrant(Degree{ 341341 }) == 7);
+    CHECK(CalChart::AngleToQuadrant(Degree::North()) == 0);
+    CHECK(CalChart::AngleToQuadrant(Degree::NorthEast()) == 7);
+    CHECK(CalChart::AngleToQuadrant(Degree::East()) == 6);
+    CHECK(CalChart::AngleToQuadrant(Degree::SouthEast()) == 5);
+    CHECK(CalChart::AngleToQuadrant(Degree::South()) == 4);
+    CHECK(CalChart::AngleToQuadrant(Degree::SouthWest()) == 3);
+    CHECK(CalChart::AngleToQuadrant(Degree::West()) == 2);
+    CHECK(CalChart::AngleToQuadrant(Degree::NorthWest()) == 1);
     for (auto [dir, v] : std::map<double, std::tuple<double, double>>{
              { 0, { 1, 0 } },
              { 10, { 0.984807753, -0.1736481777 } },

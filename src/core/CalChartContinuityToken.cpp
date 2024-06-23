@@ -164,11 +164,11 @@ void DoCounterMarch(const Procedure& proc, AnimationCompile& anim,
             leg = 2;
         } else {
             v1 = p[3] - anim.GetPointPosition();
-            if ((v1 != Coord{ 0 }) && CalChart::Degree{ v1.Direction() }.IsEqual(d1 + CalChart::Degree{ 180 })) {
+            if ((v1 != Coord{ 0 }) && CalChart::Degree{ v1.Direction() }.IsEqual(d1 + CalChart::Degree::South())) {
                 leg = 3;
             } else {
                 v1 = p[0] - anim.GetPointPosition();
-                if ((v1 != Coord{ 0 }) && CalChart::Degree{ v1.Direction() }.IsEqual(d2 + CalChart::Degree{ 180 })) {
+                if ((v1 != Coord{ 0 }) && CalChart::Degree{ v1.Direction() }.IsEqual(d2 + CalChart::Degree::South())) {
                     leg = 0;
                 } else {
                     // Current point is not in path of countermarch
@@ -190,7 +190,7 @@ void DoCounterMarch(const Procedure& proc, AnimationCompile& anim,
         } else {
             switch (leg) {
             case 0:
-                v1 = CreateCalChartVector(d2 + CalChart::Degree{ 180.0 }, beats);
+                v1 = CreateCalChartVector(d2 + CalChart::Degree::South(), beats);
                 break;
             case 1:
                 v1 = CreateCalChartVector(d1, beats);
@@ -199,7 +199,7 @@ void DoCounterMarch(const Procedure& proc, AnimationCompile& anim,
                 v1 = CreateCalChartVector(d2, beats);
                 break;
             default:
-                v1 = CreateCalChartVector(d1 + CalChart::Degree{ 180.0 }, beats);
+                v1 = CreateCalChartVector(d1 + CalChart::Degree::South(), beats);
                 break;
             }
             anim.Append(Animate::CommandMove{ anim.GetPointPosition(), float2unsigned(&proc, anim, beats), v1 }, &proc);
