@@ -71,7 +71,7 @@ auto Sheet::CollisionAtBeat(size_t whichMarcher, beats_t beat) const -> CalChart
 
 auto Sheet::GetAllBeatsWithCollisions() const -> std::set<beats_t>
 {
-    return std::reduce(mCollisions.begin(), mCollisions.end(), std::set<beats_t>{}, [](auto acc, auto item) {
+    return std::accumulate(mCollisions.begin(), mCollisions.end(), std::set<beats_t>{}, [](auto acc, auto item) {
         acc.insert(std::get<1>(std::get<0>(item)));
         return acc;
     });
@@ -79,7 +79,7 @@ auto Sheet::GetAllBeatsWithCollisions() const -> std::set<beats_t>
 
 auto Sheet::GetAllMarchersWithCollisionAtBeat(beats_t beat) const -> CalChart::SelectionList
 {
-    return std::reduce(mCollisions.begin(), mCollisions.end(), CalChart::SelectionList{}, [beat](auto acc, auto item) {
+    return std::accumulate(mCollisions.begin(), mCollisions.end(), CalChart::SelectionList{}, [beat](auto acc, auto item) {
         if (std::get<1>(std::get<0>(item)) == beat) {
             acc.insert(std::get<0>(std::get<0>(item)));
         }
@@ -125,7 +125,7 @@ auto Sheet::FindAllCollisions() const -> std::map<std::tuple<size_t, beats_t>, C
     auto results = std::map<std::tuple<size_t, beats_t>, Coord::CollisionType>{};
     for (auto beat : std::views::iota(0U, GetNumBeats())) {
         auto allCollisions = Animate::FindAllCollisions(AllMarcherInfoAtBeat(beat) | std::views::transform([](auto info) { return info.mPosition; }));
-        results = std::reduce(allCollisions.begin(), allCollisions.end(), results, [beat](auto acc, auto item) {
+        results = std::accumulate(allCollisions.begin(), allCollisions.end(), results, [beat](auto acc, auto item) {
             auto [where, collision] = item;
             acc[{ where, beat }] = collision;
             return acc;
