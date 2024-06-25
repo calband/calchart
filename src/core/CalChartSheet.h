@@ -89,6 +89,7 @@ public:
     SYMBOL_TYPE GetSymbol(unsigned i) const;
     void SetSymbol(unsigned i, SYMBOL_TYPE sym);
     std::vector<Point> GetPoints() const;
+    auto GetNumberPoints() const { return mPoints.size(); }
     std::vector<SYMBOL_TYPE> GetSymbols() const;
     void SetPoints(std::vector<Point> const& points);
     int FindPoint(Coord where, Coord::units searchBound, unsigned ref = 0) const;
