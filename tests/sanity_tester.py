@@ -46,6 +46,14 @@ def run_command(command_location, file, output_file, option, extension):
         result = subprocess.run(command, capture_output=True, text=True)
         output.write(filter_output(result.stdout, dir_name))
 
+def run_command_ps(command_location, file, output_file, option, extension):
+    dir_name = os.path.dirname(file) + "/"
+    output_name = output_file + "." + extension
+    command = [command_location, "print_to_postscript", option, file, output_name]
+    if Debug:
+        print("{} > {}".format(command, output_name))
+    subprocess.run(command, capture_output=True, text=True)
+
 def compare_files(file1, file2, custom_comparison_function):
     num_errors = 0
     line_num = 0
@@ -85,13 +93,18 @@ def extractValues(input_string):
     else:
         return None
 
+def compare_whole_lines(line1, line2):
+    if line1.startswith("%%CreationDate: "):
+        return line2.startswith("%%CreationDate: ")
+    return line1.strip() == line2.strip()
+
 def custom_comparison_function(line1, line2):
     value1 = extractValues(line1.strip())
     value2 = extractValues(line2.strip())
     if value1 is None or value2 is None:
         if Debug:
             print(f"comparing {line1.strip()} and {line2.strip()}")
-        return line1.strip() == line2.strip()
+        return compare_whole_lines(line1, line2)
     # Adjust tolerance as needed
     tolerance = 1e-2
     result = value1[0] == value2[0] and value1[1] == value2[1] and value1[2] == value2[2] and abs(value1[3] - value2[3]) < tolerance and value1[4] == value2[4]
@@ -157,6 +170,12 @@ def main():
                 # Run the command with different combinations of flags asynchronously
                 for [options, extension] in [["--print_show", "print"], ["--dump_continuity", "dump"], ["--check_flag", "check"], ["--animate_show", "animate"], ["--json", "json"]]:
                     process = multiprocessing.Process(target=run_command, args=(calchart_cmd, file_path, output_file, options, extension))
+                    process.start()
+                    processes.append(process)
+
+                # PS version Run the command with different combinations of flags asynchronously
+                for [options, extension] in [["", "normal.ps"], ["--landscape", "landscape.ps"], ["--cont", "cont.ps"], ["--contsheet", "contsheet.ps"], ["--overview", "overview.ps"]]:
+                    process = multiprocessing.Process(target=run_command_ps, args=(calchart_cmd, file_path, output_file, options, extension))
                     process.start()
                     processes.append(process)
 
