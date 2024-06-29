@@ -6,7 +6,7 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "print_ps.h"
+#import "CalChartPrintShowToPS.hpp"
 #import "cc_show.h"
 #import "modes.h"
 #import "zllrbach.h"

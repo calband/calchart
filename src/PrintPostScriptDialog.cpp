@@ -24,10 +24,10 @@
 
 #include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
+#include "CalChartPrintShowToPS.hpp"
 #include "CalChartSheet.h"
 #include "CalChartShow.h"
 #include "basic_ui.h"
-#include "print_ps.h"
 
 #include <set>
 
@@ -119,10 +119,9 @@ void PrintPostScriptDialog::PrintShow()
         break;
     }
 
-    std::ostringstream buffer;
-    auto n = mShow->PrintToPS(buffer, overview, static_cast<int>(minyards), mIsSheetPicked, mConfig);
+    auto [result, n] = mShow->PrintToPS(overview, static_cast<int>(minyards), mIsSheetPicked, mConfig);
     // stream to file:
-    wxFFileOutputStream(s).Write(buffer.str().c_str(), buffer.str().size());
+    wxFFileOutputStream(s).Write(result.c_str(), result.size());
 
 #ifdef PRINT__RUN_CMD
     switch (mConfig.Get_PrintPSModes()) {

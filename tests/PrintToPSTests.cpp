@@ -1,7 +1,7 @@
 #include "CalChartPostScript.h"
+#include "CalChartPrintShowToPS.hpp"
 #include "CalChartShow.h"
 #include "CalChartShowMode.h"
-#include "print_ps.h"
 #include <catch2/catch_test_macros.hpp>
 
 #include <fstream>
@@ -646,17 +646,17 @@ void PrintToPS(CalChart::Show const& show, CalChart::ShowMode const& mode, bool 
 {
     auto printShowToPS = CalChart::PrintShowToPS(
         show, landscape, cont, contsheet, overview, 50, mode,
-        { { head_font_str, main_font_str, number_font_str, cont_font_str,
-            bold_font_str, ital_font_str, bold_ital_font_str } },
-        PageWidth, PageHeight, PageOffsetX, PageOffsetY, PaperLength, HeaderSize,
-        YardsSize, TextSize, DotRatio, NumRatio, PLineRatio, SLineRatio,
-        ContRatio, CalChart::kDefaultYardLines);
+        { { head_font_str, main_font_str, number_font_str, cont_font_str, bold_font_str, ital_font_str, bold_ital_font_str } },
+        { PageWidth, PageHeight, PageOffsetX, PageOffsetY, PaperLength },
+        { HeaderSize, YardsSize, TextSize },
+        { DotRatio, NumRatio, PLineRatio, SLineRatio, ContRatio },
+        CalChart::kDefaultYardLines);
 
     std::set<size_t> picked;
     for (auto i = 0; i < show.GetNumSheets(); ++i)
         picked.insert(i);
 
-    printShowToPS(output, picked, "show");
+    output << std::get<0>(printShowToPS(picked, "show"));
 }
 
 TEST_CASE("CalChartTestPSPrintDefault")
@@ -704,7 +704,7 @@ TEST_CASE("CalChartTestPSPrintDefault")
                 "/x lmargin def\n(This is a centered line of text) centerText\n/y y h sub def\n" },
             std::pair{
                 "Normal \\bsBold \\isBold+Italics \\beItalics \\ieNormal\n",
-                "/x lmargin def\n(Normal ) leftText\n/boldfont findfont 12 scalefont setfont\n(Bold ) leftText\n/bolditalfont findfont 12 scalefont setfont\n(Bold+Italics ) leftText\n/italfont findfont 12 scalefont setfont\n(Italics ) leftText\n/contfont findfont 12 scalefont setfont\n(Normal) leftText\n/y y h sub def\n" },
+                "/x lmargin def\n(Normal ) leftText\n/boldfont findfont 12.00 scalefont setfont\n(Bold ) leftText\n/bolditalfont findfont 12.00 scalefont setfont\n(Bold+Italics ) leftText\n/italfont findfont 12.00 scalefont setfont\n(Italics ) leftText\n/contfont findfont 12.00 scalefont setfont\n(Normal) leftText\n/y y h sub def\n" },
             std::pair{
                 "Next line is all tabs with numbers\n",
                 "/x lmargin def\n(Next line is all tabs with numbers) leftText\n/y y h sub def\n" },
@@ -716,35 +716,35 @@ TEST_CASE("CalChartTestPSPrintDefault")
                 "/x lmargin def\n(All the symbols with two tabs) leftText\n/y y h sub def\n" },
             std::pair{
                 "\t\t\\po:\tplainman\n",
-                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12 scalefont setfont\n(A) leftText\n/contfont findfont 12 scalefont setfont\n(:) leftText\ntab3 do_tab\n(plainman) leftText\n/y y h sub def\n" },
+                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12.00 scalefont setfont\n(A) leftText\n/contfont findfont 12.00 scalefont setfont\n(:) leftText\ntab3 do_tab\n(plainman) leftText\n/y y h sub def\n" },
             std::pair{
                 "\t\t\\pb:\tbackslashman\n",
-                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12 scalefont setfont\n(C) leftText\n/contfont findfont 12 scalefont setfont\n(:) leftText\ntab3 do_tab\n(backslashman) leftText\n/y y h sub def\n" },
+                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12.00 scalefont setfont\n(C) leftText\n/contfont findfont 12.00 scalefont setfont\n(:) leftText\ntab3 do_tab\n(backslashman) leftText\n/y y h sub def\n" },
             std::pair{
                 "\t\t\\ps:\tslashman\n",
-                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12 scalefont setfont\n(D) leftText\n/contfont findfont 12 scalefont setfont\n(:) leftText\ntab3 do_tab\n(slashman) leftText\n/y y h sub def\n" },
+                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12.00 scalefont setfont\n(D) leftText\n/contfont findfont 12.00 scalefont setfont\n(:) leftText\ntab3 do_tab\n(slashman) leftText\n/y y h sub def\n" },
             std::pair{
                 "\t\t\\px:\txman\n",
-                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12 scalefont setfont\n(E) leftText\n/contfont findfont 12 scalefont setfont\n(:) leftText\ntab3 do_tab\n(xman) leftText\n/y y h sub def\n" },
+                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12.00 scalefont setfont\n(E) leftText\n/contfont findfont 12.00 scalefont setfont\n(:) leftText\ntab3 do_tab\n(xman) leftText\n/y y h sub def\n" },
             std::pair{
                 "\t\t\\so:\tsolidman\n",
-                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12 scalefont setfont\n(B) leftText\n/contfont findfont 12 scalefont setfont\n(:) leftText\ntab3 do_tab\n(solidman) leftText\n/y y h sub def\n" },
+                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12.00 scalefont setfont\n(B) leftText\n/contfont findfont 12.00 scalefont setfont\n(:) leftText\ntab3 do_tab\n(solidman) leftText\n/y y h sub def\n" },
             std::pair{
                 "\t\t\\sb:\tsolidbackslashman\n",
-                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12 scalefont setfont\n(F) leftText\n/contfont findfont 12 scalefont setfont\n(:) leftText\ntab3 do_tab\n(solidbackslashman) leftText\n/y y h sub def\n" },
+                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12.00 scalefont setfont\n(F) leftText\n/contfont findfont 12.00 scalefont setfont\n(:) leftText\ntab3 do_tab\n(solidbackslashman) leftText\n/y y h sub def\n" },
             std::pair{
                 "\t\t\\ss:\tsolidslashman\n",
-                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12 scalefont setfont\n(G) leftText\n/contfont findfont 12 scalefont setfont\n(:) leftText\ntab3 do_tab\n(solidslashman) leftText\n/y y h sub def\n" },
+                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12.00 scalefont setfont\n(G) leftText\n/contfont findfont 12.00 scalefont setfont\n(:) leftText\ntab3 do_tab\n(solidslashman) leftText\n/y y h sub def\n" },
             std::pair{
                 "\t\t\\sx:\tsolidxman\n",
-                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12 scalefont setfont\n(H) leftText\n/contfont findfont 12 scalefont setfont\n(:) leftText\ntab3 do_tab\n(solidxman) leftText\n/y y h sub def\n" },
+                "/x lmargin def\ntab1 do_tab\ntab2 do_tab\n/CalChart findfont 12.00 scalefont setfont\n(H) leftText\n/contfont findfont 12.00 scalefont setfont\n(:) leftText\ntab3 do_tab\n(solidxman) leftText\n/y y h sub def\n" },
         };
         for (auto [text, result] : DefaultText) {
             auto printCont = CalChart::PrintContinuity("", text);
             auto textChunks = printCont.GetChunks();
             std::stringstream buffer;
             for (auto& text : printCont.GetChunks()) {
-                CalChart::PostScript::GenerateContinuityLine(buffer, text, CalChart::PSFONT::NORM, 12);
+                buffer << CalChart::PostScript::GenerateContinuityLine(text, CalChart::PSFONT::NORM, 12.0);
             }
             CHECK(buffer.str() == result);
         }

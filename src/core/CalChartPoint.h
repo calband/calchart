@@ -70,6 +70,8 @@ public:
     [[nodiscard]] auto GetDrawCommands(std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) const { return GetDrawCommands(0, label, dotRatio, pLineRatio, sLineRatio); }
     [[nodiscard]] auto GetDrawCommands(double dotRatio, double pLineRatio, double sLineRatio) const -> std::vector<Draw::DrawCommand>;
 
+    [[nodiscard]] auto GetSymbol() const { return mSym; }
+
 private:
     enum {
         kPointLabelFlipped,
@@ -82,7 +84,6 @@ private:
     Coord mPos{};
     std::array<Coord, kNumRefPoints> mRef{};
 
-    [[nodiscard]] auto GetSymbol() const { return mSym; }
     void SetSymbol(SYMBOL_TYPE sym);
 
     [[nodiscard]] auto SerializeHelper() const -> std::vector<std::byte>;

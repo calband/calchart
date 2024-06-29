@@ -19,4 +19,5 @@ Other changes:
 * [#512](../../issues/512) Animation commands should contain the position, not the beat
 * [#521](../../issues/521) Degree should have special constructors for common directions
 * [#526](../../issues/526) We should have a sanity test for ps output
+* [#528](../../issues/528) Clean up postscript files to be more value like
 

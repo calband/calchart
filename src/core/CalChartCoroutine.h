@@ -22,6 +22,7 @@
 */
 
 #include <coroutine>
+#include <exception>
 #include <ranges>
 #include <stdexcept>
 

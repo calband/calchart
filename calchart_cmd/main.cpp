@@ -6,11 +6,11 @@
 //
 //
 
+#include "CalChartPrintShowToPS.hpp"
 #include "calchart_cmd_parse.hpp"
 #include "calchart_cmd_parse_continuity_text.hpp"
 #include "ccvers.h"
 #include "docopt.h"
-#include "print_ps.h"
 
 #include <fstream>
 #include <iostream>
@@ -68,11 +68,11 @@ void PrintToPS(std::string_view showPath, bool landscape, bool cont, bool contsh
 
     auto printShowToPS = CalChart::PrintShowToPS(
         *show, landscape, cont, contsheet, overview, 50, mode,
-        { { head_font_str, main_font_str, number_font_str, cont_font_str,
-            bold_font_str, ital_font_str, bold_ital_font_str } },
-        PageWidth, PageHeight, PageOffsetX, PageOffsetY, PaperLength, HeaderSize,
-        YardsSize, TextSize, DotRatio, NumRatio, PLineRatio, SLineRatio,
-        ContRatio, CalChart::kDefaultYardLines);
+        { { head_font_str, main_font_str, number_font_str, cont_font_str, bold_font_str, ital_font_str, bold_ital_font_str } },
+        { PageWidth, PageHeight, PageOffsetX, PageOffsetY, PaperLength },
+        { HeaderSize, YardsSize, TextSize },
+        { DotRatio, NumRatio, PLineRatio, SLineRatio, ContRatio },
+        CalChart::kDefaultYardLines);
 
     auto picked = std::set<size_t>{};
     for (auto i = 0; i < show->GetNumSheets(); ++i) {
@@ -81,7 +81,7 @@ void PrintToPS(std::string_view showPath, bool landscape, bool cont, bool contsh
 
     auto output = std::ofstream(std::string(outfile));
 
-    printShowToPS(output, picked, "show");
+    output << std::get<0>(printShowToPS(picked, "show"));
 }
 
 auto main(int argc, char* argv[]) -> int
