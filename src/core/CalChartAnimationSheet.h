@@ -65,7 +65,7 @@ public:
     [[nodiscard]] auto GetAllMarchersWithCollisionAtBeat(beats_t beat) const -> CalChart::SelectionList;
     [[nodiscard]] auto GetAllMarchersWithCollisions() const -> CalChart::SelectionList
     {
-        return std::reduce(mCollisions.begin(), mCollisions.end(), CalChart::SelectionList{}, [](auto acc, auto item) {
+        return std::accumulate(mCollisions.begin(), mCollisions.end(), CalChart::SelectionList{}, [](auto acc, auto item) {
             acc.insert(std::get<0>(std::get<0>(item)));
             return acc;
         });

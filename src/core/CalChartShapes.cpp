@@ -109,6 +109,11 @@ auto Lasso::GetPointsOnLine(int numpnts) const -> std::vector<Coord>
     if (numpnts < 1 || pntlist.empty()) {
         return {};
     }
+    // if we are in the degenerative case where first and last point are equal,
+    // then we just return the first point repeated.
+    if (pntlist.size() == 2 && pntlist.front() == pntlist.back()) {
+        return std::vector<Coord>(numpnts, pntlist.front());
+    }
     std::vector<Coord> results;
     results.reserve(numpnts);
     results.push_back(pntlist.front());
