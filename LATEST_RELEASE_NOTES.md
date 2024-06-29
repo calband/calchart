@@ -18,4 +18,5 @@ Other changes:
 * [#510](../../issues/510) Switch the underlying Coord system to int32
 * [#512](../../issues/512) Animation commands should contain the position, not the beat
 * [#521](../../issues/521) Degree should have special constructors for common directions
+* [#526](../../issues/526) We should have a sanity test for ps output
 
