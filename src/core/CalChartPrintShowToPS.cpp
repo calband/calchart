@@ -77,7 +77,7 @@ namespace {
         return result;
     };
 
-    const auto GeneratePageBreak = [] { return "showpage\n"; };
+    const auto GeneratePageBreak = []() { return "showpage\n"; };
 
     const auto GeneratePrintContinuityPreamble = [](auto y_def,
                                                      auto h_def,
@@ -140,7 +140,7 @@ namespace {
             + "%%EndDefaults\n";
     };
 
-    const auto GenerateDateCreated = [] -> std::string {
+    const auto GenerateDateCreated = []() -> std::string {
         time_t t;
         time(&t);
         std::ostringstream os;
