@@ -60,7 +60,7 @@ jobs:
       if: matrix.config.os == 'macos-14'
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '15.2'
+        xcode-version: '15.4'
 
     - name: Installing Dependencies (Windows)
       if: matrix.config.os == 'windows-latest'
