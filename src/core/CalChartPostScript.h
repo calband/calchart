@@ -22,62 +22,12 @@
 */
 
 #include "CalChartText.h"
-#include <iostream>
+#include <format>
+#include <sstream>
 
 namespace CalChart::PostScript {
-static inline void PageHeader(std::ostream& buffer, double dots_x, double dots_y)
-{
-    buffer << "0 setgray\n";
-    buffer << "0.25 setlinewidth\n";
-    buffer << (dots_x) << " " << (dots_y) << " translate\n";
-}
 
-static inline void PrintContinuityPreamble(std::ostream& buffer,
-    double y_def,
-    double h_def,
-    double rmargin,
-    double tab1,
-    double tab2,
-    double tab3,
-    double font_size)
-{
-    buffer << "/y " << (y_def) << " def\n";
-    buffer << "/h " << (h_def) << " def\n";
-    buffer << "/lmargin 0 def /rmargin " << (rmargin) << " def\n";
-    buffer << "/tab1 " << (tab1) << " def /tab2 " << (tab2) << " def /tab3 "
-           << (tab3) << " def\n";
-    buffer << "/contfont findfont " << (font_size) << " scalefont setfont\n";
-}
-
-static inline void PageBreak(std::ostream& buffer) { buffer << "showpage\n"; }
-
-static inline void PrintFontHeader(std::ostream& buffer, std::array<std::string, 7> const& fonts)
-{
-    buffer << "%%IncludeResources: font";
-    for (auto const& i : fonts) {
-        buffer << " " << i;
-    }
-    buffer << "\n";
-    auto fontname = std::array{
-        "head",
-        "main",
-        "number",
-        "cont",
-        "bold",
-        "ital",
-        "boldital",
-    };
-    for (auto i = static_cast<size_t>(0); i < fonts.size(); ++i) {
-        buffer << "/" << fontname[i] << "font0 /" << fonts[i] << " def\n";
-    }
-}
-
-static inline void GenerateContinuityLine(
-    std::ostream& buffer,
-    const Textline& line,
-    PSFONT currfontnum,
-    float fontsize)
-{
+constexpr auto GenerateContinuityLine = [](auto const& line, auto currfontnum, auto fontsize) -> std::string {
     static auto fontnames = std::array{
         "CalChart",
         "contfont",
@@ -85,6 +35,7 @@ static inline void GenerateContinuityLine(
         "italfont",
         "bolditalfont",
     };
+    std::ostringstream buffer;
 
     buffer << "/x lmargin def\n";
     short tabstop = 0;
@@ -102,8 +53,7 @@ static inline void GenerateContinuityLine(
                 },
                 [&buffer, &currfontnum, fontsize, &line](auto const& arg) {
                     if (arg.font != currfontnum) {
-                        buffer << "/" << fontnames[static_cast<int>(arg.font)];
-                        buffer << " findfont " << fontsize << " scalefont setfont\n";
+                        buffer << std::format("/{} findfont {:.2f} scalefont setfont\n", fontnames[static_cast<int>(arg.font)], fontsize);
                         currfontnum = arg.font;
                     }
                     std::string textstr(arg.text);
@@ -131,5 +81,6 @@ static inline void GenerateContinuityLine(
             part);
     }
     buffer << "/y y h sub def\n";
-}
+    return buffer.str();
+};
 }

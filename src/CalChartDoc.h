@@ -201,7 +201,7 @@ public:
 
     auto AlreadyHasPrintContinuity() const { return mShow->AlreadyHasPrintContinuity(); }
     auto WillMovePoints(std::map<int, CalChart::Coord> const& new_positions) const { return mShow->WillMovePoints(new_positions, mCurrentReferencePoint); }
-    int PrintToPS(std::ostream& buffer, bool overview, int min_yards, const std::set<size_t>& isPicked, const CalChart::Configuration& config_) const;
+    auto PrintToPS(bool overview, int min_yards, std::set<size_t> const& isPicked, CalChart::Configuration const& config_) const -> std::tuple<std::string, int>;
 
     // create a set of commands to apply to the document.  This is the best way to interact with the doc.
     std::unique_ptr<wxCommand> Create_SetCurrentSheetCommand(int n);

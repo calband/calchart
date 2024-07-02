@@ -25,8 +25,6 @@
 #include "CalChartShowMode.h"
 
 #include <array>
-#include <functional>
-#include <iostream>
 #include <set>
 
 namespace CalChart {
@@ -35,6 +33,7 @@ class Show;
 class Sheet;
 struct Textline;
 class ShowMode;
+class Configuration;
 
 // intented to print a show to a buffer.
 // fonts are the list of fonts in this order:
@@ -46,40 +45,69 @@ class ShowMode;
 // std::string ital_font_str;
 // std::string bold_ital_font_str;
 
+// pageInfo is a array of:
+// double pageWidth,
+// double pageHeight,
+// double pageOffsetX,
+// double pageOffsetY,
+// double paperLength,
+
+// textSizes
+// double headerSize,
+// double yardsSize,
+// double textSize,
+
+// ratios
+// double dotRatio,
+// double NumRatio,
+// double PLineRatio,
+// double SLineRatio,
+// double contRatio,
+
 class PrintShowToPS {
 public:
-    PrintShowToPS(const CalChart::Show&, bool PrintLandscape, bool PrintDoCont,
-        bool PrintDoContSheet, bool PrintOverview, int min_yards,
-        ShowMode const& mode, std::array<std::string, 7> const& fonts_,
-        double PageWidth, double PageHeight, double PageOffsetX,
-        double PageOffsetY, double PaperLength, double HeaderSize,
-        double YardsSize, double TextSize, double DotRatio,
-        double NumRatio, double PLineRatio, double SLineRatio,
-        double ContRatio,
+    PrintShowToPS(
+        CalChart::Show const& show,
+        bool printLandscape,
+        bool printDoCont,
+        bool printDoContSheet,
+        bool printOverview,
+        int minYards,
+        ShowMode const& mode,
+        CalChart::Configuration const& config);
+
+    PrintShowToPS(
+        CalChart::Show const& show,
+        bool printLandscape,
+        bool printDoCont,
+        bool printDoContSheet,
+        bool printOverview,
+        int minYards,
+        ShowMode const& mode,
+        std::array<std::string, 7> const& fonts_,
+        std::array<double, 5> pageInfo,
+        std::array<double, 3> textSizes,
+        std::array<double, 5> ratios,
         YardLinesInfo_t yardText);
 
-    int operator()(std::ostream& buffer, std::set<size_t> const& isPicked, std::string const& title) const;
+    auto operator()(std::set<size_t> const& isPicked, std::string const& title) const -> std::tuple<std::string, int>;
 
 private:
-    short PrintContinuitySheets(std::ostream& buffer, short num_pages) const;
-    void PrintContSections(std::ostream& buffer, const CalChart::Sheet& sheet) const;
-    void PrintStandard(std::ostream& buffer, const CalChart::Sheet& sheet,
-        bool split_sheet) const;
-    void PrintOverview(std::ostream& buffer, const CalChart::Sheet& sheet) const;
-    void print_start_page(std::ostream& buffer, bool landscape,
-        double translate_x, double translate_y) const;
-    bool SplitSheet(const CalChart::Sheet& sheet) const;
-    void PrintHeader(std::ostream& buffer, const std::string& title) const;
-    void PrintFieldDefinition(std::ostream& buffer) const;
-    void PrintTrailer(std::ostream& buffer, short num_pages) const;
-    short PrintSheets(std::ostream& buffer, std::set<size_t> const& isPicked, short num_pages) const;
+    [[nodiscard]] auto IsSplitSheet(CalChart::Sheet const& sheet) const -> bool;
+    [[nodiscard]] auto GenerateContinuitySheets(int numPagesSoFar) const -> std::tuple<std::string, int>;
+    [[nodiscard]] auto GenerateContSections(CalChart::Sheet const& sheet) const -> std::string;
+    [[nodiscard]] auto GenerateStandard(CalChart::Sheet const& sheet, bool split_sheet) const -> std::string;
+    [[nodiscard]] auto GenerateOverview(CalChart::Sheet const& sheet) const -> std::string;
+    [[nodiscard]] auto GenerateHeader(std::string_view title) const -> std::string;
+    [[nodiscard]] auto GenerateFieldDefinition() const -> std::string;
+    [[nodiscard]] auto GenerateSheets(std::set<size_t> const& isPicked, int numPagesSoFar) const -> std::tuple<std::string, int>;
 
-    const CalChart::Show& mShow;
+    CalChart::Show const& mShow;
     bool mPrintLandscape;
     bool mPrintDoCont;
     bool mPrintDoContSheet;
     bool mOverview;
-    ShowMode const& mMode;
+    ShowMode mMode;
 
     std::array<std::string, 7> fonts;
 

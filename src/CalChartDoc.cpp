@@ -28,6 +28,7 @@
 #include "CalChartContinuity.h"
 #include "CalChartDocCommand.h"
 #include "CalChartPoint.h"
+#include "CalChartPrintShowToPS.hpp"
 #include "CalChartShapes.h"
 #include "CalChartSheet.h"
 #include "CalChartShowMode.h"
@@ -35,7 +36,6 @@
 #include "ContinuityEditorPopup.h"
 #include "SystemConfiguration.h"
 #include "platconf.h"
-#include "print_ps.h"
 
 #include <fstream>
 #include <iomanip>
@@ -451,31 +451,14 @@ void CalChartDoc::SetGhostSource(GhostSource source, int which)
 
 const ShowMode& CalChartDoc::GetShowMode() const { return mShow->GetShowMode(); }
 
-int CalChartDoc::PrintToPS(std::ostream& buffer, bool overview,
-    int min_yards, const std::set<size_t>& isPicked,
-    const CalChart::Configuration& config_) const
+auto CalChartDoc::PrintToPS(bool overview, int min_yards, std::set<size_t> const& isPicked, CalChart::Configuration const& config_) const -> std::tuple<std::string, int>
 {
     auto doLandscape = config_.Get_PrintPSLandscape();
     auto doCont = config_.Get_PrintPSDoCont();
     auto doContSheet = config_.Get_PrintPSDoContSheet();
 
-    PrintShowToPS printShowToPS(
-        *mShow, doLandscape, doCont, doContSheet, overview, min_yards, GetShowMode(),
-        { { config_.Get_HeadFont(),
-            config_.Get_MainFont(),
-            config_.Get_NumberFont(),
-            config_.Get_ContFont(),
-            config_.Get_BoldFont(),
-            config_.Get_ItalFont(),
-            config_.Get_BoldItalFont() } },
-        config_.Get_PageWidth(), config_.Get_PageHeight(),
-        config_.Get_PageOffsetX(), config_.Get_PageOffsetY(),
-        config_.Get_PaperLength(), config_.Get_HeaderSize(),
-        config_.Get_YardsSize(), config_.Get_TextSize(), config_.Get_DotRatio(),
-        config_.Get_NumRatio(), config_.Get_PLineRatio(),
-        config_.Get_SLineRatio(), config_.Get_ContRatio(),
-        GetShowMode().Get_yard_text());
-    return printShowToPS(buffer, isPicked, GetTitle().ToStdString());
+    PrintShowToPS printShowToPS(*mShow, doLandscape, doCont, doContSheet, overview, min_yards, GetShowMode(), config_);
+    return printShowToPS(isPicked, GetTitle().ToStdString());
 }
 
 // CalChartDocCommand consist of the action to perform, and the reverse action to undo.

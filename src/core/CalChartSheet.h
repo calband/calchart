@@ -86,6 +86,9 @@ public:
     // points
     Point const& GetPoint(unsigned i) const;
     Point& GetPoint(unsigned i);
+
+    auto GetAllPoints() const { return mPoints; }
+
     SYMBOL_TYPE GetSymbol(unsigned i) const;
     void SetSymbol(unsigned i, SYMBOL_TYPE sym);
     std::vector<Point> GetPoints() const;

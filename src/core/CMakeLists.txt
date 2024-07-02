@@ -67,6 +67,8 @@ add_library(
   CalChartShow.h
   CalChartShowMode.cpp
   CalChartShowMode.h
+  CalChartPrintShowToPS.cpp
+  CalChartPrintShowToPS.hpp
   CalChartText.cpp
   CalChartText.h
   CalChartTypes.h
@@ -75,8 +77,6 @@ add_library(
   e7_transition_solver.h
   linmath.h
   parse.h
-  print_ps.cpp
-  print_ps.h
   prolog0.h
   prolog2.h
   setup0.h
