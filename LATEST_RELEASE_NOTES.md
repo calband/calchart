@@ -20,4 +20,5 @@ Other changes:
 * [#521](../../issues/521) Degree should have special constructors for common directions
 * [#526](../../issues/526) We should have a sanity test for ps output
 * [#528](../../issues/528) Clean up postscript files to be more value like
+* [#530](../../issues/530) Tidy up CalChartShow.h
 

@@ -21,7 +21,7 @@
 */
 
 #include "CalChartShow.h"
-
+#include "CalChartConstants.h"
 #include "CalChartContinuity.h"
 #include "CalChartFileFormat.h"
 #include "CalChartPoint.h"
@@ -267,9 +267,6 @@ Show::Show(ShowMode const& mode, Reader reader, ParseErrorHandlers const* correc
     }
 }
 
-// Destroy a show
-Show::~Show() { }
-
 template <typename T>
 auto anyInstrumentsBesidesDefault(T const& all)
 {
@@ -498,11 +495,6 @@ bool Show::WillMovePoints(std::map<int, Coord> const& new_positions, int ref) co
         }
     }
     return false;
-}
-
-const ShowMode& Show::GetShowMode() const
-{
-    return mMode;
 }
 
 void Show::SetShowMode(ShowMode const& mode)
@@ -1256,25 +1248,22 @@ void Show::CC_show_wrong_size_number_labels_throws()
 // too large, and too small
 void Show::CC_show_wrong_size_description()
 {
-    {
-        auto no_points(Construct_block(INGL_SIZE, std::vector<uint8_t>(4)));
-        auto no_labels(Construct_block(INGL_LABL, std::vector<uint8_t>{}));
-        auto descr(
-            Construct_block(INGL_DESC, std::vector<char>{ 'a', 'b', 'c', '\0' }));
-        descr.at(9) = std::byte{};
-        auto t_show_data = no_points;
-        t_show_data.insert(t_show_data.end(), no_labels.begin(), no_labels.end());
-        t_show_data.insert(t_show_data.end(), descr.begin(), descr.end());
-        auto show_data = Construct_block(INGL_SHOW, t_show_data);
-        bool hit_exception = false;
-        try {
-            Show show1(ShowMode::GetDefaultShowMode(), Reader({ show_data.data(), show_data.size() }));
-        } catch (CC_FileException const&) {
-            hit_exception = true;
-        }
-        (void)hit_exception;
-        assert(hit_exception);
+    auto no_points = Construct_block(INGL_SIZE, std::vector<uint8_t>(4));
+    auto no_labels = Construct_block(INGL_LABL, std::vector<uint8_t>{});
+    auto descr = Construct_block(INGL_DESC, std::vector<char>{ 'a', 'b', 'c', '\0' });
+    descr.at(9) = std::byte{};
+    auto t_show_data = no_points;
+    t_show_data.insert(t_show_data.end(), no_labels.begin(), no_labels.end());
+    t_show_data.insert(t_show_data.end(), descr.begin(), descr.end());
+    auto show_data = Construct_block(INGL_SHOW, t_show_data);
+    bool hit_exception = false;
+    try {
+        auto show1 = Show{ ShowMode::GetDefaultShowMode(), Reader({ show_data.data(), show_data.size() }) };
+    } catch (CC_FileException const&) {
+        hit_exception = true;
     }
+    (void)hit_exception;
+    assert(hit_exception);
 }
 
 // extra cruft ok
@@ -1282,7 +1271,7 @@ void Show::CC_show_extra_cruft_ok()
 {
     // now remove the description and they should be equal
     auto extra_cruft = Construct_show_zero_points_zero_labels_1_sheet_and_random();
-    Show show1(ShowMode::GetDefaultShowMode(), Reader({ extra_cruft.data(), extra_cruft.size() }));
+    auto show1 = Show{ ShowMode::GetDefaultShowMode(), Reader({ extra_cruft.data(), extra_cruft.size() }) };
     auto show1_data = show1.SerializeShow();
 
     auto blank_show = Show::Create(ShowMode::GetDefaultShowMode());
@@ -1298,7 +1287,7 @@ void Show::CC_show_with_nothing_throws()
     std::vector<std::byte> empty{};
     bool hit_exception = false;
     try {
-        Show show1(ShowMode::GetDefaultShowMode(), Reader({ empty.data(), empty.size() }));
+        auto show = Show{ ShowMode::GetDefaultShowMode(), Reader({ empty.data(), empty.size() }) };
     } catch (CC_FileException const&) {
         hit_exception = true;
     }

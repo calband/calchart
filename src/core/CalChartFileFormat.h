@@ -372,11 +372,11 @@ namespace Parser {
     auto Construct_block(uint32_t type, const T& data) -> std::vector<std::byte>
     {
         std::vector<std::byte> result;
-        Append(result, uint32_t{ type });
+        Append(result, type);
         Append(result, static_cast<uint32_t>(data.size()));
         Append(result, data);
         Append(result, uint32_t{ INGL_END });
-        Append(result, uint32_t{ type });
+        Append(result, type);
         return result;
     }
 
