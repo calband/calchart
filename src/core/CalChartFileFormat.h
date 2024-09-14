@@ -206,34 +206,37 @@ struct Current_version_and_later {
 // version 0 to 3.1 unknown
 // clang-format on
 
-#define Make4CharWord(a, b, c, d) (((a) << 24) | ((b) << 16) | ((c) << 8) | (d))
+constexpr auto Make4CharWord(uint8_t a, uint8_t b, uint8_t c, uint8_t d) -> uint32_t
+{
+    return (((a) << 24) | ((b) << 16) | ((c) << 8) | (d));
+}
 
-#define INGL_INGL Make4CharWord('I', 'N', 'G', 'L')
-#define INGL_GURK Make4CharWord('G', 'U', 'R', 'K')
-#define INGL_SHOW Make4CharWord('S', 'H', 'O', 'W')
-#define INGL_SHET Make4CharWord('S', 'H', 'E', 'T')
-#define INGL_SELE Make4CharWord('S', 'E', 'L', 'E')
-#define INGL_SIZE Make4CharWord('S', 'I', 'Z', 'E')
-#define INGL_CURR Make4CharWord('C', 'U', 'R', 'R')
-#define INGL_LABL Make4CharWord('L', 'A', 'B', 'L')
-#define INGL_INST Make4CharWord('I', 'N', 'S', 'T')
-#define INGL_MODE Make4CharWord('M', 'O', 'D', 'E')
-#define INGL_DESC Make4CharWord('D', 'E', 'S', 'C')
-#define INGL_NAME Make4CharWord('N', 'A', 'M', 'E')
-#define INGL_DURA Make4CharWord('D', 'U', 'R', 'A')
-#define INGL_POS Make4CharWord('P', 'O', 'S', ' ')
-#define INGL_SYMB Make4CharWord('S', 'Y', 'M', 'B')
-#define INGL_TYPE Make4CharWord('T', 'Y', 'P', 'E')
-#define INGL_REFP Make4CharWord('R', 'E', 'F', 'P')
-#define INGL_CONT Make4CharWord('C', 'O', 'N', 'T')
-#define INGL_ECNT Make4CharWord('E', 'C', 'N', 'T')
-#define INGL_VCNT Make4CharWord('V', 'C', 'N', 'T')
-#define INGL_EVCT Make4CharWord('E', 'V', 'C', 'T')
-#define INGL_PCNT Make4CharWord('P', 'C', 'N', 'T')
-#define INGL_BACK Make4CharWord('B', 'A', 'C', 'K')
-#define INGL_PNTS Make4CharWord('P', 'N', 'T', 'S')
-#define INGL_PONT Make4CharWord('P', 'O', 'N', 'T')
-#define INGL_END Make4CharWord('E', 'N', 'D', ' ')
+constexpr auto INGL_INGL = Make4CharWord('I', 'N', 'G', 'L');
+constexpr auto INGL_GURK = Make4CharWord('G', 'U', 'R', 'K');
+constexpr auto INGL_SHOW = Make4CharWord('S', 'H', 'O', 'W');
+constexpr auto INGL_SHET = Make4CharWord('S', 'H', 'E', 'T');
+constexpr auto INGL_SELE = Make4CharWord('S', 'E', 'L', 'E');
+constexpr auto INGL_SIZE = Make4CharWord('S', 'I', 'Z', 'E');
+constexpr auto INGL_CURR = Make4CharWord('C', 'U', 'R', 'R');
+constexpr auto INGL_LABL = Make4CharWord('L', 'A', 'B', 'L');
+constexpr auto INGL_INST = Make4CharWord('I', 'N', 'S', 'T');
+constexpr auto INGL_MODE = Make4CharWord('M', 'O', 'D', 'E');
+constexpr auto INGL_DESC = Make4CharWord('D', 'E', 'S', 'C');
+constexpr auto INGL_NAME = Make4CharWord('N', 'A', 'M', 'E');
+constexpr auto INGL_DURA = Make4CharWord('D', 'U', 'R', 'A');
+constexpr auto INGL_POS = Make4CharWord('P', 'O', 'S', ' ');
+constexpr auto INGL_SYMB = Make4CharWord('S', 'Y', 'M', 'B');
+constexpr auto INGL_TYPE = Make4CharWord('T', 'Y', 'P', 'E');
+constexpr auto INGL_REFP = Make4CharWord('R', 'E', 'F', 'P');
+constexpr auto INGL_CONT = Make4CharWord('C', 'O', 'N', 'T');
+constexpr auto INGL_ECNT = Make4CharWord('E', 'C', 'N', 'T');
+constexpr auto INGL_VCNT = Make4CharWord('V', 'C', 'N', 'T');
+constexpr auto INGL_EVCT = Make4CharWord('E', 'V', 'C', 'T');
+constexpr auto INGL_PCNT = Make4CharWord('P', 'C', 'N', 'T');
+constexpr auto INGL_BACK = Make4CharWord('B', 'A', 'C', 'K');
+constexpr auto INGL_PNTS = Make4CharWord('P', 'N', 'T', 'S');
+constexpr auto INGL_PONT = Make4CharWord('P', 'O', 'N', 'T');
+constexpr auto INGL_END = Make4CharWord('E', 'N', 'D', ' ');
 
 namespace details {
     static inline void put_big_word(std::byte* ptr, uint16_t v)
@@ -383,11 +386,11 @@ namespace Parser {
     static inline auto Construct_block(uint32_t type, uint32_t data) -> std::vector<std::byte>
     {
         std::vector<std::byte> result;
-        Append(result, uint32_t{ type });
+        Append(result, type);
         Append(result, uint32_t{ sizeof(data) });
         Append(result, data);
         Append(result, uint32_t{ INGL_END });
-        Append(result, uint32_t{ type });
+        Append(result, type);
         return result;
     }
 }
@@ -452,7 +455,7 @@ public:
             if ((end != INGL_END) || (end_name != name)) {
                 return result;
             }
-            result.push_back({ name, reader });
+            result.emplace_back(name, reader);
         }
         return result;
     }
@@ -651,5 +654,7 @@ inline auto Reader::GetVector() -> std::vector<T>
     }
     return result;
 }
+
+static_assert(Make4CharWord('a', 'b', 'c', 'd') == 0x61626364);
 
 }
