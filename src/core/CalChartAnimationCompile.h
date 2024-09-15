@@ -54,8 +54,9 @@ namespace Cont {
 }
 
 namespace CalChart::Animate {
+using beats_t = unsigned;
 using Variables = std::array<std::map<unsigned, float>, Cont::kNumVariables>;
-using CompileResult = std::vector<Command>;
+using CompileResult = std::pair<std::vector<Command>, ErrorsEncountered>;
 
 // Compile a point into the Animation Commands
 // Variables and Errors are passed as references as they maintain state over all the compiles,
@@ -64,19 +65,22 @@ using CompileResult = std::vector<Command>;
 // end is the position to go that's the next valid animation -- the shee has at least 1 beat
 // next position is the position of the marcher on the next sheet, regardless of number of beats.
 // is optional because if there is no next sheet (this is the last sheet), then it's null.
+struct AnimationData {
+    unsigned whichMarcher;
+    Point marcherPosition;
+    std::vector<std::unique_ptr<Cont::Procedure>> const& continuity;
+    std::optional<Coord> endPosition;
+    beats_t numBeats;
+    bool isLastAnimationSheet;
+};
+
 auto CreateCompileResult(
-    Variables& variablesStates,
-    Errors& errors,
-    unsigned whichMarcher,
-    Point point,
-    beats_t beats,
-    bool isLastAnimationSheet,
-    std::optional<Coord> endPosition,
-    std::vector<std::unique_ptr<Cont::Procedure>> const& proc) -> CompileResult;
+    AnimationData const& animationData,
+    Variables& variablesStates) -> CompileResult;
 
 struct Compile {
     virtual ~Compile() = default;
-    virtual auto Append(Animate::Command cmd) -> bool = 0;
+    virtual auto Append(Command cmd) -> bool = 0;
     virtual void RegisterError(Error err) const = 0;
 
     [[nodiscard]] virtual auto GetVarValue(Cont::Variable varnum) const -> float = 0;

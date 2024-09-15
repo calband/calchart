@@ -24,125 +24,86 @@
 #include "CalChartAnimationCommand.h"
 #include "CalChartAnimationCompile.h"
 #include "CalChartAnimationErrors.h"
+#include "CalChartAnimationSheet.h"
 #include "CalChartContinuity.h"
 #include "CalChartMeasure.h"
+#include "CalChartRanges.h"
 #include "CalChartSheet.h"
 #include "CalChartShow.h"
+#include <optional>
+#include <ranges>
 
 auto gAnimateMeasure = CalChart::MeasureDuration{ "AnimateShow" };
+
 namespace CalChart::Animate {
 
-namespace {
-    auto getEndPosition(
-        Show::const_Sheet_iterator_t c_sheet,
-        Show::const_Sheet_iterator_t endSheet,
-        unsigned whichMarcher) -> std::optional<Coord>
-    {
-        // find the first animation sheet.
-        auto nextAnimationSheet = std::find_if(c_sheet + 1, endSheet, [](auto& sheet) { return sheet.IsInAnimation(); });
-        auto isLastAnimationSheet = nextAnimationSheet == endSheet;
-        // End position is the position of the next valid animation sheet.
-        return
-            [=]() -> std::optional<Coord> {
-                if (isLastAnimationSheet) {
-                    return std::optional<Coord>{};
-                }
-                return nextAnimationSheet->GetPosition(whichMarcher);
-            }();
-    }
-}
-
-auto AnimateShow(const Show& show) -> std::tuple<Sheets, std::vector<Errors>>
+auto AnimateShow(const Show& show) -> Sheets
 {
     auto snapshot = gAnimateMeasure.doMeasurement();
-    auto animationErrors = std::vector<Animate::Errors>(show.GetNumSheets());
 
-    auto points = std::vector<Coord>(show.GetNumPoints());
     // the variables are persistant through the entire compile process.
     Variables variablesStates;
 
-    auto sheets = std::vector<Animate::Sheet>{};
-    auto endSheet = show.GetSheetEnd();
-
-    auto runningIndex = std::vector<unsigned>{};
-    for (auto curr_sheet = show.GetSheetBegin(); curr_sheet != endSheet; ++curr_sheet) {
-        runningIndex.push_back(curr_sheet->IsInAnimation() ? 1 : 0);
-    }
+    auto runningIndex = CalChart::Ranges::ToVector<unsigned>(show.AreSheetsInAnimation());
     std::exclusive_scan(runningIndex.begin(), runningIndex.end(), runningIndex.begin(), 0);
 
-    for (auto curr_sheet = show.GetSheetBegin(); curr_sheet != endSheet; ++curr_sheet) {
+    // First, construct pairs of sheets, the animation start and end.  We use optional here as a
+    // sentinel -- meaning if it is null we know we have the last sheet, which we treat specially.
+    // Then, from the pairs construct AnimationData, which has all the information needed for the compile step.
+    // Then CreateCompileResult with the AnimationData and Variables.  Collect the whole thing into commands,
+    // and, viola, we have the compiled show.
 
-        if (!curr_sheet->IsInAnimation()) {
-            continue;
-        }
+    return Animate::Sheets{
+        CalChart::Ranges::ToVector<Animate::Sheet>(
+            CalChart::Ranges::adjacent_view<2>([](auto&& show) {
+                // CalChart::Ranges don't work well on lvalues, so having a closure that returns what we need here.
+                auto animationSheetsWithSentinel = CalChart::Ranges::ToVector<std::optional<CalChart::Sheet>>(show.SheetsInAnimation());
+                animationSheetsWithSentinel.push_back(std::nullopt);
+                return animationSheetsWithSentinel;
+            }(show))
+            | std::views::transform([&](auto&& curr_next) {
+                  auto [curr_sheet, nextAnimationSheet] = curr_next;
+                  auto numBeats = curr_sheet->GetBeats();
+                  auto isLastSheet = !nextAnimationSheet.has_value();
+                  auto theCommands = CalChart::Ranges::ToVector<Animate::CompileResult>(
+                      std::ranges::iota_view(0, show.GetNumPoints()) | std::views::transform([=, curr_sheet = curr_sheet, nextAnimationSheet = nextAnimationSheet](auto whichMarcher) {
+                          auto current_symbol = curr_sheet->GetSymbol(whichMarcher);
+                          auto endPosition = [whichMarcher](auto&& nextAnimationSheet) -> std::optional<Coord> {
+                              if (nextAnimationSheet) {
+                                  return nextAnimationSheet->GetPosition(whichMarcher);
+                              }
+                              return std::nullopt;
+                          }(nextAnimationSheet);
+                          auto const& cont = curr_sheet->GetContinuityBySymbol(current_symbol).GetParsedContinuity();
+                          auto empty_cont = std::vector<std::unique_ptr<Cont::Procedure>>{};
+                          return AnimationData{
+                              static_cast<unsigned>(whichMarcher),
+                              curr_sheet->GetPoint(whichMarcher),
+                              curr_sheet->ContinuityInUse(current_symbol) ? cont : empty_cont,
+                              endPosition,
+                              numBeats,
+                              isLastSheet
+                          };
+                      })
+                      | std::views::transform([&](auto animationData) {
+                            return CalChart::Animate::CreateCompileResult(
+                                animationData,
+                                variablesStates);
+                        }));
 
-        // find the first animation sheet.
-        auto nextAnimationSheet = std::find_if(curr_sheet + 1, endSheet, [](auto& sheet) { return sheet.IsInAnimation(); });
-        auto isLastAnimationSheet = nextAnimationSheet == endSheet;
-        auto numBeats = curr_sheet->GetBeats();
-
-        // Now parse continuity
-        Errors errors;
-        std::vector<std::vector<Animate::Command>> theCommands(points.size());
-        for (auto current_symbol : k_symbols) {
-            if (curr_sheet->ContinuityInUse(current_symbol)) {
-                auto const& current_continuity = curr_sheet->GetContinuityBySymbol(current_symbol);
-                auto const& continuity = current_continuity.GetParsedContinuity();
-#if 0 // enable to see dump of continuity
-                {
-                    for (auto& proc : continuity) {
-                        std::cout << *proc << "\n";
-                    }
-                }
-#endif
-                for (unsigned j = 0; j < points.size(); j++) {
-                    if (curr_sheet->GetSymbol(j) == current_symbol) {
-                        auto endPosition = getEndPosition(curr_sheet, endSheet, j);
-                        theCommands[j] = CreateCompileResult(
-                            variablesStates,
-                            errors,
-                            j,
-                            curr_sheet->GetPoint(j),
-                            numBeats,
-                            isLastAnimationSheet,
-                            endPosition,
-                            continuity);
-                    }
-                }
-            }
-        }
-        // Handle points that don't have continuity (shouldn't happen)
-        for (unsigned j = 0; j < points.size(); j++) {
-            if (theCommands[j].empty()) {
-                auto endPosition = getEndPosition(curr_sheet, endSheet, j);
-
-                theCommands[j] = CreateCompileResult(
-                    variablesStates,
-                    errors,
-                    j,
-                    curr_sheet->GetPoint(j),
-                    numBeats,
-                    isLastAnimationSheet,
-                    endPosition,
-                    {});
-            }
-        }
-        if (AnyErrors(errors)) {
-            animationErrors[std::distance(show.GetSheetBegin(), curr_sheet)] = errors;
-        }
-        sheets.emplace_back(curr_sheet->GetName(), numBeats, theCommands);
-    }
-
-    return { Animate::Sheets{ sheets, runningIndex }, animationErrors };
+                  return Animate::Sheet{
+                      curr_sheet->GetName(), numBeats, theCommands
+                  };
+              })),
+        runningIndex
+    };
 }
 }
 
 namespace CalChart {
 Animation::Animation(const Show& show)
-    : mSheets({})
-    , mErrors(show.GetNumSheets())
+    : mSheets{ Animate::AnimateShow(show) }
 {
-    std::tie(mSheets, mErrors) = Animate::AnimateShow(show);
 }
 
 }

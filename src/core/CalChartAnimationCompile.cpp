@@ -28,10 +28,10 @@
 namespace CalChart::Animate {
 
 struct CompileState : public Compile {
-    CompileState(unsigned whichMarcher, Point point, beats_t beats, std::optional<Coord> endPosition, Variables& variablesStates, Errors& errors);
+    CompileState(unsigned whichMarcher, Point point, beats_t beats, std::optional<Coord> endPosition, Variables& variablesStates);
 
-    [[nodiscard]] auto Append(Animate::Command cmd) -> bool override;
-    void RegisterError(Error err) const override { ::CalChart::Animate::RegisterError(mErrors, err, mWhichMarcher); }
+    [[nodiscard]] auto Append(Command cmd) -> bool override;
+    void RegisterError(Error err) const override { mErrors.insert(err); }
 
     [[nodiscard]] auto GetVarValue(Cont::Variable varnum) const -> float override;
     void SetVarValue(Cont::Variable varnum, float value) override { mVars.at(toUType(varnum))[mWhichMarcher] = value; }
@@ -43,7 +43,7 @@ struct CompileState : public Compile {
     [[nodiscard]] auto GetCurrentPoint() const -> unsigned override { return mWhichMarcher; }
     [[nodiscard]] auto GetBeatsRemaining() const -> unsigned override { return mBeatsRem; }
 
-    [[nodiscard]] auto GetCommands() const { return mCmds; }
+    [[nodiscard]] auto GetCommands() const -> CompileResult { return CompileResult{ mCmds, mErrors }; }
 
 private:
     unsigned mWhichMarcher;
@@ -52,25 +52,19 @@ private:
     unsigned mBeatsRem;
     std::optional<Coord> mEndPosition;
     Variables& mVars;
-    Errors& mErrors;
-    std::vector<Animate::Command> mCmds{};
+    mutable ErrorsEncountered mErrors;
+    std::vector<Command> mCmds{};
 };
 
 auto CreateCompileResult(
-    Variables& variablesStates,
-    Errors& errors,
-    unsigned whichMarcher,
-    Point point,
-    beats_t beats,
-    bool isLastAnimationSheet,
-    std::optional<Coord> endPosition,
-    std::vector<std::unique_ptr<Cont::Procedure>> const& procs) -> CompileResult
+    AnimationData const& animationData,
+    Variables& variablesStates) -> CompileResult
 {
-    CompileState ac(whichMarcher, point, beats, endPosition, variablesStates, errors);
+    CompileState ac(animationData.whichMarcher, animationData.marcherPosition, animationData.numBeats, animationData.endPosition, variablesStates);
 
     // no continuity was specified
-    if (procs.empty()) {
-        if (isLastAnimationSheet) {
+    if (animationData.continuity.empty()) {
+        if (animationData.isLastAnimationSheet) {
             // use MTRM E
             Cont::ProcMTRM defcont(std::make_unique<Cont::ValueDefined>(Cont::CC_E));
             defcont.Compile(ac);
@@ -82,44 +76,43 @@ auto CreateCompileResult(
     }
 
     // compile all the commands
-    for (auto const& proc : procs) {
+    for (auto const& proc : animationData.continuity) {
         proc->Compile(ac);
     }
 
     // report if the point didn't make it
-    if (endPosition) {
-        auto next_point = *endPosition;
+    if (animationData.endPosition) {
+        auto next_point = *animationData.endPosition;
         if (ac.GetPointPosition() != next_point) {
             auto c = next_point - ac.GetPointPosition();
-            ac.RegisterError(Animate::Error::WRONGPLACE);
-            ac.Append(Animate::CommandMove{ ac.GetPointPosition(), ac.GetBeatsRemaining(), c });
+            ac.RegisterError(Error::WRONGPLACE);
+            ac.Append(CommandMove{ ac.GetPointPosition(), ac.GetBeatsRemaining(), c });
         }
     }
 
     // report if we have extra time.
     if (ac.GetBeatsRemaining()) {
-        ac.RegisterError(Animate::Error::EXTRATIME);
-        ac.Append(Animate::CommandStill{ ac.GetPointPosition(), ac.GetBeatsRemaining(), Animate::CommandStill::Style::MarkTime, CalChart::Degree::East() });
+        ac.RegisterError(Error::EXTRATIME);
+        ac.Append(CommandStill{ ac.GetPointPosition(), ac.GetBeatsRemaining(), CommandStill::Style::MarkTime, CalChart::Degree::East() });
     }
 
     return ac.GetCommands();
 }
 
-CompileState::CompileState(unsigned whichMarcher, Point point, beats_t beats, std::optional<Coord> endPosition, Variables& variablesStates, Errors& errors)
+CompileState::CompileState(unsigned whichMarcher, Point point, beats_t beats, std::optional<Coord> endPosition, Variables& variablesStates)
     : mWhichMarcher(whichMarcher)
     , mPoint{ point }
     , mWhichPos(mPoint.GetPos(0))
     , mBeatsRem(beats)
     , mEndPosition{ endPosition }
     , mVars(variablesStates)
-    , mErrors(errors)
 {
 }
 
-bool CompileState::Append(Animate::Command cmd)
+bool CompileState::Append(Command cmd)
 {
     if (mBeatsRem < NumBeats(cmd)) {
-        RegisterError(Animate::Error::OUTOFTIME);
+        RegisterError(Error::OUTOFTIME);
         if (mBeatsRem == 0) {
             return false;
         }
@@ -141,7 +134,7 @@ float CompileState::GetVarValue(Cont::Variable varnum) const
     if (i != mVars[toUType(varnum)].end()) {
         return i->second;
     }
-    RegisterError(Animate::Error::UNDEFINED);
+    RegisterError(Error::UNDEFINED);
     return 0.0;
 }
 
@@ -150,7 +143,7 @@ Coord CompileState::GetEndingPosition() const
     if (mEndPosition) {
         return *mEndPosition;
     } else {
-        RegisterError(Animate::Error::UNDEFINED);
+        RegisterError(Error::UNDEFINED);
         return GetPointPosition();
     }
 }

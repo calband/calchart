@@ -22,9 +22,11 @@
 */
 
 #include "CalChartAnimationCommand.h"
+#include "CalChartAnimationErrors.h"
 #include "CalChartAnimationTypes.h"
 #include "CalChartCoord.h"
 #include "CalChartPoint.h"
+#include "CalChartRanges.h"
 
 #include <nlohmann/json.hpp>
 #include <ranges>
@@ -35,6 +37,7 @@
 namespace CalChart::Animate {
 
 using beats_t = unsigned;
+using CompileResult = std::pair<std::vector<Command>, ErrorsEncountered>;
 
 struct Info {
     CalChart::Coord::CollisionType mCollision = CalChart::Coord::CollisionType::none;
@@ -47,12 +50,12 @@ struct Info {
 // collisions that exist.
 class Sheet {
 public:
-    Sheet(std::string name, unsigned numBeats, std::vector<std::vector<Animate::Command>> const& commands);
+    Sheet(std::string name, unsigned numBeats, std::vector<CompileResult> const& commands);
 
     [[nodiscard]] auto GetName() const { return mName; }
     [[nodiscard]] auto GetNumBeats() const { return mNumBeats; }
 
-    [[nodiscard]] auto MarcherInfoAtBeat(size_t whichMarcher, beats_t beat) const -> CalChart::Animate::MarcherInfo;
+    [[nodiscard]] auto MarcherInfoAtBeat(size_t whichMarcher, beats_t beat) const -> MarcherInfo;
 
     [[nodiscard]] auto AllMarcherInfoAtBeat(beats_t beat) const
     {
@@ -86,12 +89,18 @@ public:
 
     [[nodiscard]] auto AllAnimateInfoAtBeat(beats_t beat) const -> std::vector<Info>;
 
+    [[nodiscard]] auto GetAnimationErrors() const
+    {
+        return mErrors;
+    }
+
 private:
     [[nodiscard]] auto FindAllCollisions() const -> std::map<std::tuple<size_t, beats_t>, Coord::CollisionType>;
     std::string mName;
     beats_t mNumBeats;
-    std::vector<Animate::Commands> mCommands;
+    std::vector<Commands> mCommands;
     std::map<std::tuple<size_t, beats_t>, Coord::CollisionType> mCollisions;
+    Errors mErrors;
 };
 
 class Sheets {
@@ -117,6 +126,15 @@ public:
             MarcherInfoAtBeat(beat, whichMarcher)
         };
     }
+
+    [[nodiscard]] auto GetAnimationErrors() const -> std::vector<Errors>
+    {
+        return Ranges::ToVector<Errors>(
+            mSheets | std::views::transform([](auto&& sheet) {
+                return sheet.GetAnimationErrors();
+            }));
+    }
+
     [[nodiscard]] auto AllAnimateInfoAtBeat(beats_t whichBeat) const -> std::vector<Info>;
 
     [[nodiscard]] auto DebugAnimateInfoAtBeat(beats_t beat) const -> std::pair<std::string, std::vector<std::string>>;

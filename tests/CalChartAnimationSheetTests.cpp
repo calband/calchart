@@ -9,14 +9,16 @@
 
 TEST_CASE("AnimationSheetTest", "Animate::Sheet")
 {
-    auto cont1 = std::vector<CalChart::Animate::Command>{
-        CalChart::Animate::CommandStill{ { 16, 16 }, 4, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree::North() },
-        CalChart::Animate::CommandMove{ { 16, 16 }, 8, { 0, 128 } },
-        CalChart::Animate::CommandStill{ { 16, 144 }, 6, CalChart::Animate::CommandStill::Style::Close, CalChart::Degree::South() },
+    auto cont1 = CalChart::Animate::CompileResult{
+        { CalChart::Animate::CommandStill{ { 16, 16 }, 4, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree::North() },
+            CalChart::Animate::CommandMove{ { 16, 16 }, 8, { 0, 128 } },
+            CalChart::Animate::CommandStill{ { 16, 144 }, 6, CalChart::Animate::CommandStill::Style::Close, CalChart::Degree::South() } },
+        {}
     };
-    auto cont2 = std::vector<CalChart::Animate::Command>{
-        CalChart::Animate::CommandMove{ { 16, 144 }, 8, { 0, -128 } },
-        CalChart::Animate::CommandStill{ { 16, 16 }, 8, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree::North() },
+    auto cont2 = CalChart::Animate::CompileResult{
+        { CalChart::Animate::CommandMove{ { 16, 144 }, 8, { 0, -128 } },
+            CalChart::Animate::CommandStill{ { 16, 16 }, 8, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree::North() } },
+        {}
     };
     auto uut = CalChart::Animate::Sheet{ "test", 16, { cont1, cont2 } };
     CHECK("test" == uut.GetName());
@@ -38,14 +40,20 @@ TEST_CASE("AnimationSheetTest", "Animate::Sheet")
 TEST_CASE("NoCollision", "Animate::Sheet")
 {
     std::cout << "doing test nocolsion\n";
-    auto cont1 = std::vector<CalChart::Animate::Command>{
-        CalChart::Animate::CommandStill{ { 64, 16 }, 4, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree::North() },
-        CalChart::Animate::CommandMove{ { 64, 16 }, 8, { 0, 128 } },
-        CalChart::Animate::CommandStill{ { 64, 144 }, 6, CalChart::Animate::CommandStill::Style::Close, CalChart::Degree::South() },
+    auto cont1 = CalChart::Animate::CompileResult{
+        {
+            CalChart::Animate::CommandStill{ { 64, 16 }, 4, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree::North() },
+            CalChart::Animate::CommandMove{ { 64, 16 }, 8, { 0, 128 } },
+            CalChart::Animate::CommandStill{ { 64, 144 }, 6, CalChart::Animate::CommandStill::Style::Close, CalChart::Degree::South() },
+        },
+        {}
     };
-    auto cont2 = std::vector<CalChart::Animate::Command>{
-        CalChart::Animate::CommandMove{ { 16, 144 }, 8, { 0, -128 } },
-        CalChart::Animate::CommandStill{ { 16, 16 }, 8, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree::North() },
+    auto cont2 = CalChart::Animate::CompileResult{
+        {
+            CalChart::Animate::CommandMove{ { 16, 144 }, 8, { 0, -128 } },
+            CalChart::Animate::CommandStill{ { 16, 16 }, 8, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree::North() },
+        },
+        {}
     };
     auto uut = CalChart::Animate::Sheet{ "test", 16, { cont1, cont2 } };
     CHECK(uut.GetAllBeatsWithCollisions().empty());
@@ -54,14 +62,20 @@ TEST_CASE("NoCollision", "Animate::Sheet")
 TEST_CASE("Animate::Sheets", "Animate::Sheets")
 {
     using beats_t = CalChart::Animate::beats_t;
-    auto cont1 = std::vector<CalChart::Animate::Command>{
-        CalChart::Animate::CommandStill{ { 64, 16 }, 4, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree::North() },
-        CalChart::Animate::CommandMove{ { 64, 16 }, 8, { 0, 128 } },
-        CalChart::Animate::CommandStill{ { 64, 144 }, 6, CalChart::Animate::CommandStill::Style::Close, CalChart::Degree::South() },
+    auto cont1 = CalChart::Animate::CompileResult{
+        {
+            CalChart::Animate::CommandStill{ { 64, 16 }, 4, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree::North() },
+            CalChart::Animate::CommandMove{ { 64, 16 }, 8, { 0, 128 } },
+            CalChart::Animate::CommandStill{ { 64, 144 }, 6, CalChart::Animate::CommandStill::Style::Close, CalChart::Degree::South() },
+        },
+        {}
     };
-    auto cont2 = std::vector<CalChart::Animate::Command>{
-        CalChart::Animate::CommandMove{ { 16, 144 }, 8, { 0, -128 } },
-        CalChart::Animate::CommandStill{ { 16, 16 }, 2, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree::North() },
+    auto cont2 = CalChart::Animate::CompileResult{
+        {
+            CalChart::Animate::CommandMove{ { 16, 144 }, 8, { 0, -128 } },
+            CalChart::Animate::CommandStill{ { 16, 16 }, 2, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree::North() },
+        },
+        {}
     };
     auto sheet1 = CalChart::Animate::Sheet{ "test", 16, { cont1 } };
     auto sheet2 = CalChart::Animate::Sheet{ "test2", 10, { cont2 } };

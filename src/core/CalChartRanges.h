@@ -22,8 +22,12 @@
 */
 
 #include <algorithm>
+#include <cstddef>
+#include <optional>
 #include <ranges>
 #include <stdexcept>
+#include <tuple>
+#include <utility>
 
 namespace CalChart::Ranges {
 
@@ -45,7 +49,7 @@ template <typename... Ranges>
     requires(std::ranges::viewable_range<Ranges> && ...)
 class BasicZipView {
 public:
-    BasicZipView(Ranges&&... ranges)
+    explicit BasicZipView(Ranges&&... ranges)
         : ranges_{ std::forward<Ranges>(ranges)... }
     {
     }
@@ -65,7 +69,7 @@ public:
         }
 
         // Increment operators
-        iterator& operator++()
+        auto operator++() -> iterator&
         {
             std::apply([](auto&... iters) { (++std::get<0>(iters), ...); }, iters_);
             // if any of the iterators matches the end iterators, we are at the end, so bump them all to the end.
@@ -75,7 +79,7 @@ public:
             return *this;
         }
 
-        iterator operator++(int)
+        auto operator++(int) -> iterator
         {
             iterator tmp(*this);
             ++(*this);
@@ -92,12 +96,12 @@ public:
         }
 
         // Equality comparison operator
-        bool operator==(const iterator& other) const
+        auto operator==(const iterator& other) const
         {
             return iters_ == other.iters_;
         }
 
-        bool operator!=(const iterator& other) const
+        auto operator!=(const iterator& other) const
         {
             return !(*this == other);
         }
@@ -106,7 +110,7 @@ public:
         std::tuple<typename std::pair<std::ranges::iterator_t<Ranges>, std::ranges::iterator_t<Ranges>>...> iters_;
     };
 
-    iterator begin()
+    auto begin() -> iterator
     {
         return std::apply([](auto&&... r) {
             return iterator(std::pair{ std::ranges::begin(r), std::ranges::end(r) }...);
@@ -114,7 +118,7 @@ public:
             ranges_);
     }
 
-    iterator end()
+    auto end() -> iterator
     {
         return std::apply([](auto&&... r) {
             return iterator(std::pair{ std::ranges::end(r), std::ranges::end(r) }...);
@@ -131,7 +135,7 @@ template <typename Range>
     requires(std::ranges::viewable_range<Range>)
 class BasicEnumerateView {
 public:
-    BasicEnumerateView(Range&& range)
+    explicit BasicEnumerateView(Range&& range)
         : range_{ std::forward<Range>(range) }
     {
     }
@@ -151,14 +155,14 @@ public:
         }
 
         // Increment operators
-        iterator& operator++()
+        auto operator++() -> iterator&
         {
             ++value;
             ++iter_;
             return *this;
         }
 
-        iterator operator++(int)
+        auto operator++(int) -> iterator
         {
             iterator tmp(*this);
             ++(*this);
@@ -172,12 +176,12 @@ public:
         }
 
         // Equality comparison operator
-        bool operator==(const iterator& other) const
+        auto operator==(const iterator& other) const
         {
             return iter_ == other.iter_;
         }
 
-        bool operator!=(const iterator& other) const
+        auto operator!=(const iterator& other) const
         {
             return !(*this == other);
         }
@@ -187,14 +191,172 @@ public:
         std::ranges::iterator_t<Range> iter_;
     };
 
-    iterator begin()
+    auto begin() -> iterator
     {
         return iterator(std::ranges::begin(range_));
     }
 
-    iterator end()
+    auto end() -> iterator
     {
         return iterator(std::ranges::end(range_));
+    }
+
+private:
+    Range range_;
+};
+
+template <std::size_t I, class T>
+struct ReflectT {
+    using type = T;
+};
+
+// Helper template to create a tuple of N objects of type T
+template <typename T, std::size_t N, typename Indices = std::make_index_sequence<N>>
+struct TupleOfN;
+
+// Specialization for creating a tuple of N objects of type T
+template <typename T, std::size_t N, std::size_t... Indices>
+struct TupleOfN<T, N, std::index_sequence<Indices...>> {
+    using type = std::tuple<typename ReflectT<Indices, T>::type...>;
+};
+
+// Convenience alias
+template <typename T, std::size_t N>
+using TupleOf = typename TupleOfN<T, N>::type;
+
+// Helper function to shift tuple elements
+template <typename Tuple, std::size_t... Indices>
+auto rotateLeftImpl(const Tuple& t, std::index_sequence<Indices...>)
+{
+    // Create a new tuple by selecting elements from the next index onward, with a default value for the last position
+    return std::tuple<std::tuple_element_t<Indices + 1, Tuple>..., std::tuple_element_t<0, Tuple>>{
+        std::get<Indices + 1>(t)..., std::get<0>(t)
+    };
+}
+
+// Wrapper function to shift a tuple left by one position
+template <typename... Ts>
+auto rotateLeft(const std::tuple<Ts...>& t)
+{
+    return rotateLeftImpl(t, std::make_index_sequence<sizeof...(Ts) - 1>{});
+}
+
+// Helper function to transform each element in the tuple
+template <typename Func, typename Tuple, std::size_t... Indices>
+auto transformTupleImpl(const Tuple& t, Func func, std::index_sequence<Indices...>)
+{
+    return std::make_tuple(func(std::get<Indices>(t))...);
+}
+
+// Wrapper function to apply transformation function to a tuple
+template <typename Func, typename... Ts>
+auto transformTuple(const std::tuple<Ts...>& t, Func func)
+{
+    return transformTupleImpl(t, func, std::index_sequence_for<Ts...>{});
+}
+
+// Helper function to create a tuple of iterators with increments
+template <typename Iterator, std::size_t... Indices>
+auto makeIteratorTupleImpl(Iterator iter, std::index_sequence<Indices...>)
+{
+    return std::make_tuple((std::next(iter, Indices))...);
+}
+
+// Main function to generate a tuple of iterators incremented by each index
+template <std::size_t N, typename Iterator>
+auto makeIteratorTuple(Iterator iter)
+{
+    return makeIteratorTupleImpl(iter, std::make_index_sequence<N>{});
+}
+
+// Basic enumerate_view implementation
+template <std::size_t N, typename Range>
+    requires(std::ranges::viewable_range<Range>)
+class BasicAdjacentView {
+public:
+    explicit BasicAdjacentView(Range&& range)
+        : range_{ std::forward<Range>(range) }
+    {
+    }
+
+    // Iterator type
+    class iterator {
+    public:
+        using difference_type = std::ptrdiff_t;
+        using value_type = TupleOf<typename std::ranges::range_value_t<Range>, N>;
+        explicit iterator(std::optional<TupleOf<std::ranges::iterator_t<Range>, N>> iters, std::ranges::iterator_t<Range> last)
+            : iter_{ iters }
+            , last_{ last }
+        {
+        }
+        explicit iterator(bool end)
+            : endSentinel{ end }
+        {
+        }
+        iterator() = default;
+
+        // Increment operators
+        auto operator++() -> iterator&
+        {
+            if (iter_) {
+                std::get<0>(*iter_) = std::get<N - 1>(*iter_);
+                ++(std::get<0>(*iter_));
+                *iter_ = rotateLeft(*iter_);
+            }
+            return *this;
+        }
+
+        auto operator++(int) -> iterator
+        {
+            iterator tmp(*this);
+            ++(*this);
+            return tmp;
+        }
+
+        // Dereference operator
+        auto operator*() const -> value_type
+        {
+            return transformTuple(*iter_, [](auto&& iter) { return *iter; });
+        }
+
+        // Equality comparison operator
+        auto operator==(const iterator& other) const
+        {
+            if (endSentinel && other.endSentinel) {
+                return true;
+            }
+            if (other.endSentinel) {
+                return std::get<N - 1>(*iter_) == last_;
+            }
+            if (endSentinel) {
+                return std::get<N - 1>(*other.iter_) == other.last_;
+            }
+            return iter_ == other.iter_;
+        }
+
+        auto operator!=(const iterator& other) const
+        {
+            return !(*this == other);
+        }
+
+    private:
+        std::optional<TupleOf<std::ranges::iterator_t<Range>, N>> iter_{};
+        std::ranges::iterator_t<Range> last_{};
+        bool endSentinel{};
+    };
+
+    auto begin() -> iterator
+    {
+        auto size = std::distance(std::ranges::begin(range_), std::ranges::end(range_));
+        if (static_cast<size_t>(size) < N) {
+            return iterator{ true };
+        }
+        return iterator(makeIteratorTuple<N>(std::ranges::begin(range_)), std::ranges::end(range_));
+    }
+
+    auto end() -> iterator
+    {
+        return iterator{ true };
     }
 
 private:
@@ -215,6 +377,12 @@ template <typename Range>
 auto enumerate_view(Range&& range)
 {
     return details::BasicEnumerateView<Range>(std::forward<Range>(range));
+}
+
+template <std::size_t N, typename Range>
+auto adjacent_view(Range&& range)
+{
+    return details::BasicAdjacentView<N, Range>(std::forward<Range>(range));
 }
 
 }

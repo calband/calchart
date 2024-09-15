@@ -30,4 +30,5 @@ Other changes:
 * [#538](../../issues/538) Remove unused cont symbol from animate errors
 * [#546](../../issues/546) Change behavior of show generation so endPosition and nextPosition in animation are the same
 * [#547](../../issues/547) Add some basic profiling to calband_cmd
+* [#550](../../issues/550) Make animation compilation an operation of two pairs of sheets
 

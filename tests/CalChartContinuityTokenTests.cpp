@@ -32,17 +32,16 @@ template <typename Sheets, typename Conts>
 auto GetCompiledResults(Sheets const& sheets, Conts const& proc)
 {
     Animate::Variables vars{};
-    Animate::Errors errors{};
-
-    return Animate::CreateCompileResult(
-        vars,
-        errors,
+    auto animationData = Animate::AnimationData{
         0,
         sheets.begin()->GetPoint(0),
-        sheets.begin()->GetBeats(),
-        true,
+        proc,
         (sheets.begin() + 1)->GetPoint(0).GetPos(),
-        proc);
+        sheets.begin()->GetBeats(),
+        true
+    };
+
+    return Animate::CreateCompileResult(animationData, vars);
 }
 
 auto CreateSheetsForTest(Coord begin, Coord end, int beats)
@@ -86,7 +85,7 @@ TEST_CASE("Fountain", "CalChartContinuityToken")
     auto procs = std::vector<std::unique_ptr<Cont::Procedure>>{};
     procs.push_back(std::move(uut));
     auto sheets = CreateSheetsForTest({ 0, 0 }, { 8, 16 }, 14);
-    auto compiledResults = GetCompiledResults(sheets, procs);
+    auto [compiledResults, errors] = GetCompiledResults(sheets, procs);
 
     auto goldCompile = std::vector<Animate::Command>{
         Animate::CommandMove{ Coord{ 0, 0 }, 6, Coord{ 128, 128 } },
@@ -107,7 +106,7 @@ TEST_CASE("Fountain with nulls", "CalChartContinuityToken")
     auto procs = std::vector<std::unique_ptr<Cont::Procedure>>{};
     procs.push_back(std::move(uut));
     auto sheets = CreateSheetsForTest({ 0, 0 }, { 8, 16 }, 16);
-    auto compiledResults = GetCompiledResults(sheets, procs);
+    auto [compiledResults, errors] = GetCompiledResults(sheets, procs);
 
     auto goldCompile = std::vector<Animate::Command>{
         Animate::CommandMove{ Coord{ 0, 0 }, 8, Coord{ 128, 128 } },
@@ -129,7 +128,7 @@ TEST_CASE("HSCM", "CalChartContinuityToken")
     auto procs = std::vector<std::unique_ptr<Cont::Procedure>>{};
     procs.push_back(std::move(uut));
     auto sheets = CreateSheetsForTest({ 0, 0 }, { -8, 0 }, { 8, -2 }, { 0, 0 }, 40);
-    auto compiledResults = GetCompiledResults(sheets, procs);
+    auto [compiledResults, errors] = GetCompiledResults(sheets, procs);
 
     auto goldCompile = std::vector<Animate::Command>{
         Animate::CommandMove{ Coord{ 0, 0 }, 9, Coord{ -16 * 9, 0 } },
@@ -153,7 +152,7 @@ TEST_CASE("DMCM", "CalChartContinuityToken")
     auto procs = std::vector<std::unique_ptr<Cont::Procedure>>{};
     procs.push_back(std::move(uut));
     auto sheets = CreateSheetsForTest({ 0, 0 }, { -8, 8 }, { 8, -10 }, { 0, 0 }, 40);
-    auto compiledResults = GetCompiledResults(sheets, procs);
+    auto [compiledResults, errors] = GetCompiledResults(sheets, procs);
 
     auto goldCompile = std::vector<Animate::Command>{
         Animate::CommandMove{ Coord{ 0, 0 }, 9, Coord{ -16 * 9, 16 * 9 } },

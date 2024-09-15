@@ -51,6 +51,7 @@
 #include <map>
 #include <memory>
 #include <nlohmann/json.hpp>
+#include <ranges>
 #include <set>
 #include <string>
 #include <utility>
@@ -153,6 +154,16 @@ public:
     // Saving the show.
     [[nodiscard]] auto SerializeShow() const -> std::vector<std::byte>;
 
+    [[nodiscard]] auto AreSheetsInAnimation() const
+    {
+        return mSheets | std::views::transform([](auto&& sheet) { return sheet.IsInAnimation(); });
+    }
+
+    [[nodiscard]] auto SheetsInAnimation() const
+    {
+        return mSheets | std::views::filter([](auto&& sheet) { return sheet.IsInAnimation(); });
+    }
+
 private:
     // modification of show is private, and externally done through create and exeucte commands
     auto RemoveNthSheet(int sheetidx) -> Sheet_container_t;
@@ -166,13 +177,31 @@ private:
     void SetPointLabelAndInstrument(std::vector<std::pair<std::string, std::string>> const& labels);
 
     // Descriptions aren't used, but keeping this alive.  See issue #203
-    [[nodiscard]] auto GetDescr() const { return mDescr; }
-    void SetDescr(std::string const& newdescr) { mDescr = newdescr; }
+    [[nodiscard]] auto GetDescr() const
+    {
+        return mDescr;
+    }
+    void SetDescr(std::string const& newdescr)
+    {
+        mDescr = newdescr;
+    }
 
-    auto GetSheetBegin() { return mSheets.begin(); }
-    auto GetSheetEnd() { return mSheets.end(); }
-    auto GetNthSheet(unsigned n) { return GetSheetBegin() + n; }
-    auto GetCurrentSheet() { return GetNthSheet(mSheetNum); }
+    auto GetSheetBegin()
+    {
+        return mSheets.begin();
+    }
+    auto GetSheetEnd()
+    {
+        return mSheets.end();
+    }
+    auto GetNthSheet(unsigned n)
+    {
+        return GetSheetBegin() + n;
+    }
+    auto GetCurrentSheet()
+    {
+        return GetNthSheet(mSheetNum);
+    }
 
     void SetShowMode(ShowMode const&);
 
