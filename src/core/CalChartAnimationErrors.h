@@ -21,12 +21,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartAnimationTypes.h"
 #include "CalChartConstants.h"
 #include "CalChartContinuityToken.h"
 #include "CalChartTypes.h"
-#include <array>
+#include "CalChartUtils.h"
+#include <cstdint>
 #include <map>
+#include <optional>
 #include <ostream>
 
 /**
@@ -36,7 +37,7 @@
 
 namespace CalChart {
 
-enum class AnimateError {
+enum class AnimateError : uint8_t {
     OUTOFTIME,
     EXTRATIME,
     WRONGPLACE,
@@ -47,51 +48,6 @@ enum class AnimateError {
     SYNTAX,
     NONINT,
     NEGINT,
-};
-
-static inline std::ostream& operator<<(std::ostream& os, AnimateError e)
-{
-    return os << static_cast<int>(e);
-}
-
-struct ErrorMarker {
-    SelectionList pntgroup; // which points have this error
-    SYMBOL_TYPE contsymbol = SYMBOL_PLAIN; // which continuity
-    int line = -1, col = -1; // where
-    bool operator==(ErrorMarker const& rhs) const
-    {
-        return pntgroup == rhs.pntgroup && contsymbol == rhs.contsymbol && line == rhs.line && col == rhs.col;
-    }
-};
-
-class AnimationErrors {
-public:
-    void RegisterError(AnimateError err, Cont::Token const* token, unsigned curr_pt, SYMBOL_TYPE contsymbol)
-    {
-        mErrorMarkers[err].contsymbol = contsymbol;
-        if (token != NULL) {
-            mErrorMarkers[err].line = token->line;
-            mErrorMarkers[err].col = token->col;
-        }
-        mErrorMarkers[err].pntgroup.insert(curr_pt);
-    }
-    void RegisterError(AnimateError err, int line, int col, unsigned curr_pt, SYMBOL_TYPE contsymbol)
-    {
-        mErrorMarkers[err].contsymbol = contsymbol;
-        mErrorMarkers[err].line = line;
-        mErrorMarkers[err].col = col;
-        mErrorMarkers[err].pntgroup.insert(curr_pt);
-    }
-    auto AnyErrors() const { return !mErrorMarkers.empty(); }
-    auto GetErrors() const { return mErrorMarkers; }
-
-    bool operator==(AnimationErrors const& rhs) const
-    {
-        return mErrorMarkers == rhs.mErrorMarkers;
-    }
-
-private:
-    std::map<AnimateError, ErrorMarker> mErrorMarkers;
 };
 
 static inline auto AnimateErrorToString(AnimateError error)
@@ -120,4 +76,17 @@ static inline auto AnimateErrorToString(AnimateError error)
     }
     return "Generic error";
 }
+
+static inline auto operator<<(std::ostream& os, AnimateError e) -> std::ostream&
+{
+    return os << static_cast<int>(e);
+}
+
+using AnimationErrors = std::map<std::pair<AnimateError, SYMBOL_TYPE>, SelectionList>;
+inline auto AnyErrors(AnimationErrors const& errors) { return !errors.empty(); }
+inline auto RegisterAnimationError(AnimationErrors& errors, AnimateError err, int curr_pt, SYMBOL_TYPE contsymbol)
+{
+    errors[{ err, contsymbol }].insert(curr_pt);
+}
+
 }

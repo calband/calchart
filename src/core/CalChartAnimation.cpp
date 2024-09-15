@@ -132,7 +132,7 @@ auto AnimateShow(const Show& show) -> std::tuple<Sheets, std::vector<AnimationEr
                     {});
             }
         }
-        if (errors.AnyErrors()) {
+        if (AnyErrors(errors)) {
             animationErrors[std::distance(show.GetSheetBegin(), curr_sheet)] = errors;
         }
         sheets.emplace_back(curr_sheet->GetName(), numBeats, theCommands);

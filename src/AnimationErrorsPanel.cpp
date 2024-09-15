@@ -116,8 +116,8 @@ void AnimationErrorsPanel::UpdateErrors(std::vector<CalChart::AnimationErrors> c
     // categorize by animation error, mapping them to the sheet and ErrorMarker
     std::map<CalChart::AnimateError, std::vector<std::tuple<int, CalChart::SelectionList>>> allErrors;
     for (auto i = 0ul; i < mCurrentErrors.size(); ++i) {
-        for (auto&& error : mCurrentErrors[i].GetErrors()) {
-            allErrors[error.first].push_back({ i, error.second.pntgroup });
+        for (auto&& [error, pntgroup] : mCurrentErrors[i]) {
+            allErrors[error.first].push_back({ i, pntgroup });
         }
     }
 

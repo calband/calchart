@@ -56,8 +56,7 @@ std::vector<std::unique_ptr<Cont::Procedure>> ParseContinuity(std::string const&
             // give the user a chance to correct.
             thisParse = correct->mContinuityParseCorrectionHandler(std::string("Could not parse line ") + std::to_string(yylloc.first_line) + " at " + std::to_string(yylloc.first_column), thisParse, yylloc.first_line, yylloc.first_column);
         } else {
-            Cont::Token dummy;
-            throw ParseError(s, dummy.line, dummy.col);
+            throw ParseError(s, 0, 0);
         }
     }
 }
