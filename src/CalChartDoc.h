@@ -20,6 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartMovePointsTool.h"
+#include "CalChartSelectTool.h"
 #include "CalChartShow.h"
 
 #include <functional>

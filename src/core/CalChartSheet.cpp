@@ -22,7 +22,6 @@
 
 #include "CalChartSheet.h"
 
-#include "CalChartAnimationCommand.h"
 #include "CalChartFileFormat.h"
 #include "CalChartRanges.h"
 #include "CalChartShow.h"

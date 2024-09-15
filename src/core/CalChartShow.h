@@ -35,21 +35,25 @@
  *
  */
 
-#include "CalChartFileFormat.h"
-#include "CalChartMovePointsTool.h"
-#include "CalChartSelectTool.h"
-#include "CalChartShapes.h"
-#include "CalChartTypes.h"
-
 #include "CalChartAnimation.h"
+#include "CalChartConstants.h"
+#include "CalChartCoord.h"
+#include "CalChartFileFormat.h"
+#include "CalChartImage.h"
+#include "CalChartShapes.h"
 #include "CalChartSheet.h"
 #include "CalChartShowMode.h"
+#include "CalChartTypes.h"
 
+#include <cstddef>
+#include <functional>
+#include <istream>
 #include <map>
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace CalChart {
@@ -68,87 +72,74 @@ public:
     using const_Sheet_iterator_t = Sheet_container_t::const_iterator;
 
     // you can create a show in two ways, from nothing, or from an input stream
-    static std::unique_ptr<Show> Create(ShowMode const& mode);
-    static std::unique_ptr<Show> Create(ShowMode const& mode, std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, unsigned columns);
-    static std::unique_ptr<Show> Create(ShowMode const& mode, std::istream& stream, ParseErrorHandlers const* correction = nullptr);
-
-private:
-    Show(ShowMode const& mode);
-    // calchart 3.3 and earlier is parsed via the istream.
-    Show(Version_3_3_and_earlier, ShowMode const& mode, Reader reader, ParseErrorHandlers const* correction = nullptr);
-    // calchart 3.4 and later are given a data blob to parse.
-    Show(ShowMode const& mode, Reader reader, ParseErrorHandlers const* correction = nullptr);
-
-public:
-    ~Show();
-
-public:
-    auto SerializeShow() const -> std::vector<std::byte>;
+    static auto Create(ShowMode const& mode) -> std::unique_ptr<Show>;
+    static auto Create(ShowMode const& mode, std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, unsigned columns) -> std::unique_ptr<Show>;
+    static auto Create(ShowMode const& mode, std::istream& stream, ParseErrorHandlers const* correction = nullptr) -> std::unique_ptr<Show>;
 
     // Create command, consists of an action and undo action
-    Show_command_pair Create_SetCurrentSheetCommand(int n) const;
-    Show_command_pair Create_SetSelectionListCommand(SelectionList const& sl) const;
-    Show_command_pair Create_SetCurrentSheetAndSelectionCommand(int n, SelectionList const& sl) const;
-    Show_command_pair Create_SetShowModeCommand(CalChart::ShowMode const& newmode) const;
-    Show_command_pair Create_SetupMarchersCommand(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int numColumns, Coord const& new_march_position) const;
-    Show_command_pair Create_SetInstrumentsCommand(std::map<int, std::string> const& dotToInstrument) const;
-    Show_command_pair Create_SetSheetTitleCommand(std::string const& newname) const;
-    Show_command_pair Create_SetSheetBeatsCommand(int beats) const;
-    Show_command_pair Create_AddSheetsCommand(Show::Sheet_container_t const& sheets, int where) const;
-    Show_command_pair Create_RemoveSheetCommand(int where) const;
-    Show_command_pair Create_ApplyRelabelMapping(int sheet_num_first, std::vector<size_t> const& mapping) const;
-    Show_command_pair Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string>> const& data) const;
-    Show_command_pair Create_MovePointsCommand(std::map<int, Coord> const& new_positions, int ref) const;
-    Show_command_pair Create_MovePointsCommand(int whichSheet, std::map<int, Coord> const& new_positions, int ref) const;
-    Show_command_pair Create_DeletePointsCommand() const;
-    Show_command_pair Create_RotatePointPositionsCommand(int rotateAmount, int ref) const;
-    Show_command_pair Create_ResetReferencePointToRef0(int ref) const;
-    Show_command_pair Create_SetSymbolCommand(SYMBOL_TYPE sym) const;
-    Show_command_pair Create_SetSymbolCommand(SelectionList const& whichDots, SYMBOL_TYPE sym) const;
-    Show_command_pair Create_SetContinuityCommand(SYMBOL_TYPE which_sym, Continuity const& cont) const;
-    Show_command_pair Create_SetLabelFlipCommand(std::map<int, bool> const& new_flip) const;
-    Show_command_pair Create_SetLabelRightCommand(bool right) const;
-    Show_command_pair Create_ToggleLabelFlipCommand() const;
-    Show_command_pair Create_SetLabelVisiblityCommand(std::map<int, bool> const& new_visibility) const;
-    Show_command_pair Create_SetLabelVisibleCommand(bool isVisible) const;
-    Show_command_pair Create_ToggleLabelVisibilityCommand() const;
-    Show_command_pair Create_AddNewBackgroundImageCommand(ImageInfo const& image) const;
-    Show_command_pair Create_RemoveBackgroundImageCommand(int which) const;
-    Show_command_pair Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height) const;
+    [[nodiscard]] auto Create_SetCurrentSheetCommand(int n) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetSelectionListCommand(SelectionList const& sl) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetCurrentSheetAndSelectionCommand(int n, SelectionList const& sl) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetShowModeCommand(CalChart::ShowMode const& newmode) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetupMarchersCommand(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int numColumns, Coord const& new_march_position) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetInstrumentsCommand(std::map<int, std::string> const& dotToInstrument) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetSheetTitleCommand(std::string const& newname) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetSheetBeatsCommand(int beats) const -> Show_command_pair;
+    [[nodiscard]] auto Create_AddSheetsCommand(Show::Sheet_container_t const& sheets, int where) const -> Show_command_pair;
+    [[nodiscard]] auto Create_RemoveSheetCommand(int where) const -> Show_command_pair;
+    [[nodiscard]] auto Create_ApplyRelabelMapping(int sheet_num_first, std::vector<size_t> const& mapping) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string>> const& data) const -> Show_command_pair;
+    [[nodiscard]] auto Create_MovePointsCommand(std::map<int, Coord> const& new_positions, int ref) const -> Show_command_pair;
+    [[nodiscard]] auto Create_MovePointsCommand(int whichSheet, std::map<int, Coord> const& new_positions, int ref) const -> Show_command_pair;
+    [[nodiscard]] auto Create_DeletePointsCommand() const -> Show_command_pair;
+    [[nodiscard]] auto Create_RotatePointPositionsCommand(int rotateAmount, int ref) const -> Show_command_pair;
+    [[nodiscard]] auto Create_ResetReferencePointToRef0(int ref) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetSymbolCommand(SYMBOL_TYPE sym) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetSymbolCommand(SelectionList const& whichDots, SYMBOL_TYPE sym) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetContinuityCommand(SYMBOL_TYPE which_sym, Continuity const& cont) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetLabelFlipCommand(std::map<int, bool> const& new_flip) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetLabelRightCommand(bool right) const -> Show_command_pair;
+    [[nodiscard]] auto Create_ToggleLabelFlipCommand() const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetLabelVisiblityCommand(std::map<int, bool> const& new_visibility) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetLabelVisibleCommand(bool isVisible) const -> Show_command_pair;
+    [[nodiscard]] auto Create_ToggleLabelVisibilityCommand() const -> Show_command_pair;
+    [[nodiscard]] auto Create_AddNewBackgroundImageCommand(ImageInfo const& image) const -> Show_command_pair;
+    [[nodiscard]] auto Create_RemoveBackgroundImageCommand(int which) const -> Show_command_pair;
+    [[nodiscard]] auto Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height) const -> Show_command_pair;
 
     // Accessors
-    auto GetSheetBegin() const { return mSheets.begin(); }
-    auto GetSheetEnd() const { return mSheets.end(); }
-    auto GetNthSheet(unsigned n) const { return GetSheetBegin() + n; }
-    auto GetCurrentSheet() const { return GetNthSheet(mSheetNum); }
-    int GetNumSheets() const;
-    auto GetCurrentSheetNum() const { return mSheetNum; }
-    auto GetNumPoints() const { return static_cast<int>(mDotLabelAndInstrument.size()); }
-    std::string GetPointLabel(int i) const;
-    std::vector<std::string> GetPointsLabel() const;
-    std::string GetPointInstrument(int i) const;
-    std::vector<std::string> GetPointsInstrument() const;
-    SYMBOL_TYPE GetPointSymbol(int i) const;
-    std::vector<SYMBOL_TYPE> GetPointsSymbol() const;
-    bool AlreadyHasPrintContinuity() const;
-    ShowMode const& GetShowMode() const;
+    [[nodiscard]] auto GetSheetBegin() const { return mSheets.begin(); }
+    [[nodiscard]] auto GetSheetEnd() const { return mSheets.end(); }
+    [[nodiscard]] auto GetNthSheet(unsigned n) const { return GetSheetBegin() + n; }
+    [[nodiscard]] auto GetCurrentSheet() const { return GetNthSheet(mSheetNum); }
+    [[nodiscard]] auto GetNumSheets() const -> int;
+    [[nodiscard]] auto GetCurrentSheetNum() const { return mSheetNum; }
+    [[nodiscard]] auto GetNumPoints() const { return static_cast<int>(mDotLabelAndInstrument.size()); }
+    [[nodiscard]] auto GetPointLabel(int i) const -> std::string;
+    [[nodiscard]] auto GetPointsLabel() const -> std::vector<std::string>;
+    [[nodiscard]] auto GetPointInstrument(int i) const -> std::string;
+    [[nodiscard]] auto GetPointsInstrument() const -> std::vector<std::string>;
+    [[nodiscard]] auto GetPointSymbol(int i) const -> SYMBOL_TYPE;
+    [[nodiscard]] auto GetPointsSymbol() const -> std::vector<SYMBOL_TYPE>;
+    [[nodiscard]] auto AlreadyHasPrintContinuity() const -> bool;
+    [[nodiscard]] auto GetShowMode() const { return mMode; }
 
     // utility
-    std::pair<bool, std::vector<size_t>> GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const;
-    SelectionList MakeSelectAll() const;
-    SelectionList MakeUnselectAll() const;
-    SelectionList MakeAddToSelection(const SelectionList& sl) const;
-    SelectionList MakeRemoveFromSelection(const SelectionList& sl) const;
-    SelectionList MakeToggleSelection(const SelectionList& sl) const;
-    SelectionList MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon, int ref) const;
-    SelectionList MakeSelectBySymbol(SYMBOL_TYPE i) const;
-    SelectionList MakeSelectByInstrument(std::string const& instrumentName) const;
-    SelectionList MakeSelectByLabel(std::string const& labelName) const;
+    [[nodiscard]] auto GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const -> std::pair<bool, std::vector<size_t>>;
+    [[nodiscard]] auto MakeSelectAll() const -> SelectionList;
+    [[nodiscard]] auto MakeUnselectAll() const -> SelectionList;
+    [[nodiscard]] auto MakeAddToSelection(const SelectionList& sl) const -> SelectionList;
+    [[nodiscard]] auto MakeRemoveFromSelection(const SelectionList& sl) const -> SelectionList;
+    [[nodiscard]] auto MakeToggleSelection(const SelectionList& sl) const -> SelectionList;
+    [[nodiscard]] auto MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon, int ref) const -> SelectionList;
+    [[nodiscard]] auto MakeSelectBySymbol(SYMBOL_TYPE i) const -> SelectionList;
+    [[nodiscard]] auto MakeSelectByInstrument(std::string const& instrumentName) const -> SelectionList;
+    [[nodiscard]] auto MakeSelectByLabel(std::string const& labelName) const -> SelectionList;
 
     // Point selection
-    auto IsSelected(int i) const { return mSelectionList.count(i) != 0; }
-    auto GetSelectionList() const { return mSelectionList; }
-    bool WillMovePoints(std::map<int, Coord> const& new_positions, int ref) const;
+    [[nodiscard]] auto IsSelected(int i) const { return mSelectionList.contains(i); }
+    [[nodiscard]] auto GetSelectionList() const { return mSelectionList; }
+    [[nodiscard]] auto WillMovePoints(std::map<int, Coord> const& new_positions, int ref) const -> bool;
 
     /*!
      * @brief Generates a JSON that could represent this
@@ -157,11 +148,14 @@ public:
      * @return A JSON which could represent this show in
      * a '.viewer' file.
      */
-    nlohmann::json toOnlineViewerJSON(Animation const& compiledShow) const;
+    [[nodiscard]] auto toOnlineViewerJSON(Animation const& compiledShow) const -> nlohmann::json;
+
+    // Saving the show.
+    [[nodiscard]] auto SerializeShow() const -> std::vector<std::byte>;
 
 private:
     // modification of show is private, and externally done through create and exeucte commands
-    Sheet_container_t RemoveNthSheet(int sheetidx);
+    auto RemoveNthSheet(int sheetidx) -> Sheet_container_t;
     void InsertSheet(Sheet const& nsheet, int sheetidx);
     void InsertSheet(Sheet_container_t const& nsheet, int sheetidx);
     void SetCurrentSheet(int n);
@@ -172,7 +166,7 @@ private:
     void SetPointLabelAndInstrument(std::vector<std::pair<std::string, std::string>> const& labels);
 
     // Descriptions aren't used, but keeping this alive.  See issue #203
-    auto GetDescr() const { return mDescr; }
+    [[nodiscard]] auto GetDescr() const { return mDescr; }
     void SetDescr(std::string const& newdescr) { mDescr = newdescr; }
 
     auto GetSheetBegin() { return mSheets.begin(); }
@@ -182,8 +176,13 @@ private:
 
     void SetShowMode(ShowMode const&);
 
+    // serialization logic
+    explicit Show(ShowMode const& mode);
+    Show(Version_3_3_and_earlier, ShowMode const& mode, Reader reader, ParseErrorHandlers const* correction = nullptr);
+    Show(ShowMode const& mode, Reader reader, ParseErrorHandlers const* correction = nullptr);
+
     // implementation and helper functions
-    auto SerializeShowData() const -> std::vector<std::byte>;
+    [[nodiscard]] auto SerializeShowData() const -> std::vector<std::byte>;
 
     // members
     std::string mDescr;
