@@ -28,4 +28,5 @@ Other changes:
 * [#534](../../issues/534) remove unused Token from Continuity parsing
 * [#536](../../issues/536) Change the animation objects to be within the Animate namespace
 * [#538](../../issues/538) Remove unused cont symbol from animate errors
+* [#547](../../issues/547) Add some basic profiling to calband_cmd
 
