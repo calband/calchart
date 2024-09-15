@@ -20,7 +20,6 @@
 #include <memory>
 
 namespace CalChart::Cont {
-class Token;
 struct Drawable;
 }
 namespace CalChart {

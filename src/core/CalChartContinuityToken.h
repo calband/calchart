@@ -186,8 +186,6 @@ public:
     [[nodiscard]] virtual auto Serialize() const -> std::vector<std::byte>;
     virtual Reader Deserialize(Reader);
 
-    uint32_t line, col;
-
 protected:
     Token* parent_ptr = nullptr;
 
@@ -198,6 +196,7 @@ protected:
     }
 
 private:
+    uint32_t line, col;
     static constexpr auto NumParts = 0;
 };
 

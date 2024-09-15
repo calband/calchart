@@ -49,7 +49,6 @@ namespace CalChart {
 
 namespace Cont {
     class Procedure;
-    class Token;
 }
 
 using AnimationVariables = std::array<std::map<unsigned, float>, Cont::kNumVariables>;
@@ -76,16 +75,16 @@ auto Compile(
 
 struct AnimationCompile {
     virtual ~AnimationCompile() = default;
-    virtual auto Append(Animate::Command cmd, Cont::Token const* token) -> bool = 0;
-    virtual void RegisterError(AnimateError err, Cont::Token const* token) const = 0;
+    virtual auto Append(Animate::Command cmd) -> bool = 0;
+    virtual void RegisterError(AnimateError err) const = 0;
 
-    [[nodiscard]] virtual auto GetVarValue(Cont::Variable varnum, Cont::Token const* token) const -> float = 0;
+    [[nodiscard]] virtual auto GetVarValue(Cont::Variable varnum) const -> float = 0;
     virtual void SetVarValue(Cont::Variable varnum, float value) = 0;
 
     // helper functions to get information for building a command
     [[nodiscard]] virtual auto GetPointPosition() const -> Coord = 0;
     [[nodiscard]] virtual auto GetStartingPosition() const -> Coord = 0;
-    [[nodiscard]] virtual auto GetEndingPosition(Cont::Token const* token) const -> Coord = 0;
+    [[nodiscard]] virtual auto GetEndingPosition() const -> Coord = 0;
     [[nodiscard]] virtual auto GetReferencePointPosition(unsigned refnum) const -> Coord = 0;
     [[nodiscard]] virtual auto GetCurrentPoint() const -> unsigned = 0;
     [[nodiscard]] virtual auto GetBeatsRemaining() const -> unsigned = 0;
