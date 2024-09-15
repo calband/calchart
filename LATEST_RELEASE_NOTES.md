@@ -21,4 +21,5 @@ Other changes:
 * [#526](../../issues/526) We should have a sanity test for ps output
 * [#528](../../issues/528) Clean up postscript files to be more value like
 * [#530](../../issues/530) Tidy up CalChartShow.h
+* [#532](../../issues/532) tidy up CalChartFileFormat
 
