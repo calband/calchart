@@ -27,7 +27,6 @@
 #include "CalChartUtils.h"
 #include <cstdint>
 #include <map>
-#include <optional>
 #include <ostream>
 
 /**
@@ -35,9 +34,9 @@
  * An object that holds the errors when compiling a show.
  */
 
-namespace CalChart {
+namespace CalChart::Animate {
 
-enum class AnimateError : uint8_t {
+enum class Error : uint8_t {
     OUTOFTIME,
     EXTRATIME,
     WRONGPLACE,
@@ -50,41 +49,41 @@ enum class AnimateError : uint8_t {
     NEGINT,
 };
 
-static inline auto AnimateErrorToString(AnimateError error)
+static inline auto ErrorToString(Error error)
 {
     switch (error) {
-    case AnimateError::OUTOFTIME:
+    case Error::OUTOFTIME:
         return "Ran out of time";
-    case AnimateError::EXTRATIME:
+    case Error::EXTRATIME:
         return "Not enough to do";
-    case AnimateError::WRONGPLACE:
+    case Error::WRONGPLACE:
         return "Didn't make it to position";
-    case AnimateError::INVALID_CM:
+    case Error::INVALID_CM:
         return "Invalid countermarch";
-    case AnimateError::INVALID_FNTN:
+    case Error::INVALID_FNTN:
         return "Invalid fountain";
-    case AnimateError::DIVISION_ZERO:
+    case Error::DIVISION_ZERO:
         return "Division by zero";
-    case AnimateError::UNDEFINED:
+    case Error::UNDEFINED:
         return "Undefined value";
-    case AnimateError::SYNTAX:
+    case Error::SYNTAX:
         return "Syntax error";
-    case AnimateError::NONINT:
+    case Error::NONINT:
         return "Non-integer value";
-    case AnimateError::NEGINT:
+    case Error::NEGINT:
         return "Negative value";
     }
     return "Generic error";
 }
 
-static inline auto operator<<(std::ostream& os, AnimateError e) -> std::ostream&
+static inline auto operator<<(std::ostream& os, Error e) -> std::ostream&
 {
     return os << static_cast<int>(e);
 }
 
-using AnimationErrors = std::map<std::pair<AnimateError, SYMBOL_TYPE>, SelectionList>;
-inline auto AnyErrors(AnimationErrors const& errors) { return !errors.empty(); }
-inline auto RegisterAnimationError(AnimationErrors& errors, AnimateError err, int curr_pt, SYMBOL_TYPE contsymbol)
+using Errors = std::map<std::pair<Error, SYMBOL_TYPE>, SelectionList>;
+inline auto AnyErrors(Errors const& errors) { return !errors.empty(); }
+inline auto RegisterError(Errors& errors, Error err, int curr_pt, SYMBOL_TYPE contsymbol)
 {
     errors[{ err, contsymbol }].insert(curr_pt);
 }

@@ -26,8 +26,8 @@ auto OpenShow(std::string_view showPath) -> std::unique_ptr<CalChart::Show const
 
 auto DumpAnimationErrors(CalChart::Animation const& animation, std::ostream& os)
 {
-    for (auto&& errors : animation.GetAnimationErrors()) {
-        auto sortedErrors = std::accumulate(errors.begin(), errors.end(), std::set<CalChart::AnimateError>{}, [](auto&& acc, auto&& item) {
+    for (auto&& errors : animation.GetErrors()) {
+        auto sortedErrors = std::accumulate(errors.begin(), errors.end(), std::set<CalChart::Animate::Error>{}, [](auto&& acc, auto&& item) {
             acc.insert(item.first.first);
             return acc;
         });
@@ -60,7 +60,7 @@ auto DumpContinuity(CalChart::Show const& show, std::ostream& os)
             os << cont.GetText() << "\n";
             os << "<--EndText sheet num " << sheet_num << ": symbol " << GetNameForSymbol(symbol) << "-->\n";
 
-            CalChart::AnimationErrors e;
+            CalChart::Animate::Errors e;
             auto&& continuity = cont.GetParsedContinuity();
             os << "<--Errors during compile-->\n";
             if (AnyErrors(e)) {

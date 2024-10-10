@@ -93,7 +93,7 @@ public:
     auto GetSheetEnd() const { return mShow->GetSheetEnd(); }
     auto GetCurrentSheet() const { return mShow->GetCurrentSheet(); }
 
-    std::vector<CalChart::AnimationErrors> GetAnimationErrors() const;
+    std::vector<CalChart::Animate::Errors> GetAnimationErrors() const;
     // Sheet -> all collisions
     std::map<int, CalChart::SelectionList> GetAnimationCollisions() const;
     std::optional<CalChart::Animation> GenerateAnimation() const;

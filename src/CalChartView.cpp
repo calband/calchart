@@ -447,7 +447,7 @@ CalChart::Coord CalChartView::PointPosition(int which) const
     return mShow->GetCurrentSheet()->GetPosition(which, mShow->GetCurrentReferencePoint());
 }
 
-std::vector<CalChart::AnimationErrors> CalChartView::GetAnimationErrors() const
+std::vector<CalChart::Animate::Errors> CalChartView::GetAnimationErrors() const
 {
     if (!mShow) {
         return {};

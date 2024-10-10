@@ -334,12 +334,12 @@ auto CalChartDoc::GenerateAnimation() const -> std::optional<CalChart::Animation
     return mAnimation;
 }
 
-auto CalChartDoc::GetAnimationErrors() const -> std::vector<CalChart::AnimationErrors>
+auto CalChartDoc::GetAnimationErrors() const -> std::vector<CalChart::Animate::Errors>
 {
     if (!mAnimation) {
         return {};
     }
-    return mAnimation->GetAnimationErrors();
+    return mAnimation->GetErrors();
 }
 
 auto CalChartDoc::GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>
@@ -347,7 +347,7 @@ auto CalChartDoc::GetAnimationCollisions() const -> std::map<int, CalChart::Sele
     if (!mAnimation) {
         return {};
     }
-    return mAnimation->GetAnimationCollisions();
+    return mAnimation->GetCollisions();
 }
 
 namespace {

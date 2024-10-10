@@ -103,28 +103,28 @@ static const std::string DefinedValue_strings[] = {
     "HS", "MM", "SH", "JS", "GV", "M", "DM"
 };
 
-int float2int(AnimationCompile& anim, float f)
+int float2int(Animate::Compile& anim, float f)
 {
     auto v = (int)floor(f + 0.5);
     if (std::abs(f - (float)v) >= kCoordDecimal) {
-        anim.RegisterError(AnimateError::NONINT);
+        anim.RegisterError(Animate::Error::NONINT);
     }
     return v;
 }
 
-unsigned float2unsigned(AnimationCompile& anim,
+unsigned float2unsigned(Animate::Compile& anim,
     float f)
 {
     auto v = float2int(anim, f);
     if (v < 0) {
-        anim.RegisterError(AnimateError::NEGINT);
+        anim.RegisterError(Animate::Error::NEGINT);
         return 0;
     } else {
         return (unsigned)v;
     }
 }
 
-void DoCounterMarch(AnimationCompile& anim,
+void DoCounterMarch(Animate::Compile& anim,
     const Point& pnt1, const Point& pnt2,
     const Value& stps, const Value& dir1,
     const Value& dir2, const Value& numbeats)
@@ -133,7 +133,7 @@ void DoCounterMarch(AnimationCompile& anim,
     auto d2 = CalChart::Degree{ dir2.Get(anim) };
     auto c = sin(d1 - d2);
     if (IS_ZERO(c)) {
-        anim.RegisterError(AnimateError::INVALID_CM);
+        anim.RegisterError(Animate::Error::INVALID_CM);
         return;
     }
     auto ref1 = pnt1.Get(anim);
@@ -172,7 +172,7 @@ void DoCounterMarch(AnimationCompile& anim,
                     leg = 0;
                 } else {
                     // Current point is not in path of countermarch
-                    anim.RegisterError(AnimateError::INVALID_CM);
+                    anim.RegisterError(Animate::Error::INVALID_CM);
                     return;
                 }
             }
@@ -461,7 +461,7 @@ Reader Token::Deserialize(Reader reader)
 }
 
 // Point
-Coord Point::Get(AnimationCompile const& anim) const
+Coord Point::Get(Animate::Compile const& anim) const
 {
     return anim.GetPointPosition();
 }
@@ -532,7 +532,7 @@ Reader PointUnset::Deserialize(Reader reader)
 }
 
 // StartPoint
-Coord StartPoint::Get(AnimationCompile const& anim) const
+Coord StartPoint::Get(Animate::Compile const& anim) const
 {
     return anim.GetStartingPosition();
 }
@@ -570,7 +570,7 @@ Reader StartPoint::Deserialize(Reader reader)
 }
 
 // NextPoint
-Coord NextPoint::Get(AnimationCompile const& anim) const
+Coord NextPoint::Get(Animate::Compile const& anim) const
 {
     return anim.GetEndingPosition();
 }
@@ -613,7 +613,7 @@ RefPoint::RefPoint(unsigned n)
 {
 }
 
-Coord RefPoint::Get(AnimationCompile const& anim) const
+Coord RefPoint::Get(Animate::Compile const& anim) const
 {
     return anim.GetReferencePointPosition(refnum);
 }
@@ -714,7 +714,7 @@ ValueFloat::ValueFloat(float v)
 {
 }
 
-float ValueFloat::Get(AnimationCompile const&) const { return val; }
+float ValueFloat::Get(Animate::Compile const&) const { return val; }
 
 std::ostream& ValueFloat::Print(std::ostream& os) const
 {
@@ -755,7 +755,7 @@ ValueDefined::ValueDefined(DefinedValue v)
 {
 }
 
-float ValueDefined::Get(AnimationCompile const&) const
+float ValueDefined::Get(Animate::Compile const&) const
 {
     static const std::map<DefinedValue, float> mapping = {
         { CC_NW, 45.0 },
@@ -826,7 +826,7 @@ Reader ValueDefined::Deserialize(Reader reader)
 }
 
 // ValueAdd
-float ValueAdd::Get(AnimationCompile const& anim) const
+float ValueAdd::Get(Animate::Compile const& anim) const
 {
     return (val1->Get(anim) + val2->Get(anim));
 }
@@ -874,7 +874,7 @@ Reader ValueAdd::Deserialize(Reader reader)
 }
 
 // ValueSub
-float ValueSub::Get(AnimationCompile const& anim) const
+float ValueSub::Get(Animate::Compile const& anim) const
 {
     return (val1->Get(anim) - val2->Get(anim));
 }
@@ -922,7 +922,7 @@ Reader ValueSub::Deserialize(Reader reader)
 }
 
 // ValueMult
-float ValueMult::Get(AnimationCompile const& anim) const
+float ValueMult::Get(Animate::Compile const& anim) const
 {
     return (val1->Get(anim) * val2->Get(anim));
 }
@@ -970,11 +970,11 @@ Reader ValueMult::Deserialize(Reader reader)
 }
 
 // ValueDiv
-float ValueDiv::Get(AnimationCompile const& anim) const
+float ValueDiv::Get(Animate::Compile const& anim) const
 {
     auto f = val2->Get(anim);
     if (IS_ZERO(f)) {
-        anim.RegisterError(AnimateError::DIVISION_ZERO);
+        anim.RegisterError(Animate::Error::DIVISION_ZERO);
         return 0.0;
     } else {
         return (val1->Get(anim) / f);
@@ -1024,7 +1024,7 @@ Reader ValueDiv::Deserialize(Reader reader)
 }
 
 // ValueNeg
-float ValueNeg::Get(AnimationCompile const& anim) const { return -val->Get(anim); }
+float ValueNeg::Get(Animate::Compile const& anim) const { return -val->Get(anim); }
 
 std::ostream& ValueNeg::Print(std::ostream& os) const
 {
@@ -1067,7 +1067,7 @@ Reader ValueNeg::Deserialize(Reader reader)
 }
 
 // ValueREM
-float ValueREM::Get(AnimationCompile const& anim) const
+float ValueREM::Get(Animate::Compile const& anim) const
 {
     return anim.GetBeatsRemaining();
 }
@@ -1110,7 +1110,7 @@ ValueVar::ValueVar(Cont::Variable num)
 {
 }
 
-float ValueVar::Get(AnimationCompile const& anim) const
+float ValueVar::Get(Animate::Compile const& anim) const
 {
     return anim.GetVarValue(varnum);
 }
@@ -1133,7 +1133,7 @@ Drawable ValueVar::GetDrawable() const
     };
 }
 
-void ValueVar::Set(AnimationCompile& anim, float v)
+void ValueVar::Set(Animate::Compile& anim, float v)
 {
     anim.SetVarValue(varnum, v);
 }
@@ -1189,11 +1189,11 @@ Reader ValueVarUnset::Deserialize(Reader reader)
 }
 
 // FuncDir
-float FuncDir::Get(AnimationCompile const& anim) const
+float FuncDir::Get(Animate::Compile const& anim) const
 {
     auto c = pnt->Get(anim);
     if (c == anim.GetPointPosition()) {
-        anim.RegisterError(AnimateError::UNDEFINED);
+        anim.RegisterError(Animate::Error::UNDEFINED);
     }
     return CalChart::Degree{ anim.GetPointPosition().Direction(c) }.getValue();
 }
@@ -1239,12 +1239,12 @@ Reader FuncDir::Deserialize(Reader reader)
 }
 
 // FuncDirFrom
-float FuncDirFrom::Get(AnimationCompile const& anim) const
+float FuncDirFrom::Get(Animate::Compile const& anim) const
 {
     auto start = pnt_start->Get(anim);
     auto end = pnt_end->Get(anim);
     if (start == end) {
-        anim.RegisterError(AnimateError::UNDEFINED);
+        anim.RegisterError(Animate::Error::UNDEFINED);
     }
     return CalChart::Degree{ start.Direction(end) }.getValue();
 }
@@ -1292,7 +1292,7 @@ Reader FuncDirFrom::Deserialize(Reader reader)
 }
 
 // FuncDist
-float FuncDist::Get(AnimationCompile const& anim) const
+float FuncDist::Get(Animate::Compile const& anim) const
 {
     auto vector = pnt->Get(anim) - anim.GetPointPosition();
     return vector.DM_Magnitude();
@@ -1339,7 +1339,7 @@ Reader FuncDist::Deserialize(Reader reader)
 }
 
 // FuncDistFrom
-float FuncDistFrom::Get(AnimationCompile const& anim) const
+float FuncDistFrom::Get(Animate::Compile const& anim) const
 {
     auto vector = pnt_end->Get(anim) - pnt_start->Get(anim);
     return vector.Magnitude();
@@ -1388,11 +1388,11 @@ Reader FuncDistFrom::Deserialize(Reader reader)
 }
 
 // FuncEither
-float FuncEither::Get(AnimationCompile const& anim) const
+float FuncEither::Get(Animate::Compile const& anim) const
 {
     auto c = pnt->Get(anim);
     if (anim.GetPointPosition() == c) {
-        anim.RegisterError(AnimateError::UNDEFINED);
+        anim.RegisterError(Animate::Error::UNDEFINED);
         return dir1->Get(anim);
     }
     auto dir = anim.GetPointPosition().Direction(c);
@@ -1447,7 +1447,7 @@ Reader FuncEither::Deserialize(Reader reader)
 }
 
 // FuncOpp
-float FuncOpp::Get(AnimationCompile const& anim) const
+float FuncOpp::Get(Animate::Compile const& anim) const
 {
     return (dir->Get(anim) + 180.0f);
 }
@@ -1494,7 +1494,7 @@ Reader FuncOpp::Deserialize(Reader reader)
 
 // FuncStep
 
-float FuncStep::Get(AnimationCompile const& anim) const
+float FuncStep::Get(Animate::Compile const& anim) const
 {
     auto c = pnt->Get(anim) - anim.GetPointPosition();
     return (c.DM_Magnitude() * numbeats->Get(anim) / blksize->Get(anim));
@@ -1601,7 +1601,7 @@ Reader ProcUnset::Deserialize(Reader reader)
 }
 
 // ProcSet
-void ProcSet::Compile(AnimationCompile& anim)
+void ProcSet::Compile(Animate::Compile& anim)
 {
     var->Set(anim, val->Get(anim));
 }
@@ -1676,7 +1676,7 @@ Reader ProcSet::Deserialize(Reader reader)
 }
 
 // ProcBlam
-void ProcBlam::Compile(AnimationCompile& anim)
+void ProcBlam::Compile(Animate::Compile& anim)
 {
     NextPoint np;
     auto c = np.Get(anim) - anim.GetPointPosition();
@@ -1716,7 +1716,7 @@ Reader ProcBlam::Deserialize(Reader reader)
 }
 
 // ProcClose
-void ProcClose::Compile(AnimationCompile& anim)
+void ProcClose::Compile(Animate::Compile& anim)
 {
     anim.Append(Animate::CommandStill{ anim.GetPointPosition(), anim.GetBeatsRemaining(), Animate::CommandStill::Style::Close, CalChart::Degree{ dir->Get(anim) } });
 }
@@ -1762,7 +1762,7 @@ Reader ProcClose::Deserialize(Reader reader)
 }
 
 // ProcCM
-void ProcCM::Compile(AnimationCompile& anim)
+void ProcCM::Compile(Animate::Compile& anim)
 {
     DoCounterMarch(anim, *pnt1, *pnt2, *stps, *dir1, *dir2, *numbeats);
 }
@@ -1820,7 +1820,7 @@ Reader ProcCM::Deserialize(Reader reader)
 }
 
 // ProcDMCM
-void ProcDMCM::Compile(AnimationCompile& anim)
+void ProcDMCM::Compile(Animate::Compile& anim)
 {
     ValueFloat steps(1.0);
 
@@ -1856,7 +1856,7 @@ void ProcDMCM::Compile(AnimationCompile& anim)
             return;
         }
     }
-    anim.RegisterError(AnimateError::INVALID_CM);
+    anim.RegisterError(Animate::Error::INVALID_CM);
 }
 
 std::ostream& ProcDMCM::Print(std::ostream& os) const
@@ -1905,7 +1905,7 @@ Reader ProcDMCM::Deserialize(Reader reader)
 }
 
 // ProcDMHS
-void ProcDMHS::Compile(AnimationCompile& anim)
+void ProcDMHS::Compile(Animate::Compile& anim)
 {
     short b_hs;
 
@@ -1980,7 +1980,7 @@ Reader ProcDMHS::Deserialize(Reader reader)
 }
 
 // ProcEven
-void ProcEven::Compile(AnimationCompile& anim)
+void ProcEven::Compile(Animate::Compile& anim)
 {
     auto c = pnt->Get(anim) - anim.GetPointPosition();
     auto steps = float2int(anim, stps->Get(anim));
@@ -2034,7 +2034,7 @@ Reader ProcEven::Deserialize(Reader reader)
 }
 
 // ProcEWNS
-void ProcEWNS::Compile(AnimationCompile& anim)
+void ProcEWNS::Compile(Animate::Compile& anim)
 {
     auto c1 = pnt->Get(anim) - anim.GetPointPosition();
     if (c1.y != 0) {
@@ -2094,7 +2094,7 @@ Reader ProcEWNS::Deserialize(Reader reader)
 }
 
 // ProcFountain
-void ProcFountain::Compile(AnimationCompile& anim)
+void ProcFountain::Compile(Animate::Compile& anim)
 {
     auto [a, c] = [this, &anim] {
         auto f1 = CalChart::Degree{ dir1->Get(anim) };
@@ -2128,7 +2128,7 @@ void ProcFountain::Compile(AnimationCompile& anim)
                 return;
             }
         } else {
-            anim.RegisterError(AnimateError::INVALID_FNTN);
+            anim.RegisterError(Animate::Error::INVALID_FNTN);
             return;
         }
     } else {
@@ -2244,7 +2244,7 @@ Reader ProcFountain::Deserialize(Reader reader)
 }
 
 // ProcFM
-void ProcFM::Compile(AnimationCompile& anim)
+void ProcFM::Compile(Animate::Compile& anim)
 {
     auto b = float2int(anim, stps->Get(anim));
     if (b != 0) {
@@ -2302,7 +2302,7 @@ Reader ProcFM::Deserialize(Reader reader)
 }
 
 // ProcFMTO
-void ProcFMTO::Compile(AnimationCompile& anim)
+void ProcFMTO::Compile(Animate::Compile& anim)
 {
     auto c = pnt->Get(anim) - anim.GetPointPosition();
     if (c != Coord{ 0 }) {
@@ -2364,7 +2364,7 @@ Reader ProcFMTO::Deserialize(Reader reader)
 }
 
 // ProcGrid
-void ProcGrid::Compile(AnimationCompile& anim)
+void ProcGrid::Compile(Animate::Compile& anim)
 {
     auto gridc = Float2CoordUnits(grid->Get(anim));
 
@@ -2420,7 +2420,7 @@ Reader ProcGrid::Deserialize(Reader reader)
 }
 
 // ProcHSCM
-void ProcHSCM::Compile(AnimationCompile& anim)
+void ProcHSCM::Compile(Animate::Compile& anim)
 {
     ValueFloat steps(1.0);
 
@@ -2441,7 +2441,7 @@ void ProcHSCM::Compile(AnimationCompile& anim)
             return;
         }
     }
-    anim.RegisterError(AnimateError::INVALID_CM);
+    anim.RegisterError(Animate::Error::INVALID_CM);
 }
 
 std::ostream& ProcHSCM::Print(std::ostream& os) const
@@ -2490,7 +2490,7 @@ Reader ProcHSCM::Deserialize(Reader reader)
 }
 
 // ProcHSDM
-void ProcHSDM::Compile(AnimationCompile& anim)
+void ProcHSDM::Compile(Animate::Compile& anim)
 {
     Coord c_hs, c_dm;
     short b;
@@ -2565,7 +2565,7 @@ Reader ProcHSDM::Deserialize(Reader reader)
 }
 
 // ProcMagic
-void ProcMagic::Compile(AnimationCompile& anim)
+void ProcMagic::Compile(Animate::Compile& anim)
 {
     auto c = pnt->Get(anim) - anim.GetPointPosition();
     anim.Append(Animate::CommandMove(anim.GetPointPosition(), 0, c));
@@ -2612,7 +2612,7 @@ Reader ProcMagic::Deserialize(Reader reader)
 }
 
 // ProcMarch
-void ProcMarch::Compile(AnimationCompile& anim)
+void ProcMarch::Compile(Animate::Compile& anim)
 {
     auto b = float2int(anim, stps->Get(anim));
     if (b != 0) {
@@ -2697,7 +2697,7 @@ Reader ProcMarch::Deserialize(Reader reader)
 }
 
 // ProcMT
-void ProcMT::Compile(AnimationCompile& anim)
+void ProcMT::Compile(Animate::Compile& anim)
 {
     auto b = float2int(anim, numbeats->Get(anim));
     if (b != 0) {
@@ -2748,7 +2748,7 @@ Reader ProcMT::Deserialize(Reader reader)
 }
 
 // ProcMTRM
-void ProcMTRM::Compile(AnimationCompile& anim)
+void ProcMTRM::Compile(Animate::Compile& anim)
 {
     anim.Append(Animate::CommandStill(anim.GetPointPosition(), anim.GetBeatsRemaining(), Animate::CommandStill::Style::MarkTime, CalChart::Degree{ dir->Get(anim) }));
 }
@@ -2794,7 +2794,7 @@ Reader ProcMTRM::Deserialize(Reader reader)
 }
 
 // ProcNSEW
-void ProcNSEW::Compile(AnimationCompile& anim)
+void ProcNSEW::Compile(Animate::Compile& anim)
 {
     auto c1 = pnt->Get(anim) - anim.GetPointPosition();
     if (c1.x != 0) {
@@ -2854,7 +2854,7 @@ Reader ProcNSEW::Deserialize(Reader reader)
 }
 
 // ProcRotate
-void ProcRotate::Compile(AnimationCompile& anim)
+void ProcRotate::Compile(Animate::Compile& anim)
 {
     // Most of the work is converting to polar coordinates
     auto c = pnt->Get(anim);
@@ -2925,7 +2925,7 @@ Reader ProcRotate::Deserialize(Reader reader)
 }
 
 // ProcStandAndPlay
-void ProcStandAndPlay::Compile(AnimationCompile& anim)
+void ProcStandAndPlay::Compile(Animate::Compile& anim)
 {
     auto b = float2int(anim, numbeats->Get(anim));
     if (b != 0) {

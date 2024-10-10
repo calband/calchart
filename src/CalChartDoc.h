@@ -197,7 +197,7 @@ public:
     CalChart::Configuration& GetConfiguration() const { return mConfig; }
 
     auto GenerateAnimation() const -> std::optional<CalChart::Animation>;
-    auto GetAnimationErrors() const -> std::vector<CalChart::AnimationErrors>;
+    auto GetAnimationErrors() const -> std::vector<CalChart::Animate::Errors>;
     auto GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>;
     auto GeneratePathsDrawCommands() -> std::vector<CalChart::Draw::DrawCommand>;
 
