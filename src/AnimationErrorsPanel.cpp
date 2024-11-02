@@ -117,7 +117,7 @@ void AnimationErrorsPanel::UpdateErrors(std::vector<CalChart::Animate::Errors> c
     std::map<CalChart::Animate::Error, std::vector<std::tuple<int, CalChart::SelectionList>>> allErrors;
     for (auto i = 0ul; i < mCurrentErrors.size(); ++i) {
         for (auto&& [error, pntgroup] : mCurrentErrors[i]) {
-            allErrors[error.first].push_back({ i, pntgroup });
+            allErrors[error].push_back({ i, pntgroup });
         }
     }
 
