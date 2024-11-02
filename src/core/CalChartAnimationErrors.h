@@ -81,11 +81,11 @@ static inline auto operator<<(std::ostream& os, Error e) -> std::ostream&
     return os << static_cast<int>(e);
 }
 
-using Errors = std::map<std::pair<Error, SYMBOL_TYPE>, SelectionList>;
+using Errors = std::map<Error, SelectionList>;
 inline auto AnyErrors(Errors const& errors) { return !errors.empty(); }
-inline auto RegisterError(Errors& errors, Error err, int curr_pt, SYMBOL_TYPE contsymbol)
+inline auto RegisterError(Errors& errors, Error err, int curr_pt)
 {
-    errors[{ err, contsymbol }].insert(curr_pt);
+    errors[err].insert(curr_pt);
 }
 
 }

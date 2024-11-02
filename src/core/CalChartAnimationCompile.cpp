@@ -28,10 +28,10 @@
 namespace CalChart::Animate {
 
 struct CompileState : public Compile {
-    CompileState(SYMBOL_TYPE cont_symbol, unsigned whichMarcher, Point point, beats_t beats, std::optional<Coord> endPosition, Variables& variablesStates, Errors& errors);
+    CompileState(unsigned whichMarcher, Point point, beats_t beats, std::optional<Coord> endPosition, Variables& variablesStates, Errors& errors);
 
-    auto Append(Animate::Command cmd) -> bool override;
-    void RegisterError(Error err) const override { ::CalChart::Animate::RegisterError(mErrors, err, mWhichMarcher, contsymbol); }
+    [[nodiscard]] auto Append(Animate::Command cmd) -> bool override;
+    void RegisterError(Error err) const override { ::CalChart::Animate::RegisterError(mErrors, err, mWhichMarcher); }
 
     [[nodiscard]] auto GetVarValue(Cont::Variable varnum) const -> float override;
     void SetVarValue(Cont::Variable varnum, float value) override { mVars.at(toUType(varnum))[mWhichMarcher] = value; }
@@ -46,7 +46,6 @@ struct CompileState : public Compile {
     [[nodiscard]] auto GetCommands() const { return mCmds; }
 
 private:
-    SYMBOL_TYPE contsymbol;
     unsigned mWhichMarcher;
     Point mPoint;
     Coord mWhichPos;
@@ -61,7 +60,6 @@ auto CreateCompileResult(
     Variables& variablesStates,
     Errors& errors,
     unsigned whichMarcher,
-    SYMBOL_TYPE cont_symbol,
     Point point,
     beats_t beats,
     bool isLastAnimationSheet,
@@ -69,7 +67,7 @@ auto CreateCompileResult(
     std::optional<Coord> nextPosition,
     std::vector<std::unique_ptr<Cont::Procedure>> const& procs) -> CompileResult
 {
-    CompileState ac(cont_symbol, whichMarcher, point, beats, endPosition, variablesStates, errors);
+    CompileState ac(whichMarcher, point, beats, endPosition, variablesStates, errors);
 
     // no continuity was specified
     if (procs.empty()) {
@@ -108,9 +106,8 @@ auto CreateCompileResult(
     return ac.GetCommands();
 }
 
-CompileState::CompileState(SYMBOL_TYPE cont_symbol, unsigned whichMarcher, Point point, beats_t beats, std::optional<Coord> endPosition, Variables& variablesStates, Errors& errors)
-    : contsymbol(cont_symbol)
-    , mWhichMarcher(whichMarcher)
+CompileState::CompileState(unsigned whichMarcher, Point point, beats_t beats, std::optional<Coord> endPosition, Variables& variablesStates, Errors& errors)
+    : mWhichMarcher(whichMarcher)
     , mPoint{ point }
     , mWhichPos(mPoint.GetPos(0))
     , mBeatsRem(beats)

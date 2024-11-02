@@ -38,7 +38,6 @@ auto GetCompiledResults(Sheets const& sheets, Conts const& proc)
         vars,
         errors,
         0,
-        SYMBOL_PLAIN,
         sheets.begin()->GetPoint(0),
         sheets.begin()->GetBeats(),
         true,

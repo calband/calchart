@@ -24,4 +24,5 @@ Other changes:
 * [#532](../../issues/532) tidy up CalChartFileFormat
 * [#534](../../issues/534) remove unused Token from Continuity parsing
 * [#536](../../issues/536) Change the animation objects to be within the Animate namespace
+* [#538](../../issues/538) Remove unused cont symbol from animate errors
 

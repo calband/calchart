@@ -68,7 +68,6 @@ auto CreateCompileResult(
     Variables& variablesStates,
     Errors& errors,
     unsigned whichMarcher,
-    SYMBOL_TYPE cont_symbol,
     Point point,
     beats_t beats,
     bool isLastAnimationSheet,

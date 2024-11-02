@@ -28,7 +28,7 @@ auto DumpAnimationErrors(CalChart::Animation const& animation, std::ostream& os)
 {
     for (auto&& errors : animation.GetErrors()) {
         auto sortedErrors = std::accumulate(errors.begin(), errors.end(), std::set<CalChart::Animate::Error>{}, [](auto&& acc, auto&& item) {
-            acc.insert(item.first.first);
+            acc.insert(item.first);
             return acc;
         });
 
@@ -65,7 +65,7 @@ auto DumpContinuity(CalChart::Show const& show, std::ostream& os)
             os << "<--Errors during compile-->\n";
             if (AnyErrors(e)) {
                 for (auto&& i : e) {
-                    os << "Error of type " << i.first.first << "\n";
+                    os << "Error of type " << i.first << "\n";
                 }
             }
             os << "<--End errors-->\n";
