@@ -23,4 +23,5 @@ Other changes:
 * [#530](../../issues/530) Tidy up CalChartShow.h
 * [#532](../../issues/532) tidy up CalChartFileFormat
 * [#534](../../issues/534) remove unused Token from Continuity parsing
+* [#536](../../issues/536) Change the animation objects to be within the Animate namespace
 

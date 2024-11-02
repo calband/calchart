@@ -101,7 +101,7 @@ void AnimationErrorsPanel::OnItemActivated(wxTreeListEvent& event)
 }
 
 // Implementation details
-void AnimationErrorsPanel::UpdateErrors(std::vector<CalChart::AnimationErrors> const& errors, std::map<int, CalChart::SelectionList> const& collisions)
+void AnimationErrorsPanel::UpdateErrors(std::vector<CalChart::Animate::Errors> const& errors, std::map<int, CalChart::SelectionList> const& collisions)
 {
     if (errors == mCurrentErrors) {
         return;
@@ -114,7 +114,7 @@ void AnimationErrorsPanel::UpdateErrors(std::vector<CalChart::AnimationErrors> c
 
     // we create a mapping between the generated errors and the items we've put in the list
     // categorize by animation error, mapping them to the sheet and ErrorMarker
-    std::map<CalChart::AnimateError, std::vector<std::tuple<int, CalChart::SelectionList>>> allErrors;
+    std::map<CalChart::Animate::Error, std::vector<std::tuple<int, CalChart::SelectionList>>> allErrors;
     for (auto i = 0ul; i < mCurrentErrors.size(); ++i) {
         for (auto&& [error, pntgroup] : mCurrentErrors[i]) {
             allErrors[error.first].push_back({ i, pntgroup });
@@ -124,7 +124,7 @@ void AnimationErrorsPanel::UpdateErrors(std::vector<CalChart::AnimationErrors> c
     // now if we have any, create an error node, and then start filling it up.
     if (allErrors.size()) {
         for (auto&& errorType : allErrors) {
-            auto itemId1 = mTreeCtrl->AppendItem(mTreeCtrl->GetRootItem(), CalChart::AnimateErrorToString(errorType.first), 0, 0);
+            auto itemId1 = mTreeCtrl->AppendItem(mTreeCtrl->GetRootItem(), CalChart::Animate::ErrorToString(errorType.first), 0, 0);
             for (auto&& error : errorType.second) {
                 auto itemId2 = mTreeCtrl->AppendItem(itemId1, std::string("Sheet ") + std::to_string(std::get<0>(error)));
                 // now we need to be able to get back to the errors and select things

@@ -31,10 +31,10 @@ auto print(T const& cont)
 template <typename Sheets, typename Conts>
 auto GetCompiledResults(Sheets const& sheets, Conts const& proc)
 {
-    AnimationVariables vars{};
-    AnimationErrors errors{};
+    Animate::Variables vars{};
+    Animate::Errors errors{};
 
-    return Compile(
+    return Animate::CreateCompileResult(
         vars,
         errors,
         0,

@@ -60,13 +60,13 @@ namespace {
     }
 }
 
-auto AnimateShow(const Show& show) -> std::tuple<Sheets, std::vector<AnimationErrors>>
+auto AnimateShow(const Show& show) -> std::tuple<Sheets, std::vector<Errors>>
 {
-    auto animationErrors = std::vector<AnimationErrors>(show.GetNumSheets());
+    auto animationErrors = std::vector<Animate::Errors>(show.GetNumSheets());
 
     auto points = std::vector<Coord>(show.GetNumPoints());
     // the variables are persistant through the entire compile process.
-    AnimationVariables variablesStates;
+    Variables variablesStates;
 
     auto sheets = std::vector<Animate::Sheet>{};
     auto endSheet = show.GetSheetEnd();
@@ -83,7 +83,7 @@ auto AnimateShow(const Show& show) -> std::tuple<Sheets, std::vector<AnimationEr
         auto numBeats = curr_sheet->GetBeats();
 
         // Now parse continuity
-        AnimationErrors errors;
+        Errors errors;
         std::vector<std::vector<Animate::Command>> theCommands(points.size());
         for (auto current_symbol : k_symbols) {
             if (curr_sheet->ContinuityInUse(current_symbol)) {
@@ -99,7 +99,7 @@ auto AnimateShow(const Show& show) -> std::tuple<Sheets, std::vector<AnimationEr
                 for (unsigned j = 0; j < points.size(); j++) {
                     if (curr_sheet->GetSymbol(j) == current_symbol) {
                         auto [endPosition, nextPosition] = getEndAndNext(curr_sheet, endSheet, j);
-                        theCommands[j] = CalChart::Compile(
+                        theCommands[j] = CreateCompileResult(
                             variablesStates,
                             errors,
                             j,
@@ -119,7 +119,7 @@ auto AnimateShow(const Show& show) -> std::tuple<Sheets, std::vector<AnimationEr
             if (theCommands[j].empty()) {
                 auto [endPosition, nextPosition] = getEndAndNext(curr_sheet, endSheet, j);
 
-                theCommands[j] = CalChart::Compile(
+                theCommands[j] = CreateCompileResult(
                     variablesStates,
                     errors,
                     j,
@@ -145,9 +145,9 @@ auto AnimateShow(const Show& show) -> std::tuple<Sheets, std::vector<AnimationEr
 namespace CalChart {
 Animation::Animation(const Show& show)
     : mSheets({})
-    , mAnimationErrors(show.GetNumSheets())
+    , mErrors(show.GetNumSheets())
 {
-    std::tie(mSheets, mAnimationErrors) = Animate::AnimateShow(show);
+    std::tie(mSheets, mErrors) = Animate::AnimateShow(show);
 }
 
 }

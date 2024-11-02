@@ -82,10 +82,10 @@ public:
     [[nodiscard]] auto GetTotalNumberBeatsUpTo(int sheet) const -> beats_t { return mSheets.GetTotalNumberBeatsUpTo(sheet); }
     [[nodiscard]] auto GetTotalNumberBeats() const { return mSheets.TotalBeats(); }
 
-    [[nodiscard]] auto GetAnimationErrors() const { return mAnimationErrors; }
+    [[nodiscard]] auto GetErrors() const { return mErrors; }
 
     // Sheet -> selection of marchers who collided
-    [[nodiscard]] auto GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList> { return mSheets.SheetsToMarchersWhoCollided(); }
+    [[nodiscard]] auto GetCollisions() const -> std::map<int, CalChart::SelectionList> { return mSheets.SheetsToMarchersWhoCollided(); }
     [[nodiscard]] auto BeatHasCollision(beats_t whichBeat) const { return mSheets.BeatHasCollision(whichBeat); }
 
     // collection of position of each point, for debugging purposes
@@ -105,7 +105,7 @@ private:
     Animate::Sheets mSheets;
 
     // mapping of Which, Sheet, Beat to a collision
-    std::vector<AnimationErrors> mAnimationErrors;
+    std::vector<Animate::Errors> mErrors;
 };
 
 }

@@ -58,9 +58,9 @@
  *  As each part of the tree is a Continuity::Token, creating drawing representation can be done in a straightforward recursive way, with
  *  each Continuity::Token specialization simply calling the drawing of each of it's nodes.
  *
- * Get(AnimationCompile):
+ * Get(Animate::Compile):
  *  Point and Value need to be able to supply an actual value.  But because these are abstract representations of a point or value,
- *  they need actual state to act upon.  The AnimationCompile object represents the portion of the show that is being converted from an
+ *  they need actual state to act upon.  The Animate::Compile object represents the portion of the show that is being converted from an
  *  abstract concept (the StartPoint for example) to a specific value (the position of a specific marcher on the field.
  *
  * Memory Considerations:
@@ -93,6 +93,10 @@ namespace CalChart {
 class Reader;
 struct AnimationCompile;
 
+}
+
+namespace CalChart::Animate {
+struct Compile;
 }
 
 namespace CalChart::Cont {
@@ -217,7 +221,7 @@ public:
     Point() = default;
     virtual std::unique_ptr<Point> clone() const { return std::make_unique<Point>(); }
 
-    virtual Coord Get(AnimationCompile const& anim) const;
+    virtual Coord Get(Animate::Compile const& anim) const;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const;
 
@@ -251,7 +255,7 @@ public:
     StartPoint() = default;
     virtual std::unique_ptr<Point> clone() const override { return std::make_unique<StartPoint>(); }
 
-    virtual Coord Get(AnimationCompile const& anim) const override;
+    virtual Coord Get(Animate::Compile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
@@ -269,7 +273,7 @@ public:
     NextPoint() = default;
     virtual std::unique_ptr<Point> clone() const override { return std::make_unique<NextPoint>(); }
 
-    virtual Coord Get(AnimationCompile const& anim) const override;
+    virtual Coord Get(Animate::Compile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
@@ -288,7 +292,7 @@ public:
     RefPoint(unsigned n);
     virtual std::unique_ptr<Point> clone() const override { return std::make_unique<RefPoint>(refnum); }
 
-    virtual Coord Get(AnimationCompile const& anim) const override;
+    virtual Coord Get(Animate::Compile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
@@ -315,7 +319,7 @@ public:
     Value() = default;
     virtual std::unique_ptr<Value> clone() const = 0;
 
-    virtual float Get(AnimationCompile const& anim) const = 0;
+    virtual float Get(Animate::Compile const& anim) const = 0;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const = 0;
 
@@ -332,7 +336,7 @@ class ValueUnset : public Value {
 public:
     virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueUnset>(); }
 
-    virtual float Get(AnimationCompile const&) const override { return 0; }
+    virtual float Get(Animate::Compile const&) const override { return 0; }
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
@@ -351,7 +355,7 @@ public:
     ValueFloat(float v);
     virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueFloat>(val); }
 
-    virtual float Get(AnimationCompile const& anim) const override;
+    virtual float Get(Animate::Compile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
@@ -377,7 +381,7 @@ public:
     ValueDefined(DefinedValue v);
     virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueDefined>(val); }
 
-    virtual float Get(AnimationCompile const& anim) const override;
+    virtual float Get(Animate::Compile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
@@ -412,7 +416,7 @@ public:
     }
     virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueAdd>(val1->clone(), val2->clone()); }
 
-    virtual float Get(AnimationCompile const& anim) const override;
+    virtual float Get(Animate::Compile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -449,7 +453,7 @@ public:
     }
     virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueSub>(val1->clone(), val2->clone()); }
 
-    virtual float Get(AnimationCompile const& anim) const override;
+    virtual float Get(Animate::Compile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -486,7 +490,7 @@ public:
     }
     virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueMult>(val1->clone(), val2->clone()); }
 
-    virtual float Get(AnimationCompile const& anim) const override;
+    virtual float Get(Animate::Compile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -523,7 +527,7 @@ public:
     }
     virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueDiv>(val1->clone(), val2->clone()); }
 
-    virtual float Get(AnimationCompile const& anim) const override;
+    virtual float Get(Animate::Compile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -559,7 +563,7 @@ public:
     }
     virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueNeg>(val->clone()); }
 
-    virtual float Get(AnimationCompile const& anim) const override;
+    virtual float Get(Animate::Compile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -584,7 +588,7 @@ class ValueREM : public Value {
 public:
     virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueREM>(); }
 
-    virtual float Get(AnimationCompile const& anim) const override;
+    virtual float Get(Animate::Compile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
@@ -603,8 +607,8 @@ public:
     ValueVar(Variable num);
     virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueVar>(varnum); }
 
-    virtual float Get(AnimationCompile const& anim) const override;
-    void Set(AnimationCompile& anim, float v);
+    virtual float Get(Animate::Compile const& anim) const override;
+    void Set(Animate::Compile& anim, float v);
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
@@ -628,7 +632,7 @@ class ValueVarUnset : public ValueVar {
 public:
     virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueVarUnset>(); }
 
-    virtual float Get(AnimationCompile const&) const override { return 0; }
+    virtual float Get(Animate::Compile const&) const override { return 0; }
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
@@ -655,7 +659,7 @@ public:
     }
     virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncDir>(pnt->clone()); }
 
-    virtual float Get(AnimationCompile const& anim) const override;
+    virtual float Get(Animate::Compile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -691,7 +695,7 @@ public:
     }
     virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncDirFrom>(pnt_start->clone(), pnt_end->clone()); }
 
-    virtual float Get(AnimationCompile const& anim) const override;
+    virtual float Get(Animate::Compile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -727,7 +731,7 @@ public:
     }
     virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncDist>(pnt->clone()); }
 
-    virtual float Get(AnimationCompile const& anim) const override;
+    virtual float Get(Animate::Compile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -763,7 +767,7 @@ public:
     }
     virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncDistFrom>(pnt_start->clone(), pnt_end->clone()); }
 
-    virtual float Get(AnimationCompile const& anim) const override;
+    virtual float Get(Animate::Compile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -801,7 +805,7 @@ public:
     }
     virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncEither>(dir1->clone(), dir2->clone(), pnt->clone()); }
 
-    virtual float Get(AnimationCompile const& anim) const override;
+    virtual float Get(Animate::Compile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -838,7 +842,7 @@ public:
     }
     virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncOpp>(dir->clone()); }
 
-    virtual float Get(AnimationCompile const& anim) const override;
+    virtual float Get(Animate::Compile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -875,7 +879,7 @@ public:
     }
     virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncStep>(numbeats->clone(), blksize->clone(), pnt->clone()); }
 
-    virtual float Get(AnimationCompile const& anim) const override;
+    virtual float Get(Animate::Compile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -903,7 +907,7 @@ public:
     Procedure() = default;
     virtual std::unique_ptr<Procedure> clone() const = 0;
 
-    virtual void Compile(AnimationCompile& anim) = 0;
+    virtual void Compile(Animate::Compile& anim) = 0;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const = 0;
     virtual bool IsValid() const { return true; }
@@ -917,7 +921,7 @@ class ProcUnset : public Procedure {
 
 public:
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcUnset>(); }
-    virtual void Compile(AnimationCompile&) override { }
+    virtual void Compile(Animate::Compile&) override { }
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual bool IsValid() const override { return false; }
@@ -946,7 +950,7 @@ public:
     }
     virtual std::unique_ptr<Procedure> clone() const override;
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -976,7 +980,7 @@ class ProcBlam : public Procedure {
 public:
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcBlam>(); }
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
 
@@ -1010,7 +1014,7 @@ public:
     }
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcClose>(dir->clone()); }
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -1052,7 +1056,7 @@ public:
     }
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcCM>(pnt1->clone(), pnt2->clone(), stps->clone(), dir1->clone(), dir2->clone(), numbeats->clone()); }
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -1091,7 +1095,7 @@ public:
     }
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcDMCM>(pnt1->clone(), pnt2->clone(), numbeats->clone()); }
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -1128,7 +1132,7 @@ public:
     }
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcDMHS>(pnt->clone()); }
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -1165,7 +1169,7 @@ public:
     }
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcEven>(stps->clone(), pnt->clone()); }
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -1202,7 +1206,7 @@ public:
     }
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcEWNS>(pnt->clone()); }
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -1242,7 +1246,7 @@ public:
     }
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcFountain>(dir1->clone(), dir2->clone(), stepsize1 ? stepsize1->clone() : nullptr, stepsize2 ? stepsize2->clone() : nullptr, pnt->clone()); }
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -1295,7 +1299,7 @@ public:
     }
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcFM>(stps->clone(), dir->clone()); }
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -1331,7 +1335,7 @@ public:
     }
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcFMTO>(pnt->clone()); }
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -1367,7 +1371,7 @@ public:
     }
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcGrid>(grid->clone()); }
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -1405,7 +1409,7 @@ public:
     }
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcHSCM>(pnt1->clone(), pnt2->clone(), numbeats->clone()); }
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -1442,7 +1446,7 @@ public:
     }
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcHSDM>(pnt->clone()); }
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -1478,7 +1482,7 @@ public:
     }
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcMagic>(pnt->clone()); }
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -1518,7 +1522,7 @@ public:
     }
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcMarch>(stpsize->clone(), stps->clone(), dir->clone(), (facedir) ? facedir->clone() : nullptr); }
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -1565,7 +1569,7 @@ public:
     }
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcMT>(numbeats->clone(), dir->clone()); }
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -1601,7 +1605,7 @@ public:
     }
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcMTRM>(dir->clone()); }
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -1637,7 +1641,7 @@ public:
     }
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcNSEW>(pnt->clone()); }
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -1675,7 +1679,7 @@ public:
     }
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcRotate>(ang->clone(), stps->clone(), pnt->clone()); }
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -1713,7 +1717,7 @@ public:
     }
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcStandAndPlay>(numbeats->clone(), dir->clone()); }
 
-    virtual void Compile(AnimationCompile& anim) override;
+    virtual void Compile(Animate::Compile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
