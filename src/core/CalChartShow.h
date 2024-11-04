@@ -122,7 +122,7 @@ public:
     [[nodiscard]] auto GetPointSymbol(int i) const -> SYMBOL_TYPE;
     [[nodiscard]] auto GetPointsSymbol() const -> std::vector<SYMBOL_TYPE>;
     [[nodiscard]] auto AlreadyHasPrintContinuity() const -> bool;
-    [[nodiscard]] auto GetShowMode() const { return mMode; }
+    [[nodiscard]] auto const& GetShowMode() const { return mMode; }
 
     // utility
     [[nodiscard]] auto GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const -> std::pair<bool, std::vector<size_t>>;
