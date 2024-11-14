@@ -71,6 +71,12 @@ auto AnimateShow(const Show& show) -> std::tuple<Sheets, std::vector<Errors>>
     auto sheets = std::vector<Animate::Sheet>{};
     auto endSheet = show.GetSheetEnd();
 
+    auto runningIndex = std::vector<unsigned>{};
+    for (auto curr_sheet = show.GetSheetBegin(); curr_sheet != endSheet; ++curr_sheet) {
+        runningIndex.push_back(curr_sheet->IsInAnimation() ? 1 : 0);
+    }
+    std::exclusive_scan(runningIndex.begin(), runningIndex.end(), runningIndex.begin(), 0);
+
     for (auto curr_sheet = show.GetSheetBegin(); curr_sheet != endSheet; ++curr_sheet) {
 
         if (!curr_sheet->IsInAnimation()) {
@@ -136,7 +142,7 @@ auto AnimateShow(const Show& show) -> std::tuple<Sheets, std::vector<Errors>>
         sheets.emplace_back(curr_sheet->GetName(), numBeats, theCommands);
     }
 
-    return { Animate::Sheets{ sheets }, animationErrors };
+    return { Animate::Sheets{ sheets, runningIndex }, animationErrors };
 }
 }
 

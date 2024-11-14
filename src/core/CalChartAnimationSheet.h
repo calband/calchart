@@ -96,7 +96,7 @@ private:
 
 class Sheets {
 public:
-    explicit Sheets(std::vector<Sheet> const& sheets);
+    explicit Sheets(std::vector<Sheet> const& sheets, std::vector<unsigned> const& showSheetToAnimationSheet = {});
     [[nodiscard]] auto TotalSheets() const -> size_t { return mSheets.size(); }
     [[nodiscard]] auto TotalBeats() const -> beats_t;
     [[nodiscard]] auto BeatToSheetOffsetAndBeat(beats_t beat) const -> std::tuple<size_t, beats_t>;
@@ -141,9 +141,12 @@ public:
 
     [[nodiscard]] auto toOnlineViewerJSON() const -> std::vector<std::vector<std::vector<nlohmann::json>>>;
 
+    [[nodiscard]] auto ShowSheetToAnimSheetTranslate(unsigned sheet) const { return mShowSheetToAnimationSheet.at(sheet); }
+
 private:
     std::vector<Sheet> mSheets;
     std::vector<beats_t> mRunningBeatCount;
+    std::vector<unsigned> mShowSheetToAnimationSheet;
 };
 
 }

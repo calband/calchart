@@ -237,7 +237,7 @@ void AnimationView::RefreshFrame()
 void AnimationView::RefreshAnimationSheet()
 {
     if (mAnimation) {
-        mCurrentBeat = mAnimation->GetTotalNumberBeatsUpTo(mView->GetCurrentSheetNum());
+        mCurrentBeat = mAnimation->GetTotalNumberBeatsUpTo(mAnimation->ShowSheetToAnimSheetTranslate(mView->GetCurrentSheetNum()));
         RefreshFrame();
     }
 }

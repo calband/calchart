@@ -93,6 +93,7 @@ public:
 
     [[nodiscard]] auto GenPathToDraw(unsigned whichSheet, unsigned point, Coord::units endRadius) const { return mSheets.GeneratePathToDraw(whichSheet, point, endRadius); }
 
+    [[nodiscard]] auto ShowSheetToAnimSheetTranslate(unsigned showSheet) const { return mSheets.ShowSheetToAnimSheetTranslate(showSheet); }
     /*!
      * @brief Generates JSON that could represent of all the marchers in an Online Viewer '.viewer' file.
      * @param pointsOverSheets All of the points in all of the sheets.

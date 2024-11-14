@@ -195,9 +195,10 @@ namespace {
     }
 }
 
-Sheets::Sheets(std::vector<Sheet> const& sheets)
+Sheets::Sheets(std::vector<Sheet> const& sheets, std::vector<unsigned> const& showSheetToAnimationSheet)
     : mSheets(sheets)
     , mRunningBeatCount{ GetRunningBeats(sheets) }
+    , mShowSheetToAnimationSheet{ showSheetToAnimationSheet }
 {
 }
 
