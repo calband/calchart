@@ -38,4 +38,5 @@ public:
 private:
     wxUI::TextCtrl::Proxy mUserInput{};
     wxUI::Generic<StackDrawPreview>::Proxy mPreview{};
+    wxUI::Generic<wxStatusBar>::Proxy mStatus{};
 };

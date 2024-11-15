@@ -31,13 +31,13 @@ class StackDrawPreview : public wxScrolled<wxWindow> {
 public:
     StackDrawPreview(wxWindow* parent);
 
-    void SetDescription(std::string const& description)
+    void SetDrawCommand(CalChart::Draw::DrawCommand const& drawCommand)
     {
-        mDescription = description;
+        mDrawCommand = drawCommand;
     }
 
 private:
-    std::string mDescription{};
+    CalChart::Draw::DrawCommand mDrawCommand{};
 
     void OnPaint(wxPaintEvent& event);
     void OnSizeEvent(wxSizeEvent& event);
@@ -58,6 +58,8 @@ StackDrawPreview::StackDrawPreview(wxWindow* parent)
     SetBackgroundColour(*wxWHITE);
     Connect(wxEVT_PAINT, wxPaintEventHandler(StackDrawPreview::OnPaint));
 }
+
+namespace {
 
 [[nodiscard]] auto done(char const* begin, char const* end) -> bool
 {
@@ -91,7 +93,7 @@ static auto ParseStringHelper(char const* begin, char const* end) -> std::tuple<
     return { begin, result };
 }
 
-static auto ParseNumberHelper(char const* begin, char const* end) -> std::tuple<char const*, int>
+auto ParseNumberHelper(char const* begin, char const* end) -> std::tuple<char const*, int>
 {
     auto result = 0;
     while (begin != end && isdigit(*begin)) {
@@ -103,7 +105,7 @@ static auto ParseNumberHelper(char const* begin, char const* end) -> std::tuple<
 }
 
 // assumes that the char points to the open q
-static auto ParseWord(char const* begin, char const* end) -> std::tuple<char const*, CalChart::Draw::Text>
+auto ParseWord(char const* begin, char const* end) -> std::tuple<char const*, CalChart::Draw::Text>
 {
     if (*begin != 'q') {
         throw std::runtime_error("missing q");
@@ -120,7 +122,7 @@ static auto ParseWord(char const* begin, char const* end) -> std::tuple<char con
     return { begin, CalChart::Draw::Text{ CalChart::Coord{}, result } };
 }
 
-static auto ParseEllipse(char const* begin, char const* end) -> std::tuple<char const*, CalChart::Draw::Ellipse>
+auto ParseEllipse(char const* begin, char const* end) -> std::tuple<char const*, CalChart::Draw::Ellipse>
 {
     if (*begin != 'E') {
         throw std::runtime_error("missing E");
@@ -145,10 +147,10 @@ static auto ParseEllipse(char const* begin, char const* end) -> std::tuple<char 
     return { begin, CalChart::Draw::Ellipse{ { 0, 0 }, { c1, c2 } } };
 }
 
-static auto ParseBox(char const* begin, char const* end) -> std::tuple<char const*, CalChart::Draw::ZStack>
+auto ParseBox(char const* begin, char const* end) -> std::tuple<char const*, CalChart::Draw::ZStack>
 {
     if (*begin != 'B') {
-        throw std::runtime_error("missing E");
+        throw std::runtime_error("missing B");
     }
     begin = increment(begin, end);
     if (*begin != '(') {
@@ -177,7 +179,7 @@ static auto ParseBox(char const* begin, char const* end) -> std::tuple<char cons
     };
 }
 
-static auto CharToAlign = [](auto c) {
+auto CharToAlign = [](auto c) {
     switch (c) {
     case 'B':
         return CalChart::Draw::StackAlign::Begin;
@@ -192,7 +194,7 @@ static auto CharToAlign = [](auto c) {
     }
 };
 
-static auto ParseStringHelper(char const* begin, char const* end) -> std::tuple<char const*, CalChart::Draw::DrawCommand>
+auto ParseStringHelper(char const* begin, char const* end) -> std::tuple<char const*, CalChart::Draw::DrawCommand>
 {
     switch (*begin) {
     case 'A':
@@ -247,24 +249,29 @@ static auto ParseStringHelper(char const* begin, char const* end) -> std::tuple<
     throw std::runtime_error("Missing things");
 }
 
-static auto ParseString(char const* begin, char const* end) -> CalChart::Draw::DrawCommand
+auto ParseString(char const* begin, char const* end) -> CalChart::Draw::DrawCommand
 {
     auto [next, cmd] = ParseStringHelper(begin, end);
     return cmd;
+}
+
+auto ParseString(std::string const& description)
+{
+    return ParseString(description.data(), description.data() + description.size());
+}
+
 }
 
 void StackDrawPreview::OnPaint(wxPaintEvent&)
 {
     wxPaintDC dc(this);
     PrepareDC(dc);
-    wxSize virtSize = GetVirtualSize();
+    auto virtSize = GetVirtualSize();
 
     dc.Clear();
+    dc.SetTextForeground(*wxBLACK);
     dc.DrawRectangle(wxRect(wxPoint(0, 0), virtSize));
-    try {
-        wxCalChart::Draw::DrawCommandList(dc, ParseString(mDescription.data(), mDescription.data() + mDescription.size()));
-    } catch (std::exception const& e) {
-    }
+    wxCalChart::Draw::DrawCommandList(dc, mDrawCommand);
 }
 
 void StackDrawPreview::OnSizeEvent(wxSizeEvent& event)
@@ -291,7 +298,13 @@ StackDrawPlayground::StackDrawPlayground(wxWindow* parent)
                 return new StackDrawPreview(parent);
             },
             mUserInput = TextCtrl{}.bind([this] {
-                                       mPreview->SetDescription(*mUserInput);
+                                       try {
+                                           mPreview->SetDrawCommand(ParseString(*mUserInput));
+                                           mStatus->SetStatusText("");
+                                       } catch (std::exception const& e) {
+                                           mPreview->SetDrawCommand({});
+                                           mStatus->SetStatusText(e.what());
+                                       }
                                        Refresh();
                                    })
                              .withStyle(wxTE_MULTILINE | wxHSCROLL | wxTE_PROCESS_TAB),
@@ -299,10 +312,18 @@ StackDrawPlayground::StackDrawPlayground(wxWindow* parent)
             .withSize(wxSize(500, 400)),
 
         Generic{ CreateStdDialogButtonSizer(wxOK) },
+        mStatus = Generic<wxStatusBar>{ [](wxWindow* parent) {
+            return new wxStatusBar(parent);
+        } },
     }
         .attachTo(this);
 
     *mUserInput = DefaultText;
 
-    mPreview->SetDescription(*mUserInput);
+    try {
+        mPreview->SetDrawCommand(ParseString(*mUserInput));
+        mStatus->SetStatusText("");
+    } catch (std::exception const& e) {
+        mStatus->SetStatusText(e.what());
+    }
 }

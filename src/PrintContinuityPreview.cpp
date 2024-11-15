@@ -107,6 +107,7 @@ void PrintContinuityPreview::OnPaint(wxPaintEvent&)
     auto virtSize = GetVirtualSize();
 
     dc.Clear();
+    dc.SetTextForeground(*wxBLACK);
     dc.DrawRectangle(wxRect(wxPoint(0, 0), virtSize));
     auto useNew = mConfig.Get_PrintContUseNewDraw();
     if (useNew) {
