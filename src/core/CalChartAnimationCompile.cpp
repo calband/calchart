@@ -64,7 +64,6 @@ auto CreateCompileResult(
     beats_t beats,
     bool isLastAnimationSheet,
     std::optional<Coord> endPosition,
-    std::optional<Coord> nextPosition,
     std::vector<std::unique_ptr<Cont::Procedure>> const& procs) -> CompileResult
 {
     CompileState ac(whichMarcher, point, beats, endPosition, variablesStates, errors);
@@ -88,8 +87,8 @@ auto CreateCompileResult(
     }
 
     // report if the point didn't make it
-    if (nextPosition) {
-        auto next_point = *nextPosition;
+    if (endPosition) {
+        auto next_point = *endPosition;
         if (ac.GetPointPosition() != next_point) {
             auto c = next_point - ac.GetPointPosition();
             ac.RegisterError(Animate::Error::WRONGPLACE);

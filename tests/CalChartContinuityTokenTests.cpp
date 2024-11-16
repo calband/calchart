@@ -42,7 +42,6 @@ auto GetCompiledResults(Sheets const& sheets, Conts const& proc)
         sheets.begin()->GetBeats(),
         true,
         (sheets.begin() + 1)->GetPoint(0).GetPos(),
-        (sheets.begin() + 1)->GetPoint(0).GetPos(),
         proc);
 }
 

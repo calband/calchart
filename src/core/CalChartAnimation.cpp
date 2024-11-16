@@ -33,32 +33,22 @@ auto gAnimateMeasure = CalChart::MeasureDuration{ "AnimateShow" };
 namespace CalChart::Animate {
 
 namespace {
-    auto getEndAndNext(
+    auto getEndPosition(
         Show::const_Sheet_iterator_t c_sheet,
         Show::const_Sheet_iterator_t endSheet,
-        unsigned whichMarcher) -> std::tuple<std::optional<Coord>, std::optional<Coord>>
+        unsigned whichMarcher) -> std::optional<Coord>
     {
         // find the first animation sheet.
         auto nextAnimationSheet = std::find_if(c_sheet + 1, endSheet, [](auto& sheet) { return sheet.IsInAnimation(); });
         auto isLastAnimationSheet = nextAnimationSheet == endSheet;
-        return {
-            // End position is the position of the next valid animation sheet.
+        // End position is the position of the next valid animation sheet.
+        return
             [=]() -> std::optional<Coord> {
                 if (isLastAnimationSheet) {
                     return std::optional<Coord>{};
                 }
                 return nextAnimationSheet->GetPosition(whichMarcher);
-            }(),
-
-            // Next position is the position of the next sheet, regardless if it is valid.
-            [=]() -> std::optional<Coord> {
-                auto nextSheet = c_sheet + 1;
-                if (nextSheet == endSheet) {
-                    return std::optional<Coord>{};
-                }
-                return nextSheet->GetPosition(whichMarcher);
-            }()
-        };
+            }();
     }
 }
 
@@ -107,7 +97,7 @@ auto AnimateShow(const Show& show) -> std::tuple<Sheets, std::vector<Errors>>
 #endif
                 for (unsigned j = 0; j < points.size(); j++) {
                     if (curr_sheet->GetSymbol(j) == current_symbol) {
-                        auto [endPosition, nextPosition] = getEndAndNext(curr_sheet, endSheet, j);
+                        auto endPosition = getEndPosition(curr_sheet, endSheet, j);
                         theCommands[j] = CreateCompileResult(
                             variablesStates,
                             errors,
@@ -116,7 +106,6 @@ auto AnimateShow(const Show& show) -> std::tuple<Sheets, std::vector<Errors>>
                             numBeats,
                             isLastAnimationSheet,
                             endPosition,
-                            nextPosition,
                             continuity);
                     }
                 }
@@ -125,7 +114,7 @@ auto AnimateShow(const Show& show) -> std::tuple<Sheets, std::vector<Errors>>
         // Handle points that don't have continuity (shouldn't happen)
         for (unsigned j = 0; j < points.size(); j++) {
             if (theCommands[j].empty()) {
-                auto [endPosition, nextPosition] = getEndAndNext(curr_sheet, endSheet, j);
+                auto endPosition = getEndPosition(curr_sheet, endSheet, j);
 
                 theCommands[j] = CreateCompileResult(
                     variablesStates,
@@ -135,7 +124,6 @@ auto AnimateShow(const Show& show) -> std::tuple<Sheets, std::vector<Errors>>
                     numBeats,
                     isLastAnimationSheet,
                     endPosition,
-                    nextPosition,
                     {});
             }
         }
