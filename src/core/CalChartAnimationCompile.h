@@ -72,7 +72,6 @@ auto CreateCompileResult(
     beats_t beats,
     bool isLastAnimationSheet,
     std::optional<Coord> endPosition,
-    std::optional<Coord> nextPosition,
     std::vector<std::unique_ptr<Cont::Procedure>> const& proc) -> CompileResult;
 
 struct Compile {
