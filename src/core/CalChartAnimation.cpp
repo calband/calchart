@@ -25,9 +25,11 @@
 #include "CalChartAnimationCompile.h"
 #include "CalChartAnimationErrors.h"
 #include "CalChartContinuity.h"
+#include "CalChartMeasure.h"
 #include "CalChartSheet.h"
 #include "CalChartShow.h"
 
+auto gAnimateMeasure = CalChart::MeasureDuration{ "AnimateShow" };
 namespace CalChart::Animate {
 
 namespace {
@@ -62,6 +64,7 @@ namespace {
 
 auto AnimateShow(const Show& show) -> std::tuple<Sheets, std::vector<Errors>>
 {
+    auto snapshot = gAnimateMeasure.doMeasurement();
     auto animationErrors = std::vector<Animate::Errors>(show.GetNumSheets());
 
     auto points = std::vector<Coord>(show.GetNumPoints());

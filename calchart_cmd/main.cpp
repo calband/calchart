@@ -6,6 +6,7 @@
 //
 //
 
+#include "CalChartMeasure.h"
 #include "CalChartPrintShowToPS.hpp"
 #include "calchart_cmd_parse.hpp"
 #include "calchart_cmd_parse_continuity_text.hpp"
@@ -14,6 +15,8 @@
 
 #include <fstream>
 #include <iostream>
+
+extern CalChart::MeasureDuration gAnimateMeasure;
 
 constexpr auto USAGE =
     R"(calchart_cmd
@@ -31,6 +34,7 @@ Options:
     --dump_continuity       Parse option to dump the continuting.
     --animate_show          Parse option to print the animation.
     --json                  Parse option to dump the JSON for the viewer.
+    --profile               Print profiling data.
     -h, --help              Show this screen.
     --version               Show version.
 )";
@@ -96,6 +100,9 @@ auto main(int argc, char* argv[]) -> int
     }
     if (args["parse_continuity_text"].asBool()) {
         ParseContinuityText(args["<text>"].asString(), std::cout);
+    }
+    if (args["--profile"].asBool()) {
+        std::cout << gAnimateMeasure << "\n";
     }
 
     return 0;
