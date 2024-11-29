@@ -82,7 +82,7 @@ public:
     [[nodiscard]] auto GetTotalNumberBeatsUpTo(int sheet) const -> beats_t { return mSheets.GetTotalNumberBeatsUpTo(sheet); }
     [[nodiscard]] auto GetTotalNumberBeats() const { return mSheets.TotalBeats(); }
 
-    [[nodiscard]] auto GetErrors() const { return mErrors; }
+    [[nodiscard]] auto GetErrors() const { return mSheets.GetAnimationErrors(); }
 
     // Sheet -> selection of marchers who collided
     [[nodiscard]] auto GetCollisions() const -> std::map<int, CalChart::SelectionList> { return mSheets.SheetsToMarchersWhoCollided(); }
@@ -104,9 +104,6 @@ public:
 private:
     // There are two types of data, the ones that are set when we are created, and the ones that modify over time.
     Animate::Sheets mSheets;
-
-    // mapping of Which, Sheet, Beat to a collision
-    std::vector<Animate::Errors> mErrors;
 };
 
 }

@@ -31,14 +31,14 @@ namespace CalChart::Animate {
 
 namespace {
     template <std::ranges::input_range Range>
-        requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Command>)
+        requires(std::is_convertible_v<std::ranges::range_value_t<Range>, Command>)
     auto GetBeatsPerCont(Range&& range)
     {
         return range | std::views::transform([](auto cmd) { return NumBeats(cmd); });
     }
 
     template <std::ranges::input_range Range>
-        requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Command>)
+        requires(std::is_convertible_v<std::ranges::range_value_t<Range>, Command>)
     auto GetRunningBeats(Range&& range)
     {
         auto allBeats = CalChart::Ranges::ToVector<beats_t>(GetBeatsPerCont(range));
@@ -48,15 +48,24 @@ namespace {
     }
 }
 
-Sheet::Sheet(std::string name, unsigned numBeats, std::vector<std::vector<Animate::Command>> const& commands)
+Sheet::Sheet(std::string name, unsigned numBeats, std::vector<CompileResult> const& commands)
     : mName{ name }
     , mNumBeats{ numBeats }
-    , mCommands{ CalChart::Ranges::ToVector<Animate::Commands>(commands | std::views::transform([](auto item) { return Animate::Commands(item); })) }
+    , mCommands{ CalChart::Ranges::ToVector<Commands>(commands | std::views::transform([](auto&& item) { return Commands(item.first); })) }
+    , mErrors{ [](auto&& cmds) {
+        auto enumerated = CalChart::Ranges::enumerate_view(cmds | std::views::transform([](auto&& item) { return item.second; }));
+        return std::accumulate(std::begin(enumerated), std::end(enumerated), Errors{}, [](auto&& acc, auto&& item) {
+            for (auto& error : std::get<1>(item)) {
+                acc[error].insert(std::get<0>(item));
+            }
+            return acc;
+        });
+    }(commands) }
 {
     mCollisions = FindAllCollisions();
 }
 
-auto Sheet::MarcherInfoAtBeat(size_t whichMarcher, beats_t beat) const -> CalChart::Animate::MarcherInfo
+auto Sheet::MarcherInfoAtBeat(size_t whichMarcher, beats_t beat) const -> MarcherInfo
 {
     return mCommands.at(whichMarcher).MarcherInfoAtBeat(beat);
 }
@@ -154,7 +163,7 @@ auto Sheet::DebugAnimateInfoAtBeat(beats_t beat, bool ignoreCollision) const -> 
 namespace {
     // Because we need to draw sprites and other animations without overlap, sort them so the "closer" ones are first
     template <std::ranges::input_range Range>
-        requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Info>)
+        requires(std::is_convertible_v<std::ranges::range_value_t<Range>, Info>)
     auto SortForSprites(Range input)
     {
         std::ranges::sort(input, [](auto&& a, auto&& b) {
@@ -167,7 +176,7 @@ namespace {
 
 auto Sheet::AllAnimateInfoAtBeat(beats_t beat) const -> std::vector<Info>
 {
-    auto animates = CalChart::Ranges::ToVector<Info>(std::views::iota(0UL, mCommands.size()) | std::views::transform([this, beat](auto whichMarcher) -> Animate::Info {
+    auto animates = CalChart::Ranges::ToVector<Info>(std::views::iota(0UL, mCommands.size()) | std::views::transform([this, beat](auto whichMarcher) -> Info {
         return {
             CollisionAtBeat(whichMarcher, beat),
             MarcherInfoAtBeat(whichMarcher, beat)
@@ -178,14 +187,14 @@ auto Sheet::AllAnimateInfoAtBeat(beats_t beat) const -> std::vector<Info>
 
 namespace {
     template <std::ranges::input_range Range>
-        requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Sheet>)
+        requires(std::is_convertible_v<std::ranges::range_value_t<Range>, Sheet>)
     auto GetBeatsPerSheet(Range&& range)
     {
         return range | std::views::transform([](auto sheet) { return sheet.GetNumBeats(); });
     }
 
     template <std::ranges::input_range Range>
-        requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Sheet>)
+        requires(std::is_convertible_v<std::ranges::range_value_t<Range>, Sheet>)
     auto GetRunningBeats(Range&& range)
     {
         auto allBeats = CalChart::Ranges::ToVector<beats_t>(GetBeatsPerSheet(range));
