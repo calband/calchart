@@ -315,9 +315,7 @@ void DrawCont(wxDC& dc, [[maybe_unused]] CalChart::Configuration const& config, 
     auto numLines = std::count_if(print_continuity.begin(), print_continuity.end(), [](auto&& i) { return i.on_sheet; });
 
     auto font_size = ((bounding.GetBottom() - bounding.GetTop()) - (numLines - 1) * 2) / (numLines ? numLines : 1);
-    // font size, we scale to be no more than 256 pixels.
-    // 256 can be config
-    font_size = std::min<int>(font_size, 256);
+    font_size = std::min<int>(font_size, config.Get_PrintContMaxFontSize());
 
     auto contPlainFont = CreateFont(font_size, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
     auto contBoldFont = CreateFont(font_size, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);

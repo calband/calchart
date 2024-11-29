@@ -178,6 +178,7 @@ private:                                           \
     DECLARE_CONFIGURATION_FUNCTIONS(PrintContPLineRatio, double);
     DECLARE_CONFIGURATION_FUNCTIONS(PrintContSLineRatio, double);
     DECLARE_CONFIGURATION_FUNCTIONS(PrintContLinePad, long);
+    DECLARE_CONFIGURATION_FUNCTIONS(PrintContMaxFontSize, long);
 
     DECLARE_CONFIGURATION_FUNCTIONS(PrintPSModes, long);
     DECLARE_CONFIGURATION_FUNCTIONS(PrintPSLandscape, bool);

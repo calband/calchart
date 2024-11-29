@@ -3,6 +3,7 @@
 Bugs addressed in this release:
 
 * [#443](../../issues/443) Dark Mode doesn't show status bar on Mac
+* [#462](../../issues/462) PDF printing of Continuities seems wrong
 * [#497](../../issues/497) Animate ctor should be explicit
 * [#518](../../issues/518) Animation looks wrong
 * [#540](../../issues/540) Current 3.7.1 does not run

@@ -91,6 +91,10 @@ void PrintContinuitySetup::CreateControls()
                 mConfig.Set_PrintContLinePad(static_cast<int>(*mLinePad));
                 Refresh();
             })),
+            VLabelWidget("Max Font Size:", mMaxFontSize = wxUI::SpinCtrl{ std::pair{ 6, 30 } }.bind([this] {
+                mConfig.Set_PrintContMaxFontSize(static_cast<int>(*mMaxFontSize));
+                Refresh();
+            })),
         },
         wxUI::HSplitter{
             wxSizerFlags{ 1 }.Expand(),
@@ -145,6 +149,7 @@ bool PrintContinuitySetup::TransferDataToWindow()
     buf.Printf(wxT("%.2f"), mConfig.Get_PrintContSLineRatio());
     text->SetValue(buf);
     *mLinePad = mConfig.Get_PrintContLinePad();
+    *mMaxFontSize = mConfig.Get_PrintContMaxFontSize();
 
     return true;
 }
@@ -163,6 +168,7 @@ bool PrintContinuitySetup::TransferDataFromWindow()
         mConfig.Set_PrintContSLineRatio(value);
     }
     mConfig.Set_PrintContLinePad(*mLinePad);
+    mConfig.Set_PrintContMaxFontSize(*mMaxFontSize);
     return true;
 }
 
@@ -173,6 +179,7 @@ bool PrintContinuitySetup::ClearValuesToDefault()
     mConfig.Clear_PrintContPLineRatio();
     mConfig.Clear_PrintContSLineRatio();
     mConfig.Clear_PrintContLinePad();
+    mConfig.Clear_PrintContMaxFontSize();
     return TransferDataToWindow();
 }
 

@@ -62,11 +62,9 @@ static auto GenerateDrawCommands(wxDC& dc,
     wxRect const& bounding,
     bool landscape) -> CalChart::Draw::DrawCommand
 {
-    // font size, we scale to be no more than 256 pixels.
-    // 256 can be config
     auto linePad = static_cast<int>(config.Get_PrintContLinePad());
     auto factor = config.Get_PrintContDotRatio();
-    auto fontSize = std::min<int>(CalculatePointsPerLine(printLayout, bounding, linePad), 256);
+    auto fontSize = std::min<int>(CalculatePointsPerLine(printLayout, bounding, linePad), config.Get_PrintContMaxFontSize());
     auto [symbolSize, symbolMiddle] = [](auto& dc, int fontSize, double factor) -> std::pair<int, CalChart::Coord> {
         auto restore = SaveAndRestore::Font{ dc };
         wxCalChart::setFont(dc, { fontSize, CalChart::Font::Family::Modern });
