@@ -85,7 +85,7 @@ public:
     auto GetNumPoints() const { return mShow ? mShow->GetNumPoints() : 0; }
 
     CalChart::ShowMode const& GetShowMode() { return mShow->GetShowMode(); }
-    auto GetShowFieldOffset() const { return mShow->GetShowMode().Offset(); }
+    [[nodiscard]] auto GetShowFieldOffset() const { return mShow->GetShowMode().Offset(); }
     auto GetShowFieldSize() const { return mShow->GetShowMode().Size(); }
 
     auto GetSheets() const { return mShow->GetSheets(); }

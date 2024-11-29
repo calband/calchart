@@ -137,14 +137,12 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent&)
 
     // Draw the field
     auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
-    auto tborder1 = mMode.Border1();
     auto offset = mMode.Offset();
     CalChart::append(drawCmds,
-        CalChartDraw::GenerateModeDrawCommands(
+        CalChart::CreateModeDrawCommandsWithBorderOffset(
             mConfig,
             mMode,
-            ShowMode_kFieldView)
-            + tborder1 - offset);
+            CalChart::HowToDraw::FieldView));
 
     // draw the ghost sheet
     CalChart::append(drawCmds,

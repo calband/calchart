@@ -33,6 +33,7 @@
 
 namespace CalChart {
 
+class Configuration;
 class Reader;
 struct Font;
 struct BrushAndPen;
@@ -108,6 +109,13 @@ private:
     friend auto operator==(ShowMode const& lhs, ShowMode const& rhs) -> bool;
 };
 
+enum class HowToDraw {
+    FieldView,
+    Animation,
+    Printing,
+    OmniView
+};
+
 auto CreateFieldLayout(
     ShowMode const& mode,
     bool withDetails) -> std::vector<Draw::DrawCommand>;
@@ -115,5 +123,20 @@ auto CreateFieldLayout(
 auto CreateYardlineLayout(
     ShowMode const& mode,
     bool largeOffset) -> std::vector<Draw::DrawCommand>;
+
+auto CreateModeDrawCommands(
+    Configuration const& config,
+    ShowMode const& mode,
+    HowToDraw howToDraw) -> std::vector<CalChart::Draw::DrawCommand>;
+
+auto CreateModeDrawCommandsWithBorder(
+    Configuration const& config,
+    ShowMode const& mode,
+    HowToDraw howToDraw) -> std::vector<CalChart::Draw::DrawCommand>;
+
+auto CreateModeDrawCommandsWithBorderOffset(
+    Configuration const& config,
+    ShowMode const& mode,
+    HowToDraw howToDraw) -> std::vector<CalChart::Draw::DrawCommand>;
 
 }

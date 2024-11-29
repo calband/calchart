@@ -53,6 +53,7 @@ struct Color {
         }
     };
     using Color_t = std::variant<std::string, ColorRGB>;
+
     Color_t mColor;
 
     constexpr explicit Color(uint8_t red = 0, uint8_t green = 0, uint8_t blue = 0, uint8_t alpha = std::numeric_limits<uint8_t>::max())
@@ -65,7 +66,7 @@ struct Color {
     }
     friend auto operator==(Color const& lhs, Color const& rhs) -> bool = default;
 
-    static auto FromString(std::string const& string) -> Color;
+    static auto FromString(std::string const& color) -> Color;
     [[nodiscard]] auto ToString() const -> std::string
     {
         return std::visit(
@@ -79,6 +80,8 @@ struct Color {
             },
             mColor);
     }
+    // common colors
+    static auto Black() { return FromString("BLACK"); }
 };
 
 inline auto operator<<(std::ostream& os, [[maybe_unused]] Color const& color) -> std::ostream&

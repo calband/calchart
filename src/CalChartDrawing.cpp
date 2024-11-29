@@ -537,7 +537,7 @@ void DrawForPrintingHelper(wxDC& dc, CalChart::Configuration const& config, CalC
     dc.SetUserScale(scale, scale);
 
     // draw the field.
-    wxCalChart::Draw::DrawCommandList(dc, GenerateModeDrawCommands(config, mode, ShowMode_kPrinting) + mode.Border1());
+    wxCalChart::Draw::DrawCommandList(dc, CalChart::CreateModeDrawCommandsWithBorder(config, mode, CalChart::HowToDraw::Printing));
 
     dc.SetFont(CreateFont(CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio())));
     for (auto i = 0u; i < pts.size(); i++) {
@@ -629,7 +629,7 @@ auto GeneratePhatomPointsDrawCommands(
     const std::map<int, CalChart::Coord>& positions) -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto pointLabelFont = CalChart::Font{ CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio()) };
-    auto origin = show.GetShowMode().Offset();
+    auto origin = show.GetShowFieldOffset();
 
     auto dotRatio = config.Get_DotRatio();
     auto pLineRatio = config.Get_PLineRatio();
@@ -860,43 +860,6 @@ void DrawPath(wxDC& dc, CalChart::Configuration const& config, std::vector<CalCh
     wxCalChart::Draw::DrawCommandList(dc, draw_commands);
 }
 
-auto GenerateModeDrawCommands(CalChart::Configuration const& config, CalChart::ShowMode const& mode, HowToDraw howToDraw) -> std::vector<CalChart::Draw::DrawCommand>
-{
-    auto result = std::vector<CalChart::Draw::DrawCommand>{};
-    auto inBlackAndWhite = howToDraw == ShowMode_kPrinting;
-
-    auto fieldPen = inBlackAndWhite ? wxCalChart::toPen(*wxBLACK_PEN) : CalChart::toPen(config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD_DETAIL));
-    auto fieldText = inBlackAndWhite ? wxCalChart::toBrushAndPen(*wxBLACK_PEN) : config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD_TEXT);
-    auto fieldBrush = wxCalChart::toBrush(*wxTRANSPARENT_BRUSH);
-
-    auto field = CalChart::CreateFieldLayout(mode, howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting);
-
-    CalChart::append(result,
-        CalChart::Draw::withPen(
-            fieldPen,
-            CalChart::Draw::withTextForeground(
-                fieldText,
-                CalChart::Draw::withBrush(
-                    fieldBrush,
-                    field))));
-
-    if (howToDraw == ShowMode_kAnimation) {
-        return result;
-    }
-
-    auto font = CalChart::Font{ CalChart::Float2CoordUnits(config.Get_YardsSize()) };
-    auto brushAndPen = inBlackAndWhite ? CalChart::BrushAndPen{ .brushStyle = CalChart::Brush::Style::Transparent } : config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD);
-    auto yardLabels = CalChart::CreateYardlineLayout(mode, howToDraw == ShowMode_kOmniView);
-    CalChart::append(result,
-        CalChart::Draw::withFont(
-            font,
-            CalChart::Draw::withBrushAndPen(
-                brushAndPen,
-                yardLabels)));
-
-    return result;
-}
-
 wxImage GetOmniLinesImage(const CalChart::Configuration& config, const CalChart::ShowMode& mode)
 {
     auto fieldsize = mode.FieldSize();
@@ -905,7 +868,7 @@ wxImage GetOmniLinesImage(const CalChart::Configuration& config, const CalChart:
     dc.SelectObject(bmp);
     dc.SetBackground(*wxTRANSPARENT_BRUSH);
     dc.Clear();
-    wxCalChart::Draw::DrawCommandList(dc, GenerateModeDrawCommands(config, mode, ShowMode_kOmniView));
+    wxCalChart::Draw::DrawCommandList(dc, CalChart::CreateModeDrawCommands(config, mode, CalChart::HowToDraw::OmniView));
     auto image = bmp.ConvertToImage();
     image.InitAlpha();
     for (auto x = 0; x < fieldsize.x; ++x) {

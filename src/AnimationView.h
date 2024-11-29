@@ -68,7 +68,7 @@ public:
     [[nodiscard]] auto GetShowSizeAndOffset() const -> std::pair<wxPoint, wxPoint>;
     [[nodiscard]] auto GetMarcherSizeAndOffset() const -> std::pair<wxPoint, wxPoint>;
 
-    [[nodiscard]] auto GetShowMode() const -> CalChart::ShowMode const&;
+    [[nodiscard]] auto GetShowFieldSize() const -> CalChart::Coord;
 
     struct MarcherInfo {
         CalChart::Radian direction{};

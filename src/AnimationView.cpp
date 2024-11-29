@@ -134,15 +134,14 @@ auto AnimationView::GenerateDraw(CalChart::Configuration const& config) const ->
         return {};
     }
 
-    auto tborder1 = mView->GetShowMode().Border1();
-    auto drawCmds = CalChartDraw::GenerateModeDrawCommands(config, mView->GetShowMode(), ShowMode_kAnimation) + tborder1;
+    auto drawCmds = CalChart::CreateModeDrawCommandsWithBorderOffset(config, mView->GetShowMode(), CalChart::HowToDraw::Animation);
     auto useSprites = config.Get_UseSprites();
     if (useSprites) {
         CalChart::append(drawCmds, GenerateDrawSprites(config));
     } else {
         CalChart::append(drawCmds, GenerateDrawDots(config));
     }
-    return drawCmds;
+    return drawCmds + mView->GetShowFieldOffset();
 }
 
 auto AnimationView::GenerateDrawDots(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
@@ -185,7 +184,7 @@ auto AnimationView::GenerateDrawDots(CalChart::Configuration const& config) cons
             GeneratePointDrawCommand(
                 allInfo, [](auto&& info) { return CollisionIntersect(info); }, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_COLLISION)));
     }
-    return drawCmds + mView->GetShowMode().Offset();
+    return drawCmds;
 }
 
 auto AnimationView::GenerateDrawSprites(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
@@ -211,7 +210,7 @@ auto AnimationView::GenerateDrawSprites(CalChart::Configuration const& config) c
 
             return CalChart::Draw::Image{ position, image, mView->IsSelected(index) } - offset;
         }));
-    return drawCmds + mView->GetShowMode().Offset();
+    return drawCmds;
 }
 
 void AnimationView::OnUpdate(wxView* sender, wxObject* hint)
@@ -330,8 +329,7 @@ void AnimationView::SelectMarchersInBox(wxPoint const& mouseStart, wxPoint const
     auto mouseStartTranslated = tDIP(mouseStart);
     auto mouseEndTranslated = tDIP(mouseEnd);
 
-    auto x_off = mView->GetShowMode().Offset().x;
-    auto y_off = mView->GetShowMode().Offset().y;
+    auto [x_off, y_off] = mView->GetShowFieldOffset();
     auto polygon = CalChart::RawPolygon_t{
         Coord(mouseStartTranslated.x - x_off, mouseStartTranslated.y - y_off),
         Coord(mouseStartTranslated.x - x_off, mouseEndTranslated.y - y_off),
@@ -357,9 +355,9 @@ auto AnimationView::GetAnimationFrame() -> AnimationPanel*
     return static_cast<AnimationPanel*>(GetFrame());
 }
 
-auto AnimationView::GetShowMode() const -> CalChart::ShowMode const&
+auto AnimationView::GetShowFieldSize() const -> CalChart::Coord
 {
-    return mView->GetShowMode();
+    return mView->GetShowMode().FieldSize();
 }
 
 auto AnimationView::GetMarcherInfo(int which) const -> AnimationView::MarcherInfo
