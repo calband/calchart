@@ -194,6 +194,7 @@ public:
     void SetGhostSource(GhostSource source, int which = 0);
 
     CalChart::ShowMode const& GetShowMode() const;
+    [[nodiscard]] auto GetShowFieldOffset() const { return GetShowMode().Offset(); }
     CalChart::Configuration& GetConfiguration() const { return mConfig; }
 
     auto GenerateAnimation() const -> std::optional<CalChart::Animation>;

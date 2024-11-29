@@ -49,13 +49,6 @@ class Configuration;
 }
 class CalChartDoc;
 
-typedef enum {
-    ShowMode_kFieldView,
-    ShowMode_kAnimation,
-    ShowMode_kPrinting,
-    ShowMode_kOmniView
-} HowToDraw;
-
 namespace CalChartDraw {
 
 // draw the continuity starting at a specific offset
@@ -70,7 +63,6 @@ auto GetOmniLinesImage(const CalChart::Configuration& config, CalChart::ShowMode
 auto GeneratePointsDrawCommands(CalChart::Configuration const& config, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, bool primary) -> std::vector<CalChart::Draw::DrawCommand>;
 auto GenerateGhostPointsDrawCommands(CalChart::Configuration const& config, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref) -> std::vector<CalChart::Draw::DrawCommand>;
 auto GeneratePhatomPointsDrawCommands(const CalChart::Configuration& config, CalChartDoc const& show, CalChart::Sheet const& sheet, std::map<int, CalChart::Coord> const& positions) -> std::vector<CalChart::Draw::DrawCommand>;
-auto GenerateModeDrawCommands(CalChart::Configuration const& config, CalChart::ShowMode const& mode, HowToDraw howToDraw) -> std::vector<CalChart::Draw::DrawCommand>;
 
 void PrintStandard(std::ostream& buffer, CalChart::Sheet const& sheet);
 void PrintSpringshow(std::ostream& buffer, CalChart::Sheet const& sheet);

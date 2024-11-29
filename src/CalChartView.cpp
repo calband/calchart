@@ -72,16 +72,14 @@ void CalChartView::OnDraw(wxDC* dc)
         return;
     }
     // draw the field
-    auto origin = mShow->GetShowMode().Offset();
-    auto tborder1 = mShow->GetShowMode().Border1();
+    auto origin = mShow->GetShowFieldOffset();
     auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
     auto& config = mShow->GetConfiguration();
     CalChart::append(drawCmds,
-        CalChartDraw::GenerateModeDrawCommands(
+        CalChart::CreateModeDrawCommandsWithBorderOffset(
             config,
             mShow->GetShowMode(),
-            ShowMode_kFieldView)
-            + tborder1 - origin);
+            CalChart::HowToDraw::FieldView));
 
     if (auto ghostSheet = mShow->GetGhostSheet(GetCurrentSheetNum()); ghostSheet != nullptr) {
         CalChart::append(drawCmds,

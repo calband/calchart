@@ -687,7 +687,7 @@ void CCOmniviewCanvas::OnPaint(wxPaintEvent&)
 
     glViewport(0, 0, ClientSize.x, ClientSize.y);
 
-    CalChart::Coord fieldSize = mView ? mView->GetShowMode().FieldSize() : CalChart::Coord(160, 80);
+    CalChart::Coord fieldSize = mView ? mView->GetShowFieldSize() : CalChart::Coord(160, 80);
     auto FieldEW = CalChart::CoordUnits2Float(fieldSize.y);
     auto FieldNS = CalChart::CoordUnits2Float(fieldSize.x);
 

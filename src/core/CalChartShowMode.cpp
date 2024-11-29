@@ -21,6 +21,11 @@
 */
 
 #include "CalChartShowMode.h"
+#include "CalChartConfiguration.h"
+#include "CalChartConstants.h"
+#include "CalChartCoord.h"
+#include "CalChartDrawCommand.h"
+#include "CalChartDrawPrimatives.h"
 #include "CalChartFileFormat.h"
 
 #include <algorithm>
@@ -201,6 +206,66 @@ auto CreateYardlineLayout(
     auto yard_text = mode.Get_yard_text();
     auto yard_text2 = std::vector<std::string>(yard_text.begin() + (-CalChart::CoordUnits2Int((mode.Offset() - mode.Border1()).x) + (CalChart::kYardTextValues - 1) * 4) / 8, yard_text.end());
     return CalChart::Draw::Field::CreateYardlineLabels(yard_text2, mode.FieldSize(), largeOffset ? kStep8 : 0, kStep1);
+}
+
+auto CreateModeDrawCommands(
+    Configuration const& config,
+    ShowMode const& mode,
+    HowToDraw howToDraw) -> std::vector<CalChart::Draw::DrawCommand>
+{
+    auto result = std::vector<CalChart::Draw::DrawCommand>{};
+    auto inBlackAndWhite = howToDraw == HowToDraw::Printing;
+
+    auto fieldPen = inBlackAndWhite
+        ? CalChart::Pen{ CalChart::Color::Black() }
+        : CalChart::toPen(config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD_DETAIL));
+    auto fieldText = inBlackAndWhite
+        ? CalChart::BrushAndPen{ CalChart::Color::Black() }
+        : config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD_TEXT);
+    auto fieldBrush = CalChart::Brush::TransparentBrush();
+
+    auto field = CalChart::CreateFieldLayout(mode, howToDraw == HowToDraw::FieldView || howToDraw == HowToDraw::Printing);
+
+    CalChart::append(result,
+        CalChart::Draw::withPen(
+            fieldPen,
+            CalChart::Draw::withTextForeground(
+                fieldText,
+                CalChart::Draw::withBrush(
+                    fieldBrush,
+                    field))));
+
+    if (howToDraw == HowToDraw::Animation) {
+        return result;
+    }
+
+    auto font = CalChart::Font{ CalChart::Float2CoordUnits(config.Get_YardsSize()) };
+    auto brushAndPen = inBlackAndWhite ? CalChart::BrushAndPen{ .brushStyle = CalChart::Brush::Style::Transparent } : config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD);
+    auto yardLabels = CalChart::CreateYardlineLayout(mode, howToDraw == HowToDraw::OmniView);
+    CalChart::append(result,
+        CalChart::Draw::withFont(
+            font,
+            CalChart::Draw::withBrushAndPen(
+                brushAndPen,
+                yardLabels)));
+
+    return result;
+}
+
+auto CreateModeDrawCommandsWithBorder(
+    Configuration const& config,
+    ShowMode const& mode,
+    HowToDraw howToDraw) -> std::vector<CalChart::Draw::DrawCommand>
+{
+    return CreateModeDrawCommands(config, mode, howToDraw) + mode.Border1();
+}
+
+auto CreateModeDrawCommandsWithBorderOffset(
+    Configuration const& config,
+    ShowMode const& mode,
+    HowToDraw howToDraw) -> std::vector<CalChart::Draw::DrawCommand>
+{
+    return CreateModeDrawCommandsWithBorder(config, mode, howToDraw) - mode.Offset();
 }
 
 }
