@@ -58,6 +58,14 @@ static const auto kStep2 = fDIP(CalChart::Int2CoordUnits(2));
 static const auto kStep1 = fDIP(CalChart::Int2CoordUnits(1));
 
 // draw text centered around x (though still at y down)
+auto GenerateDrawCenteredText(std::string const& text) -> std::vector<CalChart::Draw::DrawCommand>
+{
+    using TextAnchor = CalChart::Draw::Text::TextAnchor;
+    return std::vector<CalChart::Draw::DrawCommand>{
+        CalChart::Draw::Text{ {}, text, TextAnchor::HorizontalCenter | TextAnchor::Top }
+    };
+}
+// draw text centered around x (though still at y down)
 void DrawCenteredText(wxDC& dc, const wxString& text, wxPoint pt)
 {
     auto size = dc.GetTextExtent(text);
@@ -65,11 +73,37 @@ void DrawCenteredText(wxDC& dc, const wxString& text, wxPoint pt)
     dc.DrawText(text, pt);
 }
 
+// draw text centered around x (though still at y down)
+auto GenerateDrawLineOverText(const wxString& text, int lineLength) -> std::vector<CalChart::Draw::DrawCommand>
+{
+    using TextAnchor = CalChart::Draw::Text::TextAnchor;
+    return std::vector<CalChart::Draw::DrawCommand>{
+        CalChart::Draw::Text{ {}, text, TextAnchor::HorizontalCenter | TextAnchor::Top } + CalChart::Coord{ 0, 2 },
+        CalChart::Draw::Line{ { -lineLength / 2, 0 }, { lineLength / 2, 0 } }
+    };
+}
 // draw text centered around x (though still at y down) with a line over it.
 void DrawLineOverText(wxDC& dc, wxString const& text, wxPoint const& pt, wxCoord lineLength)
 {
     DrawCenteredText(dc, text, pt + wxPoint(0, 2));
     dc.DrawLine(pt - wxPoint(lineLength / 2, 0), pt + wxPoint(lineLength / 2, 0));
+}
+
+auto GenerateDrawArrow(CalChart::Coord::units lineLength, bool pointRight) -> std::vector<CalChart::Draw::DrawCommand>
+{
+    static constexpr auto ArrowSize = 4;
+    if (pointRight) {
+        return std::vector<CalChart::Draw::DrawCommand>{
+            CalChart::Draw::Line{ CalChart::Coord{ -lineLength / 2, ArrowSize }, CalChart::Coord{ lineLength / 2, ArrowSize } },
+            CalChart::Draw::Line{ CalChart::Coord{ lineLength / 2 - ArrowSize, 0 }, CalChart::Coord{ lineLength / 2, ArrowSize } },
+            CalChart::Draw::Line{ CalChart::Coord{ lineLength / 2 - ArrowSize, 2 * ArrowSize }, CalChart::Coord{ lineLength / 2, ArrowSize } },
+        };
+    }
+    return std::vector<CalChart::Draw::DrawCommand>{
+        CalChart::Draw::Line{ CalChart::Coord{ -lineLength / 2, ArrowSize }, CalChart::Coord{ lineLength / 2, ArrowSize } },
+        CalChart::Draw::Line{ CalChart::Coord{ -(lineLength / 2 - ArrowSize), 0 }, CalChart::Coord{ -lineLength / 2, ArrowSize } },
+        CalChart::Draw::Line{ CalChart::Coord{ -(lineLength / 2 - ArrowSize), 2 * ArrowSize }, CalChart::Coord{ -lineLength / 2, ArrowSize } },
+    };
 }
 
 void DrawArrow(wxDC& dc, wxPoint const& pt, wxCoord lineLength, bool pointRight)
@@ -105,11 +139,11 @@ auto TabStops(int which, bool landscape)
 }
 
 // these are the sizes that the page is set up to do.
-static const double kBitmapScale = 4.0; // the factor to scale the bitmap
-static const double kFieldTop = 0.14;
-static const double kFieldBorderOffset = 0.06;
-static const double kSizeX = 576, kSizeY = 734;
-static const double kSizeXLandscape = 917, kSizeYLandscape = 720;
+static constexpr double kBitmapScale = 4.0; // the factor to scale the bitmap
+static constexpr double kFieldTop = 0.14;
+static constexpr double kFieldBorderOffset = 0.06;
+static constexpr double kSizeX = 576, kSizeY = 734;
+static constexpr double kSizeXLandscape = 917, kSizeYLandscape = 720;
 static const double kHeaderLocation[2][2] = {
     { 0.5, 18 / kSizeY },
     { 0.5, 22 / kSizeYLandscape }
@@ -127,66 +161,53 @@ static const double kLowerNumberBox[2][4] = {
     { 1.0 - 90 / kSizeX, 708 / kSizeY, 56 / kSizeX, 22 / kSizeY },
     { 1.0 - 124 / kSizeXLandscape, 674 / kSizeYLandscape, 56 / kSizeXLandscape, 28 / kSizeYLandscape }
 };
-static const double kMusicLabelPosition[2][3] = {
-    { 0.5, 60 / kSizeY, 240 / kSizeX },
-    { 0.5, 60 / kSizeYLandscape, 400 / kSizeXLandscape }
-};
-static const wxString kMusicLabel = wxT("Music");
-static const double kFormationLabelPosition[2][3] = {
-    { 0.5, 82 / kSizeY, 240 / kSizeX },
-    { 0.5, 82 / kSizeYLandscape, 400 / kSizeXLandscape }
-};
-static const wxString kFormationLabel = wxT("Formation");
 
-static const double kGameLabelPosition[2][3] = {
-    { 62 / kSizeX, 50 / kSizeY, 64 / kSizeX },
-    { 96 / kSizeXLandscape, 54 / kSizeYLandscape, 78 / kSizeXLandscape }
+static const auto kTextLabels = std::array{
+    std::array{
+        std::tuple{ "Music", 0.5, 60 / kSizeY, 240 / kSizeX },
+        std::tuple{ "Formation", 0.5, 82 / kSizeY, 240 / kSizeX },
+        std::tuple{ "game", 62 / kSizeX, 50 / kSizeY, 64 / kSizeX },
+        std::tuple{ "page", 1.0 - 62 / kSizeX, 50 / kSizeY, 64 / kSizeX },
+    },
+    std::array{
+        std::tuple{ "Music", 0.5, 60 / kSizeYLandscape, 400 / kSizeXLandscape },
+        std::tuple{ "Formation", 0.5, 82 / kSizeYLandscape, 400 / kSizeXLandscape },
+        std::tuple{ "game", 96 / kSizeXLandscape, 54 / kSizeYLandscape, 78 / kSizeXLandscape },
+        std::tuple{ "page", 1.0 - 96 / kSizeXLandscape, 54 / kSizeYLandscape, 78 / kSizeXLandscape },
+    },
 };
-static const wxString kGameLabel = wxT("game");
-static const double kPageLabelPosition[2][3] = {
-    { 1.0 - 62 / kSizeX, 50 / kSizeY, 64 / kSizeX },
-    { 1.0 - 96 / kSizeXLandscape, 54 / kSizeYLandscape, 78 / kSizeXLandscape }
-};
-static const wxString kPageLabel = wxT("page");
-static const double kSideLabelPosition[2][2] = { { 0.5, 580 / kSizeY },
-    { 0.5, 544 / kSizeYLandscape } };
-static const wxString kSideLabel = wxT("CAL SIDE");
 
-static const double kUpperSouthPosition[2][2] = {
-    { 52 / kSizeX, (76 - 8) / kSizeY },
-    { 76 / kSizeXLandscape, (80 - 8) / kSizeYLandscape }
+// convention is upper south, upper north, lower south, lower north
+static const auto kLabels = std::array{
+    std::array{
+        std::tuple{ "CAL SIDE", 0.5, 580 / kSizeY },
+        std::tuple{ "south", 52 / kSizeX, (76 - 8) / kSizeY },
+        std::tuple{ "north", 1.0 - 52 / kSizeX, (76 - 8) / kSizeY },
+        std::tuple{ "south", 52 / kSizeX, (570 + 8) / kSizeY },
+        std::tuple{ "north", 1.0 - 52 / kSizeX, (570 + 8) / kSizeY },
+    },
+    std::array{
+        std::tuple{ "CAL SIDE", 0.5, 544 / kSizeYLandscape },
+        std::tuple{ "south", 76 / kSizeXLandscape, (80 - 8) / kSizeYLandscape },
+        std::tuple{ "north", 1.0 - 76 / kSizeXLandscape, (80 - 8) / kSizeYLandscape },
+        std::tuple{ "south", 76 / kSizeXLandscape, (536 + 8) / kSizeYLandscape },
+        std::tuple{ "north", 1.0 - 76 / kSizeXLandscape, (536 + 8) / kSizeYLandscape },
+    },
 };
-static const wxString kUpperSouthLabel = wxT("south");
-static const double kUpperSouthArrow[2][3] = {
-    { 52 / kSizeX, (76) / kSizeY, 40 / kSizeX },
-    { 76 / kSizeXLandscape, (80) / kSizeYLandscape, 40 / kSizeXLandscape }
-};
-static const double kUpperNorthPosition[2][2] = {
-    { 1.0 - 52 / kSizeX, (76 - 8) / kSizeY },
-    { 1.0 - 76 / kSizeXLandscape, (80 - 8) / kSizeYLandscape }
-};
-static const wxString kUpperNorthLabel = wxT("north");
-static const double kUpperNorthArrow[2][3] = {
-    { 1.0 - 52 / kSizeX, (76) / kSizeY, 40 / kSizeX },
-    { 1.0 - 76 / kSizeXLandscape, (80) / kSizeYLandscape, 40 / kSizeXLandscape }
-};
-static const double kLowerSouthPosition[2][2] = {
-    { 52 / kSizeX, (570 + 8) / kSizeY },
-    { 76 / kSizeXLandscape, (536 + 8) / kSizeYLandscape }
-};
-static const wxString kLowerSouthLabel = wxT("south");
-static const double kLowerSouthArrow[2][3] = {
-    { 52 / kSizeX, (570) / kSizeY, 40 / kSizeX },
-    { 76 / kSizeXLandscape, (536) / kSizeYLandscape, 40 / kSizeXLandscape }
-};
-static const double kLowerNorthPosition[2][2] = {
-    { 1.0 - 52 / kSizeX, (570 + 8) / kSizeY },
-    { 1.0 - 76 / kSizeXLandscape, (536 + 8) / kSizeYLandscape }
-};
-static const wxString kLowerNorthLabel = wxT("north");
-static const double kLowerNorthArrow[2][3] = {
-    { 1.0 - 52 / kSizeX, (570) / kSizeY, 40 / kSizeX },
-    { 1.0 - 76 / kSizeXLandscape, (536) / kSizeYLandscape, 40 / kSizeXLandscape }
+
+static constexpr auto kArrows = std::array{
+    std::array{
+        std::tuple{ 52 / kSizeX, (76) / kSizeY, 40 / kSizeX, false },
+        std::tuple{ 1.0 - 52 / kSizeX, (76) / kSizeY, 40 / kSizeX, true },
+        std::tuple{ 52 / kSizeX, (570) / kSizeY, 40 / kSizeX, false },
+        std::tuple{ 1.0 - 52 / kSizeX, (570) / kSizeY, 40 / kSizeX, true },
+    },
+    std::array{
+        std::tuple{ 76 / kSizeXLandscape, (80) / kSizeYLandscape, 40 / kSizeXLandscape, false },
+        std::tuple{ 1.0 - 76 / kSizeXLandscape, (80) / kSizeYLandscape, 40 / kSizeXLandscape, true },
+        std::tuple{ 76 / kSizeXLandscape, (536) / kSizeYLandscape, 40 / kSizeXLandscape, false },
+        std::tuple{ 1.0 - 76 / kSizeXLandscape, (536) / kSizeYLandscape, 40 / kSizeXLandscape, true },
+    },
 };
 
 static const double kContinuityStart[2] = { 606 / kSizeY, 556 / kSizeYLandscape };
@@ -470,26 +491,6 @@ void DrawCont(wxDC& dc, [[maybe_unused]] CalChart::Configuration const& config, 
 #endif
 }
 
-auto CreateFieldForPrinting(int left_limit, int right_limit, bool landscape, CalChart::YardLinesInfo_t const& yardlines) -> CalChart::ShowMode
-{
-    // extend the limit to the next largest 5 yard line
-    left_limit = (left_limit / 8) * 8 + (left_limit % 8 ? (left_limit < 0 ? -8 : 8) : 0);
-    right_limit = (right_limit / 8) * 8 + (right_limit % 8 ? (right_limit < 0 ? -8 : 8) : 0);
-
-    auto size_x = std::max(CalChart::kFieldStepSizeNorthSouth[landscape], right_limit - left_limit);
-    auto size = CalChart::Coord{ CalChart::Int2CoordUnits(size_x), CalChart::Int2CoordUnits(CalChart::kFieldStepSizeEastWest) };
-
-    auto left_edge = -CalChart::kFieldStepSizeSouthEdgeFromCenter[landscape];
-    if (left_limit < left_edge) {
-        left_edge = left_limit;
-    } else if ((left_edge + size.x) < right_limit) {
-        left_edge = right_limit - size.x;
-    }
-    CalChart::Coord off = { CalChart::Int2CoordUnits(-left_edge), CalChart::Int2CoordUnits(CalChart::kFieldStepSizeWestEdgeFromCenter) };
-
-    return CalChart::ShowMode::CreateShowMode(size, off, { 0, 0 }, { 0, 0 }, CalChart::kFieldStepWestHashFromWestSideline, CalChart::kFieldStepEastHashFromWestSideline, yardlines);
-}
-
 // Return a bounding box of the show of where the marchers are.  If they are
 // outside the show, we don't see them.
 // can be done better with algorithms
@@ -508,7 +509,101 @@ GetMarcherBoundingBox(std::vector<CalChart::Point> const& pts)
     return { bounding_box_upper_left, bounding_box_low_right };
 }
 
-void DrawForPrintingHelper(wxDC& dc, CalChart::Configuration const& config, CalChartDoc const& show, CalChart::Sheet const& sheet, int ref, bool landscape)
+// Divide the draw space into lines with a padding in between each.
+auto CalculatePointsPerLine(
+    CalChart::PrintContinuityLayout::VStack const& print_continuity,
+    wxRect const& bounding,
+    int linePad)
+{
+    auto numLines = std::count_if(print_continuity.lines.begin(), print_continuity.lines.end(), [](auto&& i) { return i.on_sheet; });
+    return ((bounding.GetBottom() - bounding.GetTop()) - (numLines - 1) * linePad) / (numLines ? numLines : 1);
+}
+
+namespace {
+    auto GeneratePrintField(
+        CalChart::Configuration const& config,
+        CalChartDoc const& show,
+        CalChart::Sheet const& sheet,
+        int ref,
+        bool landscape) -> std::tuple<double, std::vector<CalChart::Draw::DrawCommand>>
+    {
+        // Print the field:
+        // create a field for drawing:
+        const auto pts = sheet.GetPoints();
+        auto boundingBox = GetMarcherBoundingBox(pts);
+        auto mode = show.GetShowMode().CreateFieldForPrinting(CalChart::CoordUnits2Int(boundingBox.first.x), CalChart::CoordUnits2Int(boundingBox.second.x), landscape);
+        auto drawCmds = CalChart::CreateModeDrawCommandsWithBorder(config, mode, CalChart::HowToDraw::Printing);
+        CalChart::append(drawCmds,
+            CalChart::Draw::toDrawCommands(std::views::iota(0u, pts.size())
+                | std::views::transform([&](auto i) {
+                      return CalChartDraw::Point::DrawPoint(
+                          config,
+                          pts.at(i),
+                          ref,
+                          mode.Offset(),
+                          show.GetPointLabel(i));
+                  })
+                | std::views::join));
+
+        return { static_cast<double>(mode.Size().x), drawCmds };
+    }
+
+    auto GenerateLargePrintElements(bool landscape, wxSize page, std::string sheetName)
+    {
+        auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
+        CalChart::append(drawCmds,
+            GenerateDrawCenteredText(kHeader) + CalChart::Coord(page.x * kHeaderLocation[landscape][0], page.y * kHeaderLocation[landscape][1]));
+        CalChart::append(drawCmds,
+            GenerateDrawCenteredText(sheetName) + CalChart::Coord(page.x * kUpperNumberPosition[landscape][0], page.y * kUpperNumberPosition[landscape][1]));
+        CalChart::append(drawCmds,
+            GenerateDrawCenteredText(sheetName) + CalChart::Coord(page.x * kLowerNumberPosition[landscape][0], page.y * kLowerNumberPosition[landscape][1]));
+        return drawCmds;
+    }
+
+    auto GeneratePrintElements(bool landscape, wxSize page, CalChart::Draw::DrawCommand const& cont) -> std::vector<CalChart::Draw::DrawCommand>
+    {
+        auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
+        CalChart::append(drawCmds,
+            std::vector<CalChart::Draw::DrawCommand>{ CalChart::Draw::Rectangle(
+                CalChart::Coord(page.x * kLowerNumberBox[landscape][0], page.y * kLowerNumberBox[landscape][1]),
+                CalChart::Coord(page.x * kLowerNumberBox[landscape][2], page.y * kLowerNumberBox[landscape][3])) });
+        CalChart::append(drawCmds,
+            CalChart::Draw::toDrawCommands(
+                kTextLabels[landscape] | std::views::transform([page](auto&& labelData) {
+                    auto [label, x, y, lineLength] = labelData;
+                    return GenerateDrawLineOverText(label, page.x * lineLength) + CalChart::Coord(page.x * x, page.y * y);
+                })
+                | std::views::join));
+
+        CalChart::append(drawCmds,
+            CalChart::Draw::toDrawCommands(
+                kLabels[landscape] | std::views::transform([page](auto&& labelData) {
+                    auto [label, x, y] = labelData;
+                    return GenerateDrawCenteredText(label) + CalChart::Coord(page.x * x, page.y * y);
+                })
+                | std::views::join));
+
+        CalChart::append(drawCmds,
+            CalChart::Draw::toDrawCommands(
+                kArrows[landscape] | std::views::transform([page](auto&& arrow) {
+                    auto [x, y, length, right] = arrow;
+                    return GenerateDrawArrow(page.x * length, right) + CalChart::Coord(page.x * x, page.y * y);
+                })
+                | std::views::join));
+
+        // a possible future optimization would be to generate this ahead of time.
+        CalChart::append(drawCmds, cont);
+        return drawCmds;
+    }
+}
+
+void DrawForPrintingHelper(
+    wxDC& dc,
+    CalChart::Configuration const& config,
+    CalChart::Sheet const& sheet,
+    bool landscape,
+    double scale_x,
+    std::vector<CalChart::Draw::DrawCommand> fieldDrawCommand)
 {
     // set up everything to be restored after we print
     SaveAndRestore::DeviceOrigin orig_dev(dc);
@@ -518,36 +613,25 @@ void DrawForPrintingHelper(wxDC& dc, CalChart::Configuration const& config, CalC
     // get the page dimensions
     auto page = dc.GetSize();
 
+    // a possible future optimization would be to generate this ahead of time.
+    auto printLayout = CalChart::PrintContinuityLayout::Parse(sheet.GetRawPrintContinuity());
+    auto printDrawCommands = GenerateDrawCommands(dc, config, printLayout, wxRect(wxPoint(10, page.y * kContinuityStart[landscape]), wxSize(page.x - 20, page.y - page.y * kContinuityStart[landscape])), landscape);
+
     dc.Clear();
     dc.SetLogicalFunction(wxCOPY);
 
     // Print the field:
-    // create a field for drawing:
-    const auto pts = sheet.GetPoints();
-    auto boundingBox = GetMarcherBoundingBox(pts);
-    auto mode = CreateFieldForPrinting(CalChart::CoordUnits2Int(boundingBox.first.x), CalChart::CoordUnits2Int(boundingBox.second.x), landscape, show.GetShowMode().Get_yard_text());
 
     // set the origin and scaling for drawing the field
     dc.SetDeviceOrigin(kFieldBorderOffset * page.x, kFieldTop * page.y);
-    // Because we are drawing to a bitmap, DIP isn't happening.  So we compensate by changing the scaling.
-    auto scale_x = static_cast<double>(mode.Size().x); // std::max<double>(mode.Size().x, (boundingBox.second.x - boundingBox.first.x));
+
+    // create a field for drawing:
     auto scale = tDIP(page.x - 2 * kFieldBorderOffset * page.x) / scale_x;
+    // Because we are drawing to a bitmap, DIP isn't happening.  So we compensate by changing the scaling.
     dc.SetUserScale(scale, scale);
 
     // draw the field.
-    wxCalChart::Draw::DrawCommandList(dc, CalChart::CreateModeDrawCommandsWithBorder(config, mode, CalChart::HowToDraw::Printing));
-
-    dc.SetFont(CreateFont(CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio())));
-    for (auto i = 0u; i < pts.size(); i++) {
-        wxCalChart::Draw::DrawCommandList(
-            dc,
-            CalChartDraw::Point::DrawPoint(
-                config,
-                pts.at(i),
-                ref,
-                mode.Offset(),
-                show.GetPointLabel(i)));
-    }
+    wxCalChart::Draw::DrawCommandList(dc, fieldDrawCommand);
 
     // now reset everything to draw the rest of the text
     dc.SetDeviceOrigin(CalChart::Int2CoordUnits(0), CalChart::Int2CoordUnits(0));
@@ -562,49 +646,81 @@ void DrawForPrintingHelper(wxDC& dc, CalChart::Configuration const& config, CalC
     page.x = fDIP(sizeX);
     page.y = fDIP(sizeY);
 
-    // draw the header
-    dc.SetFont(CreateFont(16, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-    dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 1, wxPENSTYLE_SOLID));
+    auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
 
-    DrawCenteredText(dc, kHeader, wxPoint(page.x * kHeaderLocation[landscape][0], page.y * kHeaderLocation[landscape][1]));
+    CalChart::append(drawCmds,
+        CalChart::Draw::withFont(
+            CalChart::Font{ 16, CalChart::Font::Family::Roman, CalChart::Font::Style::Normal, CalChart::Font::Weight::Bold },
+            GenerateLargePrintElements(landscape, page, sheet.GetNumber())));
 
-    DrawCenteredText(dc, sheet.GetNumber(), wxPoint(page.x * kUpperNumberPosition[landscape][0], page.y * kUpperNumberPosition[landscape][1]));
-    DrawCenteredText(dc, sheet.GetNumber(), wxPoint(page.x * kLowerNumberPosition[landscape][0], page.y * kLowerNumberPosition[landscape][1]));
-    dc.DrawRectangle(page.x * kLowerNumberBox[landscape][0], page.y * kLowerNumberBox[landscape][1], page.x * kLowerNumberBox[landscape][2], page.y * kLowerNumberBox[landscape][3]);
+    CalChart::append(drawCmds,
+        CalChart::Draw::withFont(
+            CalChart::Font{ 8 },
+            GeneratePrintElements(
+                landscape,
+                page,
+                printDrawCommands + CalChart::Coord(10, page.y * kContinuityStart[landscape]))));
+    wxCalChart::Draw::DrawCommandList(dc, drawCmds);
+}
 
-    dc.SetFont(CreateFont(8, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+auto GenerateDrawCommands(wxDC& dc,
+    CalChart::Configuration const& config,
+    CalChart::PrintContinuityLayout::VStack const& printLayout,
+    wxRect const& bounding,
+    bool landscape)
+    -> CalChart::Draw::DrawCommand
+{
+    auto linePad = static_cast<int>(config.Get_PrintContLinePad());
+    auto factor = config.Get_PrintContDotRatio();
+    auto fontSize = std::min<int>(CalculatePointsPerLine(printLayout, bounding, linePad), config.Get_PrintContMaxFontSize());
+    auto [symbolSize, symbolMiddle] = [](auto& dc, int fontSize, double factor) -> std::pair<int, CalChart::Coord> {
+        auto restore = SaveAndRestore::Font{ dc };
+        wxCalChart::setFont(dc, { fontSize, CalChart::Font::Family::Modern });
+        wxCoord textw{};
+        wxCoord texth{};
+        wxCoord textd{};
+        dc.GetTextExtent("O", &textw, &texth, &textd);
+        auto middle = texth - textw - textd;
+        return { textw * factor, CalChart::Coord(middle, middle) };
+    }(dc, fontSize, factor);
 
-    DrawLineOverText(dc, kMusicLabel, wxPoint(page.x * kMusicLabelPosition[landscape][0], page.y * kMusicLabelPosition[landscape][1]), page.x * kMusicLabelPosition[landscape][2]);
-    DrawLineOverText(dc, kFormationLabel, wxPoint(page.x * kFormationLabelPosition[landscape][0], page.y * kFormationLabelPosition[landscape][1]), page.x * kFormationLabelPosition[landscape][2]);
-    DrawLineOverText(dc, kGameLabel, wxPoint(page.x * kGameLabelPosition[landscape][0], page.y * kGameLabelPosition[landscape][1]), page.x * kGameLabelPosition[landscape][2]);
-    DrawLineOverText(dc, kPageLabel, wxPoint(page.x * kPageLabelPosition[landscape][0], page.y * kPageLabelPosition[landscape][1]), page.x * kPageLabelPosition[landscape][2]);
-    DrawCenteredText(dc, kSideLabel, wxPoint(page.x * kSideLabelPosition[landscape][0], page.y * kSideLabelPosition[landscape][1]));
+    auto context = CalChart::PrintContinuityLayout::Context{
+        fontSize,
+        landscape,
+        linePad,
+        symbolSize,
+        symbolMiddle,
+        config.Get_PrintContPLineRatio(),
+        config.Get_PrintContSLineRatio(),
+    };
 
-    // draw arrows
-    DrawCenteredText(dc, kUpperSouthLabel, wxPoint(page.x * kUpperSouthPosition[landscape][0], page.y * kUpperSouthPosition[landscape][1]));
-    DrawArrow(dc, wxPoint(page.x * kUpperSouthArrow[landscape][0], page.y * kUpperSouthArrow[landscape][1]), page.x * kUpperSouthArrow[landscape][2], false);
-    DrawCenteredText(dc, kUpperNorthLabel, wxPoint(page.x * kUpperNorthPosition[landscape][0], page.y * kUpperNorthPosition[landscape][1]));
-    DrawArrow(dc, wxPoint(page.x * kUpperNorthArrow[landscape][0], page.y * kUpperNorthArrow[landscape][1]), page.x * kUpperNorthArrow[landscape][2], true);
-    DrawCenteredText(dc, kLowerSouthLabel, wxPoint(page.x * kLowerSouthPosition[landscape][0], page.y * kLowerSouthPosition[landscape][1]));
-    DrawArrow(dc, wxPoint(page.x * kLowerSouthArrow[landscape][0], page.y * kLowerSouthArrow[landscape][1]), page.x * kLowerSouthArrow[landscape][2], false);
-    DrawCenteredText(dc, kLowerNorthLabel, wxPoint(page.x * kLowerNorthPosition[landscape][0], page.y * kLowerNorthPosition[landscape][1]));
-    DrawArrow(dc, wxPoint(page.x * kLowerNorthArrow[landscape][0], page.y * kLowerNorthArrow[landscape][1]), page.x * kLowerNorthArrow[landscape][2], true);
-
-    DrawCont(dc, config, sheet.GetPrintableContinuity(), wxRect(wxPoint(10, page.y * kContinuityStart[landscape]), wxSize(page.x - 20, page.y - page.y * kContinuityStart[landscape])), landscape);
+    try {
+        return CalChart::Draw::withBrushAndPen(
+            wxCalChart::toBrushAndPen(*wxBLACK_PEN),
+            CalChart::Draw::withFont(
+                context.plain,
+                CalChart::PrintContinuityLayout::ToDrawCommand(printLayout, context)));
+    } catch (std::exception const& e) {
+        std::cout << "hit the excpetion " << e.what() << "\n";
+        return CalChart::Draw::Ignore{};
+    }
 }
 
 void DrawForPrinting(wxDC* printerdc, CalChart::Configuration const& config, CalChartDoc const& show, CalChart::Sheet const& sheet, int ref, bool landscape)
 {
     auto boundingBox = GetMarcherBoundingBox(sheet.GetPoints());
     auto forced_landscape = !landscape && (boundingBox.second.x - boundingBox.first.x) > CalChart::Int2CoordUnits(CalChart::kFieldStepSizeNorthSouth[0]);
+    auto should_landscape = landscape || forced_landscape;
 
-    auto bitmapWidth = (landscape || forced_landscape ? kSizeXLandscape : kSizeX) * kBitmapScale;
-    auto bitmapHeight = (landscape || forced_landscape ? kSizeYLandscape : kSizeY) * kBitmapScale;
+    auto bitmapWidth = (should_landscape ? kSizeXLandscape : kSizeX) * kBitmapScale;
+    auto bitmapHeight = (should_landscape ? kSizeYLandscape : kSizeY) * kBitmapScale;
+
     // construct a bitmap for drawing on.
     wxBitmap membm(bitmapWidth, bitmapHeight);
     // first convert to image
     wxMemoryDC memdc(membm);
-    DrawForPrintingHelper(memdc, config, show, sheet, ref, landscape || forced_landscape);
+    auto [scale_x, drawCmds1] = GeneratePrintField(config, show, sheet, ref, should_landscape);
+    DrawForPrintingHelper(memdc, config, sheet, should_landscape, scale_x, drawCmds1);
 
     auto image = membm.ConvertToImage();
     if (forced_landscape) {
@@ -624,7 +740,8 @@ auto GeneratePhatomPointsDrawCommands(
     const CalChart::Configuration& config,
     const CalChartDoc& show,
     const CalChart::Sheet& sheet,
-    const std::map<int, CalChart::Coord>& positions) -> std::vector<CalChart::Draw::DrawCommand>
+    const std::map<int, CalChart::Coord>& positions)
+    -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto pointLabelFont = CalChart::Font{ CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio()) };
     auto origin = show.GetShowFieldOffset();
@@ -656,7 +773,6 @@ auto GeneratePhatomPointsDrawCommands(
                     drawCmds + origin)))
     };
 }
-
 }
 
 namespace wxCalChart::Draw {

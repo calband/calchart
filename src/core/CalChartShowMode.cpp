@@ -268,4 +268,24 @@ auto CreateModeDrawCommandsWithBorderOffset(
     return CreateModeDrawCommandsWithBorder(config, mode, howToDraw) - mode.Offset();
 }
 
+auto ShowMode::CreateFieldForPrinting(int left_limit, int right_limit, bool landscape) const -> CalChart::ShowMode
+{
+    // extend the limit to the next largest 5 yard line
+    left_limit = (left_limit / 8) * 8 + (left_limit % 8 ? (left_limit < 0 ? -8 : 8) : 0);
+    right_limit = (right_limit / 8) * 8 + (right_limit % 8 ? (right_limit < 0 ? -8 : 8) : 0);
+
+    auto size_x = std::max(CalChart::kFieldStepSizeNorthSouth[landscape], right_limit - left_limit);
+    auto size = CalChart::Coord{ CalChart::Int2CoordUnits(size_x), CalChart::Int2CoordUnits(CalChart::kFieldStepSizeEastWest) };
+
+    auto left_edge = -CalChart::kFieldStepSizeSouthEdgeFromCenter[landscape];
+    if (left_limit < left_edge) {
+        left_edge = left_limit;
+    } else if ((left_edge + size.x) < right_limit) {
+        left_edge = right_limit - size.x;
+    }
+    CalChart::Coord off = { CalChart::Int2CoordUnits(-left_edge), CalChart::Int2CoordUnits(CalChart::kFieldStepSizeWestEdgeFromCenter) };
+
+    return CreateShowMode(size, off, { 0, 0 }, { 0, 0 }, CalChart::kFieldStepWestHashFromWestSideline, CalChart::kFieldStepEastHashFromWestSideline, mYardLines);
+}
+
 }

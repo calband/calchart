@@ -56,6 +56,11 @@ void Draw(wxDC& dc, CalChartDoc const& show, CalChart::Sheet const& sheet, int r
 void DrawPoints(wxDC& dc, CalChart::Configuration const& config, CalChart::Coord origin, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, bool primary);
 void DrawGhostSheet(wxDC& dc, CalChart::Configuration const& config, CalChart::Coord origin, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref);
 void DrawCont(wxDC& dc, CalChart::Configuration const& config, CalChart::Textline_list const& print_continuity, wxRect const& bounding, bool landscape);
+auto GenerateDrawCommands(wxDC& dc,
+    CalChart::Configuration const& config,
+    CalChart::PrintContinuityLayout::VStack const& printLayout,
+    wxRect const& bounding,
+    bool landscape) -> CalChart::Draw::DrawCommand;
 
 void DrawForPrinting(wxDC* dc, CalChart::Configuration const& config, CalChartDoc const& show, CalChart::Sheet const& sheet, int ref, bool landscape);
 auto GetOmniLinesImage(const CalChart::Configuration& config, CalChart::ShowMode const& mode) -> wxImage;
