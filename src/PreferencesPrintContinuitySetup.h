@@ -72,6 +72,7 @@ private:
     wxUI::TextCtrl::Proxy mPLineRatio{};
     wxUI::TextCtrl::Proxy mSLineRatio{};
     wxUI::SpinCtrl::Proxy mLinePad{};
+    wxUI::SpinCtrl::Proxy mMaxFontSize{};
 
     void InitFromConfig() override;
     void CreateControls() override;
