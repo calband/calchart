@@ -372,12 +372,15 @@ auto CalChartDoc::GetAnimationInfo(CalChart::beats_t whichBeat, int which) const
     return mAnimation->GetAnimateInfo(whichBeat, which);
 }
 
-auto CalChartDoc::GetAllAnimationInfo(CalChart::beats_t whichBeat) const -> std::vector<CalChart::Animate::Info>
+auto CalChartDoc::GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::beats_t whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>
 {
     if (!mAnimation) {
         return {};
     }
-    return mAnimation->GetAllAnimateInfo(whichBeat);
+    if (mShow->GetSelectionList().empty()) {
+        return mAnimation->GetAnimateInfoWithDistanceFromPoint(whichBeat, origin);
+    }
+    return mAnimation->GetAnimateInfoWithDistanceFromPoint(whichBeat, mShow->GetSelectionList(), origin);
 }
 
 auto CalChartDoc::GetTotalNumberAnimationBeats() const -> std::optional<CalChart::beats_t>

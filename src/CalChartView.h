@@ -94,7 +94,7 @@ public:
     auto GetCurrentSheet() const { return mShow->GetCurrentSheet(); }
 
     [[nodiscard]] auto GetAnimationInfo(CalChart::beats_t whichBeat, int which) const -> std::optional<CalChart::Animate::Info>;
-    [[nodiscard]] auto GetAllAnimationInfo(CalChart::beats_t whichBeat) const -> std::vector<CalChart::Animate::Info>;
+    [[nodiscard]] auto GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::beats_t whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>;
     std::vector<CalChart::Animate::Errors> GetAnimationErrors() const;
     // Sheet -> all collisions
     std::map<int, CalChart::SelectionList> GetAnimationCollisions() const;

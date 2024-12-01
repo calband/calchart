@@ -126,6 +126,16 @@ auto GeneratePointDrawCommand(Range&& range, Function predicate, CalChart::Brush
     return CalChart::Draw::Ignore{};
 }
 
+template <std::ranges::input_range Range>
+    requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Info>)
+auto AddDistanceFromPointInfo(Range&& range, CalChart::Coord origin) -> std::multimap<double, CalChart::Animate::Info>
+{
+    return std::accumulate(range.begin(), range.end(), std::multimap<double, CalChart::Animate::Info>{}, [origin](auto&& acc, auto&& item) {
+        acc.insert({ origin.Distance(item.mMarcherInfo.mPosition.x), item });
+        return acc;
+    });
+}
+
 }
 
 namespace CalChart {
@@ -145,6 +155,24 @@ auto Animation::GetBoundingBox(beats_t whichBeat) const -> std::pair<CalChart::C
             return CalChart::Coord(std::max(acc.x, pos.x), std::max(acc.y, pos.y));
         })
     };
+}
+
+auto Animation::GetAnimateInfoWithDistanceFromPoint(beats_t whichBeat, CalChart::Coord origin) const -> std::multimap<double, Animate::Info>
+{
+    AddDistanceFromPointInfo(GetAllAnimateInfo(whichBeat), origin);
+}
+
+auto Animation::GetAnimateInfoWithDistanceFromPoint(beats_t whichBeat, SelectionList const& selectionList, CalChart::Coord origin) const -> std::multimap<double, Animate::Info>
+{
+    auto allEnumeratedInfo = CalChart::Ranges::enumerate_view(GetAllAnimateInfo(whichBeat));
+    auto allSelected = allEnumeratedInfo
+        | std::views::filter([&selectionList](auto&& info) { return selectionList.contains(std::get<0>(info)); })
+        | std::views::transform([](auto&& info) { return std::get<1>(info); });
+
+    return std::accumulate(allSelected.begin(), allSelected.end(), std::multimap<double, Animate::Info>{}, [origin](auto&& acc, auto&& item) {
+        acc.insert({ origin.Distance(item.mMarcherInfo.mPosition.x), item });
+        return acc;
+    });
 }
 
 auto Animation::GenerateDotsDrawCommands(beats_t whichBeat, SelectionList const& selectionList, bool drawCollisionWarning, CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>

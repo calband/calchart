@@ -21,7 +21,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartAngles.h"
 #include "CalChartAnimation.h"
 #include "CalChartDrawCommand.h"
 #include "CalChartMeasure.h"

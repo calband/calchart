@@ -80,6 +80,9 @@ public:
     [[nodiscard]] auto GetAnimateInfo(beats_t whichBeat, int which) const -> Animate::Info { return mSheets.AnimateInfoAtBeat(whichBeat, which); }
     [[nodiscard]] auto GetAllAnimateInfo(beats_t whichBeat) const -> std::vector<Animate::Info> { return mSheets.AllAnimateInfoAtBeat(whichBeat); }
 
+    [[nodiscard]] auto GetAnimateInfoWithDistanceFromPoint(beats_t whichBeat, CalChart::Coord origin) const -> std::multimap<double, Animate::Info>;
+    [[nodiscard]] auto GetAnimateInfoWithDistanceFromPoint(beats_t whichBeat, SelectionList const& selectionList, CalChart::Coord origin) const -> std::multimap<double, Animate::Info>;
+
     [[nodiscard]] auto GetNumberSheets() const { return mSheets.TotalSheets(); }
     [[nodiscard]] auto GetTotalNumberBeatsUpTo(int sheet) const -> beats_t { return mSheets.GetTotalNumberBeatsUpTo(sheet); }
     [[nodiscard]] auto GetTotalNumberBeats() const { return mSheets.TotalBeats(); }

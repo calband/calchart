@@ -720,9 +720,8 @@ void CCOmniviewCanvas::OnPaint(wxPaintEvent&)
     myGLUPerspective(mFOV, static_cast<float>(ClientSize.x) / static_cast<float>(ClientSize.y), 0.1, 2 * FieldNS);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    if (mFollowMarcher != -1 && mView) {
-        auto animateInfo = mView->GetMarcherInfo(mFollowMarcher);
-        if (animateInfo) {
+    if (mFollowMarcher && mView) {
+        if (auto animateInfo = mView->GetMarcherInfo(*mFollowMarcher); animateInfo.has_value()) {
             auto info = AnimateInfoToMarcherInfo(*animateInfo);
             mViewPoint.x = info.x;
             mViewPoint.y = info.y;
@@ -755,7 +754,7 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
     // predetermined camera angles:
     case '1':
     case '!':
-        OnCmd_FollowMarcher(-1);
+        OnCmd_FollowMarcher(std::nullopt);
         mViewPoint = ViewPoint{ CalChart::kViewPoint_x_1, CalChart::kViewPoint_y_1, CalChart::kViewPoint_z_1 };
         mViewAngle = CalChart::kViewAngle_1;
         mViewAngleZ = CalChart::kViewAngle_z_1;
@@ -767,7 +766,7 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
         break;
     case '2':
     case '@':
-        OnCmd_FollowMarcher(-1);
+        OnCmd_FollowMarcher(std::nullopt);
         mViewPoint = ViewPoint{ CalChart::kViewPoint_x_2, CalChart::kViewPoint_y_2, CalChart::kViewPoint_z_2 };
         mViewAngle = CalChart::kViewAngle_2;
         mViewAngleZ = CalChart::kViewAngle_z_2;
@@ -779,7 +778,7 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
         break;
     case '3':
     case '#':
-        OnCmd_FollowMarcher(-1);
+        OnCmd_FollowMarcher(std::nullopt);
         mViewPoint = ViewPoint{ CalChart::kViewPoint_x_3, CalChart::kViewPoint_y_3, CalChart::kViewPoint_z_3 };
         mViewAngle = CalChart::kViewAngle_3;
         mViewAngleZ = CalChart::kViewAngle_z_3;
@@ -791,7 +790,7 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
         break;
 
     case '4':
-        OnCmd_FollowMarcher(-1);
+        OnCmd_FollowMarcher(std::nullopt);
         mViewPoint = ViewPoint{ mConfig.Get_OmniViewPoint_X_4(),
             mConfig.Get_OmniViewPoint_Y_4(),
             mConfig.Get_OmniViewPoint_Z_4() };
@@ -814,7 +813,7 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
         break;
 
     case '$':
-        OnCmd_FollowMarcher(-1);
+        OnCmd_FollowMarcher(std::nullopt);
         if (wxMessageBox(wxT("Set Custom Viewpoint 4?"), wxT("Custom Viewpoint"), wxYES_NO) == wxYES) {
             mConfig.Set_OmniViewPoint_X_4(mViewPoint.x);
             mConfig.Set_OmniViewPoint_Y_4(mViewPoint.y);
@@ -824,7 +823,7 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
         }
         break;
     case '%':
-        OnCmd_FollowMarcher(-1);
+        OnCmd_FollowMarcher(std::nullopt);
         if (wxMessageBox(wxT("Set Custom Viewpoint 5?"), wxT("Custom Viewpoint"), wxYES_NO) == wxYES) {
             mConfig.Set_OmniViewPoint_X_5(mViewPoint.x);
             mConfig.Set_OmniViewPoint_Y_5(mViewPoint.y);
@@ -834,7 +833,7 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
         }
         break;
     case '^':
-        OnCmd_FollowMarcher(-1);
+        OnCmd_FollowMarcher(std::nullopt);
         if (wxMessageBox(wxT("Set Custom Viewpoint 6?"), wxT("Custom Viewpoint"), wxYES_NO) == wxYES) {
             mConfig.Set_OmniViewPoint_X_6(mViewPoint.x);
             mConfig.Set_OmniViewPoint_Y_6(mViewPoint.y);
@@ -846,32 +845,32 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
 
     // up and down
     case '-':
-        OnCmd_FollowMarcher(-1);
+        OnCmd_FollowMarcher(std::nullopt);
         mViewPoint.z -= stepIncr;
         mViewPoint.z = std::max(mViewPoint.z, 0.3f);
         break;
     case '+':
-        OnCmd_FollowMarcher(-1);
+        OnCmd_FollowMarcher(std::nullopt);
         mViewPoint.z += stepIncr;
         break;
 
     // change view, do not move
     case 'q':
-        OnCmd_FollowMarcher(-1);
+        OnCmd_FollowMarcher(std::nullopt);
         mViewAngle += AngleStepIncr;
         mViewAngle = CalChart::NormalizeAngle(mViewAngle);
         break;
     case 'e':
-        OnCmd_FollowMarcher(-1);
+        OnCmd_FollowMarcher(std::nullopt);
         mViewAngle -= AngleStepIncr;
         mViewAngle = CalChart::NormalizeAngle(mViewAngle);
         break;
     case 'r':
-        OnCmd_FollowMarcher(-1);
+        OnCmd_FollowMarcher(std::nullopt);
         mViewAngleZ += AngleStepIncr;
         break;
     case 'f':
-        OnCmd_FollowMarcher(-1);
+        OnCmd_FollowMarcher(std::nullopt);
         mViewAngleZ -= AngleStepIncr;
         break;
 
@@ -890,24 +889,24 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
 
     // move, following the FPS model
     case 'a':
-        OnCmd_FollowMarcher(-1);
+        OnCmd_FollowMarcher(std::nullopt);
         mViewPoint.x += -stepIncr * cos(mViewAngle - CalChart::pi / 2);
         mViewPoint.y += -stepIncr * sin(mViewAngle - CalChart::pi / 2);
         break;
     case 'd':
-        OnCmd_FollowMarcher(-1);
+        OnCmd_FollowMarcher(std::nullopt);
         mViewPoint.x += stepIncr * cos(mViewAngle - CalChart::pi / 2);
         mViewPoint.y += stepIncr * sin(mViewAngle - CalChart::pi / 2);
         break;
     case 's':
-        OnCmd_FollowMarcher(-1);
+        OnCmd_FollowMarcher(std::nullopt);
         mViewPoint.x += -stepIncr * cos(mViewAngle);
         mViewPoint.y += -stepIncr * sin(mViewAngle);
         mViewPoint.z += -stepIncr * sin(mViewAngleZ);
         mViewPoint.z = std::max(mViewPoint.z, 0.3f);
         break;
     case 'w':
-        OnCmd_FollowMarcher(-1);
+        OnCmd_FollowMarcher(std::nullopt);
         mViewPoint.x += stepIncr * cos(mViewAngle);
         mViewPoint.y += stepIncr * sin(mViewAngle);
         mViewPoint.z += stepIncr * sin(mViewAngleZ);
@@ -951,7 +950,7 @@ void CCOmniviewCanvas::OnMouseMove(wxMouseEvent& event)
     }
 }
 
-void CCOmniviewCanvas::OnCmd_FollowMarcher(int which)
+void CCOmniviewCanvas::OnCmd_FollowMarcher(std::optional<int> which)
 {
     mFollowMarcher = which;
     Refresh();
