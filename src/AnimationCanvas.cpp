@@ -71,7 +71,7 @@ void AnimationCanvas::SetStepsOutForMarchersZoom(int steps)
 }
 
 // predeclared utility function
-static auto CalcUserScaleAndOffset(std::pair<wxPoint, wxPoint> const& sizeAndOffset, wxSize const& windowSize)
+static auto CalcUserScaleAndOffset(std::pair<wxSize, wxPoint> const& sizeAndOffset, wxSize const& windowSize)
 {
     auto newX = static_cast<float>(windowSize.x);
     auto newY = static_cast<float>(windowSize.y);
@@ -208,7 +208,7 @@ void AnimationCanvas::UpdateScaleAndOrigin()
     auto boundingBox = mZoomOnMarchers ? mView->GetMarcherSizeAndOffset() : mView->GetShowSizeAndOffset();
     if (mZoomOnMarchers) {
         auto amount = CalChart::Int2CoordUnits(mStepsOutForMarcherZoom);
-        boundingBox.first += wxPoint(amount, amount) * 2;
+        boundingBox.first += wxSize(amount, amount) * 2;
         boundingBox.second -= wxPoint(amount, amount);
     }
     auto userScaleAndOffset = CalcUserScaleAndOffset(boundingBox, window_size);

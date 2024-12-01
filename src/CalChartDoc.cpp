@@ -329,11 +329,6 @@ void CalChartDoc::SetCurrentSheet(int n)
     UpdateAllViews();
 }
 
-auto CalChartDoc::GenerateAnimation() const -> std::optional<CalChart::Animation>
-{
-    return mAnimation;
-}
-
 auto CalChartDoc::GetAnimationErrors() const -> std::vector<CalChart::Animate::Errors>
 {
     if (!mAnimation) {
@@ -348,6 +343,73 @@ auto CalChartDoc::GetAnimationCollisions() const -> std::map<int, CalChart::Sele
         return {};
     }
     return mAnimation->GetCollisions();
+}
+
+auto CalChartDoc::GenerateAnimationDrawCommands(
+    CalChart::beats_t whichBeat,
+    bool drawCollisionWarning,
+    std::optional<bool> onBeat,
+    CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>
+{
+    if (!mAnimation) {
+        return {};
+    }
+    return mAnimation->GenerateDrawCommands(
+        whichBeat,
+        mShow->GetSelectionList(),
+        mShow->GetShowMode(),
+        GetConfiguration(),
+        drawCollisionWarning,
+        onBeat,
+        imageFunction);
+}
+
+auto CalChartDoc::GetAnimationInfo(CalChart::beats_t whichBeat, int which) const -> std::optional<CalChart::Animate::Info>
+{
+    if (!mAnimation) {
+        return std::nullopt;
+    }
+    return mAnimation->GetAnimateInfo(whichBeat, which);
+}
+
+auto CalChartDoc::GetAllAnimationInfo(CalChart::beats_t whichBeat) const -> std::vector<CalChart::Animate::Info>
+{
+    if (!mAnimation) {
+        return {};
+    }
+    return mAnimation->GetAllAnimateInfo(whichBeat);
+}
+
+auto CalChartDoc::GetTotalNumberAnimationBeats() const -> std::optional<CalChart::beats_t>
+{
+    if (!mAnimation) {
+        return std::nullopt;
+    }
+    return mAnimation->GetTotalNumberBeats();
+}
+
+auto CalChartDoc::GetAnimationBoundingBox(CalChart::beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>
+{
+    if (!mAnimation) {
+        return {};
+    }
+    return mAnimation->GetBoundingBox(whichBeat);
+}
+
+auto CalChartDoc::BeatHasCollision(CalChart::beats_t whichBeat) const -> bool
+{
+    if (!mAnimation) {
+        return false;
+    }
+    return mAnimation->BeatHasCollision(whichBeat);
+}
+
+auto CalChartDoc::GetAnimationBeatForCurrentSheet() const -> CalChart::beats_t
+{
+    if (!mAnimation) {
+        return {};
+    }
+    return mAnimation->GetBeatForShowSheet(GetCurrentSheetNum());
 }
 
 namespace {

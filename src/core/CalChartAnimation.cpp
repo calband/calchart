@@ -25,6 +25,7 @@
 #include "CalChartAnimationCompile.h"
 #include "CalChartAnimationErrors.h"
 #include "CalChartAnimationSheet.h"
+#include "CalChartConfiguration.h"
 #include "CalChartContinuity.h"
 #include "CalChartMeasure.h"
 #include "CalChartRanges.h"
@@ -100,10 +101,149 @@ auto AnimateShow(const Show& show) -> Sheets
 }
 }
 
+namespace {
+
+template <std::ranges::input_range Range>
+    requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Info>)
+auto GeneratePointDrawCommand(Range&& infos) -> std::vector<CalChart::Draw::DrawCommand>
+{
+    return CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(infos | std::views::transform([](auto&& info) {
+        auto size = CalChart::Coord{ CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(1) };
+        return CalChart::Draw::Rectangle{
+            info.mMarcherInfo.mPosition - size / 2, { CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(1) }
+        };
+    }));
+}
+
+template <std::ranges::input_range Range, typename Function>
+    requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Info>)
+auto GeneratePointDrawCommand(Range&& range, Function predicate, CalChart::BrushAndPen brushAndPen) -> CalChart::Draw::DrawCommand
+{
+    auto filteredRange = range | std::views::filter(predicate);
+    if (!filteredRange.empty()) {
+        return CalChart::Draw::withBrushAndPen(brushAndPen, GeneratePointDrawCommand(filteredRange));
+    }
+    return CalChart::Draw::Ignore{};
+}
+
+}
+
 namespace CalChart {
 Animation::Animation(const Show& show)
     : mSheets{ Animate::AnimateShow(show) }
 {
+}
+
+auto Animation::GetBoundingBox(beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>
+{
+    auto allPositions = GetAllAnimateInfo(whichBeat) | std::views::transform([](auto&& info) { return info.mMarcherInfo.mPosition; });
+    return {
+        std::accumulate(allPositions.begin(), allPositions.end(), CalChart::Coord{}, [](auto&& acc, auto&& pos) {
+            return CalChart::Coord(std::min(acc.x, pos.x), std::min(acc.y, pos.y));
+        }),
+        std::accumulate(allPositions.begin(), allPositions.end(), CalChart::Coord{}, [](auto&& acc, auto&& pos) {
+            return CalChart::Coord(std::max(acc.x, pos.x), std::max(acc.y, pos.y));
+        })
+    };
+}
+
+auto Animation::GenerateDotsDrawCommands(beats_t whichBeat, SelectionList const& selectionList, bool drawCollisionWarning, CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
+{
+    auto allEnumeratedInfo = CalChart::Ranges::enumerate_view(GetAllAnimateInfo(whichBeat));
+    auto allInfo = allEnumeratedInfo
+        | std::views::transform([](auto&& info) { return std::get<1>(info); });
+    auto allSelected = allEnumeratedInfo
+        | std::views::filter([&selectionList](auto&& info) { return selectionList.contains(std::get<0>(info)); })
+        | std::views::transform([](auto&& info) { return std::get<1>(info); });
+    auto allNotSelected = allEnumeratedInfo
+        | std::views::filter([&selectionList](auto&& info) { return !selectionList.contains(std::get<0>(info)); })
+        | std::views::transform([](auto&& info) { return std::get<1>(info); });
+
+    auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
+    CalChart::append(drawCmds,
+        GeneratePointDrawCommand(
+            allNotSelected, [](auto&& info) { return FacingBack(info); }, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_BACK)));
+    CalChart::append(drawCmds,
+        GeneratePointDrawCommand(
+            allNotSelected, [](auto&& info) { return FacingFront(info); }, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_FRONT)));
+    CalChart::append(drawCmds,
+        GeneratePointDrawCommand(
+            allNotSelected, [](auto&& info) { return FacingSide(info); }, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_SIDE)));
+    CalChart::append(drawCmds,
+        GeneratePointDrawCommand(
+            allSelected, [](auto&& info) { return FacingBack(info); }, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_HILIT_BACK)));
+    CalChart::append(drawCmds,
+        GeneratePointDrawCommand(
+            allSelected, [](auto&& info) { return FacingFront(info); }, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_HILIT_FRONT)));
+    CalChart::append(drawCmds,
+        GeneratePointDrawCommand(
+            allSelected, [](auto&& info) { return FacingSide(info); }, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_HILIT_SIDE)));
+
+    if (drawCollisionWarning) {
+        CalChart::append(drawCmds,
+            GeneratePointDrawCommand(
+                allInfo, [](auto&& info) { return CollisionWarning(info); }, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_COLLISION_WARNING)));
+        CalChart::append(drawCmds,
+            GeneratePointDrawCommand(
+                allInfo, [](auto&& info) { return CollisionIntersect(info); }, config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_COLLISION)));
+    }
+    return drawCmds;
+}
+
+auto Animation::GenerateSpritesDrawCommands(beats_t whichBeat, SelectionList const& selectionList, AngleStepToImageFunction imageFunction, std::optional<bool> onBeat, Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
+{
+    constexpr auto comp_X = 0.5;
+    auto comp_Y = config.Get_SpriteBitmapOffsetY();
+
+    auto drawCmds = CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(
+        CalChart::Ranges::enumerate_view(GetAllAnimateInfo(whichBeat)) | std::views::transform([comp_Y, &selectionList, onBeat, imageFunction](auto&& enum_info) {
+            auto&& [index, info] = enum_info;
+            auto image_offset = [&]() -> ImageBeat {
+                if (info.mMarcherInfo.mStepStyle == CalChart::MarchingStyle::Close) {
+                    return ImageBeat::Standing;
+                }
+                if (!onBeat.has_value()) {
+                    return ImageBeat::Standing;
+                }
+                return *onBeat ? ImageBeat::Left : ImageBeat::Right;
+            }();
+            auto image = imageFunction(info.mMarcherInfo.mFacingDirection, image_offset);
+            auto position = info.mMarcherInfo.mPosition;
+            auto offset = CalChart::Coord(image->image_width * comp_X, image->image_height * comp_Y);
+
+            return CalChart::Draw::Image{ position, image, selectionList.contains(index) } - offset;
+        }));
+    return drawCmds;
+}
+
+auto Animation::GenerateDrawCommands(
+    beats_t whichBeat,
+    SelectionList const& selectionList,
+    ShowMode const& showMode,
+    Configuration const& config,
+    bool drawCollisionWarning,
+    std::optional<bool> onBeat,
+    AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>
+{
+    auto drawCmds = CalChart::CreateModeDrawCommandsWithBorderOffset(config, showMode, CalChart::HowToDraw::Animation);
+    auto useSprites = config.Get_UseSprites();
+    if (useSprites) {
+        CalChart::append(drawCmds,
+            GenerateSpritesDrawCommands(
+                whichBeat,
+                selectionList,
+                imageFunction,
+                onBeat,
+                config));
+    } else {
+        CalChart::append(drawCmds,
+            GenerateDotsDrawCommands(
+                whichBeat,
+                selectionList,
+                drawCollisionWarning,
+                config));
+    }
+    return drawCmds + showMode.Offset();
 }
 
 }

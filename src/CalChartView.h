@@ -93,10 +93,20 @@ public:
     auto GetSheetEnd() const { return mShow->GetSheetEnd(); }
     auto GetCurrentSheet() const { return mShow->GetCurrentSheet(); }
 
+    [[nodiscard]] auto GetAnimationInfo(CalChart::beats_t whichBeat, int which) const -> std::optional<CalChart::Animate::Info>;
+    [[nodiscard]] auto GetAllAnimationInfo(CalChart::beats_t whichBeat) const -> std::vector<CalChart::Animate::Info>;
     std::vector<CalChart::Animate::Errors> GetAnimationErrors() const;
     // Sheet -> all collisions
     std::map<int, CalChart::SelectionList> GetAnimationCollisions() const;
-    std::optional<CalChart::Animation> GenerateAnimation() const;
+    [[nodiscard]] auto GenerateAnimationDrawCommands(
+        CalChart::beats_t whichBeat,
+        bool drawCollisionWarning,
+        std::optional<bool> onBeat,
+        CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GetTotalNumberAnimationBeats() const -> std::optional<CalChart::beats_t>;
+    [[nodiscard]] auto GetAnimationBoundingBox(CalChart::beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
+    [[nodiscard]] auto BeatHasCollision(CalChart::beats_t whichBeat) const -> bool;
+    [[nodiscard]] auto GetAnimationBeatForCurrentSheet() const -> CalChart::beats_t;
 
     auto ClipPositionToShowMode(CalChart::Coord const& pos) const { return mShow->GetShowMode().ClipPosition(pos); }
 

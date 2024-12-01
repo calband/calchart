@@ -33,7 +33,9 @@
 
 namespace CalChart {
 
+class Configuration;
 class Show;
+class ShowMode;
 
 namespace Animate {
     inline auto FacingBack(Info const& info)
@@ -75,8 +77,8 @@ class Animation {
 public:
     explicit Animation(const Show& show);
 
-    [[nodiscard]] auto GetAnimateInfo(beats_t whichBeat, int which) const { return mSheets.AnimateInfoAtBeat(whichBeat, which); }
-    [[nodiscard]] auto GetAllAnimateInfo(beats_t whichBeat) const { return mSheets.AllAnimateInfoAtBeat(whichBeat); }
+    [[nodiscard]] auto GetAnimateInfo(beats_t whichBeat, int which) const -> Animate::Info { return mSheets.AnimateInfoAtBeat(whichBeat, which); }
+    [[nodiscard]] auto GetAllAnimateInfo(beats_t whichBeat) const -> std::vector<Animate::Info> { return mSheets.AllAnimateInfoAtBeat(whichBeat); }
 
     [[nodiscard]] auto GetNumberSheets() const { return mSheets.TotalSheets(); }
     [[nodiscard]] auto GetTotalNumberBeatsUpTo(int sheet) const -> beats_t { return mSheets.GetTotalNumberBeatsUpTo(sheet); }
@@ -88,18 +90,43 @@ public:
     [[nodiscard]] auto GetCollisions() const -> std::map<int, CalChart::SelectionList> { return mSheets.SheetsToMarchersWhoCollided(); }
     [[nodiscard]] auto BeatHasCollision(beats_t whichBeat) const { return mSheets.BeatHasCollision(whichBeat); }
 
+    // bounds that encompasses all marchers
+    [[nodiscard]] auto GetBoundingBox(beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
+
     // collection of position of each point, for debugging purposes
     [[nodiscard]] auto GetCurrentInfo(beats_t whichBeat) const -> std::pair<std::string, std::vector<std::string>> { return mSheets.DebugAnimateInfoAtBeat(whichBeat); }
 
     [[nodiscard]] auto GenPathToDraw(unsigned whichSheet, unsigned point, Coord::units endRadius) const { return mSheets.GeneratePathToDraw(whichSheet, point, endRadius); }
 
     [[nodiscard]] auto ShowSheetToAnimSheetTranslate(unsigned showSheet) const { return mSheets.ShowSheetToAnimSheetTranslate(showSheet); }
+    [[nodiscard]] auto GetBeatForShowSheet(unsigned showSheet) const { return GetTotalNumberBeatsUpTo(ShowSheetToAnimSheetTranslate(showSheet)); }
+
     /*!
      * @brief Generates JSON that could represent of all the marchers in an Online Viewer '.viewer' file.
      * @param pointsOverSheets All of the points in all of the sheets.
      * @return A JSON which could represent all the animations in a '.viewer' file.
      */
     [[nodiscard]] auto toOnlineViewerJSON() const { return mSheets.toOnlineViewerJSON(); }
+
+    enum class ImageBeat {
+        Standing,
+        Left,
+        Right,
+        Size
+    };
+    using AngleStepToImageFunction = std::function<std::shared_ptr<ImageData>(Radian, ImageBeat)>;
+
+    // Drawing commands
+    [[nodiscard]] auto GenerateDotsDrawCommands(beats_t whichBeat, SelectionList const& selectionList, bool drawCollisionWarning, Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateSpritesDrawCommands(beats_t whichBeat, SelectionList const& selectionList, AngleStepToImageFunction imageFunction, std::optional<bool> onBeat, Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateDrawCommands(
+        beats_t whichBeat,
+        SelectionList const& selectionList,
+        ShowMode const& showMode,
+        Configuration const& config,
+        bool drawCollisionWarning,
+        std::optional<bool> onBeat,
+        AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>;
 
 private:
     // There are two types of data, the ones that are set when we are created, and the ones that modify over time.
