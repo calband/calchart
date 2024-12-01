@@ -221,25 +221,14 @@ namespace CalChartDraw::Point {
 
     auto DrawPoint(CalChart::Configuration const& config, CalChart::Point const& point, int reference, CalChart::Coord const& origin, wxString const& label)
     {
-        return point.GetDrawCommands(
-                   reference,
-                   label,
-                   config.Get_DotRatio(),
-                   config.Get_PLineRatio(),
-                   config.Get_SLineRatio())
-            + origin;
+        return point.GetDrawCommands(reference, label, config) + origin;
     }
 
     // Returns a view adaptor that will transform a range of point indices to Draw point commands.
-    auto TransformIndexToDrawCommands(CalChart::Sheet const& sheet, std::vector<std::string> const& labels, int ref, double dotRatio, double pLineRatio, double sLineRatio)
+    auto TransformIndexToDrawCommands(CalChart::Sheet const& sheet, std::vector<std::string> const& labels, int ref, CalChart::Configuration const& config)
     {
-        return std::views::transform([&sheet, ref, labels, dotRatio, pLineRatio, sLineRatio](int i) {
-            return sheet.GetPoint(i).GetDrawCommands(
-                ref,
-                labels.at(i),
-                dotRatio,
-                pLineRatio,
-                sLineRatio);
+        return std::views::transform([&sheet, ref, labels, &config](int i) {
+            return sheet.GetPoint(i).GetDrawCommands(ref, labels.at(i), config);
         })
             | std::ranges::views::join;
     }
@@ -265,9 +254,6 @@ namespace CalChartDraw::Point {
         CalChart::Colors unselectedTextColor,
         CalChart::Colors selectedTextColor) -> std::vector<CalChart::Draw::DrawCommand>
     {
-        auto dotRatio = config.Get_DotRatio();
-        auto pLineRatio = config.Get_PLineRatio();
-        auto sLineRatio = config.Get_SLineRatio();
 
         return {
             CalChart::Draw::withBrushAndPen(
@@ -275,13 +261,13 @@ namespace CalChartDraw::Point {
                 CalChart::Draw::withTextForeground(
                     config.Get_CalChartBrushAndPen(unselectedTextColor),
                     NegativeIntersection(selection_list, numberPoints)
-                        | TransformIndexToDrawCommands(sheet, labels, ref, dotRatio, pLineRatio, sLineRatio))),
+                        | TransformIndexToDrawCommands(sheet, labels, ref, config))),
             CalChart::Draw::withBrushAndPen(
                 config.Get_CalChartBrushAndPen(selectedColor),
                 CalChart::Draw::withTextForeground(
                     config.Get_CalChartBrushAndPen(selectedTextColor),
                     selection_list
-                        | TransformIndexToDrawCommands(sheet, labels, ref, dotRatio, pLineRatio, sLineRatio))),
+                        | TransformIndexToDrawCommands(sheet, labels, ref, config))),
         };
     }
 }
@@ -746,10 +732,6 @@ auto GeneratePhatomPointsDrawCommands(
     auto pointLabelFont = CalChart::Font{ CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio()) };
     auto origin = show.GetShowFieldOffset();
 
-    auto dotRatio = config.Get_DotRatio();
-    auto pLineRatio = config.Get_PLineRatio();
-    auto sLineRatio = config.Get_SLineRatio();
-
     auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
     for (auto&& i : positions) {
         CalChart::append(
@@ -757,9 +739,7 @@ auto GeneratePhatomPointsDrawCommands(
             // because points draw their position, we remove it then add the new position.
             sheet.GetPoint(i.first).GetDrawCommands(
                 show.GetPointLabel(i.first),
-                dotRatio,
-                pLineRatio,
-                sLineRatio)
+                config)
                 + i.second
                 - sheet.GetPoint(i.first).GetPos());
     }

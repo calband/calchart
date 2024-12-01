@@ -21,6 +21,7 @@
 */
 
 #include "CalChartPoint.h"
+#include "CalChartConfiguration.h"
 #include "CalChartFileFormat.h"
 
 #include <cassert>
@@ -240,9 +241,24 @@ auto Point::GetDrawCommands(unsigned ref, std::string const& label, double dotRa
     return CreatePoint(*this, GetSymbol(), label, dotRatio, pLineRatio, sLineRatio) + GetPos(ref);
 }
 
+auto Point::GetDrawCommands(unsigned ref, std::string const& label, Configuration const& config) const -> std::vector<Draw::DrawCommand>
+{
+    return GetDrawCommands(ref, label, config.Get_DotRatio(), config.Get_PLineRatio(), config.Get_SLineRatio());
+}
+
+auto Point::GetDrawCommands(std::string const& label, Configuration const& config) const -> std::vector<Draw::DrawCommand>
+{
+    return GetDrawCommands(label, config.Get_DotRatio(), config.Get_PLineRatio(), config.Get_SLineRatio());
+}
+
 auto Point::GetDrawCommands(double dotRatio, double pLineRatio, double sLineRatio) const -> std::vector<Draw::DrawCommand>
 {
     return CreatePoint(GetSymbol(), dotRatio, pLineRatio, sLineRatio) + GetPos(0);
+}
+
+auto Point::GetDrawCommands(Configuration const& config) const -> std::vector<Draw::DrawCommand>
+{
+    return GetDrawCommands(config.Get_DotRatio(), config.Get_PLineRatio(), config.Get_SLineRatio());
 }
 
 // Test Suite stuff
