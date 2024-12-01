@@ -69,6 +69,9 @@ public:
     static auto CreateShowMode(Coord size, Coord offset, Coord border1, Coord border2, uint16_t whash, uint16_t ehash, YardLinesInfo_t const& yardlines) -> ShowMode;
     static auto CreateShowMode(CalChart::Reader reader) -> ShowMode;
 
+    // When we want to take the existing show and trim it down for printing
+    [[nodiscard]] auto CreateFieldForPrinting(int left_limit, int right_limit, bool landscape) const -> CalChart::ShowMode;
+
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte>;
 
     [[nodiscard]] auto GetShowModeData() const -> ShowModeData_t;

@@ -112,6 +112,7 @@ auto append(std::vector<T>&& v, std::vector<T> const& other) -> std::vector<T>&&
 
 // This actually does the work
 template <typename T, std::ranges::range R>
+    requires(std::convertible_to<typename std::ranges::range_value_t<R>, T>)
 auto append(std::vector<T>& v, R&& range) -> std::vector<T>&
 {
     v.insert(v.end(), range.begin(), range.end());

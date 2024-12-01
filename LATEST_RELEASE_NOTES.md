@@ -33,4 +33,5 @@ Other changes:
 * [#547](../../issues/547) Add some basic profiling to calband_cmd
 * [#550](../../issues/550) Make animation compilation an operation of two pairs of sheets
 * [#552](../../issues/552) Move GenerateModeDrawCommands from CalChartDrawing to core/Mode
+* [#554](../../issues/554) Move General printing over to PrintContUseNewDraw
 
