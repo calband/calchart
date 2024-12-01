@@ -25,6 +25,7 @@
 #include "DCSaveRestore.h"
 #include <map>
 #include <memory>
+#include <optional>
 #include <wx/glcanvas.h>
 
 class AnimationView;
@@ -59,7 +60,7 @@ private:
     void OnPaint(wxPaintEvent& event);
     void OnChar(wxKeyEvent& event);
     void OnMouseMove(wxMouseEvent& event);
-    void OnCmd_FollowMarcher(int which);
+    void OnCmd_FollowMarcher(std::optional<int> which);
     void OnCmd_SaveCameraAngle(size_t which);
     void OnCmd_GoToCameraAngle(size_t which);
     void OnCmd_ToggleCrowd();
@@ -73,7 +74,7 @@ private:
     ViewPoint mViewPoint{};
 
     // a -1 means not following any marcher
-    int mFollowMarcher = -1;
+    std::optional<int> mFollowMarcher;
     bool mCrowdOn = false;
     bool mShowMarching = true;
     CalChart::Radian mViewAngle{};

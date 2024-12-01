@@ -255,16 +255,15 @@ void AnimationView::UnselectAll()
 
 void AnimationView::SelectMarchersInBox(wxPoint const& mouseStart, wxPoint const& mouseEnd, bool altDown)
 {
-    using namespace CalChart;
     auto mouseStartTranslated = tDIP(mouseStart);
     auto mouseEndTranslated = tDIP(mouseEnd);
 
     auto [x_off, y_off] = mView->GetShowFieldOffset();
     auto polygon = CalChart::RawPolygon_t{
-        Coord(mouseStartTranslated.x - x_off, mouseStartTranslated.y - y_off),
-        Coord(mouseStartTranslated.x - x_off, mouseEndTranslated.y - y_off),
-        Coord(mouseEndTranslated.x - x_off, mouseEndTranslated.y - y_off),
-        Coord(mouseEndTranslated.x - x_off, mouseStartTranslated.y - y_off),
+        CalChart::Coord(mouseStartTranslated.x - x_off, mouseStartTranslated.y - y_off),
+        CalChart::Coord(mouseStartTranslated.x - x_off, mouseEndTranslated.y - y_off),
+        CalChart::Coord(mouseEndTranslated.x - x_off, mouseEndTranslated.y - y_off),
+        CalChart::Coord(mouseEndTranslated.x - x_off, mouseStartTranslated.y - y_off),
     };
     mView->SelectWithinPolygon(polygon, altDown);
 }
@@ -303,15 +302,5 @@ auto AnimationView::GetMarcherInfo(int which) const -> std::optional<CalChart::A
 
 auto AnimationView::GetMarchersByDistance(float fromX, float fromY) const -> std::multimap<double, CalChart::Animate::Info>
 {
-    auto anySelected = !mView->GetSelectionList().empty();
-    std::multimap<double, CalChart::Animate::Info> result;
-    for (auto i = 0; (i < mView->GetNumPoints()); ++i) {
-        if (anySelected && !mView->IsSelected(i)) {
-            continue;
-        }
-        auto info = GetMarcherInfo(i);
-        auto distance = sqrt(pow(fromX - info->mMarcherInfo.mPosition.x, 2) + pow(fromY - info->mMarcherInfo.mPosition.y, 2));
-        result.insert(std::pair<double, CalChart::Animate::Info>(distance, *info));
-    }
-    return result;
+    return mView->GetSelectedAnimationInfoWithDistanceFromPoint(mCurrentBeat, CalChart::Coord(fromX, fromY));
 }

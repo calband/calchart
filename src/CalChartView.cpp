@@ -479,9 +479,9 @@ auto CalChartView::GetAnimationInfo(CalChart::beats_t whichBeat, int which) cons
     return mShow->GetAnimationInfo(whichBeat, which);
 }
 
-auto CalChartView::GetAllAnimationInfo(CalChart::beats_t whichBeat) const -> std::vector<CalChart::Animate::Info>
+auto CalChartView::GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::beats_t whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>
 {
-    return mShow->GetAllAnimationInfo(whichBeat);
+    return mShow->GetSelectedAnimationInfoWithDistanceFromPoint(whichBeat, origin);
 }
 
 auto CalChartView::GetTotalNumberAnimationBeats() const -> std::optional<CalChart::beats_t>

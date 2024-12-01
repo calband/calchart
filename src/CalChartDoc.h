@@ -198,7 +198,7 @@ public:
     CalChart::Configuration& GetConfiguration() const { return mConfig; }
 
     [[nodiscard]] auto GetAnimationInfo(CalChart::beats_t whichBeat, int which) const -> std::optional<CalChart::Animate::Info>;
-    [[nodiscard]] auto GetAllAnimationInfo(CalChart::beats_t whichBeat) const -> std::vector<CalChart::Animate::Info>;
+    [[nodiscard]] auto GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::beats_t whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>;
     [[nodiscard]] auto GetAnimationErrors() const -> std::vector<CalChart::Animate::Errors>;
     [[nodiscard]] auto GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>;
     [[nodiscard]] auto GenerateAnimationDrawCommands(
