@@ -342,13 +342,35 @@ static auto GetAngle(float x, float y, CCOmniviewCanvas::ViewPoint const& viewpo
     return CalChart::Radian{ (v.y < 0) ? -ang : ang };
 }
 
+namespace {
+struct MarcherInfo {
+    CalChart::Radian direction{};
+    float x{};
+    float y{};
+};
+
+auto AnimateInfoToMarcherInfo(CalChart::Animate::Info const& animateInfo) -> MarcherInfo
+{
+    MarcherInfo info{};
+    info.direction = CalChart::NormalizeAngle(animateInfo.mMarcherInfo.mFacingDirection);
+
+    auto position = animateInfo.mMarcherInfo.mPosition;
+    info.x = CalChart::CoordUnits2Float(position.x);
+    // because the coordinate system for continuity and OpenGL are different,
+    // correct here.
+    info.y = -1.0 * CalChart::CoordUnits2Float(position.y);
+    return info;
+}
+
+}
+
 // the rendering context used by CCOmniviewCanvas
 class CCOmniView_GLContext : public wxGLContext {
 public:
     CCOmniView_GLContext(wxGLCanvas* canvas);
 
     void DrawField(float FieldEW, float FieldNS, bool crowdOn);
-    void Draw3dMarcher(AnimationView::MarcherInfo const& info, const CCOmniviewCanvas::ViewPoint& viewpoint, WhichMarchingStyle style);
+    void Draw3dMarcher(MarcherInfo const& info, const CCOmniviewCanvas::ViewPoint& viewpoint, WhichMarchingStyle style);
 
     bool UseForLines(wxImage const& lines);
 
@@ -531,7 +553,7 @@ void CCOmniView_GLContext::DrawField(float FieldEW, float FieldNS, bool crowdOn)
     CheckGLError();
 }
 
-void CCOmniView_GLContext::Draw3dMarcher(AnimationView::MarcherInfo const& info, CCOmniviewCanvas::ViewPoint const& viewpoint, WhichMarchingStyle style)
+void CCOmniView_GLContext::Draw3dMarcher(MarcherInfo const& info, CCOmniviewCanvas::ViewPoint const& viewpoint, WhichMarchingStyle style)
 {
     auto ang = CalChart::NormalizeAngle(GetAngle(info.x, info.y, viewpoint));
     auto dir = info.direction;
@@ -699,12 +721,15 @@ void CCOmniviewCanvas::OnPaint(wxPaintEvent&)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     if (mFollowMarcher != -1 && mView) {
-        auto info = mView->GetMarcherInfo(mFollowMarcher);
-        mViewPoint.x = info.x;
-        mViewPoint.y = info.y;
-        mViewPoint.z = 2;
-        mViewAngle = info.direction;
-        mViewAngleZ = CalChart::Radian{};
+        auto animateInfo = mView->GetMarcherInfo(mFollowMarcher);
+        if (animateInfo) {
+            auto info = AnimateInfoToMarcherInfo(*animateInfo);
+            mViewPoint.x = info.x;
+            mViewPoint.y = info.y;
+            mViewPoint.z = 2;
+            mViewAngle = info.direction;
+            mViewAngleZ = CalChart::Radian{};
+        }
     }
 
     mygluLookAt(mViewPoint.x, mViewPoint.y, mViewPoint.z, mViewPoint.x + cos(mViewAngle), mViewPoint.y + sin(mViewAngle), mViewPoint.z + sin(mViewAngleZ), 0.0, 0.0, 1.0);
@@ -714,7 +739,8 @@ void CCOmniviewCanvas::OnPaint(wxPaintEvent&)
     if (mView) {
         auto marchers = mView->GetMarchersByDistance(mViewPoint.x, mViewPoint.y);
         for (auto i = marchers.rbegin(); i != marchers.rend(); ++i) {
-            m_glContext->Draw3dMarcher(i->second, mViewPoint, mShowMarching ? (mView->OnBeat() ? WhichMarchingStyle::kLeftHSHup : WhichMarchingStyle::kRightHSHup) : WhichMarchingStyle::kClosed);
+            auto info = AnimateInfoToMarcherInfo(i->second);
+            m_glContext->Draw3dMarcher(info, mViewPoint, mShowMarching ? (mView->OnBeat() ? WhichMarchingStyle::kLeftHSHup : WhichMarchingStyle::kRightHSHup) : WhichMarchingStyle::kClosed);
         }
     }
 

@@ -21,6 +21,7 @@ Other changes:
 * [#506](../../issues/506) remove index from AnimateInfo
 * [#510](../../issues/510) Switch the underlying Coord system to int32
 * [#512](../../issues/512) Animation commands should contain the position, not the beat
+* [#514](../../issues/514) Make Animation part of the Show, with access through the show
 * [#521](../../issues/521) Degree should have special constructors for common directions
 * [#526](../../issues/526) We should have a sanity test for ps output
 * [#528](../../issues/528) Clean up postscript files to be more value like

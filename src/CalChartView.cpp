@@ -461,12 +461,47 @@ std::map<int, CalChart::SelectionList> CalChartView::GetAnimationCollisions() co
     return mShow->GetAnimationCollisions();
 }
 
-std::optional<CalChart::Animation> CalChartView::GenerateAnimation() const
+auto CalChartView::GenerateAnimationDrawCommands(
+    CalChart::beats_t whichBeat,
+    bool drawCollisionWarning,
+    std::optional<bool> onBeat,
+    CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>
 {
-    if (!mShow) {
-        return {};
-    }
-    return mShow->GenerateAnimation();
+    return mShow->GenerateAnimationDrawCommands(
+        whichBeat,
+        drawCollisionWarning,
+        onBeat,
+        imageFunction);
+}
+
+auto CalChartView::GetAnimationInfo(CalChart::beats_t whichBeat, int which) const -> std::optional<CalChart::Animate::Info>
+{
+    return mShow->GetAnimationInfo(whichBeat, which);
+}
+
+auto CalChartView::GetAllAnimationInfo(CalChart::beats_t whichBeat) const -> std::vector<CalChart::Animate::Info>
+{
+    return mShow->GetAllAnimationInfo(whichBeat);
+}
+
+auto CalChartView::GetTotalNumberAnimationBeats() const -> std::optional<CalChart::beats_t>
+{
+    return mShow->GetTotalNumberAnimationBeats();
+}
+
+auto CalChartView::GetAnimationBoundingBox(CalChart::beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>
+{
+    return mShow->GetAnimationBoundingBox(whichBeat);
+}
+
+auto CalChartView::BeatHasCollision(CalChart::beats_t whichBeat) const -> bool
+{
+    return mShow->BeatHasCollision(whichBeat);
+}
+
+auto CalChartView::GetAnimationBeatForCurrentSheet() const -> CalChart::beats_t
+{
+    return mShow->GetAnimationBeatForCurrentSheet();
 }
 
 void CalChartView::GoToSheet(int which)

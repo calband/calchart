@@ -197,10 +197,21 @@ public:
     [[nodiscard]] auto GetShowFieldOffset() const { return GetShowMode().Offset(); }
     CalChart::Configuration& GetConfiguration() const { return mConfig; }
 
-    auto GenerateAnimation() const -> std::optional<CalChart::Animation>;
-    auto GetAnimationErrors() const -> std::vector<CalChart::Animate::Errors>;
-    auto GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>;
-    auto GeneratePathsDrawCommands() -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GetAnimationInfo(CalChart::beats_t whichBeat, int which) const -> std::optional<CalChart::Animate::Info>;
+    [[nodiscard]] auto GetAllAnimationInfo(CalChart::beats_t whichBeat) const -> std::vector<CalChart::Animate::Info>;
+    [[nodiscard]] auto GetAnimationErrors() const -> std::vector<CalChart::Animate::Errors>;
+    [[nodiscard]] auto GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>;
+    [[nodiscard]] auto GenerateAnimationDrawCommands(
+        CalChart::beats_t whichBeat,
+        bool drawCollisionWarning,
+        std::optional<bool> onBeat,
+        CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GetTotalNumberAnimationBeats() const -> std::optional<CalChart::beats_t>;
+    [[nodiscard]] auto GetAnimationBoundingBox(CalChart::beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
+    [[nodiscard]] auto BeatHasCollision(CalChart::beats_t whichBeat) const -> bool;
+    [[nodiscard]] auto GetAnimationBeatForCurrentSheet() const -> CalChart::beats_t;
+
+    [[nodiscard]] auto GeneratePathsDrawCommands() -> std::vector<CalChart::Draw::DrawCommand>;
 
     auto AlreadyHasPrintContinuity() const { return mShow->AlreadyHasPrintContinuity(); }
     auto WillMovePoints(std::map<int, CalChart::Coord> const& new_positions) const { return mShow->WillMovePoints(new_positions, mCurrentReferencePoint); }

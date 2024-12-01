@@ -65,20 +65,14 @@ public:
     [[nodiscard]] auto GetTotalNumberBeats() const -> int;
     [[nodiscard]] auto GetTotalCurrentBeat() const -> int;
 
-    [[nodiscard]] auto GetShowSizeAndOffset() const -> std::pair<wxPoint, wxPoint>;
-    [[nodiscard]] auto GetMarcherSizeAndOffset() const -> std::pair<wxPoint, wxPoint>;
+    [[nodiscard]] auto GetShowSizeAndOffset() const -> std::pair<wxSize, wxPoint>;
+    [[nodiscard]] auto GetMarcherSizeAndOffset() const -> std::pair<wxSize, wxPoint>;
 
     [[nodiscard]] auto GetShowFieldSize() const -> CalChart::Coord;
 
-    struct MarcherInfo {
-        CalChart::Radian direction{};
-        float x{};
-        float y{};
-    };
+    [[nodiscard]] auto GetMarcherInfo(int which) const -> std::optional<CalChart::Animate::Info>;
 
-    [[nodiscard]] auto GetMarcherInfo(int which) const -> MarcherInfo;
-
-    [[nodiscard]] auto GetMarchersByDistance(float fromX, float fromY) const -> std::multimap<double, MarcherInfo>;
+    [[nodiscard]] auto GetMarchersByDistance(float fromX, float fromY) const -> std::multimap<double, CalChart::Animate::Info>;
 
     void UnselectAll();
     void SelectMarchersInBox(wxPoint const& mouseStart, wxPoint const& mouseEnd, bool altDown);
@@ -98,8 +92,7 @@ private:
 
     void RegenerateImages() const;
     [[nodiscard]] auto GenerateDraw(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>;
-    [[nodiscard]] auto GenerateDrawDots(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>;
-    [[nodiscard]] auto GenerateDrawSprites(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateDrawSprites(CalChart::Configuration const& config, CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>;
 
     [[nodiscard]] auto GetAnimationFrame() const -> AnimationPanel const*;
     [[nodiscard]] auto GetAnimationFrame() -> AnimationPanel*;
@@ -108,22 +101,14 @@ private:
     CalChartView* mView{};
     CalChart::Configuration const& mConfig;
 
-    std::optional<CalChart::Animation> mAnimation;
     CalChart::beats_t mCurrentBeat;
     bool mDrawCollisionWarning = true;
     bool mPlayCollisionWarning = false;
 
-    enum ImageBeat {
-        Standing,
-        Right,
-        Left,
-        Size
-    };
-
     static constexpr auto kAngles = 8;
     // these need to be mutable because effectively they are a cache and may need to be regenerated.
     mutable double mScaleSize = 0;
-    mutable std::array<std::shared_ptr<CalChart::ImageData>, kAngles * ImageBeat::Size> mSpriteCalChartImages;
+    mutable std::array<std::shared_ptr<CalChart::ImageData>, kAngles * CalChart::toUType(CalChart::Animation::ImageBeat::Size)> mSpriteCalChartImages;
 
     CalChart::MeasureDuration mMeasure;
 };
