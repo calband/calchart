@@ -34,4 +34,5 @@ Other changes:
 * [#550](../../issues/550) Make animation compilation an operation of two pairs of sheets
 * [#552](../../issues/552) Move GenerateModeDrawCommands from CalChartDrawing to core/Mode
 * [#554](../../issues/554) Move General printing over to PrintContUseNewDraw
+* [#557](../../issues/557) Move Config into DrawPoints
 

@@ -44,6 +44,7 @@
 namespace CalChart {
 
 class Reader;
+class Configuration;
 
 class Point {
 public:
@@ -67,8 +68,11 @@ public:
     void SetPos(Coord c, unsigned ref = 0);
 
     [[nodiscard]] auto GetDrawCommands(unsigned ref, std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) const -> std::vector<Draw::DrawCommand>;
+    [[nodiscard]] auto GetDrawCommands(unsigned ref, std::string const& label, Configuration const& config) const -> std::vector<Draw::DrawCommand>;
     [[nodiscard]] auto GetDrawCommands(std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) const { return GetDrawCommands(0, label, dotRatio, pLineRatio, sLineRatio); }
+    [[nodiscard]] auto GetDrawCommands(std::string const& label, Configuration const& config) const -> std::vector<Draw::DrawCommand>;
     [[nodiscard]] auto GetDrawCommands(double dotRatio, double pLineRatio, double sLineRatio) const -> std::vector<Draw::DrawCommand>;
+    [[nodiscard]] auto GetDrawCommands(Configuration const& config) const -> std::vector<Draw::DrawCommand>;
 
     [[nodiscard]] auto GetSymbol() const { return mSym; }
 
