@@ -86,14 +86,14 @@ auto CreateCompileResult(
         if (ac.GetPointPosition() != next_point) {
             auto c = next_point - ac.GetPointPosition();
             ac.RegisterError(Error::WRONGPLACE);
-            ac.Append(CommandMove{ ac.GetPointPosition(), ac.GetBeatsRemaining(), c });
+            (void)ac.Append(CommandMove{ ac.GetPointPosition(), ac.GetBeatsRemaining(), c });
         }
     }
 
     // report if we have extra time.
     if (ac.GetBeatsRemaining()) {
         ac.RegisterError(Error::EXTRATIME);
-        ac.Append(CommandStill{ ac.GetPointPosition(), ac.GetBeatsRemaining(), CommandStill::Style::MarkTime, CalChart::Degree::East() });
+        (void)ac.Append(CommandStill{ ac.GetPointPosition(), ac.GetBeatsRemaining(), CommandStill::Style::MarkTime, CalChart::Degree::East() });
     }
 
     return ac.GetCommands();
