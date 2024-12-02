@@ -159,7 +159,7 @@ auto Animation::GetBoundingBox(beats_t whichBeat) const -> std::pair<CalChart::C
 
 auto Animation::GetAnimateInfoWithDistanceFromPoint(beats_t whichBeat, CalChart::Coord origin) const -> std::multimap<double, Animate::Info>
 {
-    AddDistanceFromPointInfo(GetAllAnimateInfo(whichBeat), origin);
+    return AddDistanceFromPointInfo(GetAllAnimateInfo(whichBeat), origin);
 }
 
 auto Animation::GetAnimateInfoWithDistanceFromPoint(beats_t whichBeat, SelectionList const& selectionList, CalChart::Coord origin) const -> std::multimap<double, Animate::Info>

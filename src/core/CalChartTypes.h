@@ -21,7 +21,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartUtils.h"
 #include <functional>
 #include <set>
 #include <string>
