@@ -52,10 +52,8 @@ class CalChartDoc;
 namespace CalChartDraw {
 
 // draw the continuity starting at a specific offset
-void Draw(wxDC& dc, CalChartDoc const& show, CalChart::Sheet const& sheet, int ref, bool primary);
-void DrawPoints(wxDC& dc, CalChart::Configuration const& config, CalChart::Coord origin, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, bool primary);
-void DrawGhostSheet(wxDC& dc, CalChart::Configuration const& config, CalChart::Coord origin, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref);
 void DrawCont(wxDC& dc, CalChart::Configuration const& config, CalChart::Textline_list const& print_continuity, wxRect const& bounding, bool landscape);
+
 auto GenerateDrawCommands(wxDC& dc,
     CalChart::Configuration const& config,
     CalChart::PrintContinuityLayout::VStack const& printLayout,
@@ -63,16 +61,6 @@ auto GenerateDrawCommands(wxDC& dc,
     bool landscape) -> CalChart::Draw::DrawCommand;
 
 void DrawForPrinting(wxDC* dc, CalChart::Configuration const& config, CalChartDoc const& show, CalChart::Sheet const& sheet, int ref, bool landscape);
-auto GetOmniLinesImage(const CalChart::Configuration& config, CalChart::ShowMode const& mode) -> wxImage;
-
-auto GeneratePointsDrawCommands(CalChart::Configuration const& config, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, bool primary) -> std::vector<CalChart::Draw::DrawCommand>;
-auto GenerateGhostPointsDrawCommands(CalChart::Configuration const& config, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref) -> std::vector<CalChart::Draw::DrawCommand>;
-auto GeneratePhatomPointsDrawCommands(const CalChart::Configuration& config, CalChartDoc const& show, CalChart::Sheet const& sheet, std::map<int, CalChart::Coord> const& positions) -> std::vector<CalChart::Draw::DrawCommand>;
-
-void PrintStandard(std::ostream& buffer, CalChart::Sheet const& sheet);
-void PrintSpringshow(std::ostream& buffer, CalChart::Sheet const& sheet);
-void PrintOverview(std::ostream& buffer, CalChart::Sheet const& sheet);
-void PrintCont(std::ostream& buffer, CalChart::Sheet const& sheet);
 
 }
 

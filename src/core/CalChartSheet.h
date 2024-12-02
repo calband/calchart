@@ -117,6 +117,8 @@ public:
     void RemoveBackgroundImage(size_t which);
     void MoveBackgroundImage(size_t which, int left, int top, int scaled_width, int scaled_height);
 
+    [[nodiscard]] auto ShouldPrintLandscape() const -> bool;
+
     /*!
      * @brief Generates a JSON that could represent this
      * sheet in an Online Viewer '.viewer' file.

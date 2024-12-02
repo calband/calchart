@@ -20,7 +20,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#define _LIBCPP_ENABLE_EXPERIMENTAL 1
+
 #include "CalChartShow.h"
+#include "CalChartConfiguration.h"
 #include "CalChartConstants.h"
 #include "CalChartContinuity.h"
 #include "CalChartFileFormat.h"
@@ -347,6 +350,77 @@ auto Show::SerializeShow() const -> std::vector<std::byte>
     Append(result, uint8_t{ CC_MINOR_VERSION + '0' });
     Append(result, Construct_block(INGL_SHOW, SerializeShowData()));
     return result;
+}
+
+namespace {
+    // Returns a view adaptor that will transform a range of point indices to Draw point commands.
+    auto TransformIndexToDrawCommands(CalChart::Sheet const& sheet, std::vector<std::string> const& labels, int ref, CalChart::Configuration const& config)
+    {
+        return std::views::transform([&sheet, ref, labels, &config](int i) {
+            return sheet.GetPoint(i).GetDrawCommands(ref, labels.at(i), config);
+        })
+            | std::ranges::views::join;
+    }
+
+    // Given a set and a size, return a range that has the numbers not in the set
+    auto NegativeIntersection(CalChart::SelectionList const& set, int count)
+    {
+        return std::views::iota(0, count)
+            | std::views::filter([set](int i) {
+                  return !set.contains(i);
+              });
+    }
+
+    auto GenerateSheetPointsDrawCommands(
+        CalChart::Configuration const& config,
+        CalChart::SelectionList const& selection_list,
+        int numberPoints,
+        std::vector<std::string> const& labels,
+        CalChart::Sheet const& sheet,
+        int ref,
+        CalChart::Colors unselectedColor,
+        CalChart::Colors selectedColor,
+        CalChart::Colors unselectedTextColor,
+        CalChart::Colors selectedTextColor) -> std::vector<CalChart::Draw::DrawCommand>
+    {
+
+        return {
+            CalChart::Draw::withBrushAndPen(
+                config.Get_CalChartBrushAndPen(unselectedColor),
+                CalChart::Draw::withTextForeground(
+                    config.Get_CalChartBrushAndPen(unselectedTextColor),
+                    NegativeIntersection(selection_list, numberPoints)
+                        | TransformIndexToDrawCommands(sheet, labels, ref, config))),
+            CalChart::Draw::withBrushAndPen(
+                config.Get_CalChartBrushAndPen(selectedColor),
+                CalChart::Draw::withTextForeground(
+                    config.Get_CalChartBrushAndPen(selectedTextColor),
+                    selection_list
+                        | TransformIndexToDrawCommands(sheet, labels, ref, config))),
+        };
+    }
+
+}
+
+auto Show::GeneratePointsDrawCommands(CalChart::Configuration const& config, std::optional<int> ref) const -> std::vector<CalChart::Draw::DrawCommand>
+{
+    auto unselectedColor = ref.has_value() ? CalChart::Colors::POINT : CalChart::Colors::REF_POINT;
+    auto selectedColor = ref.has_value() ? CalChart::Colors::POINT_HILIT : CalChart::Colors::REF_POINT_HILIT;
+    auto unselectedTextColor = ref.has_value() ? CalChart::Colors::POINT_TEXT : CalChart::Colors::REF_POINT_TEXT;
+    auto selectedTextColor = ref.has_value() ? CalChart::Colors::POINT_HILIT_TEXT : CalChart::Colors::REF_POINT_HILIT_TEXT;
+    return GenerateSheetPointsDrawCommands(config, mSelectionList, GetNumPoints(), GetPointsLabel(), *GetCurrentSheet(), ref.value_or(0), unselectedColor, selectedColor, unselectedTextColor, selectedTextColor);
+}
+
+auto Show::GenerateGhostPointsDrawCommands(
+    CalChart::Configuration const& config,
+    CalChart::SelectionList const& selection_list,
+    CalChart::Sheet const& sheet) const -> std::vector<CalChart::Draw::DrawCommand>
+{
+    auto unselectedColor = CalChart::Colors::GHOST_POINT;
+    auto selectedColor = CalChart::Colors::GHOST_POINT_HLIT;
+    auto unselectedTextColor = CalChart::Colors::GHOST_POINT_TEXT;
+    auto selectedTextColor = CalChart::Colors::GHOST_POINT_HLIT_TEXT;
+    return GenerateSheetPointsDrawCommands(config, selection_list, GetNumPoints(), GetPointsLabel(), sheet, 0, unselectedColor, selectedColor, unselectedTextColor, selectedTextColor);
 }
 
 int Show::GetNumSheets() const { return static_cast<int>(mSheets.size()); }

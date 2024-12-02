@@ -20,12 +20,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartMovePointsTool.h"
+#define _LIBCPP_ENABLE_EXPERIMENTAL 1
 
+#include "CalChartMovePointsTool.h"
+#include "CalChartDrawCommand.h"
 #include "CalChartShapes.h"
 #include "CalChartUtils.h"
 #include "linmath.h"
 #include <cassert>
+#include <ranges>
 
 namespace CalChart {
 
@@ -214,6 +217,13 @@ void MovePointsTool::BeginMoveDrag(Drag type, CalChart::Coord start)
     default:
         break;
     }
+}
+
+auto MovePointsTool::GenerateDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>
+{
+    return CalChart::Draw::toDrawCommands(m_shape_list
+        | std::views::transform([](auto&& shape) { return shape->GetCC_DrawCommand(); })
+        | std::views::join);
 }
 
 void MovePointsTool::AddMoveDrag(Drag type, std::unique_ptr<CalChart::Shape> shape)

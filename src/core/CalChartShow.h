@@ -164,6 +164,15 @@ public:
         return mSheets | std::views::filter([](auto&& sheet) { return sheet.IsInAnimation(); });
     }
 
+    [[nodiscard]] auto GeneratePointsDrawCommands(
+        CalChart::Configuration const& config,
+        std::optional<int> ref) const -> std::vector<CalChart::Draw::DrawCommand>;
+
+    [[nodiscard]] auto GenerateGhostPointsDrawCommands(
+        CalChart::Configuration const& config,
+        CalChart::SelectionList const& selection_list,
+        CalChart::Sheet const& sheet) const -> std::vector<CalChart::Draw::DrawCommand>;
+
 private:
     // modification of show is private, and externally done through create and exeucte commands
     auto RemoveNthSheet(int sheetidx) -> Sheet_container_t;

@@ -49,7 +49,7 @@ public:
     bool OnClose(bool deleteWindow = true) override;
 
     void OnDraw(wxDC* dc) override;
-    void DrawUncommitedMovePoints(wxDC& dc, std::map<int, CalChart::Coord> const& positions);
+    [[nodiscard]] auto GeneratePhatomPointsDrawCommands(std::map<int, CalChart::Coord> const& positions) const -> std::vector<CalChart::Draw::DrawCommand>;
     void OnDrawBackground(wxDC& dc);
 
     static void OnWizardSetup(CalChartDoc& show, wxWindow* parent);
@@ -86,7 +86,7 @@ public:
 
     CalChart::ShowMode const& GetShowMode() { return mShow->GetShowMode(); }
     [[nodiscard]] auto GetShowFieldOffset() const { return mShow->GetShowMode().Offset(); }
-    auto GetShowFieldSize() const { return mShow->GetShowMode().Size(); }
+    auto GetShowFullSize() const { return mShow->GetShowMode().Size(); }
 
     auto GetSheets() const { return mShow->GetSheets(); }
     auto GetSheetBegin() const { return mShow->GetSheetBegin(); }
@@ -104,7 +104,8 @@ public:
         std::optional<bool> onBeat,
         CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>;
     [[nodiscard]] auto GetTotalNumberAnimationBeats() const -> std::optional<CalChart::beats_t>;
-    [[nodiscard]] auto GetAnimationBoundingBox(CalChart::beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
+    [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
+
     [[nodiscard]] auto BeatHasCollision(CalChart::beats_t whichBeat) const -> bool;
     [[nodiscard]] auto GetAnimationBeatForCurrentSheet() const -> CalChart::beats_t;
 
@@ -152,7 +153,6 @@ public:
     void OnBackgroundImageDelete();
 
 private:
-    auto GeneratePathsDrawCommands() -> std::vector<CalChart::Draw::DrawCommand>;
     void GeneratePaths();
     void UpdateBackgroundImages();
 

@@ -33,7 +33,7 @@ TEST_CASE("AnimationSheetTest", "Animate::Sheet")
 
     auto collisions = uut.GetAllBeatsWithCollisions();
     auto collided = uut.GetAllMarchersWithCollisionAtBeat(6);
-    CHECK(collisions == std::set<CalChart::Animate::beats_t>{ 6 });
+    CHECK(collisions == std::set<CalChart::beats_t>{ 6 });
     CHECK(collided == CalChart::SelectionList{ 0, 1 });
 }
 
@@ -61,7 +61,7 @@ TEST_CASE("NoCollision", "Animate::Sheet")
 
 TEST_CASE("Animate::Sheets", "Animate::Sheets")
 {
-    using beats_t = CalChart::Animate::beats_t;
+    using beats_t = CalChart::beats_t;
     auto cont1 = CalChart::Animate::CompileResult{
         {
             CalChart::Animate::CommandStill{ { 64, 16 }, 4, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree::North() },

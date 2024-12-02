@@ -21,7 +21,6 @@
 */
 
 #include "CalChartCoord.h"
-#include "CalChartMovePointsTool.h"
 #include "CalChartSelectTool.h"
 #include "CalChartTypes.h"
 

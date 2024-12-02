@@ -64,8 +64,7 @@ public:
     [[nodiscard]] auto GetTotalNumberBeats() const -> int;
     [[nodiscard]] auto GetTotalCurrentBeat() const -> int;
 
-    [[nodiscard]] auto GetShowSizeAndOffset() const -> std::pair<wxSize, wxPoint>;
-    [[nodiscard]] auto GetMarcherSizeAndOffset() const -> std::pair<wxSize, wxPoint>;
+    [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers) const -> std::pair<CalChart::Coord, CalChart::Coord>;
 
     [[nodiscard]] auto GetShowFieldSize() const -> CalChart::Coord;
 

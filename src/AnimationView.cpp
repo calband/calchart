@@ -220,32 +220,9 @@ auto AnimationView::AtEndOfShow() const -> bool
     return false;
 }
 
-namespace {
-static auto towxSize(CalChart::Coord const& c)
+auto AnimationView::GetAnimationBoundingBox(bool zoomInOnMarchers) const -> std::pair<CalChart::Coord, CalChart::Coord>
 {
-    return fDIP(wxSize{ c.x, c.y });
-}
-
-static auto towxPoint(CalChart::Coord const& c)
-{
-    return fDIP(wxPoint{ c.x, c.y });
-}
-} // namespace
-
-// Return a bounding box of the show
-auto AnimationView::GetShowSizeAndOffset() const -> std::pair<wxSize, wxPoint>
-{
-    auto size = mView->GetShowFieldSize();
-    return { towxSize(size), towxPoint({ 0, 0 }) };
-}
-
-// Return a bounding box of the show of where the marchers are.  If they are
-// outside the show, we don't see them.
-auto AnimationView::GetMarcherSizeAndOffset() const -> std::pair<wxSize, wxPoint>
-{
-    auto mode_size = mView->GetShowFieldSize();
-    auto [bounding_box_upper_left, bounding_box_low_right] = mView->GetAnimationBoundingBox(mCurrentBeat);
-    return { towxSize(bounding_box_low_right - bounding_box_upper_left), towxPoint(mode_size / 2 + bounding_box_upper_left) };
+    return mView->GetAnimationBoundingBox(zoomInOnMarchers, mCurrentBeat);
 }
 
 void AnimationView::UnselectAll()

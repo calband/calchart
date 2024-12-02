@@ -188,7 +188,6 @@ public:
     auto GetCurrentMove() const { return mCurrentMove; }
     void SetCurrentMove(CalChart::MoveMode move);
 
-    CalChart::Sheet const* GetGhostSheet(int currentSheet) const;
     auto GetGhostModuleIsActive() const { return mGhostSource != GhostSource::disabled; }
     auto GetGhostSource() const { return mGhostSource; };
     void SetGhostSource(GhostSource source, int which = 0);
@@ -207,11 +206,15 @@ public:
         std::optional<bool> onBeat,
         CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>;
     [[nodiscard]] auto GetTotalNumberAnimationBeats() const -> std::optional<CalChart::beats_t>;
-    [[nodiscard]] auto GetAnimationBoundingBox(CalChart::beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
+    [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
     [[nodiscard]] auto BeatHasCollision(CalChart::beats_t whichBeat) const -> bool;
     [[nodiscard]] auto GetAnimationBeatForCurrentSheet() const -> CalChart::beats_t;
 
-    [[nodiscard]] auto GeneratePathsDrawCommands() -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateGhostPointsDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateCurrentSheetPointsDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>;
+
+    [[nodiscard]] auto GeneratePhatomPointsDrawCommands(
+        const std::map<int, CalChart::Coord>& positions) const -> std::vector<CalChart::Draw::DrawCommand>;
 
     auto AlreadyHasPrintContinuity() const { return mShow->AlreadyHasPrintContinuity(); }
     auto WillMovePoints(std::map<int, CalChart::Coord> const& new_positions) const { return mShow->WillMovePoints(new_positions, mCurrentReferencePoint); }
@@ -251,6 +254,9 @@ private:
     static CC_doc_command_pair Inject_CalChartDocArg(CalChart::Show_command_pair);
     std::vector<CC_doc_command_pair> Create_SetSheetPair() const;
     std::vector<CC_doc_command_pair> Create_SetSheetAndSelectionPair() const;
+
+    [[nodiscard]] auto GetGhostSheet() const -> CalChart::Sheet const*;
+    [[nodiscard]] auto GeneratePathsDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>;
 
     // Autosaving:
     // goal is to allow the user to have a recoverable file.

@@ -54,7 +54,6 @@ namespace Cont {
 }
 
 namespace CalChart::Animate {
-using beats_t = unsigned;
 using Variables = std::array<std::map<unsigned, float>, Cont::kNumVariables>;
 using CompileResult = std::pair<std::vector<Command>, ErrorsEncountered>;
 
