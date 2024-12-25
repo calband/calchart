@@ -24,6 +24,7 @@
 #include "CalChartDrawPrimativesHelper.h"
 #include "CalChartDrawing.h"
 #include <algorithm>
+#include <variant>
 
 // GetMinSize: Given an array of Draw Command sizes (tabs or actual size), this calculates
 // the minimum area needed to place.  This is a necessary step in laying out "Stacks" --

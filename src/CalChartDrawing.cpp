@@ -49,6 +49,15 @@
 // Conventions:  When drawing with wxPoints/Size, assume that is already in the correct DIP.
 // Drawing constants
 
+std::ostream& operator<<(std::ostream& os, wxPoint point)
+{
+    return os << "{" << point.x << "," << point.y << "}";
+}
+std::ostream& operator<<(std::ostream& os, wxSize point)
+{
+    return os << "{" << point.x << "," << point.y << "}";
+}
+
 namespace CalChartDraw {
 
 static const auto ArrowSize = fDIP(4);
@@ -546,7 +555,7 @@ namespace {
         return drawCmds;
     }
 
-    auto GeneratePrintElements(bool landscape, wxSize page, CalChart::Draw::DrawCommand const& cont) -> std::vector<CalChart::Draw::DrawCommand>
+    auto GeneratePrintElements(bool landscape, wxSize page) -> std::vector<CalChart::Draw::DrawCommand>
     {
         auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
         CalChart::append(drawCmds,
@@ -576,9 +585,6 @@ namespace {
                     return GenerateDrawArrow(page.x * length, right) + CalChart::Coord(page.x * x, page.y * y);
                 })
                 | std::views::join));
-
-        // a possible future optimization would be to generate this ahead of time.
-        CalChart::append(drawCmds, cont);
         return drawCmds;
     }
 }
@@ -644,9 +650,14 @@ void DrawForPrintingHelper(
             CalChart::Font{ 8 },
             GeneratePrintElements(
                 landscape,
-                page,
-                printDrawCommands + CalChart::Coord(10, page.y * kContinuityStart[landscape]))));
+                page)));
     wxCalChart::Draw::DrawCommandList(dc, drawCmds);
+    // now draw the continuity into its own box.  It uses Stack layout so needs to have a constrained area.
+    wxCalChart::Draw::DrawCommandList(dc,
+        wxCalChart::Draw::DrawSurface{
+            { 0, 0 },
+            wxSize(page.x - 20, page.y * (1 - kContinuityStart[landscape])) },
+        std::vector{ printDrawCommands } + CalChart::Coord(10, page.y * kContinuityStart[landscape]));
 }
 
 auto GenerateDrawCommands(wxDC& dc,
@@ -907,6 +918,10 @@ namespace details {
             cmd);
     }
 
+    auto operator+(wxPoint a, CalChart::Coord b)
+    {
+        return wxPoint{ a.x + b.x, a.y + b.y };
+    }
     void DrawCommand(wxDC& dc, DrawSurface surface, CalChart::Draw::DrawStack const& cmd)
     {
         // first we need to get an array of the min sizes.
@@ -917,19 +932,19 @@ namespace details {
                 [&dc, surface](CalChart::Draw::VStack const& c) {
                     auto layoutPoints = VLayout(GetMinSizes({ dc, surface }, c.commands), surface, c.align);
                     for (auto i = static_cast<std::size_t>(0); i < c.commands.size(); ++i) {
-                        DrawCommand(dc, { layoutPoints[i], surface.size }, c.commands[i]);
+                        DrawCommand(dc, { layoutPoints[i] + c.offset, surface.size }, c.commands[i]);
                     }
                 },
                 [&dc, surface](CalChart::Draw::HStack const& c) {
                     auto layoutPoints = HLayout(GetMinSizes({ dc, surface }, c.commands), surface, c.align);
                     for (auto i = static_cast<std::size_t>(0); i < c.commands.size(); ++i) {
-                        DrawCommand(dc, { layoutPoints[i], surface.size }, c.commands[i]);
+                        DrawCommand(dc, { layoutPoints[i] + c.offset, surface.size }, c.commands[i]);
                     }
                 },
                 [&dc, surface](CalChart::Draw::ZStack const& c) {
                     auto layoutPoints = ZLayout(GetMinSizes({ dc, surface }, c.commands), surface, c.align);
                     for (auto i = static_cast<std::size_t>(0); i < c.commands.size(); ++i) {
-                        DrawCommand(dc, { layoutPoints[i], surface.size }, c.commands[i]);
+                        DrawCommand(dc, { layoutPoints[i] + c.offset, surface.size }, c.commands[i]);
                     }
                 },
             },
