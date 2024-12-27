@@ -1,7 +1,9 @@
 #pragma once
 /*
- * cc_types.h
- * Definitions for the types
+ * CalChartTypes.h
+ * Primative types for CalChart.  All types in the CalChart namespace (and
+ * sub namespaces) should be put here.  This should be a "leaf" header,
+ * meaning it should depend on no other headers (except standard headers).
  */
 
 /*
@@ -38,5 +40,23 @@ struct ParseErrorHandlers {
 };
 
 using SelectionList = std::set<int>;
+
+using beats_t = unsigned;
+
+enum class MoveMode {
+    Normal,
+    ShapeLine,
+    ShapeX,
+    ShapeCross,
+    ShapeRectange,
+    ShapeEllipse,
+    ShapeDraw,
+    MoveLine,
+    MoveRotate,
+    MoveShear,
+    MoveReflect,
+    MoveSize,
+    MoveGenius,
+};
 
 }

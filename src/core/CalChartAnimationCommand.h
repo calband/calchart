@@ -25,6 +25,7 @@
 #include "CalChartAnimationTypes.h"
 #include "CalChartCoord.h"
 #include "CalChartDrawCommand.h"
+#include "CalChartTypes.h"
 #include <nlohmann/json.hpp>
 
 /**
@@ -50,8 +51,6 @@ class CommandStill;
 class CommandMove;
 class CommandRotate;
 using Command = std::variant<CommandStill, CommandMove, CommandRotate>;
-
-using beats_t = unsigned;
 
 struct MarcherInfo {
     CalChart::Coord mPosition{};

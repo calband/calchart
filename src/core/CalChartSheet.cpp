@@ -799,4 +799,31 @@ void Sheet::MoveBackgroundImage(size_t which, int left, int top, int scaled_widt
         mBackgroundImages.at(which).scaled_height = scaled_height;
     }
 }
+
+namespace {
+    // Return a bounding box of the show of where the marchers are.  If they are
+    // outside the show, we don't see them.
+    // can be done better with algorithms
+    auto GetMarcherBoundingBox(std::vector<CalChart::Point> const& pts) -> std::pair<CalChart::Coord, CalChart::Coord>
+    {
+        CalChart::Coord bounding_box_upper_left{ 10000, 10000 };
+        CalChart::Coord bounding_box_low_right{ -10000, -10000 };
+
+        for (auto& i : pts) {
+            auto position = i.GetPos();
+            bounding_box_upper_left = CalChart::Coord(std::min(bounding_box_upper_left.x, position.x), std::min(bounding_box_upper_left.y, position.y));
+            bounding_box_low_right = CalChart::Coord(std::max(bounding_box_low_right.x, position.x), std::max(bounding_box_low_right.y, position.y));
+        }
+
+        return { bounding_box_upper_left, bounding_box_low_right };
+    }
+}
+
+// we want sheets to print in landscape when the width exceeds the height
+auto Sheet::ShouldPrintLandscape() const -> bool
+{
+    auto boundingBox = GetMarcherBoundingBox(GetPoints());
+    return (boundingBox.second.x - boundingBox.first.x) > CalChart::Int2CoordUnits(CalChart::kFieldStepSizeNorthSouth[0]);
+}
+
 }

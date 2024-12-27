@@ -71,8 +71,6 @@ namespace Animate {
 
 }
 
-using beats_t = unsigned;
-
 class Animation {
 public:
     explicit Animation(const Show& show);

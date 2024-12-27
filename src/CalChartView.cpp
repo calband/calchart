@@ -68,60 +68,15 @@ bool CalChartView::OnCreate(wxDocument* doc, long WXUNUSED(flags))
 // Sneakily gets used for default print/preview as well as drawing on the screen.
 void CalChartView::OnDraw(wxDC* dc)
 {
-    if (!mShow) {
+    if (mShow == nullptr) {
         return;
     }
-    // draw the field
-    auto origin = mShow->GetShowFieldOffset();
-    auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
-    auto& config = mShow->GetConfiguration();
-    CalChart::append(drawCmds,
-        CalChart::CreateModeDrawCommandsWithBorderOffset(
-            config,
-            mShow->GetShowMode(),
-            CalChart::HowToDraw::FieldView));
-
-    if (auto ghostSheet = mShow->GetGhostSheet(GetCurrentSheetNum()); ghostSheet != nullptr) {
-        CalChart::append(drawCmds,
-            CalChartDraw::GenerateGhostPointsDrawCommands(
-                config,
-                CalChart::SelectionList(),
-                mShow->GetNumPoints(),
-                mShow->GetPointsLabel(),
-                *ghostSheet,
-                0));
-    }
-
-    if (auto sheet = mShow->GetCurrentSheet(); sheet != mShow->GetSheetEnd()) {
-        if (mShow->GetCurrentReferencePoint() > 0) {
-            // if we are editing a ref point other than 0, draw the 0 one in a different color.
-            CalChart::append(drawCmds,
-                CalChartDraw::GeneratePointsDrawCommands(config,
-                    mShow->GetSelectionList(),
-                    mShow->GetNumPoints(),
-                    mShow->GetPointsLabel(),
-                    *mShow->GetCurrentSheet(),
-                    0,
-                    false));
-        }
-        CalChart::append(drawCmds,
-            CalChartDraw::GeneratePointsDrawCommands(config,
-                mShow->GetSelectionList(),
-                mShow->GetNumPoints(),
-                mShow->GetPointsLabel(),
-                *mShow->GetCurrentSheet(),
-                mShow->GetCurrentReferencePoint(),
-                true));
-        CalChart::append(drawCmds,
-            GeneratePathsDrawCommands());
-    }
-    wxCalChart::Draw::DrawCommandList(*dc, drawCmds + origin);
+    wxCalChart::Draw::DrawCommandList(*dc, mShow->GenerateCurrentSheetPointsDrawCommands());
 }
 
-void CalChartView::DrawUncommitedMovePoints(wxDC& dc, std::map<int, CalChart::Coord> const& positions)
+auto CalChartView::GeneratePhatomPointsDrawCommands(std::map<int, CalChart::Coord> const& positions) const -> std::vector<CalChart::Draw::DrawCommand>
 {
-    auto& config = mShow->GetConfiguration();
-    wxCalChart::Draw::DrawCommandList(dc, CalChartDraw::GeneratePhatomPointsDrawCommands(config, *mShow, *mShow->GetCurrentSheet(), positions));
+    return mShow->GeneratePhatomPointsDrawCommands(positions);
 }
 
 void CalChartView::OnDrawBackground(wxDC& dc)
@@ -489,9 +444,11 @@ auto CalChartView::GetTotalNumberAnimationBeats() const -> std::optional<CalChar
     return mShow->GetTotalNumberAnimationBeats();
 }
 
-auto CalChartView::GetAnimationBoundingBox(CalChart::beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>
+// Return a bounding box of the show of where the marchers are.  If they are
+// outside the show, we don't see them.
+auto CalChartView::GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>
 {
-    return mShow->GetAnimationBoundingBox(whichBeat);
+    return mShow->GetAnimationBoundingBox(zoomInOnMarchers, whichBeat);
 }
 
 auto CalChartView::BeatHasCollision(CalChart::beats_t whichBeat) const -> bool
@@ -583,14 +540,6 @@ void CalChartView::GoToSheetAndSetSelectionList(int which, const CalChart::Selec
 void CalChartView::OnEnableDrawPaths(bool enable)
 {
     mShow->SetDrawPaths(enable);
-}
-
-auto CalChartView::GeneratePathsDrawCommands() -> std::vector<CalChart::Draw::DrawCommand>
-{
-    if (!mShow) {
-        return {};
-    }
-    return mShow->GeneratePathsDrawCommands();
 }
 
 void CalChartView::DoDrawBackground(bool enable)

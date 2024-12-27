@@ -391,12 +391,16 @@ auto CalChartDoc::GetTotalNumberAnimationBeats() const -> std::optional<CalChart
     return mAnimation->GetTotalNumberBeats();
 }
 
-auto CalChartDoc::GetAnimationBoundingBox(CalChart::beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>
+// Return a bounding box of where the marchers are or the entire show.  If they are
+// outside the show, we don't see them.
+auto CalChartDoc::GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>
 {
-    if (!mAnimation) {
-        return {};
+    auto modeSize = mShow->GetShowMode().Size();
+    if (!zoomInOnMarchers || !mAnimation) {
+        return { modeSize, { 0, 0 } };
     }
-    return mAnimation->GetBoundingBox(whichBeat);
+    auto [bounding_box_upper_left, bounding_box_low_right] = mAnimation->GetBoundingBox(whichBeat);
+    return { bounding_box_low_right - bounding_box_upper_left, (modeSize / 2) + bounding_box_upper_left };
 }
 
 auto CalChartDoc::BeatHasCollision(CalChart::beats_t whichBeat) const -> bool
@@ -427,7 +431,66 @@ auto TransformIndexToDrawPathCommands(CalChart::Animation const& animation, unsi
 
 }
 
-auto CalChartDoc::GeneratePathsDrawCommands() -> std::vector<CalChart::Draw::DrawCommand>
+auto CalChartDoc::GenerateGhostPointsDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>
+{
+    if (const auto* ghostSheet = GetGhostSheet(); ghostSheet != nullptr) {
+        return mShow->GenerateGhostPointsDrawCommands(
+            GetConfiguration(),
+            CalChart::SelectionList(),
+            *ghostSheet);
+    }
+    return {};
+}
+
+auto CalChartDoc::GenerateCurrentSheetPointsDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>
+{
+    auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
+    auto& config = GetConfiguration();
+    auto origin = GetShowFieldOffset();
+    CalChart::append(drawCmds, CalChart::CreateModeDrawCommandsWithBorderOffset(config, GetShowMode(), CalChart::HowToDraw::FieldView));
+    CalChart::append(drawCmds, GenerateGhostPointsDrawCommands());
+    auto sheet = GetCurrentSheet();
+    if (sheet == GetSheetEnd()) {
+        return drawCmds;
+    }
+    if (GetCurrentReferencePoint() > 0) {
+        // if we are editing a ref point other than 0, draw the 0 one in a different color.
+        CalChart::append(drawCmds, mShow->GeneratePointsDrawCommands(config, std::nullopt));
+    }
+    CalChart::append(drawCmds, mShow->GeneratePointsDrawCommands(config, GetCurrentReferencePoint()));
+    CalChart::append(drawCmds, GeneratePathsDrawCommands());
+    return drawCmds + origin;
+}
+
+auto CalChartDoc::GeneratePhatomPointsDrawCommands(
+    const std::map<int, CalChart::Coord>& positions) const -> std::vector<CalChart::Draw::DrawCommand>
+{
+    auto sheet = GetCurrentSheet();
+    auto pointLabelFont = CalChart::Font{ CalChart::Float2CoordUnits(mConfig.Get_DotRatio() * mConfig.Get_NumRatio()) };
+
+    auto drawCmds = positions
+        | std::views::transform([this, sheet](auto&& whichPosition) {
+              auto [which, position] = whichPosition;
+              // because points draw their position, we remove it then add the new position.
+              return sheet->GetPoint(which).GetDrawCommands(
+                         GetPointLabel(which),
+                         mConfig)
+                  + position
+                  - sheet->GetPoint(which).GetPos();
+          })
+        | std::views::join;
+    return {
+        CalChart::Draw::withFont(
+            pointLabelFont,
+            CalChart::Draw::withBrushAndPen(
+                mConfig.Get_CalChartBrushAndPen(CalChart::Colors::GHOST_POINT),
+                CalChart::Draw::withTextForeground(
+                    mConfig.Get_CalChartBrushAndPen(CalChart::Colors::GHOST_POINT_TEXT),
+                    drawCmds)))
+    };
+}
+
+auto CalChartDoc::GeneratePathsDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto& config = GetConfiguration();
     if (!GetDrawPaths()) {
@@ -494,8 +557,9 @@ void CalChartDoc::SetCurrentMove(CalChart::MoveMode move)
     UpdateAllViews();
 }
 
-CalChart::Sheet const* CalChartDoc::GetGhostSheet(int currentSheet) const
+auto CalChartDoc::GetGhostSheet() const -> CalChart::Sheet const*
 {
+    auto currentSheet = GetCurrentSheetNum();
     if (!GetGhostModuleIsActive()) {
         return nullptr;
     }

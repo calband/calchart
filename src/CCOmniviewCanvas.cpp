@@ -613,10 +613,6 @@ void CCOmniviewCanvas::CreateControls()
 void CCOmniviewCanvas::SetView(AnimationView* view)
 {
     mView = view;
-    // line drawing for CCOmniView doesn't look right on Mac. See issue #305
-    // #if defined(__APPLE__) && (__APPLE__)
-    //    m_glContext->UseForLines(GetOmniLinesImage(config, mView->GetShowMode()));
-    // #endif
 }
 
 // rolling my own gluperspective

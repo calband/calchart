@@ -90,6 +90,12 @@ ColorSetupCanvas::ColorSetupCanvas(CalChart::Configuration& config, wxWindow* pa
         mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 6)) } }, 1).first(*mShow);
     }
     mShow->Create_SetCurrentSheetCommand(0).first(*mShow);
+
+    SelectionList list;
+    list.insert(2);
+    list.insert(3);
+
+    mShow->Create_SetSelectionListCommand(list).first(*mShow);
 }
 
 // Because we're not a real show, we have to make the path manually.
@@ -131,10 +137,6 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent&)
     auto sheet = static_cast<CalChart::Show const&>(*mShow).GetCurrentSheet();
     auto nextSheet = sheet + 1;
 
-    SelectionList list;
-    list.insert(2);
-    list.insert(3);
-
     // Draw the field
     auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
     auto offset = mMode.Offset();
@@ -146,33 +148,14 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent&)
 
     // draw the ghost sheet
     CalChart::append(drawCmds,
-        CalChartDraw::GenerateGhostPointsDrawCommands(
+        mShow->GenerateGhostPointsDrawCommands(
             mConfig,
-            list,
-            mShow->GetNumPoints(),
-            mShow->GetPointsLabel(),
-            *nextSheet,
-            0));
+            mShow->GetSelectionList(),
+            *nextSheet));
 
     // Draw the points
-    CalChart::append(drawCmds,
-        CalChartDraw::GeneratePointsDrawCommands(
-            mConfig,
-            list,
-            mShow->GetNumPoints(),
-            mShow->GetPointsLabel(),
-            *sheet,
-            0,
-            true));
-    CalChart::append(drawCmds,
-        CalChartDraw::GeneratePointsDrawCommands(
-            mConfig,
-            list,
-            mShow->GetNumPoints(),
-            mShow->GetPointsLabel(),
-            *sheet,
-            1,
-            false));
+    CalChart::append(drawCmds, mShow->GeneratePointsDrawCommands(mConfig, std::nullopt));
+    CalChart::append(drawCmds, mShow->GeneratePointsDrawCommands(mConfig, 1));
 
     // draw the path, but because we're not a real show, we have to make the path manually.
     CalChart::append(drawCmds,

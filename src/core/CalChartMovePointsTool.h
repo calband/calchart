@@ -38,7 +38,9 @@
  */
 
 #include "CalChartCoord.h"
+#include "CalChartDrawCommand.h"
 #include "CalChartShapes.h"
+#include "CalChartTypes.h"
 
 #include <functional>
 #include <map>
@@ -47,29 +49,13 @@
 
 namespace CalChart {
 
-enum class MoveMode {
-    Normal,
-    ShapeLine,
-    ShapeX,
-    ShapeCross,
-    ShapeRectange,
-    ShapeEllipse,
-    ShapeDraw,
-    MoveLine,
-    MoveRotate,
-    MoveShear,
-    MoveReflect,
-    MoveSize,
-    MoveGenius,
-};
-
 class MovePointsTool {
 public:
     // Factory for creating a specific move.
-    static std::unique_ptr<MovePointsTool> Create(CalChart::MoveMode);
+    static auto Create(CalChart::MoveMode) -> std::unique_ptr<MovePointsTool>;
     virtual ~MovePointsTool() = default;
 
-    auto& GetShapeList() const { return m_shape_list; }
+    [[nodiscard]] auto GenerateDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>;
     virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const = 0;
 
     // provides both the high resolution point and the low resolution point.

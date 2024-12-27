@@ -36,7 +36,6 @@
 
 namespace CalChart::Animate {
 
-using beats_t = unsigned;
 using CompileResult = std::pair<std::vector<Command>, ErrorsEncountered>;
 
 struct Info {

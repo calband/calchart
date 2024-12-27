@@ -51,10 +51,7 @@ class SelectTool {
 public:
     SelectTool(CalChart::Select, CalChart::Coord start, std::function<int(int)> userScale);
 
-    [[nodiscard]] auto GetShapeList() const -> CalChart::Shape const*
-    {
-        return mLassoShape.get();
-    }
+    [[nodiscard]] auto GenerateDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>;
 
     [[nodiscard]] auto GetPolygon() const -> std::optional<CalChart::RawPolygon_t>
     {

@@ -37,4 +37,5 @@ Other changes:
 * [#554](../../issues/554) Move General printing over to PrintContUseNewDraw
 * [#557](../../issues/557) Move Config into DrawPoints
 * [#563](../../issues/563) Print doesn't show continuity correct
+* [#565](../../issues/565) Move more drawing into Show and ShowDoc
 

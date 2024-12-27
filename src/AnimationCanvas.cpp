@@ -199,13 +199,30 @@ wxPoint AnimationCanvas::TranslatePosition(wxPoint const& point)
     return { dc.DeviceToLogicalX(point.x), dc.DeviceToLogicalY(point.y) };
 }
 
+namespace {
+auto towxSize(CalChart::Coord const& c)
+{
+    return fDIP(wxSize{ c.x, c.y });
+}
+
+auto towxPoint(CalChart::Coord const& c)
+{
+    return fDIP(wxPoint{ c.x, c.y });
+}
+
+auto towxBox(std::pair<CalChart::Coord, CalChart::Coord> input) -> std::pair<wxSize, wxPoint>
+{
+    return { towxSize(input.first), towxPoint(input.second) };
+}
+} // namespace
+
 void AnimationCanvas::UpdateScaleAndOrigin()
 {
     if (!mView) {
         return;
     }
     auto window_size = GetSize();
-    auto boundingBox = mZoomOnMarchers ? mView->GetMarcherSizeAndOffset() : mView->GetShowSizeAndOffset();
+    auto boundingBox = towxBox(mView->GetAnimationBoundingBox(mZoomOnMarchers));
     if (mZoomOnMarchers) {
         auto amount = CalChart::Int2CoordUnits(mStepsOutForMarcherZoom);
         boundingBox.first += wxSize(amount, amount) * 2;

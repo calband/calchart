@@ -47,6 +47,14 @@ SelectTool::SelectTool(CalChart::Select select, CalChart::Coord start, std::func
     }
 }
 
+auto SelectTool::GenerateDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>
+{
+    if (mLassoShape) {
+        return mLassoShape->GetCC_DrawCommand();
+    }
+    return {};
+}
+
 void SelectTool::OnClickUp(CalChart::Coord pos)
 {
     if (mSelect != CalChart::Select::Poly) {

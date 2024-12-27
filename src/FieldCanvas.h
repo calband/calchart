@@ -104,17 +104,13 @@ private:
     // Background Picture
     void OnPaint(wxPaintEvent& event, const CalChart::Configuration& config);
     void PaintBackground(wxDC& dc, const CalChart::Configuration& config);
-    void PaintShapes(wxDC& dc, CalChart::Configuration const& config, ShapeList const&);
-    void PaintShapes(wxDC& dc, CalChart::Configuration const& config, CalChart::Shape const*);
-    void PaintSelectShapes(wxDC& dc, CalChart::Configuration const& config);
-    void PaintMoveShapes(wxDC& dc, CalChart::Configuration const& config);
 
     void OnMouseLeftDown_NormalMove(CalChart::Coord pos, bool shiftDown, bool altDown);
     void OnMouseLeftDown_Swap(CalChart::Coord pos);
 
     CalChartView* mView{};
     // The current selection
-    std::unique_ptr<CalChart::SelectTool> mSelectTool;
+    std::optional<CalChart::SelectTool> mSelectTool;
     // we maintain the transient movement of points, and the selection list in Canvas.
     std::unique_ptr<CalChart::MovePointsTool> mMovePointsTool;
     // A cached list of the place where the selection list will move

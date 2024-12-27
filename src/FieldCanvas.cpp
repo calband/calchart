@@ -20,6 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#define _LIBCPP_ENABLE_EXPERIMENTAL 1
+
 #include "FieldCanvas.h"
 
 #include "CalChartConfiguration.h"
@@ -30,25 +32,51 @@
 #include "CalChartMovePointsTool.h"
 #include "CalChartShapes.h"
 #include "CalChartView.h"
+#include <ranges>
 
 #include <wx/dcbuffer.h>
 
-static inline auto TranslateMouseToCoord(wxClientDC& dc, wxMouseEvent& event)
+namespace {
+auto TranslateMouseToCoord(wxClientDC& dc, wxMouseEvent& event)
 {
     auto mousePos = event.GetPosition();
     return CalChart::Coord(tDIP(dc.DeviceToLogicalX(mousePos.x)), tDIP(dc.DeviceToLogicalY(mousePos.y)));
 }
 
-static inline auto SNAPGRID(CalChart::Coord::units a, CalChart::Coord::units n, CalChart::Coord::units s)
+auto SNAPGRID(CalChart::Coord::units a, CalChart::Coord::units n, CalChart::Coord::units s)
 {
     auto a2 = (a + (n >> 1)) & (~(n - 1));
     auto h = s >> 1;
-    if ((a - a2) >= h)
+    if ((a - a2) >= h) {
         return a2 + s;
-    else if ((a - a2) < -h)
+    } else if ((a - a2) < -h) {
         return a2 - s;
-    else
-        return a2;
+    }
+    return a2;
+}
+
+auto GenerateShapeBasedCommands(std::optional<CalChart::SelectTool> const& selectTool, CalChart::MovePointsTool const* movePointsTool, CalChart::Configuration const& config) -> std::vector<CalChart::Draw::DrawCommand>
+{
+    auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
+    if (selectTool) {
+        CalChart::append(
+            drawCmds,
+            selectTool->GenerateDrawCommands());
+    }
+    if (movePointsTool) {
+        CalChart::append(
+            drawCmds,
+            movePointsTool->GenerateDrawCommands());
+    }
+    return {
+        CalChart::Draw::withBrush(
+            CalChart::Brush::TransparentBrush(),
+            CalChart::Draw::withPen(
+                CalChart::toPen(config.Get_CalChartBrushAndPen(CalChart::Colors::SHAPES)),
+                drawCmds))
+    };
+}
+
 }
 
 BEGIN_EVENT_TABLE(FieldCanvas, FieldCanvas::super)
@@ -76,7 +104,7 @@ FieldCanvas::FieldCanvas(wxWindow* parent, CalChartView* view, float def_zoom, C
 
 void FieldCanvas::Init()
 {
-    SetCanvasSize(fDIP(wxSize{ mView->GetShowFieldSize().x, mView->GetShowFieldSize().y }));
+    SetCanvasSize(fDIP(wxSize{ mView->GetShowFullSize().x, mView->GetShowFullSize().y }));
 }
 
 void FieldCanvas::SetView(CalChartView* view)
@@ -109,10 +137,12 @@ void FieldCanvas::OnPaint(wxPaintEvent&, CalChart::Configuration const& config)
     mView->OnDraw(&dc);
 
     // draw the move points dots
-    mView->DrawUncommitedMovePoints(dc, mUncommittedMovePoints);
+    auto origin = mView->GetShowFieldOffset();
+    auto drawCmds = mView->GeneratePhatomPointsDrawCommands(mUncommittedMovePoints);
+    CalChart::append(drawCmds,
+        GenerateShapeBasedCommands(mSelectTool, mMovePointsTool.get(), config));
 
-    PaintSelectShapes(dc, config);
-    PaintMoveShapes(dc, config);
+    wxCalChart::Draw::DrawCommandList(dc, drawCmds + origin);
 }
 
 void FieldCanvas::PaintBackground(wxDC& dc, CalChart::Configuration const& config)
@@ -121,37 +151,6 @@ void FieldCanvas::PaintBackground(wxDC& dc, CalChart::Configuration const& confi
     dc.SetBackgroundMode(wxTRANSPARENT);
     wxCalChart::setBackground(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD));
     dc.Clear();
-}
-
-void FieldCanvas::PaintSelectShapes(wxDC& dc, CalChart::Configuration const& config)
-{
-    if (mSelectTool) {
-        PaintShapes(dc, config, mSelectTool->GetShapeList());
-    }
-}
-
-void FieldCanvas::PaintMoveShapes(wxDC& dc, CalChart::Configuration const& config)
-{
-    if (mMovePointsTool) {
-        PaintShapes(dc, config, mMovePointsTool->GetShapeList());
-    }
-}
-
-void FieldCanvas::PaintShapes(wxDC& dc, CalChart::Configuration const& config, ShapeList const& shapeList)
-{
-    for (auto&& i : shapeList) {
-        PaintShapes(dc, config, i.get());
-    }
-}
-
-void FieldCanvas::PaintShapes(wxDC& dc, CalChart::Configuration const& config, CalChart::Shape const* shapeList)
-{
-    if (shapeList) {
-        dc.SetBrush(*wxTRANSPARENT_BRUSH);
-        wxCalChart::setPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::SHAPES));
-        auto origin = mView->GetShowFieldOffset();
-        wxCalChart::Draw::DrawCommandList(dc, shapeList->GetCC_DrawCommand() + origin);
-    }
 }
 
 // We have a empty erase background to improve redraw performance.
@@ -402,7 +401,7 @@ void FieldCanvas::OnChar(wxKeyEvent& event)
 float FieldCanvas::ZoomToFitFactor() const
 {
     const wxSize screenSize = GetSize();
-    return static_cast<float>(screenSize.GetX()) / mView->GetShowFieldSize().x;
+    return static_cast<float>(screenSize.GetX()) / mView->GetShowFullSize().x;
 }
 
 void FieldCanvas::SetZoom(float factor)
@@ -420,11 +419,11 @@ void FieldCanvas::SetZoomAroundCenter(float factor)
 
 void FieldCanvas::BeginSelectDrag(CalChart::Select type, CalChart::Coord start)
 {
-    mSelectTool = std::make_unique<CalChart::SelectTool>(type, start, [this](int input) {
-        wxClientDC dc(this);
-        PrepareDC(dc);
-        return dc.DeviceToLogicalXRel(input);
-    });
+    mSelectTool = CalChart::SelectTool{ type, start, [this](int input) {
+                                           wxClientDC dc(this);
+                                           PrepareDC(dc);
+                                           return dc.DeviceToLogicalXRel(input);
+                                       } };
 }
 
 CalChart::Coord FieldCanvas::GetMoveAmount(direction dir)
@@ -490,7 +489,7 @@ void FieldCanvas::EndDrag()
 {
     mUncommittedMovePoints.clear();
     mMovePointsTool.reset();
-    mSelectTool.reset();
+    mSelectTool = std::nullopt;
 }
 
 CalChart::Select FieldCanvas::GetCurrentSelect() const { return mView ? mView->GetSelect() : CalChart::Select::Box; }

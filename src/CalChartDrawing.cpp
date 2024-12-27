@@ -42,7 +42,7 @@
 #include "basic_ui.h"
 #include <memory>
 #include <ranges>
-#include <span>
+#include <tuple>
 #include <wx/dc.h>
 #include <wx/dcmemory.h>
 
@@ -74,13 +74,6 @@ auto GenerateDrawCenteredText(std::string const& text) -> std::vector<CalChart::
         CalChart::Draw::Text{ {}, text, TextAnchor::HorizontalCenter | TextAnchor::Top }
     };
 }
-// draw text centered around x (though still at y down)
-void DrawCenteredText(wxDC& dc, const wxString& text, wxPoint pt)
-{
-    auto size = dc.GetTextExtent(text);
-    pt.x -= size.x / 2;
-    dc.DrawText(text, pt);
-}
 
 // draw text centered around x (though still at y down)
 auto GenerateDrawLineOverText(const wxString& text, int lineLength) -> std::vector<CalChart::Draw::DrawCommand>
@@ -90,12 +83,6 @@ auto GenerateDrawLineOverText(const wxString& text, int lineLength) -> std::vect
         CalChart::Draw::Text{ {}, text, TextAnchor::HorizontalCenter | TextAnchor::Top } + CalChart::Coord{ 0, 2 },
         CalChart::Draw::Line{ { -lineLength / 2, 0 }, { lineLength / 2, 0 } }
     };
-}
-// draw text centered around x (though still at y down) with a line over it.
-void DrawLineOverText(wxDC& dc, wxString const& text, wxPoint const& pt, wxCoord lineLength)
-{
-    DrawCenteredText(dc, text, pt + wxPoint(0, 2));
-    dc.DrawLine(pt - wxPoint(lineLength / 2, 0), pt + wxPoint(lineLength / 2, 0));
 }
 
 auto GenerateDrawArrow(CalChart::Coord::units lineLength, bool pointRight) -> std::vector<CalChart::Draw::DrawCommand>
@@ -113,18 +100,6 @@ auto GenerateDrawArrow(CalChart::Coord::units lineLength, bool pointRight) -> st
         CalChart::Draw::Line{ CalChart::Coord{ -(lineLength / 2 - ArrowSize), 0 }, CalChart::Coord{ -lineLength / 2, ArrowSize } },
         CalChart::Draw::Line{ CalChart::Coord{ -(lineLength / 2 - ArrowSize), 2 * ArrowSize }, CalChart::Coord{ -lineLength / 2, ArrowSize } },
     };
-}
-
-void DrawArrow(wxDC& dc, wxPoint const& pt, wxCoord lineLength, bool pointRight)
-{
-    dc.DrawLine(pt + wxPoint(-lineLength / 2, ArrowSize), pt + wxPoint(lineLength / 2, ArrowSize));
-    if (pointRight) {
-        dc.DrawLine(pt + wxPoint(lineLength / 2 - (wxCoord)ArrowSize, 0), pt + wxPoint(lineLength / 2, ArrowSize));
-        dc.DrawLine(pt + wxPoint(lineLength / 2 - (wxCoord)ArrowSize, ArrowSize * 2), pt + wxPoint(lineLength / 2, ArrowSize));
-    } else {
-        dc.DrawLine(pt + wxPoint(-(lineLength / 2 - (wxCoord)ArrowSize), 0), pt + wxPoint(-lineLength / 2, ArrowSize));
-        dc.DrawLine(pt + wxPoint(-(lineLength / 2 - (wxCoord)ArrowSize), ArrowSize * 2), pt + wxPoint(-lineLength / 2, ArrowSize));
-    }
 }
 
 // calculate the distance for tab stops
@@ -153,165 +128,91 @@ static constexpr double kFieldTop = 0.14;
 static constexpr double kFieldBorderOffset = 0.06;
 static constexpr double kSizeX = 576, kSizeY = 734;
 static constexpr double kSizeXLandscape = 917, kSizeYLandscape = 720;
-static const double kHeaderLocation[2][2] = {
-    { 0.5, 18 / kSizeY },
-    { 0.5, 22 / kSizeYLandscape }
+
+// Scale is the amount to scale a size by
+using scale_t = std::pair<double, double>;
+auto scaleSize(wxSize size, scale_t scale) -> CalChart::Coord
+{
+    return CalChart::Coord(size.x * scale.first, size.y * scale.second);
+}
+
+static constexpr auto kHeaderLocation = std::array{
+    scale_t{ 0.5, 18 / kSizeY },
+    scale_t{ 0.5, 22 / kSizeYLandscape }
 };
-static const wxString kHeader = wxT("UNIVERSITY OF CALIFORNIA MARCHING BAND");
-static const double kUpperNumberPosition[2][2] = {
-    { 1.0 - 62 / kSizeX, 36 / kSizeY },
-    { 1.0 - 96 / kSizeXLandscape, 36 / kSizeYLandscape }
+
+static constexpr auto kHeader = "UNIVERSITY OF CALIFORNIA MARCHING BAND";
+
+static constexpr auto kNumberPosition = std::array{
+    std::array{
+        scale_t{ 1.0 - 62 / kSizeX, 36 / kSizeY },
+        scale_t{ 1.0 - 62 / kSizeX, 714 / kSizeY },
+    },
+    std::array{
+        scale_t{ 1.0 - 96 / kSizeXLandscape, 36 / kSizeYLandscape },
+        scale_t{ 1.0 - 96 / kSizeXLandscape, 680 / kSizeYLandscape },
+    },
 };
-static const double kLowerNumberPosition[2][2] = {
-    { 1.0 - 62 / kSizeX, 714 / kSizeY },
-    { 1.0 - 96 / kSizeXLandscape, 680 / kSizeYLandscape }
-};
-static const double kLowerNumberBox[2][4] = {
-    { 1.0 - 90 / kSizeX, 708 / kSizeY, 56 / kSizeX, 22 / kSizeY },
-    { 1.0 - 124 / kSizeXLandscape, 674 / kSizeYLandscape, 56 / kSizeXLandscape, 28 / kSizeYLandscape }
+static constexpr auto kLowerNumberBox = std::array{
+    std::array{
+        scale_t{ 1.0 - 90 / kSizeX, 708 / kSizeY },
+        scale_t{ 56 / kSizeX, 22 / kSizeY },
+    },
+    std::array{
+        scale_t{ 1.0 - 124 / kSizeXLandscape, 674 / kSizeYLandscape },
+        scale_t{ 56 / kSizeXLandscape, 28 / kSizeYLandscape },
+    },
 };
 
 static const auto kTextLabels = std::array{
     std::array{
-        std::tuple{ "Music", 0.5, 60 / kSizeY, 240 / kSizeX },
-        std::tuple{ "Formation", 0.5, 82 / kSizeY, 240 / kSizeX },
-        std::tuple{ "game", 62 / kSizeX, 50 / kSizeY, 64 / kSizeX },
-        std::tuple{ "page", 1.0 - 62 / kSizeX, 50 / kSizeY, 64 / kSizeX },
+        std::tuple{ "Music", scale_t{ 0.5, 60 / kSizeY }, 240 / kSizeX },
+        std::tuple{ "Formation", scale_t{ 0.5, 82 / kSizeY }, 240 / kSizeX },
+        std::tuple{ "game", scale_t{ 62 / kSizeX, 50 / kSizeY }, 64 / kSizeX },
+        std::tuple{ "page", scale_t{ 1.0 - 62 / kSizeX, 50 / kSizeY }, 64 / kSizeX },
     },
     std::array{
-        std::tuple{ "Music", 0.5, 60 / kSizeYLandscape, 400 / kSizeXLandscape },
-        std::tuple{ "Formation", 0.5, 82 / kSizeYLandscape, 400 / kSizeXLandscape },
-        std::tuple{ "game", 96 / kSizeXLandscape, 54 / kSizeYLandscape, 78 / kSizeXLandscape },
-        std::tuple{ "page", 1.0 - 96 / kSizeXLandscape, 54 / kSizeYLandscape, 78 / kSizeXLandscape },
+        std::tuple{ "Music", scale_t{ 0.5, 60 / kSizeYLandscape }, 400 / kSizeXLandscape },
+        std::tuple{ "Formation", scale_t{ 0.5, 82 / kSizeYLandscape }, 400 / kSizeXLandscape },
+        std::tuple{ "game", scale_t{ 96 / kSizeXLandscape, 54 / kSizeYLandscape }, 78 / kSizeXLandscape },
+        std::tuple{ "page", scale_t{ 1.0 - 96 / kSizeXLandscape, 54 / kSizeYLandscape }, 78 / kSizeXLandscape },
     },
 };
 
 // convention is upper south, upper north, lower south, lower north
 static const auto kLabels = std::array{
     std::array{
-        std::tuple{ "CAL SIDE", 0.5, 580 / kSizeY },
-        std::tuple{ "south", 52 / kSizeX, (76 - 8) / kSizeY },
-        std::tuple{ "north", 1.0 - 52 / kSizeX, (76 - 8) / kSizeY },
-        std::tuple{ "south", 52 / kSizeX, (570 + 8) / kSizeY },
-        std::tuple{ "north", 1.0 - 52 / kSizeX, (570 + 8) / kSizeY },
+        std::tuple{ "CAL SIDE", scale_t{ 0.5, 580 / kSizeY } },
+        std::tuple{ "south", scale_t{ 52 / kSizeX, (76 - 8) / kSizeY } },
+        std::tuple{ "north", scale_t{ 1.0 - 52 / kSizeX, (76 - 8) / kSizeY } },
+        std::tuple{ "south", scale_t{ 52 / kSizeX, (570 + 8) / kSizeY } },
+        std::tuple{ "north", scale_t{ 1.0 - 52 / kSizeX, (570 + 8) / kSizeY } },
     },
     std::array{
-        std::tuple{ "CAL SIDE", 0.5, 544 / kSizeYLandscape },
-        std::tuple{ "south", 76 / kSizeXLandscape, (80 - 8) / kSizeYLandscape },
-        std::tuple{ "north", 1.0 - 76 / kSizeXLandscape, (80 - 8) / kSizeYLandscape },
-        std::tuple{ "south", 76 / kSizeXLandscape, (536 + 8) / kSizeYLandscape },
-        std::tuple{ "north", 1.0 - 76 / kSizeXLandscape, (536 + 8) / kSizeYLandscape },
+        std::tuple{ "CAL SIDE", scale_t{ 0.5, 544 / kSizeYLandscape } },
+        std::tuple{ "south", scale_t{ 76 / kSizeXLandscape, (80 - 8) / kSizeYLandscape } },
+        std::tuple{ "north", scale_t{ 1.0 - 76 / kSizeXLandscape, (80 - 8) / kSizeYLandscape } },
+        std::tuple{ "south", scale_t{ 76 / kSizeXLandscape, (536 + 8) / kSizeYLandscape } },
+        std::tuple{ "north", scale_t{ 1.0 - 76 / kSizeXLandscape, (536 + 8) / kSizeYLandscape } },
     },
 };
 
 static constexpr auto kArrows = std::array{
     std::array{
-        std::tuple{ 52 / kSizeX, (76) / kSizeY, 40 / kSizeX, false },
-        std::tuple{ 1.0 - 52 / kSizeX, (76) / kSizeY, 40 / kSizeX, true },
-        std::tuple{ 52 / kSizeX, (570) / kSizeY, 40 / kSizeX, false },
-        std::tuple{ 1.0 - 52 / kSizeX, (570) / kSizeY, 40 / kSizeX, true },
+        std::tuple{ scale_t{ 52 / kSizeX, (76) / kSizeY }, 40 / kSizeX, false },
+        std::tuple{ scale_t{ 1.0 - 52 / kSizeX, (76) / kSizeY }, 40 / kSizeX, true },
+        std::tuple{ scale_t{ 52 / kSizeX, (570) / kSizeY }, 40 / kSizeX, false },
+        std::tuple{ scale_t{ 1.0 - 52 / kSizeX, (570) / kSizeY }, 40 / kSizeX, true },
     },
     std::array{
-        std::tuple{ 76 / kSizeXLandscape, (80) / kSizeYLandscape, 40 / kSizeXLandscape, false },
-        std::tuple{ 1.0 - 76 / kSizeXLandscape, (80) / kSizeYLandscape, 40 / kSizeXLandscape, true },
-        std::tuple{ 76 / kSizeXLandscape, (536) / kSizeYLandscape, 40 / kSizeXLandscape, false },
-        std::tuple{ 1.0 - 76 / kSizeXLandscape, (536) / kSizeYLandscape, 40 / kSizeXLandscape, true },
+        std::tuple{ scale_t{ 76 / kSizeXLandscape, (80) / kSizeYLandscape }, 40 / kSizeXLandscape, false },
+        std::tuple{ scale_t{ 1.0 - 76 / kSizeXLandscape, (80) / kSizeYLandscape }, 40 / kSizeXLandscape, true },
+        std::tuple{ scale_t{ 76 / kSizeXLandscape, (536) / kSizeYLandscape }, 40 / kSizeXLandscape, false },
+        std::tuple{ scale_t{ 1.0 - 76 / kSizeXLandscape, (536) / kSizeYLandscape }, 40 / kSizeXLandscape, true },
     },
 };
 
 static const double kContinuityStart[2] = { 606 / kSizeY, 556 / kSizeYLandscape };
-
-auto toCoord(wxPoint point)
-{
-    return CalChart::Coord(point.x, point.y);
-}
-
-namespace CalChartDraw::Point {
-
-    auto DrawPoint(CalChart::Configuration const& config, CalChart::Point const& point, int reference, CalChart::Coord const& origin, wxString const& label)
-    {
-        return point.GetDrawCommands(reference, label, config) + origin;
-    }
-
-    // Returns a view adaptor that will transform a range of point indices to Draw point commands.
-    auto TransformIndexToDrawCommands(CalChart::Sheet const& sheet, std::vector<std::string> const& labels, int ref, CalChart::Configuration const& config)
-    {
-        return std::views::transform([&sheet, ref, labels, &config](int i) {
-            return sheet.GetPoint(i).GetDrawCommands(ref, labels.at(i), config);
-        })
-            | std::ranges::views::join;
-    }
-
-    // Given a set and a size, return a range that has the numbers not in the set
-    auto NegativeIntersection(CalChart::SelectionList const& set, int count)
-    {
-        return std::views::iota(0, count)
-            | std::views::filter([set](int i) {
-                  return !set.contains(i);
-              });
-    }
-
-    auto GenerateSheetPointsDrawCommands(
-        CalChart::Configuration const& config,
-        CalChart::SelectionList const& selection_list,
-        int numberPoints,
-        std::vector<std::string> const& labels,
-        CalChart::Sheet const& sheet,
-        int ref,
-        CalChart::Colors unselectedColor,
-        CalChart::Colors selectedColor,
-        CalChart::Colors unselectedTextColor,
-        CalChart::Colors selectedTextColor) -> std::vector<CalChart::Draw::DrawCommand>
-    {
-
-        return {
-            CalChart::Draw::withBrushAndPen(
-                config.Get_CalChartBrushAndPen(unselectedColor),
-                CalChart::Draw::withTextForeground(
-                    config.Get_CalChartBrushAndPen(unselectedTextColor),
-                    NegativeIntersection(selection_list, numberPoints)
-                        | TransformIndexToDrawCommands(sheet, labels, ref, config))),
-            CalChart::Draw::withBrushAndPen(
-                config.Get_CalChartBrushAndPen(selectedColor),
-                CalChart::Draw::withTextForeground(
-                    config.Get_CalChartBrushAndPen(selectedTextColor),
-                    selection_list
-                        | TransformIndexToDrawCommands(sheet, labels, ref, config))),
-        };
-    }
-}
-
-auto GenerateGhostPointsDrawCommands(CalChart::Configuration const& config, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref) -> std::vector<CalChart::Draw::DrawCommand>
-{
-    auto unselectedColor = CalChart::Colors::GHOST_POINT;
-    auto selectedColor = CalChart::Colors::GHOST_POINT_HLIT;
-    auto unselectedTextColor = CalChart::Colors::GHOST_POINT_TEXT;
-    auto selectedTextColor = CalChart::Colors::GHOST_POINT_HLIT_TEXT;
-    return CalChartDraw::Point::GenerateSheetPointsDrawCommands(config, selection_list, numberPoints, labels, sheet, ref, unselectedColor, selectedColor, unselectedTextColor, selectedTextColor);
-}
-
-auto GeneratePointsDrawCommands(CalChart::Configuration const& config, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, bool primary) -> std::vector<CalChart::Draw::DrawCommand>
-{
-    auto unselectedColor = primary ? CalChart::Colors::POINT : CalChart::Colors::REF_POINT;
-    auto selectedColor = primary ? CalChart::Colors::POINT_HILIT : CalChart::Colors::REF_POINT_HILIT;
-    auto unselectedTextColor = primary ? CalChart::Colors::POINT_TEXT : CalChart::Colors::REF_POINT_TEXT;
-    auto selectedTextColor = primary ? CalChart::Colors::POINT_HILIT_TEXT : CalChart::Colors::REF_POINT_HILIT_TEXT;
-    return CalChartDraw::Point::GenerateSheetPointsDrawCommands(config, selection_list, numberPoints, labels, sheet, ref, unselectedColor, selectedColor, unselectedTextColor, selectedTextColor);
-}
-
-struct DrawContFonts {
-    DrawContFonts(int fontSize = 12)
-        : plain(fontSize, CalChart::Font::Family::Modern)
-        , bold(fontSize, CalChart::Font::Family::Modern, CalChart::Font::Style::Normal, CalChart::Font::Weight::Bold)
-        , italics(fontSize, CalChart::Font::Family::Modern, CalChart::Font::Style::Italic)
-        , bolditalics(fontSize, CalChart::Font::Family::Modern, CalChart::Font::Style::Italic, CalChart::Font::Weight::Bold)
-    {
-    }
-    CalChart::Font const plain{};
-    CalChart::Font const bold{};
-    CalChart::Font const italics{};
-    CalChart::Font const bolditalics{};
-};
 
 // draw the continuity starting at a specific offset
 void DrawCont(wxDC& dc, [[maybe_unused]] CalChart::Configuration const& config, CalChart::Textline_list const& print_continuity, wxRect const& bounding, bool landscape)
@@ -531,14 +432,10 @@ namespace {
         CalChart::append(drawCmds,
             CalChart::Draw::toDrawCommands(std::views::iota(0u, pts.size())
                 | std::views::transform([&](auto i) {
-                      return CalChartDraw::Point::DrawPoint(
-                          config,
-                          pts.at(i),
-                          ref,
-                          mode.Offset(),
-                          show.GetPointLabel(i));
+                      return pts.at(i).GetDrawCommands(ref, show.GetPointLabel(i), config);
                   })
-                | std::views::join));
+                | std::views::join)
+                + mode.Offset());
 
         return { static_cast<double>(mode.Size().x), drawCmds };
     }
@@ -547,11 +444,11 @@ namespace {
     {
         auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
         CalChart::append(drawCmds,
-            GenerateDrawCenteredText(kHeader) + CalChart::Coord(page.x * kHeaderLocation[landscape][0], page.y * kHeaderLocation[landscape][1]));
+            GenerateDrawCenteredText(kHeader) + scaleSize(page, kHeaderLocation[landscape]));
         CalChart::append(drawCmds,
-            GenerateDrawCenteredText(sheetName) + CalChart::Coord(page.x * kUpperNumberPosition[landscape][0], page.y * kUpperNumberPosition[landscape][1]));
+            GenerateDrawCenteredText(sheetName) + scaleSize(page, kNumberPosition[landscape][0]));
         CalChart::append(drawCmds,
-            GenerateDrawCenteredText(sheetName) + CalChart::Coord(page.x * kLowerNumberPosition[landscape][0], page.y * kLowerNumberPosition[landscape][1]));
+            GenerateDrawCenteredText(sheetName) + scaleSize(page, kNumberPosition[landscape][1]));
         return drawCmds;
     }
 
@@ -560,29 +457,29 @@ namespace {
         auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
         CalChart::append(drawCmds,
             std::vector<CalChart::Draw::DrawCommand>{ CalChart::Draw::Rectangle(
-                CalChart::Coord(page.x * kLowerNumberBox[landscape][0], page.y * kLowerNumberBox[landscape][1]),
-                CalChart::Coord(page.x * kLowerNumberBox[landscape][2], page.y * kLowerNumberBox[landscape][3])) });
+                scaleSize(page, kLowerNumberBox[landscape][0]),
+                scaleSize(page, kLowerNumberBox[landscape][1])) });
         CalChart::append(drawCmds,
             CalChart::Draw::toDrawCommands(
                 kTextLabels[landscape] | std::views::transform([page](auto&& labelData) {
-                    auto [label, x, y, lineLength] = labelData;
-                    return GenerateDrawLineOverText(label, page.x * lineLength) + CalChart::Coord(page.x * x, page.y * y);
+                    auto [label, scale, lineLength] = labelData;
+                    return GenerateDrawLineOverText(label, page.x * lineLength) + scaleSize(page, scale);
                 })
                 | std::views::join));
 
         CalChart::append(drawCmds,
             CalChart::Draw::toDrawCommands(
                 kLabels[landscape] | std::views::transform([page](auto&& labelData) {
-                    auto [label, x, y] = labelData;
-                    return GenerateDrawCenteredText(label) + CalChart::Coord(page.x * x, page.y * y);
+                    auto [label, scale] = labelData;
+                    return GenerateDrawCenteredText(label) + scaleSize(page, scale);
                 })
                 | std::views::join));
 
         CalChart::append(drawCmds,
             CalChart::Draw::toDrawCommands(
                 kArrows[landscape] | std::views::transform([page](auto&& arrow) {
-                    auto [x, y, length, right] = arrow;
-                    return GenerateDrawArrow(page.x * length, right) + CalChart::Coord(page.x * x, page.y * y);
+                    auto [scale, length, right] = arrow;
+                    return GenerateDrawArrow(page.x * length, right) + scaleSize(page, scale);
                 })
                 | std::views::join));
         return drawCmds;
@@ -705,9 +602,8 @@ auto GenerateDrawCommands(wxDC& dc,
 
 void DrawForPrinting(wxDC* printerdc, CalChart::Configuration const& config, CalChartDoc const& show, CalChart::Sheet const& sheet, int ref, bool landscape)
 {
-    auto boundingBox = GetMarcherBoundingBox(sheet.GetPoints());
-    auto forced_landscape = !landscape && (boundingBox.second.x - boundingBox.first.x) > CalChart::Int2CoordUnits(CalChart::kFieldStepSizeNorthSouth[0]);
-    auto should_landscape = landscape || forced_landscape;
+    auto should_landscape = landscape || sheet.ShouldPrintLandscape();
+    auto forced_landscape = !landscape && should_landscape;
 
     auto bitmapWidth = (should_landscape ? kSizeXLandscape : kSizeX) * kBitmapScale;
     auto bitmapHeight = (should_landscape ? kSizeYLandscape : kSizeY) * kBitmapScale;
@@ -733,37 +629,6 @@ void DrawForPrinting(wxDC* printerdc, CalChart::Configuration const& config, Cal
     printerdc->Blit(0, 0, rotate_membm.GetWidth(), rotate_membm.GetHeight(), &tmemdc, 0, 0);
 }
 
-auto GeneratePhatomPointsDrawCommands(
-    const CalChart::Configuration& config,
-    const CalChartDoc& show,
-    const CalChart::Sheet& sheet,
-    const std::map<int, CalChart::Coord>& positions)
-    -> std::vector<CalChart::Draw::DrawCommand>
-{
-    auto pointLabelFont = CalChart::Font{ CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio()) };
-    auto origin = show.GetShowFieldOffset();
-
-    auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
-    for (auto&& i : positions) {
-        CalChart::append(
-            drawCmds,
-            // because points draw their position, we remove it then add the new position.
-            sheet.GetPoint(i.first).GetDrawCommands(
-                show.GetPointLabel(i.first),
-                config)
-                + i.second
-                - sheet.GetPoint(i.first).GetPos());
-    }
-    return std::vector<CalChart::Draw::DrawCommand>{
-        CalChart::Draw::withFont(
-            pointLabelFont,
-            CalChart::Draw::withBrushAndPen(
-                config.Get_CalChartBrushAndPen(CalChart::Colors::GHOST_POINT),
-                CalChart::Draw::withTextForeground(
-                    config.Get_CalChartBrushAndPen(CalChart::Colors::GHOST_POINT_TEXT),
-                    drawCmds + origin)))
-    };
-}
 }
 
 namespace wxCalChart::Draw {
@@ -959,34 +824,5 @@ namespace details {
             },
             cmd);
     }
-}
-}
-
-namespace CalChartDraw {
-void DrawPath(wxDC& dc, CalChart::Configuration const& config, std::vector<CalChart::Draw::DrawCommand> const& draw_commands)
-{
-    wxCalChart::setBrushAndPen(dc, config.Get_CalChartBrushAndPen(CalChart::Colors::PATHS));
-    wxCalChart::Draw::DrawCommandList(dc, draw_commands);
-}
-
-wxImage GetOmniLinesImage(const CalChart::Configuration& config, const CalChart::ShowMode& mode)
-{
-    auto fieldsize = mode.FieldSize();
-    wxBitmap bmp(fieldsize.x, fieldsize.y, 32);
-    wxMemoryDC dc;
-    dc.SelectObject(bmp);
-    dc.SetBackground(*wxTRANSPARENT_BRUSH);
-    dc.Clear();
-    wxCalChart::Draw::DrawCommandList(dc, CalChart::CreateModeDrawCommands(config, mode, CalChart::HowToDraw::OmniView));
-    auto image = bmp.ConvertToImage();
-    image.InitAlpha();
-    for (auto x = 0; x < fieldsize.x; ++x) {
-        for (auto y = 0; y < fieldsize.y; ++y) {
-            if (!image.GetRed(x, y) && !image.GetGreen(x, y) && !image.GetBlue(x, y)) {
-                image.SetAlpha(x, y, 0);
-            }
-        }
-    }
-    return image;
 }
 }

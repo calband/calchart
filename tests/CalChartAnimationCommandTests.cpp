@@ -349,7 +349,7 @@ TEST_CASE("Animate::CommandRotate0", "Animate::Command")
 
 TEST_CASE("Animate::Commands", "Animate::Commands")
 {
-    using beats_t = CalChart::Animate::beats_t;
+    using beats_t = CalChart::beats_t;
     auto uut = CalChart::Animate::Commands(std::vector<CalChart::Animate::Command>{
         CalChart::Animate::CommandStill{ { 16, 16 }, 3, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree::North() },
         CalChart::Animate::CommandMove{ { 16, 16 }, 4, { 0, 64 } },
@@ -406,7 +406,7 @@ TEST_CASE("Animate::CommandMove64", "Animate::Command")
 
 TEST_CASE("Animate::CommandWith0", "Animate::Commands")
 {
-    using beats_t = CalChart::Animate::beats_t;
+    using beats_t = CalChart::beats_t;
     auto uut = CalChart::Animate::Commands(std::vector<CalChart::Animate::Command>{
         CalChart::Animate::CommandMove{ { -416, -416 }, 2, { 0, 46 } },
         CalChart::Animate::CommandMove{ { -416, -370 }, 0, { 2, 2 } },
@@ -437,7 +437,7 @@ TEST_CASE("Animate::CommandWith0", "Animate::Commands")
 
 TEST_CASE("Animate::CommandWith0.2", "Animate::Commands")
 {
-    using beats_t = CalChart::Animate::beats_t;
+    using beats_t = CalChart::beats_t;
     auto uut = CalChart::Animate::Commands(std::vector<CalChart::Animate::Command>{
         CalChart::Animate::CommandMove{ { 960, 64 }, 0, { 0, 4 } },
         CalChart::Animate::CommandMove{ { 960, 68 }, 4, { -64, 0 } },
