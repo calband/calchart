@@ -66,7 +66,7 @@ class Point;
 // Whereas: HStack[middle]( HStack[middle]( Circle, Circle, Circle ) )
 // |      o o o      |
 //
-//
+// Stacks maintain a concept of an offset.  This is the amount to shift the all the following commands.
 namespace Draw {
     // items
     struct Ignore;
@@ -413,6 +413,7 @@ namespace Draw {
     struct VStack {
         std::vector<DrawCommand> commands{};
         StackAlign align = StackAlign::Begin;
+        Coord offset{};
     };
     inline auto operator+(VStack const& lhs, Coord rhs) -> VStack;
     inline auto operator+(Coord lhs, VStack const& rhs) -> VStack;
@@ -423,6 +424,7 @@ namespace Draw {
     struct HStack {
         std::vector<DrawCommand> commands{};
         StackAlign align = StackAlign::Begin;
+        Coord offset{};
     };
     inline auto operator+(HStack const& lhs, Coord rhs) -> HStack;
     inline auto operator+(Coord lhs, HStack const& rhs) -> HStack;
@@ -433,6 +435,7 @@ namespace Draw {
     struct ZStack {
         std::vector<DrawCommand> commands{};
         StackAlign align = StackAlign::Begin;
+        Coord offset{};
     };
     inline auto operator+(ZStack const& lhs, Coord rhs) -> ZStack;
     inline auto operator+(Coord lhs, ZStack const& rhs) -> ZStack;
@@ -632,51 +635,51 @@ namespace Draw {
 
     inline auto operator+(VStack const& lhs, Coord rhs) -> VStack
     {
-        return VStack{ toDrawCommands(lhs.commands + rhs) };
+        return VStack{ lhs.commands, lhs.align, lhs.offset + rhs };
     }
     inline auto operator+(Coord lhs, VStack const& rhs) -> VStack
     {
-        return VStack{ toDrawCommands(lhs + rhs.commands) };
+        return VStack{ rhs.commands, rhs.align, lhs + rhs.offset };
     }
     inline auto operator-(VStack const& lhs, Coord rhs) -> VStack
     {
-        return VStack{ toDrawCommands(lhs.commands - rhs) };
+        return VStack{ lhs.commands, lhs.align, lhs.offset - rhs };
     }
     inline auto operator-(Coord lhs, VStack const& rhs) -> VStack
     {
-        return VStack{ toDrawCommands(lhs - rhs.commands) };
+        return VStack{ rhs.commands, rhs.align, lhs - rhs.offset };
     }
     inline auto operator+(HStack const& lhs, Coord rhs) -> HStack
     {
-        return HStack{ toDrawCommands(lhs.commands + rhs), lhs.align };
+        return HStack{ lhs.commands, lhs.align, lhs.offset + rhs };
     }
     inline auto operator+(Coord lhs, HStack const& rhs) -> HStack
     {
-        return HStack{ toDrawCommands(lhs + rhs.commands), rhs.align };
+        return HStack{ rhs.commands, rhs.align, lhs + rhs.offset };
     }
     inline auto operator-(HStack const& lhs, Coord rhs) -> HStack
     {
-        return HStack{ toDrawCommands(lhs.commands - rhs), lhs.align };
+        return HStack{ lhs.commands, lhs.align, lhs.offset - rhs };
     }
     inline auto operator-(Coord lhs, HStack const& rhs) -> HStack
     {
-        return HStack{ toDrawCommands(lhs - rhs.commands), rhs.align };
+        return HStack{ rhs.commands, rhs.align, lhs - rhs.offset };
     }
     inline auto operator+(ZStack const& lhs, Coord rhs) -> ZStack
     {
-        return ZStack{ toDrawCommands(lhs.commands + rhs) };
+        return ZStack{ lhs.commands, lhs.align, lhs.offset + rhs };
     }
     inline auto operator+(Coord lhs, ZStack const& rhs) -> ZStack
     {
-        return ZStack{ toDrawCommands(lhs + rhs.commands) };
+        return ZStack{ rhs.commands, rhs.align, lhs + rhs.offset };
     }
     inline auto operator-(ZStack const& lhs, Coord rhs) -> ZStack
     {
-        return ZStack{ toDrawCommands(lhs.commands - rhs) };
+        return ZStack{ lhs.commands, lhs.align, lhs.offset - rhs };
     }
     inline auto operator-(Coord lhs, ZStack const& rhs) -> ZStack
     {
-        return ZStack{ toDrawCommands(lhs - rhs.commands) };
+        return ZStack{ rhs.commands, rhs.align, lhs - rhs.offset };
     }
 }
 

@@ -36,4 +36,5 @@ Other changes:
 * [#552](../../issues/552) Move GenerateModeDrawCommands from CalChartDrawing to core/Mode
 * [#554](../../issues/554) Move General printing over to PrintContUseNewDraw
 * [#557](../../issues/557) Move Config into DrawPoints
+* [#563](../../issues/563) Print doesn't show continuity correct
 

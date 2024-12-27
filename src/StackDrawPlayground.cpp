@@ -35,9 +35,14 @@ public:
     {
         mDrawCommand = drawCommand;
     }
+    void SetUseOffset(bool offset)
+    {
+        mUseOffset = offset;
+    }
 
 private:
     CalChart::Draw::DrawCommand mDrawCommand{};
+    bool mUseOffset{};
 
     void OnPaint(wxPaintEvent& event);
     void OnSizeEvent(wxSizeEvent& event);
@@ -271,7 +276,8 @@ void StackDrawPreview::OnPaint(wxPaintEvent&)
     dc.Clear();
     dc.SetTextForeground(*wxBLACK);
     dc.DrawRectangle(wxRect(wxPoint(0, 0), virtSize));
-    wxCalChart::Draw::DrawCommandList(dc, mDrawCommand);
+    auto offset = mUseOffset ? CalChart::Coord(10, 10) : CalChart::Coord(0, 0);
+    wxCalChart::Draw::DrawCommandList(dc, mDrawCommand + offset);
 }
 
 void StackDrawPreview::OnSizeEvent(wxSizeEvent& event)
@@ -293,6 +299,7 @@ StackDrawPlayground::StackDrawPlayground(wxWindow* parent)
 {
     using namespace wxUI;
     VSizer{
+        wxSizerFlags{}.Border(wxALL, 2).Left().Proportion(0),
         HSplitter{
             mPreview = [](wxWindow* parent) {
                 return new StackDrawPreview(parent);
@@ -310,7 +317,10 @@ StackDrawPlayground::StackDrawPlayground(wxWindow* parent)
                              .withStyle(wxTE_MULTILINE | wxHSCROLL | wxTE_PROCESS_TAB),
         }
             .withSize(wxSize(500, 400)),
-
+        HSizer{ Text{ "Apply (10,10) offset" }, mUseOffset = CheckBox{}.bind([this]() {
+                   mPreview->SetUseOffset(*mUseOffset);
+                   Refresh();
+               }) },
         Generic{ CreateStdDialogButtonSizer(wxOK) },
         mStatus = Generic<wxStatusBar>{ [](wxWindow* parent) {
             return new wxStatusBar(parent);
