@@ -74,7 +74,7 @@ static inline auto GetPrintContinuityConstructSize() { return wxSize{ fDIP(180),
 static inline auto GetPrintContinuitySize() { return fDIP(wxSize{ 180, 360 }); }
 
 // Field Thumbnail sizes
-static inline auto GetThumbnailFontSize() { return 16; };
+static inline auto GetThumbnailFontSize() { return 12; };
 
 // toolbar sizers
 static inline auto GetToolBarControlsPadding() { return fDIP(32); }

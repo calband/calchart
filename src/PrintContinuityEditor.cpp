@@ -165,11 +165,12 @@ void PrintContinuityEditor::FlushText()
         return;
     }
     auto current_sheet = mView->GetCurrentSheet();
+    auto current_sheet_num = mView->GetCurrentSheetNum();
     wxTextCtrl* text = (wxTextCtrl*)FindWindow(PrintContinuityEditor_PrintNumber);
     try {
         if ((mUserInput->GetValue() != current_sheet->GetRawPrintContinuity()) || (text->GetValue() != current_sheet->GetNumber())) {
             mView->DoSetPrintContinuity(
-                static_cast<int>(std::distance(mView->GetSheetBegin(), current_sheet)), text->GetValue(),
+                current_sheet_num, text->GetValue(),
                 mUserInput->GetValue());
         }
     } catch (const std::runtime_error& e) {

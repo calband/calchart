@@ -292,6 +292,11 @@ namespace Draw {
         bool withBackground{};
         double linePad{};
 
+        Text(std::string text, TextAnchor anchor = TextAnchor::None, bool withBackground = false, double linePad = 0.0)
+            : Text(Coord{}, std::move(text), anchor, withBackground, linePad)
+        {
+        }
+
         Text(Coord::units startx, Coord::units starty, std::string text = "", TextAnchor anchor = TextAnchor::None, bool withBackground = false, double linePad = 0.0)
             : Text(Coord{ startx, starty }, std::move(text), anchor, withBackground, linePad)
         {
@@ -308,11 +313,6 @@ namespace Draw {
 
         explicit Text(Coord start, std::string text, double linePad)
             : Text(start, std::move(text), TextAnchor::None, false, linePad)
-        {
-        }
-
-        Text(Coord::units startx, Coord::units starty, std::string text = "", TextAnchor anchor = TextAnchor::None, bool withBackground = false)
-            : Text(Coord{ startx, starty }, std::move(text), anchor, withBackground)
         {
         }
 

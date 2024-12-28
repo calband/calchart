@@ -141,6 +141,8 @@ public:
     };
     CalChartDocSheetRange GetSheets() const { return CalChartDocSheetRange{ *mShow }; }
 
+    [[nodiscard]] auto GetSheetsName() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetsName(); }
+
     auto GetSheetBegin() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetBegin(); }
     auto GetSheetEnd() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetEnd(); }
     auto GetNthSheet(int n) const { return static_cast<CalChart::Show const&>(*mShow).GetNthSheet(n); }
@@ -215,6 +217,7 @@ public:
 
     [[nodiscard]] auto GeneratePhatomPointsDrawCommands(
         const std::map<int, CalChart::Coord>& positions) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands() const { return mShow->GenerateFieldWithMarchersDrawCommands(mConfig); }
 
     auto AlreadyHasPrintContinuity() const { return mShow->AlreadyHasPrintContinuity(); }
     auto WillMovePoints(std::map<int, CalChart::Coord> const& new_positions) const { return mShow->WillMovePoints(new_positions, mCurrentReferencePoint); }

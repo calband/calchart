@@ -19,17 +19,30 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#define _LIBCPP_ENABLE_EXPERIMENTAL 1
 #include "FieldThumbnailBrowser.h"
 #include "CalChartConfiguration.h"
+#include "CalChartDrawCommand.h"
 #include "CalChartDrawPrimativesHelper.h"
 #include "CalChartDrawing.h"
+#include "CalChartMeasure.h"
 #include "CalChartShow.h"
 #include "CalChartShowMode.h"
 #include "CalChartSizes.h"
 #include "CalChartView.h"
 #include "basic_ui.h"
 
+#include <ranges>
 #include <wx/dcbuffer.h>
+
+namespace {
+constexpr auto kXLeftPadding = 4;
+constexpr auto kXRightPadding = 4;
+constexpr auto kYUpperPadding = 4;
+constexpr auto kYNamePadding = 4;
+constexpr auto kYBottomPadding = 4;
+constexpr auto kHighlightWidth = 5;
+}
 
 BEGIN_EVENT_TABLE(FieldThumbnailBrowser, wxScrolledWindow)
 EVT_PAINT(FieldThumbnailBrowser::OnPaint)
@@ -60,13 +73,13 @@ wxSize FieldThumbnailBrowser::SizeOfOneCell(bool horizontal) const
 
     auto mode_size = fDIP(mView->GetShowFullSize());
     if (horizontal) {
-        auto current_size_y = GetSize().y - mYUpperPadding - mYNameSize - mYNamePadding - mYBottomPadding - mYScrollPadding;
+        auto current_size_y = GetSize().y - kYUpperPadding - mYNameSize - kYNamePadding - kYBottomPadding - mYScrollPadding;
         auto box_size_x = mode_size.x * (current_size_y / double(mode_size.y));
-        return { int(box_size_x) + mXLeftPadding + mXRightPadding, GetSize().y };
+        return { int(box_size_x) + kXLeftPadding + kXRightPadding, GetSize().y };
     }
-    auto current_size_x = GetSize().x - mXLeftPadding - mXRightPadding - mXScrollPadding;
+    auto current_size_x = GetSize().x - kXLeftPadding - kXRightPadding - mXScrollPadding;
     auto box_size_y = mode_size.y * (current_size_x / double(mode_size.x));
-    return { GetSize().x, int(box_size_y) + mYUpperPadding + mYNameSize + mYNamePadding };
+    return { GetSize().x, int(box_size_y) + kYUpperPadding + mYNameSize + kYNamePadding };
 }
 
 // calculate which sheet the user clicked in
@@ -76,7 +89,9 @@ int FieldThumbnailBrowser::WhichCell(wxPoint const& p) const
     return (mLayoutHorizontal) ? p.x / size_of_one.x : p.y / size_of_one.y;
 }
 
-static auto CalcUserScale(wxSize const& box_size, wxSize const& mode_size)
+namespace {
+
+auto CalcUserScale(wxSize const& box_size, wxSize const& mode_size)
 {
     auto newX = static_cast<float>(box_size.x);
     auto newY = static_cast<float>(box_size.y);
@@ -98,6 +113,34 @@ static auto CalcUserScale(wxSize const& box_size, wxSize const& mode_size)
     return userScale;
 }
 
+auto LayoutSheetThumbnails(CalChartView const& view, CalChart::Configuration const& config, int YNameSize, CalChart::Coord thumbnail_offset, CalChart::Coord box_size, CalChart::Coord box_offset)
+{
+    auto highlight_offset = box_offset + view.GetCurrentSheetNum() * thumbnail_offset;
+    return std::vector<CalChart::Draw::DrawCommand>{
+        CalChart::Draw::withFont(
+            CalChart::Font{ YNameSize },
+            CalChart::Draw::withBrushAndPen(
+                config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD),
+                CalChart::Ranges::enumerate_view(view.GetSheetsName())
+                    | std::views::transform([thumbnail_offset, box_size, box_offset](auto&& whichAndSheet) {
+                          auto [which, name] = whichAndSheet;
+                          return std::vector<CalChart::Draw::DrawCommand>{
+                              CalChart::Draw::Text(name),
+                              CalChart::Draw::Rectangle(box_offset, box_size),
+                          }
+                          + (which * thumbnail_offset);
+                      })
+                    | std::views::join)),
+        CalChart::Draw::withBrushAndPen(
+            config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD),
+            CalChart::Draw::withPen(CalChart::toPen(config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_HILIT_TEXT)).withWidth(kHighlightWidth),
+                CalChart::Draw::Rectangle(highlight_offset, box_size))),
+    }
+    + CalChart::Coord(kXLeftPadding, kYUpperPadding);
+}
+
+}
+
 // Define the repainting behaviour
 // we draw things as a series of mini-fields, with number than the field.
 // the current field is outlined in yellow
@@ -105,8 +148,12 @@ static auto CalcUserScale(wxSize const& box_size, wxSize const& mode_size)
 // with an offset of 16 point font of the current sheet
 // with a boundary of 4 above and below.
 
+// auto gFieldThumbnailMeasure = CalChart::MeasureDuration{ "FieldThumbnail" };
 void FieldThumbnailBrowser::OnPaint(wxPaintEvent&)
 {
+    // for profiling purposes
+    // std::cout << gFieldThumbnailMeasure << "\n";
+    // auto snapshot = gFieldThumbnailMeasure.doMeasurement();
     if (!mView) {
         return;
     }
@@ -115,55 +162,31 @@ void FieldThumbnailBrowser::OnPaint(wxPaintEvent&)
     PrepareDC(dc);
     dc.SetBackgroundMode(wxTRANSPARENT);
     dc.Clear();
-    dc.SetFont(ResizeFont(dc.GetFont(), mYNameSize));
 
     // let's draw the boxes
-    auto offset_x = 0;
-    auto offset_y = 0;
+    auto mode_size = fDIP(mView->GetShowFullSize());
+    auto current_size = GetSize() - wxSize(kXLeftPadding + kXRightPadding + mXScrollPadding, mYNameSize + kYNamePadding + kYUpperPadding + kYBottomPadding + mYScrollPadding);
+    auto box_size = mLayoutHorizontal
+        ? wxSize(mode_size.x * (current_size.y / static_cast<double>(mode_size.y)), current_size.y)
+        : wxSize(current_size.x, mode_size.y * (current_size.x / static_cast<double>(mode_size.x)));
 
-    for (auto sheet = mView->GetSheetBegin(); sheet != mView->GetSheetEnd(); ++sheet) {
+    auto userScale = CalcUserScale(box_size, mode_size);
 
-        dc.SetUserScale(1, 1);
-        wxCalChart::setBrush(dc, mConfig.Get_CalChartBrushAndPen(CalChart::Colors::FIELD));
-        dc.DrawText(sheet->GetName(), offset_x + mXLeftPadding, offset_y + mYUpperPadding);
-        auto newOffsetX = offset_x + mXLeftPadding;
-        auto newOffsetY = offset_y + mYUpperPadding + mYNameSize + mYNamePadding;
+    auto thumbnail_offset = mLayoutHorizontal
+        ? CalChart::Coord(box_size.x + kXLeftPadding + kXRightPadding, 0)
+        : CalChart::Coord(0, box_size.y + kYUpperPadding + mYNameSize + kYNamePadding);
 
-        auto mode_size = fDIP(mView->GetShowFullSize());
-        auto current_size_x = GetSize().x - mXLeftPadding - mXRightPadding - mXScrollPadding;
-        auto current_size_y = GetSize().y - mYNameSize - mYNamePadding - mYUpperPadding - mYBottomPadding - mYScrollPadding;
-        auto box_size_x = (mLayoutHorizontal) ? mode_size.x * (current_size_y / double(mode_size.y)) : current_size_x;
-        auto box_size_y = (mLayoutHorizontal) ? current_size_y : mode_size.y * (current_size_x / double(mode_size.x));
+    auto field_offset = CalChart::Coord(0, mYNameSize + kYNamePadding);
 
-        dc.SetPen(*wxBLACK_PEN);
-        if (mView->GetCurrentSheet() == sheet) {
-            auto copy_of_pen = *wxYELLOW_PEN;
-            copy_of_pen.SetWidth(5);
-            dc.SetPen(copy_of_pen);
-        }
+    wxCalChart::Draw::DrawCommandList(dc, LayoutSheetThumbnails(*mView, mConfig, mYNameSize, thumbnail_offset, CalChart::Coord(box_size.x, box_size.y), field_offset));
 
-        dc.DrawRectangle(newOffsetX, newOffsetY, box_size_x, box_size_y);
-        dc.SetPen(*wxBLACK_PEN);
-
-        auto origin = dc.GetDeviceOrigin();
-        auto userScale = CalcUserScale({ int(box_size_x), int(box_size_y) }, mode_size);
-        dc.SetUserScale(userScale, userScale);
-        dc.SetDeviceOrigin(origin.x + newOffsetX, origin.y + newOffsetY);
-
-        wxCalChart::setPen(dc, mConfig.Get_CalChartBrushAndPen(CalChart::Colors::FIELD_DETAIL));
-
-        wxCalChart::Draw::DrawCommandList(dc, CalChart::CreateModeDrawCommandsWithBorderOffset(mConfig, mView->GetShowMode(), CalChart::HowToDraw::Animation));
-        for (auto i = 0; i < mView->GetNumPoints(); ++i) {
-            wxCalChart::setBrushAndPen(dc, mConfig.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_FRONT));
-            auto position = sheet->GetPoint(i).GetPos();
-            auto x = position.x + mView->GetShowMode().Offset().x;
-            auto y = position.y + mView->GetShowMode().Offset().y;
-            dc.DrawRectangle(x - CalChart::Int2CoordUnits(1) / 2, y - CalChart::Int2CoordUnits(1) / 2, CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(1));
-        }
-        dc.SetDeviceOrigin(origin.x, origin.y);
-
-        offset_x += (mLayoutHorizontal) ? box_size_x + mXLeftPadding + mXRightPadding : 0;
-        offset_y += (mLayoutHorizontal) ? 0 : box_size_y + mYUpperPadding + mYNameSize + mYNamePadding;
+    // we manipulate the scale and origin to create repeating copies of the field
+    auto origin = dc.GetDeviceOrigin();
+    dc.SetUserScale(userScale, userScale);
+    for (auto [which, sheet] : CalChart::Ranges::enumerate_view(mView->GenerateFieldWithMarchersDrawCommands())) {
+        auto newOrigin = which * thumbnail_offset;
+        dc.SetDeviceOrigin(origin.x + newOrigin.x + kXLeftPadding, origin.y + newOrigin.y + kYUpperPadding + mYNameSize + kYNamePadding);
+        wxCalChart::Draw::DrawCommandList(dc, sheet);
     }
 }
 

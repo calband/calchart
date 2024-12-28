@@ -423,7 +423,40 @@ auto Show::GenerateGhostPointsDrawCommands(
     return GenerateSheetPointsDrawCommands(config, selection_list, GetNumPoints(), GetPointsLabel(), sheet, 0, unselectedColor, selectedColor, unselectedTextColor, selectedTextColor);
 }
 
-int Show::GetNumSheets() const { return static_cast<int>(mSheets.size()); }
+template <std::ranges::input_range Range>
+    requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Point>)
+auto GeneratePointDrawCommand(Range&& points) -> std::vector<CalChart::Draw::DrawCommand>
+{
+    return CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(points | std::views::transform([](auto&& point) {
+        auto size = CalChart::Coord{ CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(1) };
+        return CalChart::Draw::Rectangle{
+            point.GetPos() - size / 2, { CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(1) }
+        };
+    }));
+}
+
+auto Show::GenerateFieldWithMarchersDrawCommands(CalChart::Configuration const& config) const -> std::vector<std::vector<CalChart::Draw::DrawCommand>>
+{
+    auto field = CalChart::Draw::withBrushAndPen(
+        config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD), CalChart::CreateModeDrawCommandsWithBorderOffset(config, mMode, CalChart::HowToDraw::Animation));
+    return CalChart::Ranges::ToVector<std::vector<CalChart::Draw::DrawCommand>>(
+        mSheets
+        | std::views::transform(
+            [this, field, &config](auto&& sheet) {
+                return std::vector<CalChart::Draw::DrawCommand>{
+                    field,
+                    CalChart::Draw::withBrushAndPen(
+                        config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_FRONT),
+                        GeneratePointDrawCommand(sheet.GetPoints())),
+                }
+                + mMode.Offset();
+            }));
+}
+
+int Show::GetNumSheets() const
+{
+    return static_cast<int>(mSheets.size());
+}
 
 Show::Sheet_container_t Show::RemoveNthSheet(int sheetidx)
 {
@@ -558,6 +591,11 @@ bool Show::AlreadyHasPrintContinuity() const
         }
     }
     return false;
+}
+
+auto Show::GetSheetsName() const -> std::vector<std::string>
+{
+    return CalChart::Ranges::ToVector<std::string>(mSheets | std::views::transform([](auto&& sheet) { return sheet.GetName(); }));
 }
 
 bool Show::WillMovePoints(std::map<int, Coord> const& new_positions, int ref) const

@@ -125,6 +125,8 @@ public:
     [[nodiscard]] auto AlreadyHasPrintContinuity() const -> bool;
     [[nodiscard]] auto const& GetShowMode() const { return mMode; }
 
+    [[nodiscard]] auto GetSheetsName() const -> std::vector<std::string>;
+
     // utility
     [[nodiscard]] auto GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const -> std::pair<bool, std::vector<size_t>>;
     [[nodiscard]] auto MakeSelectAll() const -> SelectionList;
@@ -172,6 +174,9 @@ public:
         CalChart::Configuration const& config,
         CalChart::SelectionList const& selection_list,
         CalChart::Sheet const& sheet) const -> std::vector<CalChart::Draw::DrawCommand>;
+
+    [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands(CalChart::Configuration const& config) const -> std::vector<std::vector<CalChart::Draw::DrawCommand>>;
+    [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands2(CalChart::Configuration const& config) const -> std::vector<std::vector<std::string>>;
 
 private:
     // modification of show is private, and externally done through create and exeucte commands
