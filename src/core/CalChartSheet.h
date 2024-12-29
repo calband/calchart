@@ -95,7 +95,7 @@ public:
     auto GetNumberPoints() const { return mPoints.size(); }
     std::vector<SYMBOL_TYPE> GetSymbols() const;
     void SetPoints(std::vector<Point> const& points);
-    int FindPoint(Coord where, Coord::units searchBound, unsigned ref = 0) const;
+    [[nodiscard]] auto FindMarcher(Coord where, Coord::units searchBound, unsigned ref = 0) const -> std::optional<int>;
     std::vector<Point> RemapPoints(std::vector<size_t> const& table) const;
     Coord GetPosition(unsigned i, unsigned ref = 0) const;
     void SetAllPositions(Coord val, unsigned i);

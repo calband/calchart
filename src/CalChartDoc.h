@@ -183,6 +183,7 @@ public:
     void SetSelect(CalChart::Select select);
     auto GetCurrentReferencePoint() const { return mCurrentReferencePoint; }
     void SetCurrentReferencePoint(int currentReferencePoint);
+    [[nodiscard]] auto FindMarcher(CalChart::Coord pos) const -> std::optional<int>;
     auto GetDrawPaths() const { return mDrawPaths; }
     void SetDrawPaths(bool drawPaths);
     auto GetDrawBackground() const { return mDrawBackground; }

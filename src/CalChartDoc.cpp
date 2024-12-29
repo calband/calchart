@@ -539,6 +539,11 @@ void CalChartDoc::SetCurrentReferencePoint(int currentReferencePoint)
     UpdateAllViews();
 }
 
+auto CalChartDoc::FindMarcher(CalChart::Coord pos) const -> std::optional<int>
+{
+    return GetCurrentSheet()->FindMarcher(pos, CalChart::Float2CoordUnits(mConfig.Get_DotRatio()), GetCurrentReferencePoint());
+}
+
 void CalChartDoc::SetDrawPaths(bool drawPaths)
 {
     mDrawPaths = drawPaths;

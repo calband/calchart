@@ -27,6 +27,7 @@
 #include "CalChartTypes.h"
 #include <map>
 #include <memory>
+#include <optional>
 #include <utility>
 #include <wx/docview.h>
 
@@ -74,7 +75,7 @@ public:
     [[nodiscard]] auto DoAppendShow(std::unique_ptr<CalChartDoc> other_show) -> std::pair<bool, std::string>;
 
     ///// query show attributes /////
-    int FindPoint(CalChart::Coord pos) const;
+    [[nodiscard]] auto FindMarcher(CalChart::Coord pos) const { return mShow->FindMarcher(pos); }
     CalChart::Coord PointPosition(int which) const;
     auto GetCurrentSheetNum() const { return mShow ? mShow->GetCurrentSheetNum() : 0; }
     auto GetNumSheets() const { return mShow ? mShow->GetNumSheets() : 0; }

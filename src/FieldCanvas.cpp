@@ -199,19 +199,19 @@ void FieldCanvas::OnMouseLeftDown_NormalMove(CalChart::Coord pos, bool shiftDown
         OnMouseLeftDown_Swap(pos);
     }
 
-    auto i = mView->FindPoint(pos);
+    auto i = mView->FindMarcher(pos);
     // if we didn't click on anything, and we have no modifiers, we are starting a new selection
-    if ((i < 0) && !(shiftDown || altDown)) {
+    if (!i.has_value() && !(shiftDown || altDown)) {
         mView->UnselectAll();
     }
-    if (i < 0) {
+    if (!i.has_value()) {
         // if no point selected, we grab using the current select
         BeginSelectDrag(mView->GetSelect(), pos);
         return;
     }
 
     // Now add whatever we clicked to the selection.
-    auto select = CalChart::SelectionList{ i };
+    auto select = CalChart::SelectionList{ *i };
     if (altDown) {
         mView->ToggleSelection(select);
     } else {
@@ -229,12 +229,12 @@ void FieldCanvas::OnMouseLeftDown_NormalMove(CalChart::Coord pos, bool shiftDown
 // And then we unselect
 void FieldCanvas::OnMouseLeftDown_Swap(CalChart::Coord pos)
 {
-    int targetDotIndex = mView->FindPoint(pos);
-    if (targetDotIndex < 0) {
+    auto targetDotIndex = mView->FindMarcher(pos);
+    if (!targetDotIndex.has_value()) {
         return;
     }
     CalChart::SelectionList targetDot;
-    targetDot.insert(targetDotIndex);
+    targetDot.insert(*targetDotIndex);
     if (mView->GetSelectionList().size() != 1) {
         mView->UnselectAll();
     }
