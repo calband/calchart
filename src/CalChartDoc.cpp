@@ -496,7 +496,7 @@ auto CalChartDoc::GeneratePathsDrawCommands() const -> std::vector<CalChart::Dra
     if (!GetDrawPaths()) {
         return {};
     }
-    if (!mAnimation || mAnimation->GetNumberSheets() == 0 || (mAnimation->GetNumberSheets() <= GetCurrentSheetNum())) {
+    if (!mAnimation || mAnimation->GetNumberSheets() == 0 || (static_cast<int>(mAnimation->GetNumberSheets()) <= GetCurrentSheetNum())) {
         return {};
     }
     auto endRadius = CalChart::Float2CoordUnits(config.Get_DotRatio()) / 2;

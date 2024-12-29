@@ -615,10 +615,10 @@ auto PrintShowToPS::GenerateStandard(Sheet const& sheet, bool split_sheet) const
         + std::format("/numberfont findfont {:.2f} scalefont setfont\n", dot_w * 2 * mNumRatio);
 
     auto pointsOfInterest = CalChart::Ranges::enumerate_view(sheet.GetAllPoints())
-        | std::views::filter([clip_s, clip_n](auto&& enumPoint) {
+        | std::views::filter([clip_s = clip_s, clip_n = clip_n](auto&& enumPoint) {
               return std::get<1>(enumPoint).GetPos().x >= clip_s && std::get<1>(enumPoint).GetPos().x <= clip_n;
           });
-    result = std::accumulate(std::begin(pointsOfInterest), std::end(pointsOfInterest), result, [this, step_offset, fieldheight = CoordUnits2Float(fieldsize.y), fieldoffx = CoordUnits2Float(fieldoff.x), fieldoffy = CoordUnits2Float(fieldoff.y)](auto acc, auto enumPoint) {
+    result = std::accumulate(std::begin(pointsOfInterest), std::end(pointsOfInterest), result, [this, step_offset = step_offset, fieldheight = CoordUnits2Float(fieldsize.y), fieldoffx = CoordUnits2Float(fieldoff.x), fieldoffy = CoordUnits2Float(fieldoff.y)](auto acc, auto enumPoint) {
         auto [enumeration, point] = enumPoint;
         auto dot_x = (CoordUnits2Float(point.GetPos().x) - fieldoffx - step_offset) / step_width * field_w;
         auto dot_y = (1.0 - (CoordUnits2Float(point.GetPos().y) - fieldoffy) / fieldheight) * field_h;

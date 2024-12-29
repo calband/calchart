@@ -25,60 +25,53 @@
 #include "CalChartDoc.h"
 #include "CalChartShowMode.h"
 #include "CalChartTypes.h"
-
 #include <map>
 #include <memory>
+#include <utility>
 #include <wx/docview.h>
 
 // CalChartView connects together the Frames and the Doc.
 
-class BackgroundImages;
 class CalChartFrame;
-class AnimationFrame;
-class Animation;
-class Matrix;
-class CalChartConfiguration;
 
 class CalChartView : public wxView {
 public:
     CalChartView() = default;
-    ~CalChartView() = default;
+    ~CalChartView() override = default;
 
-    bool OnCreate(wxDocument* doc, long flags) override;
-    void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL) override;
-    bool OnClose(bool deleteWindow = true) override;
+    [[nodiscard]] auto OnCreate(wxDocument* doc, long flags) -> bool override;
+    void OnUpdate(wxView* sender, wxObject* hint = nullptr) override;
+    [[nodiscard]] auto OnClose(bool deleteWindow = true) -> bool override;
 
     void OnDraw(wxDC* dc) override;
-    [[nodiscard]] auto GeneratePhatomPointsDrawCommands(std::map<int, CalChart::Coord> const& positions) const -> std::vector<CalChart::Draw::DrawCommand>;
-
-    [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands() const { return mShow->GenerateFieldWithMarchersDrawCommands(); }
-
     void OnDrawBackground(wxDC& dc);
 
     static void OnWizardSetup(CalChartDoc& show, wxWindow* parent);
 
-    ///// Modify the show /////
-    bool DoRotatePointPositions(int rotateAmount);
-    bool DoMovePoints(std::map<int, CalChart::Coord> const& transmat);
-    bool DoDeletePoints();
-    bool DoResetReferencePoint();
-    bool DoSetPointsSymbol(CalChart::SYMBOL_TYPE sym);
+    ///// Modify the show. /////
+    // Results from these commands are not generally issued - think of this as a "request"
+    // to modify the show with no result of success or failure returned.
+    void DoRotatePointPositions(int rotateAmount);
+    void DoMovePoints(std::map<int, CalChart::Coord> const& transmat);
+    void DoDeletePoints();
+    void DoResetReferencePoint();
+    void DoSetPointsSymbol(CalChart::SYMBOL_TYPE sym);
     void DoSetMode(CalChart::ShowMode const& mode);
     void DoSetupMarchers(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int numColumns);
     void DoSetInstruments(std::map<int, std::string> const& dotToInstrument);
     void DoSetSheetTitle(wxString const& descr);
-    bool DoSetSheetBeats(int beats);
-    bool DoSetPointsLabel(bool right);
-    bool DoSetPointsLabelFlip();
-    bool DoSetPointsLabelVisibility(bool isVisible);
-    bool DoTogglePointsLabelVisibility();
+    void DoSetSheetBeats(int beats);
+    void DoSetPointsLabel(bool right);
+    void DoSetPointsLabelVisibility(bool isVisible);
+    void DoSetPointsLabelFlip();
+    void DoTogglePointsLabelVisibility();
     void DoInsertSheets(CalChart::Show::Sheet_container_t const& sht, int where);
-    bool DoDeleteSheet(int where);
-    bool DoImportPrintableContinuity(const wxString& file);
+    void DoDeleteSheet(int where);
+    void DoImportPrintableContinuity(const wxString& file);
     void DoSetPrintContinuity(int which_sheet, const wxString& number, const wxString& cont);
-    bool DoRelabel();
-    std::pair<bool, std::string> DoAppendShow(std::unique_ptr<CalChartDoc> other_show);
-    bool DoSetContinuityCommand(CalChart::SYMBOL_TYPE sym, CalChart::Continuity const& new_cont);
+    void DoSetContinuityCommand(CalChart::SYMBOL_TYPE sym, CalChart::Continuity const& new_cont);
+    [[nodiscard]] auto DoRelabel() -> bool;
+    [[nodiscard]] auto DoAppendShow(std::unique_ptr<CalChartDoc> other_show) -> std::pair<bool, std::string>;
 
     ///// query show attributes /////
     int FindPoint(CalChart::Coord pos) const;
@@ -142,6 +135,10 @@ public:
     auto IsSelected(int i) const { return mShow->IsSelected(i); }
 
     ///// Drawing marcher's paths /////
+    // Generate Draw Commands
+    [[nodiscard]] auto GeneratePhatomPointsDrawCommands(std::map<int, CalChart::Coord> const& positions) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands() const { return mShow->GenerateFieldWithMarchersDrawCommands(); }
+
     // call this when we need to generate the marcher's paths.
     void OnEnableDrawPaths(bool enable);
 
@@ -165,4 +162,9 @@ private:
     BackgroundImages mBackgroundImages;
 
     DECLARE_DYNAMIC_CLASS(CalChartView)
+
+    CalChartView(CalChartView const&) = delete;
+    CalChartView(CalChartView&&) = delete;
+    CalChartView& operator=(CalChartView const&) = delete;
+    CalChartView& operator=(CalChartView&&) = delete;
 };
