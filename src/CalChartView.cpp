@@ -168,55 +168,50 @@ void CalChartView::OnWizardSetup(CalChartDoc& show, wxWindow* parent)
     wizard->Destroy();
 }
 
-bool CalChartView::DoRotatePointPositions(int rotateAmount)
+void CalChartView::DoRotatePointPositions(int rotateAmount)
 {
     if (mShow->GetSelectionList().size() == 0) {
-        return false;
+        return;
     }
     auto cmd = mShow->Create_RotatePointPositionsCommand(rotateAmount);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
-    return true;
 }
 
-bool CalChartView::DoMovePoints(const std::map<int, CalChart::Coord>& newPositions)
+void CalChartView::DoMovePoints(const std::map<int, CalChart::Coord>& newPositions)
 {
     if (mShow->GetSelectionList().size() == 0 || !mShow->WillMovePoints(newPositions)) {
-        return false;
+        return;
     }
     auto cmd = mShow->Create_MovePointsCommand(newPositions);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
-    return true;
 }
 
-bool CalChartView::DoDeletePoints()
+void CalChartView::DoDeletePoints()
 {
     if (mShow->GetSelectionList().size() == 0) {
-        return false;
+        return;
     }
     auto cmd = mShow->Create_DeletePointsCommand();
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
-    return true;
 }
 
-bool CalChartView::DoResetReferencePoint()
+void CalChartView::DoResetReferencePoint()
 {
     if (mShow->GetSelectionList().size() == 0) {
-        return false;
+        return;
     }
     auto cmd = mShow->Create_ResetReferencePointToRef0();
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
-    return true;
 }
 
-bool CalChartView::DoSetPointsSymbol(CalChart::SYMBOL_TYPE sym)
+void CalChartView::DoSetPointsSymbol(CalChart::SYMBOL_TYPE sym)
 {
     if (mShow->GetSelectionList().size() == 0) {
         SetSelectionList(mShow->MakeSelectBySymbol(sym));
-        return true;
+        return;
     }
     auto cmd = mShow->Create_SetSymbolCommand(sym);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
-    return true;
 }
 
 void CalChartView::DoSetMode(CalChart::ShowMode const& mode)
@@ -243,51 +238,46 @@ void CalChartView::DoSetSheetTitle(const wxString& descr)
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-bool CalChartView::DoSetSheetBeats(int beats)
+void CalChartView::DoSetSheetBeats(int beats)
 {
     auto cmd = mShow->Create_SetSheetBeatsCommand(beats);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
-    return true;
 }
 
-bool CalChartView::DoSetPointsLabel(bool right)
+void CalChartView::DoSetPointsLabel(bool right)
 {
     if (mShow->GetSelectionList().size() == 0) {
-        return false;
+        return;
     }
     auto cmd = mShow->Create_SetLabelRightCommand(right);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
-    return true;
 }
 
-bool CalChartView::DoSetPointsLabelFlip()
+void CalChartView::DoSetPointsLabelFlip()
 {
     if (mShow->GetSelectionList().size() == 0) {
-        return false;
+        return;
     }
     auto cmd = mShow->Create_ToggleLabelFlipCommand();
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
-    return true;
 }
 
-bool CalChartView::DoSetPointsLabelVisibility(bool isVisible)
+void CalChartView::DoSetPointsLabelVisibility(bool isVisible)
 {
     if (mShow->GetSelectionList().size() == 0) {
-        return false;
+        return;
     }
     auto cmd = mShow->Create_SetLabelVisibleCommand(isVisible);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
-    return true;
 }
 
-bool CalChartView::DoTogglePointsLabelVisibility()
+void CalChartView::DoTogglePointsLabelVisibility()
 {
     if (mShow->GetSelectionList().size() == 0) {
-        return false;
+        return;
     }
     auto cmd = mShow->Create_ToggleLabelVisibilityCommand();
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
-    return true;
 }
 
 void CalChartView::DoInsertSheets(const CalChart::Show::Sheet_container_t& sht,
@@ -297,19 +287,19 @@ void CalChartView::DoInsertSheets(const CalChart::Show::Sheet_container_t& sht,
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-bool CalChartView::DoDeleteSheet(int where)
+void CalChartView::DoDeleteSheet(int where)
 {
     auto cmd = mShow->Create_RemoveSheetCommand(where);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
-    return true;
 }
 
-bool CalChartView::DoImportPrintableContinuity(const wxString& file)
+void CalChartView::DoImportPrintableContinuity(const wxString& file)
 {
     wxTextFile fp;
     fp.Open(file);
     if (!fp.IsOpened()) {
-        return wxT("Unable to open file");
+        wxMessageBox("Unable to open file", "Unable to open file", wxOK);
+        return;
     }
     // read the file into a vector
     std::vector<std::string> lines;
@@ -319,22 +309,21 @@ bool CalChartView::DoImportPrintableContinuity(const wxString& file)
     auto hasCont = mShow->AlreadyHasPrintContinuity();
     if (hasCont) {
         // prompt the user to find out if they would like to continue
-        int userchoice = wxMessageBox(
-            wxT("This show already has some Printable Continuity.")
-                wxT("Would you like to continue Importing Printable Continuity and "
-                    "overwrite it?"),
-            wxT("Overwrite Printable Continuity?"), wxYES_NO | wxCANCEL);
+        auto userchoice = wxMessageBox(
+            "This show already has some Printable Continuity.  "
+            "Would you like to continue Importing Printable Continuity and "
+            "overwrite it?",
+            "Overwrite Printable Continuity?", wxYES_NO | wxCANCEL);
         if (userchoice != wxYES) {
-            return true;
+            return;
         }
     }
     auto data = mShow->ImportPrintableContinuity(lines);
     if (data.first) {
         auto cmd = mShow->Create_SetPrintableContinuity(data.second);
         GetDocument()->GetCommandProcessor()->Submit(cmd.release());
-        return true;
+        return;
     }
-    return false;
 }
 
 void CalChartView::DoSetPrintContinuity(int which_sheet, const wxString& number, const wxString& cont)
@@ -382,11 +371,10 @@ std::pair<bool, std::string> CalChartView::DoAppendShow(std::unique_ptr<CalChart
 }
 
 // append is an insert with a relabel
-bool CalChartView::DoSetContinuityCommand(CalChart::SYMBOL_TYPE sym, CalChart::Continuity const& new_cont)
+void CalChartView::DoSetContinuityCommand(CalChart::SYMBOL_TYPE sym, CalChart::Continuity const& new_cont)
 {
     auto cmd = mShow->Create_SetContinuityCommand(sym, new_cont);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
-    return true;
 }
 
 int CalChartView::FindPoint(CalChart::Coord pos) const
