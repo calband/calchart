@@ -246,7 +246,7 @@ auto AnimationView::GetAnimationFrame() -> AnimationPanel*
 
 auto AnimationView::GetShowFieldSize() const -> CalChart::Coord
 {
-    return mView->GetShowMode().FieldSize();
+    return mView->GetShowFieldSize();
 }
 
 auto AnimationView::GetMarcherInfo(int which) const -> std::optional<CalChart::Animate::Info>

@@ -377,11 +377,6 @@ void CalChartView::DoSetContinuityCommand(CalChart::SYMBOL_TYPE sym, CalChart::C
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-CalChart::Coord CalChartView::PointPosition(int which) const
-{
-    return mShow->GetCurrentSheet()->GetPosition(which, mShow->GetCurrentReferencePoint());
-}
-
 std::vector<CalChart::Animate::Errors> CalChartView::GetAnimationErrors() const
 {
     if (!mShow) {
