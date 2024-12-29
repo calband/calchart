@@ -130,6 +130,12 @@ struct Pen {
     Style style = Pen::Style::Solid;
     int width = 1;
     friend auto operator==(Pen const&, Pen const&) -> bool = default;
+
+    Pen& withWidth(int w)
+    {
+        width = w;
+        return *this;
+    }
 };
 
 // for the cases where we share a color

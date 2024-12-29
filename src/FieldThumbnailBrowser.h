@@ -58,13 +58,13 @@ private:
 
     CalChartView* mView{};
 
-    const int mXLeftPadding{ 4 };
-    const int mXRightPadding{ 4 };
+    // const int mXLeftPadding{ 4 };
+    // const int mXRightPadding{ 4 };
     const int mXScrollPadding{};
-    const int mYUpperPadding{ 4 };
+    // const int mYUpperPadding{ 4 };
     const int mYNameSize{ 16 };
-    const int mYNamePadding{ 4 };
-    const int mYBottomPadding{ 4 };
+    // const int mYNamePadding{ 4 };
+    // const int mYBottomPadding{ 4 };
     const int mYScrollPadding{};
 
     bool mLayoutHorizontal{ false };

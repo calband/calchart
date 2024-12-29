@@ -52,29 +52,6 @@ auto GenerateSpriteImages(wxImage const& image, int numberImages, int imageX, in
     });
 }
 
-template <std::ranges::input_range Range>
-    requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Info>)
-auto GeneratePointDrawCommand(Range&& infos) -> std::vector<CalChart::Draw::DrawCommand>
-{
-    return CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(infos | std::views::transform([](auto&& info) {
-        auto size = CalChart::Coord{ CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(1) };
-        return CalChart::Draw::Rectangle{
-            info.mMarcherInfo.mPosition - size / 2, { CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(1) }
-        };
-    }));
-}
-
-template <std::ranges::input_range Range, typename Function>
-    requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Info>)
-auto GeneratePointDrawCommand(Range&& range, Function predicate, CalChart::BrushAndPen brushAndPen) -> CalChart::Draw::DrawCommand
-{
-    auto filteredRange = range | std::views::filter(predicate);
-    if (!filteredRange.empty()) {
-        return CalChart::Draw::withBrushAndPen(brushAndPen, GeneratePointDrawCommand(filteredRange));
-    }
-    return CalChart::Draw::Ignore{};
-}
-
 }
 
 AnimationView::AnimationView(CalChartView* view, CalChart::Configuration const& config, wxWindow* frame)

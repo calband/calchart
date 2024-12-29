@@ -50,6 +50,9 @@ public:
 
     void OnDraw(wxDC* dc) override;
     [[nodiscard]] auto GeneratePhatomPointsDrawCommands(std::map<int, CalChart::Coord> const& positions) const -> std::vector<CalChart::Draw::DrawCommand>;
+
+    [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands() const { return mShow->GenerateFieldWithMarchersDrawCommands(); }
+
     void OnDrawBackground(wxDC& dc);
 
     static void OnWizardSetup(CalChartDoc& show, wxWindow* parent);
@@ -84,14 +87,14 @@ public:
     auto GetNumSheets() const { return mShow ? mShow->GetNumSheets() : 0; }
     auto GetNumPoints() const { return mShow ? mShow->GetNumPoints() : 0; }
 
-    CalChart::ShowMode const& GetShowMode() { return mShow->GetShowMode(); }
+    CalChart::ShowMode const& GetShowMode() const { return mShow->GetShowMode(); }
     [[nodiscard]] auto GetShowFieldOffset() const { return mShow->GetShowMode().Offset(); }
     auto GetShowFullSize() const { return mShow->GetShowMode().Size(); }
 
     auto GetSheets() const { return mShow->GetSheets(); }
-    auto GetSheetBegin() const { return mShow->GetSheetBegin(); }
-    auto GetSheetEnd() const { return mShow->GetSheetEnd(); }
     auto GetCurrentSheet() const { return mShow->GetCurrentSheet(); }
+
+    [[nodiscard]] auto GetSheetsName() const { return mShow->GetSheetsName(); }
 
     [[nodiscard]] auto GetAnimationInfo(CalChart::beats_t whichBeat, int which) const -> std::optional<CalChart::Animate::Info>;
     [[nodiscard]] auto GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::beats_t whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>;
@@ -103,6 +106,7 @@ public:
         bool drawCollisionWarning,
         std::optional<bool> onBeat,
         CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>;
+
     [[nodiscard]] auto GetTotalNumberAnimationBeats() const -> std::optional<CalChart::beats_t>;
     [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
 
@@ -115,7 +119,6 @@ public:
     void GoToSheet(int which);
     void GoToNextSheet() { GoToSheet(mShow->GetCurrentSheetNum() + 1); }
     void GoToPrevSheet() { GoToSheet(mShow->GetCurrentSheetNum() - 1); }
-    auto GetNthSheet(int n) const { return mShow->GetNthSheet(n); }
 
     void SetActiveReferencePoint(int which);
 
