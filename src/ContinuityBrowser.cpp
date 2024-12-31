@@ -155,10 +155,13 @@ void ContinuityBrowser::OnUpdate()
     }
     auto sht = mView->GetCurrentSheet();
 
-    for (auto i = 0ul; i < sizeof(CalChart::k_symbols) / sizeof(CalChart::k_symbols[0]); ++i) {
-        mPerCont.at(i)->Show(sht->ContinuityInUse(CalChart::k_symbols[i]));
-        mPerCont.at(i)->DoSetContinuity(sht->GetContinuityBySymbol(CalChart::k_symbols[i]));
+    for (auto [i, inUse] : CalChart::Ranges::enumerate_view(sht->ContinuitiesInUse())) {
+        mPerCont.at(i)->Show(inUse);
     }
+    std::ranges::for_each(CalChart::Ranges::zip_view(sht->GetContinuities(), mPerCont),
+        [](auto&& contAndBrowser) {
+            std::get<1>(contAndBrowser)->DoSetContinuity(std::get<0>(contAndBrowser));
+        });
     GetSizer()->FitInside(this);
 }
 

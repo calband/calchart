@@ -570,11 +570,6 @@ std::vector<Point> Sheet::RemapPoints(std::vector<size_t> const& table) const
     return newpts;
 }
 
-Continuity const& Sheet::GetContinuityBySymbol(SYMBOL_TYPE i) const
-{
-    return mAnimationContinuity.at(i);
-}
-
 void Sheet::SetContinuity(SYMBOL_TYPE which, Continuity const& new_cont)
 {
     mAnimationContinuity.at(which) = new_cont;

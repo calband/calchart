@@ -35,13 +35,12 @@ auto GetCompiledResults(Sheets const& sheets, Conts const& proc)
     auto animationData = Animate::AnimationData{
         0,
         sheets.begin()->GetPoint(0),
-        proc,
         (sheets.begin() + 1)->GetPoint(0).GetPos(),
         sheets.begin()->GetBeats(),
         true
     };
 
-    return Animate::CreateCompileResult(animationData, vars);
+    return Animate::CreateCompileResult(animationData, proc, vars);
 }
 
 auto CreateSheetsForTest(Coord begin, Coord end, int beats)

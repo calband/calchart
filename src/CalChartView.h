@@ -85,7 +85,6 @@ public:
     [[nodiscard]] auto GetShowFieldOffset() const { return mShow->GetShowMode().Offset(); }
     auto GetShowFullSize() const { return mShow->GetShowMode().Size(); }
 
-    auto GetSheets() const { return mShow->GetSheets(); }
     auto GetCurrentSheet() const { return mShow->GetCurrentSheet(); }
 
     [[nodiscard]] auto GetSheetsName() const { return mShow->GetSheetsName(); }
@@ -121,11 +120,11 @@ public:
     void AddToSelection(const CalChart::SelectionList& sl) { SetSelectionList(mShow->MakeAddToSelection(sl)); }
     void ToggleSelection(const CalChart::SelectionList& sl) { SetSelectionList(mShow->MakeToggleSelection(sl)); }
     void SelectWithinPolygon(CalChart::RawPolygon_t const& polygon, bool toggleSelected);
-    void SelectPointsInRect(const CalChart::Coord& c1, const CalChart::Coord& c2, bool toggleSelected);
     auto GetSelectionList() const { return mShow->GetSelectionList(); }
     void SetSelectionList(const CalChart::SelectionList& sl);
     auto GetSelect() const { return mShow->GetSelect(); }
     void SetSelect(CalChart::Select select);
+    [[nodiscard]] auto MakeSelectBySymbol(CalChart::SYMBOL_TYPE symbol) const { return mShow->MakeSelectBySymbol(symbol); }
     auto GetCurrentMove() const { return mShow->GetCurrentMove(); }
     void SetCurrentMove(CalChart::MoveMode move) { mShow->SetCurrentMove(move); }
     auto GetGhostModuleIsActive() const { return mShow->GetGhostModuleIsActive(); }

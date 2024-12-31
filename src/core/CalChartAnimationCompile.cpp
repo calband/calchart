@@ -28,6 +28,10 @@
 namespace CalChart::Animate {
 
 struct CompileState : public Compile {
+    CompileState(AnimationData const& data, Variables& variablesStates)
+        : CompileState(data.whichMarcher, data.marcherPosition, data.numBeats, data.endPosition, variablesStates)
+    {
+    }
     CompileState(unsigned whichMarcher, Point point, beats_t beats, std::optional<Coord> endPosition, Variables& variablesStates);
 
     [[nodiscard]] auto Append(Command cmd) -> bool override;
@@ -58,12 +62,13 @@ private:
 
 auto CreateCompileResult(
     AnimationData const& animationData,
+    Proceedures const& proceedures,
     Variables& variablesStates) -> CompileResult
 {
-    CompileState ac(animationData.whichMarcher, animationData.marcherPosition, animationData.numBeats, animationData.endPosition, variablesStates);
+    auto ac = CompileState(animationData, variablesStates);
 
     // no continuity was specified
-    if (animationData.continuity.empty()) {
+    if (proceedures.empty()) {
         if (animationData.isLastAnimationSheet) {
             // use MTRM E
             Cont::ProcMTRM defcont(std::make_unique<Cont::ValueDefined>(Cont::CC_E));
@@ -76,7 +81,7 @@ auto CreateCompileResult(
     }
 
     // compile all the commands
-    for (auto const& proc : animationData.continuity) {
+    for (auto const& proc : proceedures) {
         proc->Compile(ac);
     }
 
