@@ -377,12 +377,6 @@ void CalChartView::DoSetContinuityCommand(CalChart::SYMBOL_TYPE sym, CalChart::C
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-int CalChartView::FindPoint(CalChart::Coord pos) const
-{
-    auto& config = mShow->GetConfiguration();
-    return mShow->GetCurrentSheet()->FindPoint(pos, CalChart::Float2CoordUnits(config.Get_DotRatio()), mShow->GetCurrentReferencePoint());
-}
-
 CalChart::Coord CalChartView::PointPosition(int which) const
 {
     return mShow->GetCurrentSheet()->GetPosition(which, mShow->GetCurrentReferencePoint());

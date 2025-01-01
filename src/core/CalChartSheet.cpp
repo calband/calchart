@@ -510,7 +510,7 @@ auto Sheet::SerializeSheet() const -> std::vector<std::byte>
 Sheet::~Sheet() = default;
 
 // Find point at certain coords
-int Sheet::FindPoint(Coord where, Coord::units searchBound, unsigned ref) const
+auto Sheet::FindMarcher(Coord where, Coord::units searchBound, unsigned ref) const -> std::optional<int>
 {
     for (auto i = 0; i < static_cast<int>(mPoints.size()); i++) {
         Coord c = GetPosition(i, ref);
