@@ -540,7 +540,7 @@ void DrawForPrintingHelper(
     CalChart::append(drawCmds,
         CalChart::Draw::withFont(
             CalChart::Font{ 16, CalChart::Font::Family::Roman, CalChart::Font::Style::Normal, CalChart::Font::Weight::Bold },
-            GenerateLargePrintElements(landscape, page, sheet.GetNumber())));
+            GenerateLargePrintElements(landscape, page, sheet.GetPrintNumber())));
 
     CalChart::append(drawCmds,
         CalChart::Draw::withFont(

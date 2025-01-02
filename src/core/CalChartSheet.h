@@ -86,6 +86,7 @@ public:
     // print continuity
     void SetPrintableContinuity(std::string const& name, std::string const& lines);
     Textline_list GetPrintableContinuity() const;
+    std::string GetPrintNumber() const;
     std::string GetRawPrintContinuity() const;
     auto GetPrintContinuity() const { return mPrintableContinuity; }
 
@@ -119,8 +120,6 @@ public:
     // titles
     std::string GetName() const;
     void SetName(std::string const& newname);
-    std::string GetNumber() const;
-    void SetNumber(std::string const& newnumber);
 
     // image
     std::vector<ImageInfo> const& GetBackgroundImages() const;

@@ -145,7 +145,10 @@ public:
     void SetCurrentSheet(int n);
 
     auto GetNumPoints() const { return mShow->GetNumPoints(); }
-    std::pair<bool, std::vector<size_t>> GetRelabelMapping(CalChart::Show::const_Sheet_iterator_t source_sheet, CalChart::Show::const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const;
+    [[nodiscard]] auto GetRelabelMapping(CalChart::Show::const_Sheet_iterator_t source_sheet, CalChart::Show::const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const
+    {
+        return mShow->GetRelabelMapping(source_sheet, target_sheets, tolerance);
+    }
 
     auto GetPointLabel(int i) const { return mShow->GetPointLabel(i); }
     auto GetPointsLabel() const { return mShow->GetPointsLabel(); }
@@ -153,6 +156,9 @@ public:
     auto GetPointsInstrument() const { return mShow->GetPointsInstrument(); }
     auto GetPointSymbol(int i) const { return mShow->GetPointSymbol(i); }
     auto GetPointsSymbol() const { return mShow->GetPointsSymbol(); }
+
+    [[nodiscard]] auto GetContinuities() const { return GetCurrentSheet()->GetContinuities(); }
+    [[nodiscard]] auto ContinuitiesInUse() const { return GetCurrentSheet()->ContinuitiesInUse(); }
 
     // how to select points
     // Utility functions for constructing new selection lists
@@ -214,6 +220,10 @@ public:
     [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands() const { return mShow->GenerateFieldWithMarchersDrawCommands(mConfig); }
 
     auto AlreadyHasPrintContinuity() const { return mShow->AlreadyHasPrintContinuity(); }
+    [[nodiscard]] auto GetPrintNumber() const { return GetCurrentSheet()->GetPrintNumber(); }
+    [[nodiscard]] auto GetRawPrintContinuity() const { return GetCurrentSheet()->GetRawPrintContinuity(); }
+    [[nodiscard]] auto GetPrintContinuity() const { return GetCurrentSheet()->GetPrintContinuity(); }
+
     auto WillMovePoints(std::map<int, CalChart::Coord> const& new_positions) const { return mShow->WillMovePoints(new_positions, mCurrentReferencePoint); }
     auto PrintToPS(bool overview, int min_yards, std::set<size_t> const& isPicked, CalChart::Configuration const& config_) const -> std::tuple<std::string, int>;
 

@@ -143,16 +143,18 @@ void PrintContinuityEditor::UpdateText()
     }
 
     // if the user input has changed, then refresh it
-    auto text = static_cast<wxTextCtrl*>(FindWindow(PrintContinuityEditor_PrintNumber));
-    text->SetValue(mView->GetCurrentSheet()->GetNumber());
+    auto printContinuity = mView->GetPrintContinuity();
 
-    if (mView->GetCurrentSheet()->GetRawPrintContinuity() != mUserInput->GetValue()) {
+    auto text = static_cast<wxTextCtrl*>(FindWindow(PrintContinuityEditor_PrintNumber));
+    text->SetValue(printContinuity.GetPrintNumber());
+
+    if (mView->GetRawPrintContinuity() != mUserInput->GetValue()) {
         mUserInput->Clear();
         mUserInput->DiscardEdits();
-        mUserInput->WriteText(mView->GetCurrentSheet()->GetRawPrintContinuity());
+        mUserInput->WriteText(printContinuity.GetOriginalLine());
         mUserInput->SetInsertionPoint(0);
     }
-    mPrintContDisplay->SetPrintContinuity(mView->GetCurrentSheet()->GetPrintContinuity());
+    mPrintContDisplay->SetPrintContinuity(printContinuity);
     Refresh();
 }
 
@@ -164,11 +166,10 @@ void PrintContinuityEditor::FlushText()
     if (!mView) {
         return;
     }
-    auto current_sheet = mView->GetCurrentSheet();
     auto current_sheet_num = mView->GetCurrentSheetNum();
     wxTextCtrl* text = (wxTextCtrl*)FindWindow(PrintContinuityEditor_PrintNumber);
     try {
-        if ((mUserInput->GetValue() != current_sheet->GetRawPrintContinuity()) || (text->GetValue() != current_sheet->GetNumber())) {
+        if ((mUserInput->GetValue() != mView->GetRawPrintContinuity()) || (text->GetValue() != mView->GetPrintNumber())) {
             mView->DoSetPrintContinuity(
                 current_sheet_num, text->GetValue(),
                 mUserInput->GetValue());
@@ -186,7 +187,7 @@ void PrintContinuityEditor::OnKeyPress(wxCommandEvent&)
     if (!mView) {
         return;
     }
-    if (mView->GetCurrentSheet()->GetRawPrintContinuity() == mUserInput->GetValue()) {
+    if (mView->GetRawPrintContinuity() == mUserInput->GetValue()) {
         return;
     }
     // cache out the current text, and only after it's stopped changing do we flush it out.
@@ -208,7 +209,7 @@ void PrintContinuityEditor::OnSaveTimerExpired(wxTimerEvent&)
         return;
     }
     // one last check here, don't write anything out if nothing changed
-    if (mView->GetCurrentSheet()->GetRawPrintContinuity() == mUserInput->GetValue()) {
+    if (mView->GetRawPrintContinuity() == mUserInput->GetValue()) {
         return;
     }
 

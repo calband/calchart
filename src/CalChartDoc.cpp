@@ -515,11 +515,6 @@ void CalChartDoc::WizardSetupNewShow(std::vector<std::pair<std::string, std::str
     UpdateAllViews();
 }
 
-std::pair<bool, std::vector<size_t>> CalChartDoc::GetRelabelMapping(Show::const_Sheet_iterator_t source_sheet, Show::const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const
-{
-    return mShow->GetRelabelMapping(source_sheet, target_sheets, tolerance);
-}
-
 void CalChartDoc::SetSelectionList(SelectionList const& sl)
 {
     auto cmd = mShow->Create_SetSelectionListCommand(sl);
@@ -700,10 +695,14 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_AppendShow(std::unique_ptr<CalCha
     auto last_sheet = static_cast<Show const&>(*mShow).GetNthSheet(currend - 1);
     auto next_sheet = other_show->GetSheetBegin();
     auto result = mShow->GetRelabelMapping(last_sheet, next_sheet, tolerance);
+    if (!result.has_value()) {
+        // No way to remap, throw an error
+        throw std::runtime_error("No remap information");
+    }
 
     // create a command to run on the other show.  This is how to apply changes
     // yes, this is weird.  Create a command and then immediately run it on the copy.  This is to apply the remap.
-    other_show->mShow->Create_ApplyRelabelMapping(0, result.second).first(*other_show->mShow);
+    other_show->mShow->Create_ApplyRelabelMapping(0, *result).first(*other_show->mShow);
 
     // get the sheets we want to append
     auto sheets = Show::Sheet_container_t(other_show->GetSheetBegin(), other_show->GetSheetEnd());

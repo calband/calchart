@@ -518,7 +518,7 @@ void Show::SetPointLabelAndInstrument(std::vector<std::pair<std::string, std::st
 
 // A relabel mapping is the mapping you would need to apply to sheet_next (and all following sheets)
 // so that they match with this current sheet
-std::pair<bool, std::vector<size_t>> Show::GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const
+auto Show::GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const -> std::optional<std::vector<size_t>>
 {
     std::vector<size_t> table(GetNumPoints());
     std::vector<unsigned> used_table(GetNumPoints());
@@ -536,11 +536,11 @@ std::pair<bool, std::vector<size_t>> Show::GetRelabelMapping(const_Sheet_iterato
         }
         if (j == GetNumPoints()) {
             // didn't find a match
-            return { false, {} };
+            return std::nullopt;
         }
     }
 
-    return { true, table };
+    return table;
 }
 
 std::string Show::GetPointLabel(int i) const
@@ -874,7 +874,7 @@ Show_command_pair Show::Create_SetPrintableContinuity(std::map<int, std::pair<st
 {
     std::map<unsigned, std::pair<std::string, std::string>> undo_data;
     for (auto&& i : data) {
-        undo_data[i.first] = { GetNthSheet(i.first)->GetNumber(), GetNthSheet(i.first)->GetRawPrintContinuity() };
+        undo_data[i.first] = { GetNthSheet(i.first)->GetPrintNumber(), GetNthSheet(i.first)->GetRawPrintContinuity() };
     }
     auto action = [data](Show& show) {
         for (auto&& i : data) {

@@ -592,7 +592,7 @@ std::string Sheet::GetName() const { return mName; }
 
 void Sheet::SetName(std::string const& newname) { mName = newname; }
 
-std::string Sheet::GetNumber() const
+std::string Sheet::GetPrintNumber() const
 {
     return mPrintableContinuity.GetPrintNumber();
 }
