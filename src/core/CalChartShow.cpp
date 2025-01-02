@@ -874,7 +874,7 @@ Show_command_pair Show::Create_SetPrintableContinuity(std::map<int, std::pair<st
 {
     std::map<unsigned, std::pair<std::string, std::string>> undo_data;
     for (auto&& i : data) {
-        undo_data[i.first] = { GetNthSheet(i.first)->GetNumber(), GetNthSheet(i.first)->GetRawPrintContinuity() };
+        undo_data[i.first] = { GetNthSheet(i.first)->GetPrintNumber(), GetNthSheet(i.first)->GetRawPrintContinuity() };
     }
     auto action = [data](Show& show) {
         for (auto&& i : data) {

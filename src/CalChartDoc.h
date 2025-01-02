@@ -220,6 +220,10 @@ public:
     [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands() const { return mShow->GenerateFieldWithMarchersDrawCommands(mConfig); }
 
     auto AlreadyHasPrintContinuity() const { return mShow->AlreadyHasPrintContinuity(); }
+    [[nodiscard]] auto GetPrintNumber() const { return GetCurrentSheet()->GetPrintNumber(); }
+    [[nodiscard]] auto GetRawPrintContinuity() const { return GetCurrentSheet()->GetRawPrintContinuity(); }
+    [[nodiscard]] auto GetPrintContinuity() const { return GetCurrentSheet()->GetPrintContinuity(); }
+
     auto WillMovePoints(std::map<int, CalChart::Coord> const& new_positions) const { return mShow->WillMovePoints(new_positions, mCurrentReferencePoint); }
     auto PrintToPS(bool overview, int min_yards, std::set<size_t> const& isPicked, CalChart::Configuration const& config_) const -> std::tuple<std::string, int>;
 

@@ -48,8 +48,7 @@ public:
     void OnDrawBackground(wxDC& dc);
 
     ///// Modify the show. /////
-    // Results from these commands are not generally issued - think of this as a "request"
-    // to modify the show with no result of success or failure returned.
+    // Issue the change to the docs command processor, it allows for the ability to undo the change.
     void DoRotatePointPositions(int rotateAmount);
     void DoMovePoints(std::map<int, CalChart::Coord> const& transmat);
     void DoDeletePoints();
@@ -83,33 +82,26 @@ public:
     [[nodiscard]] auto GetShowFullSize() const { return mShow->GetShowMode().Size(); }
     [[nodiscard]] auto GetShowFieldSize() const { return mShow->GetShowMode().FieldSize(); }
     [[nodiscard]] auto GetSheetsName() const { return mShow->GetSheetsName(); }
+    [[nodiscard]] auto GetPrintNumber() const { return mShow->GetPrintNumber(); }
+    [[nodiscard]] auto GetRawPrintContinuity() const { return mShow->GetRawPrintContinuity(); }
+    [[nodiscard]] auto GetPrintContinuity() const { return mShow->GetPrintContinuity(); }
     [[nodiscard]] auto GetAnimationInfo(CalChart::beats_t whichBeat, int which) const -> std::optional<CalChart::Animate::Info>;
     [[nodiscard]] auto GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::beats_t whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>;
     [[nodiscard]] auto GetAnimationErrors() const -> std::vector<CalChart::Animate::Errors>;
-    // Sheet -> all collisions
-    std::map<int, CalChart::SelectionList> GetAnimationCollisions() const;
-    [[nodiscard]] auto GenerateAnimationDrawCommands(
-        CalChart::beats_t whichBeat,
-        bool drawCollisionWarning,
-        std::optional<bool> onBeat,
-        CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>;
-
+    [[nodiscard]] auto GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>;
     [[nodiscard]] auto GetTotalNumberAnimationBeats() const -> std::optional<CalChart::beats_t>;
     [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
 
     [[nodiscard]] auto GetContinuities() const { return mShow->GetContinuities(); }
     [[nodiscard]] auto ContinuitiesInUse() const { return mShow->ContinuitiesInUse(); }
-
     [[nodiscard]] auto BeatHasCollision(CalChart::beats_t whichBeat) const -> bool;
     [[nodiscard]] auto GetAnimationBeatForCurrentSheet() const -> CalChart::beats_t;
-
-    auto ClipPositionToShowMode(CalChart::Coord const& pos) const { return mShow->GetShowMode().ClipPosition(pos); }
+    [[nodiscard]] auto ClipPositionToShowMode(CalChart::Coord const& pos) const { return mShow->GetShowMode().ClipPosition(pos); }
 
     ///// Change show attributes /////
     void GoToSheet(int which);
     void GoToNextSheet() { GoToSheet(mShow->GetCurrentSheetNum() + 1); }
     void GoToPrevSheet() { GoToSheet(mShow->GetCurrentSheetNum() - 1); }
-
     void SetActiveReferencePoint(int which);
 
     ///// Select /////
@@ -117,40 +109,44 @@ public:
     void AddToSelection(const CalChart::SelectionList& sl) { SetSelectionList(mShow->MakeAddToSelection(sl)); }
     void ToggleSelection(const CalChart::SelectionList& sl) { SetSelectionList(mShow->MakeToggleSelection(sl)); }
     void SelectWithinPolygon(CalChart::RawPolygon_t const& polygon, bool toggleSelected);
-    auto GetSelectionList() const { return mShow->GetSelectionList(); }
     void SetSelectionList(const CalChart::SelectionList& sl);
-    auto GetSelect() const { return mShow->GetSelect(); }
+    [[nodiscard]] auto GetSelectionList() const { return mShow->GetSelectionList(); }
+    [[nodiscard]] auto GetSelect() const { return mShow->GetSelect(); }
     void SetSelect(CalChart::Select select);
     [[nodiscard]] auto MakeSelectBySymbol(CalChart::SYMBOL_TYPE symbol) const { return mShow->MakeSelectBySymbol(symbol); }
-    auto GetCurrentMove() const { return mShow->GetCurrentMove(); }
+    [[nodiscard]] auto GetCurrentMove() const { return mShow->GetCurrentMove(); }
     void SetCurrentMove(CalChart::MoveMode move) { mShow->SetCurrentMove(move); }
-    auto GetGhostModuleIsActive() const { return mShow->GetGhostModuleIsActive(); }
-    auto GetGhostSource() const { return mShow->GetGhostSource(); };
+    [[nodiscard]] auto GetGhostModuleIsActive() const { return mShow->GetGhostModuleIsActive(); }
+    [[nodiscard]] auto GetGhostSource() const { return mShow->GetGhostSource(); };
     void SetGhostSource(GhostSource source, int which = 0) { mShow->SetGhostSource(source, which); }
 
     void GoToSheetAndSetSelectionList(int which, const CalChart::SelectionList& sl);
-    auto IsSelected(int i) const { return mShow->IsSelected(i); }
+    [[nodiscard]] auto IsSelected(int i) const { return mShow->IsSelected(i); }
 
     ///// Drawing marcher's paths /////
     // Generate Draw Commands
     [[nodiscard]] auto GeneratePhatomPointsDrawCommands(std::map<int, CalChart::Coord> const& positions) const -> std::vector<CalChart::Draw::DrawCommand>;
     [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands() const { return mShow->GenerateFieldWithMarchersDrawCommands(); }
+    [[nodiscard]] auto GenerateAnimationDrawCommands(
+        CalChart::beats_t whichBeat,
+        bool drawCollisionWarning,
+        std::optional<bool> onBeat,
+        CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>;
 
     // call this when we need to generate the marcher's paths.
     void OnEnableDrawPaths(bool enable);
 
     void DoDrawBackground(bool enable);
-    bool DoingDrawBackground() const;
+    [[nodiscard]] auto DoingDrawBackground() const -> bool;
     void DoPictureAdjustment(bool enable);
-    bool DoingPictureAdjustment() const;
-    bool AddBackgroundImage(const wxImage& image);
+    [[nodiscard]] auto DoingPictureAdjustment() const -> bool;
+    [[nodiscard]] auto AddBackgroundImage(const wxImage& image) -> bool;
     void OnBackgroundMouseLeftDown(wxMouseEvent& event, wxDC& dc);
     void OnBackgroundMouseLeftUp(wxMouseEvent& event, wxDC& dc);
     void OnBackgroundMouseMove(wxMouseEvent& event, wxDC& dc);
     void OnBackgroundImageDelete();
 
 private:
-    void GeneratePaths();
     void UpdateBackgroundImages();
 
     CalChartFrame* mFrame{};
@@ -162,6 +158,6 @@ private:
 
     CalChartView(CalChartView const&) = delete;
     CalChartView(CalChartView&&) = delete;
-    CalChartView& operator=(CalChartView const&) = delete;
-    CalChartView& operator=(CalChartView&&) = delete;
+    auto operator=(CalChartView const&) -> CalChartView& = delete;
+    auto operator=(CalChartView&&) -> CalChartView& = delete;
 };
