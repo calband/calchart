@@ -128,7 +128,7 @@ public:
     [[nodiscard]] auto GetSheetsName() const -> std::vector<std::string>;
 
     // utility
-    [[nodiscard]] auto GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const -> std::pair<bool, std::vector<size_t>>;
+    [[nodiscard]] auto GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const -> std::optional<std::vector<size_t>>;
     [[nodiscard]] auto MakeSelectAll() const -> SelectionList;
     [[nodiscard]] auto MakeUnselectAll() const -> SelectionList;
     [[nodiscard]] auto MakeAddToSelection(const SelectionList& sl) const -> SelectionList;

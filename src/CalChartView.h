@@ -47,8 +47,6 @@ public:
     void OnDraw(wxDC* dc) override;
     void OnDrawBackground(wxDC& dc);
 
-    static void OnWizardSetup(CalChartDoc& show, wxWindow* parent);
-
     ///// Modify the show. /////
     // Results from these commands are not generally issued - think of this as a "request"
     // to modify the show with no result of success or failure returned.
@@ -71,8 +69,9 @@ public:
     void DoImportPrintableContinuity(const wxString& file);
     void DoSetPrintContinuity(int which_sheet, const wxString& number, const wxString& cont);
     void DoSetContinuityCommand(CalChart::SYMBOL_TYPE sym, CalChart::Continuity const& new_cont);
-    [[nodiscard]] auto DoRelabel() -> bool;
-    [[nodiscard]] auto DoAppendShow(std::unique_ptr<CalChartDoc> other_show) -> std::pair<bool, std::string>;
+    // These commands may fail, and return a string with user facing information
+    [[nodiscard]] auto DoRelabel() -> std::optional<std::string>;
+    [[nodiscard]] auto DoAppendShow(std::unique_ptr<CalChartDoc> other_show) -> std::optional<std::string>;
 
     ///// query show attributes /////
     [[nodiscard]] auto FindMarcher(CalChart::Coord pos) const { return mShow->FindMarcher(pos); }
@@ -80,18 +79,13 @@ public:
     [[nodiscard]] auto GetCurrentSheetNum() const { return (mShow != nullptr) ? mShow->GetCurrentSheetNum() : 0; }
     [[nodiscard]] auto GetNumSheets() const { return (mShow != nullptr) ? mShow->GetNumSheets() : 0; }
     [[nodiscard]] auto GetNumPoints() const { return (mShow != nullptr) ? mShow->GetNumPoints() : 0; }
-
     [[nodiscard]] auto GetShowFieldOffset() const { return mShow->GetShowFieldOffset(); }
     [[nodiscard]] auto GetShowFullSize() const { return mShow->GetShowMode().Size(); }
     [[nodiscard]] auto GetShowFieldSize() const { return mShow->GetShowMode().FieldSize(); }
-
-    auto GetCurrentSheet() const { return mShow->GetCurrentSheet(); }
-
     [[nodiscard]] auto GetSheetsName() const { return mShow->GetSheetsName(); }
-
     [[nodiscard]] auto GetAnimationInfo(CalChart::beats_t whichBeat, int which) const -> std::optional<CalChart::Animate::Info>;
     [[nodiscard]] auto GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::beats_t whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>;
-    std::vector<CalChart::Animate::Errors> GetAnimationErrors() const;
+    [[nodiscard]] auto GetAnimationErrors() const -> std::vector<CalChart::Animate::Errors>;
     // Sheet -> all collisions
     std::map<int, CalChart::SelectionList> GetAnimationCollisions() const;
     [[nodiscard]] auto GenerateAnimationDrawCommands(
@@ -102,6 +96,9 @@ public:
 
     [[nodiscard]] auto GetTotalNumberAnimationBeats() const -> std::optional<CalChart::beats_t>;
     [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
+
+    [[nodiscard]] auto GetContinuities() const { return mShow->GetContinuities(); }
+    [[nodiscard]] auto ContinuitiesInUse() const { return mShow->ContinuitiesInUse(); }
 
     [[nodiscard]] auto BeatHasCollision(CalChart::beats_t whichBeat) const -> bool;
     [[nodiscard]] auto GetAnimationBeatForCurrentSheet() const -> CalChart::beats_t;

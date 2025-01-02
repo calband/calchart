@@ -648,12 +648,13 @@ void CalChartFrame::OnCmdDelete(wxCommandEvent&)
 // grey out if we're on a sheet
 void CalChartFrame::OnCmdRelabel(wxCommandEvent&)
 {
-    if (GetFieldView()->GetCurrentSheetNum() + 1 < GetFieldView()->GetNumSheets()) {
-        if (!GetFieldView()->DoRelabel()) {
-            (void)wxMessageBox("Stuntsheets don't match", "Relabel sheets");
-        }
-    } else {
+    if (GetFieldView()->GetCurrentSheetNum() + 1 >= GetFieldView()->GetNumSheets()) {
         (void)wxMessageBox("This can't used on the last stuntsheet", "Relabel sheets");
+        return;
+    }
+    auto failMessage = GetFieldView()->DoRelabel();
+    if (failMessage.has_value()) {
+        (void)wxMessageBox(*failMessage, "Relabel sheets");
     }
 }
 
@@ -1127,8 +1128,8 @@ void CalChartFrame::AppendShow()
         return;
     }
     auto result = GetFieldView()->DoAppendShow(std::move(shw));
-    if (!result.first) {
-        (void)wxMessageBox(result.second, "Append Error");
+    if (result.has_value()) {
+        (void)wxMessageBox(*result, "Append Error");
         return;
     }
 }
