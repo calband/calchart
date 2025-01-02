@@ -76,14 +76,14 @@ public:
 
     ///// query show attributes /////
     [[nodiscard]] auto FindMarcher(CalChart::Coord pos) const { return mShow->FindMarcher(pos); }
-    CalChart::Coord PointPosition(int which) const;
-    auto GetCurrentSheetNum() const { return mShow ? mShow->GetCurrentSheetNum() : 0; }
-    auto GetNumSheets() const { return mShow ? mShow->GetNumSheets() : 0; }
-    auto GetNumPoints() const { return mShow ? mShow->GetNumPoints() : 0; }
+    [[nodiscard]] auto PointPosition(int which) const { return mShow->GetCurrentSheet()->GetPosition(which, mShow->GetCurrentReferencePoint()); }
+    [[nodiscard]] auto GetCurrentSheetNum() const { return (mShow != nullptr) ? mShow->GetCurrentSheetNum() : 0; }
+    [[nodiscard]] auto GetNumSheets() const { return (mShow != nullptr) ? mShow->GetNumSheets() : 0; }
+    [[nodiscard]] auto GetNumPoints() const { return (mShow != nullptr) ? mShow->GetNumPoints() : 0; }
 
-    CalChart::ShowMode const& GetShowMode() const { return mShow->GetShowMode(); }
-    [[nodiscard]] auto GetShowFieldOffset() const { return mShow->GetShowMode().Offset(); }
-    auto GetShowFullSize() const { return mShow->GetShowMode().Size(); }
+    [[nodiscard]] auto GetShowFieldOffset() const { return mShow->GetShowFieldOffset(); }
+    [[nodiscard]] auto GetShowFullSize() const { return mShow->GetShowMode().Size(); }
+    [[nodiscard]] auto GetShowFieldSize() const { return mShow->GetShowMode().FieldSize(); }
 
     auto GetSheets() const { return mShow->GetSheets(); }
     auto GetCurrentSheet() const { return mShow->GetCurrentSheet(); }
