@@ -68,8 +68,19 @@ public:
     auto SerializeSheet() const -> std::vector<std::byte>;
 
     // continuity Functions
-    const Continuity& GetContinuityBySymbol(SYMBOL_TYPE i) const;
-    bool ContinuityInUse(SYMBOL_TYPE idx) const;
+    [[nodiscard]] auto GetContinuityBySymbol(SYMBOL_TYPE i) const
+    {
+        return mAnimationContinuity.at(i);
+    }
+    [[nodiscard]] auto GetContinuities() const
+    {
+        return k_symbols | std::views::transform([this](auto symbol) { return GetContinuityBySymbol(symbol); });
+    }
+    [[nodiscard]] auto ContinuityInUse(SYMBOL_TYPE idx) const -> bool;
+    [[nodiscard]] auto ContinuitiesInUse() const
+    {
+        return k_symbols | std::views::transform([this](auto symbol) { return ContinuityInUse(symbol); });
+    }
     void SetContinuity(SYMBOL_TYPE sym, Continuity const& new_cont);
 
     // print continuity

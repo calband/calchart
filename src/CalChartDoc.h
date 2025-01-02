@@ -134,13 +134,6 @@ public:
 
     auto GetNumSheets() const { return mShow ? mShow->GetNumSheets() : 0; }
 
-    struct CalChartDocSheetRange {
-        CalChart::Show const& mShow;
-        auto begin() { return mShow.GetSheetBegin(); }
-        auto end() { return mShow.GetSheetEnd(); }
-    };
-    CalChartDocSheetRange GetSheets() const { return CalChartDocSheetRange{ *mShow }; }
-
     [[nodiscard]] auto GetSheetsName() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetsName(); }
 
     auto GetSheetBegin() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetBegin(); }
@@ -170,7 +163,7 @@ public:
     auto MakeRemoveFromSelection(const CalChart::SelectionList& sl) const { return mShow->MakeRemoveFromSelection(sl); }
     auto MakeToggleSelection(const CalChart::SelectionList& sl) const { return mShow->MakeToggleSelection(sl); }
     auto MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon) const { return mShow->MakeSelectWithinPolygon(polygon, mCurrentReferencePoint); }
-    auto MakeSelectBySymbol(CalChart::SYMBOL_TYPE symbol) const { return mShow->MakeSelectBySymbol(symbol); }
+    [[nodiscard]] auto MakeSelectBySymbol(CalChart::SYMBOL_TYPE symbol) const { return mShow->MakeSelectBySymbol(symbol); }
     auto MakeSelectByInstrument(std::string const& instrument) const { return mShow->MakeSelectByInstrument(instrument); }
     auto MakeSelectByLabel(std::string const& label) const { return mShow->MakeSelectByLabel(label); }
 

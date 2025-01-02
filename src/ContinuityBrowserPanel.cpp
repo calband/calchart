@@ -52,11 +52,12 @@ void ContinuityBrowserPanel::Init()
 
 void ContinuityBrowserPanel::DoSetContinuity(CalChart::Continuity const& new_cont)
 {
-    std::vector<std::unique_ptr<DrawableCell>> contCells;
     mCont = new_cont;
-    for (auto&& i : mCont.GetParsedContinuity()) {
-        contCells.emplace_back(std::make_unique<ContinuityBoxDrawer>(i->GetDrawable(), mConfig));
-    }
+
+    auto contCells = CalChart::Ranges::ToVector<std::unique_ptr<DrawableCell>>(
+        mCont.GetParsedContinuity() | std::views::transform([this](auto&& proceedure) {
+            return std::make_unique<ContinuityBoxDrawer>(proceedure->GetDrawable(), mConfig);
+        }));
 
     // resize based on the new number of continuities.
     auto current_size = GetMinSize();
@@ -164,8 +165,7 @@ void ContinuityBrowserPanel::DoSetFocus(wxFocusEvent&)
         return;
     }
 
-    auto&& sht = mView->GetCurrentSheet();
-    mView->SetSelectionList(sht->MakeSelectPointsBySymbol(mSym));
+    mView->SetSelectionList(mView->MakeSelectBySymbol(mSym));
 }
 
 void ContinuityBrowserPanel::DoKillFocus(wxFocusEvent&)

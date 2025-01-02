@@ -143,8 +143,8 @@ void PrintPostScriptDialog::PrintShow()
 void PrintPostScriptDialog::ShowPrintSelect(wxCommandEvent&)
 {
     wxArrayString choices;
-    for (auto&& sheet : mShow->GetSheets()) {
-        choices.Add(sheet.GetName());
+    for (auto&& name : mShow->GetSheetsName()) {
+        choices.Add(name);
     }
     wxMultiChoiceDialog dialog(this, "Choose which pages to print", "Pages to Print", choices);
     wxArrayInt markedChoices(mIsSheetPicked.begin(), mIsSheetPicked.end());

@@ -56,6 +56,7 @@ namespace Cont {
 namespace CalChart::Animate {
 using Variables = std::array<std::map<unsigned, float>, Cont::kNumVariables>;
 using CompileResult = std::pair<std::vector<Command>, ErrorsEncountered>;
+using Proceedures = std::vector<std::unique_ptr<Cont::Procedure>>;
 
 // Compile a point into the Animation Commands
 // Variables and Errors are passed as references as they maintain state over all the compiles,
@@ -67,7 +68,6 @@ using CompileResult = std::pair<std::vector<Command>, ErrorsEncountered>;
 struct AnimationData {
     unsigned whichMarcher;
     Point marcherPosition;
-    std::vector<std::unique_ptr<Cont::Procedure>> const& continuity;
     std::optional<Coord> endPosition;
     beats_t numBeats;
     bool isLastAnimationSheet;
@@ -75,6 +75,7 @@ struct AnimationData {
 
 auto CreateCompileResult(
     AnimationData const& animationData,
+    Proceedures const& proceedures,
     Variables& variablesStates) -> CompileResult;
 
 struct Compile {
