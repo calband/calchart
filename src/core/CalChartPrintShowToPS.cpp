@@ -172,8 +172,8 @@ namespace {
 
     const auto GenerateSplitText = [](auto const& sheet, char identifier) -> std::string {
         auto result = std::format("%%Page: {}({})\n", sheet.GetName(), identifier);
-        if (!sheet.GetNumber().empty()) {
-            result += std::format("/pagenumtext ({}{}) def\n", sheet.GetNumber(), identifier);
+        if (!sheet.GetPrintNumber().empty()) {
+            result += std::format("/pagenumtext ({}{}) def\n", sheet.GetPrintNumber(), identifier);
         } else {
             result += "/pagenumtext () def\n";
         }
@@ -181,8 +181,8 @@ namespace {
     };
     const auto GenerateUnsplitText = [](auto const& sheet) -> std::string {
         auto result = std::format("%%Page: {}\n", sheet.GetName());
-        if (!sheet.GetNumber().empty()) {
-            result += std::format("/pagenumtext ({}) def\n", sheet.GetNumber());
+        if (!sheet.GetPrintNumber().empty()) {
+            result += std::format("/pagenumtext ({}) def\n", sheet.GetPrintNumber());
         } else {
             result += "/pagenumtext () def\n";
         }

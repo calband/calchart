@@ -47,6 +47,51 @@
 #include <wx/textfile.h>
 #include <wx/wizard.h>
 
+namespace {
+
+void OnWizardSetup(CalChartDoc& show, wxWindow* parent)
+{
+    auto& config = show.GetConfiguration();
+    auto* wizard = new wxWizard(parent, wxID_ANY, "New Show Setup Wizard");
+    // page 1:
+    // set the number of points and the labels
+    auto* page1 = new SetupMarchersWizard(wizard);
+
+    // page 2:
+    // choose the show mode
+    auto* page2 = new ShowModeWizard(wizard);
+
+    // page 3:
+    wxWizardPageSimple::Chain(page1, page2);
+
+    wizard->GetPageAreaSizer()->Add(page1);
+    if (wizard->RunWizard(page1)) {
+        auto labels = page1->GetLabelsAndInstruments();
+        auto columns = page1->GetNumberColumns();
+        auto newmode = GetConfigShowMode(config, page2->GetValue());
+
+        show.WizardSetupNewShow(labels, columns, newmode);
+        SetupInstruments dialog(show, parent);
+        if (dialog.ShowModal() == wxID_OK) {
+            auto instrumentMapping = dialog.GetInstruments();
+            for (auto& i : instrumentMapping) {
+                labels.at(i.first).second = i.second;
+            }
+            show.WizardSetupNewShow(labels, columns, newmode);
+        }
+    } else {
+        wxMessageBox(
+            "Show setup not completed.\n"
+            "You can change the number of marchers\n"
+            "and show mode via the menu options",
+            "Show not setup",
+            wxICON_INFORMATION | wxOK);
+    }
+    wizard->Destroy();
+}
+
+}
+
 IMPLEMENT_DYNAMIC_CLASS(CalChartView, wxView)
 
 // What to do when a view is created. Creates actual windows for displaying the view.
@@ -127,45 +172,6 @@ bool CalChartView::OnClose(bool deleteWindow)
         SetFrame(NULL);
     }
     return true;
-}
-
-void CalChartView::OnWizardSetup(CalChartDoc& show, wxWindow* parent)
-{
-    auto& config = show.GetConfiguration();
-    auto wizard = new wxWizard(parent, wxID_ANY, wxT("New Show Setup Wizard"));
-    // page 1:
-    // set the number of points and the labels
-    auto page1 = new SetupMarchersWizard(wizard);
-
-    // page 2:
-    // choose the show mode
-    auto page2 = new ShowModeWizard(wizard);
-
-    // page 3:
-    wxWizardPageSimple::Chain(page1, page2);
-
-    wizard->GetPageAreaSizer()->Add(page1);
-    if (wizard->RunWizard(page1)) {
-        auto labels = page1->GetLabelsAndInstruments();
-        auto columns = page1->GetNumberColumns();
-        auto newmode = GetConfigShowMode(config, page2->GetValue());
-
-        show.WizardSetupNewShow(labels, columns, newmode);
-        SetupInstruments dialog(show, parent);
-        if (dialog.ShowModal() == wxID_OK) {
-            auto instrumentMapping = dialog.GetInstruments();
-            for (auto& i : instrumentMapping) {
-                labels.at(i.first).second = i.second;
-            }
-            show.WizardSetupNewShow(labels, columns, newmode);
-        }
-    } else {
-        wxMessageBox(wxT("Show setup not completed.\n")
-                         wxT("You can change the number of marchers\n")
-                             wxT("and show mode via the menu options"),
-            wxT("Show not setup"), wxICON_INFORMATION | wxOK);
-    }
-    wizard->Destroy();
 }
 
 void CalChartView::DoRotatePointPositions(int rotateAmount)
@@ -333,7 +339,7 @@ void CalChartView::DoSetPrintContinuity(int which_sheet, const wxString& number,
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-bool CalChartView::DoRelabel()
+auto CalChartView::DoRelabel() -> std::optional<std::string>
 {
     auto& config = mShow->GetConfiguration();
     auto sheet_num = GetCurrentSheetNum();
@@ -342,32 +348,32 @@ bool CalChartView::DoRelabel()
     // get a relabel mapping based on the current sheet.
     auto result = mShow->GetRelabelMapping(current_sheet, next_sheet, CalChart::Float2CoordUnits(config.Get_DotRatio()));
     // check to see if there's a valid remapping
-    if (!result.first) {
-        return false;
+    if (!result.has_value()) {
+        return "Stuntsheets don't match";
     }
     // Apply remapping to the rest
-    auto cmd = mShow->Create_ApplyRelabelMapping(sheet_num + 1, result.second);
+    auto cmd = mShow->Create_ApplyRelabelMapping(sheet_num + 1, *result);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
-    return true;
+    return std::nullopt;
 }
 
 // append is an insert with a relabel
-std::pair<bool, std::string> CalChartView::DoAppendShow(std::unique_ptr<CalChartDoc> other_show)
+auto CalChartView::DoAppendShow(std::unique_ptr<CalChartDoc> other_show) -> std::optional<std::string>
 {
     auto& config = mShow->GetConfiguration();
     if (other_show->GetNumPoints() != mShow->GetNumPoints()) {
-        return { false, "The blocksize doesn't match" };
+        return "The blocksize doesn't match";
     }
     auto last_sheet = mShow->GetNthSheet(GetNumSheets() - 1);
     auto next_sheet = other_show->GetSheetBegin();
     auto result = mShow->GetRelabelMapping(last_sheet, next_sheet, CalChart::Float2CoordUnits(config.Get_DotRatio()));
     // check to see if there's a valid remapping
-    if (!result.first) {
-        return { false, "Last sheet doesn't match first sheet of other show" };
+    if (!result.has_value()) {
+        return "Last sheet doesn't match first sheet of other show";
     }
     auto cmd = mShow->Create_AppendShow(std::move(other_show), CalChart::Float2CoordUnits(config.Get_DotRatio()));
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
-    return { true, "" };
+    return std::nullopt;
 }
 
 // append is an insert with a relabel
