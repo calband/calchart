@@ -1290,7 +1290,7 @@ wxString CalChartFrame::BeatStatusText() const
 
 wxString CalChartFrame::PointStatusText() const
 {
-    auto show = GetShow();
+    auto const* show = GetShow();
     wxString result;
     auto sl = show->GetSelectionList();
     result << show->GetSelectionList().size() << " of "
