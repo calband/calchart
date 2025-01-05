@@ -518,7 +518,7 @@ auto Sheet::FindMarcher(Coord where, Coord::units searchBound, unsigned ref) con
             return i;
         }
     }
-    return -1;
+    return std::nullopt;
 }
 
 SelectionList Sheet::MakeSelectPointsBySymbol(SYMBOL_TYPE i) const
