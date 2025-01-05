@@ -88,6 +88,25 @@ jobs:
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
+    # Codesigning for mac involves:
+    # 1. Creating a signing cert in p12 form (https://help.apple.com/xcode/mac/current/#/dev154b28f09)
+    # 2. Uploading the p12 as github secrets (https://docs.github.com/en/actions/use-cases-and-examples/deploying/installing-an-apple-certificate-on-macos-runners-for-xcode-development)
+    # 3. Generating the p12 file on the github action server
+    # 4. using indygreg/apple-code-sign-action@v1 to sign the app
+    - name: Gen p12 (macOS)
+      if: matrix.config.os == 'macos-14'
+      env:
+        MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+      run: echo $MACOS_CERTIFICATE | base64 --decode > ${{github.workspace}}/certificate.p12
+
+    - name: Codesign (macOS)
+      if: matrix.config.os == 'macos-14'
+      uses: indygreg/apple-code-sign-action@v1
+      with:
+        input_path: ${{github.workspace}}/build/src/CalChart.app
+        p12_file: ${{github.workspace}}/certificate.p12
+        p12_password: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+
     - name: Run tests
       run: ctest --verbose --test-dir ${{github.workspace}}/build
 
