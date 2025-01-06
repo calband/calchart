@@ -19,7 +19,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define _LIBCPP_ENABLE_EXPERIMENTAL 1
 #include "CalChartView.h"
 #include "BackgroundImages.h"
 #include "CalChartAnimation.h"
@@ -380,6 +379,24 @@ auto CalChartView::DoAppendShow(std::unique_ptr<CalChartDoc> other_show) -> std:
 void CalChartView::DoSetContinuityCommand(CalChart::SYMBOL_TYPE sym, CalChart::Continuity const& new_cont)
 {
     auto cmd = mShow->Create_SetContinuityCommand(sym, new_cont);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+}
+
+void CalChartView::DoAddSheetCurveCommand(CalChart::Curve const& curve)
+{
+    auto cmd = mShow->Create_AddSheetCurveCommand(curve);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+}
+
+void CalChartView::DoReplaceSheetCurveCommand(CalChart::Curve const& curve, int whichCurve)
+{
+    auto cmd = mShow->Create_ReplaceSheetCurveCommand(curve, whichCurve);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+}
+
+void CalChartView::DoRemoveSheetCurveCommand(int whichCurve)
+{
+    auto cmd = mShow->Create_RemoveSheetCurveCommand(whichCurve);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 

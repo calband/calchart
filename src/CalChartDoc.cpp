@@ -453,7 +453,7 @@ auto CalChartDoc::GenerateCurrentSheetPointsDrawCommands() const -> std::vector<
     if (sheet == GetSheetEnd()) {
         return drawCmds;
     }
-    CalChart::append(drawCmds, mShow->GeneratePointsDrawCommands(config, GetCurrentReferencePoint()));
+    CalChart::append(drawCmds, mShow->GenerateSheetElements(config, GetCurrentReferencePoint()));
     CalChart::append(drawCmds, GeneratePathsDrawCommands());
     return drawCmds + origin;
 }
@@ -533,6 +533,16 @@ void CalChartDoc::SetCurrentReferencePoint(int currentReferencePoint)
 auto CalChartDoc::FindMarcher(CalChart::Coord pos) const -> std::optional<int>
 {
     return GetCurrentSheet()->FindMarcher(pos, CalChart::Float2CoordUnits(mConfig.Get_DotRatio()), GetCurrentReferencePoint());
+}
+
+auto CalChartDoc::FindCurveControlPoint(CalChart::Coord pos) const -> std::optional<std::tuple<size_t, size_t>>
+{
+    return GetCurrentSheet()->FindCurveControlPoint(pos, CalChart::Float2CoordUnits(mConfig.Get_ControlPointRatio()));
+}
+
+auto CalChartDoc::FindCurve(CalChart::Coord pos) const -> std::optional<std::tuple<size_t, size_t>>
+{
+    return GetCurrentSheet()->FindCurve(pos, CalChart::Float2CoordUnits(mConfig.Get_ControlPointRatio()));
 }
 
 void CalChartDoc::SetDrawPaths(bool drawPaths)
@@ -852,4 +862,25 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_SetTransitionCommand(const std::v
     }
 
     return std::make_unique<CalChartDocCommand>(*this, wxT("Setting Transition"), cmds);
+}
+
+auto CalChartDoc::Create_AddSheetCurveCommand(CalChart::Curve const& curve) -> std::unique_ptr<wxCommand>
+{
+    auto cmds = Create_SetSheetPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_AddSheetCurveCommand(curve)));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Adding Curve"), cmds);
+}
+
+auto CalChartDoc::Create_ReplaceSheetCurveCommand(CalChart::Curve const& curve, int whichCurve) -> std::unique_ptr<wxCommand>
+{
+    auto cmds = Create_SetSheetPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_ReplaceSheetCurveCommand(curve, whichCurve)));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Updating Curve"), cmds);
+}
+
+auto CalChartDoc::Create_RemoveSheetCurveCommand(int whichCurve) -> std::unique_ptr<wxCommand>
+{
+    auto cmds = Create_SetSheetPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_RemoveSheetCurveCommand(whichCurve)));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Removing Curve"), cmds);
 }

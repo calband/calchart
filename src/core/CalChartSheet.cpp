@@ -524,6 +524,31 @@ auto Sheet::FindMarcher(Coord where, Coord::units searchBound, unsigned ref) con
     return std::nullopt;
 }
 
+auto Sheet::FindCurveControlPoint(Coord where, Coord::units searchBound) const -> std::optional<std::tuple<size_t, size_t>>
+{
+    for (auto&& [whichCurve, curve] : CalChart::Ranges::enumerate_view(mCurves)) {
+        auto&& points = curve.GetControlPoints();
+        if (auto iter = std::find_if(points.begin(), points.end(), [where, searchBound](auto point) {
+                return ((where.x + searchBound) >= point.x) && ((where.x - searchBound) <= point.x) && ((where.y + searchBound) >= point.y) && ((where.y - searchBound) <= point.y);
+            });
+            iter != points.end()) {
+            return std::tuple<size_t, size_t>{ whichCurve, std::distance(points.begin(), iter) };
+        }
+    }
+    return std::nullopt;
+}
+
+auto Sheet::FindCurve(Coord where, Coord::units searchBound) const -> std::optional<std::tuple<size_t, size_t>>
+{
+    for (auto&& [whichCurve, curve] : CalChart::Ranges::enumerate_view(mCurves)) {
+        auto result = curve.LowerControlPointOnLine(where, searchBound);
+        if (result.has_value()) {
+            return std::tuple<size_t, size_t>{ whichCurve, *result };
+        }
+    }
+    return std::nullopt;
+}
+
 SelectionList Sheet::MakeSelectPointsBySymbol(SYMBOL_TYPE i) const
 {
     SelectionList select;
@@ -560,6 +585,12 @@ void Sheet::DeletePoints(SelectionList const& sl)
         mPoints.erase(mPoints.begin() + *iter);
     }
 }
+
+void Sheet::AddCurve(Curve const& curve, size_t index) { mCurves.insert(mCurves.begin() + index, curve); }
+void Sheet::RemoveCurve(size_t index) { mCurves.erase(mCurves.cbegin() + index); }
+void Sheet::ReplaceCurve(Curve const& curve, size_t index) { mCurves.at(index) = curve; }
+auto Sheet::GetCurve(size_t index) const -> Curve { return mCurves.at(index); }
+auto Sheet::GetCurvesSize() const -> size_t { return mCurves.size(); }
 
 std::vector<Point> Sheet::RemapPoints(std::vector<size_t> const& table) const
 {
@@ -747,6 +778,31 @@ namespace {
         };
     }
 
+    auto GenerateCurvePoints(std::vector<CalChart::Coord> const& points, Coord::units boxSize) -> std::vector<CalChart::Draw::DrawCommand>
+    {
+        return CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(points | std::views::transform([boxSize](auto&& point) {
+            return CalChart::Draw::Rectangle(point - Coord(boxSize, boxSize) / 2, Coord(boxSize, boxSize));
+        }));
+    }
+
+    auto GenerateCurve(CalChart::Configuration const& config, CalChart::Curve const& curve, int which) -> std::vector<Draw::DrawCommand>
+    {
+        auto boxSize = CalChart::Float2CoordUnits(config.Get_ControlPointRatio());
+        auto points = curve.GetControlPoints();
+        auto drawCmds = std::vector<Draw::DrawCommand>{
+            CalChart::Draw::withBrushAndPen(
+                config.Get_CalChartBrushAndPen(CalChart::Colors::SHEET_CURVE),
+                curve.GetCC_DrawCommand()),
+            CalChart::Draw::withBrushAndPen(
+                config.Get_CalChartBrushAndPen(CalChart::Colors::SHEET_CURVE_CONTROL_POINT),
+                GenerateCurvePoints(points, boxSize)),
+        };
+        if (points.size()) {
+            drawCmds.push_back(CalChart::Draw::Text(points.front(), std::string("C") + std::to_string(which)));
+        }
+        return drawCmds;
+    }
+
 }
 
 auto Sheet::GenerateGhostElements(CalChart::Configuration const& config, SelectionList const& selected, std::vector<std::string> const& marcherLabels) const -> std::vector<CalChart::Draw::DrawCommand>
@@ -762,6 +818,10 @@ auto Sheet::GenerateSheetElements(CalChart::Configuration const& config, Selecti
         CalChart::append(drawCmds, GenerateSheetMarcherDrawCommands(config, selected, marcherLabels, *this, 0, GetMarcherColors(false, true)));
     }
     CalChart::append(drawCmds, GenerateSheetMarcherDrawCommands(config, selected, marcherLabels, *this, referencePoint, GetMarcherColors(false, false)));
+
+    for (auto&& [which, curve] : CalChart::Ranges::enumerate_view(mCurves)) {
+        CalChart::append(drawCmds, GenerateCurve(config, curve, which));
+    }
     return drawCmds;
 }
 

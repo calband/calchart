@@ -107,6 +107,9 @@ public:
     [[nodiscard]] auto Create_AddNewBackgroundImageCommand(ImageInfo const& image) const -> Show_command_pair;
     [[nodiscard]] auto Create_RemoveBackgroundImageCommand(int which) const -> Show_command_pair;
     [[nodiscard]] auto Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height) const -> Show_command_pair;
+    [[nodiscard]] auto Create_AddSheetCurveCommand(CalChart::Curve const& curve) const -> Show_command_pair;
+    [[nodiscard]] auto Create_ReplaceSheetCurveCommand(CalChart::Curve const& curve, int whichCurve) const -> Show_command_pair;
+    [[nodiscard]] auto Create_RemoveSheetCurveCommand(int whichCurve) const -> Show_command_pair;
 
     // Accessors
     [[nodiscard]] auto GetSheetBegin() const { return mSheets.begin(); }
@@ -166,7 +169,7 @@ public:
         return mSheets | std::views::filter([](auto&& sheet) { return sheet.IsInAnimation(); });
     }
 
-    [[nodiscard]] auto GeneratePointsDrawCommands(
+    [[nodiscard]] auto GenerateSheetElements(
         CalChart::Configuration const& config,
         int ref) const -> std::vector<CalChart::Draw::DrawCommand>;
 

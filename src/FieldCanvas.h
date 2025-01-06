@@ -24,6 +24,7 @@
 #include "CalChartMovePointsTool.h"
 #include "CalChartPoint.h"
 #include "CalChartSelectTool.h"
+#include "CalChartShapes.h"
 #include "CalChartTypes.h"
 #include "basic_ui.h"
 
@@ -68,6 +69,8 @@ public:
     CalChart::MoveMode GetCurrentMove() const;
     // implies a call to EndDrag()
     void SetCurrentMove(CalChart::MoveMode move);
+    [[nodiscard]] auto IsDrawingCurve() const -> bool;
+    void SetDrawingCurve(bool drawingCurve);
 
     void OnChar(wxKeyEvent& event);
 
@@ -86,9 +89,10 @@ private:
 
     // Internals
     void BeginSelectDrag(CalChart::Select select, CalChart::Coord start);
-    void AddMoveDrag(CalChart::Select select, std::unique_ptr<CalChart::Shape> shape);
     void MoveDrag(CalChart::Coord end);
     void EndDrag();
+    void BeginCurveControlPointDrag();
+    void EndCurveControlPointDrag();
 
     enum class direction {
         north,
@@ -107,6 +111,18 @@ private:
 
     void OnMouseLeftDown_NormalMove(CalChart::Coord pos, bool shiftDown, bool altDown);
     void OnMouseLeftDown_Swap(CalChart::Coord pos);
+    void OnMouseLeftDown_DrawingCurve(CalChart::Coord pos);
+    void OnMouseLeftDown_FoundCurveControl(std::tuple<size_t, size_t> curveIndex, bool shiftDown, bool altDown);
+    void OnMouseLeftDown_FoundCurve(std::tuple<size_t, size_t> curveIndex);
+    void OnMouseLeftDoubleClick_Curve();
+    void OnMouseLeftDoubleClick_FoundCurve(CalChart::Coord pos, std::tuple<size_t, size_t> curveIndex);
+
+    void OnMouseMove_DrawCurve(CalChart::Coord pos);
+    void OnMouseMove_DragCurveControlPoint(CalChart::Coord pos);
+    void OnDelete_Curve();
+    void OnEscape_Curve();
+
+    void AbortDrawing();
 
     CalChartView* mView{};
     // The current selection
@@ -116,4 +132,12 @@ private:
     // A cached list of the place where the selection list will move
     std::map<int, CalChart::Coord> mUncommittedMovePoints;
     CalChart::Configuration const& mConfig;
+
+    // Curve related members
+    std::optional<CalChart::Curve> mCurve;
+    std::optional<size_t> mCurveSelected;
+    CalChart::Coord mDragStart;
+    std::set<size_t> mCurvePointsSelected;
+    bool mCurvePointDragging{};
+    bool mCurveShouldFlush{};
 };

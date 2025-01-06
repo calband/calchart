@@ -39,6 +39,35 @@ EVT_PAINT(ColorSetupCanvas::OnPaint)
 EVT_ERASE_BACKGROUND(ColorSetupCanvas::OnEraseBackground)
 END_EVENT_TABLE()
 
+namespace {
+auto GenerateScriptCal(CalChart::Coord offset)
+{
+    auto curve = CalChart::Curve(offset + Coord(Int2CoordUnits(4), Int2CoordUnits(2)));
+    curve.Append(offset + Coord(Int2CoordUnits(5), Int2CoordUnits(1)));
+    curve.Append(offset + Coord(Int2CoordUnits(3), Int2CoordUnits(0)));
+    curve.Append(offset + Coord(Int2CoordUnits(0), Int2CoordUnits(4)));
+    curve.Append(offset + Coord(Int2CoordUnits(3), Int2CoordUnits(8)));
+    curve.Append(offset + Coord(Int2CoordUnits(6), Int2CoordUnits(6)));
+    curve.Append(offset + Coord(Int2CoordUnits(8), Int2CoordUnits(4)));
+    curve.Append(offset + Coord(Int2CoordUnits(10), Int2CoordUnits(5)));
+    curve.Append(offset + Coord(Int2CoordUnits(8), Int2CoordUnits(4)));
+    curve.Append(offset + Coord(Int2CoordUnits(6), Int2CoordUnits(6)));
+    curve.Append(offset + Coord(Int2CoordUnits(7), Int2CoordUnits(8)));
+    curve.Append(offset + Coord(Int2CoordUnits(9), Int2CoordUnits(8)));
+    curve.Append(offset + Coord(Int2CoordUnits(10), Int2CoordUnits(6)));
+    curve.Append(offset + Coord(Int2CoordUnits(10), Int2CoordUnits(8)));
+    curve.Append(offset + Coord(Int2CoordUnits(13), Int2CoordUnits(7)));
+    curve.Append(offset + Coord(Int2CoordUnits(16), Int2CoordUnits(1)));
+    curve.Append(offset + Coord(Int2CoordUnits(15), Int2CoordUnits(0)));
+    curve.Append(offset + Coord(Int2CoordUnits(14), Int2CoordUnits(1)));
+    curve.Append(offset + Coord(Int2CoordUnits(12), Int2CoordUnits(8)));
+    curve.Append(offset + Coord(Int2CoordUnits(13), Int2CoordUnits(10)));
+    curve.Append(offset + Coord(Int2CoordUnits(2), Int2CoordUnits(9)));
+    curve.Append(offset + Coord(Int2CoordUnits(1), Int2CoordUnits(10)));
+    return curve;
+}
+}
+
 ColorSetupCanvas::ColorSetupCanvas(CalChart::Configuration& config, wxWindow* parent)
     : super(config, parent, wxID_ANY, wxDefaultPosition, GetColorSetupCanvas())
     , mShow(Show::Create(ShowMode::GetDefaultShowMode()))
@@ -52,7 +81,7 @@ ColorSetupCanvas::ColorSetupCanvas(CalChart::Configuration& config, wxWindow* pa
 {
     auto field_offset = mMode.FieldOffset();
     SetCanvasSize(wxSize{ mMode.Size().x, mMode.Size().y });
-    SetZoom(4.0);
+    SetZoom(3);
 
     // Create a fake show with some points and selections to draw an example for
     // the user
@@ -68,6 +97,10 @@ ColorSetupCanvas::ColorSetupCanvas(CalChart::Configuration& config, wxWindow* pa
     mShow->Create_SetSelectionListCommand(SelectionList{ 1, 3 }).first(*mShow);
     mShow->Create_SetSymbolCommand(SYMBOL_SOLX).first(*mShow);
     mShow->Create_SetSelectionListCommand(SelectionList{}).first(*mShow);
+
+    auto script_offset = field_offset + Coord(Int2CoordUnits(18), Int2CoordUnits(6));
+
+    mShow->Create_AddSheetCurveCommand(GenerateScriptCal(script_offset)).first(*mShow);
 
     // we want to show the difference between ref highlight and normal highlight, so we draw ref 1.
     // As we are doing that it means the reference points will show up in the normal color and the
@@ -116,6 +149,37 @@ auto GenerateFakeSelectShapeDrawCommands(CalChart::ShowMode const& mode) -> std:
     return rect.GetCC_DrawCommand();
 }
 
+auto GenerateCurvePoints(std::vector<CalChart::Coord> const& points, CalChart::Coord::units boxSize) -> std::vector<CalChart::Draw::DrawCommand>
+{
+    return CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(points | std::views::transform([boxSize](auto&& point) {
+        return CalChart::Draw::Rectangle(point - Coord(boxSize, boxSize) / 2, Coord(boxSize, boxSize));
+    }));
+}
+
+auto GenerateCurves(CalChart::ShowMode const& mode, CalChart::Configuration const& config) -> std::vector<CalChart::Draw::DrawCommand>
+{
+    auto field_offset = mode.FieldOffset();
+    auto boxSize = CalChart::Float2CoordUnits(config.Get_ControlPointRatio());
+    auto curve = CalChart::Curve(Coord(Int2CoordUnits(2), Int2CoordUnits(8)));
+    curve.Append(Coord(Int2CoordUnits(8), Int2CoordUnits(12)));
+    curve.Append(Coord(Int2CoordUnits(6), Int2CoordUnits(7)));
+    curve.Append(Coord(Int2CoordUnits(12), Int2CoordUnits(12)));
+    curve.Append(Coord(Int2CoordUnits(16), Int2CoordUnits(8)));
+    auto selectedPoint = std::vector{ curve.GetControlPoints().at(2) };
+    return std::vector<CalChart::Draw::DrawCommand>{
+        CalChart::Draw::withBrushAndPen(
+            config.Get_CalChartBrushAndPen(CalChart::Colors::DRAW_CURVE),
+            curve.GetCC_DrawCommand()),
+        CalChart::Draw::withBrushAndPen(
+            config.Get_CalChartBrushAndPen(CalChart::Colors::DRAW_CURVE_CONTROL_POINT),
+            GenerateCurvePoints(curve.GetControlPoints(), boxSize)),
+        CalChart::Draw::withBrushAndPen(
+            config.Get_CalChartBrushAndPen(CalChart::Colors::DRAW_CURVE_CONTROL_POINT),
+            GenerateCurvePoints(selectedPoint, 2 * boxSize)),
+    }
+    + field_offset;
+}
+
 // Define the repainting behaviour
 void ColorSetupCanvas::OnPaint(wxPaintEvent&)
 {
@@ -147,7 +211,7 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent&)
             *nextSheet));
 
     // Draw the points
-    CalChart::append(drawCmds, mShow->GeneratePointsDrawCommands(mConfig, 1));
+    CalChart::append(drawCmds, mShow->GenerateSheetElements(mConfig, 1));
 
     // draw the path, but because we're not a real show, we have to make the path manually.
     CalChart::append(drawCmds,
@@ -162,6 +226,8 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent&)
             CalChart::Draw::withPen(
                 toPen(mConfig.Get_CalChartBrushAndPen(CalChart::Colors::SHAPES)),
                 GenerateFakeSelectShapeDrawCommands(mMode))));
+    // draw the curves
+    CalChart::append(drawCmds, GenerateCurves(mMode, mConfig));
     wxCalChart::Draw::DrawCommandList(dc, drawCmds + offset);
 }
 

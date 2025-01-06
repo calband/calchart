@@ -20,8 +20,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define _LIBCPP_ENABLE_EXPERIMENTAL 1
-
 #include "CalChartShow.h"
 #include "CalChartConfiguration.h"
 #include "CalChartConstants.h"
@@ -352,7 +350,7 @@ auto Show::SerializeShow() const -> std::vector<std::byte>
     return result;
 }
 
-auto Show::GeneratePointsDrawCommands(CalChart::Configuration const& config, int referencePoint) const -> std::vector<CalChart::Draw::DrawCommand>
+auto Show::GenerateSheetElements(CalChart::Configuration const& config, int referencePoint) const -> std::vector<CalChart::Draw::DrawCommand>
 {
     return GetCurrentSheet()->GenerateSheetElements(config, mSelectionList, GetPointsLabel(), referencePoint);
 }
@@ -1086,6 +1084,42 @@ Show_command_pair Show::Create_MoveBackgroundImageCommand(int which, int left, i
     auto reaction = [sheet_num = mSheetNum, which, current_left, current_top, current_scaled_width, current_scaled_height](Show& show) {
         auto sheet = show.GetNthSheet(sheet_num);
         sheet->MoveBackgroundImage(which, current_left, current_top, current_scaled_width, current_scaled_height);
+    };
+    return { action, reaction };
+}
+
+auto Show::Create_AddSheetCurveCommand(CalChart::Curve const& curve) const -> Show_command_pair
+{
+    auto newIndex = GetCurrentSheet()->GetCurvesSize();
+    auto action = [sheet_num = mSheetNum, curve, newIndex](Show& show) {
+        show.GetNthSheet(sheet_num)->AddCurve(curve, newIndex);
+    };
+    auto reaction = [sheet_num = mSheetNum, newIndex](Show& show) {
+        show.GetNthSheet(sheet_num)->RemoveCurve(newIndex);
+    };
+    return { action, reaction };
+}
+
+auto Show::Create_ReplaceSheetCurveCommand(CalChart::Curve const& curve, int whichCurve) const -> Show_command_pair
+{
+    auto oldCurve = GetCurrentSheet()->GetCurve(whichCurve);
+    auto action = [sheet_num = mSheetNum, curve, whichCurve](Show& show) {
+        show.GetNthSheet(sheet_num)->ReplaceCurve(curve, whichCurve);
+    };
+    auto reaction = [sheet_num = mSheetNum, oldCurve, whichCurve](Show& show) {
+        show.GetNthSheet(sheet_num)->ReplaceCurve(oldCurve, whichCurve);
+    };
+    return { action, reaction };
+}
+
+auto Show::Create_RemoveSheetCurveCommand(int whichCurve) const -> Show_command_pair
+{
+    auto oldCurve = GetCurrentSheet()->GetCurve(whichCurve);
+    auto action = [sheet_num = mSheetNum, whichCurve](Show& show) {
+        show.GetNthSheet(sheet_num)->RemoveCurve(whichCurve);
+    };
+    auto reaction = [sheet_num = mSheetNum, oldCurve, whichCurve](Show& show) {
+        show.GetNthSheet(sheet_num)->AddCurve(oldCurve, whichCurve);
     };
     return { action, reaction };
 }

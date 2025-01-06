@@ -511,4 +511,66 @@ TEST_CASE("Test_Inside", "CalChartShapeTests")
     CHECK(CalChart::Inside({ 8, 7 }, CalChart::RawPolygon_t{ CalChart::Coord{ 1, 1 }, CalChart::Coord{ 5, 9 }, CalChart::Coord{ 9, 1 }, CalChart::Coord{ 1, 6 }, CalChart::Coord{ 1, 8 }, CalChart::Coord{ 9, 8 }, CalChart::Coord{ 9, 6 } }));
 }
 
+TEST_CASE("Shape_Curve", "CalChartShapeTests")
+{
+    auto controlPoints = std::vector<CalChart::Coord>{
+        { 10, 10 },
+        { 500, 400 },
+        { 10, 400 },
+        { 500, 10 }
+    };
+    auto uut = CalChart::Curve(controlPoints);
+    CHECK(controlPoints == uut.GetControlPoints());
+    auto drawCommands = uut.GetCC_DrawCommand();
+    // for reference, this is how we would print out the draw commands if they need to be regenerated:
+    // for (auto&& cmd : drawCommands) {
+    //     std::visit(
+    //         CalChart::overloaded{
+    //             [](CalChart::Draw::DrawItems item) {
+    //                 std::visit(
+    //                     CalChart::overloaded{
+    //                         [](CalChart::Draw::Line line) { std::cout << "CalChart::Draw::Line{ Coord{ " << line.c1.x << ", " << line.c1.y << "}, Coord{ " << line.c2.x << ", " << line.c2.y << "} },\n"; },
+    //                         [](auto&&) {},
+    //                     },
+    //                     item);
+    //             },
+    //             [](auto&&) {},
+    //         },
+    //         cmd);
+    // }
+    auto uut_draw = std::vector<CalChart::Draw::DrawCommand>{
+        CalChart::Draw::Line{ CalChart::Coord{ 10, 10 }, CalChart::Coord{ 43, 35 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 43, 35 }, CalChart::Coord{ 93, 70 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 93, 70 }, CalChart::Coord{ 152, 111 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 152, 111 }, CalChart::Coord{ 218, 156 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 218, 156 }, CalChart::Coord{ 286, 205 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 286, 205 }, CalChart::Coord{ 352, 254 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 352, 254 }, CalChart::Coord{ 409, 299 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 409, 299 }, CalChart::Coord{ 457, 340 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 457, 340 }, CalChart::Coord{ 488, 374 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 488, 374 }, CalChart::Coord{ 500, 400 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 500, 400 }, CalChart::Coord{ 486, 417 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 486, 417 }, CalChart::Coord{ 448, 431 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 448, 431 }, CalChart::Coord{ 394, 441 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 394, 441 }, CalChart::Coord{ 328, 447 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 328, 447 }, CalChart::Coord{ 255, 450 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 255, 450 }, CalChart::Coord{ 181, 447 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 181, 447 }, CalChart::Coord{ 116, 441 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 116, 441 }, CalChart::Coord{ 60, 431 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 60, 431 }, CalChart::Coord{ 23, 417 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 23, 417 }, CalChart::Coord{ 10, 400 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 10, 400 }, CalChart::Coord{ 21, 374 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 21, 374 }, CalChart::Coord{ 53, 340 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 53, 340 }, CalChart::Coord{ 101, 299 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 101, 299 }, CalChart::Coord{ 159, 254 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 159, 254 }, CalChart::Coord{ 224, 205 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 224, 205 }, CalChart::Coord{ 293, 156 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 293, 156 }, CalChart::Coord{ 358, 111 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 358, 111 }, CalChart::Coord{ 418, 70 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 418, 70 }, CalChart::Coord{ 466, 35 } },
+        CalChart::Draw::Line{ CalChart::Coord{ 466, 35 }, CalChart::Coord{ 500, 10 } },
+    };
+    CHECK(uut_draw == drawCommands);
+}
+
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers, readability-function-cognitive-complexity)

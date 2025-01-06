@@ -21,8 +21,11 @@
 */
 
 #include "CalChartShapes.h"
+#include "CalChartConfiguration.h"
 #include "CalChartDrawCommand.h"
+#include "CalChartRanges.h"
 #include <cmath>
+#include <format>
 #include <numeric>
 
 namespace CalChart {
@@ -181,6 +184,146 @@ Poly::Poly(Coord p)
 {
     // add end point
     Append(p);
+}
+
+namespace {
+    // Compute a point on a Catmull-Rom spline segment
+    auto catmullRom(CalChart::Coord p0, CalChart::Coord p1, CalChart::Coord p2, CalChart::Coord p3, double t) -> CalChart::Coord
+    {
+        // Catmull-Rom basis functions
+        auto t2 = t * t;
+        auto t3 = t2 * t;
+
+        auto b0 = -0.5 * t3 + t2 - 0.5 * t;
+        auto b1 = 1.5 * t3 - 2.5 * t2 + 1.0;
+        auto b2 = -1.5 * t3 + 2.0 * t2 + 0.5 * t;
+        auto b3 = 0.5 * t3 - 0.5 * t2;
+
+        return (p0 * b0) + (p1 * b1) + (p2 * b2) + (p3 * b3);
+    }
+
+    // Generate line segments from a Catmull-Rom spline
+    auto generateCatmullRomLineSegments(std::vector<CalChart::Coord> const& controlPoints, int segments) -> std::vector<std::pair<CalChart::Coord, CalChart::Coord>>
+    {
+        auto lineSegments = std::vector<std::pair<CalChart::Coord, CalChart::Coord>>{};
+
+        if (controlPoints.size() < 4) {
+            return {};
+        }
+
+        // Loop over segments defined by consecutive points
+        for (size_t i = 1; i < controlPoints.size() - 2; ++i) {
+            auto p0 = controlPoints[i - 1];
+            auto p1 = controlPoints[i];
+            auto p2 = controlPoints[i + 1];
+            auto p3 = controlPoints[i + 2];
+
+            // Generate points along the segment
+            CalChart::Coord prevPoint = p1; // Start at the current point
+            auto step = 1.0 / segments;
+
+            for (int j = 1; j <= segments; ++j) {
+                auto t = j * step;
+                auto currentPoint = catmullRom(p0, p1, p2, p3, t);
+                lineSegments.emplace_back(prevPoint, currentPoint);
+                prevPoint = currentPoint;
+            }
+        }
+
+        return lineSegments;
+    }
+
+    // Generate line segments from a Catmull-Rom spline
+    auto generateCatmullRomDrawCommands(std::vector<CalChart::Coord> const& controlPoints, int segments) -> std::vector<CalChart::Draw::DrawCommand>
+    {
+        return CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(
+            generateCatmullRomLineSegments(controlPoints, segments)
+            | std::views::transform([](auto points) {
+                  return CalChart::Draw::Line{ std::get<0>(points), std::get<1>(points) };
+              }));
+    }
+
+    auto GenerateCurve(std::vector<CalChart::Coord> const& points, int segments) -> std::vector<CalChart::Draw::DrawCommand>
+    {
+        return generateCatmullRomDrawCommands(points, segments);
+    }
+
+    // Helper function to compute distance from a point to a line segment
+    auto pointToSegmentDistance(CalChart::Coord point,
+        CalChart::Coord segStart,
+        CalChart::Coord segEnd) -> double
+    {
+        auto segment = segEnd - segStart;
+        auto pointVec = point - segStart;
+
+        auto segmentLengthSq = static_cast<double>(segment.Dot(segment));
+        if (segmentLengthSq == 0) {
+            // Segment is a single point
+            return pointVec.Length();
+        }
+
+        // Project point onto segment, clamped to [0, 1]
+        auto t = std::clamp(0.0, 1.0, pointVec.Dot(segment) / segmentLengthSq);
+
+        // Find the closest point on the segment
+        auto projection = segStart + segment * t;
+
+        // Return distance to the closest point
+        return (point - projection).Length();
+    }
+
+    // Function to check if a point hits the curve and determine lower control point
+    std::optional<size_t> isPointOnCurve(
+        const std::vector<CalChart::Coord>& controlPoints,
+        const CalChart::Coord& point, double tolerance, int segmentsPerCurve)
+    {
+
+        // Generate line segments using Catmull-Rom
+        auto lineSegments = generateCatmullRomLineSegments(controlPoints, segmentsPerCurve);
+
+        for (size_t i = 0; i < lineSegments.size(); ++i) {
+            const auto& [segStart, segEnd] = lineSegments[i];
+
+            // Check if the point is within tolerance of the segment
+            double distance = pointToSegmentDistance(point, segStart, segEnd);
+            if (distance <= tolerance) {
+                // Determine which control points the segment is between
+                return i / segmentsPerCurve;
+            }
+        }
+
+        return std::nullopt; // No hit
+    }
+}
+
+auto Curve::GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand>
+{
+    auto drawPoints = std::vector<CalChart::Coord>{};
+    drawPoints.reserve(pntlist.size() + 3);
+    drawPoints.push_back(pntlist.front());
+    std::copy(pntlist.begin(), pntlist.end(), std::back_inserter(drawPoints));
+    if (movingPoint) {
+        drawPoints.push_back(*movingPoint);
+        drawPoints.push_back(*movingPoint);
+    } else {
+        drawPoints.push_back(pntlist.back());
+    }
+    return GenerateCurve(drawPoints, kNumberSegments);
+}
+
+auto Curve::LowerControlPointOnLine(Coord point, Coord::units searchBound) const -> std::optional<size_t>
+{
+    auto drawPoints = std::vector<CalChart::Coord>{};
+    drawPoints.reserve(pntlist.size() + 3);
+    drawPoints.push_back(pntlist.front());
+    std::copy(pntlist.begin(), pntlist.end(), std::back_inserter(drawPoints));
+    if (movingPoint) {
+        drawPoints.push_back(*movingPoint);
+        drawPoints.push_back(*movingPoint);
+    } else {
+        drawPoints.push_back(pntlist.back());
+    }
+    return isPointOnCurve(drawPoints, point, searchBound, kNumberSegments);
 }
 
 }
