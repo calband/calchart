@@ -75,7 +75,7 @@ struct AnimationData {
 
 auto CreateCompileResult(
     AnimationData const& animationData,
-    Proceedures const& proceedures,
+    Continuity const* proceedures,
     Variables& variablesStates) -> CompileResult;
 
 struct Compile {

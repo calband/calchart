@@ -75,8 +75,7 @@ auto AnimateShow(const Show& show) -> Sheets
                               }
                               return std::nullopt;
                           }(nextAnimationSheet);
-                          auto const& cont = curr_sheet->GetContinuityBySymbol(current_symbol).GetParsedContinuity();
-                          auto empty_cont = std::vector<std::unique_ptr<Cont::Procedure>>{};
+                          auto cont = curr_sheet->GetContinuityBySymbol(current_symbol);
                           return CalChart::Animate::CreateCompileResult(
                               AnimationData{
                                   static_cast<unsigned>(whichMarcher),
@@ -84,7 +83,7 @@ auto AnimateShow(const Show& show) -> Sheets
                                   endPosition,
                                   numBeats,
                                   isLastSheet },
-                              curr_sheet->ContinuityInUse(current_symbol) ? cont : empty_cont,
+                              curr_sheet->ContinuityInUse(current_symbol) ? &cont : nullptr,
                               variablesStates);
                       }));
 
