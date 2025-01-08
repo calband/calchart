@@ -6,6 +6,6 @@ Bugs addressed in this release:
 
 Other changes:
 
+* [#583](../../issues/583) Enable ASAN builds for debug to help catch issue.
 * [#584](../../issues/584) Why didn't the failures in ASAN cause sanity_test.py to fail?
-
 
