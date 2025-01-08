@@ -62,13 +62,13 @@ private:
 
 auto CreateCompileResult(
     AnimationData const& animationData,
-    Proceedures const& proceedures,
+    Continuity const* proceedures,
     Variables& variablesStates) -> CompileResult
 {
     auto ac = CompileState(animationData, variablesStates);
 
     // no continuity was specified
-    if (proceedures.empty()) {
+    if (proceedures == nullptr || !proceedures->HasParsedContinuity()) {
         if (animationData.isLastAnimationSheet) {
             // use MTRM E
             Cont::ProcMTRM defcont(std::make_unique<Cont::ValueDefined>(Cont::CC_E));
@@ -78,11 +78,11 @@ auto CreateCompileResult(
             Cont::ProcEven defcont(std::make_unique<Cont::ValueFloat>(ac.GetBeatsRemaining()), std::make_unique<Cont::NextPoint>());
             defcont.Compile(ac);
         }
-    }
-
-    // compile all the commands
-    for (auto const& proc : proceedures) {
-        proc->Compile(ac);
+    } else {
+        // compile all the commands
+        for (auto const& proc : proceedures->GetParsedContinuity()) {
+            proc->Compile(ac);
+        }
     }
 
     // report if the point didn't make it

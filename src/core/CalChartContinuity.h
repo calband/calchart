@@ -64,6 +64,7 @@ public:
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte>;
 
     std::vector<std::unique_ptr<Cont::Procedure>> const& GetParsedContinuity() const noexcept { return m_parsedContinuity; }
+    [[nodiscard]] auto HasParsedContinuity() const { return !m_parsedContinuity.empty(); }
     auto GetText() const { return m_legacyText; }
 
     friend void swap(Continuity& lhs, Continuity& rhs)

@@ -40,7 +40,7 @@ auto GetCompiledResults(Sheets const& sheets, Conts const& proc)
         true
     };
 
-    return Animate::CreateCompileResult(animationData, proc, vars);
+    return Animate::CreateCompileResult(animationData, &proc, vars);
 }
 
 auto CreateSheetsForTest(Coord begin, Coord end, int beats)
@@ -84,7 +84,8 @@ TEST_CASE("Fountain", "CalChartContinuityToken")
     auto procs = std::vector<std::unique_ptr<Cont::Procedure>>{};
     procs.push_back(std::move(uut));
     auto sheets = CreateSheetsForTest({ 0, 0 }, { 8, 16 }, 14);
-    auto [compiledResults, errors] = GetCompiledResults(sheets, procs);
+    auto continuity = Continuity(std::move(procs));
+    auto [compiledResults, errors] = GetCompiledResults(sheets, continuity);
 
     auto goldCompile = std::vector<Animate::Command>{
         Animate::CommandMove{ Coord{ 0, 0 }, 6, Coord{ 128, 128 } },
@@ -105,7 +106,8 @@ TEST_CASE("Fountain with nulls", "CalChartContinuityToken")
     auto procs = std::vector<std::unique_ptr<Cont::Procedure>>{};
     procs.push_back(std::move(uut));
     auto sheets = CreateSheetsForTest({ 0, 0 }, { 8, 16 }, 16);
-    auto [compiledResults, errors] = GetCompiledResults(sheets, procs);
+    auto continuity = Continuity(std::move(procs));
+    auto [compiledResults, errors] = GetCompiledResults(sheets, continuity);
 
     auto goldCompile = std::vector<Animate::Command>{
         Animate::CommandMove{ Coord{ 0, 0 }, 8, Coord{ 128, 128 } },
@@ -127,7 +129,8 @@ TEST_CASE("HSCM", "CalChartContinuityToken")
     auto procs = std::vector<std::unique_ptr<Cont::Procedure>>{};
     procs.push_back(std::move(uut));
     auto sheets = CreateSheetsForTest({ 0, 0 }, { -8, 0 }, { 8, -2 }, { 0, 0 }, 40);
-    auto [compiledResults, errors] = GetCompiledResults(sheets, procs);
+    auto continuity = Continuity(std::move(procs));
+    auto [compiledResults, errors] = GetCompiledResults(sheets, continuity);
 
     auto goldCompile = std::vector<Animate::Command>{
         Animate::CommandMove{ Coord{ 0, 0 }, 9, Coord{ -16 * 9, 0 } },
@@ -151,7 +154,8 @@ TEST_CASE("DMCM", "CalChartContinuityToken")
     auto procs = std::vector<std::unique_ptr<Cont::Procedure>>{};
     procs.push_back(std::move(uut));
     auto sheets = CreateSheetsForTest({ 0, 0 }, { -8, 8 }, { 8, -10 }, { 0, 0 }, 40);
-    auto [compiledResults, errors] = GetCompiledResults(sheets, procs);
+    auto continuity = Continuity(std::move(procs));
+    auto [compiledResults, errors] = GetCompiledResults(sheets, continuity);
 
     auto goldCompile = std::vector<Animate::Command>{
         Animate::CommandMove{ Coord{ 0, 0 }, 9, Coord{ -16 * 9, 16 * 9 } },
