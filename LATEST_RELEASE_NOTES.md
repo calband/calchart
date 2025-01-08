@@ -6,3 +6,6 @@ Bugs addressed in this release:
 
 Other changes:
 
+* [#584](../../issues/584) Why didn't the failures in ASAN cause sanity_test.py to fail?
+
+
