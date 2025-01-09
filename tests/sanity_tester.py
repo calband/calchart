@@ -58,6 +58,11 @@ def compare_files(file1, file2, custom_comparison_function):
     num_errors = 0
     line_num = 0
     with open(file1, 'r') as f1, open(file2, 'r') as f2:
+        line_count1 = sum(1 for line in f1)
+        line_count2 = sum(1 for line in f2)
+        if (line_count1 != line_count2):
+            print(f"Failed.  Lines {file1}: {line_count1}, {file2}: {line_count2}")
+            return 1
         for line1, line2 in zip(f1, f2):
             line_num = line_num + 1
             # Apply custom comparison function to each line
