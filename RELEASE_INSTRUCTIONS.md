@@ -15,7 +15,7 @@ CalChart uses CMake and Github actions to automate the release process.  When yo
 
 The current calchart version is 3.7.2.  In all commands below, substitute that number for `$CCVER` (meaning when you read `$CCVER`, type 3.7.2).  When incrementing, be sure to consider if it's time to bump the MINOR version.  Only do that if there's incompatibilities, such as a new feature that won't work on a previous version of CalChart.
 
- 1. Create a git branch to prep the changes: `git diff dev/prep_$CCVER`
+ 1. Create a git branch to prep the changes: `git checkout -b dev/prep_$CCVER`
 
  2. Prebuild the project to make sure its working
 
@@ -56,7 +56,7 @@ This should trigger the github action, which should publish release notes in Dra
 
  15. Update https://github.com/calband/calchart/milestones by closing the shipped milestone and starting the next one.
 
- 16. Create a git branch to pre-prep the next version: `git diff dev/pre_prep_$CCVER+1`
+ 16. Create a git branch to pre-prep the next version: `git checkout -b dev/pre_prep_$CCVER+1`
 
  17. Clear out LATEST_RELEASE_NOTES.md for next development effort. Update $CCVER+1 in RELEASE_INSTRUCTIONS.md.
 
