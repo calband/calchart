@@ -154,7 +154,6 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent&)
             *nextSheet));
 
     // Draw the points
-    CalChart::append(drawCmds, mShow->GeneratePointsDrawCommands(mConfig, std::nullopt));
     CalChart::append(drawCmds, mShow->GeneratePointsDrawCommands(mConfig, 1));
 
     // draw the path, but because we're not a real show, we have to make the path manually.

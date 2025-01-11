@@ -20,8 +20,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartSheet.h"
+#define _LIBCPP_ENABLE_EXPERIMENTAL 1
 
+#include "CalChartSheet.h"
+#include "CalChartConfiguration.h"
 #include "CalChartFileFormat.h"
 #include "CalChartRanges.h"
 #include "CalChartShow.h"
@@ -689,6 +691,80 @@ nlohmann::json Sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::str
     return j;
 }
 
+namespace {
+    // Returns a view adaptor that will transform a range of point indices to Draw point commands.
+    auto TransformIndexToDrawCommands(CalChart::Sheet const& sheet, std::vector<std::string> const& labels, int ref, CalChart::Configuration const& config)
+    {
+        return std::views::transform([&sheet, ref, labels, &config](int i) {
+            return sheet.GetMarcher(i).GetDrawCommands(ref, labels.at(i), config);
+        })
+            | std::ranges::views::join;
+    }
+
+    // Given a set and a size, return a range that has the numbers not in the set
+    auto NegativeIntersection(CalChart::SelectionList const& set, int count)
+    {
+        return std::views::iota(0, count)
+            | std::views::filter([set](int i) {
+                  return !set.contains(i);
+              });
+    }
+
+    // convention is that we have unselected
+    auto GetMarcherColors(bool isGhost, bool isRef) -> std::array<Colors, 4>
+    {
+        if (isGhost) {
+            return { Colors::GHOST_POINT, Colors::GHOST_POINT_HLIT, Colors::GHOST_POINT_TEXT, Colors::GHOST_POINT_HLIT_TEXT };
+        }
+        if (isRef) {
+            return { Colors::REF_POINT, Colors::REF_POINT_HILIT, Colors::REF_POINT_TEXT, Colors::REF_POINT_HILIT_TEXT };
+        }
+        return { Colors::POINT, Colors::POINT_HILIT, Colors::POINT_TEXT, Colors::POINT_HILIT_TEXT };
+    }
+
+    auto GenerateSheetMarcherDrawCommands(
+        CalChart::Configuration const& config,
+        CalChart::SelectionList const& selection_list,
+        std::vector<std::string> const& labels,
+        CalChart::Sheet const& sheet,
+        int ref,
+        std::array<Colors, 4> color) -> std::vector<CalChart::Draw::DrawCommand>
+    {
+
+        return {
+            CalChart::Draw::withBrushAndPen(
+                config.Get_CalChartBrushAndPen(std::get<0>(color)),
+                CalChart::Draw::withTextForeground(
+                    config.Get_CalChartBrushAndPen(std::get<2>(color)),
+                    NegativeIntersection(selection_list, labels.size())
+                        | TransformIndexToDrawCommands(sheet, labels, ref, config))),
+            CalChart::Draw::withBrushAndPen(
+                config.Get_CalChartBrushAndPen(std::get<1>(color)),
+                CalChart::Draw::withTextForeground(
+                    config.Get_CalChartBrushAndPen(std::get<3>(color)),
+                    selection_list
+                        | TransformIndexToDrawCommands(sheet, labels, ref, config))),
+        };
+    }
+
+}
+
+auto Sheet::GenerateGhostElements(CalChart::Configuration const& config, SelectionList const& selected, std::vector<std::string> const& marcherLabels) const -> std::vector<CalChart::Draw::DrawCommand>
+{
+    return GenerateSheetMarcherDrawCommands(config, selected, marcherLabels, *this, 0, GetMarcherColors(true, false));
+}
+
+auto Sheet::GenerateSheetElements(CalChart::Configuration const& config, SelectionList const& selected, std::vector<std::string> const& marcherLabels, int referencePoint) const -> std::vector<CalChart::Draw::DrawCommand>
+{
+    auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
+    if (referencePoint > 0) {
+        // if we are editing a ref point other than 0, draw the 0 one in a different color.
+        CalChart::append(drawCmds, GenerateSheetMarcherDrawCommands(config, selected, marcherLabels, *this, 0, GetMarcherColors(false, true)));
+    }
+    CalChart::append(drawCmds, GenerateSheetMarcherDrawCommands(config, selected, marcherLabels, *this, referencePoint, GetMarcherColors(false, false)));
+    return drawCmds;
+}
+
 void Sheet::SetPoints(std::vector<Point> const& points) { mPoints = points; }
 
 // -=-=-=-=-=-=- Unit Tests -=-=-=-=-=-=-=-
@@ -811,5 +887,4 @@ auto Sheet::ShouldPrintLandscape() const -> bool
     auto boundingBox = GetMarcherBoundingBox(GetAllMarchers());
     return (boundingBox.second.x - boundingBox.first.x) > CalChart::Int2CoordUnits(CalChart::kFieldStepSizeNorthSouth[0]);
 }
-
 }

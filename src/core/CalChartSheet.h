@@ -143,6 +143,11 @@ public:
      */
     [[nodiscard]] auto toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, std::map<std::string, std::vector<nlohmann::json>> const& movements) const -> nlohmann::json;
 
+    // Draw Commands
+    // the sheet can generate all the elements related to sheet specific draw aspects
+    [[nodiscard]] auto GenerateGhostElements(CalChart::Configuration const& config, SelectionList const& selected, std::vector<std::string> const& marcherLabels) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateSheetElements(CalChart::Configuration const& config, SelectionList const& selected, std::vector<std::string> const& marcherLabels, int referencePoint) const -> std::vector<CalChart::Draw::DrawCommand>;
+
 private:
     std::vector<Continuity> mAnimationContinuity;
     PrintContinuity mPrintableContinuity;
