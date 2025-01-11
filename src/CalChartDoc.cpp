@@ -472,11 +472,11 @@ auto CalChartDoc::GeneratePhatomPointsDrawCommands(
         | std::views::transform([this, sheet](auto&& whichPosition) {
               auto [which, position] = whichPosition;
               // because points draw their position, we remove it then add the new position.
-              return sheet->GetPoint(which).GetDrawCommands(
+              return sheet->GetMarcher(which).GetDrawCommands(
                          GetPointLabel(which),
                          mConfig)
                   + position
-                  - sheet->GetPoint(which).GetPos();
+                  - sheet->GetMarcher(which).GetPos();
           })
         | std::views::join;
     return {

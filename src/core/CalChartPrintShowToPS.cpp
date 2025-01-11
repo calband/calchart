@@ -221,7 +221,7 @@ namespace {
         auto fmax = mode.FieldSize().x + fmin;
 
         /* find bounds */
-        auto allX = sheet.GetAllPoints()
+        auto allX = sheet.GetAllMarchers()
             | std::views::transform([](auto&& point) { return point.GetPos().x; });
         auto [max_s, max_n] = std::accumulate(allX.begin(), allX.end(), std::pair<Coord::units, Coord::units>{ fmax, fmin }, [](auto acc, auto x) {
             return std::pair<Coord::units, Coord::units>{ std::min(x, std::get<0>(acc)), std::max(x, std::get<1>(acc)) };
@@ -614,7 +614,7 @@ auto PrintShowToPS::GenerateStandard(Sheet const& sheet, bool split_sheet) const
         + std::format("/slinew {:.4f} def\n", dot_w * mSLineRatio)
         + std::format("/numberfont findfont {:.2f} scalefont setfont\n", dot_w * 2 * mNumRatio);
 
-    auto pointsOfInterest = CalChart::Ranges::enumerate_view(sheet.GetAllPoints())
+    auto pointsOfInterest = CalChart::Ranges::enumerate_view(sheet.GetAllMarchers())
         | std::views::filter([clip_s = clip_s, clip_n = clip_n](auto&& enumPoint) {
               return std::get<1>(enumPoint).GetPos().x >= clip_s && std::get<1>(enumPoint).GetPos().x <= clip_n;
           });
@@ -651,7 +651,7 @@ auto PrintShowToPS::GenerateOverview(Sheet const& sheet) const -> std::string
 
     auto fieldheight = CoordUnits2Float(fieldsize.y);
 
-    auto allBoxes = sheet.GetAllPoints()
+    auto allBoxes = sheet.GetAllMarchers()
         | std::views::transform([](auto&& point) { return point.GetPos(); })
         | std::views::transform([this, fieldoff, fieldwidth, fieldheight](auto&& position) {
               return std::format("{:.2f} {:.2f} dotbox\n",

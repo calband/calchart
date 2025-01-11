@@ -28,16 +28,20 @@
  *
  */
 
-#include "CalChartAnimation.h"
+#include "CalChartConstants.h"
 #include "CalChartContinuity.h"
+#include "CalChartCoord.h"
 #include "CalChartFileFormat.h"
 #include "CalChartImage.h"
 #include "CalChartPoint.h"
 #include "CalChartText.h"
 #include "CalChartTypes.h"
 
+#include <cstddef>
+#include <map>
 #include <nlohmann/json.hpp>
-#include <set>
+#include <optional>
+#include <ranges>
 #include <string>
 #include <vector>
 
@@ -50,22 +54,21 @@ struct ParseErrorHandlers;
 // error occurred on parsing.  First arg is what went wrong, second is the values that need to be fixed.
 class Sheet {
 public:
-    Sheet(size_t numPoints);
-    Sheet(size_t numPoints, std::string const& newname);
+    explicit Sheet(size_t numPoints);
+    Sheet(size_t numPoints, std::string name);
     // intentionally a reference to Reader.
     Sheet(Version_3_3_and_earlier, size_t numPoints, Reader&, ParseErrorHandlers const* correction = nullptr);
     Sheet(size_t numPoints, Reader, ParseErrorHandlers const* correction = nullptr);
-    ~Sheet();
 
 private:
-    auto SerializeAllPoints() const -> std::vector<std::byte>;
-    auto SerializeContinuityData() const -> std::vector<std::byte>;
-    auto SerializePrintContinuityData() const -> std::vector<std::byte>;
-    auto SerializeBackgroundImageInfo() const -> std::vector<std::byte>;
-    auto SerializeSheetData() const -> std::vector<std::byte>;
+    [[nodiscard]] auto SerializeAllPoints() const -> std::vector<std::byte>;
+    [[nodiscard]] auto SerializeContinuityData() const -> std::vector<std::byte>;
+    [[nodiscard]] auto SerializePrintContinuityData() const -> std::vector<std::byte>;
+    [[nodiscard]] auto SerializeBackgroundImageInfo() const -> std::vector<std::byte>;
+    [[nodiscard]] auto SerializeSheetData() const -> std::vector<std::byte>;
 
 public:
-    auto SerializeSheet() const -> std::vector<std::byte>;
+    [[nodiscard]] auto SerializeSheet() const -> std::vector<std::byte>;
 
     // continuity Functions
     [[nodiscard]] auto GetContinuityBySymbol(SYMBOL_TYPE i) const
@@ -85,44 +88,42 @@ public:
 
     // print continuity
     void SetPrintableContinuity(std::string const& name, std::string const& lines);
-    Textline_list GetPrintableContinuity() const;
-    std::string GetPrintNumber() const;
-    std::string GetRawPrintContinuity() const;
-    auto GetPrintContinuity() const { return mPrintableContinuity; }
+    [[nodiscard]] auto GetPrintableContinuity() const -> Textline_list;
+    [[nodiscard]] auto GetPrintNumber() const -> std::string;
+    [[nodiscard]] auto GetRawPrintContinuity() const -> std::string;
+    [[nodiscard]] auto GetPrintContinuity() const { return mPrintableContinuity; }
 
     // beats
-    unsigned short GetBeats() const;
-    void SetBeats(unsigned short b);
-    bool IsInAnimation() const { return (GetBeats() != 0); }
+    [[nodiscard]] auto GetBeats() const { return mBeats; }
+    void SetBeats(beats_t b) { mBeats = b; }
+    [[nodiscard]] auto IsInAnimation() const { return (GetBeats() != 0); }
 
-    // points
-    Point const& GetPoint(unsigned i) const;
-    Point& GetPoint(unsigned i);
+    // Marchers
+    [[nodiscard]] auto GetMarcher(unsigned i) const -> Point;
+    [[nodiscard]] auto GetAllMarchers() const { return mPoints; }
 
-    auto GetAllPoints() const { return mPoints; }
+    [[nodiscard]] auto GetSymbol(unsigned i) const { return mPoints[i].GetSymbol(); }
 
-    SYMBOL_TYPE GetSymbol(unsigned i) const;
     void SetSymbol(unsigned i, SYMBOL_TYPE sym);
-    std::vector<Point> GetPoints() const;
-    auto GetNumberPoints() const { return mPoints.size(); }
-    std::vector<SYMBOL_TYPE> GetSymbols() const;
+    [[nodiscard]] auto GetNumberPoints() const { return mPoints.size(); }
+    [[nodiscard]] auto GetSymbols() const -> std::vector<SYMBOL_TYPE>;
     void SetPoints(std::vector<Point> const& points);
     [[nodiscard]] auto FindMarcher(Coord where, Coord::units searchBound, unsigned ref = 0) const -> std::optional<int>;
-    std::vector<Point> RemapPoints(std::vector<size_t> const& table) const;
-    Coord GetPosition(unsigned i, unsigned ref = 0) const;
+    [[nodiscard]] auto RemapPoints(std::vector<size_t> const& table) const -> std::vector<Point>;
+    [[nodiscard]] auto GetPosition(unsigned i, unsigned ref = 0) const -> Coord;
     void SetAllPositions(Coord val, unsigned i);
     void SetPosition(Coord val, unsigned i, unsigned ref = 0);
     void SetAllPoints(std::vector<Point> const& newpts);
-    SelectionList MakeSelectPointsBySymbol(SYMBOL_TYPE i) const;
-    std::vector<Point> NewNumPointsPositions(int num, int columns, Coord new_march_position) const;
+    [[nodiscard]] auto MakeSelectPointsBySymbol(SYMBOL_TYPE i) const -> SelectionList;
+    [[nodiscard]] auto NewNumPointsPositions(int num, int columns, Coord new_march_position) const -> std::vector<Point>;
     void DeletePoints(SelectionList const& sl);
 
     // titles
-    std::string GetName() const;
+    [[nodiscard]] auto GetName() const -> std::string;
     void SetName(std::string const& newname);
 
     // image
-    std::vector<ImageInfo> const& GetBackgroundImages() const;
+    [[nodiscard]] auto GetBackgroundImages() const -> std::vector<ImageInfo> const&;
     void AddBackgroundImage(ImageInfo const& image, size_t where);
     void RemoveBackgroundImage(size_t which);
     void MoveBackgroundImage(size_t which, int left, int top, int scaled_width, int scaled_height);
@@ -140,12 +141,12 @@ public:
      * @return A JSON which could represent this sheet in
      * a '.viewer' file.
      */
-    nlohmann::json toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, std::map<std::string, std::vector<nlohmann::json>> const& movements) const;
+    [[nodiscard]] auto toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, std::map<std::string, std::vector<nlohmann::json>> const& movements) const -> nlohmann::json;
 
 private:
     std::vector<Continuity> mAnimationContinuity;
     PrintContinuity mPrintableContinuity;
-    unsigned short mBeats;
+    beats_t mBeats;
     std::vector<Point> mPoints;
     std::string mName;
     std::vector<ImageInfo> mBackgroundImages;
