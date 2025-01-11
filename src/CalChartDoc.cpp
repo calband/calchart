@@ -453,10 +453,6 @@ auto CalChartDoc::GenerateCurrentSheetPointsDrawCommands() const -> std::vector<
     if (sheet == GetSheetEnd()) {
         return drawCmds;
     }
-    if (GetCurrentReferencePoint() > 0) {
-        // if we are editing a ref point other than 0, draw the 0 one in a different color.
-        CalChart::append(drawCmds, mShow->GeneratePointsDrawCommands(config, std::nullopt));
-    }
     CalChart::append(drawCmds, mShow->GeneratePointsDrawCommands(config, GetCurrentReferencePoint()));
     CalChart::append(drawCmds, GeneratePathsDrawCommands());
     return drawCmds + origin;

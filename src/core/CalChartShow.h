@@ -168,7 +168,7 @@ public:
 
     [[nodiscard]] auto GeneratePointsDrawCommands(
         CalChart::Configuration const& config,
-        std::optional<int> ref) const -> std::vector<CalChart::Draw::DrawCommand>;
+        int ref) const -> std::vector<CalChart::Draw::DrawCommand>;
 
     [[nodiscard]] auto GenerateGhostPointsDrawCommands(
         CalChart::Configuration const& config,
@@ -176,7 +176,6 @@ public:
         CalChart::Sheet const& sheet) const -> std::vector<CalChart::Draw::DrawCommand>;
 
     [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands(CalChart::Configuration const& config) const -> std::vector<std::vector<CalChart::Draw::DrawCommand>>;
-    [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands2(CalChart::Configuration const& config) const -> std::vector<std::vector<std::string>>;
 
 private:
     // modification of show is private, and externally done through create and exeucte commands
