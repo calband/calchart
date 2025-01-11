@@ -521,7 +521,7 @@ private:
     /*!
      * @brief Clips the movement schedule for a marcher, such no movement
      * occurs on or after the specified beat.
-     * @param movement The original movement schedule for a marcher. This 
+     * @param movement The original movement schedule for a marcher. This
      * is the schedule that will be clipped.
      * @param beat The beat to which the schedule shall be clipped.
      * @return The adjusted movement schedule, with no movement phase persisting
@@ -582,7 +582,7 @@ private:
      */
     const std::set<unsigned>& getMarchersAt(unsigned gridX, unsigned gridY, unsigned beat) const;
     /*!
-     * @brief Returns the indices of all marchers present at a particular 
+     * @brief Returns the indices of all marchers present at a particular
      * location at a particular
      * time.
      * @param gridX The x coordinate of the position containing the returned
@@ -641,7 +641,7 @@ private:
      * marcher at a particular time.
      * @param marcher The index of the marcher being placed in the collision space
      * at a particular moment.
-     * @param gridX The x coordinate at which the marcher is being placed, where the 
+     * @param gridX The x coordinate at which the marcher is being placed, where the
      * coordinate system matches the coordinate system understood by SolverCoords.
      * @param gridY The y coordinate at which the marcher is being placed, where the
      * coordinate system matches the coordinate system understood by SolverCoords.
@@ -1059,9 +1059,8 @@ std::set<unsigned> CollisionSpace::getMarchersWithMovePattern(unsigned startBeat
  */
 void convertPositionsOnSheetToSolverSpace(const CalChart::Sheet& sheet, std::vector<SolverCoord>& positions)
 {
-    auto points = sheet.GetPoints();
-    for (size_t i = 0; i < points.size(); i++) {
-        positions.push_back(SolverCoord::fromShowSpace(points[i].GetPos()));
+    for (auto&& point : sheet.GetAllMarchers()) {
+        positions.push_back(SolverCoord::fromShowSpace(point.GetPos()));
     }
 }
 
@@ -1095,7 +1094,7 @@ Matrix<double> makeHungarianDistanceMatrix(const std::vector<SolverCoord>& start
             auto diff = startPositions.at(j) - endPositions.at(i);
             unsigned manhattanDist = abs(diff.x) + abs(diff.y);
             if (manhattanDist > numBeats) {
-                matrix(j, i) = std::numeric_limits<double>::max(); //std::numeric_limits<double>::infinity();
+                matrix(j, i) = std::numeric_limits<double>::max(); // std::numeric_limits<double>::infinity();
             } else {
                 matrix(j, i) = manhattanDist + 1;
             }
@@ -2134,11 +2133,11 @@ std::vector<std::string> validateSheetForTransitionSolver(const CalChart::Sheet&
     std::vector<std::string> errors;
 
     // Verify that all points are in the grid, and that all of them can be converted to and from solver space
-    for (unsigned i = 0; i < sheet.GetPoints().size(); i++) {
+    for (unsigned i = 0; i < sheet.GetAllMarchers().size(); i++) {
         CalChart::Coord showPosition;
         SolverCoord solverPosition;
 
-        showPosition = sheet.GetPoint(i).GetPos();
+        showPosition = sheet.GetMarcher(i).GetPos();
         solverPosition = SolverCoord::fromShowSpace(showPosition);
 
         if (solverPosition.x % 2 != 0 || solverPosition.y % 2 != 0) {

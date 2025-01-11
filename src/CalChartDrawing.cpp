@@ -425,7 +425,7 @@ namespace {
     {
         // Print the field:
         // create a field for drawing:
-        const auto pts = sheet.GetPoints();
+        const auto pts = sheet.GetAllMarchers();
         auto boundingBox = GetMarcherBoundingBox(pts);
         auto mode = show.GetShowMode().CreateFieldForPrinting(CalChart::CoordUnits2Int(boundingBox.first.x), CalChart::CoordUnits2Int(boundingBox.second.x), landscape);
         auto drawCmds = CalChart::CreateModeDrawCommandsWithBorder(config, mode, CalChart::HowToDraw::Printing);

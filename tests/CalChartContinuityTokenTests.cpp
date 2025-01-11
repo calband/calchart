@@ -34,8 +34,8 @@ auto GetCompiledResults(Sheets const& sheets, Conts const& proc)
     Animate::Variables vars{};
     auto animationData = Animate::AnimationData{
         0,
-        sheets.begin()->GetPoint(0),
-        (sheets.begin() + 1)->GetPoint(0).GetPos(),
+        sheets.begin()->GetMarcher(0),
+        (sheets.begin() + 1)->GetMarcher(0).GetPos(),
         sheets.begin()->GetBeats(),
         true
     };

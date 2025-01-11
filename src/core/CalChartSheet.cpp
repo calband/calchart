@@ -36,11 +36,11 @@
 
 namespace CalChart {
 
-std::string const contnames[MAX_NUM_SYMBOLS] = {
+std::array<std::string, MAX_NUM_SYMBOLS> const contnames = {
     "Plain", "Sol", "Bksl", "Sl", "X", "Solbksl", "Solsl", "Solx"
 };
 
-std::string const long_contnames[MAX_NUM_SYMBOLS] = {
+std::array<std::string, MAX_NUM_SYMBOLS> const long_contnames = {
     "Plain", "Solid", "Backslash", "Slash", "Crossed", "Solid Backslash", "Solid Slash", "Solid Crossed"
 };
 
@@ -51,36 +51,35 @@ Sheet::Sheet(size_t numPoints)
 {
 }
 
-Sheet::Sheet(size_t numPoints, std::string const& newname)
+Sheet::Sheet(size_t numPoints, std::string name)
     : mAnimationContinuity(MAX_NUM_SYMBOLS)
     , mBeats(1)
     , mPoints(numPoints)
-    , mName(newname)
+    , mName(std::move(name))
 {
 }
 
-// -=-=-=-=-=- LEGACY CODE -=-=-=-=-=-
-// Recommend that you don't touch this unless you know what you are doing.
-bool are_equal_helper(std::string const& a, std::string const& b)
-{
-    auto p = std::mismatch(a.begin(), a.end(), b.begin(), [](char c1, char c2) {
-        return std::tolower(c1) == std::tolower(c2);
-    });
-    return (p.first == a.end() && p.second == b.end());
+namespace {
+    auto are_equal_helper(std::string const& a, std::string const& b) -> bool
+    {
+        auto p = std::mismatch(a.begin(), a.end(), b.begin(), [](char c1, char c2) {
+            return std::tolower(c1) == std::tolower(c2);
+        });
+        return (p.first == a.end() && p.second == b.end());
+    }
+
+    auto are_equal(std::string const& a, std::string const& b) -> bool
+    {
+        return a.size() <= b.size() ? are_equal_helper(a, b) : are_equal_helper(b, a);
+    }
+
 }
 
-bool are_equal(std::string const& a, std::string const& b)
+auto GetSymbolForName(std::string const& name) -> SYMBOL_TYPE
 {
-    return a.size() <= b.size() ? are_equal_helper(a, b) : are_equal_helper(b, a);
-}
-
-SYMBOL_TYPE GetSymbolForName(std::string const& name)
-{
-    for (auto i = contnames;
-         i != (contnames + sizeof(contnames) / sizeof(contnames[0])); ++i) {
-
-        if (are_equal(name, *i)) {
-            return static_cast<SYMBOL_TYPE>(std::distance(contnames, i));
+    for (auto [index, symbolName] : CalChart::Ranges::enumerate_view(contnames)) {
+        if (are_equal(name, symbolName)) {
+            return static_cast<SYMBOL_TYPE>(index);
         }
     }
     // what do we do here?  give larger one for now...
@@ -88,7 +87,7 @@ SYMBOL_TYPE GetSymbolForName(std::string const& name)
     return MAX_NUM_SYMBOLS;
 }
 
-std::string GetNameForSymbol(SYMBOL_TYPE which)
+auto GetNameForSymbol(SYMBOL_TYPE which) -> std::string
 {
     if (which > MAX_NUM_SYMBOLS) {
         return "";
@@ -96,7 +95,7 @@ std::string GetNameForSymbol(SYMBOL_TYPE which)
     return contnames[which];
 }
 
-std::string GetLongNameForSymbol(SYMBOL_TYPE which)
+auto GetLongNameForSymbol(SYMBOL_TYPE which) -> std::string
 {
     if (which > MAX_NUM_SYMBOLS) {
         return "";
@@ -104,43 +103,47 @@ std::string GetLongNameForSymbol(SYMBOL_TYPE which)
     return long_contnames[which];
 }
 
-static void
-CheckInconsistancy(SYMBOL_TYPE symbol, uint8_t cont_index,
-    std::map<SYMBOL_TYPE, uint8_t>& continity_for_symbol,
-    std::map<uint8_t, SYMBOL_TYPE>& symbol_for_continuity,
-    std::string const& sheet_name, uint32_t pointNum)
-{
-    // need to check for symbol inconsistency here.
-    if (continity_for_symbol.count(symbol) == 0) {
-        // we haven't seen this symbol->cont_index yet
-        continity_for_symbol[symbol] = cont_index;
-    } else {
-        if (continity_for_symbol[symbol] != cont_index) {
-            std::stringstream buf;
-            buf << "Error, symbol inconsistency on sheet \"" << sheet_name << "\".\n";
-            buf << "Symbol " << GetNameForSymbol(symbol)
-                << " previously used continuity "
-                << (uint32_t)continity_for_symbol[symbol] << " but point " << pointNum
-                << " on uses continuity " << (uint32_t)cont_index
-                << ", which is used by symbol "
-                << GetNameForSymbol(symbol_for_continuity[cont_index]) << ".\n";
-            buf << "Try opening this file on CalChart v3.3.5 or earlier.\n";
-            throw CC_FileException(buf.str());
+// -=-=-=-=-=- LEGACY CODE -=-=-=-=-=-
+// Recommend that you don't touch this unless you know what you are doing.
+namespace {
+    void
+    CheckInconsistancy(SYMBOL_TYPE symbol, uint8_t cont_index,
+        std::map<SYMBOL_TYPE, uint8_t>& continity_for_symbol,
+        std::map<uint8_t, SYMBOL_TYPE>& symbol_for_continuity,
+        std::string const& sheet_name, uint32_t pointNum)
+    {
+        // need to check for symbol inconsistency here.
+        if (continity_for_symbol.count(symbol) == 0) {
+            // we haven't seen this symbol->cont_index yet
+            continity_for_symbol[symbol] = cont_index;
+        } else {
+            if (continity_for_symbol[symbol] != cont_index) {
+                std::stringstream buf;
+                buf << "Error, symbol inconsistency on sheet \"" << sheet_name << "\".\n";
+                buf << "Symbol " << GetNameForSymbol(symbol)
+                    << " previously used continuity "
+                    << (uint32_t)continity_for_symbol[symbol] << " but point " << pointNum
+                    << " on uses continuity " << (uint32_t)cont_index
+                    << ", which is used by symbol "
+                    << GetNameForSymbol(symbol_for_continuity[cont_index]) << ".\n";
+                buf << "Try opening this file on CalChart v3.3.5 or earlier.\n";
+                throw CC_FileException(buf.str());
+            }
         }
-    }
-    if (symbol_for_continuity.count(cont_index) == 0) {
-        symbol_for_continuity[cont_index] = symbol;
-    } else {
-        if (symbol_for_continuity[cont_index] != symbol) {
-            std::stringstream buf;
-            buf << "Error, symbol inconsistency on sheet \"" << sheet_name << "\".\n";
-            buf << "Continuity index " << (uint32_t)cont_index
-                << " previously used symbol "
-                << GetNameForSymbol(symbol_for_continuity[cont_index])
-                << "  but point " << pointNum << " on uses symbol "
-                << GetNameForSymbol(symbol) << ".\n";
-            buf << "Try opening this file on CalChart v3.3.5 or earlier.\n";
-            throw CC_FileException(buf.str());
+        if (symbol_for_continuity.count(cont_index) == 0) {
+            symbol_for_continuity[cont_index] = symbol;
+        } else {
+            if (symbol_for_continuity[cont_index] != symbol) {
+                std::stringstream buf;
+                buf << "Error, symbol inconsistency on sheet \"" << sheet_name << "\".\n";
+                buf << "Continuity index " << (uint32_t)cont_index
+                    << " previously used symbol "
+                    << GetNameForSymbol(symbol_for_continuity[cont_index])
+                    << "  but point " << pointNum << " on uses symbol "
+                    << GetNameForSymbol(symbol) << ".\n";
+                buf << "Try opening this file on CalChart v3.3.5 or earlier.\n";
+                throw CC_FileException(buf.str());
+            }
         }
     }
 }
@@ -507,8 +510,6 @@ auto Sheet::SerializeSheet() const -> std::vector<std::byte>
     return result;
 }
 
-Sheet::~Sheet() = default;
-
 // Find point at certain coords
 auto Sheet::FindMarcher(Coord where, Coord::units searchBound, unsigned ref) const -> std::optional<int>
 {
@@ -602,10 +603,6 @@ std::string Sheet::GetRawPrintContinuity() const
     return mPrintableContinuity.GetOriginalLine();
 }
 
-unsigned short Sheet::GetBeats() const { return mBeats; }
-
-void Sheet::SetBeats(unsigned short b) { mBeats = b; }
-
 // Get position of point
 Coord Sheet::GetPosition(unsigned i, unsigned ref) const
 {
@@ -646,18 +643,12 @@ Textline_list Sheet::GetPrintableContinuity() const
     return mPrintableContinuity.GetChunks();
 }
 
-Point const& Sheet::GetPoint(unsigned i) const { return mPoints[i]; }
-
-Point& Sheet::GetPoint(unsigned i) { return mPoints[i]; }
-
-SYMBOL_TYPE Sheet::GetSymbol(unsigned i) const { return mPoints[i].GetSymbol(); }
+auto Sheet::GetMarcher(unsigned i) const -> Point { return mPoints[i]; }
 
 void Sheet::SetSymbol(unsigned i, SYMBOL_TYPE sym)
 {
     mPoints[i].SetSymbol(sym);
 }
-
-std::vector<Point> Sheet::GetPoints() const { return mPoints; }
 
 std::vector<SYMBOL_TYPE> Sheet::GetSymbols() const
 {
@@ -817,7 +808,7 @@ namespace {
 // we want sheets to print in landscape when the width exceeds the height
 auto Sheet::ShouldPrintLandscape() const -> bool
 {
-    auto boundingBox = GetMarcherBoundingBox(GetPoints());
+    auto boundingBox = GetMarcherBoundingBox(GetAllMarchers());
     return (boundingBox.second.x - boundingBox.first.x) > CalChart::Int2CoordUnits(CalChart::kFieldStepSizeNorthSouth[0]);
 }
 

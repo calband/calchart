@@ -79,7 +79,7 @@ auto AnimateShow(const Show& show) -> Sheets
                           return CalChart::Animate::CreateCompileResult(
                               AnimationData{
                                   static_cast<unsigned>(whichMarcher),
-                                  curr_sheet->GetPoint(whichMarcher),
+                                  curr_sheet->GetMarcher(whichMarcher),
                                   endPosition,
                                   numBeats,
                                   isLastSheet },

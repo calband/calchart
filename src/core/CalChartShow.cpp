@@ -357,7 +357,7 @@ namespace {
     auto TransformIndexToDrawCommands(CalChart::Sheet const& sheet, std::vector<std::string> const& labels, int ref, CalChart::Configuration const& config)
     {
         return std::views::transform([&sheet, ref, labels, &config](int i) {
-            return sheet.GetPoint(i).GetDrawCommands(ref, labels.at(i), config);
+            return sheet.GetMarcher(i).GetDrawCommands(ref, labels.at(i), config);
         })
             | std::ranges::views::join;
     }
@@ -447,7 +447,7 @@ auto Show::GenerateFieldWithMarchersDrawCommands(CalChart::Configuration const& 
                     field,
                     CalChart::Draw::withBrushAndPen(
                         config.Get_CalChartBrushAndPen(CalChart::Colors::POINT_ANIM_FRONT),
-                        GeneratePointDrawCommand(sheet.GetPoints())),
+                        GeneratePointDrawCommand(sheet.GetAllMarchers())),
                 }
                 + mMode.Offset();
             }));
@@ -721,7 +721,7 @@ namespace {
         requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Sheet>)
     auto GetAllPointPositions(Range&& sheets)
     {
-        return sheets | std::views::transform([](auto&& sheet) { return sheet.GetPoints(); });
+        return sheets | std::views::transform([](auto&& sheet) { return sheet.GetAllMarchers(); });
     }
 }
 
@@ -788,7 +788,7 @@ Show_command_pair Show::Create_SetupMarchersCommand(std::vector<std::pair<std::s
     auto old_labels = mDotLabelAndInstrument;
     std::vector<std::vector<Point>> old_points;
     for (auto&& sheet : mSheets) {
-        old_points.emplace_back(sheet.GetPoints());
+        old_points.emplace_back(sheet.GetAllMarchers());
     }
     auto reaction = [old_labels, old_points](Show& show) {
         for (auto i = 0ul; i < show.mSheets.size(); ++i) {
@@ -849,7 +849,7 @@ Show_command_pair Show::Create_ApplyRelabelMapping(int sheet_num_first, std::vec
 {
     std::vector<std::vector<Point>> current_pos;
     for (auto s = GetNthSheet(sheet_num_first); s != GetSheetEnd(); ++s) {
-        current_pos.emplace_back(s->GetPoints());
+        current_pos.emplace_back(s->GetAllMarchers());
     }
     // first gather where all the points are;
     auto action = [sheet_num_first, mapping](Show& show) {
@@ -926,7 +926,7 @@ Show_command_pair Show::Create_DeletePointsCommand() const
     auto old_labels = mDotLabelAndInstrument;
     std::vector<std::vector<Point>> old_points;
     for (auto&& sheet : mSheets) {
-        old_points.emplace_back(sheet.GetPoints());
+        old_points.emplace_back(sheet.GetAllMarchers());
     }
     auto reaction = [old_labels, old_points](Show& show) {
         for (auto i = 0ul; i < show.mSheets.size(); ++i) {
@@ -1022,18 +1022,18 @@ Show_command_pair Show::Create_SetLabelFlipCommand(std::map<int, bool> const& ne
     auto sheet = GetCurrentSheet();
     std::map<unsigned, bool> original_flip;
     for (auto&& index : new_flip) {
-        original_flip[index.first] = sheet->GetPoint(index.first).GetFlip();
+        original_flip[index.first] = sheet->GetMarcher(index.first).GetFlip();
     }
     auto action = [sheet_num = mSheetNum, new_flip](Show& show) {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : new_flip) {
-            sheet->GetPoint(i.first).Flip(i.second);
+            sheet->GetMarcher(i.first).Flip(i.second);
         }
     };
     auto reaction = [sheet_num = mSheetNum, original_flip](Show& show) {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : original_flip) {
-            sheet->GetPoint(i.first).Flip(i.second);
+            sheet->GetMarcher(i.first).Flip(i.second);
         }
     };
     return { action, reaction };
@@ -1053,7 +1053,7 @@ Show_command_pair Show::Create_ToggleLabelFlipCommand() const
     std::map<int, bool> flips;
     auto sheet = GetCurrentSheet();
     for (auto&& i : mSelectionList) {
-        flips[i] = !sheet->GetPoint(i).GetFlip();
+        flips[i] = !sheet->GetMarcher(i).GetFlip();
     }
     return Create_SetLabelFlipCommand(flips);
 }
@@ -1063,18 +1063,18 @@ Show_command_pair Show::Create_SetLabelVisiblityCommand(std::map<int, bool> cons
     auto sheet = GetCurrentSheet();
     std::map<int, bool> original_visibility;
     for (auto&& index : new_visibility) {
-        original_visibility[index.first] = sheet->GetPoint(index.first).LabelIsVisible();
+        original_visibility[index.first] = sheet->GetMarcher(index.first).LabelIsVisible();
     }
     auto action = [sheet_num = mSheetNum, new_visibility](Show& show) {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : new_visibility) {
-            sheet->GetPoint(i.first).SetLabelVisibility(i.second);
+            sheet->GetMarcher(i.first).SetLabelVisibility(i.second);
         }
     };
     auto reaction = [sheet_num = mSheetNum, original_visibility](Show& show) {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : original_visibility) {
-            sheet->GetPoint(i.first).SetLabelVisibility(i.second);
+            sheet->GetMarcher(i.first).SetLabelVisibility(i.second);
         }
     };
     return { action, reaction };
@@ -1094,7 +1094,7 @@ Show_command_pair Show::Create_ToggleLabelVisibilityCommand() const
     std::map<int, bool> visible;
     auto sheet = GetCurrentSheet();
     for (auto&& i : mSelectionList) {
-        visible[i] = !sheet->GetPoint(i).LabelIsVisible();
+        visible[i] = !sheet->GetMarcher(i).LabelIsVisible();
     }
     return Create_SetLabelVisiblityCommand(visible);
 }
