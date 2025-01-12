@@ -63,31 +63,24 @@ ColorSetupCanvas::ColorSetupCanvas(CalChart::Configuration& config, wxWindow* pa
         { "sel", "" },
     };
     mShow->Create_SetupMarchersCommand(labels, 4, field_offset).first(*mShow);
-    mShow->Create_SetupMarchersCommand(labels, 4, field_offset).first(*mShow);
     mShow->Create_SetSelectionListCommand(SelectionList{ 0, 2 }).first(*mShow);
     mShow->Create_SetSymbolCommand(SYMBOL_X).first(*mShow);
     mShow->Create_SetSelectionListCommand(SelectionList{ 1, 3 }).first(*mShow);
     mShow->Create_SetSymbolCommand(SYMBOL_SOLX).first(*mShow);
     mShow->Create_SetSelectionListCommand(SelectionList{}).first(*mShow);
 
+    // we want to show the difference between ref highlight and normal highlight, so we draw ref 1.
+    // As we are doing that it means the reference points will show up in the normal color and the
+    // non-ref point (0) will show up in the reference point color.
     for (auto i = 0; i < 4; ++i) {
-        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 0).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(6)) } }, 0).first(*mShow);
         mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 1).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 2).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 3).first(*mShow);
-
-        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(6)) } }, 1).first(*mShow);
     }
 
     mShow->Create_AddSheetsCommand(Show::Sheet_container_t{ *static_cast<CalChart::Show const&>(*mShow).GetCurrentSheet() }, 1).first(*mShow);
     mShow->Create_SetCurrentSheetCommand(1).first(*mShow);
     for (auto i = 0; i < 4; ++i) {
         mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 0).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 1).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 2).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 3).first(*mShow);
-
-        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 6)) } }, 1).first(*mShow);
     }
     mShow->Create_SetCurrentSheetCommand(0).first(*mShow);
 
