@@ -55,31 +55,67 @@ constexpr auto toUType(E enumerator)
 // from https://stackoverflow.com/questions/261963/how-can-i-iterate-over-an-enum
 template <typename C, C beginVal, C endVal>
 class Iterator {
-    using val_t = typename std::underlying_type<C>::type;
-    val_t val;
 
 public:
-    explicit Iterator(const C& f)
-        : val(static_cast<val_t>(f))
+    Iterator() = default;
+
+    // Iterator type
+    class iterator {
+        using val_t = typename std::underlying_type<C>::type;
+
+    public:
+        using difference_type = std::ptrdiff_t;
+        using value_type = C;
+        iterator() = default;
+        explicit iterator(val_t value)
+            : val_{ value }
+        {
+        }
+
+        // Increment operators
+        auto operator++() -> iterator&
+        {
+            ++val_;
+            return *this;
+        }
+
+        auto operator++(int) -> iterator
+        {
+            iterator tmp(*this);
+            ++(*this);
+            return tmp;
+        }
+
+        // Dereference operator
+        auto operator*() const -> C
+        {
+            return static_cast<C>(val_);
+        }
+
+        // Equality comparison operator
+        auto operator==(const iterator& other) const
+        {
+            return val_ == other.val_;
+        }
+
+        auto operator!=(const iterator& other) const
+        {
+            return !(*this == other);
+        }
+
+    private:
+        val_t val_{};
+    };
+
+    auto begin() const -> iterator
     {
+        return iterator(toUType(beginVal));
     }
-    Iterator()
-        : val(static_cast<val_t>(beginVal))
+
+    auto end() const -> iterator
     {
+        return iterator(toUType(endVal) + 1);
     }
-    auto operator++() -> Iterator
-    {
-        ++val;
-        return *this;
-    }
-    auto operator*() const { return static_cast<C>(val); }
-    auto begin() const -> Iterator { return *this; } // default ctor is good
-    auto end() const -> Iterator
-    {
-        static const Iterator endIter = ++Iterator(endVal); // cache it
-        return endIter;
-    }
-    auto operator!=(const Iterator& i) const { return val != i.val; }
 };
 
 template <class... Ts>
