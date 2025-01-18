@@ -68,7 +68,7 @@ AnimationView::~AnimationView()
 {
 }
 
-void AnimationView::RegenerateImages() const
+void AnimationView::RegenerateImages()
 {
     auto spriteScale = mConfig.Get_SpriteBitmapScale();
     if (spriteScale == mScaleSize) {
@@ -93,7 +93,10 @@ void AnimationView::RegenerateImages() const
     constexpr auto image_Y = 128;
     auto images = GenerateSpriteImages(image, mSpriteCalChartImages.size(), image_X, image_Y, mScaleSize);
     std::transform(images.begin(), images.end(), mSpriteCalChartImages.begin(), [](auto&& image) {
-        return std::make_shared<CalChart::ImageData>(wxCalChart::ConvertToImageData(image));
+        return BitmapSize_t{ std::make_shared<wxCalChart::BitmapHolder>(image), wxCalChart::toCoord(image.GetSize()) };
+    });
+    std::transform(images.begin(), images.end(), mSelectedSpriteCalChartImages.begin(), [](auto&& image) {
+        return BitmapSize_t{ std::make_shared<wxCalChart::BitmapHolder>(image.ConvertToGreyscale()), wxCalChart::toCoord(image.GetSize()) };
     });
 }
 
@@ -111,9 +114,9 @@ void AnimationView::OnDraw(wxDC* dc)
             mCurrentBeat,
             mDrawCollisionWarning,
             onBeat,
-            [this](CalChart::Radian angle, CalChart::Animation::ImageBeat imageBeat) {
+            [this](CalChart::Radian angle, CalChart::Animation::ImageBeat imageBeat, bool selected) {
                 auto imageIndex = CalChart::AngleToQuadrant(angle) + CalChart::toUType(imageBeat) * 8;
-                return mSpriteCalChartImages[imageIndex];
+                return selected ? mSelectedSpriteCalChartImages[imageIndex] : mSpriteCalChartImages[imageIndex];
             }));
 }
 

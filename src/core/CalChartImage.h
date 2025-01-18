@@ -21,21 +21,33 @@
 */
 
 #include <cstdint>
+#include <memory>
 #include <vector>
+
+namespace CalChart::Draw {
+struct OpaqueImageData;
+}
 
 namespace CalChart {
 
 class Reader;
 
+// Image has the complexity that while there is a platform independent way for representing their info,
+// when it comes to drawing with a specific implementation (like wxWidgets), conversions and scaling are
+// necessary.  To avoid that we allow an optional "Rendered" object stored along with the data.
 struct ImageData {
-    int image_width, image_height;
+    int width{};
+    int height{};
     std::vector<unsigned char> data;
     std::vector<unsigned char> alpha;
+    std::shared_ptr<Draw::OpaqueImageData> render;
 };
 
 struct ImageInfo {
-    int left, top;
-    int scaled_width, scaled_height;
+    int left{};
+    int top{};
+    int scaledWidth{};
+    int scaledHeight{};
     ImageData data;
 };
 

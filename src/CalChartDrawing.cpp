@@ -736,10 +736,7 @@ namespace details {
                 },
                 [&dc, layoutPoint = surface.origin](CalChart::Draw::Image const& c) {
                     auto where = wxCalChart::to_wxPoint(c.mStart) + layoutPoint;
-                    auto image = wxCalChart::ConvertTowxImage(*c.mImage);
-                    if (c.mGreyscale) {
-                        image = image.ConvertToGreyscale();
-                    }
+                    auto image = wxCalChart::ConvertTowxBitmap(c);
                     dc.DrawBitmap(image, fDIP(where));
                 },
                 []([[maybe_unused]] CalChart::Draw::Ignore const& c) {

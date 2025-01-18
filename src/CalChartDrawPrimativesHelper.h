@@ -26,6 +26,7 @@
  * Helper functions for creating wxWidgets from drawing primatives
  */
 
+#include "CalChartDrawCommand.h"
 #include "CalChartDrawPrimatives.h"
 #include "CalChartImage.h"
 #include "CalChartSizes.h"
@@ -44,6 +45,26 @@ inline auto operator<(wxSize const& p1, wxSize const& p2)
 namespace wxCalChart {
 
 inline auto make_wxSize(CalChart::Coord coord) { return wxSize{ coord.x, coord.y }; }
+
+inline auto toSize(CalChart::Coord size) -> wxSize
+{
+    return { size.x, size.y };
+}
+
+inline auto toPoint(CalChart::Coord point) -> wxPoint
+{
+    return { point.x, point.y };
+}
+
+inline auto toCoord(wxSize size) -> CalChart::Coord
+{
+    return { size.x, size.y };
+}
+
+inline auto toCoord(wxPoint point) -> CalChart::Coord
+{
+    return { point.x, point.y };
+}
 
 inline auto toColour(CalChart::Color::ColorRGB c) -> wxColour
 {
@@ -232,6 +253,47 @@ inline auto setFont(wxDC& dc, CalChart::Font font)
     dc.SetFont(wxFont(size, family, style, weight));
 }
 
+// Creates a deep copy the image data
+inline auto towxImage(CalChart::ImageData const& image) -> wxImage
+{
+    auto data = std::unique_ptr<unsigned char, void (*)(void*)>{
+        static_cast<unsigned char*>(std::malloc(image.data.size())),
+        [](void* p) { std::free(p); }
+    };
+    std::copy(image.data.begin(), image.data.end(), data.get());
+    if (image.alpha.empty()) {
+        return wxImage{ image.width, image.height, data.release() };
+    }
+    auto alpha = std::unique_ptr<unsigned char, void (*)(void*)>{
+        static_cast<unsigned char*>(std::malloc(image.alpha.size())),
+        [](void* p) { std::free(p); }
+    };
+
+    std::copy(image.alpha.begin(), image.alpha.end(), alpha.get());
+    return wxImage{ image.width, image.height, data.release(), alpha.release() };
+}
+
+struct BitmapHolder : CalChart::Draw::OpaqueImageData {
+    BitmapHolder(wxImage const& image)
+        : bitmap(image)
+    {
+    }
+    ~BitmapHolder() override = default;
+    BitmapHolder(CalChart::ImageData const& image)
+    {
+        wxImage converted = [](CalChart::ImageData const& image) {
+            auto data = image.data;
+            if (image.alpha.size()) {
+                auto alpha = image.alpha;
+                return wxImage{ image.width, image.height, data.data(), alpha.data(), true };
+            }
+            return wxImage{ image.width, image.height, data.data(), true };
+        }(image);
+        bitmap = converted;
+    }
+    wxBitmap bitmap;
+};
+
 inline auto ConvertToImageData(wxImage const& image) -> CalChart::ImageData
 {
     auto width = image.GetWidth();
@@ -246,7 +308,7 @@ inline auto ConvertToImageData(wxImage const& image) -> CalChart::ImageData
         std::copy(a, a + width * height, alpha.data());
     }
 
-    return { width, height, data, alpha };
+    return { width, height, data, alpha, std::make_shared<BitmapHolder>(image) };
 }
 
 inline auto ConvertToImageInfo(wxImage const& image, int x = 0, int y = 0) -> CalChart::ImageInfo
@@ -256,13 +318,21 @@ inline auto ConvertToImageInfo(wxImage const& image, int x = 0, int y = 0) -> Ca
     return CalChart::ImageInfo{ x, y, width, height, ConvertToImageData(image) };
 }
 
-inline auto ConvertTowxImage(CalChart::ImageData const& image) -> wxImage
+inline auto ConvertTowxBitmap(CalChart::Draw::Image const& image) -> wxBitmap
 {
-    auto data = image.data;
-    if (image.alpha.size()) {
-        auto alpha = image.alpha;
-        return { image.image_width, image.image_height, data.data(), alpha.data(), true };
-    }
-    return { image.image_width, image.image_height, data.data(), true };
+    // visit
+    return std::visit(
+        CalChart::overloaded{
+            [](std::shared_ptr<CalChart::Draw::OpaqueImageData> data) {
+                return dynamic_cast<BitmapHolder&>(*data).bitmap;
+            },
+            [](std::shared_ptr<CalChart::ImageData> data) {
+                if (data->render == nullptr) {
+                    data->render = std::make_shared<BitmapHolder>(*data);
+                }
+                return dynamic_cast<BitmapHolder&>(*(data->render)).bitmap;
+            },
+        },
+        image.mImage);
 }
 }

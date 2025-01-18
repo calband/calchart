@@ -331,28 +331,32 @@ namespace Draw {
     inline auto operator-(Text const& lhs, Coord rhs) { return Text{ lhs.c1 - rhs, lhs.text, lhs.anchor, lhs.withBackground, lhs.linePad }; }
     inline auto operator-(Coord lhs, Text const& rhs) { return Text{ lhs - rhs.c1, rhs.text, rhs.anchor, rhs.withBackground, rhs.linePad }; }
 
+    // We allow implementation defined objects to be passed as the mImage by inheritening from the OpaqueImage
+    // data.  It is up to the implementation to determine how to draw.
+    struct OpaqueImageData {
+        virtual ~OpaqueImageData() = default;
+    };
     struct Image {
+        using ImageData_t = std::variant<std::shared_ptr<ImageData>, std::shared_ptr<OpaqueImageData>>;
         Coord mStart{};
-        std::shared_ptr<ImageData> mImage{};
-        bool mGreyscale{};
+        ImageData_t mImage{};
 
-        Image(Coord::units startx, Coord::units starty, std::shared_ptr<ImageData> image, bool greyscale = false)
-            : Image{ { startx, starty }, std::move(image), greyscale }
+        Image(Coord::units startx, Coord::units starty, ImageData_t image)
+            : Image{ { startx, starty }, std::move(image) }
         {
         }
 
-        Image(Coord start, std::shared_ptr<ImageData> image, bool greyscale = false)
+        Image(Coord start, ImageData_t image)
             : mStart{ start }
             , mImage{ std::move(image) }
-            , mGreyscale{ greyscale }
         {
         }
         friend auto operator==(Image const&, Image const&) -> bool = default;
     };
-    inline auto operator+(Image lhs, Coord rhs) { return Image{ lhs.mStart + rhs, lhs.mImage, lhs.mGreyscale }; }
-    inline auto operator+(Coord lhs, Image rhs) { return Image{ lhs + rhs.mStart, rhs.mImage, rhs.mGreyscale }; }
-    inline auto operator-(Image lhs, Coord rhs) { return Image{ lhs.mStart - rhs, lhs.mImage, lhs.mGreyscale }; }
-    inline auto operator-(Coord lhs, Image rhs) { return Image{ lhs - rhs.mStart, rhs.mImage, rhs.mGreyscale }; }
+    inline auto operator+(Image lhs, Coord rhs) { return Image{ lhs.mStart + rhs, lhs.mImage }; }
+    inline auto operator+(Coord lhs, Image rhs) { return Image{ lhs + rhs.mStart, rhs.mImage }; }
+    inline auto operator-(Image lhs, Coord rhs) { return Image{ lhs.mStart - rhs, lhs.mImage }; }
+    inline auto operator-(Coord lhs, Image rhs) { return Image{ lhs - rhs.mStart, rhs.mImage }; }
 
     struct OverrideFont {
         Font font;

@@ -31,6 +31,9 @@
 
 class AnimationPanel;
 class CalChartView;
+namespace wxCalChart {
+struct BitmapHolder;
+}
 namespace CalChart {
 class Configuration;
 class Continuity;
@@ -88,7 +91,7 @@ private:
     void Generate();
     void RefreshFrame();
 
-    void RegenerateImages() const;
+    void RegenerateImages();
     [[nodiscard]] auto GenerateDraw(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>;
     [[nodiscard]] auto GenerateDrawSprites(CalChart::Configuration const& config, CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>;
 
@@ -104,9 +107,10 @@ private:
     bool mPlayCollisionWarning = false;
 
     static constexpr auto kAngles = 8;
-    // these need to be mutable because effectively they are a cache and may need to be regenerated.
-    mutable double mScaleSize = 0;
-    mutable std::array<std::shared_ptr<CalChart::ImageData>, kAngles * CalChart::toUType(CalChart::Animation::ImageBeat::Size)> mSpriteCalChartImages;
+    double mScaleSize = 0;
+    using BitmapSize_t = std::tuple<std::shared_ptr<wxCalChart::BitmapHolder>, CalChart::Coord>;
+    std::array<BitmapSize_t, kAngles * CalChart::toUType(CalChart::Animation::ImageBeat::Size)> mSpriteCalChartImages;
+    std::array<BitmapSize_t, kAngles * CalChart::toUType(CalChart::Animation::ImageBeat::Size)> mSelectedSpriteCalChartImages;
 
     CalChart::MeasureDuration mMeasure;
 };

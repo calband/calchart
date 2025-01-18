@@ -230,11 +230,11 @@ auto Animation::GenerateSpritesDrawCommands(beats_t whichBeat, SelectionList con
                 }
                 return *onBeat ? ImageBeat::Left : ImageBeat::Right;
             }();
-            auto image = imageFunction(info.mMarcherInfo.mFacingDirection, image_offset);
+            auto [image, size] = imageFunction(info.mMarcherInfo.mFacingDirection, image_offset, selectionList.contains(index));
             auto position = info.mMarcherInfo.mPosition;
-            auto offset = CalChart::Coord(image->image_width * comp_X, image->image_height * comp_Y);
+            auto offset = CalChart::Coord(size.x * comp_X, size.y * comp_Y);
 
-            return CalChart::Draw::Image{ position, image, selectionList.contains(index) } - offset;
+            return CalChart::Draw::Image{ position, image } - offset;
         }));
     return drawCmds;
 }

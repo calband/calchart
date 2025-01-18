@@ -1077,8 +1077,8 @@ Show_command_pair Show::Create_MoveBackgroundImageCommand(int which, int left, i
     auto sheet = GetCurrentSheet();
     auto current_left = sheet->GetBackgroundImages().at(which).left;
     auto current_top = sheet->GetBackgroundImages().at(which).top;
-    auto current_scaled_width = sheet->GetBackgroundImages().at(which).scaled_width;
-    auto current_scaled_height = sheet->GetBackgroundImages().at(which).scaled_height;
+    auto current_scaled_width = sheet->GetBackgroundImages().at(which).scaledWidth;
+    auto current_scaled_height = sheet->GetBackgroundImages().at(which).scaledHeight;
     auto action = [sheet_num = mSheetNum, which, left, top, scaled_width, scaled_height](Show& show) {
         auto sheet = show.GetNthSheet(sheet_num);
         sheet->MoveBackgroundImage(which, left, top, scaled_width, scaled_height);
