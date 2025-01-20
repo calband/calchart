@@ -98,10 +98,13 @@ void AnimationPanel::CreateControls()
             },
             wxUI::VSizer{
                 mSpritesCheckbox = wxUI::CheckBox{ "Sprites" }
+                                       .withValue(mConfig.Get_UseSprites())
                                        .bind([this](wxCommandEvent& event) {
                                            mConfig.Set_UseSprites(event.IsChecked());
+                                           Refresh();
                                        }),
                 mZoomCheckbox = wxUI::CheckBox{ "Zoom" }
+                                    .withValue(mCanvas->GetZoomOnMarchers())
                                     .bind([this](wxCommandEvent& event) {
                                         mCanvas->SetZoomOnMarchers(event.IsChecked());
                                     }),
