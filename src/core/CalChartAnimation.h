@@ -115,7 +115,7 @@ public:
         Right,
         Size
     };
-    using AngleStepToImageFunction = std::function<std::shared_ptr<ImageData>(Radian, ImageBeat)>;
+    using AngleStepToImageFunction = std::function<std::tuple<std::shared_ptr<Draw::OpaqueImageData>, CalChart::Coord>(Radian, ImageBeat, bool)>;
 
     // Drawing commands
     [[nodiscard]] auto GenerateDotsDrawCommands(beats_t whichBeat, SelectionList const& selectionList, bool drawCollisionWarning, Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>;

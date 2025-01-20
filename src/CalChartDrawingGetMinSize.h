@@ -159,8 +159,16 @@ namespace details {
 
     inline auto GetMinSize([[maybe_unused]] Context context, CalChart::Draw::Image const& image) -> StackSize
     {
-        // TODO: should this have scale in it?
-        return wxSize(image.mImage->image_width, image.mImage->image_width);
+        return std::visit(
+            CalChart::overloaded{
+                [](std::shared_ptr<CalChart::ImageData> data) {
+                    return wxSize(data->width, data->width);
+                },
+                [](std::shared_ptr<CalChart::Draw::OpaqueImageData> data) {
+                    return dynamic_cast<wxCalChart::BitmapHolder&>(*data).bitmap.GetSize();
+                },
+            },
+            image.mImage);
     }
 
     inline auto GetMinSize(Context context, CalChart::Draw::DrawManipulators const& cmd) -> StackSize;

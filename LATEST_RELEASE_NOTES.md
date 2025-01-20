@@ -3,6 +3,7 @@
 Bugs addressed in this release:
 
 * [#593](../../issues/593) Are the draw colors for selected and reference inverted on the drawing setup
+* [#598](../../issues/598) ASAN crashes when drawing sprites
 
 Other changes:
 

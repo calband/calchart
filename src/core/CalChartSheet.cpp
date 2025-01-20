@@ -857,8 +857,8 @@ void Sheet::MoveBackgroundImage(size_t which, int left, int top, int scaled_widt
     if (which < mBackgroundImages.size()) {
         mBackgroundImages.at(which).left = left;
         mBackgroundImages.at(which).top = top;
-        mBackgroundImages.at(which).scaled_width = scaled_width;
-        mBackgroundImages.at(which).scaled_height = scaled_height;
+        mBackgroundImages.at(which).scaledWidth = scaled_width;
+        mBackgroundImages.at(which).scaledHeight = scaled_height;
     }
 }
 

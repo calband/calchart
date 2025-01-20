@@ -28,12 +28,13 @@
 
 class BackgroundImage {
 public:
-    BackgroundImage(wxImage const& image, int x, int y, int scaled_width, int scaled_height);
+    explicit BackgroundImage(CalChart::ImageInfo const& image);
 
-    bool MouseClickIsHit(wxMouseEvent const& event, wxDC const& dc) const;
+    [[nodiscard]] auto MouseClickIsHit(wxMouseEvent const& event, wxDC const& dc) const -> bool;
     void OnMouseLeftDown(wxMouseEvent const& event, wxDC const& dc);
+
     // returns left, top, width, height
-    std::array<int, 4> OnMouseLeftUp(wxMouseEvent const& event, wxDC const& dc);
+    [[nodiscard]] auto OnMouseLeftUp(wxMouseEvent const& event, wxDC const& dc) -> std::array<int, 4>;
 
     void OnMouseMove(wxMouseEvent const& event, wxDC const& dc);
     void OnPaint(wxDC& dc, bool drawPicAdjustDots, bool selected) const;
@@ -41,9 +42,10 @@ public:
 private:
     static constexpr auto kCircleSize = 6;
 
-    wxImage mImage;
+    CalChart::Coord mPosition{};
+    CalChart::Coord mScaledSize{};
+    wxImage mRawImage;
     wxBitmap mBitmap;
-    wxPoint mBitmapPoint;
 
     // what type of background adjustments could we do
     enum class BackgroundAdjustType {
@@ -60,7 +62,7 @@ private:
     };
     using BackgroundAdjustTypeIterator = CalChart::Iterator<BackgroundAdjustType, BackgroundAdjustType::kUpperLeft, BackgroundAdjustType::kLowerRight>;
     BackgroundAdjustType mBackgroundAdjustType;
-    BackgroundAdjustType WhereIsMouseClick(const wxMouseEvent& event, const wxDC& dc) const;
+    [[nodiscard]] auto WhereIsMouseClick(const wxMouseEvent& event, const wxDC& dc) const -> BackgroundAdjustType;
 
     static auto toOffsetX(BackgroundAdjustType where)
     {
@@ -103,16 +105,16 @@ private:
         float mAspectRatio;
         BackgroundAdjustType mAdjustType;
     };
-    std::unique_ptr<CalculateScaleAndMove> mScaleAndMove;
+    std::optional<CalculateScaleAndMove> mScaleAndMove;
 };
 
-BackgroundImage::BackgroundImage(const wxImage& image, int x, int y, int scaled_width, int scaled_height)
-    : mImage(image)
-    , mBitmapPoint(x, y)
-    , // always adjust when we get created
-    mBackgroundAdjustType(BackgroundAdjustType::kLast)
+BackgroundImage::BackgroundImage(CalChart::ImageInfo const& image)
+    : mPosition{ image.left, image.top }
+    , mScaledSize{ image.scaledWidth, image.scaledHeight }
+    , mRawImage{ wxCalChart::towxImage(image.data) }
+    , mBitmap{ mRawImage.Scale(mScaledSize.x, mScaledSize.y, wxIMAGE_QUALITY_HIGH) }
+    , mBackgroundAdjustType(BackgroundAdjustType::kLast) // always adjust when we get created
 {
-    mBitmap = wxBitmap(mImage.Scale(scaled_width, scaled_height, wxIMAGE_QUALITY_HIGH));
 }
 
 BackgroundImage::BackgroundAdjustType BackgroundImage::WhereIsMouseClick(const wxMouseEvent& event, const wxDC& dc) const
@@ -122,10 +124,10 @@ BackgroundImage::BackgroundAdjustType BackgroundImage::WhereIsMouseClick(const w
     auto y = dc.DeviceToLogicalY(point.y);
 
     // where are we?
-    auto bitmapSize = mBitmap.GetSize();
-    auto middle = mBitmapPoint + bitmapSize / 2;
+    auto bitmapSize = wxCalChart::toSize(mScaledSize);
+    auto middle = wxCalChart::toPoint(mPosition) + bitmapSize / 2;
     for (auto where : BackgroundAdjustTypeIterator()) {
-        if (where == BackgroundAdjustType::kMove && wxRect{ mBitmapPoint, mBitmap.GetSize() }.Contains(x, y)) {
+        if (where == BackgroundAdjustType::kMove && wxRect{ wxCalChart::toPoint(mPosition), wxCalChart::toSize(mScaledSize) }.Contains(x, y)) {
             return where;
         }
         auto offsetX = toOffsetX(where);
@@ -160,15 +162,17 @@ void BackgroundImage::OnMouseLeftDown(wxMouseEvent const& event, wxDC const& dc)
         return;
     }
     mBackgroundAdjustType = where;
-    mScaleAndMove = std::make_unique<CalculateScaleAndMove>(wxPoint{ x, y }, wxRect{ mBitmapPoint, mBitmap.GetSize() }, mBackgroundAdjustType);
+    mScaleAndMove = { wxPoint{ x, y }, wxRect{ wxCalChart::toPoint(mPosition), wxCalChart::toSize(mScaledSize) }, mBackgroundAdjustType };
 }
 
 std::array<int, 4> BackgroundImage::OnMouseLeftUp(const wxMouseEvent&, const wxDC&)
 {
     if (mScaleAndMove) {
         // done moving, lock down the picture and make it pretty:
-        mBitmap = wxBitmap(mImage.Scale(mBitmap.GetWidth(), mBitmap.GetHeight(), wxIMAGE_QUALITY_HIGH));
-        std::array<int, 4> data{ { mBitmapPoint.x, mBitmapPoint.y, mBitmap.GetWidth(), mBitmap.GetHeight() } };
+        mBitmap = wxBitmap(mRawImage.Scale(mBitmap.GetWidth(), mBitmap.GetHeight(), wxIMAGE_QUALITY_HIGH));
+        auto [width, height] = wxCalChart::toSize(mScaledSize);
+        auto [x, y] = wxCalChart::toPoint(mPosition);
+        std::array<int, 4> data{ { x, y, width, height } };
         mScaleAndMove.reset();
         mBackgroundAdjustType = BackgroundAdjustType::kLast;
         return data;
@@ -183,19 +187,21 @@ void BackgroundImage::OnMouseMove(const wxMouseEvent& event, const wxDC& dc)
     auto y = dc.DeviceToLogicalY(point.y);
 
     if (event.Dragging() && event.LeftIsDown() && mScaleAndMove) {
-        auto rect = (*mScaleAndMove)(x, y, { mBitmapPoint, mBitmap.GetSize() });
-        mBitmapPoint = rect.GetPosition();
-        mBitmap = wxBitmap(mImage.Scale(rect.width, rect.height));
+        auto rect = (*mScaleAndMove)(x, y, { wxCalChart::toPoint(mPosition), wxCalChart::toSize(mScaledSize) });
+        mPosition = wxCalChart::toCoord(rect.GetPosition());
+        mScaledSize = wxCalChart::toCoord(rect.GetSize());
+        mBitmap = wxBitmap(mRawImage.Scale(mScaledSize.x, mScaledSize.y));
     }
 }
 
 void BackgroundImage::OnPaint(wxDC& dc, bool drawPicAdjustDots, bool selected) const
 {
-    dc.DrawBitmap(mBitmap, mBitmapPoint.x, mBitmapPoint.y, true);
+    auto pos = wxCalChart::toPoint(mPosition);
+    dc.DrawBitmap(mBitmap, pos.x, pos.y, true);
     if (drawPicAdjustDots) {
         // draw guide dots
-        auto bitmapSize = mBitmap.GetSize();
-        auto middle = mBitmapPoint + bitmapSize / 2;
+        auto bitmapSize = wxCalChart::toSize(mScaledSize);
+        auto middle = wxCalChart::toPoint(mPosition) + bitmapSize / 2;
         dc.SetBrush(*wxBLUE_BRUSH);
         dc.SetPen(*wxBLUE_PEN);
         for (auto where : BackgroundAdjustTypeIterator()) {
@@ -320,7 +326,7 @@ void BackgroundImages::SetBackgroundImages(std::vector<CalChart::ImageInfo> cons
     mBackgroundImages.clear();
     mWhichBackgroundIndex = -1;
     for (auto&& image : images) {
-        mBackgroundImages.emplace_back(wxCalChart::ConvertTowxImage(image.data), image.left, image.top, image.scaled_width, image.scaled_height);
+        mBackgroundImages.emplace_back(image);
     }
 }
 
