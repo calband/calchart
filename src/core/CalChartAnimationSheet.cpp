@@ -178,11 +178,12 @@ auto Sheet::AllAnimateInfoAtBeat(beats_t beat) const -> std::vector<Info>
 {
     auto animates = CalChart::Ranges::ToVector<Info>(std::views::iota(0UL, mCommands.size()) | std::views::transform([this, beat](auto whichMarcher) -> Info {
         return {
+            static_cast<int>(whichMarcher),
             CollisionAtBeat(whichMarcher, beat),
             MarcherInfoAtBeat(whichMarcher, beat)
         };
     }));
-    return SortForSprites(animates);
+    return animates;
 }
 
 namespace {

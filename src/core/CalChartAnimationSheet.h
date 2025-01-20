@@ -39,6 +39,7 @@ namespace CalChart::Animate {
 using CompileResult = std::pair<std::vector<Command>, ErrorsEncountered>;
 
 struct Info {
+    int mIndex;
     CalChart::Coord::CollisionType mCollision = CalChart::Coord::CollisionType::none;
     MarcherInfo mMarcherInfo{};
 };
@@ -121,6 +122,7 @@ public:
     [[nodiscard]] auto AnimateInfoAtBeat(beats_t beat, int whichMarcher) const -> Info
     {
         return {
+            whichMarcher,
             CollisionAtBeat(beat, whichMarcher),
             MarcherInfoAtBeat(beat, whichMarcher)
         };

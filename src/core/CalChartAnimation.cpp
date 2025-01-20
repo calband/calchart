@@ -131,6 +131,17 @@ auto AddDistanceFromPointInfo(Range&& range, CalChart::Coord origin) -> std::mul
     });
 }
 
+// Because we need to draw sprites and other animations without overlap, sort them so the "closer" ones are first
+template <std::ranges::input_range Range>
+    requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Info>)
+auto SortForSprites(Range input)
+{
+    std::ranges::sort(input, [](auto&& a, auto&& b) {
+        return a.mMarcherInfo.mPosition < b.mMarcherInfo.mPosition;
+    });
+    return input;
+}
+
 }
 
 namespace CalChart {
@@ -159,10 +170,8 @@ auto Animation::GetAnimateInfoWithDistanceFromPoint(beats_t whichBeat, CalChart:
 
 auto Animation::GetAnimateInfoWithDistanceFromPoint(beats_t whichBeat, SelectionList const& selectionList, CalChart::Coord origin) const -> std::multimap<double, Animate::Info>
 {
-    auto allEnumeratedInfo = CalChart::Ranges::enumerate_view(GetAllAnimateInfo(whichBeat));
-    auto allSelected = allEnumeratedInfo
-        | std::views::filter([&selectionList](auto&& info) { return selectionList.contains(std::get<0>(info)); })
-        | std::views::transform([](auto&& info) { return std::get<1>(info); });
+    auto allSelected = GetAllAnimateInfo(whichBeat)
+        | std::views::filter([&selectionList](auto&& info) { return selectionList.contains(info.mIndex); });
 
     return std::accumulate(allSelected.begin(), allSelected.end(), std::multimap<double, Animate::Info>{}, [origin](auto&& acc, auto&& item) {
         acc.insert({ origin.Distance(item.mMarcherInfo.mPosition.x), item });
@@ -172,15 +181,11 @@ auto Animation::GetAnimateInfoWithDistanceFromPoint(beats_t whichBeat, Selection
 
 auto Animation::GenerateDotsDrawCommands(beats_t whichBeat, SelectionList const& selectionList, bool drawCollisionWarning, CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
 {
-    auto allEnumeratedInfo = CalChart::Ranges::enumerate_view(GetAllAnimateInfo(whichBeat));
-    auto allInfo = allEnumeratedInfo
-        | std::views::transform([](auto&& info) { return std::get<1>(info); });
-    auto allSelected = allEnumeratedInfo
-        | std::views::filter([&selectionList](auto&& info) { return selectionList.contains(std::get<0>(info)); })
-        | std::views::transform([](auto&& info) { return std::get<1>(info); });
-    auto allNotSelected = allEnumeratedInfo
-        | std::views::filter([&selectionList](auto&& info) { return !selectionList.contains(std::get<0>(info)); })
-        | std::views::transform([](auto&& info) { return std::get<1>(info); });
+    auto allInfo = GetAllAnimateInfo(whichBeat);
+    auto allSelected = allInfo
+        | std::views::filter([&selectionList](auto&& info) { return selectionList.contains(info.mIndex); });
+    auto allNotSelected = allInfo
+        | std::views::filter([&selectionList](auto&& info) { return !selectionList.contains(info.mIndex); });
 
     auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
     CalChart::append(drawCmds,
@@ -219,8 +224,7 @@ auto Animation::GenerateSpritesDrawCommands(beats_t whichBeat, SelectionList con
     auto comp_Y = config.Get_SpriteBitmapOffsetY();
 
     auto drawCmds = CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(
-        CalChart::Ranges::enumerate_view(GetAllAnimateInfo(whichBeat)) | std::views::transform([comp_Y, &selectionList, onBeat, imageFunction](auto&& enum_info) {
-            auto&& [index, info] = enum_info;
+        SortForSprites(GetAllAnimateInfo(whichBeat)) | std::views::transform([comp_Y, &selectionList, onBeat, imageFunction](auto&& info) {
             auto image_offset = [&]() -> ImageBeat {
                 if (info.mMarcherInfo.mStepStyle == CalChart::MarchingStyle::Close) {
                     return ImageBeat::Standing;
@@ -230,7 +234,7 @@ auto Animation::GenerateSpritesDrawCommands(beats_t whichBeat, SelectionList con
                 }
                 return *onBeat ? ImageBeat::Left : ImageBeat::Right;
             }();
-            auto [image, size] = imageFunction(info.mMarcherInfo.mFacingDirection, image_offset, selectionList.contains(index));
+            auto [image, size] = imageFunction(info.mMarcherInfo.mFacingDirection, image_offset, selectionList.contains(info.mIndex));
             auto position = info.mMarcherInfo.mPosition;
             auto offset = CalChart::Coord(size.x * comp_X, size.y * comp_Y);
 
