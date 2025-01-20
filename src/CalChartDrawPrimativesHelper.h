@@ -274,8 +274,12 @@ inline auto towxImage(CalChart::ImageData const& image) -> wxImage
 }
 
 struct BitmapHolder : CalChart::Draw::OpaqueImageData {
-    BitmapHolder(wxImage const& image)
-        : bitmap(image)
+    explicit BitmapHolder(wxImage const& image)
+        : bitmap{ image }
+    {
+    }
+    explicit BitmapHolder(wxBitmap const& bitmap)
+        : bitmap{ bitmap }
     {
     }
     ~BitmapHolder() override = default;

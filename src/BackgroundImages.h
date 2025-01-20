@@ -39,13 +39,13 @@ public:
 
     void SetBackgroundImages(std::vector<CalChart::ImageInfo> const& images);
 
-    auto GetAdjustBackgroundMode() const { return mAdjustBackgroundMode; }
+    [[nodiscard]] auto GetAdjustBackgroundMode() const { return mAdjustBackgroundMode; }
     void SetAdjustBackgroundMode(bool adjustBackgroundMode) { mAdjustBackgroundMode = adjustBackgroundMode; }
 
-    std::optional<std::size_t> GetCurrentIndex() const { return mWhichBackgroundIndex == -1 ? std::optional<std::size_t>{} : mWhichBackgroundIndex; }
+    [[nodiscard]] auto GetCurrentIndex() const { return mWhichBackgroundIndex; }
 
     void OnMouseLeftDown(wxMouseEvent const& event, wxDC const& dc);
-    std::optional<std::tuple<int, std::array<int, 4>>> OnMouseLeftUp(wxMouseEvent const& event, wxDC const& dc);
+    [[nodiscard]] auto OnMouseLeftUp(wxMouseEvent const& event, wxDC const& dc) -> std::optional<std::tuple<int, std::array<int, 4>>>;
     void OnMouseMove(wxMouseEvent const& event, wxDC const& dc);
 
     void OnPaint(wxDC& dc) const;
@@ -53,5 +53,5 @@ public:
 private:
     std::vector<BackgroundImage> mBackgroundImages;
     bool mAdjustBackgroundMode{};
-    int mWhichBackgroundIndex = -1;
+    std::optional<std::size_t> mWhichBackgroundIndex = std::nullopt;
 };
