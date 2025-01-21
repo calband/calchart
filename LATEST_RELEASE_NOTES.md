@@ -5,6 +5,7 @@ Bugs addressed in this release:
 * [#593](../../issues/593) Are the draw colors for selected and reference inverted on the drawing setup
 * [#598](../../issues/598) ASAN crashes when drawing sprites
 * [#599](../../issues/599) Selected marchers on field don't match animation
+* [#600](../../issues/600) click on Sprites in animation view doesn't automatically update the view
 
 Other changes:
 
