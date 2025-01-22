@@ -652,6 +652,16 @@ void Sheet::SetSymbol(unsigned i, SYMBOL_TYPE sym)
     mPoints[i].SetSymbol(sym);
 }
 
+void Sheet::SetMarcherFlip(unsigned i, bool val)
+{
+    mPoints.at(i).Flip(val);
+}
+
+void Sheet::SetMarcherLabelVisibility(unsigned i, bool isVisible)
+{
+    mPoints.at(i).SetLabelVisibility(isVisible);
+}
+
 std::vector<SYMBOL_TYPE> Sheet::GetSymbols() const
 {
     std::vector<SYMBOL_TYPE> result;

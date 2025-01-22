@@ -969,13 +969,13 @@ Show_command_pair Show::Create_SetLabelFlipCommand(std::map<int, bool> const& ne
     auto action = [sheet_num = mSheetNum, new_flip](Show& show) {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : new_flip) {
-            sheet->GetMarcher(i.first).Flip(i.second);
+            sheet->SetMarcherFlip(i.first, i.second);
         }
     };
     auto reaction = [sheet_num = mSheetNum, original_flip](Show& show) {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : original_flip) {
-            sheet->GetMarcher(i.first).Flip(i.second);
+            sheet->SetMarcherFlip(i.first, i.second);
         }
     };
     return { action, reaction };
@@ -1010,13 +1010,13 @@ Show_command_pair Show::Create_SetLabelVisiblityCommand(std::map<int, bool> cons
     auto action = [sheet_num = mSheetNum, new_visibility](Show& show) {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : new_visibility) {
-            sheet->GetMarcher(i.first).SetLabelVisibility(i.second);
+            sheet->SetMarcherLabelVisibility(i.first, i.second);
         }
     };
     auto reaction = [sheet_num = mSheetNum, original_visibility](Show& show) {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : original_visibility) {
-            sheet->GetMarcher(i.first).SetLabelVisibility(i.second);
+            sheet->SetMarcherLabelVisibility(i.first, i.second);
         }
     };
     return { action, reaction };
