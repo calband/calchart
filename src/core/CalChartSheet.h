@@ -101,9 +101,7 @@ public:
     // Marchers
     [[nodiscard]] auto GetMarcher(unsigned i) const -> Point;
     [[nodiscard]] auto GetAllMarchers() const { return mPoints; }
-
     [[nodiscard]] auto GetSymbol(unsigned i) const { return mPoints[i].GetSymbol(); }
-
     void SetSymbol(unsigned i, SYMBOL_TYPE sym);
     [[nodiscard]] auto GetNumberPoints() const { return mPoints.size(); }
     [[nodiscard]] auto GetSymbols() const -> std::vector<SYMBOL_TYPE>;
@@ -113,7 +111,8 @@ public:
     [[nodiscard]] auto GetPosition(unsigned i, unsigned ref = 0) const -> Coord;
     void SetAllPositions(Coord val, unsigned i);
     void SetPosition(Coord val, unsigned i, unsigned ref = 0);
-    void SetAllPoints(std::vector<Point> const& newpts);
+    void SetMarcherFlip(unsigned i, bool val);
+    void SetMarcherLabelVisibility(unsigned i, bool isVisible);
     [[nodiscard]] auto MakeSelectPointsBySymbol(SYMBOL_TYPE i) const -> SelectionList;
     [[nodiscard]] auto NewNumPointsPositions(int num, int columns, Coord new_march_position) const -> std::vector<Point>;
     void DeletePoints(SelectionList const& sl);
