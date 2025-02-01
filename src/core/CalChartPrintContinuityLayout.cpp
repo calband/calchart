@@ -20,7 +20,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define _LIBCPP_ENABLE_EXPERIMENTAL 1
 #include "CalChartPrintContinuityLayout.h"
 #include "CalChartCoroutine.h"
 #include "CalChartPoint.h"

@@ -49,6 +49,7 @@ namespace CalChart {
 
 class Continuity;
 class Reader;
+class Curve;
 struct ParseErrorHandlers;
 
 // error occurred on parsing.  First arg is what went wrong, second is the values that need to be fixed.
@@ -107,6 +108,8 @@ public:
     [[nodiscard]] auto GetSymbols() const -> std::vector<SYMBOL_TYPE>;
     void SetPoints(std::vector<Point> const& points);
     [[nodiscard]] auto FindMarcher(Coord where, Coord::units searchBound, unsigned ref = 0) const -> std::optional<int>;
+    [[nodiscard]] auto FindCurveControlPoint(Coord where, Coord::units searchBound) const -> std::optional<std::tuple<size_t, size_t>>;
+    [[nodiscard]] auto FindCurve(Coord where, Coord::units searchBound) const -> std::optional<std::tuple<size_t, size_t>>;
     [[nodiscard]] auto RemapPoints(std::vector<size_t> const& table) const -> std::vector<Point>;
     [[nodiscard]] auto GetPosition(unsigned i, unsigned ref = 0) const -> Coord;
     void SetAllPositions(Coord val, unsigned i);
@@ -116,6 +119,13 @@ public:
     [[nodiscard]] auto MakeSelectPointsBySymbol(SYMBOL_TYPE i) const -> SelectionList;
     [[nodiscard]] auto NewNumPointsPositions(int num, int columns, Coord new_march_position) const -> std::vector<Point>;
     void DeletePoints(SelectionList const& sl);
+
+    // Curves
+    void AddCurve(Curve const& curve, size_t index);
+    void RemoveCurve(size_t index);
+    void ReplaceCurve(Curve const& curve, size_t index);
+    [[nodiscard]] auto GetCurve(size_t index) const -> Curve;
+    [[nodiscard]] auto GetCurvesSize() const -> size_t;
 
     // titles
     [[nodiscard]] auto GetName() const -> std::string;
@@ -154,6 +164,7 @@ private:
     std::vector<Point> mPoints;
     std::string mName;
     std::vector<ImageInfo> mBackgroundImages;
+    std::vector<Curve> mCurves;
 
     // unit tests
     friend void Sheet_UnitTests();

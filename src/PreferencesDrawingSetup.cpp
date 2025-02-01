@@ -53,6 +53,7 @@ enum {
     SLINERATIO,
     SPRITESCALE,
     SPRITEHEIGHT,
+    CURVECONTROL,
     NEW_COLOR_PALETTE,
 };
 
@@ -66,6 +67,7 @@ EVT_TEXT_ENTER(PLINERATIO, DrawingSetup::OnCmdTextChanged)
 EVT_TEXT_ENTER(SLINERATIO, DrawingSetup::OnCmdTextChanged)
 EVT_TEXT_ENTER(SPRITESCALE, DrawingSetup::OnCmdTextChanged)
 EVT_TEXT_ENTER(SPRITEHEIGHT, DrawingSetup::OnCmdTextChanged)
+EVT_TEXT_ENTER(CURVECONTROL, DrawingSetup::OnCmdTextChanged)
 END_EVENT_TABLE()
 
 IMPLEMENT_CLASS(DrawingSetup, PreferencePage)
@@ -99,46 +101,49 @@ void DrawingSetup::CreateControls()
     }
     wxUI::VSizer{
         LeftBasicSizerFlags(),
-        wxUI::VSizer{
-            "Palette Selector",
-            mPaletteNameBox = wxUI::BitmapComboBox(NEW_COLOR_PALETTE, colorPalettes)
-                                  .withSelection(mActiveColorPalette)
-                                  .withSize({ 200, -1 })
-                                  .withStyle(wxCB_READONLY | wxCB_DROPDOWN),
+        wxUI::HSizer{
+            wxUI::VSizer{
+                "Palette Selector",
+                mPaletteNameBox = wxUI::BitmapComboBox(NEW_COLOR_PALETTE, colorPalettes)
+                                      .withSelection(mActiveColorPalette)
+                                      .withSize({ 200, -1 })
+                                      .withStyle(wxCB_READONLY | wxCB_DROPDOWN),
 
-            wxUI::HSizer{
-                wxUI::Button("&Edit Color")
-                    .bind([this] { OnCmdChangePaletteColor(); }),
-                wxUI::Button("&Edit Name")
-                    .bind([this] { OnCmdChangePaletteName(); }),
+                wxUI::HSizer{
+                    wxUI::Button("&Edit Color")
+                        .bind([this] { OnCmdChangePaletteColor(); }),
+                    wxUI::Button("&Edit Name")
+                        .bind([this] { OnCmdChangePaletteName(); }),
+                },
             },
-        },
-        wxUI::VSizer{
-            "Color settings",
-            wxUI::HSizer{
-                mNameBox = wxUI::BitmapComboBox(NEW_COLOR_CHOICE, colorNames)
-                               .withSelection(0)
-                               .withSize({ 200, -1 })
-                               .withStyle(wxCB_READONLY | wxCB_DROPDOWN),
-                mSpin = wxUI::SpinCtrl(SPIN_WIDTH, std::pair{ 1, 10 }, mCalChartPens[mActiveColorPalette][0].GetWidth())
-                            .withStyle(wxSP_ARROW_KEYS),
-            },
+            wxUI::VSizer{
+                "Color settings",
+                wxUI::HSizer{
+                    mNameBox = wxUI::BitmapComboBox(NEW_COLOR_CHOICE, colorNames)
+                                   .withSelection(0)
+                                   .withSize({ 200, -1 })
+                                   .withStyle(wxCB_READONLY | wxCB_DROPDOWN),
+                    mSpin = wxUI::SpinCtrl(SPIN_WIDTH, std::pair{ 1, 10 }, mCalChartPens[mActiveColorPalette][0].GetWidth())
+                                .withStyle(wxSP_ARROW_KEYS),
+                },
 
-            wxUI::HSizer{
-                wxUI::Button("&Change Color")
-                    .bind([this] { OnCmdSelectColors(); }),
-                wxUI::Button("&Reset Name")
-                    .bind([this] { OnCmdResetColors(); }),
+                wxUI::HSizer{
+                    wxUI::Button("&Change Color")
+                        .bind([this] { OnCmdSelectColors(); }),
+                    wxUI::Button("&Reset Name")
+                        .bind([this] { OnCmdResetColors(); }),
+                },
             },
         },
         wxUI::HSizer{
             "ratios",
-            VLabelWidget("Dot Ratio:", wxUI::TextCtrl{ DOTRATIO }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER)),
-            VLabelWidget("Num Ratio:", wxUI::TextCtrl{ NUMRATIO }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER)),
-            VLabelWidget("P-Line Ratio:", wxUI::TextCtrl{ PLINERATIO }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER)),
-            VLabelWidget("S-Line Ratio:", wxUI::TextCtrl{ SLINERATIO }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER)),
-            VLabelWidget("Sprite Scale:", wxUI::TextCtrl{ SPRITESCALE }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER)),
-            VLabelWidget("Sprite Height:", wxUI::TextCtrl{ SPRITEHEIGHT }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER)),
+            VLabelWidget("Dot Ratio:", wxUI::TextCtrl{ DOTRATIO }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER)),
+            VLabelWidget("Num Ratio:", wxUI::TextCtrl{ NUMRATIO }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER)),
+            VLabelWidget("P-Line Ratio:", wxUI::TextCtrl{ PLINERATIO }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER)),
+            VLabelWidget("S-Line Ratio:", wxUI::TextCtrl{ SLINERATIO }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER)),
+            VLabelWidget("Sprite Scale:", wxUI::TextCtrl{ SPRITESCALE }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER)),
+            VLabelWidget("Sprite Height:", wxUI::TextCtrl{ SPRITEHEIGHT }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER)),
+            VLabelWidget("Curve Box:", wxUI::TextCtrl{ CURVECONTROL }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER)),
         },
         wxUI::Generic{ ExpandSizerFlags(), new ColorSetupCanvas(mConfig, this) },
     }
@@ -168,6 +173,7 @@ void DrawingSetup::InitFromConfig()
     mDrawingValues[3] = mConfig.Get_SLineRatio();
     mDrawingValues[4] = mConfig.Get_SpriteBitmapScale();
     mDrawingValues[5] = mConfig.Get_SpriteBitmapOffsetY();
+    mDrawingValues[6] = mConfig.Get_ControlPointRatio();
 }
 
 bool DrawingSetup::TransferDataToWindow()
@@ -203,6 +209,9 @@ bool DrawingSetup::TransferDataToWindow()
     text->SetValue(buf);
     text = (wxTextCtrl*)FindWindow(SPRITEHEIGHT);
     buf.Printf(wxT("%.2f"), mDrawingValues[5]);
+    text->SetValue(buf);
+    text = (wxTextCtrl*)FindWindow(CURVECONTROL);
+    buf.Printf(wxT("%.2f"), mDrawingValues[6]);
     text->SetValue(buf);
 
     return true;
@@ -359,6 +368,9 @@ void DrawingSetup::OnCmdTextChanged(wxCommandEvent& e)
             break;
         case 5:
             mConfig.Set_SpriteBitmapOffsetY(value);
+            break;
+        case 6:
+            mConfig.Set_ControlPointRatio(value);
             break;
         }
     }

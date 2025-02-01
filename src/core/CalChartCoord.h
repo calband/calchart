@@ -25,7 +25,9 @@
 
 #include <compare>
 #include <cstdint>
+#include <format>
 #include <ostream>
+#include <sstream>
 
 namespace CalChart {
 
@@ -105,6 +107,8 @@ struct CoordBasic {
 
     // Get distance of point to other
     [[nodiscard]] auto Distance(CoordBasic<T> other) const { return std::hypot(other.x - x, other.y - y); }
+    // Get distance of the begin to the end
+    [[nodiscard]] auto Length() const { return std::hypot(x, y); }
 
     // Angle of vector {0, 0} and this.
     [[nodiscard]] auto Direction() const -> CalChart::Radian;
@@ -289,35 +293,51 @@ inline auto CoordBasic<T>::DetectCollision(CoordBasic<T> c) const -> CoordBasic<
     }
     return CollisionType::none;
 }
-
-namespace details {
-    static_assert(Coord{} == Coord{ 0 });
-    static_assert(Coord{ 1 } == Coord{ 1, 0 });
-    static_assert(Coord{ std::tuple{ 1.0, 1.0 } } == Coord{ 1, 1 });
-    static_assert(Coord{ 0, 0 } <= Coord{ 0, 0 });
-    static_assert(Coord{ -1, 0 } < Coord{ 0, 0 });
-    static_assert(Coord{ -1, -1 } < Coord{ -1, 0 });
-    static_assert(Coord{ 1, 1 } == (Coord{ 1, 0 } + Coord{ 0, 1 }));
-    static_assert(Coord{ 1, 1 } != (Coord{ 1, 0 } + Coord{ 1, 0 }));
-    static_assert(Coord{ 2, 2 } == 2 * Coord{ 1, 1 });
-    static_assert(Coord{ 2, 2 } == Coord{ 1, 1 } * 2);
-    static_assert(Coord{ 1, 1 } == Coord{ 2, 2 } / 2);
-    static_assert(Coord{ 1, -1 } == -Coord{ -1, 1 });
-    static_assert(Coord{ -1, 1 } == -Coord{ 1, -1 });
-
-    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-    static_assert(1 == RoundToCoordUnits(0.5));
-    static_assert(0 == RoundToCoordUnits(0.4));
-    static_assert(-1 == RoundToCoordUnits(-0.5));
-    static_assert(0 == RoundToCoordUnits(-0.4));
-
-    static_assert(8 == Float2CoordUnits(0.5));
-    static_assert(6 == Float2CoordUnits(0.4));
-    static_assert(-8 == Float2CoordUnits(-0.5));
-    static_assert(-6 == Float2CoordUnits(-0.4));
-    static_assert(16 == Float2CoordUnits(1));
-    static_assert(16 == Float2CoordUnits(1.0));
-    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 }
 
+// Custom formatter specialization for CalChart::Coord
+template <>
+struct std::formatter<CalChart::Coord> {
+    // No parse function needed since we have no format specifiers
+    static constexpr auto parse(std::format_parse_context& ctx)
+    {
+        return ctx.begin();
+    }
+
+    // Formats the CalChart::Coord object
+    template <typename FormatContext>
+    static auto format(const CalChart::Coord& coord, FormatContext& ctx)
+    {
+        return std::format_to(ctx.out(), "({}, {})", coord.x, coord.y);
+    }
+};
+
+namespace CalChart::details {
+static_assert(Coord{} == Coord{ 0 });
+static_assert(Coord{ 1 } == Coord{ 1, 0 });
+static_assert(Coord{ std::tuple{ 1.0, 1.0 } } == Coord{ 1, 1 });
+static_assert(Coord{ 0, 0 } <= Coord{ 0, 0 });
+static_assert(Coord{ -1, 0 } < Coord{ 0, 0 });
+static_assert(Coord{ -1, -1 } < Coord{ -1, 0 });
+static_assert(Coord{ 1, 1 } == (Coord{ 1, 0 } + Coord{ 0, 1 }));
+static_assert(Coord{ 1, 1 } != (Coord{ 1, 0 } + Coord{ 1, 0 }));
+static_assert(Coord{ 2, 2 } == 2 * Coord{ 1, 1 });
+static_assert(Coord{ 2, 2 } == Coord{ 1, 1 } * 2);
+static_assert(Coord{ 1, 1 } == Coord{ 2, 2 } / 2);
+static_assert(Coord{ 1, -1 } == -Coord{ -1, 1 });
+static_assert(Coord{ -1, 1 } == -Coord{ 1, -1 });
+
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+static_assert(1 == RoundToCoordUnits(0.5));
+static_assert(0 == RoundToCoordUnits(0.4));
+static_assert(-1 == RoundToCoordUnits(-0.5));
+static_assert(0 == RoundToCoordUnits(-0.4));
+
+static_assert(8 == Float2CoordUnits(0.5));
+static_assert(6 == Float2CoordUnits(0.4));
+static_assert(-8 == Float2CoordUnits(-0.5));
+static_assert(-6 == Float2CoordUnits(-0.4));
+static_assert(16 == Float2CoordUnits(1));
+static_assert(16 == Float2CoordUnits(1.0));
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 }

@@ -160,6 +160,9 @@ public:
     [[nodiscard]] auto GetContinuities() const { return GetCurrentSheet()->GetContinuities(); }
     [[nodiscard]] auto ContinuitiesInUse() const { return GetCurrentSheet()->ContinuitiesInUse(); }
 
+    [[nodiscard]] auto GetCurrentCurve(size_t index) const { return GetCurrentSheet()->GetCurve(index); }
+    [[nodiscard]] auto GetCurrentCurvesSize() const { return GetCurrentSheet()->GetCurvesSize(); }
+
     // how to select points
     // Utility functions for constructing new selection lists
     // Then you push the selection list with the Create_SetSelectionListCommand
@@ -183,12 +186,18 @@ public:
     auto GetCurrentReferencePoint() const { return mCurrentReferencePoint; }
     void SetCurrentReferencePoint(int currentReferencePoint);
     [[nodiscard]] auto FindMarcher(CalChart::Coord pos) const -> std::optional<int>;
+    // Determine if the position is on a curve control point, if so, return which curve and which control point.
+    [[nodiscard]] auto FindCurveControlPoint(CalChart::Coord pos) const -> std::optional<std::tuple<size_t, size_t>>;
+    // Determine if the position is on a curve, if so, return which curve and the lower control point.
+    [[nodiscard]] auto FindCurve(CalChart::Coord pos) const -> std::optional<std::tuple<size_t, size_t>>;
     auto GetDrawPaths() const { return mDrawPaths; }
     void SetDrawPaths(bool drawPaths);
     auto GetDrawBackground() const { return mDrawBackground; }
     void SetDrawBackground(bool drawBackground);
     auto GetCurrentMove() const { return mCurrentMove; }
     void SetCurrentMove(CalChart::MoveMode move);
+    [[nodiscard]] auto IsDrawingCurve() const { return mDrawingCurve; }
+    void SetDrawingCurve(bool drawingCurve) { mDrawingCurve = drawingCurve; }
 
     auto GetGhostModuleIsActive() const { return mGhostSource != GhostSource::disabled; }
     auto GetGhostSource() const { return mGhostSource; };
@@ -256,6 +265,9 @@ public:
     std::unique_ptr<wxCommand> Create_RemoveBackgroundImageCommand(int which);
     std::unique_ptr<wxCommand> Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height);
     std::unique_ptr<wxCommand> Create_SetTransitionCommand(const std::vector<CalChart::Coord>& finalPositions, const std::map<CalChart::SYMBOL_TYPE, std::string>& continuities, const std::vector<CalChart::SYMBOL_TYPE>& marcherDotTypes);
+    [[nodiscard]] auto Create_AddSheetCurveCommand(CalChart::Curve const& curve) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_ReplaceSheetCurveCommand(CalChart::Curve const& curve, int whichCurve) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_RemoveSheetCurveCommand(int whichCurve) -> std::unique_ptr<wxCommand>;
 
 private:
     static CC_doc_command_pair Inject_CalChartDocArg(CalChart::Show_command_pair);
@@ -307,4 +319,5 @@ private:
     GhostSource mGhostSource = GhostSource::disabled;
     int mGhostSheet = 0;
     AutoSaveTimer mTimer;
+    bool mDrawingCurve = false;
 };

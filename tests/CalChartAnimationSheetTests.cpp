@@ -39,7 +39,6 @@ TEST_CASE("AnimationSheetTest", "Animate::Sheet")
 
 TEST_CASE("NoCollision", "Animate::Sheet")
 {
-    std::cout << "doing test nocolsion\n";
     auto cont1 = CalChart::Animate::CompileResult{
         {
             CalChart::Animate::CommandStill{ { 64, 16 }, 4, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree::North() },

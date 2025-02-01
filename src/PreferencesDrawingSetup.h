@@ -82,5 +82,5 @@ private:
     std::array<std::array<wxPen, toUType(CalChart::Colors::NUM)>, CalChart::kNumberPalettes> mCalChartPens{};
     std::array<std::array<wxBrush, toUType(CalChart::Colors::NUM)>, CalChart::kNumberPalettes> mCalChartBrushes{};
 
-    std::array<double, 6> mDrawingValues{};
+    std::array<double, 7> mDrawingValues{};
 };

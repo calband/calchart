@@ -68,12 +68,17 @@ public:
     void DoImportPrintableContinuity(const wxString& file);
     void DoSetPrintContinuity(int which_sheet, const wxString& number, const wxString& cont);
     void DoSetContinuityCommand(CalChart::SYMBOL_TYPE sym, CalChart::Continuity const& new_cont);
+    void DoAddSheetCurveCommand(CalChart::Curve const& curve);
+    void DoReplaceSheetCurveCommand(CalChart::Curve const& curve, int whichCurve);
+    void DoRemoveSheetCurveCommand(int whichCurve);
     // These commands may fail, and return a string with user facing information
     [[nodiscard]] auto DoRelabel() -> std::optional<std::string>;
     [[nodiscard]] auto DoAppendShow(std::unique_ptr<CalChartDoc> other_show) -> std::optional<std::string>;
 
     ///// query show attributes /////
     [[nodiscard]] auto FindMarcher(CalChart::Coord pos) const { return mShow->FindMarcher(pos); }
+    [[nodiscard]] auto FindCurveControlPoint(CalChart::Coord pos) const { return mShow->FindCurveControlPoint(pos); }
+    [[nodiscard]] auto FindCurve(CalChart::Coord pos) const { return mShow->FindCurve(pos); }
     [[nodiscard]] auto PointPosition(int which) const { return mShow->GetCurrentSheet()->GetPosition(which, mShow->GetCurrentReferencePoint()); }
     [[nodiscard]] auto GetCurrentSheetNum() const { return (mShow != nullptr) ? mShow->GetCurrentSheetNum() : 0; }
     [[nodiscard]] auto GetNumSheets() const { return (mShow != nullptr) ? mShow->GetNumSheets() : 0; }
@@ -116,6 +121,12 @@ public:
     [[nodiscard]] auto MakeSelectBySymbol(CalChart::SYMBOL_TYPE symbol) const { return mShow->MakeSelectBySymbol(symbol); }
     [[nodiscard]] auto GetCurrentMove() const { return mShow->GetCurrentMove(); }
     void SetCurrentMove(CalChart::MoveMode move) { mShow->SetCurrentMove(move); }
+    [[nodiscard]] auto IsDrawingCurve() const { return mShow->IsDrawingCurve(); }
+    void SetDrawingCurve(bool drawingCurve) const { return mShow->SetDrawingCurve(drawingCurve); }
+
+    [[nodiscard]] auto GetCurrentCurve(size_t index) const { return mShow->GetCurrentCurve(index); }
+    [[nodiscard]] auto GetCurrentCurvesSize() const { return mShow->GetCurrentCurvesSize(); }
+
     [[nodiscard]] auto GetGhostModuleIsActive() const { return mShow->GetGhostModuleIsActive(); }
     [[nodiscard]] auto GetGhostSource() const { return mShow->GetGhostSource(); };
     void SetGhostSource(GhostSource source, int which = 0) { mShow->SetGhostSource(source, which); }

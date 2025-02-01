@@ -53,6 +53,7 @@ enum {
     CALCHART__poly,
     CALCHART__lasso,
     CALCHART__swap,
+    CALCHART__curve,
     CALCHART__move,
     CALCHART__shape_line,
     CALCHART__shape_x,

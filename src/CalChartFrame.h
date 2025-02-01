@@ -91,6 +91,7 @@ public:
     void OnCmd_poly(wxCommandEvent& event);
     void OnCmd_lasso(wxCommandEvent& event);
     void OnCmd_move(wxCommandEvent& event);
+    void OnCmd_curve(wxCommandEvent& event);
     void OnCmd_swap(wxCommandEvent& event);
     void OnCmd_shape_line(wxCommandEvent& event);
     void OnCmd_shape_x(wxCommandEvent& event);
@@ -155,6 +156,7 @@ public:
     void SetCurrentSelect(CalChart::Select type);
     void SetCurrentMove(CalChart::MoveMode type);
     void ToolBarSetCurrentMove(CalChart::MoveMode type);
+    void ToolBarUnsetDrawingCurve();
     float ToolBarSetZoom(float zoom); // set to an amount, returns what it was set to.
     void zoom_callback(wxCommandEvent&);
     void zoom_callback_textenter(wxCommandEvent&);

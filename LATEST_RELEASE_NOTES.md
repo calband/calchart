@@ -12,4 +12,6 @@ Other changes:
 
 * [#590](../../issues/590) Move things related to drawing a sheet to sheet so it can generate Draw commands
 * [#602](../../issues/602) Have Background images use CalChart::Draw
+* [#602](../../issues/602) Have Background images use CalChart::Draw
+* [#608](../../issues/608) Add the ability to draw a curve in CalChart
 

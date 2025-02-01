@@ -55,9 +55,13 @@ enum class Colors {
     POINT_ANIM_COLLISION_WARNING,
     SHAPES,
     PATHS,
+    SHEET_CURVE,
+    SHEET_CURVE_CONTROL_POINT,
+    DRAW_CURVE,
+    DRAW_CURVE_CONTROL_POINT,
     NUM
 };
-using ColorsIterator = CalChart::Iterator<Colors, Colors::FIELD, Colors::PATHS>;
+using ColorsIterator = CalChart::Iterator<Colors, Colors::FIELD, Colors::DRAW_CURVE_CONTROL_POINT>;
 
 using ColorInfoDefault_t = std::tuple<std::string const, std::string const, int const>;
 static const std::array<ColorInfoDefault_t, toUType(Colors::NUM)> ColorInfoDefaults = {
@@ -86,6 +90,10 @@ static const std::array<ColorInfoDefault_t, toUType(Colors::NUM)> ColorInfoDefau
     ColorInfoDefault_t{ "ANIM COLLISION WARNING", "CORAL", 1 },
     ColorInfoDefault_t{ "SHAPES", "ORANGE", 2 },
     ColorInfoDefault_t{ "CONTINUITY PATHS", "RED", 1 },
+    ColorInfoDefault_t{ "CURVE", "BLUE", 2 },
+    ColorInfoDefault_t{ "CURVE CONTROL POINTS", "YELLOW", 1 },
+    ColorInfoDefault_t{ "DRAW CURVE", "RED", 2 },
+    ColorInfoDefault_t{ "DRAW CURVE CONTROL POINTS", "RED", 1 },
 };
 
 enum class ContinuityCellColors {

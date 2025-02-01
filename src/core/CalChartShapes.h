@@ -330,4 +330,41 @@ inline auto GetDistance(RawPolygon_t const& polygon) -> double
     });
 }
 
+// A curve is described by Control Points, which are appended.
+class Curve : public Shape {
+    static constexpr auto kNumberSegments = 10;
+
+public:
+    explicit Curve(Coord p)
+        : pntlist{ p }
+    {
+    }
+    explicit Curve(std::vector<Coord> points)
+        : pntlist{ points }
+    {
+    }
+
+    void cleanMove()
+    {
+        movingPoint = std::nullopt;
+    }
+
+    void Append(Coord p)
+    {
+        pntlist.push_back(p);
+        movingPoint = std::nullopt;
+    }
+    [[nodiscard]] auto GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand> override;
+
+    [[nodiscard]] auto GetPointsOnLine(int numpnts) const -> std::vector<Coord>;
+    [[nodiscard]] auto GetControlPoints() const -> std::vector<Coord> { return pntlist; }
+    [[nodiscard]] auto LowerControlPointOnLine(Coord point, Coord::units searchBound) const -> std::optional<size_t>;
+
+private:
+    std::vector<Coord> pntlist;
+    std::optional<Coord> movingPoint;
+
+    void OnMoveImpl(Coord p) override { movingPoint = p; }
+};
+
 }
