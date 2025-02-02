@@ -66,6 +66,7 @@ private:
     [[nodiscard]] auto SerializeContinuityData() const -> std::vector<std::byte>;
     [[nodiscard]] auto SerializePrintContinuityData() const -> std::vector<std::byte>;
     [[nodiscard]] auto SerializeBackgroundImageInfo() const -> std::vector<std::byte>;
+    [[nodiscard]] auto SerializeCurves() const -> std::vector<std::byte>;
     [[nodiscard]] auto SerializeSheetData() const -> std::vector<std::byte>;
 
 public:

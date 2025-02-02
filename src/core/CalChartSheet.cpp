@@ -400,6 +400,17 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
             throw CC_FileException("Bad Background chunk", INGL_BACK);
         }
     };
+    auto parse_INGL_CURV = [](Sheet* sheet, Reader reader) {
+        auto num = reader.Get<int32_t>();
+        while (num--) {
+            auto [curve, new_reader] = CreateCurve(reader);
+            sheet->mCurves.push_back(curve);
+            reader = new_reader;
+        }
+        if (reader.size() != 0) {
+            throw CC_FileException("Bad Background chunk", INGL_BACK);
+        }
+    };
 
     std::map<uint32_t, std::function<void(Sheet*, Reader)>> const
         parser
@@ -411,6 +422,7 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
               { INGL_VCNT, parse_INGL_VCNT },
               { INGL_PCNT, parse_INGL_PCNT },
               { INGL_BACK, parse_INGL_BACK },
+              { INGL_CURV, parse_INGL_CURV },
           };
 
     auto table = reader.ParseOutLabels();
@@ -468,6 +480,16 @@ auto Sheet::SerializeBackgroundImageInfo() const -> std::vector<std::byte>
     return result;
 }
 
+auto Sheet::SerializeCurves() const -> std::vector<std::byte>
+{
+    std::vector<std::byte> result;
+    Parser::Append(result, static_cast<uint32_t>(mCurves.size()));
+    for (auto&& curve : mCurves) {
+        Parser::Append(result, curve.Serialize());
+    }
+    return result;
+}
+
 auto Sheet::SerializeSheetData() const -> std::vector<std::byte>
 {
     // SHEET_DATA         = NAME , DURATION , ALL_POINTS , CONTINUITY,
@@ -496,6 +518,9 @@ auto Sheet::SerializeSheetData() const -> std::vector<std::byte>
 
     // Write Background
     Parser::Append(result, Parser::Construct_block(INGL_BACK, SerializeBackgroundImageInfo()));
+
+    // Write Curves
+    Parser::Append(result, Parser::Construct_block(INGL_CURV, SerializeCurves()));
 
     return result;
 }

@@ -37,6 +37,8 @@
 
 namespace CalChart {
 
+class Reader;
+
 using RawPolygon_t = std::vector<Coord>;
 auto Inside(Coord p, RawPolygon_t const& polygon) -> bool;
 auto CrossesLine(Coord start, Coord end, Coord p) -> bool;
@@ -360,11 +362,20 @@ public:
     [[nodiscard]] auto GetControlPoints() const -> std::vector<Coord> { return pntlist; }
     [[nodiscard]] auto LowerControlPointOnLine(Coord point, Coord::units searchBound) const -> std::optional<size_t>;
 
+    [[nodiscard]] auto Serialize() const -> std::vector<std::byte>;
+
+    [[nodiscard]] auto operator==(Curve const& other) const -> bool
+    {
+        return pntlist == other.pntlist && movingPoint == other.movingPoint;
+    }
+
 private:
     std::vector<Coord> pntlist;
     std::optional<Coord> movingPoint;
 
     void OnMoveImpl(Coord p) override { movingPoint = p; }
 };
+
+auto CreateCurve(Reader) -> std::pair<Curve, Reader>;
 
 }

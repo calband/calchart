@@ -23,6 +23,7 @@
 #include "CalChartShapes.h"
 #include "CalChartConfiguration.h"
 #include "CalChartDrawCommand.h"
+#include "CalChartFileFormat.h"
 #include "CalChartRanges.h"
 #include <cmath>
 #include <format>
@@ -324,6 +325,29 @@ auto Curve::LowerControlPointOnLine(Coord point, Coord::units searchBound) const
         drawPoints.push_back(pntlist.back());
     }
     return isPointOnCurve(drawPoints, point, searchBound, kNumberSegments);
+}
+
+auto Curve::Serialize() const -> std::vector<std::byte>
+{
+    auto result = std::vector<std::byte>{};
+    Parser::Append(result, static_cast<int32_t>(pntlist.size()));
+    for (auto&& point : pntlist) {
+        Parser::Append(result, static_cast<int32_t>(point.x));
+        Parser::Append(result, static_cast<int32_t>(point.y));
+    }
+    return result;
+}
+
+auto CreateCurve(Reader reader) -> std::pair<Curve, Reader>
+{
+    auto numControlPoints = reader.Get<int32_t>();
+    auto controlPoints = std::vector<Coord>{};
+    while (numControlPoints--) {
+        auto x = static_cast<Coord::units>(reader.Get<int32_t>());
+        auto y = static_cast<Coord::units>(reader.Get<int32_t>());
+        controlPoints.emplace_back(x, y);
+    }
+    return { Curve{ controlPoints }, reader };
 }
 
 }
