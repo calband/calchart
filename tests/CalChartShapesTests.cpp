@@ -1,3 +1,4 @@
+#include "CalChartFileFormat.h"
 #include "CalChartShapes.h"
 #include <catch2/catch_test_macros.hpp>
 
@@ -571,6 +572,21 @@ TEST_CASE("Shape_Curve", "CalChartShapeTests")
         CalChart::Draw::Line{ CalChart::Coord{ 466, 35 }, CalChart::Coord{ 500, 10 } },
     };
     CHECK(uut_draw == drawCommands);
+}
+
+TEST_CASE("Shape_Curve_SerializeDeserialize", "CalChartShapeTests")
+{
+    {
+        auto uut = CalChart::Curve(std::vector<CalChart::Coord>{
+            { 10, 10 },
+            { 500, 400 },
+            { 10, 400 },
+            { 500, 10 } });
+        auto serialized = uut.Serialize();
+        auto reader = CalChart::Reader({ serialized.data(), serialized.size() });
+        auto [curve, newReader] = CalChart::CreateCurve(reader);
+        CHECK(curve == uut);
+    }
 }
 
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers, readability-function-cognitive-complexity)
