@@ -133,7 +133,22 @@ public:
     void SetName(std::string const& newname);
 
     // image
-    [[nodiscard]] auto GetBackgroundImages() const -> std::vector<ImageInfo> const&;
+    [[nodiscard]] auto GetBackgroundImages() const -> std::vector<ImageInfo>
+    {
+        return mBackgroundImages;
+    }
+    [[nodiscard]] auto GetBackgroundImage(size_t which) const -> ImageInfo
+    {
+        return mBackgroundImages.at(which);
+    }
+    [[nodiscard]] auto GetNumberBackgroundImages() const { return mBackgroundImages.size(); }
+    [[nodiscard]] auto GetBackgroundImageInfo(size_t which) const -> std::array<int, 4>
+    {
+        return { mBackgroundImages.at(which).left,
+            mBackgroundImages.at(which).top,
+            mBackgroundImages.at(which).scaledWidth,
+            mBackgroundImages.at(which).scaledHeight };
+    }
     void AddBackgroundImage(ImageInfo const& image, size_t where);
     void RemoveBackgroundImage(size_t which);
     void MoveBackgroundImage(size_t which, int left, int top, int scaled_width, int scaled_height);
