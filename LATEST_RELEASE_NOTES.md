@@ -15,4 +15,5 @@ Other changes:
 * [#602](../../issues/602) Have Background images use CalChart::Draw
 * [#608](../../issues/608) Add the ability to draw a curve in CalChart
 * [#613](../../issues/613) Have a way to save Curves in the show
+* [#615](../../issues/615) Update to latest wxWidgets
 
