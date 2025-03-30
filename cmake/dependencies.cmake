@@ -37,8 +37,8 @@ set(wxUSE_STC OFF)
 set(wxUSE_STD_CONTAINERS ON)
 FetchContent_Declare(
   wxWidgets
-  GIT_REPOSITORY "https://github.com/rmpowell77/wxWidgets.git"
-  GIT_TAG 1e53b7f804073e6cf4903935fb7f9cccaf05e22f # v3.2.4_wxAUI_fix
+  GIT_REPOSITORY "https://github.com/wxWidgets/wxWidgets.git"
+  GIT_TAG d74ef99edca34d5b44b74875fcdf97cc236feb75 # v3.2.7.1
 )
 FetchContent_MakeAvailable(wxWidgets)
 
