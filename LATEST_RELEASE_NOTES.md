@@ -16,4 +16,5 @@ Other changes:
 * [#608](../../issues/608) Add the ability to draw a curve in CalChart
 * [#613](../../issues/613) Have a way to save Curves in the show
 * [#615](../../issues/615) Update to latest wxWidgets
+* [#617](../../issues/617) Don't have GetBackgroundImages return std::vector<ImageInfo> by reference
 

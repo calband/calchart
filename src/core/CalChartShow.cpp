@@ -1042,11 +1042,11 @@ Show_command_pair Show::Create_ToggleLabelVisibilityCommand() const
 Show_command_pair Show::Create_AddNewBackgroundImageCommand(ImageInfo const& image) const
 {
     auto sheet = GetCurrentSheet();
-    auto action = [sheet_num = mSheetNum, image, where = sheet->GetBackgroundImages().size()](Show& show) {
+    auto action = [sheet_num = mSheetNum, image, where = sheet->GetNumberBackgroundImages()](Show& show) {
         auto sheet = show.GetNthSheet(sheet_num);
         sheet->AddBackgroundImage(image, where);
     };
-    auto reaction = [sheet_num = mSheetNum, where = sheet->GetBackgroundImages().size()](Show& show) {
+    auto reaction = [sheet_num = mSheetNum, where = sheet->GetNumberBackgroundImages()](Show& show) {
         auto sheet = show.GetNthSheet(sheet_num);
         sheet->RemoveBackgroundImage(where);
     };
@@ -1056,7 +1056,7 @@ Show_command_pair Show::Create_AddNewBackgroundImageCommand(ImageInfo const& ima
 Show_command_pair Show::Create_RemoveBackgroundImageCommand(int which) const
 {
     auto sheet = GetCurrentSheet();
-    if (static_cast<size_t>(which) >= sheet->GetBackgroundImages().size()) {
+    if (static_cast<size_t>(which) >= sheet->GetNumberBackgroundImages()) {
         return { [](Show&) {}, [](Show&) {} };
     }
     auto action = [sheet_num = mSheetNum, which](Show& show) {
@@ -1073,10 +1073,7 @@ Show_command_pair Show::Create_RemoveBackgroundImageCommand(int which) const
 Show_command_pair Show::Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height) const
 {
     auto sheet = GetCurrentSheet();
-    auto current_left = sheet->GetBackgroundImages().at(which).left;
-    auto current_top = sheet->GetBackgroundImages().at(which).top;
-    auto current_scaled_width = sheet->GetBackgroundImages().at(which).scaledWidth;
-    auto current_scaled_height = sheet->GetBackgroundImages().at(which).scaledHeight;
+    auto [current_left, current_top, current_scaled_width, current_scaled_height] = sheet->GetBackgroundImageInfo(which);
     auto action = [sheet_num = mSheetNum, which, left, top, scaled_width, scaled_height](Show& show) {
         auto sheet = show.GetNthSheet(sheet_num);
         sheet->MoveBackgroundImage(which, left, top, scaled_width, scaled_height);

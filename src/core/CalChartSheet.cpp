@@ -929,11 +929,6 @@ void Sheet::sheet_round_trip_test()
 
 void Sheet_UnitTests() { Sheet::sheet_round_trip_test(); }
 
-std::vector<ImageInfo> const& Sheet::GetBackgroundImages() const
-{
-    return mBackgroundImages;
-}
-
 void Sheet::AddBackgroundImage(ImageInfo const& image, size_t where)
 {
     auto insert_point = mBackgroundImages.begin() + std::min(where, mBackgroundImages.size());
