@@ -17,4 +17,5 @@ Other changes:
 * [#613](../../issues/613) Have a way to save Curves in the show
 * [#615](../../issues/615) Update to latest wxWidgets
 * [#617](../../issues/617) Don't have GetBackgroundImages return std::vector<ImageInfo> by reference
+* [#619](../../issues/619) fix failing builds with png
 
