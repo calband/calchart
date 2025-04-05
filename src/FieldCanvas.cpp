@@ -687,10 +687,9 @@ CalChart::Coord FieldCanvas::GetMoveAmount(direction dir)
     return { 0, 0 };
 }
 
-CalChart::Coord FieldCanvas::SnapToGrid(CalChart::Coord c)
+auto FieldCanvas::SnapToGrid(CalChart::Coord c) -> CalChart::Coord
 {
-    CalChart::Coord::units gridn, grids;
-    std::tie(gridn, grids) = static_cast<CalChartFrame*>(GetParent())->GridChoice();
+    auto [gridn, grids] = static_cast<CalChartFrame*>(GetParent())->GridChoice();
 
     return {
         c.x = SNAPGRID(c.x, gridn, grids),
@@ -699,10 +698,9 @@ CalChart::Coord FieldCanvas::SnapToGrid(CalChart::Coord c)
     };
 }
 
-CalChart::Coord FieldCanvas::SnapToolToGrid(CalChart::Coord c)
+auto FieldCanvas::SnapToolToGrid(CalChart::Coord c) -> CalChart::Coord
 {
-    CalChart::Coord::units gridn, grids;
-    std::tie(gridn, grids) = static_cast<CalChartFrame*>(GetParent())->ToolGridChoice();
+    auto [gridn, grids] = static_cast<CalChartFrame*>(GetParent())->ToolGridChoice();
 
     return {
         c.x = SNAPGRID(c.x, gridn, grids),
@@ -713,17 +711,14 @@ CalChart::Coord FieldCanvas::SnapToolToGrid(CalChart::Coord c)
 
 void FieldCanvas::MoveByKey(direction dir)
 {
-    if (!mView) {
+    if (!mView || mView->GetSelectionList().empty()) {
         return;
     }
-    if (mView->GetSelectionList().empty())
-        return;
     std::map<int, CalChart::Coord> move_points;
-    auto&& select_list = mView->GetSelectionList();
     auto pos = GetMoveAmount(dir);
     // saturate by mode
-    for (auto i = select_list.begin(); i != select_list.end(); ++i) {
-        move_points[*i] = mView->ClipPositionToShowMode(mView->PointPosition(*i) + pos);
+    for (auto i : mView->GetSelectionList()) {
+        move_points[i] = mView->ClipPositionToShowMode(mView->PointPosition(i) + pos);
     }
     mView->DoMovePoints(move_points);
 }
