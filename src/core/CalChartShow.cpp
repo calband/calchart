@@ -39,7 +39,6 @@
 
 namespace CalChart {
 static constexpr auto kDefault = "default";
-static std::string const k_nofile_str = "Unable to open file";
 static std::string const k_badcont_str = "Error in continuity file";
 static std::string const k_contnohead_str = "Continuity file doesn't begin with header";
 
@@ -436,7 +435,7 @@ void Show::SetNumPoints(std::vector<std::pair<std::string, std::string>> const& 
 {
     for (auto sht = GetSheetBegin(); sht != GetSheetEnd(); ++sht) {
         auto pts = sht->NewNumPointsPositions(static_cast<int>(labelsAndInstruments.size()), columns, new_march_position);
-        sht->SetPoints(pts);
+        sht->SetMarchers(pts);
     }
     SetPointLabelAndInstrument(labelsAndInstruments);
 }
@@ -467,7 +466,7 @@ auto Show::GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_it
         auto j = 0;
         for (; j < GetNumPoints(); j++) {
             if (!used_table[j]) {
-                if (source_sheet->GetPosition(i).Distance(target_sheets->GetPosition(j)) < tolerance) {
+                if (source_sheet->GetMarcherPosition(i).Distance(target_sheets->GetMarcherPosition(j)) < tolerance) {
                     table[i] = j;
                     used_table[j] = true;
                     break;
@@ -542,7 +541,7 @@ bool Show::WillMovePoints(std::map<int, Coord> const& new_positions, int ref) co
 {
     auto sheet = GetCurrentSheet();
     for (auto&& index : new_positions) {
-        if (index.second != sheet->GetPosition(index.first, ref)) {
+        if (index.second != sheet->GetMarcherPosition(index.first, ref)) {
             return true;
         }
     }
@@ -610,7 +609,7 @@ SelectionList Show::MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygo
     SelectionList sl;
     auto sheet = GetCurrentSheet();
     for (int i = 0; i < GetNumPoints(); i++) {
-        if (CalChart::Inside(sheet->GetPosition(i, ref), polygon)) {
+        if (CalChart::Inside(sheet->GetMarcherPosition(i, ref), polygon)) {
             sl.insert(i);
         }
     }
@@ -732,7 +731,7 @@ Show_command_pair Show::Create_SetupMarchersCommand(std::vector<std::pair<std::s
     }
     auto reaction = [old_labels, old_points](Show& show) {
         for (auto i = 0ul; i < show.mSheets.size(); ++i) {
-            show.mSheets.at(i).SetPoints(old_points.at(i));
+            show.mSheets.at(i).SetMarchers(old_points.at(i));
         }
         show.SetPointLabelAndInstrument(old_labels);
     };
@@ -795,7 +794,7 @@ Show_command_pair Show::Create_ApplyRelabelMapping(int sheet_num_first, std::vec
     auto action = [sheet_num_first, mapping](Show& show) {
         auto s = show.GetNthSheet(sheet_num_first);
         while (s != show.GetSheetEnd()) {
-            s->SetPoints(s->RemapPoints(mapping));
+            s->SetMarchers(s->RemapPoints(mapping));
             ++s;
         }
     };
@@ -803,7 +802,7 @@ Show_command_pair Show::Create_ApplyRelabelMapping(int sheet_num_first, std::vec
         auto i = 0;
         auto s = show.GetNthSheet(sheet_num_first);
         while (s != show.GetSheetEnd()) {
-            s->SetPoints(current_pos.at(i++));
+            s->SetMarchers(current_pos.at(i++));
             ++s;
         }
     };
@@ -839,19 +838,61 @@ Show_command_pair Show::Create_MovePointsCommand(int whichSheet, std::map<int, C
     auto sheet = GetNthSheet(whichSheet);
     std::map<unsigned, Coord> original_positions;
     for (auto&& index : new_positions) {
-        original_positions[index.first] = sheet->GetPosition(index.first, ref);
+        original_positions[index.first] = sheet->GetMarcherPosition(index.first, ref);
     }
+    auto originalCurves = sheet->GetCurveAssignments();
+
     auto action = [sheet_num = whichSheet, new_positions, ref](Show& show) {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : new_positions) {
             sheet->SetPosition(i.second, i.first, ref);
         }
     };
-    auto reaction = [sheet_num = whichSheet, original_positions, ref](Show& show) {
+    auto reaction = [sheet_num = whichSheet, original_positions, ref, originalCurves](Show& show) {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : original_positions) {
             sheet->SetPosition(i.second, i.first, ref);
         }
+        sheet->SetCurveAssignment(originalCurves);
+    };
+    return { action, reaction };
+}
+
+namespace {
+    auto found(MarcherIndex marcher, std::vector<std::vector<MarcherIndex>> locations)
+    {
+        for (auto&& location : locations) {
+            if (std::find(location.begin(), location.end(), marcher) != location.end()) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+Show_command_pair Show::Create_AssignPointsToCurve(size_t whichCurve, std::vector<MarcherIndex> whichMarchers)
+{
+    auto whichSheet = GetCurrentSheetNum();
+    auto sheet = GetNthSheet(whichSheet);
+    std::map<MarcherIndex, Coord> originalPositions;
+    auto originalCurves = sheet->GetCurveAssignments();
+
+    for (auto&& index : whichMarchers) {
+        if (!found(index, originalCurves)) {
+            originalPositions[index] = sheet->GetMarcherPosition(index);
+        }
+    }
+    auto newAssignments = sheet->GetCurveAssignmentsWithNewAssignments(whichCurve, whichMarchers);
+
+    auto action = [whichSheet, newAssignments](Show& show) {
+        show.GetNthSheet(whichSheet)->SetCurveAssignment(newAssignments);
+    };
+    auto reaction = [whichSheet, originalPositions, originalCurves](Show& show) {
+        auto sheet = show.GetNthSheet(whichSheet);
+        for (auto&& [whichMarcher, pos] : originalPositions) {
+            sheet->SetPosition(pos, whichMarcher);
+        }
+        sheet->SetCurveAssignment(originalCurves);
     };
     return { action, reaction };
 }
@@ -870,7 +911,7 @@ Show_command_pair Show::Create_DeletePointsCommand() const
     }
     auto reaction = [old_labels, old_points](Show& show) {
         for (auto i = 0ul; i < show.mSheets.size(); ++i) {
-            show.mSheets.at(i).SetPoints(old_points.at(i));
+            show.mSheets.at(i).SetMarchers(old_points.at(i));
         }
         show.SetPointLabelAndInstrument(old_labels);
     };
@@ -888,7 +929,7 @@ Show_command_pair Show::Create_RotatePointPositionsCommand(int rotateAmount, int
     auto sheet = GetCurrentSheet();
     std::transform(mSelectionList.begin(), mSelectionList.end(),
         std::back_inserter(finalPositions),
-        [=](unsigned i) { return sheet->GetPosition(i, ref); });
+        [=](unsigned i) { return sheet->GetMarcherPosition(i, ref); });
     rotateAmount %= mSelectionList.size();
     std::rotate(finalPositions.begin(), finalPositions.begin() + rotateAmount,
         finalPositions.end());
@@ -908,7 +949,7 @@ Show_command_pair Show::Create_ResetReferencePointToRef0(int ref) const
     // for selected points, set the reference point to ref0
     // this should be per selection list defect #179
     for (auto&& i : mSelectionList) {
-        positions[i] = sheet->GetPosition(i, 0);
+        positions[i] = sheet->GetMarcherPosition(i, 0);
     }
     return Create_MovePointsCommand(positions, ref);
 }
@@ -1087,7 +1128,7 @@ Show_command_pair Show::Create_MoveBackgroundImageCommand(int which, int left, i
 
 auto Show::Create_AddSheetCurveCommand(CalChart::Curve const& curve) const -> Show_command_pair
 {
-    auto newIndex = GetCurrentSheet()->GetCurvesSize();
+    auto newIndex = GetCurrentSheet()->GetNumberCurves();
     auto action = [sheet_num = mSheetNum, curve, newIndex](Show& show) {
         show.GetNthSheet(sheet_num)->AddCurve(curve, newIndex);
     };
@@ -1112,11 +1153,13 @@ auto Show::Create_ReplaceSheetCurveCommand(CalChart::Curve const& curve, int whi
 auto Show::Create_RemoveSheetCurveCommand(int whichCurve) const -> Show_command_pair
 {
     auto oldCurve = GetCurrentSheet()->GetCurve(whichCurve);
+    auto oldAssignments = GetCurrentSheet()->GetCurveAssignments();
     auto action = [sheet_num = mSheetNum, whichCurve](Show& show) {
         show.GetNthSheet(sheet_num)->RemoveCurve(whichCurve);
     };
-    auto reaction = [sheet_num = mSheetNum, oldCurve, whichCurve](Show& show) {
+    auto reaction = [sheet_num = mSheetNum, oldCurve, whichCurve, oldAssignments](Show& show) {
         show.GetNthSheet(sheet_num)->AddCurve(oldCurve, whichCurve);
+        show.GetNthSheet(sheet_num)->SetCurveAssignment(oldAssignments);
     };
     return { action, reaction };
 }

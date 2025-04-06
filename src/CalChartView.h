@@ -51,6 +51,7 @@ public:
     // Issue the change to the docs command processor, it allows for the ability to undo the change.
     void DoRotatePointPositions(int rotateAmount);
     void DoMovePoints(std::map<int, CalChart::Coord> const& transmat);
+    void DoAssignPointsToCurve(size_t whichCurve, std::vector<CalChart::MarcherIndex> whichMarchers);
     void DoDeletePoints();
     void DoResetReferencePoint();
     void DoSetPointsSymbol(CalChart::SYMBOL_TYPE sym);
@@ -79,7 +80,7 @@ public:
     [[nodiscard]] auto FindMarcher(CalChart::Coord pos) const { return mShow->FindMarcher(pos); }
     [[nodiscard]] auto FindCurveControlPoint(CalChart::Coord pos) const { return mShow->FindCurveControlPoint(pos); }
     [[nodiscard]] auto FindCurve(CalChart::Coord pos) const { return mShow->FindCurve(pos); }
-    [[nodiscard]] auto PointPosition(int which) const { return mShow->GetCurrentSheet()->GetPosition(which, mShow->GetCurrentReferencePoint()); }
+    [[nodiscard]] auto PointPosition(int which) const { return mShow->GetCurrentSheet()->GetMarcherPosition(which, mShow->GetCurrentReferencePoint()); }
     [[nodiscard]] auto GetCurrentSheetNum() const { return (mShow != nullptr) ? mShow->GetCurrentSheetNum() : 0; }
     [[nodiscard]] auto GetNumSheets() const { return (mShow != nullptr) ? mShow->GetNumSheets() : 0; }
     [[nodiscard]] auto GetNumPoints() const { return (mShow != nullptr) ? mShow->GetNumPoints() : 0; }
@@ -116,6 +117,7 @@ public:
     void SelectWithinPolygon(CalChart::RawPolygon_t const& polygon, bool toggleSelected);
     void SetSelectionList(const CalChart::SelectionList& sl);
     [[nodiscard]] auto GetSelectionList() const { return mShow->GetSelectionList(); }
+    [[nodiscard]] auto GetSelectedPoints() const { return mShow->GetSelectedPoints(); }
     [[nodiscard]] auto GetSelect() const { return mShow->GetSelect(); }
     void SetSelect(CalChart::Select select);
     [[nodiscard]] auto MakeSelectBySymbol(CalChart::SYMBOL_TYPE symbol) const { return mShow->MakeSelectBySymbol(symbol); }
@@ -125,7 +127,8 @@ public:
     void SetDrawingCurve(bool drawingCurve) const { return mShow->SetDrawingCurve(drawingCurve); }
 
     [[nodiscard]] auto GetCurrentCurve(size_t index) const { return mShow->GetCurrentCurve(index); }
-    [[nodiscard]] auto GetCurrentCurvesSize() const { return mShow->GetCurrentCurvesSize(); }
+    [[nodiscard]] auto GetCurrentNumberCurves() const { return mShow->GetCurrentNumberCurves(); }
+    [[nodiscard]] auto GetMarchersAssignedToCurve(size_t whichCurve) const { return mShow->GetMarchersAssignedToCurve(whichCurve); }
 
     [[nodiscard]] auto GetGhostModuleIsActive() const { return mShow->GetGhostModuleIsActive(); }
     [[nodiscard]] auto GetGhostSource() const { return mShow->GetGhostSource(); };

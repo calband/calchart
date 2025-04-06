@@ -191,6 +191,12 @@ void CalChartView::DoMovePoints(const std::map<int, CalChart::Coord>& newPositio
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
+void CalChartView::DoAssignPointsToCurve(size_t whichCurve, std::vector<CalChart::MarcherIndex> whichMarchers)
+{
+    auto cmd = mShow->Create_AssignPointsToCurve(whichCurve, whichMarchers);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+}
+
 void CalChartView::DoDeletePoints()
 {
     if (mShow->GetSelectionList().size() == 0) {

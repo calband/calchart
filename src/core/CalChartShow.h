@@ -92,6 +92,7 @@ public:
     [[nodiscard]] auto Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string>> const& data) const -> Show_command_pair;
     [[nodiscard]] auto Create_MovePointsCommand(std::map<int, Coord> const& new_positions, int ref) const -> Show_command_pair;
     [[nodiscard]] auto Create_MovePointsCommand(int whichSheet, std::map<int, Coord> const& new_positions, int ref) const -> Show_command_pair;
+    [[nodiscard]] auto Create_AssignPointsToCurve(size_t whichCurve, std::vector<MarcherIndex> whichMarchers) -> Show_command_pair;
     [[nodiscard]] auto Create_DeletePointsCommand() const -> Show_command_pair;
     [[nodiscard]] auto Create_RotatePointPositionsCommand(int rotateAmount, int ref) const -> Show_command_pair;
     [[nodiscard]] auto Create_ResetReferencePointToRef0(int ref) const -> Show_command_pair;
