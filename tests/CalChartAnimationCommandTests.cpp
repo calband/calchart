@@ -349,14 +349,14 @@ TEST_CASE("Animate::CommandRotate0", "Animate::Command")
 
 TEST_CASE("Animate::Commands", "Animate::Commands")
 {
-    using beats_t = CalChart::beats_t;
+    using Beats = CalChart::Beats;
     auto uut = CalChart::Animate::Commands(std::vector<CalChart::Animate::Command>{
         CalChart::Animate::CommandStill{ { 16, 16 }, 3, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree::North() },
         CalChart::Animate::CommandMove{ { 16, 16 }, 4, { 0, 64 } },
         CalChart::Animate::CommandStill{ { 16, 80 }, 5, CalChart::Animate::CommandStill::Style::Close, CalChart::Degree::South() },
     });
     CHECK(12 == uut.TotalBeats());
-    using beatInfo = std::pair<std::pair<size_t, beats_t>, std::pair<size_t, beats_t>>;
+    using beatInfo = std::pair<std::pair<size_t, Beats>, std::pair<size_t, Beats>>;
     CHECK(beatInfo{ { 0, 0 }, { 0, 0 } } == uut.BeatToCommandOffsetAndBeat(0));
     CHECK(beatInfo{ { 0, 1 }, { 0, 1 } } == uut.BeatToCommandOffsetAndBeat(1));
     CHECK(beatInfo{ { 0, 2 }, { 0, 2 } } == uut.BeatToCommandOffsetAndBeat(2));
@@ -406,14 +406,14 @@ TEST_CASE("Animate::CommandMove64", "Animate::Command")
 
 TEST_CASE("Animate::CommandWith0", "Animate::Commands")
 {
-    using beats_t = CalChart::beats_t;
+    using Beats = CalChart::Beats;
     auto uut = CalChart::Animate::Commands(std::vector<CalChart::Animate::Command>{
         CalChart::Animate::CommandMove{ { -416, -416 }, 2, { 0, 46 } },
         CalChart::Animate::CommandMove{ { -416, -370 }, 0, { 2, 2 } },
         CalChart::Animate::CommandStill{ { -414, -368 }, 6, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree::West() },
     });
     CHECK(8 == uut.TotalBeats());
-    using beatInfo = std::pair<std::pair<size_t, beats_t>, std::pair<size_t, beats_t>>;
+    using beatInfo = std::pair<std::pair<size_t, Beats>, std::pair<size_t, Beats>>;
     CHECK(beatInfo{ { 0, 0 }, { 0, 0 } } == uut.BeatToCommandOffsetAndBeat(0));
     CHECK(beatInfo{ { 0, 1 }, { 0, 1 } } == uut.BeatToCommandOffsetAndBeat(1));
     CHECK(beatInfo{ { 2, 0 }, { 1, 0 } } == uut.BeatToCommandOffsetAndBeat(2));
@@ -437,14 +437,14 @@ TEST_CASE("Animate::CommandWith0", "Animate::Commands")
 
 TEST_CASE("Animate::CommandWith0.2", "Animate::Commands")
 {
-    using beats_t = CalChart::beats_t;
+    using Beats = CalChart::Beats;
     auto uut = CalChart::Animate::Commands(std::vector<CalChart::Animate::Command>{
         CalChart::Animate::CommandMove{ { 960, 64 }, 0, { 0, 4 } },
         CalChart::Animate::CommandMove{ { 960, 68 }, 4, { -64, 0 } },
         CalChart::Animate::CommandStill{ { 896, 68 }, 2, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree::East() },
     });
     CHECK(6 == uut.TotalBeats());
-    using beatInfo = std::pair<std::pair<size_t, beats_t>, std::pair<size_t, beats_t>>;
+    using beatInfo = std::pair<std::pair<size_t, Beats>, std::pair<size_t, Beats>>;
     CHECK(beatInfo{ { 1, 0 }, { 0, 0 } } == uut.BeatToCommandOffsetAndBeat(0));
     CHECK(beatInfo{ { 1, 0 }, { 1, 0 } } == uut.BeatToCommandOffsetAndBeat(1));
     CHECK(beatInfo{ { 1, 1 }, { 1, 1 } } == uut.BeatToCommandOffsetAndBeat(2));

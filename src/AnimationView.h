@@ -58,7 +58,7 @@ public:
 
     void PrevBeat();
     void NextBeat();
-    void GotoTotalBeat(CalChart::beats_t whichBeat);
+    void GotoTotalBeat(CalChart::Beats whichBeat);
     [[nodiscard]] auto AtEndOfShow() const -> bool;
 
     void RefreshAnimationSheet();
@@ -102,7 +102,7 @@ private:
     CalChartView* mView{};
     CalChart::Configuration const& mConfig;
 
-    CalChart::beats_t mCurrentBeat;
+    CalChart::Beats mCurrentBeat;
     bool mDrawCollisionWarning = true;
     bool mPlayCollisionWarning = false;
 

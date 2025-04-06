@@ -417,7 +417,7 @@ std::map<int, CalChart::SelectionList> CalChartView::GetAnimationCollisions() co
 }
 
 auto CalChartView::GenerateAnimationDrawCommands(
-    CalChart::beats_t whichBeat,
+    CalChart::Beats whichBeat,
     bool drawCollisionWarning,
     std::optional<bool> onBeat,
     CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>
@@ -429,34 +429,34 @@ auto CalChartView::GenerateAnimationDrawCommands(
         imageFunction);
 }
 
-auto CalChartView::GetAnimationInfo(CalChart::beats_t whichBeat, int which) const -> std::optional<CalChart::Animate::Info>
+auto CalChartView::GetAnimationInfo(CalChart::Beats whichBeat, int which) const -> std::optional<CalChart::Animate::Info>
 {
     return mShow->GetAnimationInfo(whichBeat, which);
 }
 
-auto CalChartView::GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::beats_t whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>
+auto CalChartView::GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::Beats whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>
 {
     return mShow->GetSelectedAnimationInfoWithDistanceFromPoint(whichBeat, origin);
 }
 
-auto CalChartView::GetTotalNumberAnimationBeats() const -> std::optional<CalChart::beats_t>
+auto CalChartView::GetTotalNumberAnimationBeats() const -> std::optional<CalChart::Beats>
 {
     return mShow->GetTotalNumberAnimationBeats();
 }
 
 // Return a bounding box of the show of where the marchers are.  If they are
 // outside the show, we don't see them.
-auto CalChartView::GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>
+auto CalChartView::GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beats whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>
 {
     return mShow->GetAnimationBoundingBox(zoomInOnMarchers, whichBeat);
 }
 
-auto CalChartView::BeatHasCollision(CalChart::beats_t whichBeat) const -> bool
+auto CalChartView::BeatHasCollision(CalChart::Beats whichBeat) const -> bool
 {
     return mShow->BeatHasCollision(whichBeat);
 }
 
-auto CalChartView::GetAnimationBeatForCurrentSheet() const -> CalChart::beats_t
+auto CalChartView::GetAnimationBeatForCurrentSheet() const -> CalChart::Beats
 {
     return mShow->GetAnimationBeatForCurrentSheet();
 }

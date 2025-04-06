@@ -207,19 +207,19 @@ public:
     [[nodiscard]] auto GetShowFieldOffset() const { return GetShowMode().Offset(); }
     CalChart::Configuration& GetConfiguration() const { return mConfig; }
 
-    [[nodiscard]] auto GetAnimationInfo(CalChart::beats_t whichBeat, int which) const -> std::optional<CalChart::Animate::Info>;
-    [[nodiscard]] auto GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::beats_t whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>;
+    [[nodiscard]] auto GetAnimationInfo(CalChart::Beats whichBeat, int which) const -> std::optional<CalChart::Animate::Info>;
+    [[nodiscard]] auto GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::Beats whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>;
     [[nodiscard]] auto GetAnimationErrors() const -> std::vector<CalChart::Animate::Errors>;
     [[nodiscard]] auto GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>;
     [[nodiscard]] auto GenerateAnimationDrawCommands(
-        CalChart::beats_t whichBeat,
+        CalChart::Beats whichBeat,
         bool drawCollisionWarning,
         std::optional<bool> onBeat,
         CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>;
-    [[nodiscard]] auto GetTotalNumberAnimationBeats() const -> std::optional<CalChart::beats_t>;
-    [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
-    [[nodiscard]] auto BeatHasCollision(CalChart::beats_t whichBeat) const -> bool;
-    [[nodiscard]] auto GetAnimationBeatForCurrentSheet() const -> CalChart::beats_t;
+    [[nodiscard]] auto GetTotalNumberAnimationBeats() const -> std::optional<CalChart::Beats>;
+    [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beats whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
+    [[nodiscard]] auto BeatHasCollision(CalChart::Beats whichBeat) const -> bool;
+    [[nodiscard]] auto GetAnimationBeatForCurrentSheet() const -> CalChart::Beats;
 
     [[nodiscard]] auto GenerateGhostPointsDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>;
     [[nodiscard]] auto GenerateCurrentSheetPointsDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>;

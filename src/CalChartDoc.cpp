@@ -346,7 +346,7 @@ auto CalChartDoc::GetAnimationCollisions() const -> std::map<int, CalChart::Sele
 }
 
 auto CalChartDoc::GenerateAnimationDrawCommands(
-    CalChart::beats_t whichBeat,
+    CalChart::Beats whichBeat,
     bool drawCollisionWarning,
     std::optional<bool> onBeat,
     CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>
@@ -364,7 +364,7 @@ auto CalChartDoc::GenerateAnimationDrawCommands(
         imageFunction);
 }
 
-auto CalChartDoc::GetAnimationInfo(CalChart::beats_t whichBeat, int which) const -> std::optional<CalChart::Animate::Info>
+auto CalChartDoc::GetAnimationInfo(CalChart::Beats whichBeat, int which) const -> std::optional<CalChart::Animate::Info>
 {
     if (!mAnimation) {
         return std::nullopt;
@@ -372,7 +372,7 @@ auto CalChartDoc::GetAnimationInfo(CalChart::beats_t whichBeat, int which) const
     return mAnimation->GetAnimateInfo(whichBeat, which);
 }
 
-auto CalChartDoc::GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::beats_t whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>
+auto CalChartDoc::GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::Beats whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>
 {
     if (!mAnimation) {
         return {};
@@ -383,7 +383,7 @@ auto CalChartDoc::GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::beats_
     return mAnimation->GetAnimateInfoWithDistanceFromPoint(whichBeat, mShow->GetSelectionList(), origin);
 }
 
-auto CalChartDoc::GetTotalNumberAnimationBeats() const -> std::optional<CalChart::beats_t>
+auto CalChartDoc::GetTotalNumberAnimationBeats() const -> std::optional<CalChart::Beats>
 {
     if (!mAnimation) {
         return std::nullopt;
@@ -393,7 +393,7 @@ auto CalChartDoc::GetTotalNumberAnimationBeats() const -> std::optional<CalChart
 
 // Return a bounding box of where the marchers are or the entire show.  If they are
 // outside the show, we don't see them.
-auto CalChartDoc::GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>
+auto CalChartDoc::GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beats whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>
 {
     auto modeSize = mShow->GetShowMode().Size();
     if (!zoomInOnMarchers || !mAnimation) {
@@ -403,7 +403,7 @@ auto CalChartDoc::GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::beats
     return { bounding_box_low_right - bounding_box_upper_left, (modeSize / 2) + bounding_box_upper_left };
 }
 
-auto CalChartDoc::BeatHasCollision(CalChart::beats_t whichBeat) const -> bool
+auto CalChartDoc::BeatHasCollision(CalChart::Beats whichBeat) const -> bool
 {
     if (!mAnimation) {
         return false;
@@ -411,7 +411,7 @@ auto CalChartDoc::BeatHasCollision(CalChart::beats_t whichBeat) const -> bool
     return mAnimation->BeatHasCollision(whichBeat);
 }
 
-auto CalChartDoc::GetAnimationBeatForCurrentSheet() const -> CalChart::beats_t
+auto CalChartDoc::GetAnimationBeatForCurrentSheet() const -> CalChart::Beats
 {
     if (!mAnimation) {
         return {};

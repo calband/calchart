@@ -63,7 +63,7 @@ struct MarcherInfo {
 };
 
 template <typename Command>
-concept CommandT = requires(Command cmd, beats_t beats) {
+concept CommandT = requires(Command cmd, Beats beats) {
     {
         cmd.End()
     } -> std::convertible_to<Coord>;
@@ -78,7 +78,7 @@ concept CommandT = requires(Command cmd, beats_t beats) {
     } -> std::convertible_to<CalChart::Degree>;
     {
         cmd.NumBeats()
-    } -> std::convertible_to<beats_t>;
+    } -> std::convertible_to<Beats>;
     {
         cmd.StepStyle()
     } -> std::convertible_to<MarchingStyle>;
@@ -100,7 +100,7 @@ public:
         StandAndPlay,
         Close,
     };
-    CommandStill(Coord start, beats_t beats, Style style, CalChart::Degree direction)
+    CommandStill(Coord start, Beats beats, Style style, CalChart::Degree direction)
         : mStart{ start }
         , mNumBeats{ beats }
         , mDirection{ direction }
@@ -108,17 +108,17 @@ public:
     {
     }
 
-    [[nodiscard]] auto WithBeats(beats_t beats) const -> CommandStill
+    [[nodiscard]] auto WithBeats(Beats beats) const -> CommandStill
     {
         return CommandStill{ mStart, beats, mStyle, mDirection };
     }
 
     [[nodiscard]] auto End() const -> Coord { return mStart; }
-    [[nodiscard]] auto PositionAtBeat([[maybe_unused]] beats_t beat) const -> Coord { return mStart; }
-    [[nodiscard]] auto FacingDirectionAtBeat([[maybe_unused]] beats_t beat) const { return mDirection; }
-    [[nodiscard]] auto MotionDirectionAtBeat([[maybe_unused]] beats_t beat) const { return mDirection; }
+    [[nodiscard]] auto PositionAtBeat([[maybe_unused]] Beats beat) const -> Coord { return mStart; }
+    [[nodiscard]] auto FacingDirectionAtBeat([[maybe_unused]] Beats beat) const { return mDirection; }
+    [[nodiscard]] auto MotionDirectionAtBeat([[maybe_unused]] Beats beat) const { return mDirection; }
 
-    [[nodiscard]] auto NumBeats() const -> beats_t { return mNumBeats; }
+    [[nodiscard]] auto NumBeats() const -> Beats { return mNumBeats; }
     [[nodiscard]] auto StepStyle() const -> MarchingStyle
     {
         return mStyle == Style::MarkTime ? MarchingStyle::HighStep : MarchingStyle::Close;
@@ -131,18 +131,18 @@ public:
 
 private:
     Coord mStart;
-    beats_t mNumBeats;
+    Beats mNumBeats;
     CalChart::Degree mDirection;
     Style mStyle = Style::MarkTime;
 };
 
 class CommandMove {
 public:
-    CommandMove(Coord start, beats_t beats, Coord movement)
+    CommandMove(Coord start, Beats beats, Coord movement)
         : CommandMove{ start, beats, movement, CalChart::Degree{ movement.Direction() } }
     {
     }
-    CommandMove(Coord start, beats_t beats, Coord movement, CalChart::Degree direction)
+    CommandMove(Coord start, Beats beats, Coord movement, CalChart::Degree direction)
         : mStart{ start }
         , mNumBeats{ beats }
         , mMovement{ movement }
@@ -150,22 +150,22 @@ public:
     {
     }
 
-    [[nodiscard]] auto WithBeats(beats_t beats) const -> CommandMove
+    [[nodiscard]] auto WithBeats(Beats beats) const -> CommandMove
     {
         return CommandMove{ mStart, beats, mMovement, mDirection };
     }
 
     [[nodiscard]] auto End() const -> Coord { return mStart + mMovement; }
 
-    [[nodiscard]] auto PositionAtBeat(beats_t beat) const -> Coord;
-    [[nodiscard]] auto FacingDirectionAtBeat([[maybe_unused]] beats_t beat) const
+    [[nodiscard]] auto PositionAtBeat(Beats beat) const -> Coord;
+    [[nodiscard]] auto FacingDirectionAtBeat([[maybe_unused]] Beats beat) const
     {
         //        std::cout << "Asking for move facing at beat " << beat << " dir " << mDirection << " in radian: " << CalChart::Radian{ mDirection } << "\n";
         return mDirection;
     }
-    [[nodiscard]] auto MotionDirectionAtBeat([[maybe_unused]] beats_t beat) const { return CalChart::Degree{ mMovement.Direction() }; }
+    [[nodiscard]] auto MotionDirectionAtBeat([[maybe_unused]] Beats beat) const { return CalChart::Degree{ mMovement.Direction() }; }
 
-    [[nodiscard]] auto NumBeats() const -> beats_t { return mNumBeats; }
+    [[nodiscard]] auto NumBeats() const -> Beats { return mNumBeats; }
     [[nodiscard]] auto StepStyle() const -> MarchingStyle { return MarchingStyle::HighStep; }
 
     [[nodiscard]] auto GenCC_DrawCommand() const -> Draw::DrawCommand;
@@ -175,7 +175,7 @@ public:
 
 private:
     Coord mStart;
-    beats_t mNumBeats;
+    Beats mNumBeats;
     Coord mMovement;
     CalChart::Degree mDirection;
 };
@@ -183,7 +183,7 @@ private:
 class CommandRotate {
 public:
     CommandRotate(
-        beats_t beats,
+        Beats beats,
         Coord cntr,
         float radius,
         CalChart::Degree ang1,
@@ -191,7 +191,7 @@ public:
         bool backwards = false);
     CommandRotate(
         Coord start,
-        beats_t beats,
+        Beats beats,
         Coord cntr,
         float radius,
         CalChart::Degree ang1,
@@ -207,17 +207,17 @@ public:
     {
     }
 
-    [[nodiscard]] auto WithBeats(beats_t beats) const -> CommandRotate
+    [[nodiscard]] auto WithBeats(Beats beats) const -> CommandRotate
     {
         return CommandRotate{ mStart, beats, mOrigin, mRadius, mAngStart, mAngEnd, mFace };
     }
 
     [[nodiscard]] auto End() const -> Coord;
-    [[nodiscard]] auto PositionAtBeat([[maybe_unused]] beats_t beat) const -> Coord;
-    [[nodiscard]] auto FacingDirectionAtBeat(beats_t beat) const -> CalChart::Degree;
-    [[nodiscard]] auto MotionDirectionAtBeat(beats_t beat) const { return FacingDirectionAtBeat(beat); }
+    [[nodiscard]] auto PositionAtBeat([[maybe_unused]] Beats beat) const -> Coord;
+    [[nodiscard]] auto FacingDirectionAtBeat(Beats beat) const -> CalChart::Degree;
+    [[nodiscard]] auto MotionDirectionAtBeat(Beats beat) const { return FacingDirectionAtBeat(beat); }
 
-    [[nodiscard]] auto NumBeats() const -> beats_t { return mNumBeats; }
+    [[nodiscard]] auto NumBeats() const -> Beats { return mNumBeats; }
     [[nodiscard]] auto StepStyle() const -> MarchingStyle { return MarchingStyle::HighStep; }
 
     [[nodiscard]] auto GenCC_DrawCommand() const -> Draw::DrawCommand;
@@ -227,7 +227,7 @@ public:
 
 private:
     Coord mStart;
-    beats_t mNumBeats;
+    Beats mNumBeats;
     Coord mOrigin;
     float mRadius;
     CalChart::Degree mAngStart;
@@ -246,22 +246,22 @@ inline auto End(Command const& cmd) -> Coord
     return std::visit([](auto arg) { return arg.End(); }, cmd);
 }
 
-inline auto PositionAtBeat(Command const& cmd, beats_t beats) -> Coord
+inline auto PositionAtBeat(Command const& cmd, Beats beats) -> Coord
 {
     return std::visit([beats](auto arg) { return arg.PositionAtBeat(beats); }, cmd);
 }
 
-inline auto FacingDirectionAtBeat(Command const& cmd, beats_t beats) -> CalChart::Degree
+inline auto FacingDirectionAtBeat(Command const& cmd, Beats beats) -> CalChart::Degree
 {
     return std::visit([beats](auto arg) { return arg.FacingDirectionAtBeat(beats); }, cmd);
 }
 
-inline auto MotionDirectionAtBeat(Command const& cmd, beats_t beats) -> CalChart::Degree
+inline auto MotionDirectionAtBeat(Command const& cmd, Beats beats) -> CalChart::Degree
 {
     return std::visit([beats](auto arg) { return arg.MotionDirectionAtBeat(beats); }, cmd);
 }
 
-inline auto NumBeats(Command const& cmd) -> beats_t
+inline auto NumBeats(Command const& cmd) -> Beats
 {
     return std::visit([](auto arg) { return arg.NumBeats(); }, cmd);
 }
@@ -281,7 +281,7 @@ inline auto toOnlineViewerJSON(Command const& cmd) -> nlohmann::json
     return std::visit([](auto arg) { return arg.toOnlineViewerJSON(); }, cmd);
 }
 
-inline auto WithBeats(Command const& cmd, beats_t beats) -> Command
+inline auto WithBeats(Command const& cmd, Beats beats) -> Command
 {
     return std::visit([beats](auto arg) { return Command{ arg.WithBeats(beats) }; }, cmd);
 }
@@ -289,16 +289,16 @@ inline auto WithBeats(Command const& cmd, beats_t beats) -> Command
 class Commands {
 public:
     explicit Commands(std::vector<Command> const& commands);
-    [[nodiscard]] auto TotalBeats() const -> beats_t;
+    [[nodiscard]] auto TotalBeats() const -> Beats;
     // which command, beat for position/step and which command,beat for facing
-    [[nodiscard]] auto BeatToCommandOffsetAndBeat(beats_t beat) const -> std::pair<std::pair<size_t, beats_t>, std::pair<size_t, beats_t>>;
-    [[nodiscard]] auto MarcherInfoAtBeat(beats_t beat) const -> MarcherInfo;
+    [[nodiscard]] auto BeatToCommandOffsetAndBeat(Beats beat) const -> std::pair<std::pair<size_t, Beats>, std::pair<size_t, Beats>>;
+    [[nodiscard]] auto MarcherInfoAtBeat(Beats beat) const -> MarcherInfo;
     [[nodiscard]] auto GeneratePathToDraw(Coord::units endRadius) const -> std::vector<Draw::DrawCommand>;
     [[nodiscard]] auto toOnlineViewerJSON() const -> std::vector<nlohmann::json>;
 
 private:
     std::vector<Command> mCommands;
-    std::vector<beats_t> mRunningBeatCount;
+    std::vector<Beats> mRunningBeatCount;
 };
 
 }

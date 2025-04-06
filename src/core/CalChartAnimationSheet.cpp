@@ -41,8 +41,8 @@ namespace {
         requires(std::is_convertible_v<std::ranges::range_value_t<Range>, Command>)
     auto GetRunningBeats(Range&& range)
     {
-        auto allBeats = CalChart::Ranges::ToVector<beats_t>(GetBeatsPerCont(range));
-        auto running = std::vector<beats_t>(allBeats.size());
+        auto allBeats = CalChart::Ranges::ToVector<Beats>(GetBeatsPerCont(range));
+        auto running = std::vector<Beats>(allBeats.size());
         std::inclusive_scan(allBeats.begin(), allBeats.end(), running.begin());
         return running;
     }
@@ -65,12 +65,12 @@ Sheet::Sheet(std::string name, unsigned numBeats, std::vector<CompileResult> con
     mCollisions = FindAllCollisions();
 }
 
-auto Sheet::MarcherInfoAtBeat(size_t whichMarcher, beats_t beat) const -> MarcherInfo
+auto Sheet::MarcherInfoAtBeat(size_t whichMarcher, Beats beat) const -> MarcherInfo
 {
     return mCommands.at(whichMarcher).MarcherInfoAtBeat(beat);
 }
 
-auto Sheet::CollisionAtBeat(size_t whichMarcher, beats_t beat) const -> CalChart::Coord::CollisionType
+auto Sheet::CollisionAtBeat(size_t whichMarcher, Beats beat) const -> CalChart::Coord::CollisionType
 {
     if (auto where = mCollisions.find({ whichMarcher, beat }); where != mCollisions.end()) {
         return where->second;
@@ -78,15 +78,15 @@ auto Sheet::CollisionAtBeat(size_t whichMarcher, beats_t beat) const -> CalChart
     return Coord::CollisionType::none;
 }
 
-auto Sheet::GetAllBeatsWithCollisions() const -> std::set<beats_t>
+auto Sheet::GetAllBeatsWithCollisions() const -> std::set<Beats>
 {
-    return std::accumulate(mCollisions.begin(), mCollisions.end(), std::set<beats_t>{}, [](auto acc, auto item) {
+    return std::accumulate(mCollisions.begin(), mCollisions.end(), std::set<Beats>{}, [](auto acc, auto item) {
         acc.insert(std::get<1>(std::get<0>(item)));
         return acc;
     });
 }
 
-auto Sheet::GetAllMarchersWithCollisionAtBeat(beats_t beat) const -> CalChart::SelectionList
+auto Sheet::GetAllMarchersWithCollisionAtBeat(Beats beat) const -> CalChart::SelectionList
 {
     return std::accumulate(mCollisions.begin(), mCollisions.end(), CalChart::SelectionList{}, [beat](auto acc, auto item) {
         if (std::get<1>(std::get<0>(item)) == beat) {
@@ -129,9 +129,9 @@ namespace {
     }
 }
 
-auto Sheet::FindAllCollisions() const -> std::map<std::tuple<size_t, beats_t>, Coord::CollisionType>
+auto Sheet::FindAllCollisions() const -> std::map<std::tuple<size_t, Beats>, Coord::CollisionType>
 {
-    auto results = std::map<std::tuple<size_t, beats_t>, Coord::CollisionType>{};
+    auto results = std::map<std::tuple<size_t, Beats>, Coord::CollisionType>{};
     for (auto beat : std::views::iota(0U, GetNumBeats())) {
         auto allCollisions = Animate::FindAllCollisions(AllMarcherInfoAtBeat(beat) | std::views::transform([](auto info) { return info.mPosition; }));
         results = std::accumulate(allCollisions.begin(), allCollisions.end(), results, [beat](auto acc, auto item) {
@@ -143,7 +143,7 @@ auto Sheet::FindAllCollisions() const -> std::map<std::tuple<size_t, beats_t>, C
     return results;
 }
 
-auto Sheet::DebugAnimateInfoAtBeat(beats_t beat, bool ignoreCollision) const -> std::vector<std::string>
+auto Sheet::DebugAnimateInfoAtBeat(Beats beat, bool ignoreCollision) const -> std::vector<std::string>
 {
     return CalChart::Ranges::ToVector<std::string>(
         std::views::iota(0UL, mCommands.size()) | std::views::transform([this, beat, ignoreCollision](auto whichMarcher) {
@@ -174,7 +174,7 @@ namespace {
 
 }
 
-auto Sheet::AllAnimateInfoAtBeat(beats_t beat) const -> std::vector<Info>
+auto Sheet::AllAnimateInfoAtBeat(Beats beat) const -> std::vector<Info>
 {
     auto animates = CalChart::Ranges::ToVector<Info>(std::views::iota(0UL, mCommands.size()) | std::views::transform([this, beat](auto whichMarcher) -> Info {
         return {
@@ -198,8 +198,8 @@ namespace {
         requires(std::is_convertible_v<std::ranges::range_value_t<Range>, Sheet>)
     auto GetRunningBeats(Range&& range)
     {
-        auto allBeats = CalChart::Ranges::ToVector<beats_t>(GetBeatsPerSheet(range));
-        auto running = std::vector<beats_t>(allBeats.size());
+        auto allBeats = CalChart::Ranges::ToVector<Beats>(GetBeatsPerSheet(range));
+        auto running = std::vector<Beats>(allBeats.size());
         std::inclusive_scan(allBeats.begin(), allBeats.end(), running.begin());
         return running;
     }
@@ -212,7 +212,7 @@ Sheets::Sheets(std::vector<Sheet> const& sheets, std::vector<unsigned> const& sh
 {
 }
 
-auto Sheets::TotalBeats() const -> beats_t
+auto Sheets::TotalBeats() const -> Beats
 {
     if (mRunningBeatCount.empty()) {
         return 0;
@@ -220,7 +220,7 @@ auto Sheets::TotalBeats() const -> beats_t
     return mRunningBeatCount.back();
 }
 
-auto Sheets::BeatToSheetOffsetAndBeat(beats_t beat) const -> std::tuple<size_t, beats_t>
+auto Sheets::BeatToSheetOffsetAndBeat(Beats beat) const -> std::tuple<size_t, Beats>
 {
     auto where = std::ranges::find_if(mRunningBeatCount, [beat](auto thisBeat) { return beat < thisBeat; });
     if (where == mRunningBeatCount.end()) {
@@ -230,7 +230,7 @@ auto Sheets::BeatToSheetOffsetAndBeat(beats_t beat) const -> std::tuple<size_t, 
     return { index, beat - (*where - mSheets.at(index).GetNumBeats()) };
 }
 
-auto Sheets::MarcherInfoAtBeat(beats_t beat, int whichMarcher) const -> MarcherInfo
+auto Sheets::MarcherInfoAtBeat(Beats beat, int whichMarcher) const -> MarcherInfo
 {
     auto [which, newBeat] = BeatToSheetOffsetAndBeat(beat);
     if (which >= mSheets.size()) {
@@ -239,7 +239,7 @@ auto Sheets::MarcherInfoAtBeat(beats_t beat, int whichMarcher) const -> MarcherI
     return mSheets.at(which).MarcherInfoAtBeat(whichMarcher, newBeat);
 }
 
-auto Sheets::CollisionAtBeat(beats_t beat, int whichMarcher) const -> Coord::CollisionType
+auto Sheets::CollisionAtBeat(Beats beat, int whichMarcher) const -> Coord::CollisionType
 {
     // this is because Calchart-3.7 and earlier would skip the first beat for collision detection.
     if (beat == 0) {
@@ -252,7 +252,7 @@ auto Sheets::CollisionAtBeat(beats_t beat, int whichMarcher) const -> Coord::Col
     return mSheets.at(which).CollisionAtBeat(whichMarcher, newBeat);
 }
 
-auto Sheets::BeatHasCollision(beats_t beat) const -> bool
+auto Sheets::BeatHasCollision(Beats beat) const -> bool
 {
     auto [which, newBeat] = BeatToSheetOffsetAndBeat(beat);
     if (which >= mSheets.size()) {
@@ -261,7 +261,7 @@ auto Sheets::BeatHasCollision(beats_t beat) const -> bool
     return mSheets.at(which).GetAllBeatsWithCollisions().contains(beat);
 }
 
-auto Sheets::DebugAnimateInfoAtBeat(beats_t beat) const -> std::pair<std::string, std::vector<std::string>>
+auto Sheets::DebugAnimateInfoAtBeat(Beats beat) const -> std::pair<std::string, std::vector<std::string>>
 {
     auto [whichSheet, newBeat] = BeatToSheetOffsetAndBeat(beat);
     std::ostringstream output;
@@ -271,7 +271,7 @@ auto Sheets::DebugAnimateInfoAtBeat(beats_t beat) const -> std::pair<std::string
     return { output.str(), each };
 }
 
-auto Sheets::AllAnimateInfoAtBeat(beats_t whichBeat) const -> std::vector<Info>
+auto Sheets::AllAnimateInfoAtBeat(Beats whichBeat) const -> std::vector<Info>
 {
     auto [whichSheet, newBeat] = BeatToSheetOffsetAndBeat(whichBeat);
     return mSheets.at(whichSheet).AllAnimateInfoAtBeat(newBeat);

@@ -41,7 +41,7 @@ struct ParseErrorHandlers {
 
 using SelectionList = std::set<int>;
 
-using beats_t = unsigned;
+using Beats = unsigned;
 
 enum class MoveMode {
     Normal,
