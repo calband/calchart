@@ -81,6 +81,7 @@ public:
     void OnCmdSetMode(wxCommandEvent& event);
     void OnCmdPointPicker(wxCommandEvent& event);
     void OnCmdSelectAll(wxCommandEvent& event);
+    void OnCmdEditCurveAssignments(wxCommandEvent& event);
     void OnCmdAbout(wxCommandEvent& event);
     void OnCmdHelp(wxCommandEvent& event);
     void OnCmdAnimate(wxCommandEvent& event);

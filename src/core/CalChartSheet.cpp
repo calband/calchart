@@ -404,11 +404,20 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
         auto num = reader.Get<int32_t>();
         while (num--) {
             auto [curve, new_reader] = CreateCurve(reader);
-            sheet->mCurves.push_back(curve);
+            sheet->mCurves.push_back(std::pair<Curve, std::vector<MarcherIndex>>{ curve, {} });
             reader = new_reader;
         }
         if (reader.size() != 0) {
-            throw CC_FileException("Bad Background chunk", INGL_BACK);
+            throw CC_FileException("Bad curve chunk", INGL_BACK);
+        }
+    };
+    auto parse_INGL_CASS = [](Sheet* sheet, Reader reader) {
+        auto num = reader.Get<int32_t>();
+        for (auto which = 0; which < num; ++which) {
+            sheet->mCurves.at(which).second = reader.GetVector<uint32_t>();
+        }
+        if (reader.size() != 0) {
+            throw CC_FileException("Bad Curve Assignment chunk", INGL_BACK);
         }
     };
 
@@ -423,6 +432,7 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
               { INGL_PCNT, parse_INGL_PCNT },
               { INGL_BACK, parse_INGL_BACK },
               { INGL_CURV, parse_INGL_CURV },
+              { INGL_CASS, parse_INGL_CASS },
           };
 
     auto table = reader.ParseOutLabels();
@@ -432,6 +442,7 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
             the_parser->second(this, std::get<1>(i));
         }
     }
+    RepositionCurveMarchers();
 }
 
 auto Sheet::SerializeAllPoints() const -> std::vector<std::byte>
@@ -484,8 +495,19 @@ auto Sheet::SerializeCurves() const -> std::vector<std::byte>
 {
     std::vector<std::byte> result;
     Parser::Append(result, static_cast<uint32_t>(mCurves.size()));
-    for (auto&& curve : mCurves) {
+    for (auto&& [curve, marchers] : mCurves) {
         Parser::Append(result, curve.Serialize());
+    }
+    return result;
+}
+
+auto Sheet::SerializeCurveAssigments() const -> std::vector<std::byte>
+{
+    std::vector<std::byte> result;
+    Parser::Append(result, static_cast<uint32_t>(mCurves.size()));
+    for (auto&& [curve, marchers] : mCurves) {
+        Parser::Append(result, static_cast<uint32_t>(marchers.size()));
+        Parser::Append(result, marchers);
     }
     return result;
 }
@@ -521,6 +543,7 @@ auto Sheet::SerializeSheetData() const -> std::vector<std::byte>
 
     // Write Curves
     Parser::Append(result, Parser::Construct_block(INGL_CURV, SerializeCurves()));
+    Parser::Append(result, Parser::Construct_block(INGL_CASS, SerializeCurveAssigments()));
 
     return result;
 }
@@ -552,7 +575,7 @@ auto Sheet::FindMarcher(Coord where, Coord::units searchBound, unsigned ref) con
 auto Sheet::FindCurveControlPoint(Coord where, Coord::units searchBound) const -> std::optional<std::tuple<size_t, size_t>>
 {
     for (auto&& [whichCurve, curve] : CalChart::Ranges::enumerate_view(mCurves)) {
-        auto&& points = curve.GetControlPoints();
+        auto&& points = curve.first.GetControlPoints();
         if (auto iter = std::find_if(points.begin(), points.end(), [where, searchBound](auto point) {
                 return ((where.x + searchBound) >= point.x) && ((where.x - searchBound) <= point.x) && ((where.y + searchBound) >= point.y) && ((where.y - searchBound) <= point.y);
             });
@@ -563,15 +586,54 @@ auto Sheet::FindCurveControlPoint(Coord where, Coord::units searchBound) const -
     return std::nullopt;
 }
 
-auto Sheet::FindCurve(Coord where, Coord::units searchBound) const -> std::optional<std::tuple<size_t, size_t>>
+auto Sheet::FindCurve(Coord where, Coord::units searchBound) const -> std::optional<std::tuple<size_t, size_t, double>>
 {
     for (auto&& [whichCurve, curve] : CalChart::Ranges::enumerate_view(mCurves)) {
-        auto result = curve.LowerControlPointOnLine(where, searchBound);
+        auto result = curve.first.LowerControlPointOnLine(where, searchBound);
         if (result.has_value()) {
-            return std::tuple<size_t, size_t>{ whichCurve, *result };
+            return std::tuple<size_t, size_t, double>{ whichCurve, std::get<0>(*result), std::get<1>(*result) };
         }
     }
     return std::nullopt;
+}
+
+auto Sheet::GetCurveAssignments() const -> std::vector<std::vector<MarcherIndex>>
+{
+    return CalChart::Ranges::ToVector<std::vector<MarcherIndex>>(mCurves | std::views::transform([](auto&& curve) { return curve.second; }));
+}
+
+void Sheet::SetCurveAssignment(std::vector<std::vector<MarcherIndex>> curveAssignments)
+{
+    for (auto&& [which, marchers] : CalChart::Ranges::enumerate_view(curveAssignments)) {
+        mCurves.at(which).second = marchers;
+    }
+    RepositionCurveMarchers();
+}
+
+auto Sheet::GetCurveAssignmentsWithNewAssignments(size_t whichCurve, std::vector<MarcherIndex> whichMarchers) const -> std::vector<std::vector<MarcherIndex>>
+{
+    // first get all the marchers assigned to curves
+    auto curveAssignments = GetCurveAssignments();
+    for (auto& assignment : curveAssignments) {
+        auto begin = assignment.begin();
+        auto end = assignment.end();
+        for (auto marcher : whichMarchers) {
+            end = std::remove(begin, end, marcher);
+        }
+        assignment.erase(end, assignment.end());
+    }
+    // go through and remove and of the ones we're adding to curves
+    curveAssignments.at(whichCurve) = whichMarchers;
+    return curveAssignments;
+}
+
+void Sheet::UnassignMarchersFromAnyCurve(std::vector<MarcherIndex> marchers)
+{
+    for (auto marcher : marchers) {
+        for (auto& [curve, marchers] : mCurves) {
+            marchers.erase(std::remove(marchers.begin(), marchers.end(), marcher), marchers.end());
+        }
+    }
 }
 
 auto Sheet::MakeSelectPointsBySymbol(SYMBOL_TYPE i) const -> SelectionList
@@ -605,16 +667,32 @@ auto Sheet::NewNumPointsPositions(int num, int columns, Coord new_march_position
 
 void Sheet::DeletePoints(SelectionList const& sl)
 {
+    UnassignMarchersFromAnyCurve({ sl.begin(), sl.end() });
     for (auto iter = sl.rbegin(); iter != sl.rend(); ++iter) {
         mPoints.erase(mPoints.begin() + *iter);
     }
+    RepositionCurveMarchers();
 }
 
-void Sheet::AddCurve(Curve const& curve, size_t index) { mCurves.insert(mCurves.begin() + index, curve); }
-void Sheet::RemoveCurve(size_t index) { mCurves.erase(mCurves.cbegin() + index); }
-void Sheet::ReplaceCurve(Curve const& curve, size_t index) { mCurves.at(index) = curve; }
-auto Sheet::GetCurve(size_t index) const -> Curve { return mCurves.at(index); }
-auto Sheet::GetCurvesSize() const -> size_t { return mCurves.size(); }
+// modifying curves means reseting all the points
+void Sheet::AddCurve(Curve const& curve, size_t index)
+{
+    mCurves.insert(mCurves.begin() + index, std::pair<Curve, std::vector<MarcherIndex>>{ curve, {} });
+}
+
+void Sheet::RemoveCurve(size_t index)
+{
+    mCurves.erase(mCurves.cbegin() + index);
+}
+
+void Sheet::ReplaceCurve(Curve const& curve, size_t index)
+{
+    mCurves.at(index).first = curve;
+    RepositionCurveMarchers();
+}
+
+auto Sheet::GetCurve(size_t index) const -> Curve { return mCurves.at(index).first; }
+auto Sheet::GetNumberCurves() const -> size_t { return mCurves.size(); }
 
 auto Sheet::RemapPoints(std::vector<MarcherIndex> const& table) const -> std::vector<Point>
 {
@@ -666,20 +744,20 @@ auto Sheet::GetMarcherPosition(MarcherIndex i, unsigned ref) const -> Coord
     return mPoints[i].GetPos(ref);
 }
 
-// Set position of point and all refs
-void Sheet::SetAllPositions(Coord val, MarcherIndex i)
-{
-    for (unsigned j = 0; j <= Point::kNumRefPoints; j++) {
-        mPoints[i].SetPos(val, j);
-    }
-}
-
 // Set position of point
 void Sheet::SetPosition(Coord val, MarcherIndex i, unsigned ref)
 {
-    unsigned j;
+    SetPositionHelper(val, i, ref);
     if (ref == 0) {
-        for (j = 1; j <= Point::kNumRefPoints; j++) {
+        UnassignMarchersFromAnyCurve({ i });
+        RepositionCurveMarchers();
+    }
+}
+
+void Sheet::SetPositionHelper(Coord val, MarcherIndex i, unsigned ref)
+{
+    if (ref == 0) {
+        for (auto j = 1; j <= Point::kNumRefPoints; j++) {
             if (mPoints[i].GetPos(j) == mPoints[i].GetPos(0)) {
                 mPoints[i].SetPos(val, j);
             }
@@ -854,12 +932,12 @@ auto Sheet::GenerateSheetElements(CalChart::Configuration const& config, Selecti
     CalChart::append(drawCmds, GenerateSheetMarcherDrawCommands(config, selected, marcherLabels, *this, referencePoint, GetMarcherColors(false, false)));
 
     for (auto&& [which, curve] : CalChart::Ranges::enumerate_view(mCurves)) {
-        CalChart::append(drawCmds, GenerateCurve(config, curve, which));
+        CalChart::append(drawCmds, GenerateCurve(config, curve.first, which));
     }
     return drawCmds;
 }
 
-void Sheet::SetPoints(std::vector<Point> const& points) { mPoints = points; }
+void Sheet::SetMarchers(std::vector<Point> const& points) { mPoints = points; }
 
 void Sheet::AddBackgroundImage(ImageInfo const& image, size_t where)
 {
@@ -909,4 +987,14 @@ auto Sheet::ShouldPrintLandscape() const -> bool
     auto boundingBox = GetMarcherBoundingBox(GetAllMarchers());
     return (boundingBox.second.x - boundingBox.first.x) > CalChart::Int2CoordUnits(CalChart::kFieldStepSizeNorthSouth[0]);
 }
+
+void Sheet::RepositionCurveMarchers()
+{
+    for (auto&& [curve, marchers] : mCurves) {
+        for (auto&& [where, marcher] : CalChart::Ranges::zip_view(curve.GetPointsOnLine(marchers.size()), marchers)) {
+            SetPositionHelper(where, marcher);
+        }
+    }
+}
+
 }

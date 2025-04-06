@@ -67,6 +67,7 @@ private:
     [[nodiscard]] auto SerializePrintContinuityData() const -> std::vector<std::byte>;
     [[nodiscard]] auto SerializeBackgroundImageInfo() const -> std::vector<std::byte>;
     [[nodiscard]] auto SerializeCurves() const -> std::vector<std::byte>;
+    [[nodiscard]] auto SerializeCurveAssigments() const -> std::vector<std::byte>;
     [[nodiscard]] auto SerializeSheetData() const -> std::vector<std::byte>;
 
 public:
@@ -109,10 +110,9 @@ public:
     [[nodiscard]] auto GetSymbols() const -> std::vector<SYMBOL_TYPE>;
     void SetPoints(std::vector<Point> const& points);
     [[nodiscard]] auto FindMarcher(Coord where, Coord::units searchBound, unsigned ref = 0) const -> std::optional<MarcherIndex>;
-    [[nodiscard]] auto FindCurveControlPoint(Coord where, Coord::units searchBound) const -> std::optional<std::tuple<size_t, size_t>>;
-    [[nodiscard]] auto FindCurve(Coord where, Coord::units searchBound) const -> std::optional<std::tuple<size_t, size_t>>;
     [[nodiscard]] auto RemapPoints(std::vector<MarcherIndex> const& table) const -> std::vector<Point>;
     [[nodiscard]] auto GetMarcherPosition(MarcherIndex i, unsigned ref = 0) const -> Coord;
+    void SetMarchers(std::vector<Point> const& points);
     void SetAllPositions(Coord val, unsigned i);
     void SetPosition(Coord val, MarcherIndex i, unsigned ref = 0);
     void SetMarcherFlip(MarcherIndex i, bool val);
@@ -126,7 +126,17 @@ public:
     void RemoveCurve(size_t index);
     void ReplaceCurve(Curve const& curve, size_t index);
     [[nodiscard]] auto GetCurve(size_t index) const -> Curve;
-    [[nodiscard]] auto GetCurvesSize() const -> size_t;
+    [[nodiscard]] auto GetNumberCurves() const -> size_t;
+    [[nodiscard]] auto FindCurveControlPoint(Coord where, Coord::units searchBound) const -> std::optional<std::tuple<size_t, size_t>>;
+    [[nodiscard]] auto FindCurve(Coord where, Coord::units searchBound) const -> std::optional<std::tuple<size_t, size_t, double>>;
+    // Curve assignemnts: the idea is some marchers are assigned to curves.  The sheet will automatically determine
+    // where they should be.  You can get and set all the curve assignements.
+    // But if you want to assign a group of marchers to a curve, you ask first what would be the new assignments
+    // if you were to make that change (because some marchers will be moved from 1 curve to another if you do so)
+    // and then you would set the sheet with that result.
+    [[nodiscard]] auto GetCurveAssignments() const -> std::vector<std::vector<MarcherIndex>>;
+    void SetCurveAssignment(std::vector<std::vector<MarcherIndex>> curveAssignments);
+    [[nodiscard]] auto GetCurveAssignmentsWithNewAssignments(size_t whichCurve, std::vector<MarcherIndex> whichMarchers) const -> std::vector<std::vector<MarcherIndex>>;
 
     // titles
     [[nodiscard]] auto GetName() const -> std::string;
@@ -180,7 +190,11 @@ private:
     std::vector<Point> mPoints;
     std::string mName;
     std::vector<ImageInfo> mBackgroundImages;
-    std::vector<Curve> mCurves;
+    std::vector<std::pair<Curve, std::vector<MarcherIndex>>> mCurves; // curves and the points assigned to them.
+
+    void RepositionCurveMarchers();
+    void SetPositionHelper(Coord val, MarcherIndex i, unsigned ref = 0);
+    void UnassignMarchersFromAnyCurve(std::vector<MarcherIndex> marchers);
 };
 
 }

@@ -1,5 +1,6 @@
 #include "CalChartFileFormat.h"
 #include "CalChartShapes.h"
+#include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers, readability-function-cognitive-complexity)
@@ -530,7 +531,7 @@ TEST_CASE("Shape_Curve", "CalChartShapeTests")
     //             [](CalChart::Draw::DrawItems item) {
     //                 std::visit(
     //                     CalChart::overloaded{
-    //                         [](CalChart::Draw::Line line) { std::cout << "CalChart::Draw::Line{ Coord{ " << line.c1.x << ", " << line.c1.y << "}, Coord{ " << line.c2.x << ", " << line.c2.y << "} },\n"; },
+    //                         [](CalChart::Draw::Line line) { std::cout << "CalChart::Draw::Line{ CalChart::Coord{ " << line.c1.x << ", " << line.c1.y << "}, CalChart::Coord{ " << line.c2.x << ", " << line.c2.y << "} },\n"; },
     //                         [](auto&&) {},
     //                     },
     //                     item);
@@ -572,6 +573,19 @@ TEST_CASE("Shape_Curve", "CalChartShapeTests")
         CalChart::Draw::Line{ CalChart::Coord{ 466, 35 }, CalChart::Coord{ 500, 10 } },
     };
     CHECK(uut_draw == drawCommands);
+
+    {
+        auto found = uut.LowerControlPointOnLine({ 10, 10 }, 1);
+        CHECK(found.has_value());
+        REQUIRE(std::get<0>(*found) == 0);
+        REQUIRE(std::get<1>(*found) == Catch::Approx(0.0));
+    }
+    {
+        auto found = uut.LowerControlPointOnLine({ 159, 254 }, 1);
+        CHECK(found.has_value());
+        REQUIRE(std::get<0>(*found) == 2);
+        REQUIRE(std::get<1>(*found) == Catch::Approx(0.722436));
+    }
 }
 
 TEST_CASE("Shape_Curve_SerializeDeserialize", "CalChartShapeTests")

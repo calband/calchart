@@ -21,6 +21,7 @@
 
 #include <cstring>
 #include <fstream>
+#include <ranges>
 #include <sstream>
 
 #include "CalChartFrame.h"
@@ -42,6 +43,7 @@
 #include "CalChartView.h"
 #include "ColorPalette.h"
 #include "ContinuityBrowser.h"
+#include "EditCurveAssignments.hpp"
 #include "FieldCanvas.h"
 #include "FieldControlsToolBar.h"
 #include "FieldThumbnailBrowser.h"
@@ -106,6 +108,7 @@ EVT_MENU(CALCHART__SETUPINSTRUMENTS, CalChartFrame::OnCmdSetupInstruments)
 EVT_MENU(CALCHART__SETMODE, CalChartFrame::OnCmdSetMode)
 EVT_MENU(CALCHART__POINTPICKER, CalChartFrame::OnCmdPointPicker)
 EVT_MENU(CALCHART__SELECT_ALL, CalChartFrame::OnCmdSelectAll)
+EVT_MENU(CALCHART__EDITCURVEASSIGNMENTS, CalChartFrame::OnCmdEditCurveAssignments)
 EVT_MENU(wxID_ABOUT, CalChartFrame::OnCmdAbout)
 EVT_MENU(wxID_HELP, CalChartFrame::OnCmdHelp)
 EVT_MENU(CALCHART__ShowBackgroundImages, CalChartFrame::OnCmd_ShowBackgroundImages)
@@ -262,6 +265,8 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
     edit_menu->AppendSeparator();
     edit_menu->Append(CALCHART__POINTPICKER, "Point Picker...\tCTRL-SHIFT-A", "Point Picker");
     edit_menu->Append(CALCHART__SELECT_ALL, "Select &All...\tCTRL-A", "Select All Points");
+    edit_menu->AppendSeparator();
+    edit_menu->Append(CALCHART__EDITCURVEASSIGNMENTS, "Edit Curve Assignments...", "Edit Curve Assignments");
     edit_menu->AppendSeparator();
     edit_menu->Append(CALCHART__SET_SHEET_TITLE, "Set Sheet &Title...\tCTRL-T", "Change the title of this stuntsheet");
     edit_menu->Append(CALCHART__SET_BEATS, "Set &Beats...\tCTRL-B", "Change the number of beats for this stuntsheet");
@@ -726,6 +731,35 @@ void CalChartFrame::OnCmdPointPicker(wxCommandEvent&)
     if (dialog.ShowModal() == wxID_OK) {
         auto selections = dialog.GetMarchersSelected();
         GetShow()->SetSelectionList(GetShow()->MakeSelectByLabels(selections));
+    }
+}
+
+void CalChartFrame::OnCmdEditCurveAssignments(wxCommandEvent&)
+{
+    if (!GetShow()) {
+        return;
+    }
+    auto numberCurves = GetShow()->GetCurrentNumberCurves();
+    if (numberCurves == 0) {
+        wxMessageBox("Sorry, no curves available to edit.", "No Curves", wxOK | wxICON_INFORMATION);
+        return;
+    }
+    auto whichCurve = 0;
+    if (numberCurves > 1) {
+        auto curves = CalChart::Ranges::ToVector<wxString>(std::views::iota(0ul, numberCurves) | std::views::transform([](int i) -> wxString { return std::string("Curve ") + std::to_string(i); }));
+
+        whichCurve = wxGetSingleChoiceIndex(
+            "Which curve would you like to edit?",
+            "Edit Curve Assignments",
+            static_cast<int>(numberCurves),
+            curves.data());
+        if (whichCurve == wxNOT_FOUND) {
+            return;
+        }
+    }
+    EditCurveAssignments dialog(this, *GetShow(), whichCurve);
+    if (dialog.ShowModal() == wxID_OK) {
+        GetFieldView()->DoAssignPointsToCurve(whichCurve, GetShow()->GetPointsFromLabels(dialog.GetCurveAssignment()));
     }
 }
 

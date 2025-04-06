@@ -435,7 +435,7 @@ void Show::SetNumPoints(std::vector<std::pair<std::string, std::string>> const& 
 {
     for (auto sht = GetSheetBegin(); sht != GetSheetEnd(); ++sht) {
         auto pts = sht->NewNumPointsPositions(static_cast<int>(labelsAndInstruments.size()), columns, new_march_position);
-        sht->SetPoints(pts);
+        sht->SetMarchers(pts);
     }
     SetPointLabelAndInstrument(labelsAndInstruments);
 }
@@ -553,6 +553,27 @@ auto Show::GetPointsSymbol() const -> std::vector<SYMBOL_TYPE>
 auto Show::GetPointsSymbol(CalChart::SelectionList const& sl) const -> std::vector<SYMBOL_TYPE>
 {
     return CalChart::Ranges::ToVector<SYMBOL_TYPE>(sl | std::views::transform([this](auto&& i) { return GetPointSymbol(i); }));
+}
+
+auto Show::GetPointFromLabel(std::string const& label) const -> std::optional<CalChart::MarcherIndex>
+{
+    if (auto it = std::find_if(
+            mDotLabelAndInstrument.begin(),
+            mDotLabelAndInstrument.end(),
+            [&label](const auto& pair) { return pair.first == label; });
+        it != mDotLabelAndInstrument.end()) {
+        return static_cast<CalChart::MarcherIndex>(std::distance(mDotLabelAndInstrument.begin(), it));
+    }
+    return std::nullopt;
+}
+
+auto Show::GetPointsFromLabels(std::vector<std::string> const& labels) const -> std::vector<CalChart::MarcherIndex>
+{
+    return CalChart::Ranges::ToVector<CalChart::MarcherIndex>(
+        labels
+        | std::views::transform([this](const std::string& label) { return GetPointFromLabel(label); })
+        | std::views::filter([](const std::optional<int>& opt) { return opt.has_value(); })
+        | std::views::transform([](const std::optional<int>& opt) { return *opt; }));
 }
 
 auto Show::AlreadyHasPrintContinuity() const -> bool
@@ -774,7 +795,7 @@ auto Show::Create_SetupMarchersCommand(std::vector<std::pair<std::string, std::s
     }
     auto reaction = [old_labels, old_points](Show& show) {
         for (auto i = 0ul; i < show.mSheets.size(); ++i) {
-            show.mSheets.at(i).SetPoints(old_points.at(i));
+            show.mSheets.at(i).SetMarchers(old_points.at(i));
         }
         show.SetPointLabelAndInstrument(old_labels);
     };
@@ -837,7 +858,7 @@ auto Show::Create_ApplyRelabelMapping(int sheet_num_first, std::vector<MarcherIn
     auto action = [sheet_num_first, mapping](Show& show) {
         auto s = show.GetNthSheet(sheet_num_first);
         while (s != show.GetSheetEnd()) {
-            s->SetPoints(s->RemapPoints(mapping));
+            s->SetMarchers(s->RemapPoints(mapping));
             ++s;
         }
     };
@@ -845,7 +866,7 @@ auto Show::Create_ApplyRelabelMapping(int sheet_num_first, std::vector<MarcherIn
         auto i = 0;
         auto s = show.GetNthSheet(sheet_num_first);
         while (s != show.GetSheetEnd()) {
-            s->SetPoints(current_pos.at(i++));
+            s->SetMarchers(current_pos.at(i++));
             ++s;
         }
     };
@@ -883,17 +904,59 @@ auto Show::Create_MovePointsCommand(int whichSheet, MarcherToPosition const& new
     for (auto&& index : new_positions) {
         original_positions[index.first] = sheet->GetMarcherPosition(index.first, ref);
     }
+    auto originalCurves = sheet->GetCurveAssignments();
+
     auto action = [sheet_num = whichSheet, new_positions, ref](Show& show) {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : new_positions) {
             sheet->SetPosition(i.second, i.first, ref);
         }
     };
-    auto reaction = [sheet_num = whichSheet, original_positions, ref](Show& show) {
+    auto reaction = [sheet_num = whichSheet, original_positions, ref, originalCurves](Show& show) {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : original_positions) {
             sheet->SetPosition(i.second, i.first, ref);
         }
+        sheet->SetCurveAssignment(originalCurves);
+    };
+    return { action, reaction };
+}
+
+namespace {
+    auto found(MarcherIndex marcher, std::vector<std::vector<MarcherIndex>> locations)
+    {
+        for (auto&& location : locations) {
+            if (std::find(location.begin(), location.end(), marcher) != location.end()) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+Show_command_pair Show::Create_AssignPointsToCurve(size_t whichCurve, std::vector<MarcherIndex> whichMarchers)
+{
+    auto whichSheet = GetCurrentSheetNum();
+    auto sheet = GetNthSheet(whichSheet);
+    std::map<MarcherIndex, Coord> originalPositions;
+    auto originalCurves = sheet->GetCurveAssignments();
+
+    for (auto&& index : whichMarchers) {
+        if (!found(index, originalCurves)) {
+            originalPositions[index] = sheet->GetMarcherPosition(index);
+        }
+    }
+    auto newAssignments = sheet->GetCurveAssignmentsWithNewAssignments(whichCurve, whichMarchers);
+
+    auto action = [whichSheet, newAssignments](Show& show) {
+        show.GetNthSheet(whichSheet)->SetCurveAssignment(newAssignments);
+    };
+    auto reaction = [whichSheet, originalPositions, originalCurves](Show& show) {
+        auto sheet = show.GetNthSheet(whichSheet);
+        for (auto&& [whichMarcher, pos] : originalPositions) {
+            sheet->SetPosition(pos, whichMarcher);
+        }
+        sheet->SetCurveAssignment(originalCurves);
     };
     return { action, reaction };
 }
@@ -912,7 +975,7 @@ auto Show::Create_DeletePointsCommand() const -> Show_command_pair
     }
     auto reaction = [old_labels, old_points](Show& show) {
         for (auto i = 0ul; i < show.mSheets.size(); ++i) {
-            show.mSheets.at(i).SetPoints(old_points.at(i));
+            show.mSheets.at(i).SetMarchers(old_points.at(i));
         }
         show.SetPointLabelAndInstrument(old_labels);
     };
@@ -1129,7 +1192,7 @@ auto Show::Create_MoveBackgroundImageCommand(int which, int left, int top, int s
 
 auto Show::Create_AddSheetCurveCommand(CalChart::Curve const& curve) const -> Show_command_pair
 {
-    auto newIndex = GetCurrentSheet()->GetCurvesSize();
+    auto newIndex = GetCurrentSheet()->GetNumberCurves();
     auto action = [sheet_num = mSheetNum, curve, newIndex](Show& show) {
         show.GetNthSheet(sheet_num)->AddCurve(curve, newIndex);
     };
@@ -1154,11 +1217,13 @@ auto Show::Create_ReplaceSheetCurveCommand(CalChart::Curve const& curve, int whi
 auto Show::Create_RemoveSheetCurveCommand(int whichCurve) const -> Show_command_pair
 {
     auto oldCurve = GetCurrentSheet()->GetCurve(whichCurve);
+    auto oldAssignments = GetCurrentSheet()->GetCurveAssignments();
     auto action = [sheet_num = mSheetNum, whichCurve](Show& show) {
         show.GetNthSheet(sheet_num)->RemoveCurve(whichCurve);
     };
-    auto reaction = [sheet_num = mSheetNum, oldCurve, whichCurve](Show& show) {
+    auto reaction = [sheet_num = mSheetNum, oldCurve, whichCurve, oldAssignments](Show& show) {
         show.GetNthSheet(sheet_num)->AddCurve(oldCurve, whichCurve);
+        show.GetNthSheet(sheet_num)->SetCurveAssignment(oldAssignments);
     };
     return { action, reaction };
 }
