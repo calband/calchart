@@ -97,6 +97,7 @@ public:
     [[nodiscard]] auto Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string>> const& data) const -> Show_command_pair;
     [[nodiscard]] auto Create_MovePointsCommand(MarcherToPosition const& new_positions, int ref) const -> Show_command_pair;
     [[nodiscard]] auto Create_MovePointsCommand(int whichSheet, MarcherToPosition const& new_positions, int ref) const -> Show_command_pair;
+    [[nodiscard]] auto Create_AssignPointsToCurve(size_t whichCurve, std::vector<MarcherIndex> whichMarchers) -> Show_command_pair;
     [[nodiscard]] auto Create_DeletePointsCommand() const -> Show_command_pair;
     [[nodiscard]] auto Create_RotatePointPositionsCommand(int rotateAmount, int ref) const -> Show_command_pair;
     [[nodiscard]] auto Create_ResetReferencePointToRef0(int ref) const -> Show_command_pair;
@@ -135,6 +136,8 @@ public:
     [[nodiscard]] auto GetPointSymbol(std::string const& label) const -> std::optional<SYMBOL_TYPE>;
     [[nodiscard]] auto GetPointsSymbol() const -> std::vector<SYMBOL_TYPE>;
     [[nodiscard]] auto GetPointsSymbol(CalChart::SelectionList const& sl) const -> std::vector<SYMBOL_TYPE>;
+    [[nodiscard]] auto GetPointFromLabel(std::string const& label) const -> std::optional<CalChart::MarcherIndex>;
+    [[nodiscard]] auto GetPointsFromLabels(std::vector<std::string> const& labels) const -> std::vector<CalChart::MarcherIndex>;
     [[nodiscard]] auto AlreadyHasPrintContinuity() const -> bool;
     [[nodiscard]] auto const& GetShowMode() const { return mMode; }
 

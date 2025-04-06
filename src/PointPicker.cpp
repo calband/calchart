@@ -88,7 +88,7 @@ PointPicker::PointPicker(wxWindow* parent, CalChartDoc const& show, CalChart::Se
                     EndModal(wxID_OK);
                 }),
         },
-        wxUI::ListBox{ show.GetPointsLabel() }
+        wxUI::ListBox{ labels }
             .withStyle(wxLB_EXTENDED)
             .withSize(wxSize(50, 250))
             .withProxy(mList)

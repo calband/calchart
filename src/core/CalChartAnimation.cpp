@@ -21,12 +21,9 @@
 */
 
 #include "CalChartAnimation.h"
-#include "CalChartAnimationCommand.h"
 #include "CalChartAnimationCompile.h"
-#include "CalChartAnimationErrors.h"
 #include "CalChartAnimationSheet.h"
 #include "CalChartConfiguration.h"
-#include "CalChartContinuity.h"
 #include "CalChartMeasure.h"
 #include "CalChartRanges.h"
 #include "CalChartSheet.h"

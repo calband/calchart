@@ -235,6 +235,7 @@ constexpr auto INGL_EVCT = Make4CharWord('E', 'V', 'C', 'T');
 constexpr auto INGL_PCNT = Make4CharWord('P', 'C', 'N', 'T');
 constexpr auto INGL_BACK = Make4CharWord('B', 'A', 'C', 'K');
 constexpr auto INGL_CURV = Make4CharWord('C', 'U', 'R', 'V');
+constexpr auto INGL_CASS = Make4CharWord('C', 'A', 'S', 'S');
 constexpr auto INGL_PNTS = Make4CharWord('P', 'N', 'T', 'S');
 constexpr auto INGL_PONT = Make4CharWord('P', 'O', 'N', 'T');
 constexpr auto INGL_END = Make4CharWord('E', 'N', 'D', ' ');

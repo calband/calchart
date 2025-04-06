@@ -76,6 +76,7 @@ public:
     void OnSetupInstruments();
     void OnPointPicker();
     void OnSelectAll();
+    void OnEditCurveAssignments();
     void OnCmdAbout(wxCommandEvent& event);
     void OnCmdHelp(wxCommandEvent& event);
 
