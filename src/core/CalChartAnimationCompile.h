@@ -69,7 +69,7 @@ struct AnimationData {
     unsigned whichMarcher;
     Point marcherPosition;
     std::optional<Coord> endPosition;
-    beats_t numBeats;
+    Beats numBeats;
     bool isLastAnimationSheet;
 };
 

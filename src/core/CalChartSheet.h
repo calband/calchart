@@ -97,7 +97,7 @@ public:
 
     // beats
     [[nodiscard]] auto GetBeats() const { return mBeats; }
-    void SetBeats(beats_t b) { mBeats = b; }
+    void SetBeats(Beats b) { mBeats = b; }
     [[nodiscard]] auto IsInAnimation() const { return (GetBeats() != 0); }
 
     // Marchers
@@ -176,7 +176,7 @@ public:
 private:
     std::vector<Continuity> mAnimationContinuity;
     PrintContinuity mPrintableContinuity;
-    beats_t mBeats;
+    Beats mBeats;
     std::vector<Point> mPoints;
     std::string mName;
     std::vector<ImageInfo> mBackgroundImages;

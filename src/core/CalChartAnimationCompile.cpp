@@ -32,7 +32,7 @@ struct CompileState : public Compile {
         : CompileState(data.whichMarcher, data.marcherPosition, data.numBeats, data.endPosition, variablesStates)
     {
     }
-    CompileState(unsigned whichMarcher, Point point, beats_t beats, std::optional<Coord> endPosition, Variables& variablesStates);
+    CompileState(unsigned whichMarcher, Point point, Beats beats, std::optional<Coord> endPosition, Variables& variablesStates);
 
     [[nodiscard]] auto Append(Command cmd) -> bool override;
     void RegisterError(Error err) const override { mErrors.insert(err); }
@@ -104,7 +104,7 @@ auto CreateCompileResult(
     return ac.GetCommands();
 }
 
-CompileState::CompileState(unsigned whichMarcher, Point point, beats_t beats, std::optional<Coord> endPosition, Variables& variablesStates)
+CompileState::CompileState(unsigned whichMarcher, Point point, Beats beats, std::optional<Coord> endPosition, Variables& variablesStates)
     : mWhichMarcher(whichMarcher)
     , mPoint{ point }
     , mWhichPos(mPoint.GetPos(0))

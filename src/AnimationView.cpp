@@ -185,7 +185,7 @@ void AnimationView::NextBeat()
     }
 }
 
-void AnimationView::GotoTotalBeat(CalChart::beats_t whichBeat)
+void AnimationView::GotoTotalBeat(CalChart::Beats whichBeat)
 {
     mCurrentBeat = whichBeat;
     RefreshFrame();

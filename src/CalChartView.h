@@ -90,17 +90,17 @@ public:
     [[nodiscard]] auto GetPrintNumber() const { return mShow->GetPrintNumber(); }
     [[nodiscard]] auto GetRawPrintContinuity() const { return mShow->GetRawPrintContinuity(); }
     [[nodiscard]] auto GetPrintContinuity() const { return mShow->GetPrintContinuity(); }
-    [[nodiscard]] auto GetAnimationInfo(CalChart::beats_t whichBeat, int which) const -> std::optional<CalChart::Animate::Info>;
-    [[nodiscard]] auto GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::beats_t whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>;
+    [[nodiscard]] auto GetAnimationInfo(CalChart::Beats whichBeat, int which) const -> std::optional<CalChart::Animate::Info>;
+    [[nodiscard]] auto GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::Beats whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>;
     [[nodiscard]] auto GetAnimationErrors() const -> std::vector<CalChart::Animate::Errors>;
     [[nodiscard]] auto GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>;
-    [[nodiscard]] auto GetTotalNumberAnimationBeats() const -> std::optional<CalChart::beats_t>;
-    [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
+    [[nodiscard]] auto GetTotalNumberAnimationBeats() const -> std::optional<CalChart::Beats>;
+    [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beats whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
 
     [[nodiscard]] auto GetContinuities() const { return mShow->GetContinuities(); }
     [[nodiscard]] auto ContinuitiesInUse() const { return mShow->ContinuitiesInUse(); }
-    [[nodiscard]] auto BeatHasCollision(CalChart::beats_t whichBeat) const -> bool;
-    [[nodiscard]] auto GetAnimationBeatForCurrentSheet() const -> CalChart::beats_t;
+    [[nodiscard]] auto BeatHasCollision(CalChart::Beats whichBeat) const -> bool;
+    [[nodiscard]] auto GetAnimationBeatForCurrentSheet() const -> CalChart::Beats;
     [[nodiscard]] auto ClipPositionToShowMode(CalChart::Coord const& pos) const { return mShow->GetShowMode().ClipPosition(pos); }
 
     ///// Change show attributes /////
@@ -139,7 +139,7 @@ public:
     [[nodiscard]] auto GeneratePhatomPointsDrawCommands(std::map<int, CalChart::Coord> const& positions) const -> std::vector<CalChart::Draw::DrawCommand>;
     [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands() const { return mShow->GenerateFieldWithMarchersDrawCommands(); }
     [[nodiscard]] auto GenerateAnimationDrawCommands(
-        CalChart::beats_t whichBeat,
+        CalChart::Beats whichBeat,
         bool drawCollisionWarning,
         std::optional<bool> onBeat,
         CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>;

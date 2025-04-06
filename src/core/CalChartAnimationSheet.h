@@ -55,17 +55,17 @@ public:
     [[nodiscard]] auto GetName() const { return mName; }
     [[nodiscard]] auto GetNumBeats() const { return mNumBeats; }
 
-    [[nodiscard]] auto MarcherInfoAtBeat(size_t whichMarcher, beats_t beat) const -> MarcherInfo;
+    [[nodiscard]] auto MarcherInfoAtBeat(size_t whichMarcher, Beats beat) const -> MarcherInfo;
 
-    [[nodiscard]] auto AllMarcherInfoAtBeat(beats_t beat) const
+    [[nodiscard]] auto AllMarcherInfoAtBeat(Beats beat) const
     {
         return std::views::iota(0UL, mCommands.size()) | std::views::transform([this, beat](auto whichMarcher) {
             return MarcherInfoAtBeat(whichMarcher, beat);
         });
     }
 
-    [[nodiscard]] auto GetAllBeatsWithCollisions() const -> std::set<beats_t>;
-    [[nodiscard]] auto GetAllMarchersWithCollisionAtBeat(beats_t beat) const -> CalChart::SelectionList;
+    [[nodiscard]] auto GetAllBeatsWithCollisions() const -> std::set<Beats>;
+    [[nodiscard]] auto GetAllMarchersWithCollisionAtBeat(Beats beat) const -> CalChart::SelectionList;
     [[nodiscard]] auto GetAllMarchersWithCollisions() const -> CalChart::SelectionList
     {
         return std::accumulate(mCollisions.begin(), mCollisions.end(), CalChart::SelectionList{}, [](auto acc, auto item) {
@@ -73,7 +73,7 @@ public:
             return acc;
         });
     }
-    [[nodiscard]] auto CollisionAtBeat(size_t whichMarcher, beats_t beat) const -> Coord::CollisionType;
+    [[nodiscard]] auto CollisionAtBeat(size_t whichMarcher, Beats beat) const -> Coord::CollisionType;
     [[nodiscard]] auto GeneratePathToDraw(int whichMarcher, Coord::units endRadius) const -> std::vector<Draw::DrawCommand>
     {
         return mCommands.at(whichMarcher).GeneratePathToDraw(endRadius);
@@ -85,9 +85,9 @@ public:
     }
 
     [[nodiscard]] auto toOnlineViewerJSON() const -> std::vector<std::vector<nlohmann::json>>;
-    [[nodiscard]] auto DebugAnimateInfoAtBeat(beats_t beat, bool ignoreCollision) const -> std::vector<std::string>;
+    [[nodiscard]] auto DebugAnimateInfoAtBeat(Beats beat, bool ignoreCollision) const -> std::vector<std::string>;
 
-    [[nodiscard]] auto AllAnimateInfoAtBeat(beats_t beat) const -> std::vector<Info>;
+    [[nodiscard]] auto AllAnimateInfoAtBeat(Beats beat) const -> std::vector<Info>;
 
     [[nodiscard]] auto GetAnimationErrors() const
     {
@@ -95,11 +95,11 @@ public:
     }
 
 private:
-    [[nodiscard]] auto FindAllCollisions() const -> std::map<std::tuple<size_t, beats_t>, Coord::CollisionType>;
+    [[nodiscard]] auto FindAllCollisions() const -> std::map<std::tuple<size_t, Beats>, Coord::CollisionType>;
     std::string mName;
-    beats_t mNumBeats;
+    Beats mNumBeats;
     std::vector<Commands> mCommands;
-    std::map<std::tuple<size_t, beats_t>, Coord::CollisionType> mCollisions;
+    std::map<std::tuple<size_t, Beats>, Coord::CollisionType> mCollisions;
     Errors mErrors;
 };
 
@@ -107,19 +107,19 @@ class Sheets {
 public:
     explicit Sheets(std::vector<Sheet> const& sheets, std::vector<unsigned> const& showSheetToAnimationSheet = {});
     [[nodiscard]] auto TotalSheets() const -> size_t { return mSheets.size(); }
-    [[nodiscard]] auto TotalBeats() const -> beats_t;
-    [[nodiscard]] auto BeatToSheetOffsetAndBeat(beats_t beat) const -> std::tuple<size_t, beats_t>;
-    [[nodiscard]] auto GetTotalNumberBeatsUpTo(int whichSheet) const -> beats_t
+    [[nodiscard]] auto TotalBeats() const -> Beats;
+    [[nodiscard]] auto BeatToSheetOffsetAndBeat(Beats beat) const -> std::tuple<size_t, Beats>;
+    [[nodiscard]] auto GetTotalNumberBeatsUpTo(int whichSheet) const -> Beats
     {
         if (whichSheet == 0) {
             return 0;
         }
         return mRunningBeatCount.at(whichSheet - 1);
     }
-    [[nodiscard]] auto BeatForSheet(int whichSheet) const -> beats_t { return mSheets.at(whichSheet).GetNumBeats(); }
-    [[nodiscard]] auto MarcherInfoAtBeat(beats_t beat, int whichMarcher) const -> MarcherInfo;
-    [[nodiscard]] auto CollisionAtBeat(beats_t beat, int whichMarcher) const -> Coord::CollisionType;
-    [[nodiscard]] auto AnimateInfoAtBeat(beats_t beat, int whichMarcher) const -> Info
+    [[nodiscard]] auto BeatForSheet(int whichSheet) const -> Beats { return mSheets.at(whichSheet).GetNumBeats(); }
+    [[nodiscard]] auto MarcherInfoAtBeat(Beats beat, int whichMarcher) const -> MarcherInfo;
+    [[nodiscard]] auto CollisionAtBeat(Beats beat, int whichMarcher) const -> Coord::CollisionType;
+    [[nodiscard]] auto AnimateInfoAtBeat(Beats beat, int whichMarcher) const -> Info
     {
         return {
             whichMarcher,
@@ -136,11 +136,11 @@ public:
             }));
     }
 
-    [[nodiscard]] auto AllAnimateInfoAtBeat(beats_t whichBeat) const -> std::vector<Info>;
+    [[nodiscard]] auto AllAnimateInfoAtBeat(Beats whichBeat) const -> std::vector<Info>;
 
-    [[nodiscard]] auto DebugAnimateInfoAtBeat(beats_t beat) const -> std::pair<std::string, std::vector<std::string>>;
+    [[nodiscard]] auto DebugAnimateInfoAtBeat(Beats beat) const -> std::pair<std::string, std::vector<std::string>>;
 
-    [[nodiscard]] auto BeatHasCollision(beats_t whichBeat) const -> bool;
+    [[nodiscard]] auto BeatHasCollision(Beats whichBeat) const -> bool;
     [[nodiscard]] auto GetSheetName(int whichSheet) const { return mSheets.at(whichSheet).GetName(); }
     // Sheet -> selection of marchers who collided
     [[nodiscard]] auto SheetsToMarchersWhoCollided() const -> std::map<int, CalChart::SelectionList>
@@ -164,7 +164,7 @@ public:
 
 private:
     std::vector<Sheet> mSheets;
-    std::vector<beats_t> mRunningBeatCount;
+    std::vector<Beats> mRunningBeatCount;
     std::vector<unsigned> mShowSheetToAnimationSheet;
 };
 

@@ -33,7 +33,7 @@ TEST_CASE("AnimationSheetTest", "Animate::Sheet")
 
     auto collisions = uut.GetAllBeatsWithCollisions();
     auto collided = uut.GetAllMarchersWithCollisionAtBeat(6);
-    CHECK(collisions == std::set<CalChart::beats_t>{ 6 });
+    CHECK(collisions == std::set<CalChart::Beats>{ 6 });
     CHECK(collided == CalChart::SelectionList{ 0, 1 });
 }
 
@@ -60,7 +60,7 @@ TEST_CASE("NoCollision", "Animate::Sheet")
 
 TEST_CASE("Animate::Sheets", "Animate::Sheets")
 {
-    using beats_t = CalChart::beats_t;
+    using Beats = CalChart::Beats;
     auto cont1 = CalChart::Animate::CompileResult{
         {
             CalChart::Animate::CommandStill{ { 64, 16 }, 4, CalChart::Animate::CommandStill::Style::MarkTime, CalChart::Degree::North() },
@@ -82,20 +82,20 @@ TEST_CASE("Animate::Sheets", "Animate::Sheets")
         { sheet1, sheet2 }
     };
     CHECK(26 == uut.TotalBeats());
-    CHECK(std::tuple<size_t, beats_t>{ 0, 0 } == uut.BeatToSheetOffsetAndBeat(0));
-    CHECK(std::tuple<size_t, beats_t>{ 0, 1 } == uut.BeatToSheetOffsetAndBeat(1));
-    CHECK(std::tuple<size_t, beats_t>{ 0, 12 } == uut.BeatToSheetOffsetAndBeat(12));
-    CHECK(std::tuple<size_t, beats_t>{ 0, 13 } == uut.BeatToSheetOffsetAndBeat(13));
-    CHECK(std::tuple<size_t, beats_t>{ 0, 14 } == uut.BeatToSheetOffsetAndBeat(14));
-    CHECK(std::tuple<size_t, beats_t>{ 0, 15 } == uut.BeatToSheetOffsetAndBeat(15));
-    CHECK(std::tuple<size_t, beats_t>{ 1, 0 } == uut.BeatToSheetOffsetAndBeat(16));
-    CHECK(std::tuple<size_t, beats_t>{ 1, 1 } == uut.BeatToSheetOffsetAndBeat(17));
-    CHECK(std::tuple<size_t, beats_t>{ 1, 2 } == uut.BeatToSheetOffsetAndBeat(18));
-    CHECK(std::tuple<size_t, beats_t>{ 1, 7 } == uut.BeatToSheetOffsetAndBeat(23));
-    CHECK(std::tuple<size_t, beats_t>{ 1, 8 } == uut.BeatToSheetOffsetAndBeat(24));
-    CHECK(std::tuple<size_t, beats_t>{ 1, 9 } == uut.BeatToSheetOffsetAndBeat(25));
-    CHECK(std::tuple<size_t, beats_t>{ 2, 0 } == uut.BeatToSheetOffsetAndBeat(26));
-    CHECK(std::tuple<size_t, beats_t>{ 2, 1 } == uut.BeatToSheetOffsetAndBeat(27));
+    CHECK(std::tuple<size_t, Beats>{ 0, 0 } == uut.BeatToSheetOffsetAndBeat(0));
+    CHECK(std::tuple<size_t, Beats>{ 0, 1 } == uut.BeatToSheetOffsetAndBeat(1));
+    CHECK(std::tuple<size_t, Beats>{ 0, 12 } == uut.BeatToSheetOffsetAndBeat(12));
+    CHECK(std::tuple<size_t, Beats>{ 0, 13 } == uut.BeatToSheetOffsetAndBeat(13));
+    CHECK(std::tuple<size_t, Beats>{ 0, 14 } == uut.BeatToSheetOffsetAndBeat(14));
+    CHECK(std::tuple<size_t, Beats>{ 0, 15 } == uut.BeatToSheetOffsetAndBeat(15));
+    CHECK(std::tuple<size_t, Beats>{ 1, 0 } == uut.BeatToSheetOffsetAndBeat(16));
+    CHECK(std::tuple<size_t, Beats>{ 1, 1 } == uut.BeatToSheetOffsetAndBeat(17));
+    CHECK(std::tuple<size_t, Beats>{ 1, 2 } == uut.BeatToSheetOffsetAndBeat(18));
+    CHECK(std::tuple<size_t, Beats>{ 1, 7 } == uut.BeatToSheetOffsetAndBeat(23));
+    CHECK(std::tuple<size_t, Beats>{ 1, 8 } == uut.BeatToSheetOffsetAndBeat(24));
+    CHECK(std::tuple<size_t, Beats>{ 1, 9 } == uut.BeatToSheetOffsetAndBeat(25));
+    CHECK(std::tuple<size_t, Beats>{ 2, 0 } == uut.BeatToSheetOffsetAndBeat(26));
+    CHECK(std::tuple<size_t, Beats>{ 2, 1 } == uut.BeatToSheetOffsetAndBeat(27));
 }
 
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers, cppcoreguidelines-avoid-do-while, readability-magic-numbers, readability-function-cognitive-complexity)

@@ -175,8 +175,8 @@ namespace {
         requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Command>)
     auto GetRunningBeats(Range range)
     {
-        auto allBeats = CalChart::Ranges::ToVector<beats_t>(GetBeatsPerCont(range));
-        auto running = std::vector<beats_t>(allBeats.size());
+        auto allBeats = CalChart::Ranges::ToVector<Beats>(GetBeatsPerCont(range));
+        auto running = std::vector<Beats>(allBeats.size());
         std::inclusive_scan(allBeats.begin(), allBeats.end(), running.begin());
         return running;
     }
@@ -188,7 +188,7 @@ Commands::Commands(std::vector<Command> const& commands)
 {
 }
 
-auto Commands::TotalBeats() const -> beats_t
+auto Commands::TotalBeats() const -> Beats
 {
     if (mRunningBeatCount.empty()) {
         return 0;
@@ -208,7 +208,7 @@ namespace {
 
 }
 
-auto Commands::BeatToCommandOffsetAndBeat(unsigned beat) const -> std::pair<std::pair<size_t, beats_t>, std::pair<size_t, beats_t>>
+auto Commands::BeatToCommandOffsetAndBeat(unsigned beat) const -> std::pair<std::pair<size_t, Beats>, std::pair<size_t, Beats>>
 {
     // count the number of 0s
     auto leadingBeats = LeadingBeatsAre0(mCommands);
@@ -242,9 +242,9 @@ namespace {
     // is of the previous beat.
     auto MarcherInfoAtBeat(
         Command const& cmd,
-        beats_t beat,
+        Beats beat,
         Command const& facingCmd,
-        beats_t facingBeat)
+        Beats facingBeat)
         -> MarcherInfo
     {
         return {
@@ -255,7 +255,7 @@ namespace {
     }
 }
 
-auto Commands::MarcherInfoAtBeat(beats_t beat) const -> MarcherInfo
+auto Commands::MarcherInfoAtBeat(Beats beat) const -> MarcherInfo
 {
     auto [position, facing] = BeatToCommandOffsetAndBeat(beat);
     auto [which, newBeat] = position;

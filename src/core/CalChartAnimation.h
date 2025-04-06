@@ -75,27 +75,27 @@ class Animation {
 public:
     explicit Animation(const Show& show);
 
-    [[nodiscard]] auto GetAnimateInfo(beats_t whichBeat, int which) const -> Animate::Info { return mSheets.AnimateInfoAtBeat(whichBeat, which); }
-    [[nodiscard]] auto GetAllAnimateInfo(beats_t whichBeat) const -> std::vector<Animate::Info> { return mSheets.AllAnimateInfoAtBeat(whichBeat); }
+    [[nodiscard]] auto GetAnimateInfo(Beats whichBeat, int which) const -> Animate::Info { return mSheets.AnimateInfoAtBeat(whichBeat, which); }
+    [[nodiscard]] auto GetAllAnimateInfo(Beats whichBeat) const -> std::vector<Animate::Info> { return mSheets.AllAnimateInfoAtBeat(whichBeat); }
 
-    [[nodiscard]] auto GetAnimateInfoWithDistanceFromPoint(beats_t whichBeat, CalChart::Coord origin) const -> std::multimap<double, Animate::Info>;
-    [[nodiscard]] auto GetAnimateInfoWithDistanceFromPoint(beats_t whichBeat, SelectionList const& selectionList, CalChart::Coord origin) const -> std::multimap<double, Animate::Info>;
+    [[nodiscard]] auto GetAnimateInfoWithDistanceFromPoint(Beats whichBeat, CalChart::Coord origin) const -> std::multimap<double, Animate::Info>;
+    [[nodiscard]] auto GetAnimateInfoWithDistanceFromPoint(Beats whichBeat, SelectionList const& selectionList, CalChart::Coord origin) const -> std::multimap<double, Animate::Info>;
 
     [[nodiscard]] auto GetNumberSheets() const { return mSheets.TotalSheets(); }
-    [[nodiscard]] auto GetTotalNumberBeatsUpTo(int sheet) const -> beats_t { return mSheets.GetTotalNumberBeatsUpTo(sheet); }
+    [[nodiscard]] auto GetTotalNumberBeatsUpTo(int sheet) const -> Beats { return mSheets.GetTotalNumberBeatsUpTo(sheet); }
     [[nodiscard]] auto GetTotalNumberBeats() const { return mSheets.TotalBeats(); }
 
     [[nodiscard]] auto GetErrors() const { return mSheets.GetAnimationErrors(); }
 
     // Sheet -> selection of marchers who collided
     [[nodiscard]] auto GetCollisions() const -> std::map<int, CalChart::SelectionList> { return mSheets.SheetsToMarchersWhoCollided(); }
-    [[nodiscard]] auto BeatHasCollision(beats_t whichBeat) const { return mSheets.BeatHasCollision(whichBeat); }
+    [[nodiscard]] auto BeatHasCollision(Beats whichBeat) const { return mSheets.BeatHasCollision(whichBeat); }
 
     // bounds that encompasses all marchers
-    [[nodiscard]] auto GetBoundingBox(beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
+    [[nodiscard]] auto GetBoundingBox(Beats whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
 
     // collection of position of each point, for debugging purposes
-    [[nodiscard]] auto GetCurrentInfo(beats_t whichBeat) const -> std::pair<std::string, std::vector<std::string>> { return mSheets.DebugAnimateInfoAtBeat(whichBeat); }
+    [[nodiscard]] auto GetCurrentInfo(Beats whichBeat) const -> std::pair<std::string, std::vector<std::string>> { return mSheets.DebugAnimateInfoAtBeat(whichBeat); }
 
     [[nodiscard]] auto GenPathToDraw(unsigned whichSheet, unsigned point, Coord::units endRadius) const { return mSheets.GeneratePathToDraw(whichSheet, point, endRadius); }
 
@@ -118,10 +118,10 @@ public:
     using AngleStepToImageFunction = std::function<std::tuple<std::shared_ptr<Draw::OpaqueImageData>, CalChart::Coord>(Radian, ImageBeat, bool)>;
 
     // Drawing commands
-    [[nodiscard]] auto GenerateDotsDrawCommands(beats_t whichBeat, SelectionList const& selectionList, bool drawCollisionWarning, Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>;
-    [[nodiscard]] auto GenerateSpritesDrawCommands(beats_t whichBeat, SelectionList const& selectionList, AngleStepToImageFunction imageFunction, std::optional<bool> onBeat, Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateDotsDrawCommands(Beats whichBeat, SelectionList const& selectionList, bool drawCollisionWarning, Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateSpritesDrawCommands(Beats whichBeat, SelectionList const& selectionList, AngleStepToImageFunction imageFunction, std::optional<bool> onBeat, Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>;
     [[nodiscard]] auto GenerateDrawCommands(
-        beats_t whichBeat,
+        Beats whichBeat,
         SelectionList const& selectionList,
         ShowMode const& showMode,
         Configuration const& config,

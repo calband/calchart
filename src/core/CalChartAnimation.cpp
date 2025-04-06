@@ -150,7 +150,7 @@ Animation::Animation(const Show& show)
 {
 }
 
-auto Animation::GetBoundingBox(beats_t whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>
+auto Animation::GetBoundingBox(Beats whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>
 {
     auto allPositions = GetAllAnimateInfo(whichBeat) | std::views::transform([](auto&& info) { return info.mMarcherInfo.mPosition; });
     return {
@@ -163,12 +163,12 @@ auto Animation::GetBoundingBox(beats_t whichBeat) const -> std::pair<CalChart::C
     };
 }
 
-auto Animation::GetAnimateInfoWithDistanceFromPoint(beats_t whichBeat, CalChart::Coord origin) const -> std::multimap<double, Animate::Info>
+auto Animation::GetAnimateInfoWithDistanceFromPoint(Beats whichBeat, CalChart::Coord origin) const -> std::multimap<double, Animate::Info>
 {
     return AddDistanceFromPointInfo(GetAllAnimateInfo(whichBeat), origin);
 }
 
-auto Animation::GetAnimateInfoWithDistanceFromPoint(beats_t whichBeat, SelectionList const& selectionList, CalChart::Coord origin) const -> std::multimap<double, Animate::Info>
+auto Animation::GetAnimateInfoWithDistanceFromPoint(Beats whichBeat, SelectionList const& selectionList, CalChart::Coord origin) const -> std::multimap<double, Animate::Info>
 {
     auto allSelected = GetAllAnimateInfo(whichBeat)
         | std::views::filter([&selectionList](auto&& info) { return selectionList.contains(info.mIndex); });
@@ -179,7 +179,7 @@ auto Animation::GetAnimateInfoWithDistanceFromPoint(beats_t whichBeat, Selection
     });
 }
 
-auto Animation::GenerateDotsDrawCommands(beats_t whichBeat, SelectionList const& selectionList, bool drawCollisionWarning, CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
+auto Animation::GenerateDotsDrawCommands(Beats whichBeat, SelectionList const& selectionList, bool drawCollisionWarning, CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto allInfo = GetAllAnimateInfo(whichBeat);
     auto allSelected = allInfo
@@ -218,7 +218,7 @@ auto Animation::GenerateDotsDrawCommands(beats_t whichBeat, SelectionList const&
     return drawCmds;
 }
 
-auto Animation::GenerateSpritesDrawCommands(beats_t whichBeat, SelectionList const& selectionList, AngleStepToImageFunction imageFunction, std::optional<bool> onBeat, Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
+auto Animation::GenerateSpritesDrawCommands(Beats whichBeat, SelectionList const& selectionList, AngleStepToImageFunction imageFunction, std::optional<bool> onBeat, Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>
 {
     constexpr auto comp_X = 0.5;
     auto comp_Y = config.Get_SpriteBitmapOffsetY();
@@ -244,7 +244,7 @@ auto Animation::GenerateSpritesDrawCommands(beats_t whichBeat, SelectionList con
 }
 
 auto Animation::GenerateDrawCommands(
-    beats_t whichBeat,
+    Beats whichBeat,
     SelectionList const& selectionList,
     ShowMode const& showMode,
     Configuration const& config,

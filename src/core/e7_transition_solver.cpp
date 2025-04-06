@@ -2302,7 +2302,7 @@ TransitionSolverResult runTransitionSolver(const CalChart::Sheet& sheet1, const 
     TransitionSolverResult recentResult;
 
     auto scaledHighestBeatCap = (sheet1.GetBeats() + (sheet1.GetBeats() / 2)) / 2;
-    auto scaledBeatCapForCurrentCalculation = CalChart::beats_t{};
+    auto scaledBeatCapForCurrentCalculation = CalChart::Beats{};
     finalResult.successfullySolved = false;
     finalResult.numBeatsOfMovement = sheet1.GetBeats();
 
