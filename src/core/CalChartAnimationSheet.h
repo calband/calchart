@@ -148,7 +148,9 @@ public:
         auto result = std::map<int, CalChart::SelectionList>{};
         for (auto whichSheet : std::views::iota(0UL, mSheets.size())) {
             auto marchersWithCollisions = mSheets[whichSheet].GetAllMarchersWithCollisions();
-            result[whichSheet] = marchersWithCollisions;
+            if (marchersWithCollisions.size()) {
+                result[whichSheet] = marchersWithCollisions;
+            }
         }
         return result;
     }

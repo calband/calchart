@@ -19,7 +19,7 @@ auto OpenShow(std::string_view showPath) -> std::unique_ptr<CalChart::Show const
 {
     auto input = std::ifstream(std::string(showPath));
     if (!input.is_open()) {
-        throw std::runtime_error("could not open file");
+        throw std::runtime_error(std::format("could not open file {}", showPath));
     }
     return CalChart::Show::Create(CalChart::ShowMode::GetDefaultShowMode(), input);
 };
@@ -35,6 +35,11 @@ auto DumpAnimationErrors(CalChart::Animation const& animation, std::ostream& os)
         for (auto&& key : sortedErrors) {
             os << "error " << key << "\n";
         }
+    }
+    for (auto&& [sheet, who] : animation.GetCollisions()) {
+        os << std::format("collision on sheet {}: ", sheet);
+        std::copy(who.begin(), who.end(), std::ostream_iterator<int>(os, ", "));
+        os << "\n";
     }
 }
 
