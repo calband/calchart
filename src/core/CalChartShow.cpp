@@ -39,7 +39,6 @@
 
 namespace CalChart {
 static constexpr auto kDefault = "default";
-static std::string const k_nofile_str = "Unable to open file";
 static std::string const k_badcont_str = "Error in continuity file";
 static std::string const k_contnohead_str = "Continuity file doesn't begin with header";
 

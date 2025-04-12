@@ -7,6 +7,7 @@ Bugs addressed in this release:
 * [#598](../../issues/598) ASAN crashes when drawing sprites
 * [#599](../../issues/599) Selected marchers on field don't match animation
 * [#600](../../issues/600) click on Sprites in animation view doesn't automatically update the view
+* [#600](../../issues/624) Why are all shows showing there are collisions
 
 Other changes:
 
