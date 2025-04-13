@@ -14,8 +14,4 @@
 
 @implementation cc_sheet_tests
 
-- (void)test_builtin {
-    CalChart::Sheet_UnitTests();
-}
-
 @end

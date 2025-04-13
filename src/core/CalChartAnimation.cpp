@@ -21,12 +21,9 @@
 */
 
 #include "CalChartAnimation.h"
-#include "CalChartAnimationCommand.h"
 #include "CalChartAnimationCompile.h"
-#include "CalChartAnimationErrors.h"
 #include "CalChartAnimationSheet.h"
 #include "CalChartConfiguration.h"
-#include "CalChartContinuity.h"
 #include "CalChartMeasure.h"
 #include "CalChartRanges.h"
 #include "CalChartSheet.h"
@@ -71,7 +68,7 @@ auto AnimateShow(const Show& show) -> Sheets
                           auto current_symbol = curr_sheet->GetSymbol(whichMarcher);
                           auto endPosition = [whichMarcher](auto&& nextAnimationSheet) -> std::optional<Coord> {
                               if (nextAnimationSheet) {
-                                  return nextAnimationSheet->GetPosition(whichMarcher);
+                                  return nextAnimationSheet->GetMarcherPosition(whichMarcher);
                               }
                               return std::nullopt;
                           }(nextAnimationSheet);

@@ -161,7 +161,8 @@ public:
     [[nodiscard]] auto ContinuitiesInUse() const { return GetCurrentSheet()->ContinuitiesInUse(); }
 
     [[nodiscard]] auto GetCurrentCurve(size_t index) const { return GetCurrentSheet()->GetCurve(index); }
-    [[nodiscard]] auto GetCurrentCurvesSize() const { return GetCurrentSheet()->GetCurvesSize(); }
+    [[nodiscard]] auto GetCurrentNumberCurves() const { return GetCurrentSheet()->GetNumberCurves(); }
+    [[nodiscard]] auto GetMarchersAssignedToCurve(size_t whichCurve) const { return GetCurrentSheet()->GetCurveAssignments().at(whichCurve); }
 
     // how to select points
     // Utility functions for constructing new selection lists
@@ -180,6 +181,8 @@ public:
 
     auto IsSelected(int i) const { return mShow->IsSelected(i); }
     auto GetSelectionList() const { return mShow->GetSelectionList(); }
+    // get the selection list and where the points are.
+    [[nodiscard]] auto GetSelectedPoints() const -> std::map<int, CalChart::Coord>;
 
     auto GetSelect() const { return mSelect; }
     void SetSelect(CalChart::Select select);
@@ -188,8 +191,8 @@ public:
     [[nodiscard]] auto FindMarcher(CalChart::Coord pos) const -> std::optional<int>;
     // Determine if the position is on a curve control point, if so, return which curve and which control point.
     [[nodiscard]] auto FindCurveControlPoint(CalChart::Coord pos) const -> std::optional<std::tuple<size_t, size_t>>;
-    // Determine if the position is on a curve, if so, return which curve and the lower control point.
-    [[nodiscard]] auto FindCurve(CalChart::Coord pos) const -> std::optional<std::tuple<size_t, size_t>>;
+    // if found curve, return which curve, the control point lower to where we clicked, the distance [0.0, 1.0] of the pos
+    [[nodiscard]] auto FindCurve(CalChart::Coord pos) const -> std::optional<std::tuple<size_t, size_t, double>>;
     auto GetDrawPaths() const { return mDrawPaths; }
     void SetDrawPaths(bool drawPaths);
     auto GetDrawBackground() const { return mDrawBackground; }
@@ -252,6 +255,7 @@ public:
     std::unique_ptr<wxCommand> Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string>> const& data);
     std::unique_ptr<wxCommand> Create_MovePointsCommand(std::map<int, CalChart::Coord> const& new_positions);
     std::unique_ptr<wxCommand> Create_MovePointsCommand(unsigned whichSheet, std::map<int, CalChart::Coord> const& new_positions);
+    std::unique_ptr<wxCommand> Create_AssignPointsToCurve(size_t whichCurve, std::vector<CalChart::MarcherIndex> whichMarchers);
     std::unique_ptr<wxCommand> Create_DeletePointsCommand();
     std::unique_ptr<wxCommand> Create_RotatePointPositionsCommand(int rotateAmount);
     std::unique_ptr<wxCommand> Create_ResetReferencePointToRef0();

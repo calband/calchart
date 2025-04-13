@@ -109,13 +109,13 @@ private:
     void OnPaint(wxPaintEvent& event, const CalChart::Configuration& config);
     void PaintBackground(wxDC& dc, const CalChart::Configuration& config);
 
-    void OnMouseLeftDown_NormalMove(CalChart::Coord pos, bool shiftDown, bool altDown);
+    void OnMouseLeftDown_Normal(CalChart::Coord pos, bool shiftDown, bool altDown);
     void OnMouseLeftDown_Swap(CalChart::Coord pos);
     void OnMouseLeftDown_DrawingCurve(CalChart::Coord pos);
-    void OnMouseLeftDown_FoundCurveControl(std::tuple<size_t, size_t> curveIndex, bool shiftDown, bool altDown);
-    void OnMouseLeftDown_FoundCurve(std::tuple<size_t, size_t> curveIndex);
+    void OnMouseLeftDown_FoundCurveControl(size_t curveIndex, size_t curveControl, bool shiftDown, bool altDown);
+    void OnMouseLeftDown_FoundCurve(size_t curveIndex);
     void OnMouseLeftDoubleClick_Curve();
-    void OnMouseLeftDoubleClick_FoundCurve(CalChart::Coord pos, std::tuple<size_t, size_t> curveIndex);
+    void OnMouseLeftDoubleClick_FoundCurve(CalChart::Coord pos, size_t whichCurve, size_t whereToInsert);
 
     void OnMouseMove_DrawCurve(CalChart::Coord pos);
     void OnMouseMove_DragCurveControlPoint(CalChart::Coord pos);
