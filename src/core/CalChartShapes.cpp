@@ -129,32 +129,30 @@ namespace {
         const auto each_segment = GetDistance(pntlist) / (numpnts - 1);
         auto iter = pntlist.begin();
         auto curr_pnt = *iter++;
-        auto curr_dist = iter->Distance(curr_pnt);
         auto running_dist = each_segment;
         while (iter != pntlist.end()) {
             // emergency rip chord on rounding cases
             if (static_cast<int>(results.size()) == numpnts) {
                 break;
             }
+            auto curr_dist = iter->Distance(curr_pnt);
             // if the distance to the next point is more than we need, use it up.
             if (running_dist > curr_dist) {
                 running_dist -= curr_dist;
                 curr_pnt = *iter++;
-                curr_dist = iter->Distance(curr_pnt);
-            } else {
-                // the new point will be along the vector by
-                auto dist_vector = (*iter - curr_pnt);
-                auto factor = (running_dist / curr_dist);
-                dist_vector *= factor;
-                auto new_pnt = curr_pnt + dist_vector;
-
-                // we found a place for this point.
-                results.push_back(new_pnt);
-
-                curr_pnt = new_pnt;
-                curr_dist = iter->Distance(curr_pnt);
-                running_dist = each_segment;
+                continue;
             }
+            // the new point will be along the vector by
+            auto dist_vector = (*iter - curr_pnt);
+            auto factor = (running_dist / curr_dist);
+            dist_vector *= factor;
+            auto new_pnt = curr_pnt + dist_vector;
+
+            // we found a place for this point.
+            results.push_back(new_pnt);
+
+            curr_pnt = new_pnt;
+            running_dist = each_segment;
         }
         // emergency rip chord on rounding cases
         while (static_cast<int>(results.size()) < numpnts) {

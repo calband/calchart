@@ -192,7 +192,10 @@ auto MergeCurvePoints(std::vector<CalChart::MarcherIndex> curveMarchers, double 
     }
     curveMarchers.erase(end, curveMarchers.end());
     // now where to insert them.
-    auto offset = static_cast<size_t>(curveMarchers.size() * lengthOffset);
+    auto offset = static_cast<size_t>((curveMarchers.size() + 1) * lengthOffset);
+    if (offset == curveMarchers.size() + 1) {
+        --offset;
+    }
     curveMarchers.insert(curveMarchers.begin() + offset, selected.begin(), selected.end());
     return curveMarchers;
 }
