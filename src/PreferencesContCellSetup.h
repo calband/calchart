@@ -23,7 +23,7 @@
 
 #include "CalChartConstants.h"
 #include "PreferencesUtils.h"
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 /// Continuity Cell setup
 /// Handles configurations parameters of Continuity input system

@@ -28,7 +28,7 @@
 #include <wx/bmpcbox.h>
 #include <wx/spinctrl.h>
 #include <wx/wx.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 namespace CalChart {
 class Configuration;

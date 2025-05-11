@@ -26,7 +26,7 @@
 #include <vector>
 #include <wx/treelist.h>
 #include <wx/wx.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 class CalChartView;
 

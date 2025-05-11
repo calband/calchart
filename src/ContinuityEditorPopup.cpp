@@ -54,7 +54,7 @@ void ContinuityEditorPopup::CreateControls()
     wxUI::VSizer{
         BasicSizerFlags(),
         wxUI::Text{ mWhatError },
-        mUserInput = wxUI::TextCtrl{ wxSizerFlags{}.Expand().Border(wxALL, 5) }.withSize({ 60, 100 }),
+        wxUI::TextCtrl{}.withSize({ 60, 100 }).withFlags(wxSizerFlags{}.Expand().Border(wxALL, 5)).withProxy(mUserInput),
         // add a horizontal bar to make things clear:
         wxUI::HLine(),
         // add a discard, done
@@ -63,7 +63,7 @@ void ContinuityEditorPopup::CreateControls()
             wxUI::Button{ wxID_OK, "Done" },
         },
     }
-        .attachTo(this);
+        .fitTo(this);
 }
 
 void ContinuityEditorPopup::SetValue(wxString const& value, int line, int column)

@@ -23,7 +23,7 @@
 
 #include <vector>
 #include <wx/wizard.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 class FancyTextWin;
 

@@ -35,8 +35,9 @@ ShowModeWizard::ShowModeWizard(wxWizard* parent)
     wxUI::VSizer{
         BasicSizerFlags(),
         wxUI::Text{ "Choose a field to set your show:" },
-        mChoice = wxUI::Choice{ CalChart::kShowModeDefaultValues | std::views::transform([](auto item) { return std::get<0>(item); }) }
-    }.attachTo(this);
+        wxUI::Choice{ CalChart::kShowModeDefaultValues | std::views::transform([](auto item) { return std::get<0>(item); }) }.withProxy(mChoice)
+    }
+        .fitTo(this);
 }
 
 wxString ShowModeWizard::GetValue()

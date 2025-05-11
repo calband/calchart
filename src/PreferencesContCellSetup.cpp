@@ -77,11 +77,13 @@ void ContCellSetup::CreateControls()
         wxUI::VSizer{
             "Color settings",
             wxUI::HSizer{
-                mNameBox = wxUI::BitmapComboBox(NEW_COLOR_CHOICE, colorNames)
-                               .withSize({ 200, -1 })
-                               .withStyle(wxCB_READONLY | wxCB_DROPDOWN),
-                mSpin = wxUI::SpinCtrl(SPIN_WIDTH, std::pair{ 1, 10 }, mContCellPens[0].GetWidth())
-                            .withStyle(wxSP_ARROW_KEYS),
+                wxUI::BitmapComboBox(NEW_COLOR_CHOICE, colorNames)
+                    .withSize({ 200, -1 })
+                    .withStyle(wxCB_READONLY | wxCB_DROPDOWN)
+                    .withProxy(mNameBox),
+                wxUI::SpinCtrl(SPIN_WIDTH, std::pair{ 1, 10 }, mContCellPens[0].GetWidth())
+                    .withStyle(wxSP_ARROW_KEYS)
+                    .withProxy(mSpin),
             },
 
             wxUI::HSizer{
@@ -133,7 +135,7 @@ void ContCellSetup::CreateControls()
             }(),
         },
     }
-        .attachTo(this);
+        .fitTo(this);
 
     TransferDataToWindow();
 }

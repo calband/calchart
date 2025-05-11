@@ -217,77 +217,76 @@ void PrintPostScriptDialog::CreateControls()
         wxUI::HSizer{
             wxUI::VSizer{
                 wxUI::Text{ "Printer Command:" },
-                text_cmd = wxUI::TextCtrl{ wxSizerFlags{}.Expand() }.withWidthSize(minWidth),
+                wxUI::TextCtrl{}.withWidth(minWidth).withFlags(wxSizerFlags{}.Expand()).withProxy(text_cmd),
             },
             wxUI::VSizer{
                 wxUI::Text{ "Printer Options:" },
-                text_opts = wxUI::TextCtrl{ wxSizerFlags{}.Expand() }.withWidthSize(minWidth),
+                wxUI::TextCtrl{}.withWidth(minWidth).withFlags(wxSizerFlags{}.Expand()).withProxy(text_opts),
             },
         },
         wxUI::HSizer{
             wxUI::VSizer{
                 wxUI::Text{ "Preview Command:" },
-                text_view_cmd = wxUI::TextCtrl{ wxSizerFlags{}.Expand() }.withWidthSize(minWidth),
+                wxUI::TextCtrl{}.withWidth(minWidth).withFlags(wxSizerFlags{}.Expand()).withProxy(text_view_cmd),
             },
             wxUI::VSizer{
                 wxUI::Text{ "Preview Options:" },
-                text_view_opts = wxUI::TextCtrl{ wxSizerFlags{}.Expand() }.withWidthSize(minWidth),
+                wxUI::TextCtrl{}.withWidth(minWidth).withFlags(wxSizerFlags{}.Expand()).withProxy(text_view_opts),
             },
         },
 #else
         wxUI::HSizer{
             wxUI::VSizer{
                 wxUI::Text{ "Printer &Device:" },
-                text_cmd = wxUI::TextCtrl{ wxSizerFlags{}.Expand() }.withWidthSize(minWidth),
+                wxUI::TextCtrl{}.withWidth(minWidth).withFlags(wxSizerFlags{}.Expand()).withProxy(text_cmd),
             },
         },
 #endif
         wxUI::HSizer{
-            radio_orient = wxUI::RadioBox{ "&Orientation:", wxUI::RadioBox::withChoices{}, { "Portrait", "Landscape" } },
+            wxUI::RadioBox{ "&Orientation:", wxUI::RadioBox::withChoices{}, { "Portrait", "Landscape" } }.withProxy(radio_orient),
 #ifdef PRINT__RUN_CMD
-            radio_method = wxUI::RadioBox{ "Post&Script:", wxUI::RadioBox::withChoices{}, { "Send to Printer", "Print to File", "Preview Only" } },
+            wxUI::RadioBox{ "Post&Script:", wxUI::RadioBox::withChoices{}, { "Send to Printer", "Print to File", "Preview Only" } }.withProxy(radio_method),
 #else
-            radio_method = wxUI::RadioBox{ "Post&Script:", wxUI::RadioBox::withChoices{}, { "Send to Printer", "Print to File" } },
+            wxUI::RadioBox{ "Post&Script:", wxUI::RadioBox::withChoices{}, { "Send to Printer", "Print to File" } }.withProxy(radio_method),
 #endif
         },
         wxUI::HSizer{
-            check_overview = wxUI::CheckBox{ "Over&view" },
-            check_cont = wxUI::CheckBox{ "Continuit&y" },
-            check_pages = wxUI::CheckBox{ "Cove&r pages" },
+            wxUI::CheckBox{ "Over&view" }.withProxy(check_overview),
+            wxUI::CheckBox{ "Continuit&y" }.withProxy(check_cont),
+            wxUI::CheckBox{ "Cove&r pages" }.withProxy(check_pages),
         },
         wxUI::Button{ CC_PRINT_BUTTON_SELECT, "S&elect sheets..." },
         wxUI::HSizer{
             wxUI::VSizer{
                 wxUI::Text{ "Page &width:" },
-                text_width = wxUI::TextCtrl{ wxSizerFlags{}.Expand() }.withWidthSize(minWidth),
+                wxUI::TextCtrl{}.withWidth(minWidth).withFlags(wxSizerFlags{}.Expand()).withProxy(text_width),
             },
             wxUI::VSizer{
                 wxUI::Text{ "Page &height:" },
-                text_height = wxUI::TextCtrl{ wxSizerFlags{}.Expand() }.withWidthSize(minWidth),
+                wxUI::TextCtrl{}.withWidth(minWidth).withFlags(wxSizerFlags{}.Expand()).withProxy(text_height),
             },
             wxUI::VSizer{
                 wxUI::Text{ "&Left margin:" },
-                text_x = wxUI::TextCtrl{ wxSizerFlags{}.Expand() }.withWidthSize(minWidth),
+                wxUI::TextCtrl{}.withWidth(minWidth).withFlags(wxSizerFlags{}.Expand()).withProxy(text_x),
             },
             wxUI::VSizer{
                 wxUI::Text{ "&Top margin:" },
-                text_y = wxUI::TextCtrl{ wxSizerFlags{}.Expand() }.withWidthSize(minWidth),
+                wxUI::TextCtrl{}.withWidth(minWidth).withFlags(wxSizerFlags{}.Expand()).withProxy(text_y),
             },
             wxUI::VSizer{
                 wxUI::Text{ "Paper &length:" },
-                text_length = wxUI::TextCtrl{ wxSizerFlags{}.Expand() }.withWidthSize(minWidth),
+                wxUI::TextCtrl{}.withWidth(minWidth).withFlags(wxSizerFlags{}.Expand()).withProxy(text_length),
             },
 
         },
         wxUI::HSizer{
             wxUI::VSizer{
                 wxUI::Text{ "Yards:" },
-                text_minyards = wxUI::TextCtrl{ wxSizerFlags{}.Expand(), "50" }.withWidthSize(minWidth),
-
+                wxUI::TextCtrl{ "50" }.withWidth(minWidth).withFlags(wxSizerFlags{}.Expand()).withProxy(text_minyards),
             },
         },
     }
-        .attachTo(this);
+        .fitTo(this);
 }
 
 bool PrintPostScriptDialog::TransferDataToWindow()
