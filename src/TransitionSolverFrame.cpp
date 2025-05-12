@@ -198,9 +198,9 @@ void TransitionSolverFrame::CreateControls()
                 },
                 wxUI::VSizer{
                     wxUI::Text{ "Group Allowed Destinations:" },
-                    mCurrentGroupMembersList = wxUI::ListBox{ wxSizerFlags{}.Expand(), CALCHART__TRANSITION_SOLVER__NULL }
-                                                   .setStyle(wxLB_EXTENDED)
-                                                   .withSize({ 130, 100 }),
+                    mCurrentGroupDestinationsList = wxUI::ListBox{ wxSizerFlags{}.Expand(), CALCHART__TRANSITION_SOLVER__NULL }
+                                                        .setStyle(wxLB_EXTENDED)
+                                                        .withSize({ 130, 100 }),
                     wxUI::HSizer{
                         mClearDestinationsButton = wxUI::Button{ "Clear" }.bind([this] {
                             ClearDestinations();
