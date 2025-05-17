@@ -152,10 +152,15 @@ public:
 
     auto GetPointLabel(int i) const { return mShow->GetPointLabel(i); }
     auto GetPointsLabel() const { return mShow->GetPointsLabel(); }
+    auto GetPointsLabel(const CalChart::SelectionList& sl) const { return mShow->GetPointsLabel(sl); }
     auto GetPointInstrument(int i) const { return mShow->GetPointInstrument(i); }
+    auto GetPointInstrument(std::string const& label) const { return mShow->GetPointInstrument(label); }
     auto GetPointsInstrument() const { return mShow->GetPointsInstrument(); }
+    auto GetPointsInstrument(const CalChart::SelectionList& sl) const { return mShow->GetPointsInstrument(sl); }
     auto GetPointSymbol(int i) const { return mShow->GetPointSymbol(i); }
+    auto GetPointSymbol(std::string const& label) const { return mShow->GetPointSymbol(label); }
     auto GetPointsSymbol() const { return mShow->GetPointsSymbol(); }
+    auto GetPointsSymbol(const CalChart::SelectionList& sl) const { return mShow->GetPointsSymbol(sl); }
 
     [[nodiscard]] auto GetContinuities() const { return GetCurrentSheet()->GetContinuities(); }
     [[nodiscard]] auto ContinuitiesInUse() const { return GetCurrentSheet()->ContinuitiesInUse(); }
@@ -175,6 +180,7 @@ public:
     [[nodiscard]] auto MakeSelectBySymbol(CalChart::SYMBOL_TYPE symbol) const { return mShow->MakeSelectBySymbol(symbol); }
     auto MakeSelectByInstrument(std::string const& instrument) const { return mShow->MakeSelectByInstrument(instrument); }
     auto MakeSelectByLabel(std::string const& label) const { return mShow->MakeSelectByLabel(label); }
+    auto MakeSelectByLabel(std::vector<std::string> const& label) const { return mShow->MakeSelectByLabel(label); }
 
     void SetSelectionList(CalChart::SelectionList const& sl);
 

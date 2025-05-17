@@ -121,10 +121,15 @@ public:
     [[nodiscard]] auto GetNumPoints() const { return static_cast<int>(mDotLabelAndInstrument.size()); }
     [[nodiscard]] auto GetPointLabel(int i) const -> std::string;
     [[nodiscard]] auto GetPointsLabel() const -> std::vector<std::string>;
+    [[nodiscard]] auto GetPointsLabel(const CalChart::SelectionList& sl) const -> std::vector<std::string>;
     [[nodiscard]] auto GetPointInstrument(int i) const -> std::string;
+    [[nodiscard]] auto GetPointInstrument(std::string const& label) const -> std::optional<std::string>;
     [[nodiscard]] auto GetPointsInstrument() const -> std::vector<std::string>;
+    [[nodiscard]] auto GetPointsInstrument(const CalChart::SelectionList& sl) const -> std::vector<std::string>;
     [[nodiscard]] auto GetPointSymbol(int i) const -> SYMBOL_TYPE;
+    [[nodiscard]] auto GetPointSymbol(std::string const& label) const -> std::optional<SYMBOL_TYPE>;
     [[nodiscard]] auto GetPointsSymbol() const -> std::vector<SYMBOL_TYPE>;
+    [[nodiscard]] auto GetPointsSymbol(const CalChart::SelectionList& sl) const -> std::vector<SYMBOL_TYPE>;
     [[nodiscard]] auto AlreadyHasPrintContinuity() const -> bool;
     [[nodiscard]] auto const& GetShowMode() const { return mMode; }
 
@@ -141,6 +146,7 @@ public:
     [[nodiscard]] auto MakeSelectBySymbol(SYMBOL_TYPE i) const -> SelectionList;
     [[nodiscard]] auto MakeSelectByInstrument(std::string const& instrumentName) const -> SelectionList;
     [[nodiscard]] auto MakeSelectByLabel(std::string const& labelName) const -> SelectionList;
+    [[nodiscard]] auto MakeSelectByLabel(std::vector<std::string> const& labelName) const -> SelectionList;
 
     // Point selection
     [[nodiscard]] auto IsSelected(int i) const { return mSelectionList.contains(i); }
