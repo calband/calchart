@@ -23,7 +23,7 @@
 #include "PointPicker.h"
 #include "CalChartToolBar.h"
 #include "basic_ui.h"
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 enum {
     PointPicker_PointPickerList = 1100,
@@ -92,11 +92,12 @@ void PointPicker::CreateControls()
                     EndModal(wxID_OK);
                 }),
         },
-        mList = wxUI::ListBox{ PointPicker_PointPickerList }
-                    .withStyle(wxLB_EXTENDED)
-                    .withSize(wxSize(50, 250))
+        wxUI::ListBox{ PointPicker_PointPickerList }
+            .withStyle(wxLB_EXTENDED)
+            .withSize(wxSize(50, 250))
+            .withProxy(mList)
     }
-        .attachTo(this);
+        .fitTo(this);
 
     RereadFromShow();
 }

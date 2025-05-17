@@ -23,7 +23,7 @@
 #include "ContinuityBoxDrawer.h"
 #include "CustomListViewPanel.h"
 #include "basic_ui.h"
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 class ContinuityComposerCanvas : public CustomListViewPanel {
     using super = CustomListViewPanel;
@@ -143,17 +143,19 @@ void ContinuityComposerPanel::CreateControls()
                 return new ContinuityComposerCanvas(mConfig, parent);
             },
         },
-        mComboSelection = wxUI::ComboBox{ wxSizerFlags(1).Expand().Border(), {} }.withStyle(wxTE_PROCESS_ENTER).bind(wxEVT_TEXT_ENTER, [this](auto const& event) {
-                                                                                                                   OnCmdTextEnterKeyPressed(event);
-                                                                                                               })
-                              .bind(wxEVT_COMBOBOX, [this](auto const& event) {
-                                  OnComboPressed(event);
-                              })
-                              .bind(wxEVT_TEXT, [this](auto const& event) {
-                                  OnComboText(event);
-                              }),
+        wxUI::ComboBox{ {} }.withStyle(wxTE_PROCESS_ENTER).bind(wxEVT_TEXT_ENTER, [this](auto const& event) {
+                                                              OnCmdTextEnterKeyPressed(event);
+                                                          })
+            .bind(wxEVT_COMBOBOX, [this](auto const& event) {
+                OnComboPressed(event);
+            })
+            .bind(wxEVT_TEXT, [this](auto const& event) {
+                OnComboText(event);
+            })
+            .withFlags(wxSizerFlags(1).Expand().Border())
+            .withProxy(mComboSelection),
     }
-        .attachTo(this);
+        .fitTo(this);
 
     if (!mCont) {
         mCont = std::make_unique<CalChart::Cont::ProcUnset>();
@@ -679,7 +681,7 @@ ContinuityComposerDialog::ContinuityComposerDialog(std::unique_ptr<CalChart::Con
             },
         },
     }
-        .attachTo(this);
+        .fitTo(this);
 
     mPanel->SetOnUpdateIsValid([this](bool enable) {
         FindWindow(wxID_OK)->Enable(enable);

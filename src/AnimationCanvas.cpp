@@ -28,7 +28,7 @@
 #include "basic_ui.h"
 #include "ui_enums.h"
 #include <wx/dcbuffer.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 BEGIN_EVENT_TABLE(AnimationCanvas, AnimationCanvas::super)
 EVT_CHAR(AnimationCanvas::OnChar)
@@ -55,7 +55,7 @@ void AnimationCanvas::Init()
 
 void AnimationCanvas::CreateControls()
 {
-    wxUI::VSizer{}.attachTo(this);
+    wxUI::VSizer{}.fitTo(this);
 }
 
 void AnimationCanvas::SetZoomOnMarchers(bool zoomOnMarchers)

@@ -40,7 +40,7 @@
 #include <wx/notebook.h>
 #include <wx/statline.h>
 #include <wx/stattext.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 using namespace CalChart;
 
@@ -141,7 +141,7 @@ void ShowModeSetup::CreateControls()
                 return modeSetupCanvas;
             }() },
     }
-        .attachTo(this);
+        .fitTo(this);
 
     TransferDataToWindow();
 }

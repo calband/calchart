@@ -23,7 +23,7 @@
 
 #include <wx/docview.h>
 #include <wx/wx.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 class AnimationView;
 class AnimationCanvas;

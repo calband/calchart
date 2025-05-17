@@ -304,29 +304,31 @@ StackDrawPlayground::StackDrawPlayground(wxWindow* parent)
             mPreview = [](wxWindow* parent) {
                 return new StackDrawPreview(parent);
             },
-            mUserInput = TextCtrl{}.bind([this] {
-                                       try {
-                                           mPreview->SetDrawCommand(ParseString(*mUserInput));
-                                           mStatus->SetStatusText("");
-                                       } catch (std::exception const& e) {
-                                           mPreview->SetDrawCommand({});
-                                           mStatus->SetStatusText(e.what());
-                                       }
-                                       Refresh();
-                                   })
-                             .withStyle(wxTE_MULTILINE | wxHSCROLL | wxTE_PROCESS_TAB),
+            TextCtrl{}.bind([this] {
+                          try {
+                              mPreview->SetDrawCommand(ParseString(*mUserInput));
+                              mStatus->SetStatusText("");
+                          } catch (std::exception const& e) {
+                              mPreview->SetDrawCommand({});
+                              mStatus->SetStatusText(e.what());
+                          }
+                          Refresh();
+                      })
+                .withStyle(wxTE_MULTILINE | wxHSCROLL | wxTE_PROCESS_TAB)
+                .withProxy(mUserInput),
         }
             .withSize(wxSize(500, 400)),
-        HSizer{ Text{ "Apply (10,10) offset" }, mUseOffset = CheckBox{}.bind([this]() {
-                   mPreview->SetUseOffset(*mUseOffset);
-                   Refresh();
-               }) },
+        HSizer{ Text{ "Apply (10,10) offset" }, CheckBox{}.bind([this]() {
+                                                              mPreview->SetUseOffset(*mUseOffset);
+                                                              Refresh();
+                                                          })
+                                                    .withProxy(mUseOffset) },
         Generic{ CreateStdDialogButtonSizer(wxOK) },
         mStatus = Generic<wxStatusBar>{ [](wxWindow* parent) {
             return new wxStatusBar(parent);
         } },
     }
-        .attachTo(this);
+        .fitTo(this);
 
     *mUserInput = DefaultText;
 

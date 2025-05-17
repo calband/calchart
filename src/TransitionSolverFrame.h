@@ -9,7 +9,7 @@
 
 #include <wx/dialog.h>
 #include <wx/docview.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 #include "CalChartDoc.h"
 #include "e7_transition_solver.h"

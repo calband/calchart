@@ -109,12 +109,12 @@ void PrintContinuityEditor::CreateControls()
             wxUI::Button{ wxID_HELP, "&Help" },
         },
         wxUI::HSplitter{
-            wxSizerFlags{ 1 }.Expand(),
             mPrintContDisplay = [this](wxWindow* parent) { return new PrintContinuityPreview(parent, mConfig); },
             mUserInput = [](wxWindow* parent) { return new FancyTextWin(parent, PrintContinuityEditor_KeyPress); } }
-            .withStashGravity(0.5),
+            .withStashGravity(0.5)
+            .withFlags(wxSizerFlags{ 1 }.Expand()),
     }
-        .attachTo(this);
+        .fitTo(this);
 }
 
 void PrintContinuityEditor::OnCmdHelp(wxCommandEvent&)

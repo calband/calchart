@@ -39,7 +39,7 @@
 #include <wx/splitter.h>
 #include <wx/tglbtn.h>
 #include <wx/timer.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 using namespace CalChart;
 
@@ -82,51 +82,59 @@ void AnimationPanel::CreateControls()
     wxUI::VSizer{
         BasicSizerFlags(),
         wxUI::HSizer{
-            mAnimateOmniToggle = wxUI::Button{ "Omni" }
-                                     .bind([this] {
-                                         OnCmd_ToggleAnimOmni();
-                                     }),
-            mPlayPauseButton = wxUI::BitmapToggleButton{ ScaleButtonBitmap(wxBitmap{ BITMAP_NAME(tb_play) }), ScaleButtonBitmap(wxBitmap{ BITMAP_NAME(tb_stop) }) }
-                                   .bind([this] {
-                                       OnCmd_PlayButton();
-                                   }),
-            mBeatSlider = wxUI::Slider{ ExpandSizerFlags(), CALCHART__anim_gotobeat, std::pair{ 1, 2 }, 1 }
-                              .withStyle(wxSL_HORIZONTAL | wxSL_LABELS),
+            wxUI::Button{ "Omni" }
+                .bind([this] {
+                    OnCmd_ToggleAnimOmni();
+                })
+                .withProxy(mAnimateOmniToggle),
+            wxUI::BitmapToggleButton{ ScaleButtonBitmap(wxBitmap{ BITMAP_NAME(tb_play) }), ScaleButtonBitmap(wxBitmap{ BITMAP_NAME(tb_stop) }) }
+                .bind([this] {
+                    OnCmd_PlayButton();
+                })
+                .withProxy(mPlayPauseButton),
+            wxUI::Slider{ CALCHART__anim_gotobeat, std::pair{ 1, 2 }, 1 }
+                .withStyle(wxSL_HORIZONTAL | wxSL_LABELS)
+                .withFlags(ExpandSizerFlags())
+                .withProxy(mBeatSlider),
             wxUI::VSizer{
-                mTempoLabel = wxUI::Text{ "Tempo" },
-                mTempoCtrl = wxUI::SpinCtrl{ CALCHART__anim_tempo, std::pair(10, 300), tmp },
+                wxUI::Text{ "Tempo" }.withProxy(mTempoLabel),
+                wxUI::SpinCtrl{ CALCHART__anim_tempo, std::pair(10, 300), tmp }.withProxy(mTempoCtrl),
             },
             wxUI::VSizer{
-                mSpritesCheckbox = wxUI::CheckBox{ "Sprites" }
-                                       .withValue(mConfig.Get_UseSprites())
-                                       .bind([this](wxCommandEvent& event) {
-                                           mConfig.Set_UseSprites(event.IsChecked());
-                                           Refresh();
-                                       }),
-                mZoomCheckbox = wxUI::CheckBox{ "Zoom" }
-                                    .withValue(mCanvas->GetZoomOnMarchers())
-                                    .bind([this](wxCommandEvent& event) {
-                                        mCanvas->SetZoomOnMarchers(event.IsChecked());
-                                    }),
+                wxUI::CheckBox{ "Sprites" }
+                    .withValue(mConfig.Get_UseSprites())
+                    .bind([this](wxCommandEvent& event) {
+                        mConfig.Set_UseSprites(event.IsChecked());
+                        Refresh();
+                    })
+                    .withProxy(mSpritesCheckbox),
+                wxUI::CheckBox{ "Zoom" }
+                    .withValue(mCanvas->GetZoomOnMarchers())
+                    .bind([this](wxCommandEvent& event) {
+                        mCanvas->SetZoomOnMarchers(event.IsChecked());
+                    })
+                    .withProxy(mZoomCheckbox),
             },
             wxUI::VSizer{
-                mCollisionCheckbox = wxUI::CheckBox{ "Collisions" }
-                                         .bind([this](wxCommandEvent& event) {
-                                             if (mView) {
-                                                 mView->SetDrawCollisionWarning(event.IsChecked());
-                                             }
-                                         }),
+                wxUI::CheckBox{ "Collisions" }
+                    .bind([this](wxCommandEvent& event) {
+                        if (mView) {
+                            mView->SetDrawCollisionWarning(event.IsChecked());
+                        }
+                    })
+                    .withProxy(mCollisionCheckbox),
             },
 
-            mOmniHelpButton = wxUI::Button{ wxID_HELP, "&Help" }
-                                  .bind([this]() {
-                                      mOmniCanvas->OnCmd_ShowKeyboardControls();
-                                  }),
+            wxUI::Button{ wxID_HELP, "&Help" }
+                .bind([this]() {
+                    mOmniCanvas->OnCmd_ShowKeyboardControls();
+                })
+                .withProxy(mOmniHelpButton),
         },
         wxUI::Generic{ ExpandSizerFlags(), mCanvas },
         wxUI::Generic{ ExpandSizerFlags(), mOmniCanvas },
     }
-        .attachTo(this);
+        .fitTo(this);
 
     mItemsToHide.push_back(mAnimateOmniToggle.control());
     mItemsToHide.push_back(mOmniHelpButton.control());

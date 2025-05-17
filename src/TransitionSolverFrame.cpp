@@ -21,7 +21,7 @@
 #include <wx/html/helpctrl.h>
 #include <wx/msgdlg.h>
 #include <wx/statline.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
@@ -119,12 +119,13 @@ void TransitionSolverFrame::CreateControls()
         wxUI::HLine(),
         wxUI::HSizer{
             wxUI::Text{ "Select an algorithm: " },
-            mAlgorithmChoiceControl = wxUI::Choice{ { "E7 Algorithm: Chiu, Zamora, Malani",
-                                                        "E7 Algorithm: Namini Asl, Ramirez, Zhang",
-                                                        "Ey Algorithm: Sover, Eliceiri, Hershkovitz" } }
-                                          .bind([this](wxCommandEvent& event) {
-                                              ChooseAlgorithm((CalChart::TransitionSolverParams::AlgorithmIdentifier)event.GetSelection());
-                                          }),
+            wxUI::Choice{ { "E7 Algorithm: Chiu, Zamora, Malani",
+                              "E7 Algorithm: Namini Asl, Ramirez, Zhang",
+                              "Ey Algorithm: Sover, Eliceiri, Hershkovitz" } }
+                .bind([this](wxCommandEvent& event) {
+                    ChooseAlgorithm((CalChart::TransitionSolverParams::AlgorithmIdentifier)event.GetSelection());
+                })
+                .withProxy(mAlgorithmChoiceControl),
         },
         wxUI::HLine(),
         wxUI::VSizer{
@@ -133,114 +134,136 @@ void TransitionSolverFrame::CreateControls()
                     wxUI::Text{ "Please select a set of marcher instructions to allow.\n (You may select up to 8)\n" }
                         .withWrap(180),
                     wxUI::Text{ "Selected Instructions:" },
-                    mNumSelectedInstructionsIndicator = wxUI::Text{ "0:" },
+                    wxUI::Text{ "0:" }.withProxy(mNumSelectedInstructionsIndicator),
                 },
-                mAvailableCommandsControl = wxUI::ListBox{ wxSizerFlags{}.Expand() }.withSize({ 400, 100 }).setStyle(wxLB_EXTENDED).bind([this] {
-                    EditAllowedCommands();
-                }),
+                wxUI::ListBox{}.withSize({ 400, 100 }).setStyle(wxLB_EXTENDED).bind([this] {
+                                                                                  EditAllowedCommands();
+                                                                              })
+                    .withFlags(wxSizerFlags{}.Expand())
+                    .withProxy(mAvailableCommandsControl),
             },
             wxUI::HLine(),
             wxUI::HSizer{
                 wxUI::Text{ "New Group:" },
-                mNewGroupNameControl = wxUI::TextCtrl{}.withWidthSize(100),
-                mAddGroupButton = wxUI::Button{ "Add" }.bind([this] {
-                    AddNewGroup(mNewGroupNameControl->GetValue().ToStdString());
-                    SyncGroupControlsWithCurrentState();
-                }),
+                wxUI::TextCtrl{}.withWidth(100).withProxy(mNewGroupNameControl),
+                wxUI::Button{ "Add" }.bind([this] {
+                                         AddNewGroup(mNewGroupNameControl->GetValue().ToStdString());
+                                         SyncGroupControlsWithCurrentState();
+                                     })
+                    .withProxy(mAddGroupButton),
             },
             wxUI::HSizer{
                 wxUI::Text{ "Viewing Group:" },
-                mCurrentGroupControl = wxUI::ListBox{ wxSizerFlags{}.Expand() }.withSize({ 400, 100 }).bind([this] {
-                    SelectGroup();
-                }),
-                mRemoveGroupControl = wxUI::Button{ "Remove" }.bind([this] {
-                    AddNewGroup(mNewGroupNameControl->GetValue().ToStdString());
-                    SyncGroupControlsWithCurrentState();
-                }),
+                wxUI::ListBox{}.withSize({ 400, 100 }).bind([this] {
+                                                          SelectGroup();
+                                                      })
+                    .withFlags(wxSizerFlags{}.Expand())
+                    .withProxy(mCurrentGroupControl),
+                wxUI::Button{ "Remove" }.bind([this] {
+                                            AddNewGroup(mNewGroupNameControl->GetValue().ToStdString());
+                                            SyncGroupControlsWithCurrentState();
+                                        })
+                    .withProxy(mRemoveGroupControl),
             },
             wxUI::HSizer{
                 wxUI::VSizer{
                     wxUI::Text{ "Select marchers on the field to enable adding them as members or destinations of the current group." }
                         .withWrap(150),
                     wxUI::Text{ "Number of selected marchers:" },
-                    mNumberOfSelectedPointsLabel = wxUI::Text{ "0" },
+                    wxUI::Text{ "0" }.withProxy(mNumberOfSelectedPointsLabel),
                 },
                 wxUI::VSizer{
                     wxUI::Text{ "Group Members:" },
-                    mCurrentGroupMembersList = wxUI::ListBox{ wxSizerFlags{}.Expand(), CALCHART__TRANSITION_SOLVER__NULL }
-                                                   .setStyle(wxLB_EXTENDED)
-                                                   .withSize({ 130, 100 }),
+                    wxUI::ListBox{ CALCHART__TRANSITION_SOLVER__NULL }
+                        .setStyle(wxLB_EXTENDED)
+                        .withSize({ 130, 100 })
+                        .withFlags(wxSizerFlags{}.Expand())
+                        .withProxy(mCurrentGroupMembersList),
                     wxUI::HSizer{
-                        mClearMembersButton = wxUI::Button{ "Clear" }.bind([this] {
-                            ClearMembers();
-                            SyncGroupControlsWithCurrentState();
-                        }),
-                        mSetMembersToSelectionButton = wxUI::Button{ "Set" }.bind([this] {
-                            SetMembers(mDoc->GetSelectionList());
-                            SyncGroupControlsWithCurrentState();
-                        }),
+                        wxUI::Button{ "Clear" }.bind([this] {
+                                                   ClearMembers();
+                                                   SyncGroupControlsWithCurrentState();
+                                               })
+                            .withProxy(mClearMembersButton),
+                        wxUI::Button{ "Set" }.bind([this] {
+                                                 SetMembers(mDoc->GetSelectionList());
+                                                 SyncGroupControlsWithCurrentState();
+                                             })
+                            .withProxy(mSetMembersToSelectionButton),
                     },
                     wxUI::HSizer{
-                        mAddSelectionToMembersButton = wxUI::Button{ "Add" }.bind([this] {
-                            AddMembers(mDoc->GetSelectionList());
-                            SyncGroupControlsWithCurrentState();
-                        }),
-                        mRemoveSelectionFromMembersButton = wxUI::Button{ "Remove" }.bind([this] {
-                            RemoveMembers(mDoc->GetSelectionList());
-                            SyncGroupControlsWithCurrentState();
-                        }),
+                        wxUI::Button{ "Add" }.bind([this] {
+                                                 AddMembers(mDoc->GetSelectionList());
+                                                 SyncGroupControlsWithCurrentState();
+                                             })
+                            .withProxy(mAddSelectionToMembersButton),
+                        wxUI::Button{ "Remove" }.bind([this] {
+                                                    RemoveMembers(mDoc->GetSelectionList());
+                                                    SyncGroupControlsWithCurrentState();
+                                                })
+                            .withProxy(mRemoveSelectionFromMembersButton),
                     },
                     wxUI::HSizer{
-                        mSelectMembersButton = wxUI::Button{ "Select" }.bind([this] {
-                            mView->SelectMarchers(mSolverParams.groups[mSelectedGroup].marchers);
-                        }),
+                        wxUI::Button{ "Select" }.bind([this] {
+                                                    mView->SelectMarchers(mSolverParams.groups[mSelectedGroup].marchers);
+                                                })
+                            .withProxy(mSelectMembersButton),
                     },
                 },
                 wxUI::VSizer{
                     wxUI::Text{ "Group Allowed Destinations:" },
-                    mCurrentGroupDestinationsList = wxUI::ListBox{ wxSizerFlags{}.Expand(), CALCHART__TRANSITION_SOLVER__NULL }
-                                                        .setStyle(wxLB_EXTENDED)
-                                                        .withSize({ 130, 100 }),
+                    wxUI::ListBox{ CALCHART__TRANSITION_SOLVER__NULL }
+                        .setStyle(wxLB_EXTENDED)
+                        .withSize({ 130, 100 })
+                        .withFlags(wxSizerFlags{}.Expand())
+                        .withProxy(mCurrentGroupDestinationsList),
                     wxUI::HSizer{
-                        mClearDestinationsButton = wxUI::Button{ "Clear" }.bind([this] {
-                            ClearDestinations();
-                            SyncGroupControlsWithCurrentState();
-                        }),
-                        mSetDestinationsToSelectionButton = wxUI::Button{ "Set" }.bind([this] {
-                            SetDestinations(mDoc->GetSelectionList());
-                            SyncGroupControlsWithCurrentState();
-                        }),
+                        wxUI::Button{ "Clear" }.bind([this] {
+                                                   ClearDestinations();
+                                                   SyncGroupControlsWithCurrentState();
+                                               })
+                            .withProxy(mClearDestinationsButton),
+                        wxUI::Button{ "Set" }.bind([this] {
+                                                 SetDestinations(mDoc->GetSelectionList());
+                                                 SyncGroupControlsWithCurrentState();
+                                             })
+                            .withProxy(mSetDestinationsToSelectionButton),
                     },
                     wxUI::HSizer{
-                        mAddSelectionToDestinationsButton = wxUI::Button{ "Add" }.bind([this] {
-                            AddDestinations(mDoc->GetSelectionList());
-                            SyncGroupControlsWithCurrentState();
-                        }),
-                        mRemoveSelectionFromDestinationsButton = wxUI::Button{ "Remove" }.bind([this] {
-                            RemoveDestinations(mDoc->GetSelectionList());
-                            SyncGroupControlsWithCurrentState();
-                        }),
+                        wxUI::Button{ "Add" }.bind([this] {
+                                                 AddDestinations(mDoc->GetSelectionList());
+                                                 SyncGroupControlsWithCurrentState();
+                                             })
+                            .withProxy(mAddSelectionToDestinationsButton),
+                        wxUI::Button{ "Remove" }.bind([this] {
+                                                    RemoveDestinations(mDoc->GetSelectionList());
+                                                    SyncGroupControlsWithCurrentState();
+                                                })
+                            .withProxy(mRemoveSelectionFromDestinationsButton),
                     },
                     wxUI::HSizer{
-                        mSelectDestinationsButton = wxUI::Button{ "Select" }.bind([this] {
-                            mView->SelectMarchers(mSolverParams.groups[mSelectedGroup].allowedDestinations);
-                        }),
+                        wxUI::Button{ "Select" }.bind([this] {
+                                                    mView->SelectMarchers(mSolverParams.groups[mSelectedGroup].allowedDestinations);
+                                                })
+                            .withProxy(mSelectDestinationsButton),
                     },
                 },
             },
         },
         wxUI::HLine(),
         wxUI::HSizer{
-            mCloseButton = wxUI::Button{ "Close" }.bind([this] {
-                Close();
-            }),
-            mApplyButton = wxUI::Button{ "Apply (Solve Transition from This Sheet to Next)" }.bind([this] {
-                Apply();
-            }),
+            wxUI::Button{ "Close" }.bind([this] {
+                                       Close();
+                                   })
+                .withProxy(mCloseButton),
+            wxUI::Button{ "Apply (Solve Transition from This Sheet to Next)" }.bind([this] {
+                                                                                  Apply();
+                                                                              })
+                .withProxy(mApplyButton),
         },
 
     }
-        .attachTo(scrolledWindow);
+        .fitTo(scrolledWindow);
 
     {
         // configure the minimum size of the window, and then add scroll bars

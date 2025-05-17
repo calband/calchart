@@ -26,7 +26,7 @@
 #include <set>
 #include <wx/dialog.h>
 #include <wx/wx.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 class CalChartDoc;
 namespace CalChart {

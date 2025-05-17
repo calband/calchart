@@ -104,10 +104,11 @@ void DrawingSetup::CreateControls()
         wxUI::HSizer{
             wxUI::VSizer{
                 "Palette Selector",
-                mPaletteNameBox = wxUI::BitmapComboBox(NEW_COLOR_PALETTE, colorPalettes)
-                                      .withSelection(mActiveColorPalette)
-                                      .withSize({ 200, -1 })
-                                      .withStyle(wxCB_READONLY | wxCB_DROPDOWN),
+                wxUI::BitmapComboBox(NEW_COLOR_PALETTE, colorPalettes)
+                    .withSelection(mActiveColorPalette)
+                    .withSize({ 200, -1 })
+                    .withStyle(wxCB_READONLY | wxCB_DROPDOWN)
+                    .withProxy(mPaletteNameBox),
 
                 wxUI::HSizer{
                     wxUI::Button("&Edit Color")
@@ -119,12 +120,14 @@ void DrawingSetup::CreateControls()
             wxUI::VSizer{
                 "Color settings",
                 wxUI::HSizer{
-                    mNameBox = wxUI::BitmapComboBox(NEW_COLOR_CHOICE, colorNames)
-                                   .withSelection(0)
-                                   .withSize({ 200, -1 })
-                                   .withStyle(wxCB_READONLY | wxCB_DROPDOWN),
-                    mSpin = wxUI::SpinCtrl(SPIN_WIDTH, std::pair{ 1, 10 }, mCalChartPens[mActiveColorPalette][0].GetWidth())
-                                .withStyle(wxSP_ARROW_KEYS),
+                    wxUI::BitmapComboBox(NEW_COLOR_CHOICE, colorNames)
+                        .withSelection(0)
+                        .withSize({ 200, -1 })
+                        .withStyle(wxCB_READONLY | wxCB_DROPDOWN)
+                        .withProxy(mNameBox),
+                    wxUI::SpinCtrl(SPIN_WIDTH, std::pair{ 1, 10 }, mCalChartPens[mActiveColorPalette][0].GetWidth())
+                        .withStyle(wxSP_ARROW_KEYS)
+                        .withProxy(mSpin),
                 },
 
                 wxUI::HSizer{
@@ -147,7 +150,7 @@ void DrawingSetup::CreateControls()
         },
         wxUI::Generic{ ExpandSizerFlags(), new ColorSetupCanvas(mConfig, this) },
     }
-        .attachTo(this);
+        .fitTo(this);
 
     TransferDataToWindow();
 }

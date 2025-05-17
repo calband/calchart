@@ -29,7 +29,7 @@
 #include <wx/tglbtn.h>
 #include <wx/toolbar.h>
 #include <wx/wx.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"

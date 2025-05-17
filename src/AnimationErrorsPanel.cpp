@@ -63,7 +63,7 @@ void AnimationErrorsPanel::CreateControls()
             treeList->SetImageList(imageList);
             return treeList;
         } }
-    }.attachTo(this);
+    }.fitTo(this);
 }
 
 void AnimationErrorsPanel::OnUpdate()

@@ -23,7 +23,7 @@
 #include "PreferencesGeneralSetup.h"
 #include "CalChartConfiguration.h"
 #include "PreferencesUtils.h"
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 BEGIN_EVENT_TABLE(GeneralSetup, PreferencePage)
 END_EVENT_TABLE()
@@ -36,15 +36,15 @@ void GeneralSetup::CreateControls()
         LeftBasicSizerFlags(),
         wxUI::VSizer{
             "General Settings",
-            VLabelWidget("Autosave Interval", mAutoSave_Interval = wxUI::TextCtrl{}.withSize({ 100, -1 })),
-            mBeep_On_Collisions = wxUI::CheckBox{ "Beep on animation collisions " },
-            mScroll_Natural = wxUI::CheckBox{ "Scroll Direction: Natural" },
-            mSetSheet_Undo = wxUI::CheckBox{ "Set Sheet is undo-able" },
-            mSelection_Undo = wxUI::CheckBox{ "Point selection is undo-able" },
-            mFeatureCurves = wxUI::CheckBox{ "Enable Feature Curves" },
+            VLabelWidget("Autosave Interval", wxUI::TextCtrl{}.withSize({ 100, -1 }).withProxy(mAutoSave_Interval)),
+            wxUI::CheckBox{ "Beep on animation collisions " }.withProxy(mBeep_On_Collisions),
+            wxUI::CheckBox{ "Scroll Direction: Natural" }.withProxy(mScroll_Natural),
+            wxUI::CheckBox{ "Set Sheet is undo-able" }.withProxy(mSetSheet_Undo),
+            wxUI::CheckBox{ "Point selection is undo-able" }.withProxy(mSelection_Undo),
+            wxUI::CheckBox{ "Enable Feature Curves" }.withProxy(mFeatureCurves),
         },
     }
-        .attachTo(this);
+        .fitTo(this);
 
     TransferDataToWindow();
 }

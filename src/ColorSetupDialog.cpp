@@ -28,7 +28,7 @@
 #include <fstream>
 #include <iomanip>
 #include <wx/colordlg.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 using namespace CalChart;
 
@@ -107,12 +107,14 @@ void ColorSetupDialog::CreateControls()
         wxUI::VSizer{
             "Color settings",
             wxUI::HSizer{
-                mNameBox = wxUI::BitmapComboBox(NEW_COLOR_CHOICE, colorNames)
-                               .withSelection(0)
-                               .withSize({ 200, -1 })
-                               .withStyle(wxCB_READONLY | wxCB_DROPDOWN),
-                mSpin = wxUI::SpinCtrl(SPIN_WIDTH, std::pair{ 1, 10 }, mCalChartPens[mActiveColorPalette][0].GetWidth())
-                            .withStyle(wxSP_ARROW_KEYS),
+                wxUI::BitmapComboBox(NEW_COLOR_CHOICE, colorNames)
+                    .withSelection(0)
+                    .withSize({ 200, -1 })
+                    .withStyle(wxCB_READONLY | wxCB_DROPDOWN)
+                    .withProxy(mNameBox),
+                wxUI::SpinCtrl(SPIN_WIDTH, std::pair{ 1, 10 }, mCalChartPens[mActiveColorPalette][0].GetWidth())
+                    .withStyle(wxSP_ARROW_KEYS)
+                    .withProxy(mSpin),
             },
 
             wxUI::HSizer{
@@ -129,7 +131,7 @@ void ColorSetupDialog::CreateControls()
 
         }
     }
-        .attachTo(this);
+        .fitTo(this);
 }
 
 void ColorSetupDialog::Init()

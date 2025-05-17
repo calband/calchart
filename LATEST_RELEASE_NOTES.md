@@ -21,4 +21,5 @@ Other changes:
 * [#617](../../issues/617) Don't have GetBackgroundImages return std::vector<ImageInfo> by reference
 * [#619](../../issues/619) fix failing builds with png
 * [#622](../../issues/622) change beats_t to Beats
+* [#628](../../issues/628) Bump wxWidgets to 3.2.8 and wxUI to 0.2.0
 

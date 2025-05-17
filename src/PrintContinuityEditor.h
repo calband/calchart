@@ -24,7 +24,7 @@
 #include <wx/dialog.h>
 #include <wx/docview.h>
 #include <wx/wx.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 namespace CalChart {
 class Configuration;

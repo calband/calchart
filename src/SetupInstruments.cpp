@@ -194,21 +194,24 @@ void SetupInstruments::CreateControls()
         },
         wxUI::HSizer{
             wxUI::Text{ "Select Instrument" },
-            mSelectInstrument = wxUI::Choice{ std::set(mInstruments.begin(), mInstruments.end()) }
-                                    .withSelection(wxNOT_FOUND)
-                                    .bind([this] { SelectInstrument(); }),
+            wxUI::Choice{ std::set(mInstruments.begin(), mInstruments.end()) }
+                .withSelection(wxNOT_FOUND)
+                .bind([this] { SelectInstrument(); })
+                .withProxy(mSelectInstrument),
         },
         wxUI::HLine(),
         wxUI::HSizer{
-            mSetupInstrumentList = wxUI::ListBox{ SetupInstruments_SetupInstrumentsList }
-                                       .setStyle(wxLB_EXTENDED)
-                                       .withSize({ 50, 200 })
-                                       .bind(wxEVT_LISTBOX, [this] { Select(); })
-                                       .bind(wxEVT_LISTBOX_DCLICK, [this] { SelectAll(); }),
+            wxUI::ListBox{ SetupInstruments_SetupInstrumentsList }
+                .setStyle(wxLB_EXTENDED)
+                .withSize({ 50, 200 })
+                .bind(wxEVT_LISTBOX, [this] { Select(); })
+                .bind(wxEVT_LISTBOX_DCLICK, [this] { SelectAll(); })
+                .withProxy(mSetupInstrumentList),
             wxUI::VSizer{
                 wxUI::Text{ "Set Instrument" },
-                mInstrumentChoice = wxUI::Choice{ mInstrumentChoices }
-                                        .bind([this] { OnCmdChoice(); }),
+                wxUI::Choice{ mInstrumentChoices }
+                    .bind([this] { OnCmdChoice(); })
+                    .withProxy(mInstrumentChoice),
             },
         },
         wxUI::HSizer{
@@ -216,7 +219,7 @@ void SetupInstruments::CreateControls()
             wxUI::Button{ wxID_OK },
         },
     }
-        .attachTo(this);
+        .fitTo(this);
 }
 
 std::map<int, std::string> SetupInstruments::GetInstruments() const

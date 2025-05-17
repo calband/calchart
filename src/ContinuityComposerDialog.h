@@ -18,7 +18,7 @@
 
 #include <memory>
 #include <wx/wx.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 namespace CalChart::Cont {
 class Procedure;

@@ -33,7 +33,7 @@
 #include <wx/html/helpctrl.h>
 #include <wx/statline.h>
 #include <wx/tglbtn.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 // a panel consists of the name, canvas
 class ContinuityBrowserPerCont : public wxPanel {
@@ -73,11 +73,12 @@ void ContinuityBrowserPerCont::CreateControls(CalChart::Configuration const& con
     wxUI::VSizer{
         BasicSizerFlags(),
         wxUI::HSizer{
-            wxUI::Text{ ExpandSizerFlags(), CalChart::GetLongNameForSymbol(mSym) },
-            wxUI::BitmapButton{ BasicSizerFlags(), ScaleButtonBitmap(wxArtProvider::GetBitmap(wxART_PLUS)) }
+            wxUI::Text{ CalChart::GetLongNameForSymbol(mSym) }.withFlags(ExpandSizerFlags()),
+            wxUI::BitmapButton{ ScaleButtonBitmap(wxArtProvider::GetBitmap(wxART_PLUS)) }
                 .bind([this]() {
                     mCanvas->AddNewEntry();
-                }) },
+                })
+                .withFlags(BasicSizerFlags()) },
         // here's a canvas
         mCanvas = wxUI::Generic<ContinuityBrowserPanel>{
             ExpandSizerFlags(),
@@ -85,7 +86,7 @@ void ContinuityBrowserPerCont::CreateControls(CalChart::Configuration const& con
                 return new ContinuityBrowserPanel(mSym, config, parent);
             } },
     }
-        .attachTo(this);
+        .fitTo(this);
 }
 
 void ContinuityBrowserPerCont::OnUpdate()
@@ -142,7 +143,7 @@ void ContinuityBrowser::CreateControls(CalChart::Configuration const& config)
                 }),
         },
     }
-        .attachTo(this);
+        .fitTo(this);
 
     SetScrollRate(1, 1);
     // now update the current screen

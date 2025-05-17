@@ -28,7 +28,7 @@
 #include "basic_ui.h"
 #include <algorithm>
 #include <ranges>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 //////// Show Mode setup ////////
 // setup drawing characteristics
@@ -185,7 +185,7 @@ void ShowModeDialogSetup::CreateControls()
                 return modeSetupCanvas;
             }() },
     }
-        .attachTo(this);
+        .fitTo(this);
 }
 
 bool ShowModeDialogSetup::TransferDataToWindow()
@@ -259,7 +259,7 @@ ModeSetupDialog::ModeSetupDialog(wxWindow* parent, CalChart::ShowMode const& cur
             wxUI::Button{ wxID_OK },
         },
     }
-        .attachTo(this);
+        .fitTo(this);
     Center();
 }
 

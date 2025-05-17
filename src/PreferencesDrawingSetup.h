@@ -28,7 +28,7 @@
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>
 #include <wx/wx.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 class DrawingSetup : public PreferencePage {
     using super = PreferencePage;

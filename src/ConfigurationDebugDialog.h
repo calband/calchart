@@ -22,7 +22,7 @@
 */
 
 #include <wx/wx.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 class wxConfigBase;
 class wxTreeListCtrl;

@@ -22,7 +22,7 @@
 */
 
 #include "PreferencesUtils.h"
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 /// General setup
 /// Handles general configurations parameters of CalChart

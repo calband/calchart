@@ -28,7 +28,7 @@
 #include "PreferencesPrintContinuitySetup.h"
 #include "PreferencesShowModeSetup.h"
 #include "PreferencesUtils.h"
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 // how the preferences work:
 // preference dialog create a copy of the CalChart config from which to read and
@@ -81,7 +81,7 @@ CalChartPreferences::CalChartPreferences(wxWindow* parent, CalChart::Configurati
             wxUI::Button{ wxID_CANCEL },
         },
     }
-        .attachTo(this);
+        .fitTo(this);
 
     Center();
 }

@@ -71,38 +71,42 @@ void PrintContinuitySetup::CreateControls()
     wxUI::VSizer{
         wxSizerFlags{}.Border(wxALL, 2),
         wxUI::HSizer{
-            mLandscape = wxUI::CheckBox{ "Landscape" }
-                             .bind([this] {
-                                 mPrintContDisplay->SetOrientation(*mLandscape);
-                                 Refresh();
-                             }),
+            wxUI::CheckBox{ "Landscape" }
+                .bind([this] {
+                    mPrintContDisplay->SetOrientation(*mLandscape);
+                    Refresh();
+                })
+                .withProxy(mLandscape),
         },
         wxUI::HSizer{
             "Draw details",
-            mUseNewDraw = wxUI::CheckBox{ "Use New Draw" }
-                              .bind([this] {
-                                  mConfig.Set_PrintContUseNewDraw(*mUseNewDraw);
-                                  Refresh();
-                              }),
-            VLabelWidget("Symbol Ratio:", mDotRatio = wxUI::TextCtrl{ PrintContinuitySetup_DOTRATIO }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER)),
-            VLabelWidget("P-Line Ratio:", mPLineRatio = wxUI::TextCtrl{ PrintContinuitySetup_PLINERATIO }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER)),
-            VLabelWidget("S-Line Ratio:", mSLineRatio = wxUI::TextCtrl{ PrintContinuitySetup_SLINERATIO }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER)),
-            VLabelWidget("Line Pad:", mLinePad = wxUI::SpinCtrl{ std::pair{ 0, 10 } }.bind([this] {
-                mConfig.Set_PrintContLinePad(static_cast<int>(*mLinePad));
-                Refresh();
-            })),
-            VLabelWidget("Max Font Size:", mMaxFontSize = wxUI::SpinCtrl{ std::pair{ 6, 30 } }.bind([this] {
-                mConfig.Set_PrintContMaxFontSize(static_cast<int>(*mMaxFontSize));
-                Refresh();
-            })),
+            wxUI::CheckBox{ "Use New Draw" }
+                .bind([this] {
+                    mConfig.Set_PrintContUseNewDraw(*mUseNewDraw);
+                    Refresh();
+                })
+                .withProxy(mUseNewDraw),
+            VLabelWidget("Symbol Ratio:", wxUI::TextCtrl{ PrintContinuitySetup_DOTRATIO }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER).withProxy(mDotRatio)),
+            VLabelWidget("P-Line Ratio:", wxUI::TextCtrl{ PrintContinuitySetup_PLINERATIO }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER).withProxy(mPLineRatio)),
+            VLabelWidget("S-Line Ratio:", wxUI::TextCtrl{ PrintContinuitySetup_SLINERATIO }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER).withProxy(mSLineRatio)),
+            VLabelWidget("Line Pad:", wxUI::SpinCtrl{ std::pair{ 0, 10 } }.bind([this] {
+                                                                              mConfig.Set_PrintContLinePad(static_cast<int>(*mLinePad));
+                                                                              Refresh();
+                                                                          })
+                                          .withProxy(mLinePad)),
+            VLabelWidget("Max Font Size:", wxUI::SpinCtrl{ std::pair{ 6, 30 } }.bind([this] {
+                                                                                   mConfig.Set_PrintContMaxFontSize(static_cast<int>(*mMaxFontSize));
+                                                                                   Refresh();
+                                                                               })
+                                               .withProxy(mMaxFontSize)),
         },
         wxUI::HSplitter{
-            wxSizerFlags{ 1 }.Expand(),
             mPrintContDisplay = [this](wxWindow* parent) { return new PrintContinuityPreview(parent, mConfig); },
             mUserInput = [](wxWindow* parent) { return new FancyTextWin(parent, PrintContinuitySetup_KeyPress); } }
-            .withStashGravity(0.5),
+            .withStashGravity(0.5)
+            .withFlags(wxSizerFlags{ 1 }.Expand()),
     }
-        .attachTo(this);
+        .fitTo(this);
 
     mUserInput->SetValue(DefaultText);
 
