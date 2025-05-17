@@ -518,6 +518,15 @@ void CalChartDoc::SetSelectionList(SelectionList const& sl)
     UpdateAllViews();
 }
 
+auto CalChartDoc::GetSelectedPoints() const -> std::map<int, CalChart::Coord>
+{
+    std::map<int, CalChart::Coord> result;
+    for (auto i : GetSelectionList()) {
+        result[i] = GetCurrentSheet()->GetMarcherPosition(i, GetCurrentReferencePoint());
+    }
+    return result;
+}
+
 void CalChartDoc::SetSelect(CalChart::Select select)
 {
     mSelect = select;
@@ -540,7 +549,7 @@ auto CalChartDoc::FindCurveControlPoint(CalChart::Coord pos) const -> std::optio
     return GetCurrentSheet()->FindCurveControlPoint(pos, CalChart::Float2CoordUnits(mConfig.Get_ControlPointRatio()));
 }
 
-auto CalChartDoc::FindCurve(CalChart::Coord pos) const -> std::optional<std::tuple<size_t, size_t>>
+auto CalChartDoc::FindCurve(CalChart::Coord pos) const -> std::optional<std::tuple<size_t, size_t, double>>
 {
     return GetCurrentSheet()->FindCurve(pos, CalChart::Float2CoordUnits(mConfig.Get_ControlPointRatio()));
 }
@@ -737,6 +746,13 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_MovePointsCommand(unsigned whichS
     auto cmds = Create_SetSheetAndSelectionPair();
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_MovePointsCommand(whichSheet, new_positions, mCurrentReferencePoint)));
     return std::make_unique<CalChartDocCommand>(*this, wxT("Move Points"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_AssignPointsToCurve(size_t whichCurve, std::vector<MarcherIndex> whichMarchers)
+{
+    auto cmds = Create_SetSheetAndSelectionPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_AssignPointsToCurve(whichCurve, whichMarchers)));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Assign to Curve"), cmds);
 }
 
 std::unique_ptr<wxCommand> CalChartDoc::Create_DeletePointsCommand()

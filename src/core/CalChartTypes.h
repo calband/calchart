@@ -39,8 +39,8 @@ struct ParseErrorHandlers {
     VersionMismatchNotice_t mVersionMismatchHandler{};
 };
 
+using MarcherIndex = unsigned;
 using SelectionList = std::set<int>;
-
 using Beats = unsigned;
 
 enum class MoveMode {

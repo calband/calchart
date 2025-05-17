@@ -75,6 +75,7 @@ public:
     [[nodiscard]] auto GetDrawCommands(Configuration const& config) const -> std::vector<Draw::DrawCommand>;
 
     [[nodiscard]] auto GetSymbol() const { return mSym; }
+    void SetSymbol(SYMBOL_TYPE sym);
 
 private:
     enum {
@@ -88,11 +89,7 @@ private:
     Coord mPos{};
     std::array<Coord, kNumRefPoints> mRef{};
 
-    void SetSymbol(SYMBOL_TYPE sym);
-
     [[nodiscard]] auto SerializeHelper() const -> std::vector<std::byte>;
-
-    friend class Sheet;
 
     friend struct Point_values;
     friend auto Check_Point(const Point&, const struct Point_values&) -> bool;
