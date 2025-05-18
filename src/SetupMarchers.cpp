@@ -79,7 +79,6 @@ static void EnableLetter(wxWindow& window, bool letters)
 static void LayoutShowInfo(wxWindow* parent, bool putLastRowButtons)
 {
     auto labels = std::vector<wxString>{};
-    wxUI::ListBox::Proxy tlabels{};
 
     for (auto i = 0; i < 26; ++i) {
         wxString buf(static_cast<char>('A' + i));
@@ -120,9 +119,10 @@ static void LayoutShowInfo(wxWindow* parent, bool putLastRowButtons)
             wxUI::VSizer{
                 wxUI::HSizer{
                     "Letters",
-                    tlabels = wxUI::ListBox{ ExpandSizerFlags(), SetupMarchers_ID_LABEL_LETTERS, labels }
-                                  .withStyle(wxLB_EXTENDED)
-                                  .withEnsureVisible(0),
+                    wxUI::ListBox{ SetupMarchers_ID_LABEL_LETTERS, labels }
+                        .withStyle(wxLB_EXTENDED)
+                        .withEnsureVisible(0)
+                        .withFlags(ExpandSizerFlags()),
                 },
             },
         },
@@ -140,7 +140,7 @@ static void LayoutShowInfo(wxWindow* parent, bool putLastRowButtons)
                     .createAndAdd(window, sizer, flags);
             } },
     }
-        .attachTo(parent);
+        .fitTo(parent);
 }
 
 static auto GenNumberLabels(int num)

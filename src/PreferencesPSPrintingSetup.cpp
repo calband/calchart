@@ -24,7 +24,7 @@
 #include "CalChartConfiguration.h"
 
 #include <wx/listbook.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 using namespace CalChart;
 
@@ -72,7 +72,7 @@ void PSPrintingSetUp::CreateControls()
             VLabelWidget("Continuity Ratio:", wxUI::TextCtrl{ CONTRATIO }.withSize({ 100, -1 })),
         },
     }
-        .attachTo(this);
+        .fitTo(this);
 
     TransferDataToWindow();
 }

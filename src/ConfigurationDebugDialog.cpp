@@ -230,5 +230,5 @@ ConfigurationDebug::ConfigurationDebug(wxWindow* parent, wxConfigBase* config)
         wxUI::HSizer{
             wxUI::Button{ wxID_OK },
         }
-    }.attachTo(this);
+    }.fitTo(this);
 }

@@ -37,8 +37,8 @@ set(wxUSE_STC OFF)
 set(wxUSE_STD_CONTAINERS ON)
 FetchContent_Declare(
   wxWidgets
-  GIT_REPOSITORY "https://github.com/rmpowell77/wxWidgets.git"
-  GIT_TAG a61a71dc98 # v3.2.7_libpng_latest
+  GIT_REPOSITORY "https://github.com/wxWidgets/wxWidgets.git"
+  GIT_TAG 8aef5f40b93958719771331ca03866b7b6fff6bf # v3.2.8
 )
 FetchContent_MakeAvailable(wxWidgets)
 
@@ -52,6 +52,6 @@ FetchContent_MakeAvailable(Catch2)
 FetchContent_Declare(
   wxUI
   GIT_REPOSITORY https://github.com/rmpowell77/wxUI.git
-  GIT_TAG        6e447948a56626f6d14635c97069a52c3397c3a3 # v0.1.10
+  GIT_TAG        262603fce62bc71e5f173786e306e474194156d3 # v0.2.0
 )
 FetchContent_MakeAvailable(wxUI)

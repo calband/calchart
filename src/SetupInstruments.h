@@ -24,7 +24,7 @@
 #include <vector>
 #include <wx/docview.h>
 #include <wx/wizard.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 class SetupInstruments : public wxDialog {
     DECLARE_CLASS(SetupInstruments)

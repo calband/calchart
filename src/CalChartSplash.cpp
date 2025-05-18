@@ -34,8 +34,8 @@
 #include <wx/html/helpctrl.h>
 #include <wx/icon.h>
 #include <wx/stdpaths.h>
-#include <wxUI/Hyperlink.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/Hyperlink.hpp>
+#include <wxUI/wxUI.hpp>
 
 #include "calchart.xbm"
 #include "calchart.xpm"
@@ -118,7 +118,7 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString c
                            Help();
                        } },
         }
-    }.attachTo(this);
+    }.fitTo(this);
 
     // A nice touch: a history of files visited. Use this menu.
     auto which = GetMenuBar()->FindMenu("&File");
@@ -133,7 +133,7 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString c
     auto fontSubSubTitle = wxFontInfo(GetSubSubTitleFontSize()).Family(wxFONTFAMILY_SWISS);
     VSizer{
         BasicSizerFlags(),
-        Bitmap{ ExpandSizerFlags(), BitmapWithBandIcon(GetLogoSize()) },
+        Bitmap{ BitmapWithBandIcon(GetLogoSize()) }.withFlags(ExpandSizerFlags()),
         Text{ "CalChart " CC_VERSION }
             .withFont(fontTitle),
         Line{}
@@ -155,7 +155,7 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString c
         Text{ "Contributors: Brandon Chinn, Kevin Durand,\nNoah Gilmore, David Strachan-Olson, Allan Yu" }
             .withFont(fontSubSubTitle),
     }
-        .attachTo(this);
+        .fitTo(this);
 
     Show(true);
 }

@@ -23,7 +23,7 @@
 
 #include "CalChartDoc.h"
 #include "basic_ui.h"
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 class ContinuityBrowserPerCont;
 

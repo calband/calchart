@@ -36,7 +36,7 @@
 #include <wx/dcbuffer.h>
 #include <wx/filename.h>
 #include <wx/stdpaths.h>
-#include <wxUI/wxUI.h>
+#include <wxUI/wxUI.hpp>
 
 #if !wxUSE_GLCANVAS
 #error "OpenGL required: set wxUSE_GLCANVAS to 1 and rebuild the library"
@@ -607,7 +607,7 @@ void CCOmniviewCanvas::Init()
 
 void CCOmniviewCanvas::CreateControls()
 {
-    wxUI::VSizer{}.attachTo(this);
+    wxUI::VSizer{}.fitTo(this);
 }
 
 void CCOmniviewCanvas::SetView(AnimationView* view)

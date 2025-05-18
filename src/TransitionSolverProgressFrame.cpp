@@ -105,24 +105,25 @@ void TransitionSolverProgressFrame::CreateControls()
     wxUI::VSizer{
         wxSizerFlags{}.Border(wxALL, 5).Expand(),
         wxUI::Text{ "Working on a solution..." },
-        mProgressBar = wxUI::Gauge{},
-        mSubtaskProgressBar = wxUI::Gauge{},
+        wxUI::Gauge{}.withProxy(mProgressBar),
+        wxUI::Gauge{}.withProxy(mSubtaskProgressBar),
         wxUI::Text{ "Best solution so far:" },
-        mBestSolutionDescription = wxUI::Text{ "No solution found" },
+        wxUI::Text{ "No solution found" }.withProxy(mBestSolutionDescription),
         wxUI::HSizer{
             wxUI::Button{ "Cancel" }
                 .bind([this] {
                     mShouldAbortCalculation = true;
                     mShouldApplyResultOnCompletion = false;
                 }),
-            mAcceptButton = wxUI::Button{ "Finish Now and Apply" }
-                                .bind([this] {
-                                    mShouldAbortCalculation = true;
-                                    mShouldApplyResultOnCompletion = true;
-                                }),
+            wxUI::Button{ "Finish Now and Apply" }
+                .bind([this] {
+                    mShouldAbortCalculation = true;
+                    mShouldApplyResultOnCompletion = true;
+                })
+                .withProxy(mAcceptButton),
         },
     }
-        .attachTo(this);
+        .fitTo(this);
 
     SyncControlsWithCurrentState();
 }
