@@ -21,62 +21,55 @@
 */
 
 #include "PointPicker.h"
+#include "CalChartRanges.h"
 #include "CalChartToolBar.h"
-#include "basic_ui.h"
+#include <ranges>
 #include <wxUI/wxUI.hpp>
 
-enum {
-    PointPicker_PointPickerList = 1100,
-};
-
-BEGIN_EVENT_TABLE(PointPicker, wxDialog)
-EVT_LISTBOX(PointPicker_PointPickerList, PointPicker::PointPickerSelect)
-EVT_LISTBOX_DCLICK(PointPicker_PointPickerList, PointPicker::PointPickerAll)
-END_EVENT_TABLE()
-
-PointPicker::PointPicker(CalChartDoc const& shw, wxWindow* parent)
-    : super(parent, wxID_ANY, "Select Points", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
-    , mShow(shw)
+PointPicker::PointPicker(wxWindow* parent, CalChartDoc const& show)
+    : PointPicker(
+        parent,
+        show,
+        std::set<int>(std::views::iota(0, show.GetNumPoints()).begin(), std::views::iota(0, show.GetNumPoints()).end()),
+        show.GetSelectionList())
 {
-    CreateControls();
-
-    // This fits the dalog to the minimum size dictated by the sizers
-    GetSizer()->Fit(this);
-    // This ensures that the dialog cannot be smaller than the minimum size
-    GetSizer()->SetSizeHints(this);
-
-    Center();
 }
 
-void PointPicker::CreateControls()
+// Given a set of marchers, and a set of selected marchers, create a dialog that allows the user to select
+// the labels of the marchers to use.
+PointPicker::PointPicker(wxWindow* parent, CalChartDoc const& show, CalChart::SelectionList const& marchersToUse, CalChart::SelectionList const& selected)
+    : super(parent, wxID_ANY, "Select Marchers", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
 {
-    auto instruments = mShow.GetPointsInstrument();
+    auto labels = show.GetPointsLabel(marchersToUse);
+    auto instruments = show.GetPointsInstrument(marchersToUse);
     auto currentInstruments = std::set(instruments.begin(), instruments.end());
+
+    wxUI::ListBox::Proxy mList{};
     wxUI::VSizer{
         wxSizerFlags{}.Border(wxALL, 2).Center().Proportion(0),
         wxUI::HSizer{
             wxUI::Button{ "&All" }
-                .bind([this] {
-                    mSelection = mShow.MakeSelectAll();
+                .bind([this, mList] {
+                    mMarcherLabels = CalChart::Ranges::ToVector<std::string>(mList->GetStrings());
                     EndModal(wxID_OK);
                 }),
             wxUI::Button{ "&None" }
                 .bind([this] {
-                    mSelection = mShow.MakeUnselectAll();
-                    ;
+                    mMarcherLabels = {};
                     EndModal(wxID_OK);
                 }),
             wxUI::Button{ wxID_OK }.setDefault(),
         },
         wxUI::HSizer{
-            wxUI::Custom{ [this](wxWindow* w, wxSizer* s, wxSizerFlags flags) {
-                auto counter = 0;
-                for (auto&& i : GetSymbolsBitmap()) {
-                    auto which = static_cast<CalChart::SYMBOL_TYPE>(counter++);
-                    if (!mShow.MakeSelectBySymbol(which).empty()) {
-                        wxUI::BitmapButton{ i }
-                            .bind([this, which] {
-                                mSelection = mShow.MakeSelectBySymbol(which);
+            wxUI::Custom{ [this, &show, mList](wxWindow* w, wxSizer* s, wxSizerFlags flags) {
+                for (auto&& [which, bitmap] : CalChart::Ranges::enumerate_view(GetSymbolsBitmap())) {
+                    if (!show.MakeSelectBySymbol(static_cast<CalChart::SYMBOL_TYPE>(which)).empty()) {
+                        wxUI::BitmapButton{ bitmap }
+                            .bind([this, which, &show, mList] {
+                                // given a symbol, we go through the labels, and see if it matches
+                                mMarcherLabels = CalChart::Ranges::ToVector<std::string>(mList->GetStrings() | std::views::filter([which, &show](auto&& label) {
+                                    return show.GetPointSymbol(label) == static_cast<CalChart::SYMBOL_TYPE>(which);
+                                }));
                                 EndModal(wxID_OK);
                             })
                             .createAndAdd(w, s, flags);
@@ -85,50 +78,31 @@ void PointPicker::CreateControls()
             } } },
         wxUI::HSizer{
             wxUI::Text{ "Select Instrument" },
-            wxUI::Choice{ std::vector<wxString>{ currentInstruments.begin(), currentInstruments.end() } }
+            wxUI::Choice{ currentInstruments }
                 .withSelection(wxNOT_FOUND)
-                .bind([this](wxCommandEvent& e) {
-                    mSelection = mShow.MakeSelectByInstrument(e.GetString());
+                .bind([this, &show, mList](wxCommandEvent& e) {
+                    // given the instrument, we go through the labels, and see if it matches
+                    mMarcherLabels = CalChart::Ranges::ToVector<std::string>(mList->GetStrings() | std::views::filter([&show, e](auto&& label) {
+                        return show.GetPointInstrument(label) == e.GetString();
+                    }));
                     EndModal(wxID_OK);
                 }),
         },
-        wxUI::ListBox{ PointPicker_PointPickerList }
+        wxUI::ListBox{ show.GetPointsLabel() }
             .withStyle(wxLB_EXTENDED)
             .withSize(wxSize(50, 250))
             .withProxy(mList)
+            .withSelections(std::vector<int>{ selected.begin(), selected.end() })
+            .bind([this, mList] {
+                mMarcherLabels = CalChart::Ranges::ToVector<std::string>(mList.selections().get() | std::views::transform([mList](auto&& i) {
+                    return mList->GetString(i);
+                }));
+            })
+            .bindDClick([this, mList] {
+                mMarcherLabels = CalChart::Ranges::ToVector<std::string>(mList->GetStrings());
+            }),
     }
         .fitTo(this);
 
-    RereadFromShow();
-}
-
-void PointPicker::PointPickerAll(wxCommandEvent&)
-{
-    mSelection = mShow.MakeSelectAll();
-}
-
-void PointPicker::PointPickerSelect(wxCommandEvent&)
-{
-    wxArrayInt selections;
-    mList.control()->GetSelections(selections);
-    mSelection = CalChart::SelectionList(selections.begin(), selections.end());
-}
-
-void PointPicker::RereadFromShow()
-{
-    auto tshowLabels = mShow.GetPointsLabel();
-    auto showLabels = std::vector<wxString>(tshowLabels.begin(), tshowLabels.end());
-    if (mCachedLabels != showLabels) {
-        mCachedLabels = showLabels;
-        mList.control()->Clear();
-        mList.control()->Set(wxArrayString{ mCachedLabels.size(), &mCachedLabels[0] });
-    }
-    auto showSelectionList = mShow.GetSelectionList();
-    if (mSelection != showSelectionList) {
-        mList.control()->DeselectAll();
-        mSelection = showSelectionList;
-        for (auto&& n : mSelection) {
-            mList.control()->SetSelection(n);
-        }
-    }
+    Center();
 }

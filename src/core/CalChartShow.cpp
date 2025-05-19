@@ -496,11 +496,25 @@ std::vector<std::string> Show::GetPointsLabel() const
     return labels;
 }
 
+auto Show::GetPointsLabel(const CalChart::SelectionList& sl) const -> std::vector<std::string>
+{
+    return CalChart::Ranges::ToVector<std::string>(sl | std::views::transform([this](auto&& i) { return GetPointLabel(i); }));
+}
+
 std::string Show::GetPointInstrument(int i) const
 {
     if (i >= static_cast<int>(mDotLabelAndInstrument.size()))
         return "";
     return mDotLabelAndInstrument.at(i).second;
+}
+
+auto Show::GetPointInstrument(std::string const& label) const -> std::optional<std::string>
+{
+    auto selection = MakeSelectByLabel(label);
+    if (selection.size() == 0) {
+        return std::nullopt;
+    }
+    return GetPointInstrument(*selection.begin());
 }
 
 std::vector<std::string> Show::GetPointsInstrument() const
@@ -510,6 +524,11 @@ std::vector<std::string> Show::GetPointsInstrument() const
     return instruments;
 }
 
+auto Show::GetPointsInstrument(const CalChart::SelectionList& sl) const -> std::vector<std::string>
+{
+    return CalChart::Ranges::ToVector<std::string>(sl | std::views::transform([this](auto&& i) { return GetPointInstrument(i); }));
+}
+
 SYMBOL_TYPE Show::GetPointSymbol(int i) const
 {
     if (i >= static_cast<int>(mDotLabelAndInstrument.size()))
@@ -517,9 +536,23 @@ SYMBOL_TYPE Show::GetPointSymbol(int i) const
     return GetCurrentSheet()->GetSymbol(i);
 }
 
+auto Show::GetPointSymbol(std::string const& label) const -> std::optional<SYMBOL_TYPE>
+{
+    auto selection = MakeSelectByLabel(label);
+    if (selection.size() == 0) {
+        return std::nullopt;
+    }
+    return GetPointSymbol(*selection.begin());
+}
+
 std::vector<SYMBOL_TYPE> Show::GetPointsSymbol() const
 {
     return GetCurrentSheet()->GetSymbols();
+}
+
+auto Show::GetPointsSymbol(const CalChart::SelectionList& sl) const -> std::vector<SYMBOL_TYPE>
+{
+    return CalChart::Ranges::ToVector<SYMBOL_TYPE>(sl | std::views::transform([this](auto&& i) { return GetPointSymbol(i); }));
 }
 
 bool Show::AlreadyHasPrintContinuity() const
@@ -639,6 +672,16 @@ SelectionList Show::MakeSelectByLabel(std::string const& label) const
         if (mDotLabelAndInstrument[i].first == label) {
             sl.insert(i);
         }
+    }
+    return sl;
+}
+
+SelectionList Show::MakeSelectByLabel(std::vector<std::string> const& labels) const
+{
+    SelectionList sl;
+    for (auto&& label : labels) {
+        auto this_sl = MakeSelectByLabel(label);
+        sl.insert(this_sl.begin(), this_sl.end());
     }
     return sl;
 }

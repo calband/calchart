@@ -31,22 +31,12 @@ class PointPicker : public wxDialog {
     using super = wxDialog;
 
 public:
-    PointPicker(CalChartDoc const& shw, wxWindow* parent);
-    ~PointPicker() = default;
+    PointPicker(wxWindow* parent, CalChartDoc const& show);
+    PointPicker(wxWindow* parent, CalChartDoc const& show, CalChart::SelectionList const& marchersToUse, CalChart::SelectionList const& selected);
+    ~PointPicker() override = default;
 
-    auto GetSelection() const { return mSelection; }
+    auto GetMarchersSelected() const { return mMarcherLabels; }
 
 private:
-    CalChartDoc const& mShow;
-    wxUI::ListBox::Proxy mList{};
-    std::vector<wxString> mCachedLabels;
-    CalChart::SelectionList mSelection;
-
-    void CreateControls();
-    void RereadFromShow();
-
-    void PointPickerAll(wxCommandEvent&);
-    void PointPickerSelect(wxCommandEvent&);
-
-    DECLARE_EVENT_TABLE()
+    std::vector<std::string> mMarcherLabels;
 };
