@@ -538,9 +538,9 @@ auto Sheet::SerializeSheet() const -> std::vector<std::byte>
 }
 
 // Find point at certain coords
-auto Sheet::FindMarcher(Coord where, Coord::units searchBound, unsigned ref) const -> std::optional<int>
+auto Sheet::FindMarcher(Coord where, Coord::units searchBound, unsigned ref) const -> std::optional<MarcherIndex>
 {
-    for (auto i = 0; i < static_cast<int>(mPoints.size()); i++) {
+    for (auto i : std::views::iota(0ul, mPoints.size())) {
         Coord c = GetPosition(i, ref);
         if (((where.x + searchBound) >= c.x) && ((where.x - searchBound) <= c.x) && ((where.y + searchBound) >= c.y) && ((where.y - searchBound) <= c.y)) {
             return i;
@@ -574,18 +574,17 @@ auto Sheet::FindCurve(Coord where, Coord::units searchBound) const -> std::optio
     return std::nullopt;
 }
 
-SelectionList Sheet::MakeSelectPointsBySymbol(SYMBOL_TYPE i) const
+auto Sheet::MakeSelectPointsBySymbol(SYMBOL_TYPE i) const -> SelectionList
 {
     SelectionList select;
-    for (auto j = 0; j < static_cast<int>(mPoints.size()); j++) {
-        if (GetSymbol(j) == i) {
-            select.insert(j);
-        }
-    }
+    std::ranges::for_each(
+        std::views::iota(0ul, mPoints.size())
+            | std::views::filter([&](MarcherIndex j) { return GetSymbol(j) == i; }),
+        [&](MarcherIndex j) { select.insert(j); });
     return select;
 }
 
-std::vector<Point> Sheet::NewNumPointsPositions(int num, int columns, Coord new_march_position) const
+auto Sheet::NewNumPointsPositions(int num, int columns, Coord new_march_position) const -> std::vector<Point>
 {
     std::vector<Point> newpts(mPoints.begin(), mPoints.begin() + std::min<size_t>(mPoints.size(), num));
     auto c = new_march_position;
@@ -617,7 +616,7 @@ void Sheet::ReplaceCurve(Curve const& curve, size_t index) { mCurves.at(index) =
 auto Sheet::GetCurve(size_t index) const -> Curve { return mCurves.at(index); }
 auto Sheet::GetCurvesSize() const -> size_t { return mCurves.size(); }
 
-std::vector<Point> Sheet::RemapPoints(std::vector<size_t> const& table) const
+auto Sheet::RemapPoints(std::vector<MarcherIndex> const& table) const -> std::vector<Point>
 {
     if (mPoints.size() != table.size()) {
         throw std::runtime_error("wrong size for Relabel");
@@ -634,7 +633,7 @@ void Sheet::SetContinuity(SYMBOL_TYPE which, Continuity const& new_cont)
     mAnimationContinuity.at(which) = new_cont;
 }
 
-bool Sheet::ContinuityInUse(SYMBOL_TYPE idx) const
+auto Sheet::ContinuityInUse(SYMBOL_TYPE idx) const -> bool
 {
     auto points = std::vector<int>(mPoints.size());
     std::iota(points.begin(), points.end(), 0);
@@ -647,11 +646,11 @@ bool Sheet::ContinuityInUse(SYMBOL_TYPE idx) const
     return false;
 }
 
-std::string Sheet::GetName() const { return mName; }
+auto Sheet::GetName() const -> std::string { return mName; }
 
 void Sheet::SetName(std::string const& newname) { mName = newname; }
 
-std::string Sheet::GetPrintNumber() const
+auto Sheet::GetPrintNumber() const -> std::string
 {
     return mPrintableContinuity.GetPrintNumber();
 }
@@ -662,13 +661,13 @@ std::string Sheet::GetRawPrintContinuity() const
 }
 
 // Get position of point
-Coord Sheet::GetPosition(unsigned i, unsigned ref) const
+auto Sheet::GetPosition(MarcherIndex i, unsigned ref) const -> Coord
 {
     return mPoints[i].GetPos(ref);
 }
 
 // Set position of point and all refs
-void Sheet::SetAllPositions(Coord val, unsigned i)
+void Sheet::SetAllPositions(Coord val, MarcherIndex i)
 {
     for (unsigned j = 0; j <= Point::kNumRefPoints; j++) {
         mPoints[i].SetPos(val, j);
@@ -676,7 +675,7 @@ void Sheet::SetAllPositions(Coord val, unsigned i)
 }
 
 // Set position of point
-void Sheet::SetPosition(Coord val, unsigned i, unsigned ref)
+void Sheet::SetPosition(Coord val, MarcherIndex i, unsigned ref)
 {
     unsigned j;
     if (ref == 0) {
@@ -696,36 +695,36 @@ void Sheet::SetPrintableContinuity(std::string const& name, std::string const& l
     mPrintableContinuity = PrintContinuity(name, lines);
 }
 
-Textline_list Sheet::GetPrintableContinuity() const
+auto Sheet::GetPrintableContinuity() const -> Textline_list
 {
     return mPrintableContinuity.GetChunks();
 }
 
-auto Sheet::GetMarcher(unsigned i) const -> Point { return mPoints[i]; }
+auto Sheet::GetMarcher(MarcherIndex i) const -> Point { return mPoints[i]; }
 
-void Sheet::SetSymbol(unsigned i, SYMBOL_TYPE sym)
+void Sheet::SetSymbol(MarcherIndex i, SYMBOL_TYPE sym)
 {
     mPoints[i].SetSymbol(sym);
 }
 
-void Sheet::SetMarcherFlip(unsigned i, bool val)
+void Sheet::SetMarcherFlip(MarcherIndex i, bool val)
 {
     mPoints.at(i).Flip(val);
 }
 
-void Sheet::SetMarcherLabelVisibility(unsigned i, bool isVisible)
+void Sheet::SetMarcherLabelVisibility(MarcherIndex i, bool isVisible)
 {
     mPoints.at(i).SetLabelVisibility(isVisible);
 }
 
-std::vector<SYMBOL_TYPE> Sheet::GetSymbols() const
+auto Sheet::GetSymbols() const -> std::vector<SYMBOL_TYPE>
 {
     std::vector<SYMBOL_TYPE> result;
     std::transform(mPoints.begin(), mPoints.end(), std::back_inserter(result), [](auto&& i) { return i.GetSymbol(); });
     return result;
 }
 
-nlohmann::json Sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, std::map<std::string, std::vector<nlohmann::json>> const& movements) const
+auto Sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, std::map<std::string, std::vector<nlohmann::json>> const& movements) const -> nlohmann::json
 {
     nlohmann::json j;
     // TODO; add printed continuities to viewer file manually for now

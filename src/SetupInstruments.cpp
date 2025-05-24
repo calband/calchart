@@ -222,10 +222,10 @@ void SetupInstruments::CreateControls()
         .fitTo(this);
 }
 
-std::map<int, std::string> SetupInstruments::GetInstruments() const
+auto SetupInstruments::GetInstruments() const -> std::map<CalChart::MarcherIndex, std::string>
 {
-    auto result = std::vector<std::pair<int, std::string>>{};
-    std::transform(mDotIndices.begin(), mDotIndices.end(), mInstruments.begin(), std::back_inserter(result), [](auto&& a, auto&& b) -> std::pair<int, std::string> { return { a, b }; });
+    auto result = std::vector<std::pair<CalChart::MarcherIndex, std::string>>{};
+    std::transform(mDotIndices.begin(), mDotIndices.end(), mInstruments.begin(), std::back_inserter(result), [](auto&& a, auto&& b) -> std::pair<CalChart::MarcherIndex, std::string> { return { a, b }; });
     return { result.begin(), result.end() };
 }
 

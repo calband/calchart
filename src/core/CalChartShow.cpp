@@ -392,12 +392,12 @@ auto Show::GenerateFieldWithMarchersDrawCommands(CalChart::Configuration const& 
             }));
 }
 
-int Show::GetNumSheets() const
+auto Show::GetNumSheets() const -> int
 {
     return static_cast<int>(mSheets.size());
 }
 
-Show::Sheet_container_t Show::RemoveNthSheet(int sheetidx)
+auto Show::RemoveNthSheet(int sheetidx) -> Sheet_container_t
 {
     auto i = GetNthSheet(sheetidx);
     Sheet_container_t shts(1, *i);
@@ -415,14 +415,14 @@ Show::Sheet_container_t Show::RemoveNthSheet(int sheetidx)
 
 void Show::SetCurrentSheet(int n) { mSheetNum = n; }
 
-void Show::InsertSheet(const Sheet& sheet, int sheetidx)
+void Show::InsertSheet(Sheet const& sheet, int sheetidx)
 {
     mSheets.insert(mSheets.begin() + sheetidx, sheet);
     if (sheetidx <= GetCurrentSheetNum())
         SetCurrentSheet(GetCurrentSheetNum() + 1);
 }
 
-void Show::InsertSheet(const Sheet_container_t& sheet,
+void Show::InsertSheet(Sheet_container_t const& sheet,
     int sheetidx)
 {
     mSheets.insert(mSheets.begin() + sheetidx, sheet.begin(), sheet.end());
@@ -457,10 +457,10 @@ void Show::SetPointLabelAndInstrument(std::vector<std::pair<std::string, std::st
 
 // A relabel mapping is the mapping you would need to apply to sheet_next (and all following sheets)
 // so that they match with this current sheet
-auto Show::GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const -> std::optional<std::vector<size_t>>
+auto Show::GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const -> std::optional<std::vector<MarcherIndex>>
 {
-    std::vector<size_t> table(GetNumPoints());
-    std::vector<unsigned> used_table(GetNumPoints());
+    std::vector<MarcherIndex> table(GetNumPoints());
+    std::vector<bool> used_table(GetNumPoints());
 
     for (auto i = 0; i < GetNumPoints(); i++) {
         auto j = 0;
@@ -482,14 +482,14 @@ auto Show::GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_it
     return table;
 }
 
-std::string Show::GetPointLabel(int i) const
+auto Show::GetPointLabel(MarcherIndex i) const -> std::string
 {
-    if (i >= static_cast<int>(mDotLabelAndInstrument.size()))
+    if (i >= static_cast<MarcherIndex>(mDotLabelAndInstrument.size()))
         return "";
     return mDotLabelAndInstrument.at(i).first;
 }
 
-std::vector<std::string> Show::GetPointsLabel() const
+auto Show::GetPointsLabel() const -> std::vector<std::string>
 {
     std::vector<std::string> labels;
     std::transform(mDotLabelAndInstrument.begin(), mDotLabelAndInstrument.end(), std::back_inserter(labels), [](auto&& i) { return i.first; });
@@ -501,9 +501,9 @@ auto Show::GetPointsLabel(const CalChart::SelectionList& sl) const -> std::vecto
     return CalChart::Ranges::ToVector<std::string>(sl | std::views::transform([this](auto&& i) { return GetPointLabel(i); }));
 }
 
-std::string Show::GetPointInstrument(int i) const
+auto Show::GetPointInstrument(MarcherIndex i) const -> std::string
 {
-    if (i >= static_cast<int>(mDotLabelAndInstrument.size()))
+    if (i >= static_cast<MarcherIndex>(mDotLabelAndInstrument.size()))
         return "";
     return mDotLabelAndInstrument.at(i).second;
 }
@@ -517,21 +517,21 @@ auto Show::GetPointInstrument(std::string const& label) const -> std::optional<s
     return GetPointInstrument(*selection.begin());
 }
 
-std::vector<std::string> Show::GetPointsInstrument() const
+auto Show::GetPointsInstrument() const -> std::vector<std::string>
 {
     std::vector<std::string> instruments;
     std::transform(mDotLabelAndInstrument.begin(), mDotLabelAndInstrument.end(), std::back_inserter(instruments), [](auto&& i) { return i.second; });
     return instruments;
 }
 
-auto Show::GetPointsInstrument(const CalChart::SelectionList& sl) const -> std::vector<std::string>
+auto Show::GetPointsInstrument(CalChart::SelectionList const& sl) const -> std::vector<std::string>
 {
     return CalChart::Ranges::ToVector<std::string>(sl | std::views::transform([this](auto&& i) { return GetPointInstrument(i); }));
 }
 
-SYMBOL_TYPE Show::GetPointSymbol(int i) const
+auto Show::GetPointSymbol(MarcherIndex i) const -> SYMBOL_TYPE
 {
-    if (i >= static_cast<int>(mDotLabelAndInstrument.size()))
+    if (i >= static_cast<MarcherIndex>(mDotLabelAndInstrument.size()))
         return SYMBOL_PLAIN;
     return GetCurrentSheet()->GetSymbol(i);
 }
@@ -545,17 +545,17 @@ auto Show::GetPointSymbol(std::string const& label) const -> std::optional<SYMBO
     return GetPointSymbol(*selection.begin());
 }
 
-std::vector<SYMBOL_TYPE> Show::GetPointsSymbol() const
+auto Show::GetPointsSymbol() const -> std::vector<SYMBOL_TYPE>
 {
     return GetCurrentSheet()->GetSymbols();
 }
 
-auto Show::GetPointsSymbol(const CalChart::SelectionList& sl) const -> std::vector<SYMBOL_TYPE>
+auto Show::GetPointsSymbol(CalChart::SelectionList const& sl) const -> std::vector<SYMBOL_TYPE>
 {
     return CalChart::Ranges::ToVector<SYMBOL_TYPE>(sl | std::views::transform([this](auto&& i) { return GetPointSymbol(i); }));
 }
 
-bool Show::AlreadyHasPrintContinuity() const
+auto Show::AlreadyHasPrintContinuity() const -> bool
 {
     for (auto& i : mSheets) {
         if (i.GetPrintableContinuity().size() > 0) {
@@ -570,11 +570,11 @@ auto Show::GetSheetsName() const -> std::vector<std::string>
     return CalChart::Ranges::ToVector<std::string>(mSheets | std::views::transform([](auto&& sheet) { return sheet.GetName(); }));
 }
 
-bool Show::WillMovePoints(std::map<int, Coord> const& new_positions, int ref) const
+auto Show::WillMovePoints(MarcherToPosition const& new_positions, int ref) const -> bool
 {
     auto sheet = GetCurrentSheet();
-    for (auto&& index : new_positions) {
-        if (index.second != sheet->GetPosition(index.first, ref)) {
+    for (auto&& [index, position] : new_positions) {
+        if (position != sheet->GetPosition(index, ref)) {
             return true;
         }
     }
@@ -586,7 +586,7 @@ void Show::SetShowMode(ShowMode const& mode)
     mMode = mode;
 }
 
-SelectionList Show::MakeSelectAll() const
+auto Show::MakeSelectAll() const -> SelectionList
 {
     SelectionList sl;
     for (auto i = 0u; i < mDotLabelAndInstrument.size(); ++i)
@@ -594,31 +594,31 @@ SelectionList Show::MakeSelectAll() const
     return sl;
 }
 
-SelectionList Show::MakeUnselectAll() const
+auto Show::MakeUnselectAll() const -> SelectionList
 {
     return {};
 }
 
-void Show::SetSelectionList(const SelectionList& sl)
+void Show::SetSelectionList(SelectionList const& sl)
 {
     mSelectionList = sl;
 }
 
-SelectionList Show::MakeAddToSelection(const SelectionList& sl) const
+auto Show::MakeAddToSelection(SelectionList const& sl) const -> SelectionList
 {
     SelectionList slcopy = mSelectionList;
     slcopy.insert(sl.begin(), sl.end());
     return slcopy;
 }
 
-SelectionList Show::MakeRemoveFromSelection(const SelectionList& sl) const
+auto Show::MakeRemoveFromSelection(SelectionList const& sl) const -> SelectionList
 {
     SelectionList slcopy = mSelectionList;
     slcopy.erase(sl.begin(), sl.end());
     return slcopy;
 }
 
-SelectionList Show::MakeToggleSelection(const SelectionList& sl) const
+auto Show::MakeToggleSelection(SelectionList const& sl) const -> SelectionList
 {
     SelectionList slcopy = mSelectionList;
     for (auto i : sl) {
@@ -633,7 +633,7 @@ SelectionList Show::MakeToggleSelection(const SelectionList& sl) const
 
 // toggle selection means toggle it as selected to unselected
 // otherwise, always select it
-SelectionList Show::MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon, int ref) const
+auto Show::MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon, int ref) const -> SelectionList
 {
     if (polygon.size() < 3) {
         return {};
@@ -649,12 +649,12 @@ SelectionList Show::MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygo
     return sl;
 }
 
-SelectionList Show::MakeSelectBySymbol(SYMBOL_TYPE symbol) const
+auto Show::MakeSelectBySymbol(SYMBOL_TYPE symbol) const -> SelectionList
 {
     return GetCurrentSheet()->MakeSelectPointsBySymbol(symbol);
 }
 
-SelectionList Show::MakeSelectByInstrument(std::string const& instrumentName) const
+auto Show::MakeSelectByInstrument(std::string const& instrumentName) const -> SelectionList
 {
     SelectionList sl;
     for (auto i = 0ul; i < mDotLabelAndInstrument.size(); ++i) {
@@ -665,7 +665,7 @@ SelectionList Show::MakeSelectByInstrument(std::string const& instrumentName) co
     return sl;
 }
 
-SelectionList Show::MakeSelectByLabel(std::string const& label) const
+auto Show::MakeSelectByLabel(std::string const& label) const -> SelectionList
 {
     SelectionList sl;
     for (auto i = 0ul; i < mDotLabelAndInstrument.size(); ++i) {
@@ -676,7 +676,7 @@ SelectionList Show::MakeSelectByLabel(std::string const& label) const
     return sl;
 }
 
-SelectionList Show::MakeSelectByLabel(std::vector<std::string> const& labels) const
+auto Show::MakeSelectByLabels(std::vector<std::string> const& labels) const -> SelectionList
 {
     SelectionList sl;
     for (auto&& label : labels) {
@@ -707,7 +707,7 @@ namespace {
     }
 }
 
-nlohmann::json Show::toOnlineViewerJSON(const Animation& compiledShow) const
+auto Show::toOnlineViewerJSON(Animation const& compiledShow) const -> nlohmann::json
 {
     nlohmann::json j;
 
@@ -731,28 +731,28 @@ nlohmann::json Show::toOnlineViewerJSON(const Animation& compiledShow) const
     return j;
 }
 
-Show_command_pair Show::Create_SetCurrentSheetCommand(int n) const
+auto Show::Create_SetCurrentSheetCommand(int n) const -> Show_command_pair
 {
     auto action = [n = n](Show& show) { show.SetCurrentSheet(n); };
     auto reaction = [n = mSheetNum](Show& show) { show.SetCurrentSheet(n); };
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_SetSelectionListCommand(const SelectionList& sl) const
+auto Show::Create_SetSelectionListCommand(SelectionList const& sl) const -> Show_command_pair
 {
     auto action = [sl](Show& show) { show.SetSelectionList(sl); };
     auto reaction = [sl = mSelectionList](Show& show) { show.SetSelectionList(sl); };
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_SetCurrentSheetAndSelectionCommand(int n, const SelectionList& sl) const
+auto Show::Create_SetCurrentSheetAndSelectionCommand(int n, SelectionList const& sl) const -> Show_command_pair
 {
     auto action = [n, sl](Show& show) { show.SetCurrentSheet(n); show.SetSelectionList(sl); };
     auto reaction = [n = mSheetNum, sl = mSelectionList](Show& show) { show.SetCurrentSheet(n); show.SetSelectionList(sl); };
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_SetShowModeCommand(CalChart::ShowMode const& newmode) const
+auto Show::Create_SetShowModeCommand(CalChart::ShowMode const& newmode) const -> Show_command_pair
 {
     auto action = [mode = newmode](Show& show) {
         show.SetShowMode(mode);
@@ -763,7 +763,7 @@ Show_command_pair Show::Create_SetShowModeCommand(CalChart::ShowMode const& newm
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_SetupMarchersCommand(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int numColumns, Coord const& new_march_position) const
+auto Show::Create_SetupMarchersCommand(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int numColumns, Coord const& new_march_position) const -> Show_command_pair
 {
     auto action = [labelsAndInstruments, numColumns, new_march_position](Show& show) { show.SetNumPoints(labelsAndInstruments, numColumns, new_march_position); };
     // need to go through and save all the positions and labels for later
@@ -781,7 +781,7 @@ Show_command_pair Show::Create_SetupMarchersCommand(std::vector<std::pair<std::s
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_SetInstrumentsCommand(std::map<int, std::string> const& dotToInstrument) const
+auto Show::Create_SetInstrumentsCommand(std::map<MarcherIndex, std::string> const& dotToInstrument) const -> Show_command_pair
 {
     auto old_labels = mDotLabelAndInstrument;
     auto new_labels = old_labels;
@@ -797,28 +797,28 @@ Show_command_pair Show::Create_SetInstrumentsCommand(std::map<int, std::string> 
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_SetSheetTitleCommand(std::string const& newname) const
+auto Show::Create_SetSheetTitleCommand(std::string const& newname) const -> Show_command_pair
 {
     auto action = [whichSheet = mSheetNum, newname](Show& show) { show.mSheets.at(whichSheet).SetName(newname); };
     auto reaction = [whichSheet = mSheetNum, newname = mSheets.at(mSheetNum).GetName()](Show& show) { show.mSheets.at(whichSheet).SetName(newname); };
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_SetSheetBeatsCommand(int beats) const
+auto Show::Create_SetSheetBeatsCommand(Beats beats) const -> Show_command_pair
 {
     auto action = [whichSheet = mSheetNum, beats](Show& show) { show.mSheets.at(whichSheet).SetBeats(beats); };
     auto reaction = [whichSheet = mSheetNum, beats = mSheets.at(mSheetNum).GetBeats()](Show& show) { show.mSheets.at(whichSheet).SetBeats(beats); };
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_AddSheetsCommand(const Show::Sheet_container_t& sheets, int where) const
+auto Show::Create_AddSheetsCommand(const Show::Sheet_container_t& sheets, int where) const -> Show_command_pair
 {
     auto action = [sheets, where](Show& show) { show.InsertSheet(sheets, where); };
     auto reaction = [sheets, where](Show& show) { auto num_times = sheets.size(); while (num_times--) show.RemoveNthSheet(where); };
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_RemoveSheetCommand(int where) const
+auto Show::Create_RemoveSheetCommand(int where) const -> Show_command_pair
 {
     Sheet_container_t old_shts(1, *GetNthSheet(where));
     auto action = [where](Show& show) { show.RemoveNthSheet(where); };
@@ -827,7 +827,7 @@ Show_command_pair Show::Create_RemoveSheetCommand(int where) const
 }
 
 // remapping gets applied on this sheet till the last one
-Show_command_pair Show::Create_ApplyRelabelMapping(int sheet_num_first, std::vector<size_t> const& mapping) const
+auto Show::Create_ApplyRelabelMapping(int sheet_num_first, std::vector<MarcherIndex> const& mapping) const -> Show_command_pair
 {
     std::vector<std::vector<Point>> current_pos;
     for (auto s = GetNthSheet(sheet_num_first); s != GetSheetEnd(); ++s) {
@@ -852,7 +852,7 @@ Show_command_pair Show::Create_ApplyRelabelMapping(int sheet_num_first, std::vec
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string>> const& data) const
+auto Show::Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string>> const& data) const -> Show_command_pair
 {
     std::map<unsigned, std::pair<std::string, std::string>> undo_data;
     for (auto&& i : data) {
@@ -871,15 +871,15 @@ Show_command_pair Show::Create_SetPrintableContinuity(std::map<int, std::pair<st
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_MovePointsCommand(std::map<int, Coord> const& new_positions, int ref) const
+auto Show::Create_MovePointsCommand(MarcherToPosition const& new_positions, int ref) const -> Show_command_pair
 {
     return Create_MovePointsCommand(GetCurrentSheetNum(), new_positions, ref);
 }
 
-Show_command_pair Show::Create_MovePointsCommand(int whichSheet, std::map<int, Coord> const& new_positions, int ref) const
+auto Show::Create_MovePointsCommand(int whichSheet, MarcherToPosition const& new_positions, int ref) const -> Show_command_pair
 {
     auto sheet = GetNthSheet(whichSheet);
-    std::map<unsigned, Coord> original_positions;
+    MarcherToPosition original_positions;
     for (auto&& index : new_positions) {
         original_positions[index.first] = sheet->GetPosition(index.first, ref);
     }
@@ -898,7 +898,7 @@ Show_command_pair Show::Create_MovePointsCommand(int whichSheet, std::map<int, C
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_DeletePointsCommand() const
+auto Show::Create_DeletePointsCommand() const -> Show_command_pair
 {
     auto action = [selectionList = mSelectionList](Show& show) {
         show.DeletePoints(selectionList);
@@ -919,7 +919,7 @@ Show_command_pair Show::Create_DeletePointsCommand() const
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_RotatePointPositionsCommand(int rotateAmount, int ref) const
+auto Show::Create_RotatePointPositionsCommand(int rotateAmount, int ref) const -> Show_command_pair
 {
     // construct a vector of point indices in order
     std::vector<unsigned> pointIndices;
@@ -936,16 +936,16 @@ Show_command_pair Show::Create_RotatePointPositionsCommand(int rotateAmount, int
         finalPositions.end());
 
     // put things into place.
-    std::map<int, Coord> positions;
+    MarcherToPosition positions;
     for (int index = static_cast<int>(pointIndices.size()) - 1; index >= 0; index--) {
         positions[pointIndices[index]] = finalPositions[index];
     }
     return Create_MovePointsCommand(positions, ref);
 }
 
-Show_command_pair Show::Create_ResetReferencePointToRef0(int ref) const
+auto Show::Create_ResetReferencePointToRef0(int ref) const -> Show_command_pair
 {
-    std::map<int, Coord> positions;
+    MarcherToPosition positions;
     auto sheet = GetCurrentSheet();
     // for selected points, set the reference point to ref0
     // this should be per selection list defect #179
@@ -955,15 +955,15 @@ Show_command_pair Show::Create_ResetReferencePointToRef0(int ref) const
     return Create_MovePointsCommand(positions, ref);
 }
 
-Show_command_pair Show::Create_SetSymbolCommand(SYMBOL_TYPE sym) const
+auto Show::Create_SetSymbolCommand(SYMBOL_TYPE sym) const -> Show_command_pair
 {
     return Create_SetSymbolCommand(mSelectionList, sym);
 }
 
-Show_command_pair Show::Create_SetSymbolCommand(const SelectionList& selectionList, SYMBOL_TYPE sym) const
+auto Show::Create_SetSymbolCommand(SelectionList const& selectionList, SYMBOL_TYPE sym) const -> Show_command_pair
 {
-    std::map<unsigned, SYMBOL_TYPE> new_sym;
-    std::map<unsigned, SYMBOL_TYPE> original_sym;
+    std::map<MarcherIndex, SYMBOL_TYPE> new_sym;
+    std::map<MarcherIndex, SYMBOL_TYPE> original_sym;
     auto sheet = GetCurrentSheet();
     for (auto&& i : selectionList) {
         // Only do work on points that have different symbols
@@ -987,7 +987,7 @@ Show_command_pair Show::Create_SetSymbolCommand(const SelectionList& selectionLi
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_SetContinuityCommand(SYMBOL_TYPE which_sym, CalChart::Continuity const& new_cont) const
+auto Show::Create_SetContinuityCommand(SYMBOL_TYPE which_sym, CalChart::Continuity const& new_cont) const -> Show_command_pair
 {
     auto original_cont = GetCurrentSheet()->GetContinuityBySymbol(which_sym);
     auto action = [sheet_num = mSheetNum, which_sym, new_cont](Show& show) {
@@ -999,7 +999,7 @@ Show_command_pair Show::Create_SetContinuityCommand(SYMBOL_TYPE which_sym, CalCh
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_SetLabelFlipCommand(std::map<int, bool> const& new_flip) const
+auto Show::Create_SetLabelFlipCommand(std::map<MarcherIndex, bool> const& new_flip) const -> Show_command_pair
 {
     auto sheet = GetCurrentSheet();
     std::map<unsigned, bool> original_flip;
@@ -1021,18 +1021,18 @@ Show_command_pair Show::Create_SetLabelFlipCommand(std::map<int, bool> const& ne
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_SetLabelRightCommand(bool right) const
+auto Show::Create_SetLabelRightCommand(bool right) const -> Show_command_pair
 {
-    std::map<int, bool> flips;
+    std::map<MarcherIndex, bool> flips;
     for (auto&& i : mSelectionList) {
         flips[i] = right;
     }
     return Create_SetLabelFlipCommand(flips);
 }
 
-Show_command_pair Show::Create_ToggleLabelFlipCommand() const
+auto Show::Create_ToggleLabelFlipCommand() const -> Show_command_pair
 {
-    std::map<int, bool> flips;
+    std::map<MarcherIndex, bool> flips;
     auto sheet = GetCurrentSheet();
     for (auto&& i : mSelectionList) {
         flips[i] = !sheet->GetMarcher(i).GetFlip();
@@ -1040,10 +1040,10 @@ Show_command_pair Show::Create_ToggleLabelFlipCommand() const
     return Create_SetLabelFlipCommand(flips);
 }
 
-Show_command_pair Show::Create_SetLabelVisiblityCommand(std::map<int, bool> const& new_visibility) const
+auto Show::Create_SetLabelVisiblityCommand(std::map<MarcherIndex, bool> const& new_visibility) const -> Show_command_pair
 {
     auto sheet = GetCurrentSheet();
-    std::map<int, bool> original_visibility;
+    std::map<MarcherIndex, bool> original_visibility;
     for (auto&& index : new_visibility) {
         original_visibility[index.first] = sheet->GetMarcher(index.first).LabelIsVisible();
     }
@@ -1062,18 +1062,18 @@ Show_command_pair Show::Create_SetLabelVisiblityCommand(std::map<int, bool> cons
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_SetLabelVisibleCommand(bool isVisible) const
+auto Show::Create_SetLabelVisibleCommand(bool isVisible) const -> Show_command_pair
 {
-    std::map<int, bool> visible;
+    std::map<MarcherIndex, bool> visible;
     for (auto&& i : mSelectionList) {
         visible[i] = isVisible;
     }
     return Create_SetLabelVisiblityCommand(visible);
 }
 
-Show_command_pair Show::Create_ToggleLabelVisibilityCommand() const
+auto Show::Create_ToggleLabelVisibilityCommand() const -> Show_command_pair
 {
-    std::map<int, bool> visible;
+    std::map<MarcherIndex, bool> visible;
     auto sheet = GetCurrentSheet();
     for (auto&& i : mSelectionList) {
         visible[i] = !sheet->GetMarcher(i).LabelIsVisible();
@@ -1081,7 +1081,7 @@ Show_command_pair Show::Create_ToggleLabelVisibilityCommand() const
     return Create_SetLabelVisiblityCommand(visible);
 }
 
-Show_command_pair Show::Create_AddNewBackgroundImageCommand(ImageInfo const& image) const
+auto Show::Create_AddNewBackgroundImageCommand(ImageInfo const& image) const -> Show_command_pair
 {
     auto sheet = GetCurrentSheet();
     auto action = [sheet_num = mSheetNum, image, where = sheet->GetNumberBackgroundImages()](Show& show) {
@@ -1095,7 +1095,7 @@ Show_command_pair Show::Create_AddNewBackgroundImageCommand(ImageInfo const& ima
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_RemoveBackgroundImageCommand(int which) const
+auto Show::Create_RemoveBackgroundImageCommand(int which) const -> Show_command_pair
 {
     auto sheet = GetCurrentSheet();
     if (static_cast<size_t>(which) >= sheet->GetNumberBackgroundImages()) {
@@ -1112,7 +1112,7 @@ Show_command_pair Show::Create_RemoveBackgroundImageCommand(int which) const
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height) const
+auto Show::Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height) const -> Show_command_pair
 {
     auto sheet = GetCurrentSheet();
     auto [current_left, current_top, current_scaled_width, current_scaled_height] = sheet->GetBackgroundImageInfo(which);

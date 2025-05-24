@@ -599,20 +599,20 @@ void TransitionSolverFrame::ClearMembers()
     mSolverParams.groups[mSelectedGroup].marchers.clear();
 }
 
-void TransitionSolverFrame::SetMembers(std::set<int> marchers)
+void TransitionSolverFrame::SetMembers(CalChart::SelectionList marchers)
 {
     ClearMembers();
     AddMembers(marchers);
 }
 
-void TransitionSolverFrame::AddMembers(std::set<int> marchers)
+void TransitionSolverFrame::AddMembers(CalChart::SelectionList marchers)
 {
     for (auto iter = marchers.begin(); iter != marchers.end(); iter++) {
         mSolverParams.groups[mSelectedGroup].marchers.insert(*iter);
     }
 }
 
-void TransitionSolverFrame::RemoveMembers(std::set<int> marchers)
+void TransitionSolverFrame::RemoveMembers(CalChart::SelectionList marchers)
 {
     for (auto iter = marchers.begin(); iter != marchers.end(); iter++) {
         mSolverParams.groups[mSelectedGroup].marchers.erase(*iter);
@@ -624,20 +624,20 @@ void TransitionSolverFrame::ClearDestinations()
     mSolverParams.groups[mSelectedGroup].allowedDestinations.clear();
 }
 
-void TransitionSolverFrame::SetDestinations(std::set<int> marchers)
+void TransitionSolverFrame::SetDestinations(CalChart::SelectionList marchers)
 {
     ClearDestinations();
     AddDestinations(marchers);
 }
 
-void TransitionSolverFrame::AddDestinations(std::set<int> marchers)
+void TransitionSolverFrame::AddDestinations(CalChart::SelectionList marchers)
 {
     for (auto iter = marchers.begin(); iter != marchers.end(); iter++) {
         mSolverParams.groups[mSelectedGroup].allowedDestinations.insert(*iter);
     }
 }
 
-void TransitionSolverFrame::RemoveDestinations(std::set<int> marchers)
+void TransitionSolverFrame::RemoveDestinations(CalChart::SelectionList marchers)
 {
     for (auto iter = marchers.begin(); iter != marchers.end(); iter++) {
         mSolverParams.groups[mSelectedGroup].allowedDestinations.erase(*iter);

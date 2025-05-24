@@ -570,7 +570,7 @@ void FieldCanvas::MoveDrag(CalChart::Coord end)
     }
     if (mMovePointsTool) {
         mMovePointsTool->OnMove(end, [this](auto c) { return SnapToolToGrid(c); });
-        std::map<int, CalChart::Coord> selected_points;
+        CalChart::MarcherToPosition selected_points;
         for (auto i : mView->GetSelectionList()) {
             selected_points[i] = mView->PointPosition(i);
         }
@@ -714,7 +714,7 @@ void FieldCanvas::MoveByKey(direction dir)
     if (!mView || mView->GetSelectionList().empty()) {
         return;
     }
-    std::map<int, CalChart::Coord> move_points;
+    CalChart::MarcherToPosition move_points;
     auto pos = GetMoveAmount(dir);
     // saturate by mode
     for (auto i : mView->GetSelectionList()) {

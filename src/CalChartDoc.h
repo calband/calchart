@@ -126,41 +126,41 @@ private:
 
 public:
     // translates input into a mapping of which sheet to number,lines pair.
-    std::pair<bool, std::map<int, std::pair<std::string, std::string>>> ImportPrintableContinuity(std::vector<std::string> const& lines) const;
+    [[nodiscard]] auto ImportPrintableContinuity(std::vector<std::string> const& lines) const -> std::pair<bool, std::map<int, std::pair<std::string, std::string>>>;
 
     void FlushAllTextWindows();
 
     void WizardSetupNewShow(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int columns, CalChart::ShowMode const& newmode);
 
-    auto GetNumSheets() const { return mShow ? mShow->GetNumSheets() : 0; }
+    [[nodiscard]] auto GetNumSheets() const { return mShow ? mShow->GetNumSheets() : 0; }
 
     [[nodiscard]] auto GetSheetsName() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetsName(); }
 
-    auto GetSheetBegin() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetBegin(); }
-    auto GetSheetEnd() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetEnd(); }
-    auto GetNthSheet(int n) const { return static_cast<CalChart::Show const&>(*mShow).GetNthSheet(n); }
-    auto GetCurrentSheet() const { return static_cast<CalChart::Show const&>(*mShow).GetCurrentSheet(); }
+    [[nodiscard]] auto GetSheetBegin() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetBegin(); }
+    [[nodiscard]] auto GetSheetEnd() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetEnd(); }
+    [[nodiscard]] auto GetNthSheet(int n) const { return static_cast<CalChart::Show const&>(*mShow).GetNthSheet(n); }
+    [[nodiscard]] auto GetCurrentSheet() const { return static_cast<CalChart::Show const&>(*mShow).GetCurrentSheet(); }
 
-    auto GetCurrentSheetNum() const { return static_cast<CalChart::Show const&>(*mShow).GetCurrentSheetNum(); }
+    [[nodiscard]] auto GetCurrentSheetNum() const { return static_cast<CalChart::Show const&>(*mShow).GetCurrentSheetNum(); }
     void SetCurrentSheet(int n);
 
-    auto GetNumPoints() const { return mShow->GetNumPoints(); }
+    [[nodiscard]] auto GetNumPoints() const { return mShow->GetNumPoints(); }
     [[nodiscard]] auto GetRelabelMapping(CalChart::Show::const_Sheet_iterator_t source_sheet, CalChart::Show::const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const
     {
         return mShow->GetRelabelMapping(source_sheet, target_sheets, tolerance);
     }
 
-    auto GetPointLabel(int i) const { return mShow->GetPointLabel(i); }
-    auto GetPointsLabel() const { return mShow->GetPointsLabel(); }
-    auto GetPointsLabel(const CalChart::SelectionList& sl) const { return mShow->GetPointsLabel(sl); }
-    auto GetPointInstrument(int i) const { return mShow->GetPointInstrument(i); }
-    auto GetPointInstrument(std::string const& label) const { return mShow->GetPointInstrument(label); }
-    auto GetPointsInstrument() const { return mShow->GetPointsInstrument(); }
-    auto GetPointsInstrument(const CalChart::SelectionList& sl) const { return mShow->GetPointsInstrument(sl); }
-    auto GetPointSymbol(int i) const { return mShow->GetPointSymbol(i); }
-    auto GetPointSymbol(std::string const& label) const { return mShow->GetPointSymbol(label); }
-    auto GetPointsSymbol() const { return mShow->GetPointsSymbol(); }
-    auto GetPointsSymbol(const CalChart::SelectionList& sl) const { return mShow->GetPointsSymbol(sl); }
+    [[nodiscard]] auto GetPointLabel(CalChart::MarcherIndex i) const { return mShow->GetPointLabel(i); }
+    [[nodiscard]] auto GetPointsLabel() const { return mShow->GetPointsLabel(); }
+    [[nodiscard]] auto GetPointsLabel(CalChart::SelectionList const& sl) const { return mShow->GetPointsLabel(sl); }
+    [[nodiscard]] auto GetPointInstrument(CalChart::MarcherIndex i) const { return mShow->GetPointInstrument(i); }
+    [[nodiscard]] auto GetPointInstrument(std::string const& label) const { return mShow->GetPointInstrument(label); }
+    [[nodiscard]] auto GetPointsInstrument() const { return mShow->GetPointsInstrument(); }
+    [[nodiscard]] auto GetPointsInstrument(CalChart::SelectionList const& sl) const { return mShow->GetPointsInstrument(sl); }
+    [[nodiscard]] auto GetPointSymbol(CalChart::MarcherIndex i) const { return mShow->GetPointSymbol(i); }
+    [[nodiscard]] auto GetPointSymbol(std::string const& label) const { return mShow->GetPointSymbol(label); }
+    [[nodiscard]] auto GetPointsSymbol() const { return mShow->GetPointsSymbol(); }
+    [[nodiscard]] auto GetPointsSymbol(CalChart::SelectionList const& sl) const { return mShow->GetPointsSymbol(sl); }
 
     [[nodiscard]] auto GetContinuities() const { return GetCurrentSheet()->GetContinuities(); }
     [[nodiscard]] auto ContinuitiesInUse() const { return GetCurrentSheet()->ContinuitiesInUse(); }
@@ -171,47 +171,47 @@ public:
     // how to select points
     // Utility functions for constructing new selection lists
     // Then you push the selection list with the Create_SetSelectionListCommand
-    auto MakeSelectAll() const { return mShow->MakeSelectAll(); }
-    auto MakeUnselectAll() const { return mShow->MakeUnselectAll(); }
-    auto MakeAddToSelection(const CalChart::SelectionList& sl) const { return mShow->MakeAddToSelection(sl); }
-    auto MakeRemoveFromSelection(const CalChart::SelectionList& sl) const { return mShow->MakeRemoveFromSelection(sl); }
-    auto MakeToggleSelection(const CalChart::SelectionList& sl) const { return mShow->MakeToggleSelection(sl); }
-    auto MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon) const { return mShow->MakeSelectWithinPolygon(polygon, mCurrentReferencePoint); }
+    [[nodiscard]] auto MakeSelectAll() const { return mShow->MakeSelectAll(); }
+    [[nodiscard]] auto MakeUnselectAll() const { return mShow->MakeUnselectAll(); }
+    [[nodiscard]] auto MakeAddToSelection(CalChart::SelectionList const& sl) const { return mShow->MakeAddToSelection(sl); }
+    [[nodiscard]] auto MakeRemoveFromSelection(CalChart::SelectionList const& sl) const { return mShow->MakeRemoveFromSelection(sl); }
+    [[nodiscard]] auto MakeToggleSelection(CalChart::SelectionList const& sl) const { return mShow->MakeToggleSelection(sl); }
+    [[nodiscard]] auto MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon) const { return mShow->MakeSelectWithinPolygon(polygon, mCurrentReferencePoint); }
     [[nodiscard]] auto MakeSelectBySymbol(CalChart::SYMBOL_TYPE symbol) const { return mShow->MakeSelectBySymbol(symbol); }
-    auto MakeSelectByInstrument(std::string const& instrument) const { return mShow->MakeSelectByInstrument(instrument); }
-    auto MakeSelectByLabel(std::string const& label) const { return mShow->MakeSelectByLabel(label); }
-    auto MakeSelectByLabel(std::vector<std::string> const& label) const { return mShow->MakeSelectByLabel(label); }
+    [[nodiscard]] auto MakeSelectByInstrument(std::string const& instrument) const { return mShow->MakeSelectByInstrument(instrument); }
+    [[nodiscard]] auto MakeSelectByLabel(std::string const& label) const { return mShow->MakeSelectByLabel(label); }
+    [[nodiscard]] auto MakeSelectByLabels(std::vector<std::string> const& label) const { return mShow->MakeSelectByLabels(label); }
 
     void SetSelectionList(CalChart::SelectionList const& sl);
 
-    auto IsSelected(int i) const { return mShow->IsSelected(i); }
-    auto GetSelectionList() const { return mShow->GetSelectionList(); }
+    [[nodiscard]] auto IsSelected(CalChart::MarcherIndex i) const { return mShow->IsSelected(i); }
+    [[nodiscard]] auto GetSelectionList() const { return mShow->GetSelectionList(); }
 
-    auto GetSelect() const { return mSelect; }
+    [[nodiscard]] auto GetSelect() const { return mSelect; }
     void SetSelect(CalChart::Select select);
-    auto GetCurrentReferencePoint() const { return mCurrentReferencePoint; }
+    [[nodiscard]] auto GetCurrentReferencePoint() const { return mCurrentReferencePoint; }
     void SetCurrentReferencePoint(int currentReferencePoint);
-    [[nodiscard]] auto FindMarcher(CalChart::Coord pos) const -> std::optional<int>;
+    [[nodiscard]] auto FindMarcher(CalChart::Coord pos) const -> std::optional<CalChart::MarcherIndex>;
     // Determine if the position is on a curve control point, if so, return which curve and which control point.
     [[nodiscard]] auto FindCurveControlPoint(CalChart::Coord pos) const -> std::optional<std::tuple<size_t, size_t>>;
     // Determine if the position is on a curve, if so, return which curve and the lower control point.
     [[nodiscard]] auto FindCurve(CalChart::Coord pos) const -> std::optional<std::tuple<size_t, size_t>>;
-    auto GetDrawPaths() const { return mDrawPaths; }
+    [[nodiscard]] auto GetDrawPaths() const { return mDrawPaths; }
     void SetDrawPaths(bool drawPaths);
-    auto GetDrawBackground() const { return mDrawBackground; }
+    [[nodiscard]] auto GetDrawBackground() const { return mDrawBackground; }
     void SetDrawBackground(bool drawBackground);
-    auto GetCurrentMove() const { return mCurrentMove; }
+    [[nodiscard]] auto GetCurrentMove() const { return mCurrentMove; }
     void SetCurrentMove(CalChart::MoveMode move);
     [[nodiscard]] auto IsDrawingCurve() const { return mDrawingCurve; }
     void SetDrawingCurve(bool drawingCurve) { mDrawingCurve = drawingCurve; }
 
-    auto GetGhostModuleIsActive() const { return mGhostSource != GhostSource::disabled; }
-    auto GetGhostSource() const { return mGhostSource; };
+    [[nodiscard]] auto GetGhostModuleIsActive() const { return mGhostSource != GhostSource::disabled; }
+    [[nodiscard]] auto GetGhostSource() const { return mGhostSource; };
     void SetGhostSource(GhostSource source, int which = 0);
 
-    CalChart::ShowMode const& GetShowMode() const;
+    [[nodiscard]] CalChart::ShowMode const& GetShowMode() const;
     [[nodiscard]] auto GetShowFieldOffset() const { return GetShowMode().Offset(); }
-    CalChart::Configuration& GetConfiguration() const { return mConfig; }
+    [[nodiscard]] CalChart::Configuration& GetConfiguration() const { return mConfig; }
 
     [[nodiscard]] auto GetAnimationInfo(CalChart::Beats whichBeat, int which) const -> std::optional<CalChart::Animate::Info>;
     [[nodiscard]] auto GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::Beats whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>;
@@ -230,55 +230,54 @@ public:
     [[nodiscard]] auto GenerateGhostPointsDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>;
     [[nodiscard]] auto GenerateCurrentSheetPointsDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>;
 
-    [[nodiscard]] auto GeneratePhatomPointsDrawCommands(
-        const std::map<int, CalChart::Coord>& positions) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GeneratePhatomPointsDrawCommands(CalChart::MarcherToPosition const& positions) const -> std::vector<CalChart::Draw::DrawCommand>;
     [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands() const { return mShow->GenerateFieldWithMarchersDrawCommands(mConfig); }
 
-    auto AlreadyHasPrintContinuity() const { return mShow->AlreadyHasPrintContinuity(); }
+    [[nodiscard]] auto AlreadyHasPrintContinuity() const { return mShow->AlreadyHasPrintContinuity(); }
     [[nodiscard]] auto GetPrintNumber() const { return GetCurrentSheet()->GetPrintNumber(); }
     [[nodiscard]] auto GetRawPrintContinuity() const { return GetCurrentSheet()->GetRawPrintContinuity(); }
     [[nodiscard]] auto GetPrintContinuity() const { return GetCurrentSheet()->GetPrintContinuity(); }
 
-    auto WillMovePoints(std::map<int, CalChart::Coord> const& new_positions) const { return mShow->WillMovePoints(new_positions, mCurrentReferencePoint); }
-    auto PrintToPS(bool overview, int min_yards, std::set<size_t> const& isPicked, CalChart::Configuration const& config_) const -> std::tuple<std::string, int>;
+    [[nodiscard]] auto WillMovePoints(CalChart::MarcherToPosition const& new_positions) const { return mShow->WillMovePoints(new_positions, mCurrentReferencePoint); }
+    [[nodiscard]] auto PrintToPS(bool overview, int min_yards, std::set<size_t> const& isPicked, CalChart::Configuration const& config_) const -> std::tuple<std::string, int>;
 
     // create a set of commands to apply to the document.  This is the best way to interact with the doc.
-    std::unique_ptr<wxCommand> Create_SetCurrentSheetCommand(int n);
-    std::unique_ptr<wxCommand> Create_SetSelectionListCommand(const CalChart::SelectionList& sl);
-    std::unique_ptr<wxCommand> Create_SetCurrentSheetAndSelectionCommand(int n, const CalChart::SelectionList& sl);
-    std::unique_ptr<wxCommand> Create_SetShowModeCommand(CalChart::ShowMode const& newmode);
-    std::unique_ptr<wxCommand> Create_SetupMarchersCommand(std::vector<std::pair<std::string, std::string>> const& labels, int numColumns);
-    std::unique_ptr<wxCommand> Create_SetInstrumentsCommand(std::map<int, std::string> const& dotToInstrument);
-    std::unique_ptr<wxCommand> Create_SetSheetTitleCommand(const wxString& newname);
-    std::unique_ptr<wxCommand> Create_SetSheetBeatsCommand(int beats);
-    std::unique_ptr<wxCommand> Create_AddSheetsCommand(const CalChart::Show::Sheet_container_t& sheets, int where);
-    std::unique_ptr<wxCommand> Create_RemoveSheetCommand(int where);
-    std::unique_ptr<wxCommand> Create_ApplyRelabelMapping(int sheet, std::vector<size_t> const& mapping);
-    std::unique_ptr<wxCommand> Create_AppendShow(std::unique_ptr<CalChartDoc> sheets, CalChart::Coord::units tolerance);
-    std::unique_ptr<wxCommand> Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string>> const& data);
-    std::unique_ptr<wxCommand> Create_MovePointsCommand(std::map<int, CalChart::Coord> const& new_positions);
-    std::unique_ptr<wxCommand> Create_MovePointsCommand(unsigned whichSheet, std::map<int, CalChart::Coord> const& new_positions);
-    std::unique_ptr<wxCommand> Create_DeletePointsCommand();
-    std::unique_ptr<wxCommand> Create_RotatePointPositionsCommand(int rotateAmount);
-    std::unique_ptr<wxCommand> Create_ResetReferencePointToRef0();
-    std::unique_ptr<wxCommand> Create_SetSymbolCommand(CalChart::SYMBOL_TYPE sym);
-    std::unique_ptr<wxCommand> Create_SetContinuityCommand(CalChart::SYMBOL_TYPE i, CalChart::Continuity const& new_cont);
-    std::unique_ptr<wxCommand> Create_SetLabelRightCommand(bool right);
-    std::unique_ptr<wxCommand> Create_ToggleLabelFlipCommand();
-    std::unique_ptr<wxCommand> Create_SetLabelVisibleCommand(bool isVisible);
-    std::unique_ptr<wxCommand> Create_ToggleLabelVisibilityCommand();
-    std::unique_ptr<wxCommand> Create_AddNewBackgroundImageCommand(CalChart::ImageInfo const& image);
-    std::unique_ptr<wxCommand> Create_RemoveBackgroundImageCommand(int which);
-    std::unique_ptr<wxCommand> Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height);
-    std::unique_ptr<wxCommand> Create_SetTransitionCommand(const std::vector<CalChart::Coord>& finalPositions, const std::map<CalChart::SYMBOL_TYPE, std::string>& continuities, const std::vector<CalChart::SYMBOL_TYPE>& marcherDotTypes);
+    [[nodiscard]] auto Create_SetCurrentSheetCommand(int n) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_SetSelectionListCommand(const CalChart::SelectionList& sl) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_SetCurrentSheetAndSelectionCommand(int n, const CalChart::SelectionList& sl) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_SetShowModeCommand(CalChart::ShowMode const& newmode) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_SetupMarchersCommand(std::vector<std::pair<std::string, std::string>> const& labels, int numColumns) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_SetInstrumentsCommand(std::map<CalChart::MarcherIndex, std::string> const& dotToInstrument) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_SetSheetTitleCommand(wxString const& newname) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_SetSheetBeatsCommand(CalChart::Beats beats) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_AddSheetsCommand(CalChart::Show::Sheet_container_t const& sheets, int where) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_RemoveSheetCommand(int where) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_ApplyRelabelMapping(int sheet, std::vector<CalChart::MarcherIndex> const& mapping) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_AppendShow(std::unique_ptr<CalChartDoc> sheets, CalChart::Coord::units tolerance) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string>> const& data) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_MovePointsCommand(CalChart::MarcherToPosition const& new_positions) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_MovePointsCommand(unsigned whichSheet, CalChart::MarcherToPosition const& new_positions) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_DeletePointsCommand() -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_RotatePointPositionsCommand(int rotateAmount) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_ResetReferencePointToRef0() -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_SetSymbolCommand(CalChart::SYMBOL_TYPE sym) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_SetContinuityCommand(CalChart::SYMBOL_TYPE i, CalChart::Continuity const& new_cont) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_SetLabelRightCommand(bool right) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_ToggleLabelFlipCommand() -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_SetLabelVisibleCommand(bool isVisible) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_ToggleLabelVisibilityCommand() -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_AddNewBackgroundImageCommand(CalChart::ImageInfo const& image) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_RemoveBackgroundImageCommand(int which) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_SetTransitionCommand(std::vector<CalChart::Coord> const& finalPositions, const std::map<CalChart::SYMBOL_TYPE, std::string>& continuities, const std::vector<CalChart::SYMBOL_TYPE>& marcherDotTypes) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_AddSheetCurveCommand(CalChart::Curve const& curve) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_ReplaceSheetCurveCommand(CalChart::Curve const& curve, int whichCurve) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_RemoveSheetCurveCommand(int whichCurve) -> std::unique_ptr<wxCommand>;
 
 private:
-    static CC_doc_command_pair Inject_CalChartDocArg(CalChart::Show_command_pair);
-    std::vector<CC_doc_command_pair> Create_SetSheetPair() const;
-    std::vector<CC_doc_command_pair> Create_SetSheetAndSelectionPair() const;
+    [[nodiscard]] static auto Inject_CalChartDocArg(CalChart::Show_command_pair) -> CC_doc_command_pair;
+    [[nodiscard]] auto Create_SetSheetPair() const -> std::vector<CC_doc_command_pair>;
+    [[nodiscard]] auto Create_SetSheetAndSelectionPair() const -> std::vector<CC_doc_command_pair>;
 
     [[nodiscard]] auto GetGhostSheet() const -> CalChart::Sheet const*;
     [[nodiscard]] auto GeneratePathsDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>;
@@ -295,7 +294,7 @@ private:
     // that file instead.
     // When we save a file, the recovery file should be removed to prevent
     // a false detection that the file writing failed.
-    static wxString TranslateNameToAutosaveName(const wxString& name);
+    static auto TranslateNameToAutosaveName(const wxString& name) -> wxString;
     void Autosave();
 
     class AutoSaveTimer : public wxTimer {

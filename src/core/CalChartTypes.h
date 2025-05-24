@@ -24,6 +24,7 @@
 */
 
 #include <functional>
+#include <map>
 #include <set>
 #include <string>
 
@@ -39,11 +40,12 @@ struct ParseErrorHandlers {
     VersionMismatchNotice_t mVersionMismatchHandler{};
 };
 
-using SelectionList = std::set<int>;
+using MarcherIndex = unsigned;
+using SelectionList = std::set<MarcherIndex>;
 
 using Beats = unsigned;
 
-enum class MoveMode {
+enum class MoveMode : uint8_t {
     Normal,
     ShapeLine,
     ShapeX,
