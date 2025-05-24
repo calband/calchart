@@ -22,6 +22,7 @@
 */
 
 #include "CalChartAngles.h"
+#include "CalChartTypes.h"
 
 #include <compare>
 #include <cstdint>
@@ -124,6 +125,7 @@ struct CoordBasic {
 };
 
 using Coord = CoordBasic<int>;
+using MarcherToPosition = std::map<MarcherIndex, Coord>;
 
 template <Arithmetic T>
 [[nodiscard]] constexpr auto operator+(CoordBasic<T> lhs, CoordBasic<T> rhs) -> CoordBasic<T>

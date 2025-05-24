@@ -61,13 +61,13 @@ private:
     void SelectGroup(unsigned groupIndex);
     void UnselectGroup();
     void ClearMembers();
-    void SetMembers(std::set<int> marchers);
-    void AddMembers(std::set<int> marchers);
-    void RemoveMembers(std::set<int> marchers);
+    void SetMembers(CalChart::SelectionList marchers);
+    void AddMembers(CalChart::SelectionList marchers);
+    void RemoveMembers(CalChart::SelectionList marchers);
     void ClearDestinations();
-    void SetDestinations(std::set<int> marchers);
-    void AddDestinations(std::set<int> marchers);
-    void RemoveDestinations(std::set<int> marchers);
+    void SetDestinations(CalChart::SelectionList marchers);
+    void AddDestinations(CalChart::SelectionList marchers);
+    void RemoveDestinations(CalChart::SelectionList marchers);
 
     std::vector<CalChart::TransitionSolverParams::MarcherInstruction> mInstructionOptions;
     int mSelectedGroup;

@@ -34,92 +34,92 @@ namespace CalChart {
 
 class MovePointsTool_Normal : public MovePointsTool {
 public:
-    virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnClickDown(CalChart::Coord pos) override;
+    auto TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition override;
+    void OnClickDown(CalChart::Coord pos) override;
 };
 
 class MovePointsTool_MoveLine : public MovePointsTool {
 public:
-    virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnClickDown(CalChart::Coord pos) override;
+    auto TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition override;
+    void OnClickDown(CalChart::Coord pos) override;
 };
 
 class MovePointsTool_MoveRotate : public MovePointsTool {
 public:
-    virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnClickDown(CalChart::Coord pos) override;
-    virtual void OnClickUp(CalChart::Coord pos) override;
-    virtual bool IsDone() const override;
-    virtual bool IsReadyForMoving() const override;
+    auto TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition override;
+    void OnClickDown(CalChart::Coord pos) override;
+    void OnClickUp(CalChart::Coord pos) override;
+    bool IsDone() const override;
+    bool IsReadyForMoving() const override;
 };
 
 class MovePointsTool_MoveShear : public MovePointsTool {
 public:
-    virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnClickDown(CalChart::Coord pos) override;
-    virtual void OnClickUp(CalChart::Coord pos) override;
-    virtual bool IsDone() const override;
-    virtual bool IsReadyForMoving() const override;
+    auto TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition override;
+    void OnClickDown(CalChart::Coord pos) override;
+    void OnClickUp(CalChart::Coord pos) override;
+    bool IsDone() const override;
+    bool IsReadyForMoving() const override;
 };
 
 class MovePointsTool_MoveReflect : public MovePointsTool {
 public:
-    virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnClickDown(CalChart::Coord pos) override;
+    auto TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition override;
+    void OnClickDown(CalChart::Coord pos) override;
 };
 
 class MovePointsTool_MoveSize : public MovePointsTool {
 public:
-    virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnClickDown(CalChart::Coord pos) override;
-    virtual void OnClickUp(CalChart::Coord pos) override;
-    virtual bool IsDone() const override;
-    virtual bool IsReadyForMoving() const override;
+    auto TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition override;
+    void OnClickDown(CalChart::Coord pos) override;
+    void OnClickUp(CalChart::Coord pos) override;
+    bool IsDone() const override;
+    bool IsReadyForMoving() const override;
 };
 
 class MovePointsTool_MoveGenius : public MovePointsTool {
 public:
-    virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnClickDown(CalChart::Coord pos) override;
-    virtual void OnClickUp(CalChart::Coord pos) override;
-    virtual bool IsDone() const override;
-    virtual bool IsReadyForMoving() const override;
+    auto TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition override;
+    void OnClickDown(CalChart::Coord pos) override;
+    void OnClickUp(CalChart::Coord pos) override;
+    bool IsDone() const override;
+    bool IsReadyForMoving() const override;
 };
 
 class MovePointsTool_ShapeLine : public MovePointsTool {
 public:
-    virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnClickDown(CalChart::Coord pos) override;
+    auto TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition override;
+    void OnClickDown(CalChart::Coord pos) override;
 };
 
 class MovePointsTool_ShapeEllipse : public MovePointsTool {
 public:
-    virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnClickDown(CalChart::Coord pos) override;
+    auto TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition override;
+    void OnClickDown(CalChart::Coord pos) override;
 };
 
 class MovePointsTool_ShapeRectangle : public MovePointsTool {
 public:
-    virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnClickDown(CalChart::Coord pos) override;
+    auto TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition override;
+    void OnClickDown(CalChart::Coord pos) override;
 };
 
 class MovePointsTool_ShapeDraw : public MovePointsTool {
 public:
-    virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnClickDown(CalChart::Coord pos) override;
+    auto TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition override;
+    void OnClickDown(CalChart::Coord pos) override;
 };
 
 class MovePointsTool_ShapeX : public MovePointsTool {
 public:
-    virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnClickDown(CalChart::Coord pos) override;
+    auto TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition override;
+    void OnClickDown(CalChart::Coord pos) override;
 };
 
 class MovePointsTool_ShapeCross : public MovePointsTool {
 public:
-    virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnClickDown(CalChart::Coord pos) override;
+    auto TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition override;
+    void OnClickDown(CalChart::Coord pos) override;
 };
 
 std::unique_ptr<MovePointsTool> MovePointsTool::Create(CalChart::MoveMode curr_move)
@@ -157,9 +157,9 @@ std::unique_ptr<MovePointsTool> MovePointsTool::Create(CalChart::MoveMode curr_m
 }
 
 template <typename T>
-static std::map<int, CalChart::Coord> GetTransformedPoints(const Matrix<T>& transmat, std::map<int, CalChart::Coord> const& select_list)
+static auto GetTransformedPoints(const Matrix<T>& transmat, MarcherToPosition const& select_list) -> MarcherToPosition
 {
-    std::map<int, CalChart::Coord> result;
+    MarcherToPosition result;
     for (auto i : select_list) {
         auto c = i.second;
         Vector<T> v(c.x, c.y, 0);
@@ -171,14 +171,14 @@ static std::map<int, CalChart::Coord> GetTransformedPoints(const Matrix<T>& tran
     return result;
 }
 
-static std::vector<int> get_ordered_selection(std::map<int, CalChart::Coord> const& select_list)
+static auto get_ordered_selection(MarcherToPosition const& select_list) -> std::vector<MarcherIndex>
 {
     // stuff all the points into a map, which will order them.  Then pull out the points.
-    std::multimap<CalChart::Coord, int> ordered;
+    std::multimap<CalChart::Coord, MarcherIndex> ordered;
     for (auto&& i : select_list) {
         ordered.insert({ i.second, i.first });
     }
-    std::vector<int> result;
+    std::vector<MarcherIndex> result;
     for (auto&& i : ordered) {
         result.push_back(i.second);
     }
@@ -237,14 +237,14 @@ void MovePointsTool_MoveLine::OnClickDown(CalChart::Coord pos)
     BeginMoveDrag(Drag::LINE, pos);
 }
 
-std::map<int, CalChart::Coord> MovePointsTool_MoveLine::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+auto MovePointsTool_MoveLine::TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition
 {
     assert(m_shape_list.size() == 1);
     auto* shape = static_cast<CalChart::Shape_2point const*>(m_shape_list.back().get());
     auto start = shape->GetOrigin();
     auto second = shape->GetPoint();
     auto curr_pos = start;
-    std::map<int, CalChart::Coord> result;
+    MarcherToPosition result;
     auto ordered = get_ordered_selection(select_list);
     for (auto i : ordered) {
         // should this have a snap to grid?
@@ -259,11 +259,11 @@ void MovePointsTool_Normal::OnClickDown(CalChart::Coord pos)
     BeginMoveDrag(Drag::LINE, pos);
 }
 
-std::map<int, CalChart::Coord> MovePointsTool_Normal::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+auto MovePointsTool_Normal::TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition
 {
     auto* shape = static_cast<CalChart::Shape_2point const*>(m_shape_list.back().get());
     auto pos = shape->GetPoint() - shape->GetOrigin();
-    std::map<int, CalChart::Coord> result;
+    MarcherToPosition result;
     for (auto i = select_list.begin(); i != select_list.end(); ++i) {
         result[i->first] = i->second + pos;
     }
@@ -283,7 +283,7 @@ void MovePointsTool_MoveRotate::OnClickDown(CalChart::Coord pos)
     }
 }
 
-std::map<int, CalChart::Coord> MovePointsTool_MoveRotate::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+auto MovePointsTool_MoveRotate::TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition
 {
     if (m_shape_list.size() < 2) {
         return select_list;
@@ -331,7 +331,7 @@ void MovePointsTool_MoveShear::OnClickDown(CalChart::Coord pos)
     }
 }
 
-std::map<int, CalChart::Coord> MovePointsTool_MoveShear::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+auto MovePointsTool_MoveShear::TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition
 {
     if (m_shape_list.size() < 2) {
         return select_list;
@@ -382,7 +382,7 @@ void MovePointsTool_MoveReflect::OnClickDown(CalChart::Coord pos)
     BeginMoveDrag(Drag::LINE, pos);
 }
 
-std::map<int, CalChart::Coord> MovePointsTool_MoveReflect::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+auto MovePointsTool_MoveReflect::TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition
 {
     assert(m_shape_list.size() == 1);
     auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
@@ -403,7 +403,7 @@ void MovePointsTool_MoveSize::OnClickDown(CalChart::Coord pos)
     }
 }
 
-std::map<int, CalChart::Coord> MovePointsTool_MoveSize::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+auto MovePointsTool_MoveSize::TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition
 {
     if (m_shape_list.size() < 2) {
         return select_list;
@@ -429,7 +429,7 @@ std::map<int, CalChart::Coord> MovePointsTool_MoveSize::TransformPoints(std::map
             auto m = TranslationMatrix(Vector<float>(-c1.x, -c1.y, 0)) * ScaleMatrix(Vector<float>(sx, sy, 0)) * TranslationMatrix(Vector<float>(c1.x, c1.y, 0));
             return GetTransformedPoints(m, select_list);
         }
-        return std::map<int, CalChart::Coord>{};
+        return {};
     }
 }
 
@@ -465,7 +465,7 @@ void MovePointsTool_MoveGenius::OnClickDown(CalChart::Coord pos)
     }
 }
 
-std::map<int, CalChart::Coord> MovePointsTool_MoveGenius::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+auto MovePointsTool_MoveGenius::TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition
 {
     if (m_shape_list.size() < 3) {
         return select_list;
@@ -482,7 +482,7 @@ std::map<int, CalChart::Coord> MovePointsTool_MoveGenius::TransformPoints(std::m
         auto e3 = v3->GetPoint();
         auto d = (float)s1.x * (float)s2.y - (float)s2.x * (float)s1.y + (float)s3.x * (float)s1.y - (float)s1.x * (float)s3.y + (float)s2.x * (float)s3.y - (float)s3.x * (float)s2.y;
         if (IS_ZERO(d)) {
-            return std::map<int, CalChart::Coord>{};
+            return {};
         } else {
             auto A = Matrix(Vector<float>(e1.x, e2.x, 0, e3.x), Vector<float>(e1.y, e2.y, 0, e3.y),
                 Vector<float>(0, 0, 0, 0), Vector<float>(1, 1, 0, 1));
@@ -524,14 +524,14 @@ void MovePointsTool_ShapeLine::OnClickDown(CalChart::Coord pos)
     BeginMoveDrag(Drag::LINE, pos);
 }
 
-std::map<int, CalChart::Coord> MovePointsTool_ShapeLine::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+auto MovePointsTool_ShapeLine::TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition
 {
     assert(m_shape_list.size() == 1);
     auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
     auto start = shape->GetOrigin();
     auto second = shape->GetPoint();
     auto curr_pos = start;
-    std::map<int, CalChart::Coord> result;
+    MarcherToPosition result;
     auto distance = (select_list.size() > 1) ? (second - start) / static_cast<float>(select_list.size() - 1) : start;
     auto ordered = get_ordered_selection(select_list);
     for (auto i : ordered) {
@@ -547,7 +547,7 @@ void MovePointsTool_ShapeEllipse::OnClickDown(CalChart::Coord pos)
     BeginMoveDrag(Drag::SHAPE_ELLIPSE, pos);
 }
 
-std::map<int, CalChart::Coord> MovePointsTool_ShapeEllipse::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+auto MovePointsTool_ShapeEllipse::TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition
 {
     assert(m_shape_list.size() == 1);
     auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
@@ -556,7 +556,7 @@ std::map<int, CalChart::Coord> MovePointsTool_ShapeEllipse::TransformPoints(std:
     const auto center = start + (end - start) / 2;
     const auto a = (end.x - start.x) / 2.0;
     const auto b = (end.y - start.y) / 2.0;
-    std::map<int, CalChart::Coord> result;
+    MarcherToPosition result;
     auto amount = (2.0 * std::numbers::pi) / select_list.size();
     auto angle = -std::numbers::pi / 2.0;
     auto ordered = get_ordered_selection(select_list);
@@ -578,7 +578,7 @@ void MovePointsTool_ShapeRectangle::OnClickDown(CalChart::Coord pos)
     BeginMoveDrag(Drag::BOX, pos);
 }
 
-std::map<int, CalChart::Coord> MovePointsTool_ShapeRectangle::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+auto MovePointsTool_ShapeRectangle::TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition
 {
     assert(m_shape_list.size() == 1);
     auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
@@ -587,7 +587,7 @@ std::map<int, CalChart::Coord> MovePointsTool_ShapeRectangle::TransformPoints(st
     const auto a = (end.x - start.x);
     const auto b = (end.y - start.y);
     const auto perimeter = a * 2.0 + b * 2.0;
-    std::map<int, CalChart::Coord> result;
+    MarcherToPosition result;
     auto each_segment = perimeter / select_list.size();
     auto total_distance = 0.0;
     auto ordered = get_ordered_selection(select_list);
@@ -612,11 +612,11 @@ void MovePointsTool_ShapeDraw::OnClickDown(CalChart::Coord pos)
     BeginMoveDrag(Drag::LASSO, pos);
 }
 
-std::map<int, CalChart::Coord> MovePointsTool_ShapeDraw::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+auto MovePointsTool_ShapeDraw::TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition
 {
     assert(m_shape_list.size() == 1);
     auto* shape = (CalChart::Lasso const*)m_shape_list.back().get();
-    std::map<int, CalChart::Coord> result;
+    MarcherToPosition result;
     auto points = shape->GetPointsOnLine(static_cast<int>(select_list.size()));
     auto iter = points.begin();
     assert(points.size() == select_list.size());
@@ -634,7 +634,7 @@ void MovePointsTool_ShapeX::OnClickDown(CalChart::Coord pos)
     BeginMoveDrag(Drag::SHAPE_X, pos);
 }
 
-std::map<int, CalChart::Coord> MovePointsTool_ShapeX::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+auto MovePointsTool_ShapeX::TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition
 {
     assert(m_shape_list.size() == 1);
     auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
@@ -645,7 +645,7 @@ std::map<int, CalChart::Coord> MovePointsTool_ShapeX::TransformPoints(std::map<i
     auto num_squares = (select_list.size() + 2) / 4;
     auto iter = select_list.begin();
 
-    std::map<int, CalChart::Coord> result;
+    MarcherToPosition result;
     for (auto i = 0u; i < num_squares; ++i) {
         result[iter->first] = start1 + (end1 - start1) / (2 * num_squares) * i;
         iter++;
@@ -678,7 +678,7 @@ void MovePointsTool_ShapeCross::OnClickDown(CalChart::Coord pos)
     BeginMoveDrag(Drag::SHAPE_CROSS, pos);
 }
 
-std::map<int, CalChart::Coord> MovePointsTool_ShapeCross::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+auto MovePointsTool_ShapeCross::TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition
 {
     assert(m_shape_list.size() == 1);
     auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
@@ -691,7 +691,7 @@ std::map<int, CalChart::Coord> MovePointsTool_ShapeCross::TransformPoints(std::m
     auto num_squares = (select_list.size() + 2) / 4;
     auto iter = select_list.begin();
 
-    std::map<int, CalChart::Coord> result;
+    MarcherToPosition result;
     for (auto i = 0u; i < num_squares; ++i) {
         result[iter->first] = start1 + (end1 - start1) / (2 * num_squares) * i;
         iter++;

@@ -127,7 +127,7 @@ bool CalChartDoc::OnSaveDocument(wxString const& filename)
     return true;
 }
 
-std::pair<bool, std::map<int, std::pair<std::string, std::string>>> CalChartDoc::ImportPrintableContinuity(std::vector<std::string> const& lines) const
+auto CalChartDoc::ImportPrintableContinuity(std::vector<std::string> const& lines) const -> std::pair<bool, std::map<int, std::pair<std::string, std::string>>>
 {
     std::map<int, std::pair<std::string, std::string>> result;
     // should this first clear out all the continuity?
@@ -458,8 +458,7 @@ auto CalChartDoc::GenerateCurrentSheetPointsDrawCommands() const -> std::vector<
     return drawCmds + origin;
 }
 
-auto CalChartDoc::GeneratePhatomPointsDrawCommands(
-    const std::map<int, CalChart::Coord>& positions) const -> std::vector<CalChart::Draw::DrawCommand>
+auto CalChartDoc::GeneratePhatomPointsDrawCommands(CalChart::MarcherToPosition const& positions) const -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto sheet = GetCurrentSheet();
     auto pointLabelFont = CalChart::Font{ CalChart::Float2CoordUnits(mConfig.Get_DotRatio() * mConfig.Get_NumRatio()) };
@@ -530,7 +529,7 @@ void CalChartDoc::SetCurrentReferencePoint(int currentReferencePoint)
     UpdateAllViews();
 }
 
-auto CalChartDoc::FindMarcher(CalChart::Coord pos) const -> std::optional<int>
+auto CalChartDoc::FindMarcher(CalChart::Coord pos) const -> std::optional<CalChart::MarcherIndex>
 {
     return GetCurrentSheet()->FindMarcher(pos, CalChart::Float2CoordUnits(mConfig.Get_DotRatio()), GetCurrentReferencePoint());
 }
@@ -654,7 +653,7 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_SetupMarchersCommand(std::vector<
     return std::make_unique<CalChartDocCommand>(*this, wxT("Set show info"), show_cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_SetInstrumentsCommand(std::map<int, std::string> const& dotToInstrument)
+auto CalChartDoc::Create_SetInstrumentsCommand(std::map<CalChart::MarcherIndex, std::string> const& dotToInstrument) -> std::unique_ptr<wxCommand>
 {
     auto show_cmds = Inject_CalChartDocArg(mShow->Create_SetInstrumentsCommand(dotToInstrument));
     return std::make_unique<CalChartDocCommand>(*this, wxT("Set instruments"), show_cmds);
@@ -667,14 +666,14 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_SetSheetTitleCommand(const wxStri
     return std::make_unique<CalChartDocCommand>(*this, wxT("Set title"), cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_SetSheetBeatsCommand(int beats)
+auto CalChartDoc::Create_SetSheetBeatsCommand(CalChart::Beats beats) -> std::unique_ptr<wxCommand>
 {
     auto cmds = Create_SetSheetPair();
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetSheetBeatsCommand(beats)));
     return std::make_unique<CalChartDocCommand>(*this, wxT("Set beats"), cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_AddSheetsCommand(const Show::Sheet_container_t& sheets, int where)
+auto CalChartDoc::Create_AddSheetsCommand(Show::Sheet_container_t const& sheets, int where) -> std::unique_ptr<wxCommand>
 {
     auto cmds = Create_SetSheetPair();
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_AddSheetsCommand(sheets, where)));
@@ -688,7 +687,7 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_RemoveSheetCommand(int where)
     return std::make_unique<CalChartDocCommand>(*this, wxT("Removing Sheet"), cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_ApplyRelabelMapping(int sheet, std::vector<size_t> const& mapping)
+auto CalChartDoc::Create_ApplyRelabelMapping(int sheet, std::vector<MarcherIndex> const& mapping) -> std::unique_ptr<wxCommand>
 {
     auto cmds = Create_SetSheetPair();
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_ApplyRelabelMapping(sheet, mapping)));
@@ -725,14 +724,14 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_SetPrintableContinuity(std::map<i
     return std::make_unique<CalChartDocCommand>(*this, wxT("Set Continuity"), cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_MovePointsCommand(std::map<int, Coord> const& new_positions)
+auto CalChartDoc::Create_MovePointsCommand(CalChart::MarcherToPosition const& new_positions) -> std::unique_ptr<wxCommand>
 {
     auto cmds = Create_SetSheetAndSelectionPair();
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_MovePointsCommand(new_positions, mCurrentReferencePoint)));
     return std::make_unique<CalChartDocCommand>(*this, wxT("Move Points"), cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_MovePointsCommand(unsigned whichSheet, std::map<int, Coord> const& new_positions)
+std::unique_ptr<wxCommand> CalChartDoc::Create_MovePointsCommand(unsigned whichSheet, CalChart::MarcherToPosition const& new_positions)
 {
     auto cmds = Create_SetSheetAndSelectionPair();
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_MovePointsCommand(whichSheet, new_positions, mCurrentReferencePoint)));
@@ -825,9 +824,9 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_MoveBackgroundImageCommand(int wh
 
 std::unique_ptr<wxCommand> CalChartDoc::Create_SetTransitionCommand(const std::vector<Coord>& finalPositions, const std::map<SYMBOL_TYPE, std::string>& continuities, const std::vector<SYMBOL_TYPE>& marcherDotTypes)
 {
-    std::map<int, Coord> positionAssignments;
+    CalChart::MarcherToPosition positionAssignments;
 
-    for (unsigned marcher = 0; marcher < finalPositions.size(); marcher++) {
+    for (MarcherIndex marcher = 0; marcher < finalPositions.size(); marcher++) {
         positionAssignments[marcher] = finalPositions.at(marcher);
     }
 

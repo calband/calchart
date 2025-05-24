@@ -56,7 +56,7 @@ public:
     virtual ~MovePointsTool() = default;
 
     [[nodiscard]] auto GenerateDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>;
-    virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const = 0;
+    virtual auto TransformPoints(MarcherToPosition const& select_list) const -> MarcherToPosition = 0;
 
     // provides both the high resolution point and the low resolution point.
 

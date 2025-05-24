@@ -101,22 +101,22 @@ public:
     [[nodiscard]] auto IsInAnimation() const { return (GetBeats() != 0); }
 
     // Marchers
-    [[nodiscard]] auto GetMarcher(unsigned i) const -> Point;
+    [[nodiscard]] auto GetMarcher(MarcherIndex i) const -> Point;
     [[nodiscard]] auto GetAllMarchers() const { return mPoints; }
-    [[nodiscard]] auto GetSymbol(unsigned i) const { return mPoints[i].GetSymbol(); }
-    void SetSymbol(unsigned i, SYMBOL_TYPE sym);
+    [[nodiscard]] auto GetSymbol(MarcherIndex i) const { return mPoints[i].GetSymbol(); }
+    void SetSymbol(MarcherIndex i, SYMBOL_TYPE sym);
     [[nodiscard]] auto GetNumberPoints() const { return mPoints.size(); }
     [[nodiscard]] auto GetSymbols() const -> std::vector<SYMBOL_TYPE>;
     void SetPoints(std::vector<Point> const& points);
-    [[nodiscard]] auto FindMarcher(Coord where, Coord::units searchBound, unsigned ref = 0) const -> std::optional<int>;
+    [[nodiscard]] auto FindMarcher(Coord where, Coord::units searchBound, unsigned ref = 0) const -> std::optional<MarcherIndex>;
     [[nodiscard]] auto FindCurveControlPoint(Coord where, Coord::units searchBound) const -> std::optional<std::tuple<size_t, size_t>>;
     [[nodiscard]] auto FindCurve(Coord where, Coord::units searchBound) const -> std::optional<std::tuple<size_t, size_t>>;
-    [[nodiscard]] auto RemapPoints(std::vector<size_t> const& table) const -> std::vector<Point>;
-    [[nodiscard]] auto GetPosition(unsigned i, unsigned ref = 0) const -> Coord;
+    [[nodiscard]] auto RemapPoints(std::vector<MarcherIndex> const& table) const -> std::vector<Point>;
+    [[nodiscard]] auto GetPosition(MarcherIndex i, unsigned ref = 0) const -> Coord;
     void SetAllPositions(Coord val, unsigned i);
-    void SetPosition(Coord val, unsigned i, unsigned ref = 0);
-    void SetMarcherFlip(unsigned i, bool val);
-    void SetMarcherLabelVisibility(unsigned i, bool isVisible);
+    void SetPosition(Coord val, MarcherIndex i, unsigned ref = 0);
+    void SetMarcherFlip(MarcherIndex i, bool val);
+    void SetMarcherLabelVisibility(MarcherIndex i, bool isVisible);
     [[nodiscard]] auto MakeSelectPointsBySymbol(SYMBOL_TYPE i) const -> SelectionList;
     [[nodiscard]] auto NewNumPointsPositions(int num, int columns, Coord new_march_position) const -> std::vector<Point>;
     void DeletePoints(SelectionList const& sl);

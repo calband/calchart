@@ -83,25 +83,25 @@ public:
     [[nodiscard]] auto Create_SetCurrentSheetAndSelectionCommand(int n, SelectionList const& sl) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetShowModeCommand(CalChart::ShowMode const& newmode) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetupMarchersCommand(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int numColumns, Coord const& new_march_position) const -> Show_command_pair;
-    [[nodiscard]] auto Create_SetInstrumentsCommand(std::map<int, std::string> const& dotToInstrument) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetInstrumentsCommand(std::map<MarcherIndex, std::string> const& dotToInstrument) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetSheetTitleCommand(std::string const& newname) const -> Show_command_pair;
-    [[nodiscard]] auto Create_SetSheetBeatsCommand(int beats) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetSheetBeatsCommand(Beats beats) const -> Show_command_pair;
     [[nodiscard]] auto Create_AddSheetsCommand(Show::Sheet_container_t const& sheets, int where) const -> Show_command_pair;
     [[nodiscard]] auto Create_RemoveSheetCommand(int where) const -> Show_command_pair;
-    [[nodiscard]] auto Create_ApplyRelabelMapping(int sheet_num_first, std::vector<size_t> const& mapping) const -> Show_command_pair;
+    [[nodiscard]] auto Create_ApplyRelabelMapping(int sheet_num_first, std::vector<MarcherIndex> const& mapping) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string>> const& data) const -> Show_command_pair;
-    [[nodiscard]] auto Create_MovePointsCommand(std::map<int, Coord> const& new_positions, int ref) const -> Show_command_pair;
-    [[nodiscard]] auto Create_MovePointsCommand(int whichSheet, std::map<int, Coord> const& new_positions, int ref) const -> Show_command_pair;
+    [[nodiscard]] auto Create_MovePointsCommand(MarcherToPosition const& new_positions, int ref) const -> Show_command_pair;
+    [[nodiscard]] auto Create_MovePointsCommand(int whichSheet, MarcherToPosition const& new_positions, int ref) const -> Show_command_pair;
     [[nodiscard]] auto Create_DeletePointsCommand() const -> Show_command_pair;
     [[nodiscard]] auto Create_RotatePointPositionsCommand(int rotateAmount, int ref) const -> Show_command_pair;
     [[nodiscard]] auto Create_ResetReferencePointToRef0(int ref) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetSymbolCommand(SYMBOL_TYPE sym) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetSymbolCommand(SelectionList const& whichDots, SYMBOL_TYPE sym) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetContinuityCommand(SYMBOL_TYPE which_sym, Continuity const& cont) const -> Show_command_pair;
-    [[nodiscard]] auto Create_SetLabelFlipCommand(std::map<int, bool> const& new_flip) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetLabelFlipCommand(std::map<MarcherIndex, bool> const& new_flip) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetLabelRightCommand(bool right) const -> Show_command_pair;
     [[nodiscard]] auto Create_ToggleLabelFlipCommand() const -> Show_command_pair;
-    [[nodiscard]] auto Create_SetLabelVisiblityCommand(std::map<int, bool> const& new_visibility) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetLabelVisiblityCommand(std::map<MarcherIndex, bool> const& new_visibility) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetLabelVisibleCommand(bool isVisible) const -> Show_command_pair;
     [[nodiscard]] auto Create_ToggleLabelVisibilityCommand() const -> Show_command_pair;
     [[nodiscard]] auto Create_AddNewBackgroundImageCommand(ImageInfo const& image) const -> Show_command_pair;
@@ -119,39 +119,39 @@ public:
     [[nodiscard]] auto GetNumSheets() const -> int;
     [[nodiscard]] auto GetCurrentSheetNum() const { return mSheetNum; }
     [[nodiscard]] auto GetNumPoints() const { return static_cast<int>(mDotLabelAndInstrument.size()); }
-    [[nodiscard]] auto GetPointLabel(int i) const -> std::string;
+    [[nodiscard]] auto GetPointLabel(MarcherIndex i) const -> std::string;
     [[nodiscard]] auto GetPointsLabel() const -> std::vector<std::string>;
-    [[nodiscard]] auto GetPointsLabel(const CalChart::SelectionList& sl) const -> std::vector<std::string>;
-    [[nodiscard]] auto GetPointInstrument(int i) const -> std::string;
+    [[nodiscard]] auto GetPointsLabel(CalChart::SelectionList const& sl) const -> std::vector<std::string>;
+    [[nodiscard]] auto GetPointInstrument(MarcherIndex i) const -> std::string;
     [[nodiscard]] auto GetPointInstrument(std::string const& label) const -> std::optional<std::string>;
     [[nodiscard]] auto GetPointsInstrument() const -> std::vector<std::string>;
-    [[nodiscard]] auto GetPointsInstrument(const CalChart::SelectionList& sl) const -> std::vector<std::string>;
-    [[nodiscard]] auto GetPointSymbol(int i) const -> SYMBOL_TYPE;
+    [[nodiscard]] auto GetPointsInstrument(CalChart::SelectionList const& sl) const -> std::vector<std::string>;
+    [[nodiscard]] auto GetPointSymbol(MarcherIndex i) const -> SYMBOL_TYPE;
     [[nodiscard]] auto GetPointSymbol(std::string const& label) const -> std::optional<SYMBOL_TYPE>;
     [[nodiscard]] auto GetPointsSymbol() const -> std::vector<SYMBOL_TYPE>;
-    [[nodiscard]] auto GetPointsSymbol(const CalChart::SelectionList& sl) const -> std::vector<SYMBOL_TYPE>;
+    [[nodiscard]] auto GetPointsSymbol(CalChart::SelectionList const& sl) const -> std::vector<SYMBOL_TYPE>;
     [[nodiscard]] auto AlreadyHasPrintContinuity() const -> bool;
     [[nodiscard]] auto const& GetShowMode() const { return mMode; }
 
     [[nodiscard]] auto GetSheetsName() const -> std::vector<std::string>;
 
     // utility
-    [[nodiscard]] auto GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const -> std::optional<std::vector<size_t>>;
+    [[nodiscard]] auto GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const -> std::optional<std::vector<MarcherIndex>>;
     [[nodiscard]] auto MakeSelectAll() const -> SelectionList;
     [[nodiscard]] auto MakeUnselectAll() const -> SelectionList;
-    [[nodiscard]] auto MakeAddToSelection(const SelectionList& sl) const -> SelectionList;
-    [[nodiscard]] auto MakeRemoveFromSelection(const SelectionList& sl) const -> SelectionList;
-    [[nodiscard]] auto MakeToggleSelection(const SelectionList& sl) const -> SelectionList;
+    [[nodiscard]] auto MakeAddToSelection(SelectionList const& sl) const -> SelectionList;
+    [[nodiscard]] auto MakeRemoveFromSelection(SelectionList const& sl) const -> SelectionList;
+    [[nodiscard]] auto MakeToggleSelection(SelectionList const& sl) const -> SelectionList;
     [[nodiscard]] auto MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon, int ref) const -> SelectionList;
     [[nodiscard]] auto MakeSelectBySymbol(SYMBOL_TYPE i) const -> SelectionList;
     [[nodiscard]] auto MakeSelectByInstrument(std::string const& instrumentName) const -> SelectionList;
     [[nodiscard]] auto MakeSelectByLabel(std::string const& labelName) const -> SelectionList;
-    [[nodiscard]] auto MakeSelectByLabel(std::vector<std::string> const& labelName) const -> SelectionList;
+    [[nodiscard]] auto MakeSelectByLabels(std::vector<std::string> const& labelName) const -> SelectionList;
 
     // Point selection
-    [[nodiscard]] auto IsSelected(int i) const { return mSelectionList.contains(i); }
+    [[nodiscard]] auto IsSelected(MarcherIndex i) const { return mSelectionList.contains(i); }
     [[nodiscard]] auto GetSelectionList() const { return mSelectionList; }
-    [[nodiscard]] auto WillMovePoints(std::map<int, Coord> const& new_positions, int ref) const -> bool;
+    [[nodiscard]] auto WillMovePoints(MarcherToPosition const& new_positions, int ref) const -> bool;
 
     /*!
      * @brief Generates a JSON that could represent this

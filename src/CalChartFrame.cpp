@@ -725,7 +725,7 @@ void CalChartFrame::OnCmdPointPicker(wxCommandEvent&)
     PointPicker dialog(this, *GetShow());
     if (dialog.ShowModal() == wxID_OK) {
         auto selections = dialog.GetMarchersSelected();
-        GetShow()->SetSelectionList(GetShow()->MakeSelectByLabel(selections));
+        GetShow()->SetSelectionList(GetShow()->MakeSelectByLabels(selections));
     }
 }
 

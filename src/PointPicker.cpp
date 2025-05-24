@@ -30,7 +30,7 @@ PointPicker::PointPicker(wxWindow* parent, CalChartDoc const& show)
     : PointPicker(
         parent,
         show,
-        std::set<int>(std::views::iota(0, show.GetNumPoints()).begin(), std::views::iota(0, show.GetNumPoints()).end()),
+        CalChart::SelectionList(std::views::iota(0, show.GetNumPoints()).begin(), std::views::iota(0, show.GetNumPoints()).end()),
         show.GetSelectionList())
 {
 }

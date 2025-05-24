@@ -118,7 +118,7 @@ void CalChartView::OnDraw(wxDC* dc)
     wxCalChart::Draw::DrawCommandList(*dc, mShow->GenerateCurrentSheetPointsDrawCommands());
 }
 
-auto CalChartView::GeneratePhatomPointsDrawCommands(std::map<int, CalChart::Coord> const& positions) const -> std::vector<CalChart::Draw::DrawCommand>
+auto CalChartView::GeneratePhatomPointsDrawCommands(CalChart::MarcherToPosition const& positions) const -> std::vector<CalChart::Draw::DrawCommand>
 {
     return mShow->GeneratePhatomPointsDrawCommands(positions);
 }
@@ -152,7 +152,7 @@ void CalChartView::OnUpdate(wxView* WXUNUSED(sender), wxObject* hint)
 }
 
 // Clean up windows used for displaying the view.
-bool CalChartView::OnClose(bool deleteWindow)
+auto CalChartView::OnClose(bool deleteWindow) -> bool
 {
     if (!wxView::OnClose(deleteWindow)) {
         return false;
@@ -182,7 +182,7 @@ void CalChartView::DoRotatePointPositions(int rotateAmount)
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-void CalChartView::DoMovePoints(const std::map<int, CalChart::Coord>& newPositions)
+void CalChartView::DoMovePoints(CalChart::MarcherToPosition const& newPositions)
 {
     if (mShow->GetSelectionList().size() == 0 || !mShow->WillMovePoints(newPositions)) {
         return;
@@ -231,7 +231,7 @@ void CalChartView::DoSetupMarchers(const std::vector<std::pair<std::string, std:
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-void CalChartView::DoSetInstruments(std::map<int, std::string> const& dotToInstrument)
+void CalChartView::DoSetInstruments(std::map<CalChart::MarcherIndex, std::string> const& dotToInstrument)
 {
     auto cmd = mShow->Create_SetInstrumentsCommand(dotToInstrument);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
@@ -243,7 +243,7 @@ void CalChartView::DoSetSheetTitle(const wxString& descr)
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-void CalChartView::DoSetSheetBeats(int beats)
+void CalChartView::DoSetSheetBeats(CalChart::Beats beats)
 {
     auto cmd = mShow->Create_SetSheetBeatsCommand(beats);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
@@ -285,7 +285,7 @@ void CalChartView::DoTogglePointsLabelVisibility()
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-void CalChartView::DoInsertSheets(const CalChart::Show::Sheet_container_t& sht,
+void CalChartView::DoInsertSheets(CalChart::Show::Sheet_container_t const& sht,
     int where)
 {
     auto cmd = mShow->Create_AddSheetsCommand(sht, where);
@@ -298,7 +298,7 @@ void CalChartView::DoDeleteSheet(int where)
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-void CalChartView::DoImportPrintableContinuity(const wxString& file)
+void CalChartView::DoImportPrintableContinuity(wxString const& file)
 {
     wxTextFile fp;
     fp.Open(file);
@@ -331,7 +331,7 @@ void CalChartView::DoImportPrintableContinuity(const wxString& file)
     }
 }
 
-void CalChartView::DoSetPrintContinuity(int which_sheet, const wxString& number, const wxString& cont)
+void CalChartView::DoSetPrintContinuity(int which_sheet, wxString const& number, wxString const& cont)
 {
     std::map<int, std::pair<std::string, std::string>> data{ { which_sheet, { number.ToStdString(), cont.ToStdString() } } };
     auto cmd = static_cast<CalChartDoc*>(GetDocument())->Create_SetPrintableContinuity(data);
@@ -429,7 +429,7 @@ auto CalChartView::GenerateAnimationDrawCommands(
         imageFunction);
 }
 
-auto CalChartView::GetAnimationInfo(CalChart::Beats whichBeat, int which) const -> std::optional<CalChart::Animate::Info>
+auto CalChartView::GetAnimationInfo(CalChart::Beats whichBeat, CalChart::MarcherIndex which) const -> std::optional<CalChart::Animate::Info>
 {
     return mShow->GetAnimationInfo(whichBeat, which);
 }

@@ -38,7 +38,7 @@ public:
     ~SetupInstruments() = default;
 
     // returns label, symbol, instrument
-    std::map<int, std::string> GetInstruments() const;
+    [[nodiscard]] auto GetInstruments() const -> std::map<CalChart::MarcherIndex, std::string>;
 
 private:
     bool Create(wxWindow* parent, wxWindowID id = wxID_ANY,
@@ -51,7 +51,7 @@ private:
 
 private:
     CalChartDoc const& mShow;
-    std::vector<int> mDotIndices;
+    std::vector<CalChart::MarcherIndex> mDotIndices;
     std::vector<std::string> mLabels;
     std::vector<std::string> mInstruments;
     std::vector<std::string> mInstrumentChoices;

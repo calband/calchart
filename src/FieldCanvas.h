@@ -130,7 +130,7 @@ private:
     // we maintain the transient movement of points, and the selection list in Canvas.
     std::unique_ptr<CalChart::MovePointsTool> mMovePointsTool;
     // A cached list of the place where the selection list will move
-    std::map<int, CalChart::Coord> mUncommittedMovePoints;
+    CalChart::MarcherToPosition mUncommittedMovePoints;
     CalChart::Configuration const& mConfig;
 
     // Curve related members

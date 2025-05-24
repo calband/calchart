@@ -50,15 +50,15 @@ public:
     ///// Modify the show. /////
     // Issue the change to the docs command processor, it allows for the ability to undo the change.
     void DoRotatePointPositions(int rotateAmount);
-    void DoMovePoints(std::map<int, CalChart::Coord> const& transmat);
+    void DoMovePoints(CalChart::MarcherToPosition const& transmat);
     void DoDeletePoints();
     void DoResetReferencePoint();
     void DoSetPointsSymbol(CalChart::SYMBOL_TYPE sym);
     void DoSetMode(CalChart::ShowMode const& mode);
     void DoSetupMarchers(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int numColumns);
-    void DoSetInstruments(std::map<int, std::string> const& dotToInstrument);
+    void DoSetInstruments(std::map<CalChart::MarcherIndex, std::string> const& dotToInstrument);
     void DoSetSheetTitle(wxString const& descr);
-    void DoSetSheetBeats(int beats);
+    void DoSetSheetBeats(CalChart::Beats beats);
     void DoSetPointsLabel(bool right);
     void DoSetPointsLabelVisibility(bool isVisible);
     void DoSetPointsLabelFlip();
@@ -79,7 +79,7 @@ public:
     [[nodiscard]] auto FindMarcher(CalChart::Coord pos) const { return mShow->FindMarcher(pos); }
     [[nodiscard]] auto FindCurveControlPoint(CalChart::Coord pos) const { return mShow->FindCurveControlPoint(pos); }
     [[nodiscard]] auto FindCurve(CalChart::Coord pos) const { return mShow->FindCurve(pos); }
-    [[nodiscard]] auto PointPosition(int which) const { return mShow->GetCurrentSheet()->GetPosition(which, mShow->GetCurrentReferencePoint()); }
+    [[nodiscard]] auto PointPosition(CalChart::MarcherIndex which) const { return mShow->GetCurrentSheet()->GetPosition(which, mShow->GetCurrentReferencePoint()); }
     [[nodiscard]] auto GetCurrentSheetNum() const { return (mShow != nullptr) ? mShow->GetCurrentSheetNum() : 0; }
     [[nodiscard]] auto GetNumSheets() const { return (mShow != nullptr) ? mShow->GetNumSheets() : 0; }
     [[nodiscard]] auto GetNumPoints() const { return (mShow != nullptr) ? mShow->GetNumPoints() : 0; }
@@ -90,7 +90,7 @@ public:
     [[nodiscard]] auto GetPrintNumber() const { return mShow->GetPrintNumber(); }
     [[nodiscard]] auto GetRawPrintContinuity() const { return mShow->GetRawPrintContinuity(); }
     [[nodiscard]] auto GetPrintContinuity() const { return mShow->GetPrintContinuity(); }
-    [[nodiscard]] auto GetAnimationInfo(CalChart::Beats whichBeat, int which) const -> std::optional<CalChart::Animate::Info>;
+    [[nodiscard]] auto GetAnimationInfo(CalChart::Beats whichBeat, CalChart::MarcherIndex which) const -> std::optional<CalChart::Animate::Info>;
     [[nodiscard]] auto GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::Beats whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>;
     [[nodiscard]] auto GetAnimationErrors() const -> std::vector<CalChart::Animate::Errors>;
     [[nodiscard]] auto GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>;
@@ -132,11 +132,11 @@ public:
     void SetGhostSource(GhostSource source, int which = 0) { mShow->SetGhostSource(source, which); }
 
     void GoToSheetAndSetSelectionList(int which, const CalChart::SelectionList& sl);
-    [[nodiscard]] auto IsSelected(int i) const { return mShow->IsSelected(i); }
+    [[nodiscard]] auto IsSelected(CalChart::MarcherIndex i) const { return mShow->IsSelected(i); }
 
     ///// Drawing marcher's paths /////
     // Generate Draw Commands
-    [[nodiscard]] auto GeneratePhatomPointsDrawCommands(std::map<int, CalChart::Coord> const& positions) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GeneratePhatomPointsDrawCommands(CalChart::MarcherToPosition const& positions) const -> std::vector<CalChart::Draw::DrawCommand>;
     [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands() const { return mShow->GenerateFieldWithMarchersDrawCommands(); }
     [[nodiscard]] auto GenerateAnimationDrawCommands(
         CalChart::Beats whichBeat,
