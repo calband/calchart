@@ -75,6 +75,7 @@ public:
     [[nodiscard]] auto GetDrawCommands(Configuration const& config) const -> std::vector<Draw::DrawCommand>;
 
     [[nodiscard]] auto GetSymbol() const { return mSym; }
+    void SetSymbol(SYMBOL_TYPE sym);
 
     enum {
         kPointLabelFlipped,
@@ -88,11 +89,7 @@ private:
     Coord mPos{};
     std::array<Coord, kNumRefPoints> mRef{};
 
-    void SetSymbol(SYMBOL_TYPE sym);
-
     [[nodiscard]] auto SerializeHelper() const -> std::vector<std::byte>;
-
-    friend class Sheet;
 };
 
 }
