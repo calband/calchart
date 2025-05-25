@@ -71,7 +71,7 @@ auto AnimateShow(const Show& show) -> Sheets
                           auto current_symbol = curr_sheet->GetSymbol(whichMarcher);
                           auto endPosition = [whichMarcher](auto&& nextAnimationSheet) -> std::optional<Coord> {
                               if (nextAnimationSheet) {
-                                  return nextAnimationSheet->GetPosition(whichMarcher);
+                                  return nextAnimationSheet->GetMarcherPosition(whichMarcher);
                               }
                               return std::nullopt;
                           }(nextAnimationSheet);

@@ -77,14 +77,6 @@ public:
 private:
     std::vector<std::unique_ptr<Cont::Procedure>> m_parsedContinuity;
     std::string m_legacyText;
-
-    friend bool Check_Continuity(const Continuity&, const struct Continuity_values&);
-    friend void Continuity_serialize_test();
-    friend void Continuity_UnitTests();
 };
 
-bool Check_Continuity(const Continuity&,
-    const struct Continuity_values&);
-
-void Continuity_UnitTests();
 }

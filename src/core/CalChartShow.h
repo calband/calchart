@@ -77,6 +77,11 @@ public:
     static auto Create(ShowMode const& mode, std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, unsigned columns) -> std::unique_ptr<Show>;
     static auto Create(ShowMode const& mode, std::istream& stream, ParseErrorHandlers const* correction = nullptr) -> std::unique_ptr<Show>;
 
+    // These constructors are exposed for testing purposes, and generally should not be used
+    explicit Show(ShowMode const& mode);
+    Show(Version_3_3_and_earlier, ShowMode const& mode, Reader reader, ParseErrorHandlers const* correction = nullptr);
+    Show(ShowMode const& mode, Reader reader, ParseErrorHandlers const* correction = nullptr);
+
     // Create command, consists of an action and undo action
     [[nodiscard]] auto Create_SetCurrentSheetCommand(int n) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetSelectionListCommand(SelectionList const& sl) const -> Show_command_pair;
@@ -227,11 +232,6 @@ private:
 
     void SetShowMode(ShowMode const&);
 
-    // serialization logic
-    explicit Show(ShowMode const& mode);
-    Show(Version_3_3_and_earlier, ShowMode const& mode, Reader reader, ParseErrorHandlers const* correction = nullptr);
-    Show(ShowMode const& mode, Reader reader, ParseErrorHandlers const* correction = nullptr);
-
     // implementation and helper functions
     [[nodiscard]] auto SerializeShowData() const -> std::vector<std::byte>;
 
@@ -245,20 +245,6 @@ private:
     // the more "transient" settings, representing a current set of manipulations by the user
     SelectionList mSelectionList; // order of selections
     int mSheetNum{};
-
-    // unit tests
-    friend void Show_UnitTests();
-    static void CC_show_round_trip_test();
-    static void CC_show_round_trip_test_with_number_label_description();
-    static void CC_show_round_trip_test_with_different_show_modes();
-    static void CC_show_blank_desc_test();
-    static void CC_show_future_show_test();
-    static void CC_show_wrong_size_throws_exception();
-    static void CC_show_wrong_size_number_labels_throws();
-    static void CC_show_wrong_size_description();
-    static void CC_show_extra_cruft_ok();
-    static void CC_show_with_nothing_throws();
 };
 
-void Show_UnitTests();
 }

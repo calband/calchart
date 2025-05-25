@@ -36,13 +36,6 @@
 #include <wx/html/helpctrl.h>
 #include <wx/stdpaths.h>
 
-namespace CalChart {
-void Point_UnitTests();
-void Show_UnitTests();
-void Sheet_UnitTests();
-void Continuity_UnitTests();
-}
-
 // This statement initializes the whole application and calls OnInit
 IMPLEMENT_APP(CalChartApp)
 
@@ -133,12 +126,6 @@ void CalChartApp::InitAppAsServer()
     auto* config = wxConfigBase::Get();
     config->SetPath("/FileHistory");
     mDocManager->FileHistoryLoad(*config);
-
-    // run the built in self tests.
-    CalChart::Continuity_UnitTests();
-    CalChart::Point_UnitTests();
-    CalChart::Show_UnitTests();
-    CalChart::Sheet_UnitTests();
 
     ProcessArguments();
 }

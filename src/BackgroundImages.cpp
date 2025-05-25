@@ -343,7 +343,7 @@ void BackgroundImages::SetBackgroundImages(std::vector<CalChart::ImageInfo> cons
 void BackgroundImages::OnPaint(wxDC& dc) const
 {
     for (auto&& [i, backgroundImages] : CalChart::Ranges::enumerate_view(mBackgroundImages)) {
-        backgroundImages.OnPaint(dc, mAdjustBackgroundMode, mWhichBackgroundIndex.has_value() ? *mWhichBackgroundIndex == i : false);
+        backgroundImages.OnPaint(dc, mAdjustBackgroundMode, mWhichBackgroundIndex.has_value() ? *mWhichBackgroundIndex == static_cast<size_t>(i) : false);
     }
 }
 

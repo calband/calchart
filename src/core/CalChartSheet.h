@@ -112,7 +112,7 @@ public:
     [[nodiscard]] auto FindCurveControlPoint(Coord where, Coord::units searchBound) const -> std::optional<std::tuple<size_t, size_t>>;
     [[nodiscard]] auto FindCurve(Coord where, Coord::units searchBound) const -> std::optional<std::tuple<size_t, size_t>>;
     [[nodiscard]] auto RemapPoints(std::vector<MarcherIndex> const& table) const -> std::vector<Point>;
-    [[nodiscard]] auto GetPosition(MarcherIndex i, unsigned ref = 0) const -> Coord;
+    [[nodiscard]] auto GetMarcherPosition(MarcherIndex i, unsigned ref = 0) const -> Coord;
     void SetAllPositions(Coord val, unsigned i);
     void SetPosition(Coord val, MarcherIndex i, unsigned ref = 0);
     void SetMarcherFlip(MarcherIndex i, bool val);
@@ -181,11 +181,6 @@ private:
     std::string mName;
     std::vector<ImageInfo> mBackgroundImages;
     std::vector<Curve> mCurves;
-
-    // unit tests
-    friend void Sheet_UnitTests();
-    static void sheet_round_trip_test();
 };
 
-void Sheet_UnitTests();
 }

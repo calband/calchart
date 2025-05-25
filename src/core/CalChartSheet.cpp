@@ -541,7 +541,7 @@ auto Sheet::SerializeSheet() const -> std::vector<std::byte>
 auto Sheet::FindMarcher(Coord where, Coord::units searchBound, unsigned ref) const -> std::optional<MarcherIndex>
 {
     for (auto i : std::views::iota(0ul, mPoints.size())) {
-        Coord c = GetPosition(i, ref);
+        Coord c = GetMarcherPosition(i, ref);
         if (((where.x + searchBound) >= c.x) && ((where.x - searchBound) <= c.x) && ((where.y + searchBound) >= c.y) && ((where.y - searchBound) <= c.y)) {
             return i;
         }
@@ -661,7 +661,7 @@ std::string Sheet::GetRawPrintContinuity() const
 }
 
 // Get position of point
-auto Sheet::GetPosition(MarcherIndex i, unsigned ref) const -> Coord
+auto Sheet::GetMarcherPosition(MarcherIndex i, unsigned ref) const -> Coord
 {
     return mPoints[i].GetPos(ref);
 }
@@ -860,73 +860,6 @@ auto Sheet::GenerateSheetElements(CalChart::Configuration const& config, Selecti
 }
 
 void Sheet::SetPoints(std::vector<Point> const& points) { mPoints = points; }
-
-// -=-=-=-=-=-=- Unit Tests -=-=-=-=-=-=-=-
-#include <cassert>
-using namespace Parser;
-
-void Sheet::sheet_round_trip_test()
-{
-    {
-        auto blank_sheet = Sheet(0);
-        auto blank_sheet_data = blank_sheet.SerializeSheet();
-        // need to pull out the sheet data
-        auto reader = Reader({ blank_sheet_data.data(), blank_sheet_data.size() });
-        auto table = reader.ParseOutLabels();
-        assert(table.size() == 1);
-        assert(std::get<0>(table.front()) == INGL_SHET);
-        auto re_read_sheet = Sheet(0, std::get<1>(table.front()));
-        auto re_read_sheet_data = re_read_sheet.SerializeSheet();
-        bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
-        (void)is_equal;
-        assert(is_equal);
-    }
-    {
-        auto blank_sheet = Sheet(0, "new_sheet");
-        auto blank_sheet_data = blank_sheet.SerializeSheet();
-        // need to pull out the sheet data
-        auto reader = Reader({ blank_sheet_data.data(), blank_sheet_data.size() });
-        auto table = reader.ParseOutLabels();
-        assert(table.size() == 1);
-        assert(std::get<0>(table.front()) == INGL_SHET);
-        auto re_read_sheet = Sheet(0, std::get<1>(table.front()));
-        auto re_read_sheet_data = re_read_sheet.SerializeSheet();
-        bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
-        (void)is_equal;
-        assert(is_equal);
-    }
-    {
-        auto blank_sheet = Sheet(1, "new_sheet");
-        blank_sheet.SetName("new_name");
-        blank_sheet.SetPosition(Coord(10, 10), 0);
-        blank_sheet.SetPosition(Coord(20, 10), 0, 1);
-        blank_sheet.SetPosition(Coord(30, 40), 0, 2);
-        blank_sheet.SetPosition(Coord(52, 50), 0, 3);
-        blank_sheet.SetBeats(13);
-        blank_sheet.mAnimationContinuity.at(SYMBOL_PLAIN) = Continuity{ "MT E REM" };
-        blank_sheet.mPrintableContinuity = PrintContinuity{
-            "number 1", "duuuude, writing this testing is boring"
-        };
-        auto blank_sheet_data = blank_sheet.SerializeSheet();
-        // need to pull out the sheet data
-        auto reader = Reader({ blank_sheet_data.data(), blank_sheet_data.size() });
-        auto table = reader.ParseOutLabels();
-        assert(table.size() == 1);
-        assert(std::get<0>(table.front()) == INGL_SHET);
-        auto re_read_sheet = Sheet(1, std::get<1>(table.front()));
-        auto re_read_sheet_data = re_read_sheet.SerializeSheet();
-        bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
-        //		auto mismatch_at = std::mismatch(blank_sheet_data.begin(),
-        // blank_sheet_data.end(), re_read_sheet_data.begin());
-        //		std::cout<<"mismatch at
-        //"<<std::distance(blank_sheet_data.begin(),
-        // mismatch_at.first)<<"\n";
-        (void)is_equal;
-        assert(is_equal);
-    }
-}
-
-void Sheet_UnitTests() { Sheet::sheet_round_trip_test(); }
 
 void Sheet::AddBackgroundImage(ImageInfo const& image, size_t where)
 {

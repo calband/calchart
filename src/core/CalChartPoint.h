@@ -76,13 +76,13 @@ public:
 
     [[nodiscard]] auto GetSymbol() const { return mSym; }
 
-private:
     enum {
         kPointLabelFlipped,
         kLabelIsInvisible,
         kTotalBits
     };
 
+private:
     std::bitset<kTotalBits> mFlags{};
     SYMBOL_TYPE mSym{};
     Coord mPos{};
@@ -93,10 +93,6 @@ private:
     [[nodiscard]] auto SerializeHelper() const -> std::vector<std::byte>;
 
     friend class Sheet;
-
-    friend struct Point_values;
-    friend auto Check_Point(const Point&, const struct Point_values&) -> bool;
 };
 
-void Point_UnitTests();
 }
