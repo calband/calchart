@@ -25,4 +25,5 @@ Other changes:
 * [#632](../../issues/632) Make PointPicker more generic
 * [#636](../../issues/636) introduce MarcherIndex to clarify what type an argument is
 * [#638](../../issues/638) Move tests into CMake Tests
+* [#640](../../issues/640) Clean up some of the CalChartAngles.h clang-tidy errors
 
