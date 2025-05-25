@@ -65,7 +65,7 @@ public:
     void DoTogglePointsLabelVisibility();
     void DoInsertSheets(CalChart::Show::Sheet_container_t const& sht, int where);
     void DoDeleteSheet(int where);
-    void DoImportPrintableContinuity(const wxString& file);
+    void DoImportPrintableContinuity(std::string const& file);
     void DoSetPrintContinuity(int which_sheet, const wxString& number, const wxString& cont);
     void DoSetContinuityCommand(CalChart::SYMBOL_TYPE sym, CalChart::Continuity const& new_cont);
     void DoAddSheetCurveCommand(CalChart::Curve const& curve);

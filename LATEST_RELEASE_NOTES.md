@@ -23,6 +23,7 @@ Other changes:
 * [#622](../../issues/622) change beats_t to Beats
 * [#628](../../issues/628) Bump wxWidgets to 3.2.8 and wxUI to 0.2.0
 * [#632](../../issues/632) Make PointPicker more generic
+* [#634](../../issues/634) change ImportPrintableContinuity to return optional
 * [#636](../../issues/636) introduce MarcherIndex to clarify what type an argument is
 * [#638](../../issues/638) Move tests into CMake Tests
 * [#640](../../issues/640) Clean up some of the CalChartAngles.h clang-tidy errors
