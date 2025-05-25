@@ -23,9 +23,10 @@
 
 #include "CalChartUtils.h"
 #include <cmath>
-#include <compare>
+#include <cstdint>
 #include <numbers>
 #include <ostream>
+#include <tuple>
 
 namespace CalChart {
 
@@ -33,7 +34,7 @@ struct Radian;
 struct Degree;
 
 // we lay out directions in clockwise order from North
-enum class Direction {
+enum struct Direction : uint8_t {
     North,
     NorthEast,
     East,
@@ -206,12 +207,12 @@ namespace details {
 
 }
 
-inline constexpr auto operator*(double v, Radian r) -> Radian
+constexpr auto operator*(double v, Radian r) -> Radian
 {
     return r * v;
 }
 
-inline constexpr auto operator*(double v, Degree r) -> Degree
+constexpr auto operator*(double v, Degree r) -> Degree
 {
     return r * v;
 }
@@ -219,12 +220,12 @@ inline constexpr auto operator*(double v, Degree r) -> Degree
 inline auto operator<<(std::ostream& os, Radian v) -> std::ostream& { return os << v.getValue(); }
 inline auto operator<<(std::ostream& os, Degree v) -> std::ostream& { return os << v.getValue(); }
 
-inline constexpr Radian::Radian(Degree v)
+constexpr Radian::Radian(Degree v)
     : Radian(details::Deg2Rad(v.getValue()))
 {
 }
 
-inline constexpr Degree::Degree(Radian v)
+constexpr Degree::Degree(Radian v)
     : Degree(details::Rad2Deg(v.getValue()))
 {
 }
@@ -323,6 +324,7 @@ inline auto sin(Degree v) -> double { return sin(Radian{ v }); }
 // static tests
 namespace details {
     constexpr auto t_180 = 180.0;
+    constexpr auto t_90 = 90.0;
     constexpr auto point5 = 1.0 / 2;
     static_assert(details::Deg2Rad(t_180) == std::numbers::pi);
     static_assert(details::Rad2Deg(std::numbers::pi) == t_180);
@@ -338,6 +340,6 @@ namespace details {
     static_assert(Degree(1.0) == (Degree(point5) * 2));
     static_assert(Degree(1.0) == (2 * Degree(point5)));
     static_assert(Degree(point5) == (Degree(1.0) / 2));
-    static_assert(Degree{ 90 } == Degree::East());
+    static_assert(Degree{ t_90 } == Degree::East());
 }
 }
