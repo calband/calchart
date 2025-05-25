@@ -77,13 +77,13 @@ public:
     [[nodiscard]] auto GetSymbol() const { return mSym; }
     void SetSymbol(SYMBOL_TYPE sym);
 
+private:
     enum {
         kPointLabelFlipped,
         kLabelIsInvisible,
         kTotalBits
     };
 
-private:
     std::bitset<kTotalBits> mFlags{};
     SYMBOL_TYPE mSym{};
     Coord mPos{};

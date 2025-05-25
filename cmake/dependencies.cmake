@@ -52,6 +52,6 @@ FetchContent_MakeAvailable(Catch2)
 FetchContent_Declare(
   wxUI
   GIT_REPOSITORY https://github.com/rmpowell77/wxUI.git
-  GIT_TAG        e3ce18b1bbd0f67b9fe9cf8ae07db8a6c7431e1e # v0.2.1
+  GIT_TAG        aea5c52fb5d5525c2770954574acacaae24f9b3b # v0.2.2
 )
 FetchContent_MakeAvailable(wxUI)

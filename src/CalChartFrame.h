@@ -21,12 +21,14 @@
 */
 
 #include "CalChartCoord.h"
+#include "CalChartDoc.h"
 #include "CalChartSelectTool.h"
 #include "CalChartTypes.h"
 
 #include <map>
 #include <wx/aui/framemanager.h>
 #include <wx/docview.h>
+#include <wxUI/wxUI.hpp>
 
 // CalChartFrame is the central frame of the CalChart app.  Manipulation of
 // the CalChartDoc happens via the CalChartView.
@@ -54,36 +56,28 @@ public:
     CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configuration& config_, wxDocParentFrame* frame, const wxPoint& pos, const wxSize& size);
     ~CalChartFrame() override;
 
-    void OnCmdAppend(wxCommandEvent& event);
-    void OnCmdImportCont(wxCommandEvent& event);
-    void OnCmdSave(wxCommandEvent& event);
-    void OnCmdSaveAs(wxCommandEvent& event);
-    void OnCmdPrint(wxCommandEvent& event);
-    void OnCmdPrintPreview(wxCommandEvent& event);
-    void OnCmdLegacyPrint(wxCommandEvent& event);
+    void OnPrint();
+    void OnPrintPreview();
+    void OnLegacyPrint();
     void OnCmdPageSetup(wxCommandEvent& event);
-    void OnCmdExportViewerFile(wxCommandEvent& event);
+    void OnExportViewerFile();
     void OnCmdPreferences(wxCommandEvent& event);
-    void OnCmdClose(wxCommandEvent& event);
-    void OnCmdRedo(wxCommandEvent& event);
-    void OnCmdInsertBefore(wxCommandEvent& event);
-    void OnCmdInsertAfter(wxCommandEvent& event);
-    void OnCmdInsertFromOtherShow(wxCommandEvent& event);
-    void OnCmdCopySheet(wxCommandEvent& event);
-    void OnCmdPasteSheet(wxCommandEvent& event);
+    void OnInsertBefore();
+    void OnInsertAfter();
+    void OnInsertFromOtherShow();
+    void OnCopySheet();
+    void OnPasteSheet();
     void OnCmdDelete(wxCommandEvent& event);
-    void OnCmdRelabel(wxCommandEvent& event);
-    void OnCmdEditPrintCont(wxCommandEvent& event);
-    void OnCmdSetSheetTitle(wxCommandEvent& event);
-    void OnCmdSetBeats(wxCommandEvent& event);
-    void OnCmdSetupMarchers(wxCommandEvent& event);
-    void OnCmdSetupInstruments(wxCommandEvent& event);
-    void OnCmdSetMode(wxCommandEvent& event);
-    void OnCmdPointPicker(wxCommandEvent& event);
-    void OnCmdSelectAll(wxCommandEvent& event);
+    void OnRelabel();
+    void OnEditPrintContinuity();
+    void OnSetSheetTitle();
+    void OnSetBeats();
+    void OnSetupMarchers();
+    void OnSetupInstruments();
+    void OnPointPicker();
+    void OnSelectAll();
     void OnCmdAbout(wxCommandEvent& event);
     void OnCmdHelp(wxCommandEvent& event);
-    void OnCmdAnimate(wxCommandEvent& event);
 
     void OnCmd_prev_ss(wxCommandEvent& event);
     void OnCmd_next_ss(wxCommandEvent& event);
@@ -121,26 +115,28 @@ public:
     void OnCmd_setsym7(wxCommandEvent& event);
     void OnChar(wxKeyEvent& event);
 
-    void OnCmd_AddBackgroundImage(wxCommandEvent& event);
-    void OnCmd_AdjustBackgroundImageMode(wxCommandEvent& event);
-    void OnCmd_ShowBackgroundImages(wxCommandEvent& event);
+    void OnAddBackgroundImage();
+    void OnAdjustBackgroundImageMode();
+    void OnShowBackgroundImages();
 
     void OnCmd_GhostOption(wxCommandEvent& event);
+    void OnGhostOption(GhostSource option);
     void OnCmd_InstrumentSelection(wxCommandEvent& event);
     void OnCmd_SymbolSelection(wxCommandEvent& event);
     void OnCmd_MarcherSelection(wxCommandEvent& event);
-    void OnCmd_AdjustViews(wxCommandEvent& event);
-    void OnCmd_SwapAnimation(wxCommandEvent& event);
-    void OnCmd_DrawPaths(wxCommandEvent& event);
+    void OnAdjustViews(size_t which);
+    void OnSwapAnimation();
 
-    void OnCmd_ResetReferencePoint(wxCommandEvent& event);
+    void OnResetReferencePoint();
 
     void OnCmd_ChangedColorPalette(wxCommandEvent& event);
 
-    void OnCmd_SolveTransition(wxCommandEvent& event);
+    void OnSolveTransition();
 
-    void OnCmd_ZoomFit(wxCommandEvent&);
+    void OnZoomFit();
+    void OnZoomIn();
     void OnCmd_ZoomIn(wxCommandEvent&);
+    void OnZoomOut();
     void OnCmd_ZoomOut(wxCommandEvent&);
 
     void OnClose();
@@ -181,13 +177,8 @@ public:
 private:
     void refreshGhostOptionStates();
     void refreshInUse();
-    void ChangeFieldThumbnailVisibility(bool show);
-    void ChangeVisibility(wxWindow* window, bool show, int itemid, std::string const& name);
-    void ChangeVisibility(bool show, int itemid);
-    void ChangeAnimationErrorsVisibility(bool show);
-    void ChangeAnimationVisibility(bool show);
+    void ChangePaneVisibility(bool show, size_t itemid);
     void ChangeMainFieldVisibility(bool show);
-
     void ShowFieldAndHideAnimation(bool showField);
     void SetViewsOnComponents(CalChartView* showField);
     wxString BeatStatusText() const;
@@ -205,13 +196,20 @@ private:
     wxAuiToolBar* mSelectAndMoveToolBar;
     wxAuiToolBar* mMarcherToolBar;
 
-    std::map<int, wxWindow*> mLookupEnumToSubWindow;
-    std::map<wxWindow*, int> mLookupSubWindowToEnum;
+    std::vector<wxWindow*> mLookupSubWindows;
+    std::map<wxWindow*, size_t> mLookupSubWindowToIndex;
 
     CalChart::Configuration& mConfig;
     wxAuiManager* mAUIManager;
 
     bool mMainFieldVisible = true;
+
+    wxUI::MenuItemProxy mShowBackgroundImages;
+    wxUI::MenuItemProxy mAdjustBackgroundImageMode;
+    wxUI::MenuItemProxy mGhostOff;
+    wxUI::MenuItemProxy mViewSwapFieldAndAnimate;
+    wxUI::MenuItemProxy mDrawPaths;
+    std::vector<wxUI::MenuItemProxy> mAdjustPaneIndex;
 
     DECLARE_EVENT_TABLE()
 };

@@ -32,18 +32,14 @@ class Configuration;
 class CalChartSplash : public wxDocParentFrame {
     using super = wxDocParentFrame;
     DECLARE_CLASS(CalChartSplash)
-    DECLARE_EVENT_TABLE()
 public:
     CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString const& title, CalChart::Configuration& config);
     ~CalChartSplash() = default;
-
-    void OnCmdAbout(wxCommandEvent& event);
-    void OnCmdHelp(wxCommandEvent& event);
-    void OnCmdPreferences(wxCommandEvent& event);
 
     static void About();
     static void Help();
 
 private:
+    void Preferences();
     CalChart::Configuration& mConfig;
 };
