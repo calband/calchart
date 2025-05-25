@@ -298,7 +298,7 @@ void CalChartView::DoDeleteSheet(int where)
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-void CalChartView::DoImportPrintableContinuity(wxString const& file)
+void CalChartView::DoImportPrintableContinuity(std::string const& file)
 {
     wxTextFile fp;
     fp.Open(file);
@@ -323,11 +323,10 @@ void CalChartView::DoImportPrintableContinuity(wxString const& file)
             return;
         }
     }
-    auto data = mShow->ImportPrintableContinuity(lines);
-    if (data.first) {
-        auto cmd = mShow->Create_SetPrintableContinuity(data.second);
+    if (auto data = mShow->ImportPrintableContinuity(lines);
+        data) {
+        auto cmd = mShow->Create_SetPrintableContinuity(*data);
         GetDocument()->GetCommandProcessor()->Submit(cmd.release());
-        return;
     }
 }
 

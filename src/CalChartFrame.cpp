@@ -1146,10 +1146,8 @@ void CalChartFrame::AppendShow()
 // Append a show with file selector
 void CalChartFrame::ImportContFile()
 {
-    wxString s;
-
-    s = wxFileSelector("Import Continuity", wxEmptyString, wxEmptyString, wxEmptyString, "*.txt");
-    if (!s.empty()) {
+    if (std::string s = wxFileSelector("Import Continuity", wxEmptyString, wxEmptyString, wxEmptyString, "*.txt");
+        !s.empty()) {
         GetFieldView()->DoImportPrintableContinuity(s);
     }
 }
