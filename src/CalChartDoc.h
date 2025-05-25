@@ -126,7 +126,7 @@ private:
 
 public:
     // translates input into a mapping of which sheet to number,lines pair.
-    [[nodiscard]] auto ImportPrintableContinuity(std::vector<std::string> const& lines) const -> std::pair<bool, std::map<int, std::pair<std::string, std::string>>>;
+    [[nodiscard]] auto ImportPrintableContinuity(std::vector<std::string> const& lines) const -> std::optional<std::map<int, std::pair<std::string, std::string>>>;
 
     void FlushAllTextWindows();
 

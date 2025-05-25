@@ -127,12 +127,12 @@ bool CalChartDoc::OnSaveDocument(wxString const& filename)
     return true;
 }
 
-auto CalChartDoc::ImportPrintableContinuity(std::vector<std::string> const& lines) const -> std::pair<bool, std::map<int, std::pair<std::string, std::string>>>
+auto CalChartDoc::ImportPrintableContinuity(std::vector<std::string> const& lines) const -> std::optional<std::map<int, std::pair<std::string, std::string>>>
 {
     std::map<int, std::pair<std::string, std::string>> result;
     // should this first clear out all the continuity?
     if (lines.empty()) {
-        return { false, {} }; // done, technically
+        return std::nullopt;
     }
     try {
         // check to make sure the first line starts with %%
@@ -171,9 +171,9 @@ auto CalChartDoc::ImportPrintableContinuity(std::vector<std::string> const& line
         wxString message = wxT("Error encountered:\n");
         message += e.what();
         wxMessageBox(message, wxT("Error!"));
-        return { false, {} };
+        return std::nullopt;
     }
-    return { true, result };
+    return result;
 }
 
 template <typename T>
