@@ -161,12 +161,15 @@ public:
     [[nodiscard]] auto GetPointSymbol(std::string const& label) const { return mShow->GetPointSymbol(label); }
     [[nodiscard]] auto GetPointsSymbol() const { return mShow->GetPointsSymbol(); }
     [[nodiscard]] auto GetPointsSymbol(CalChart::SelectionList const& sl) const { return mShow->GetPointsSymbol(sl); }
+    [[nodiscard]] auto GetPointFromLabel(std::string const& label) const { return mShow->GetPointFromLabel(label); }
+    [[nodiscard]] auto GetPointsFromLabels(std::vector<std::string> const& labels) const { return mShow->GetPointsFromLabels(labels); }
 
     [[nodiscard]] auto GetContinuities() const { return GetCurrentSheet()->GetContinuities(); }
     [[nodiscard]] auto ContinuitiesInUse() const { return GetCurrentSheet()->ContinuitiesInUse(); }
 
     [[nodiscard]] auto GetCurrentCurve(size_t index) const { return GetCurrentSheet()->GetCurve(index); }
-    [[nodiscard]] auto GetCurrentCurvesSize() const { return GetCurrentSheet()->GetCurvesSize(); }
+    [[nodiscard]] auto GetCurrentNumberCurves() const { return GetCurrentSheet()->GetNumberCurves(); }
+    [[nodiscard]] auto GetMarchersAssignedToCurve(size_t whichCurve) const { return GetCurrentSheet()->GetCurveAssignments().at(whichCurve); }
 
     // how to select points
     // Utility functions for constructing new selection lists
@@ -186,6 +189,8 @@ public:
 
     [[nodiscard]] auto IsSelected(CalChart::MarcherIndex i) const { return mShow->IsSelected(i); }
     [[nodiscard]] auto GetSelectionList() const { return mShow->GetSelectionList(); }
+    // get the selection list and where the points are.
+    [[nodiscard]] auto GetSelectedPoints() const -> CalChart::MarcherToPosition;
 
     [[nodiscard]] auto GetSelect() const { return mSelect; }
     void SetSelect(CalChart::Select select);
@@ -194,8 +199,8 @@ public:
     [[nodiscard]] auto FindMarcher(CalChart::Coord pos) const -> std::optional<CalChart::MarcherIndex>;
     // Determine if the position is on a curve control point, if so, return which curve and which control point.
     [[nodiscard]] auto FindCurveControlPoint(CalChart::Coord pos) const -> std::optional<std::tuple<size_t, size_t>>;
-    // Determine if the position is on a curve, if so, return which curve and the lower control point.
-    [[nodiscard]] auto FindCurve(CalChart::Coord pos) const -> std::optional<std::tuple<size_t, size_t>>;
+    // if found curve, return which curve, the control point lower to where we clicked, the distance [0.0, 1.0] of the pos
+    [[nodiscard]] auto FindCurve(CalChart::Coord pos) const -> std::optional<std::tuple<size_t, size_t, double>>;
     [[nodiscard]] auto GetDrawPaths() const { return mDrawPaths; }
     void SetDrawPaths(bool drawPaths);
     [[nodiscard]] auto GetDrawBackground() const { return mDrawBackground; }
@@ -257,6 +262,7 @@ public:
     [[nodiscard]] auto Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string>> const& data) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_MovePointsCommand(CalChart::MarcherToPosition const& new_positions) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_MovePointsCommand(unsigned whichSheet, CalChart::MarcherToPosition const& new_positions) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_AssignPointsToCurve(size_t whichCurve, std::vector<CalChart::MarcherIndex> whichMarchers) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_DeletePointsCommand() -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_RotatePointPositionsCommand(int rotateAmount) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_ResetReferencePointToRef0() -> std::unique_ptr<wxCommand>;

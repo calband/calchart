@@ -65,3 +65,94 @@ TEST_CASE("RoundTrip3", "CalChartSheetTests")
     (void)is_equal;
     CHECK(is_equal);
 }
+
+TEST_CASE("AssigningToCurves", "CalChartSheetTests")
+{
+    using namespace CalChart;
+    auto uut = Sheet(4);
+    uut.SetPosition({ 0, 0 }, 0);
+    uut.SetPosition({ 1, 1 }, 1);
+    uut.SetPosition({ 2, 2 }, 2);
+    uut.SetPosition({ 3, 3 }, 3);
+    CHECK(uut.GetMarcherPosition(0) == Coord{ 0, 0 });
+    CHECK(uut.GetNumberCurves() == 0);
+
+    {
+        auto allMarchers = uut.GetCurveAssignments();
+        CHECK(allMarchers.empty());
+    }
+
+    // create a curve
+    CHECK(uut.GetNumberCurves() == 0);
+    auto curve = Curve{ { { 0, 8 }, { 8, 8 }, { 16, 8 } } };
+    uut.AddCurve(curve, 0);
+    CHECK(uut.GetNumberCurves() == 1);
+
+    CHECK(!uut.FindCurveControlPoint({ 4, 8 }, 1).has_value());
+    CHECK(!uut.FindCurve({ 4, 0 }, 1).has_value());
+    CHECK(uut.FindCurve({ 4, 8 }, 1).has_value());
+    {
+        auto point = uut.FindCurveControlPoint({ 0, 8 }, 1);
+        CHECK(point.has_value());
+        CHECK(std::get<0>(*point) == 0);
+        CHECK(std::get<1>(*point) == 0);
+    }
+    {
+        auto point = uut.FindCurveControlPoint({ 8, 8 }, 1);
+        CHECK(point.has_value());
+        CHECK(std::get<0>(*point) == 0);
+        CHECK(std::get<1>(*point) == 1);
+    }
+
+    {
+        auto point = uut.FindCurve({ 4, 8 }, 1);
+        CHECK(point.has_value());
+        CHECK(std::get<0>(*point) == 0);
+        CHECK(std::get<1>(*point) == 0);
+    }
+    {
+        auto point = uut.FindCurve({ 12, 8 }, 1);
+        CHECK(point.has_value());
+        CHECK(std::get<0>(*point) == 0);
+        CHECK(std::get<1>(*point) == 1);
+    }
+
+    {
+        auto allMarchers = uut.GetCurveAssignments();
+        CHECK(allMarchers.at(0) == std::vector<MarcherIndex>{});
+    }
+
+    uut.SetCurveAssignment(uut.GetCurveAssignmentsWithNewAssignments(0, { 0 }));
+    {
+        auto allMarchers = uut.GetCurveAssignments();
+        CHECK(allMarchers.at(0) == std::vector<MarcherIndex>{ 0 });
+    }
+    CHECK(uut.GetMarcherPosition(0) == Coord{ 0, 8 });
+    uut.SetCurveAssignment(uut.GetCurveAssignmentsWithNewAssignments(0, { 2, 3, 1, 0 }));
+    {
+        auto allMarchers = uut.GetCurveAssignments();
+        CHECK(allMarchers.size() == 1);
+        CHECK(allMarchers.at(0) == std::vector<MarcherIndex>{ 2, 3, 1, 0 });
+    }
+    CHECK(uut.GetMarcherPosition(0) == Coord{ 15, 7 });
+    CHECK(uut.GetMarcherPosition(1) == Coord{ 9, 8 });
+    CHECK(uut.GetMarcherPosition(2) == Coord{ 0, 8 });
+    CHECK(uut.GetMarcherPosition(3) == Coord{ 5, 8 });
+
+    uut.SetPosition({ 0, 0 }, 3);
+    {
+        auto allMarchers = uut.GetCurveAssignments();
+        CHECK(allMarchers.size() == 1);
+        CHECK(allMarchers.at(0) == std::vector<MarcherIndex>{ 2, 1, 0 });
+    }
+    CHECK(uut.GetMarcherPosition(0) == Coord{ 14, 8 });
+    CHECK(uut.GetMarcherPosition(1) == Coord{ 7, 7 });
+    CHECK(uut.GetMarcherPosition(2) == Coord{ 0, 8 });
+    CHECK(uut.GetMarcherPosition(3) == Coord{ 0, 0 });
+
+    // replace the curve, that should cause the points to have their positions change
+    uut.ReplaceCurve(Curve{ { { 0, 4 }, { 8, 4 } } }, 0);
+    CHECK(uut.GetMarcherPosition(0) == Coord{ 7, 3 });
+    CHECK(uut.GetMarcherPosition(1) == Coord{ 3, 3 });
+    CHECK(uut.GetMarcherPosition(2) == Coord{ 0, 4 });
+}

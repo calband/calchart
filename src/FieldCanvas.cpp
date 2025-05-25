@@ -29,9 +29,11 @@
 #include "CalChartFrame.h"
 #include "CalChartMovePointsTool.h"
 #include "CalChartShapes.h"
+#include "CalChartTypes.h"
 #include "CalChartUtils.h"
 #include "CalChartView.h"
 #include <optional>
+#include <print>
 #include <ranges>
 #include <wx/dcbuffer.h>
 
@@ -91,6 +93,15 @@ struct Defer {
 private:
     Function function;
 };
+
+auto clipPointsToView(CalChartView const& view, CalChart::MovePointsTool const& tool, CalChart::MarcherToPosition const& points, std::function<CalChart::Coord(CalChart::Coord c)> snapper)
+{
+    auto result = CalChart::MarcherToPosition{};
+    for (auto i : tool.TransformPoints(points)) {
+        result[i.first] = view.ClipPositionToShowMode(snapper(i.second));
+    }
+    return result;
+}
 
 }
 
@@ -169,6 +180,26 @@ auto DrawCurve(CalChart::Curve const& curve, std::set<size_t> selectedPoints, Ca
                   })));
     return drawCmds;
 }
+
+// given a curve, and a selection list, figure out the newest points to use:
+auto MergeCurvePoints(std::vector<CalChart::MarcherIndex> curveMarchers, double lengthOffset, CalChart::SelectionList const& selected) -> std::vector<CalChart::MarcherIndex>
+{
+    // first remove all selected marchers from the curve
+    auto begin = curveMarchers.begin();
+    auto end = curveMarchers.end();
+    for (auto marcher : selected) {
+        end = std::remove(begin, end, marcher);
+    }
+    curveMarchers.erase(end, curveMarchers.end());
+    // now where to insert them.
+    auto offset = static_cast<size_t>((curveMarchers.size() + 1) * lengthOffset);
+    if (offset == curveMarchers.size() + 1) {
+        --offset;
+    }
+    curveMarchers.insert(curveMarchers.begin() + offset, selected.begin(), selected.end());
+    return curveMarchers;
+}
+
 }
 
 void FieldCanvas::OnPaint(wxPaintEvent&, CalChart::Configuration const& config)
@@ -237,7 +268,7 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
     mDragStart = pos;
 
     if (GetCurrentMove() == CalChart::MoveMode::Normal) {
-        OnMouseLeftDown_NormalMove(pos, event.ShiftDown(), event.AltDown());
+        OnMouseLeftDown_Normal(pos, event.ShiftDown(), event.AltDown());
         return;
     }
     if (!mMovePointsTool) {
@@ -246,7 +277,7 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
     mMovePointsTool->OnClickDown(SnapToolToGrid(pos));
 }
 
-void FieldCanvas::OnMouseLeftDown_NormalMove(CalChart::Coord pos, bool shiftDown, bool altDown)
+void FieldCanvas::OnMouseLeftDown_Normal(CalChart::Coord pos, bool shiftDown, bool altDown)
 {
     // if we are drawing a curve, then we do the curve path.
     if (mView->IsDrawingCurve()) {
@@ -263,36 +294,40 @@ void FieldCanvas::OnMouseLeftDown_NormalMove(CalChart::Coord pos, bool shiftDown
         return;
     }
 
-    auto foundCurveControls = mView->FindCurveControlPoint(pos);
-    // If we clicked on a curve point, modify that point.
-    if (foundCurveControls.has_value()) {
-        OnMouseLeftDown_FoundCurveControl(*foundCurveControls, shiftDown, altDown);
+    auto foundMarcher = mView->FindMarcher(pos);
+
+    // If we clicked on a curve point without a marcher, modify that point.
+    if (auto foundCurveControls = mView->FindCurveControlPoint(pos);
+        !foundMarcher.has_value() && foundCurveControls.has_value()) {
+        // forget any selection
+        mView->UnselectAll();
+        OnMouseLeftDown_FoundCurveControl(std::get<0>(*foundCurveControls), std::get<1>(*foundCurveControls), shiftDown, altDown);
         return;
     }
-    auto foundCurve = mView->FindCurve(pos);
-    // If we clicked on a curve select the whole curve.
-    if (foundCurve.has_value()) {
-        OnMouseLeftDown_FoundCurve(*foundCurve);
+    // If we clicked on a curve without a marcher, select the whole curve.
+    if (auto foundCurve = mView->FindCurve(pos);
+        !foundMarcher.has_value() && foundCurve.has_value()) {
+        mView->UnselectAll();
+        OnMouseLeftDown_FoundCurve(std::get<0>(*foundCurve));
         return;
     }
-    // didn't click on a curve point, we're not doing any curve things
+    // If we got here, we're not doing any curve things
     mCurve = std::nullopt;
     mCurveSelected = std::nullopt;
     EndCurveControlPointDrag();
 
-    auto i = mView->FindMarcher(pos);
     // if we didn't click on anything, and we have no modifiers, we are starting a new selection
-    if (!i.has_value() && !(shiftDown || altDown)) {
+    if (!foundMarcher.has_value() && !(shiftDown || altDown)) {
         mView->UnselectAll();
     }
-    if (!i.has_value()) {
+    if (!foundMarcher.has_value()) {
         // if no point selected, we grab using the current select
         BeginSelectDrag(mView->GetSelect(), pos);
         return;
     }
 
     // Now add whatever we clicked to the selection.
-    auto select = CalChart::SelectionList{ *i };
+    auto select = CalChart::SelectionList{ *foundMarcher };
     if (altDown) {
         mView->ToggleSelection(select);
     } else {
@@ -335,38 +370,38 @@ void FieldCanvas::OnMouseLeftDown_DrawingCurve(CalChart::Coord pos)
     mCurve->Append(pos);
 }
 
-void FieldCanvas::OnMouseLeftDown_FoundCurveControl(std::tuple<size_t, size_t> curveIndex, bool shiftDown, bool altDown)
+void FieldCanvas::OnMouseLeftDown_FoundCurveControl(size_t curveIndex, size_t curveControl, bool shiftDown, bool altDown)
 {
     // What are the cases?
     // If we don't have a curve, then get the curve and the point -- shifts/alts don't matter here
     // If we have a different curve, then treat it like we don't have a curve.
     // If we are already selecting the curve, then shift means add it, alt means toggle,
-    if (!mCurveSelected.has_value() || (mCurveSelected.has_value() && *mCurveSelected != std::get<0>(curveIndex))) {
-        mCurve = mView->GetCurrentCurve(std::get<0>(curveIndex));
-        mCurveSelected = std::get<0>(curveIndex);
-        mCurvePointsSelected.insert(std::get<1>(curveIndex));
+    if (!mCurveSelected.has_value() || (mCurveSelected.has_value() && *mCurveSelected != curveIndex)) {
+        mCurve = mView->GetCurrentCurve(curveIndex);
+        mCurveSelected = curveIndex;
+        mCurvePointsSelected.insert(curveControl);
     } else {
         if (!shiftDown && !altDown) {
             mCurvePointsSelected.clear();
-            mCurvePointsSelected.insert(std::get<1>(curveIndex));
+            mCurvePointsSelected.insert(curveControl);
         }
         if (shiftDown) {
-            mCurvePointsSelected.insert(std::get<1>(curveIndex));
+            mCurvePointsSelected.insert(curveControl);
         } else if (altDown) {
-            if (mCurvePointsSelected.contains(std::get<1>(curveIndex))) {
-                mCurvePointsSelected.erase(std::get<1>(curveIndex));
+            if (mCurvePointsSelected.contains(curveControl)) {
+                mCurvePointsSelected.erase(curveControl);
             } else {
-                mCurvePointsSelected.insert(std::get<1>(curveIndex));
+                mCurvePointsSelected.insert(curveControl);
             }
         }
     }
     BeginCurveControlPointDrag();
 }
 
-void FieldCanvas::OnMouseLeftDown_FoundCurve(std::tuple<size_t, size_t> curveIndex)
+void FieldCanvas::OnMouseLeftDown_FoundCurve(size_t curveIndex)
 {
-    mCurve = mView->GetCurrentCurve(std::get<0>(curveIndex));
-    mCurveSelected = std::get<0>(curveIndex);
+    mCurve = mView->GetCurrentCurve(curveIndex);
+    mCurveSelected = curveIndex;
     auto pointIndexes = std::views::iota(0UL, mCurve->GetControlPoints().size());
     mCurvePointsSelected.clear();
     for (auto index : pointIndexes) {
@@ -398,7 +433,13 @@ void FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
     if (mMovePointsTool) {
         mMovePointsTool->OnClickUp(pos);
         if (mMovePointsTool->IsDone()) {
-            mView->DoMovePoints(mUncommittedMovePoints);
+            if (auto foundCurve = mView->FindCurve(pos);
+                GetCurrentMove() == CalChart::MoveMode::Normal && foundCurve.has_value()) {
+                auto currentPointsOnCurve = MergeCurvePoints(mView->GetMarchersAssignedToCurve(std::get<0>(*foundCurve)), std::get<2>(*foundCurve), mView->GetSelectionList());
+                mView->DoAssignPointsToCurve(std::get<0>(*foundCurve), currentPointsOnCurve);
+            } else {
+                mView->DoMovePoints(clipPointsToView(*mView, *mMovePointsTool, mView->GetSelectedPoints(), [this](CalChart::Coord coord) { return SnapToGrid(coord); }));
+            }
             EndDrag();
             mView->SetCurrentMove(CalChart::MoveMode::Normal);
             static_cast<CalChartFrame*>(GetParent())->ToolBarSetCurrentMove(CalChart::MoveMode::Normal);
@@ -440,18 +481,17 @@ void FieldCanvas::OnMouseLeftDoubleClick(wxMouseEvent& event)
 
     auto mousePos = TranslateMouseToCoord(dc, event);
     auto pos = mousePos - mView->GetShowFieldOffset();
-    auto foundCurve = mView->FindCurve(pos);
 
     // If we clicked on a curve point, modify that point.
-    if (foundCurve.has_value()) {
-        OnMouseLeftDoubleClick_FoundCurve(pos, *foundCurve);
+    if (auto foundCurve = mView->FindCurve(pos);
+        foundCurve.has_value()) {
+        OnMouseLeftDoubleClick_FoundCurve(pos, std::get<0>(*foundCurve), std::get<1>(*foundCurve));
         return;
     }
 }
 
-void FieldCanvas::OnMouseLeftDoubleClick_FoundCurve(CalChart::Coord pos, std::tuple<size_t, size_t> curveIndex)
+void FieldCanvas::OnMouseLeftDoubleClick_FoundCurve(CalChart::Coord pos, size_t whichCurve, size_t whereToInsert)
 {
-    auto [whichCurve, whereToInsert] = curveIndex;
     auto points = mView->GetCurrentCurve(whichCurve).GetControlPoints();
     points.insert(points.begin() + whereToInsert + 1, pos);
     mCurvePointsSelected.clear();
@@ -563,23 +603,27 @@ void FieldCanvas::AbortDrawing()
         static_cast<CalChartFrame*>(GetParent())->ToolBarUnsetDrawingCurve();
     }
 }
+
 void FieldCanvas::MoveDrag(CalChart::Coord end)
 {
     if (mSelectTool) {
         mSelectTool->OnMove(end, [this](auto c) { return SnapToolToGrid(c); });
+        return;
+    }
+    if (auto foundCurve = mView->FindCurve(end);
+        GetCurrentMove() == CalChart::MoveMode::Normal && !mCurveSelected.has_value() && foundCurve.has_value()) {
+        auto currentPointsOnCurve = MergeCurvePoints(mView->GetMarchersAssignedToCurve(std::get<0>(*foundCurve)), std::get<2>(*foundCurve), mView->GetSelectionList());
+        auto points = mView->GetCurrentCurve(std::get<0>(*foundCurve)).GetPointsOnLine(currentPointsOnCurve.size());
+        mUncommittedMovePoints.clear();
+        for (auto&& thething : CalChart::Ranges::zip_view(currentPointsOnCurve, points)) {
+            mUncommittedMovePoints[std::get<0>(thething)] = std::get<1>(thething);
+        }
+        return;
     }
     if (mMovePointsTool) {
         mMovePointsTool->OnMove(end, [this](auto c) { return SnapToolToGrid(c); });
-        CalChart::MarcherToPosition selected_points;
-        for (auto i : mView->GetSelectionList()) {
-            selected_points[i] = mView->PointPosition(i);
-        }
-
         if (mMovePointsTool->IsReadyForMoving()) {
-            mUncommittedMovePoints = mMovePointsTool->TransformPoints(selected_points);
-            for (auto& i : mUncommittedMovePoints) {
-                i.second = mView->ClipPositionToShowMode(SnapToGrid(i.second));
-            }
+            mUncommittedMovePoints = clipPointsToView(*mView, *mMovePointsTool, mView->GetSelectedPoints(), [this](CalChart::Coord coord) { return SnapToGrid(coord); });
         }
     }
     if (mCurvePointDragging) {

@@ -77,6 +77,8 @@ add_executable(
   ContinuityEditorPopup.h
   CustomListViewPanel.cpp
   CustomListViewPanel.h
+  EditCurveAssignments.cpp
+  EditCurveAssignments.hpp
   DCSaveRestore.h
   FieldCanvas.cpp
   FieldCanvas.h
