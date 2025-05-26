@@ -17,6 +17,7 @@ Checks: >
   google-runtime-operator,
   hicpp-*,
   -hicpp-vararg,
+  -misc-include-cleaner,
   misc-*,
   modernize-*,
   performance-*,

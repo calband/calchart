@@ -338,42 +338,50 @@ class Curve : public Shape {
 
 public:
     explicit Curve(Coord p)
-        : pntlist{ p }
+        : mControlPoints{ p }
     {
+        Regenerate();
     }
     explicit Curve(std::vector<Coord> points)
-        : pntlist{ points }
+        : mControlPoints{ points }
     {
+        Regenerate();
     }
 
     void cleanMove()
     {
-        movingPoint = std::nullopt;
+        mMovingPoint = std::nullopt;
+        Regenerate();
     }
 
-    void Append(Coord p)
-    {
-        pntlist.push_back(p);
-        movingPoint = std::nullopt;
-    }
+    void Append(Coord p);
     [[nodiscard]] auto GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand> override;
 
     [[nodiscard]] auto GetPointsOnLine(int numpnts) const -> std::vector<Coord>;
-    [[nodiscard]] auto GetControlPoints() const -> std::vector<Coord> { return pntlist; }
-    [[nodiscard]] auto LowerControlPointOnLine(Coord point, Coord::units searchBound) const -> std::optional<size_t>;
+    [[nodiscard]] auto GetControlPoints() const -> std::vector<Coord> { return mControlPoints; }
+    [[nodiscard]] auto LowerControlPointOnLine(Coord point, Coord::units searchBound) const -> std::optional<std::tuple<size_t, double>>;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte>;
 
+    void Regenerate();
+
     [[nodiscard]] auto operator==(Curve const& other) const -> bool
     {
-        return pntlist == other.pntlist && movingPoint == other.movingPoint;
+        return mControlPoints == other.mControlPoints
+            && mMovingPoint == other.mMovingPoint;
     }
 
 private:
-    std::vector<Coord> pntlist;
-    std::optional<Coord> movingPoint;
+    std::vector<Coord> mControlPoints;
+    std::optional<Coord> mMovingPoint;
 
-    void OnMoveImpl(Coord p) override { movingPoint = p; }
+    std::vector<Coord> mSegmentPoints; // this is an "memoization"; keep this coherenet with mControlPoints
+
+    void OnMoveImpl(Coord p) override
+    {
+        mMovingPoint = p;
+        Regenerate();
+    }
 };
 
 auto CreateCurve(Reader) -> std::pair<Curve, Reader>;

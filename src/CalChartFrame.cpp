@@ -21,6 +21,7 @@
 
 #include <cstring>
 #include <fstream>
+#include <ranges>
 #include <sstream>
 
 #include "CalChartFrame.h"
@@ -42,6 +43,7 @@
 #include "CalChartView.h"
 #include "ColorPalette.h"
 #include "ContinuityBrowser.h"
+#include "EditCurveAssignments.hpp"
 #include "FieldCanvas.h"
 #include "FieldControlsToolBar.h"
 #include "FieldThumbnailBrowser.h"
@@ -252,6 +254,10 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
                        } },
             wxUI::Item{ "Select &All...\tCTRL-A", "Select All Points", [this] {
                            OnSelectAll();
+                       } },
+            wxUI::Separator{},
+            wxUI::Item{ "Edit Curve Assignments...", "Edit Curve Assignments", [this] {
+                           OnEditCurveAssignments();
                        } },
             wxUI::Separator{},
             wxUI::Item{ "Set Sheet &Title...\tCTRL-T", "Change the title of this stuntsheet", [this] {
@@ -761,6 +767,18 @@ void CalChartFrame::OnSelectAll()
 {
     if (GetShow()) {
         GetShow()->SetSelectionList(GetShow()->MakeSelectAll());
+    }
+}
+
+void CalChartFrame::OnEditCurveAssignments()
+{
+    auto* show = GetShow();
+    if (!show) {
+        return;
+    }
+    if (auto curveAssignment = PromptUserForCurveAssignment(this, *show);
+        curveAssignment) {
+        GetFieldView()->DoAssignPointsToCurve(curveAssignment->first, GetShow()->GetPointsFromLabels(curveAssignment->second));
     }
 }
 
