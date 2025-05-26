@@ -43,12 +43,6 @@
 
 IMPLEMENT_CLASS(CalChartSplash, wxDocParentFrame)
 
-BEGIN_EVENT_TABLE(CalChartSplash, wxDocParentFrame)
-EVT_MENU(wxID_ABOUT, CalChartSplash::OnCmdAbout)
-EVT_MENU(wxID_HELP, CalChartSplash::OnCmdHelp)
-EVT_MENU(wxID_PREFERENCES, CalChartSplash::OnCmdPreferences)
-END_EVENT_TABLE()
-
 struct CalChartSplashDropTarget : public wxFileDropTarget {
 public:
     CalChartSplashDropTarget(wxDocManager* manager)
@@ -92,14 +86,16 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString c
     // Give it an icon
     SetBandIcon(this);
 
+    wxUI::MenuProxy fileMenu;
     wxUI::MenuBar{
         wxUI::Menu{
             "&File",
             wxUI::Item{ wxID_NEW, "&New Show\tCTRL-N", "Create a new show" },
             wxUI::Item{ wxID_OPEN, "&Open...\tCTRL-O", "Load a saved show" },
-            wxUI::Item{ wxID_PREFERENCES, "&Preferences\tCTRL-,", [this](wxCommandEvent& event) { OnCmdPreferences(event); } },
+            wxUI::Item{ wxID_PREFERENCES, "&Preferences\tCTRL-,", [this] { Preferences(); } },
             wxUI::Item{ wxID_EXIT, "&Quit\tCTRL-Q", "Quit CalChart" },
-        },
+        }
+            .withProxy(fileMenu),
         wxUI::Menu{
             "&Debug",
             wxUI::Item{ "Stack Draw Playground", [this] {
@@ -121,48 +117,41 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString c
     }.fitTo(this);
 
     // A nice touch: a history of files visited. Use this menu.
-    auto which = GetMenuBar()->FindMenu("&File");
-    manager->FileHistoryUseMenu(GetMenuBar()->GetMenu(which));
+    manager->FileHistoryUseMenu(fileMenu.control());
 
     SetDropTarget(new CalChartSplashDropTarget(manager));
 
     // create a sizer and populate
-    using namespace wxUI;
     auto fontTitle = wxFontInfo(GetTitleFontSize()).Family(wxFONTFAMILY_SWISS);
     auto fontSubTitle = wxFontInfo(GetSubTitleFontSize()).Family(wxFONTFAMILY_SWISS);
     auto fontSubSubTitle = wxFontInfo(GetSubSubTitleFontSize()).Family(wxFONTFAMILY_SWISS);
-    VSizer{
+    wxUI::VSizer{
         BasicSizerFlags(),
-        Bitmap{ BitmapWithBandIcon(GetLogoSize()) }.withFlags(ExpandSizerFlags()),
-        Text{ "CalChart " CC_VERSION }
+        wxUI::Bitmap{ BitmapWithBandIcon(GetLogoSize()) }.withFlags(ExpandSizerFlags()),
+        wxUI::Text{ "CalChart " CC_VERSION }
             .withFont(fontTitle),
-        Line{}
+        wxUI::Line{}
             .withSize({ GetLogoLineSize(), -1 }),
-        HSizer{
-            Hyperlink{ "Check for latest.", "https://sourceforge.net/projects/calchart/" }
+        wxUI::HSizer{
+            wxUI::Hyperlink{ "Check for latest.", "https://sourceforge.net/projects/calchart/" }
                 .withFont(fontSubTitle)
                 .withStyle(wxHL_DEFAULT_STYLE),
-            Text{ "        " }
+            wxUI::Text{ "        " }
                 .withFont(fontSubTitle),
-            Hyperlink{ "Report an issue.", "https://github.com/calband/calchart/issues/new" }
+            wxUI::Hyperlink{ "Report an issue.", "https://github.com/calband/calchart/issues/new" }
                 .withFont(fontSubTitle)
                 .withStyle(wxHL_DEFAULT_STYLE),
         },
-        Line{}
+        wxUI::Line{}
             .withSize({ GetLogoLineSize(), -1 }),
-        Text{ "Authors: Gurk Meeker, Richard Michael Powell" }
+        wxUI::Text{ "Authors: Gurk Meeker, Richard Michael Powell" }
             .withFont(fontSubTitle),
-        Text{ "Contributors: Brandon Chinn, Kevin Durand,\nNoah Gilmore, David Strachan-Olson, Allan Yu" }
+        wxUI::Text{ "Contributors: Brandon Chinn, Kevin Durand,\nNoah Gilmore, David Strachan-Olson, Allan Yu" }
             .withFont(fontSubSubTitle),
     }
         .fitTo(this);
-
     Show(true);
 }
-
-void CalChartSplash::OnCmdAbout(wxCommandEvent&) { CalChartSplash::About(); }
-
-void CalChartSplash::OnCmdHelp(wxCommandEvent&) { CalChartSplash::Help(); }
 
 void CalChartSplash::About()
 {
@@ -194,7 +183,7 @@ void CalChartSplash::Help()
     wxGetApp().GetGlobalHelpController().DisplayContents();
 }
 
-void CalChartSplash::OnCmdPreferences(wxCommandEvent&)
+void CalChartSplash::Preferences()
 {
     // here's where we flush out the configuration.
     auto localConfig = mConfig.Copy();

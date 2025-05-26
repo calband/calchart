@@ -28,4 +28,5 @@ Other changes:
 * [#638](../../issues/638) Move tests into CMake Tests
 * [#640](../../issues/640) Clean up some of the CalChartAngles.h clang-tidy errors
 * [#643](../../issues/643) Remove sheet as point friend
+* [#645](../../issues/645) Adopt wxUI Menu widely
 
