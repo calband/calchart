@@ -116,9 +116,11 @@ jobs:
 
 
     - name: Code sign the app
+      env:
+        DEVELOPER_ID_APP: ${{ secrets.DEVELOPER_ID_APP }}
       run: |
-        codesign --deep --force --verify --verbose \
-          --sign "Developer ID Application" \
+        codesign --deep --force --verify --verbose --timestamp --options runtime \
+          --sign "$DEVELOPER_ID_APP" \
           ${{github.workspace}}/build/src/CalChart.app
 
     # - name: Codesign (macOS)
