@@ -105,16 +105,33 @@ jobs:
       if: matrix.config.os == 'macos-14'
       env:
         MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
-      run: echo $MACOS_CERTIFICATE | base64 --decode > ${{github.workspace}}/certificate.p12
+        MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+      run: |
+        echo $MACOS_CERTIFICATE | base64 --decode > ${{github.workspace}}/certificate.p12
+        security create-keychain -p "" build.keychain
+        security default-keychain -s build.keychain
+        security unlock-keychain -p "" build.keychain
+        security import certificate.p12 -k build.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+        security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
 
-    - name: Codesign (macOS)
-      if: matrix.config.os == 'macos-14'
-      uses: indygreg/apple-code-sign-action@v1
-      with:
-        input_path: ${{github.workspace}}/build/src/CalChart.app
-        p12_file: ${{github.workspace}}/certificate.p12
-        p12_password: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
 
+    - name: Code sign the app
+      run: |
+        codesign --deep --force --verify --verbose \
+          --sign "Developer ID Application" \
+          ${{github.workspace}}/build/src/CalChart.app
+
+    # - name: Codesign (macOS)
+    #   if: matrix.config.os == 'macos-14'
+    #   uses: indygreg/apple-code-sign-action@v1
+    #   with:
+    #     input_path: ${{github.workspace}}/build/src/CalChart.app
+    #     p12_file: ${{github.workspace}}/certificate.p12
+    #     p12_password: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+
+    # Notarizing involves
+    # 1. Zip the file up
+    # 2. Notarize using the password and IDs for notarytool
     - name: Zip for notarization (macOS)
       if: matrix.config.os == 'macos-14'
       run: ditto -c -k --keepParent ${{github.workspace}}/build/src/CalChart.app ${{github.workspace}}/build/src/CalChart.zip
