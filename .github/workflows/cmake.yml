@@ -93,6 +93,9 @@ jobs:
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
 
+    - name: Run tests
+      run: ctest --verbose --test-dir ${{github.workspace}}/build
+
     # Codesigning for mac involves:
     # 1. Creating a signing cert in p12 form (https://help.apple.com/xcode/mac/current/#/dev154b28f09)
     # 2. Uploading the p12 as github secrets (https://docs.github.com/en/actions/use-cases-and-examples/deploying/installing-an-apple-certificate-on-macos-runners-for-xcode-development)
@@ -112,8 +115,25 @@ jobs:
         p12_file: ${{github.workspace}}/certificate.p12
         p12_password: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
 
-    - name: Run tests
-      run: ctest --verbose --test-dir ${{github.workspace}}/build
+    - name: Zip for notarization (macOS)
+      if: matrix.config.os == 'macos-14'
+      run: ditto -c -k --keepParent ${{github.workspace}}/build/src/CalChart.app ${{github.workspace}}/build/src/CalChart.zip
+
+    - name: Notarize (macOS)
+      if: matrix.config.os == 'macos-14'
+      run: |
+        xcrun notarytool submit ${{github.workspace}}/build/src/CalChart.zip \
+          --apple-id "$APPLE_ID" \
+          --team-id "$APPLE_TEAM_ID" \
+          --password "$APP_SPECIFIC_PASSWORD" \
+          --wait
+      env:
+        APPLE_ID: ${{ secrets.APPLE_ID }}
+        APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+
+    - name: Staple notarization ticket
+      run: xcrun stapler staple ${{github.workspace}}/build/src/CalChart.app
 
     - name: Pack (macOS)
       if: matrix.config.os == 'macos-14'
