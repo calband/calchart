@@ -61,13 +61,14 @@ jobs:
     - name: Checkout submodules
       run: git submodule update --init --recursive
 
+      # make sure that if we change our dependencies layout, we update the cache hash we use
     - name: Cache wxWidgets FetchContent
       uses: actions/cache@v4
       with:
         path: |
           ~/.cache/cmake
           ${{github.workspace}}/build/_deps
-        key: wxwidgets-${{ hashFiles('**/CMakeLists.txt') }}
+        key: wxwidgets-${{ hashFiles('**/CMakeLists.txt', '${{github.workspace}}/cmake/*.cmake') }}
         restore-keys: |
           wxwidgets-
         
