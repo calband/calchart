@@ -122,6 +122,23 @@ jobs:
         p12-file-base64: $MACOS_CERTIFICATE
         p12-password: $CERTIFICATE_PASSWORD
 
+#         -    # 4. using indygreg/apple-code-sign-action@v1 to sign the app
+# +    # 4. using apple-actions/import-codesign-certs@v3 to set-up the keychain
+#      - name: Gen p12 (macOS)
+#        if: matrix.config.os == 'macos-14'
+#        env:
+#          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+#          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+# 
+#          -      run: |
+# -        echo $MACOS_CERTIFICATE | base64 --decode > ${{github.workspace}}/certificate.p12
+# -        security create-keychain -p "" build.keychain
+# -        security default-keychain -s build.keychain
+# -        security unlock-keychain -p "" build.keychain
+# -        security import certificate.p12 -k build.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+# -        security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
+# -
+
     - name: Code sign the app
       if: matrix.config.os == 'macos-14'
       env:
