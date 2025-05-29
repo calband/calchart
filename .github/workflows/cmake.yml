@@ -100,22 +100,19 @@ jobs:
     # 1. Creating a signing cert in p12 form (https://help.apple.com/xcode/mac/current/#/dev154b28f09)
     # 2. Uploading the p12 as github secrets (https://docs.github.com/en/actions/use-cases-and-examples/deploying/installing-an-apple-certificate-on-macos-runners-for-xcode-development)
     # 3. Generating the p12 file on the github action server
-    # 4. using indygreg/apple-code-sign-action@v1 to sign the app
+    # 4. using apple-actions/import-codesign-certs@v3 to set-up the keychain
     - name: Gen p12 (macOS)
       if: matrix.config.os == 'macos-14'
       env:
         MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
         MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
-      run: |
-        echo $MACOS_CERTIFICATE | base64 --decode > ${{github.workspace}}/certificate.p12
-        security create-keychain -p "" build.keychain
-        security default-keychain -s build.keychain
-        security unlock-keychain -p "" build.keychain
-        security import certificate.p12 -k build.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-        security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
-
+      uses: apple-actions/import-codesign-certs@v3
+      with:
+        p12-file-base64: $MACOS_CERTIFICATE
+        p12-password: $CERTIFICATE_PASSWORD
 
     - name: Code sign the app
+      if: matrix.config.os == 'macos-14'
       env:
         DEVELOPER_ID_APP: ${{ secrets.DEVELOPER_ID_APP }}
       run: |
@@ -152,6 +149,7 @@ jobs:
         APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
 
     - name: Staple notarization ticket
+      if: matrix.config.os == 'macos-14'
       run: xcrun stapler staple ${{github.workspace}}/build/src/CalChart.app
 
     - name: Pack (macOS)
