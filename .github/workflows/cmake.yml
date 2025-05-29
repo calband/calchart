@@ -120,7 +120,7 @@ jobs:
       uses: apple-actions/import-codesign-certs@v3
       with:
         p12-file-base64: $MACOS_CERTIFICATE
-        p12-password: $CERTIFICATE_PASSWORD
+        p12-password: $MACOS_CERTIFICATE_PASSWORD
 
 #         -    # 4. using indygreg/apple-code-sign-action@v1 to sign the app
 # +    # 4. using apple-actions/import-codesign-certs@v3 to set-up the keychain
