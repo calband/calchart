@@ -61,6 +61,16 @@ jobs:
     - name: Checkout submodules
       run: git submodule update --init --recursive
 
+    - name: Cache wxWidgets FetchContent
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/cmake
+          ${{github.workspace}}/build/_deps
+        key: wxwidgets-${{ hashFiles('**/CMakeLists.txt') }}
+        restore-keys: |
+          wxwidgets-
+        
     - name: Installing Xcode (MacOS)
       if: matrix.config.os == 'macos-14'
       uses: maxim-lobanov/setup-xcode@v1
