@@ -83,7 +83,6 @@ jobs:
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 100 --slave /usr/bin/g++ g++ /usr/bin/g++-14 --slave /usr/bin/gcov gcov /usr/bin/gcov-14
         sudo update-alternatives --set gcc /usr/bin/gcc-14
 
-
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
@@ -93,27 +92,109 @@ jobs:
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
 
-    # Codesigning for mac involves:
-    # 1. Creating a signing cert in p12 form (https://help.apple.com/xcode/mac/current/#/dev154b28f09)
-    # 2. Uploading the p12 as github secrets (https://docs.github.com/en/actions/use-cases-and-examples/deploying/installing-an-apple-certificate-on-macos-runners-for-xcode-development)
-    # 3. Generating the p12 file on the github action server
-    # 4. using indygreg/apple-code-sign-action@v1 to sign the app
-    - name: Gen p12 (macOS)
+    - name: Run tests
+      run: ctest --verbose --test-dir ${{github.workspace}}/build
+
+    # Codesigning and Notorizing for Mac:
+    # These are the steps you need to do before we run CI to Codesign and Notorize
+    # prerequisites: You need an Apple Developer Account (Apple ID)
+    # ✅ Step 1: Generate a Certificate Signing Request (CSR)
+    #   On your Mac, open Keychain Access
+    #   In the menu bar, select:
+    #     Keychain Access → Certificate Assistant → Request a Certificate From a Certificate Authority…
+    #   Fill in:
+    #     User Email Address: your Apple ID
+    #     Common Name: something like Developer ID for CalChart
+    #     CA Email: leave blank
+    #     Request is: ✔ Save to disk
+    #   Click Continue, and save the .certSigningRequest file
+    # ✅ Step 2: Create a Developer ID Application Certificate
+    #   Go to https://developer.apple.com/account/
+    #   Navigate to Certificates, Identifiers & Profiles
+    #   Under Certificates, click the ➕ button
+    #   Choose:
+    #    Type: Developer ID Application
+    #   Click Continue
+    #    Upload your .certSigningRequest
+    #   Click Continue, then Download the .cer file
+    # ✅ Step 3: Import the Certificate to Keychain
+    #   Double-click the downloaded .cer file
+    #   It will appear in your login keychain
+    #   Make sure the certificate appears with a private key (expand the triangle in Keychain)
+    #   🔒 If there's no private key: Something went wrong during CSR generation. Try again from Step 1.
+    # ✅ Step 4: Export as .p12 for GitHub Use
+    #   In Keychain Access, right-click the certificate → Export
+    #   Choose .p12 format
+    #   Set a strong password (you’ll store this in GitHub Secrets as MACOS_CERTIFICATE_PASSWORD)
+    #   Save the file as DeveloperID.p12
+    # ✅ Step 5: App-Specific Password for notarytool
+    #   notarytool is going to access the server as you, so create an app-specific password
+    #   If you haven’t already, create an App-Specific Password for your Apple ID .
+    #   https://account.apple.com/account/manage
+    #   Create a password for notarytool (you’ll store this in GitHub Secrets as APP_SPECIFIC_PASSWORD)
+    # ✅ Step 5: Base64 Encode and Store in GitHub
+    #   Run:
+    #     base64 DeveloperID.p12 | pbcopy
+    #   Then in GitHub, Go to Settings → Secrets and variables → Actions
+    #   Add these secrets:
+    #     MACOS_CERTIFICATE (Paste base64 contents)
+    #     MACOS_CERTIFICATE_PASSWORD (The password you set for export)
+    #     DEVELOPER_ID_APP "Developer ID Application: Your Name (TEAMID)"
+    #     APPLE_ID (Your developer Apple ID)
+    #     APPLE_TEAM_ID (Your developer team (usually 10 alphanumeric digits))
+    #     APP_SPECIFIC_PASSWORD (The notarytool password)
+    #   To get the full identity name, run:
+    #     security find-identity -p codesigning -v
+    #   You'll see:
+    # 
+    #     1) XXXXXXXX "Developer ID Application: Richard Powell (ABCDE12345)"
+    #   Use that full quoted string in DEVELOPER_ID_APP.
+
+    - name: Setup keychain with cert p12 (macOS)
       if: matrix.config.os == 'macos-14'
       env:
         MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
-      run: echo $MACOS_CERTIFICATE | base64 --decode > ${{github.workspace}}/certificate.p12
+        MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+      run: |
+        echo $MACOS_CERTIFICATE | base64 --decode > ${{github.workspace}}/certificate.p12
+        security create-keychain -p "CalChart" build.keychain
+        security default-keychain -s build.keychain
+        security unlock-keychain -p "CalChart" build.keychain
+        security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+        security set-key-partition-list -S apple-tool:,apple: -s -k "CalChart" build.keychain
 
-    - name: Codesign (macOS)
+    - name: Code sign the app
       if: matrix.config.os == 'macos-14'
-      uses: indygreg/apple-code-sign-action@v1
-      with:
-        input_path: ${{github.workspace}}/build/src/CalChart.app
-        p12_file: ${{github.workspace}}/certificate.p12
-        p12_password: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+      env:
+        DEVELOPER_ID_APP: ${{ secrets.DEVELOPER_ID_APP }}
+      run: |
+        codesign --deep --force --verify --verbose --timestamp --options runtime \
+          --sign "$DEVELOPER_ID_APP" \
+          ${{github.workspace}}/build/src/CalChart.app
 
-    - name: Run tests
-      run: ctest --verbose --test-dir ${{github.workspace}}/build
+    # Notarizing involves
+    # 1. Zip the file up
+    # 2. Notarize using the password and IDs for notarytool
+    - name: Zip for notarization (macOS)
+      if: matrix.config.os == 'macos-14'
+      run: ditto -c -k --keepParent ${{github.workspace}}/build/src/CalChart.app ${{github.workspace}}/build/src/CalChart.zip
+
+    - name: Notarize (macOS)
+      if: matrix.config.os == 'macos-14'
+      run: |
+        xcrun notarytool submit ${{github.workspace}}/build/src/CalChart.zip \
+          --apple-id "$APPLE_ID" \
+          --team-id "$APPLE_TEAM_ID" \
+          --password "$APP_SPECIFIC_PASSWORD" \
+          --wait
+      env:
+        APPLE_ID: ${{ secrets.APPLE_ID }}
+        APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+
+    - name: Staple notarization ticket
+      if: matrix.config.os == 'macos-14'
+      run: xcrun stapler staple ${{github.workspace}}/build/src/CalChart.app
 
     - name: Pack (macOS)
       if: matrix.config.os == 'macos-14'

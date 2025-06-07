@@ -2,6 +2,7 @@
 
 Bugs addressed in this release:
 
+* [#582](../../issues/582) Why does CalChart still say it's from an unknown developer when launch on Mac?
 * [#593](../../issues/593) Are the draw colors for selected and reference inverted on the drawing setup
 * [#596](../../issues/596) Did flip labels break?
 * [#598](../../issues/598) ASAN crashes when drawing sprites
