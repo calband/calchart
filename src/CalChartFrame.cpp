@@ -47,8 +47,8 @@
 #include "FieldCanvas.h"
 #include "FieldControlsToolBar.h"
 #include "FieldThumbnailBrowser.h"
+#include "MarcherPicker.hpp"
 #include "ModeSetupDialog.h"
-#include "PointPicker.h"
 #include "PrintContinuityEditor.h"
 #include "PrintPostScriptDialog.h"
 #include "SetupInstruments.h"
@@ -249,8 +249,8 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
                            SetMode();
                        } },
             wxUI::Separator{},
-            wxUI::Item{ "Point Picker...\tCTRL-SHIFT-A", "Point Picker", [this] {
-                           OnPointPicker();
+            wxUI::Item{ "Marcher Picker...\tCTRL-SHIFT-A", "Marcher Picker", [this] {
+                           OnMarcherPicker();
                        } },
             wxUI::Item{ "Select &All...\tCTRL-A", "Select All Points", [this] {
                            OnSelectAll();
@@ -751,15 +751,14 @@ void CalChartFrame::OnSetupInstruments()
     }
 }
 
-void CalChartFrame::OnPointPicker()
+void CalChartFrame::OnMarcherPicker()
 {
     if (!GetShow()) {
         return;
     }
-    PointPicker dialog(this, *GetShow());
-    if (dialog.ShowModal() == wxID_OK) {
-        auto selections = dialog.GetMarchersSelected();
-        GetShow()->SetSelectionList(GetShow()->MakeSelectByLabels(selections));
+    if (auto selections = PromptUserToPickMarchers(this, *GetShow());
+        selections.has_value()) {
+        GetShow()->SetSelectionList(GetShow()->MakeSelectByLabels(*selections));
     }
 }
 

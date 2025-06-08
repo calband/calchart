@@ -1,6 +1,6 @@
 /*
- * PointPicker.cpp
- * Dialog for picking points
+ * MarcherPicker.cpp
+ * Dialog for picking marchers
  */
 
 /*
@@ -20,24 +20,30 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "PointPicker.h"
+#include "MarcherPicker.hpp"
+#include "CalChartDoc.h"
 #include "CalChartRanges.h"
 #include "CalChartToolBar.h"
 #include <ranges>
+#include <wx/dialog.h>
 #include <wxUI/wxUI.hpp>
 
-PointPicker::PointPicker(wxWindow* parent, CalChartDoc const& show)
-    : PointPicker(
-        parent,
-        show,
-        CalChart::SelectionList(std::views::iota(0, show.GetNumPoints()).begin(), std::views::iota(0, show.GetNumPoints()).end()),
-        show.GetSelectionList())
-{
-}
+class MarcherPicker : public wxDialog {
+    using super = wxDialog;
+
+public:
+    MarcherPicker(wxWindow* parent, CalChartDoc const& show, CalChart::SelectionList const& marchersToUse, CalChart::SelectionList const& selected);
+    ~MarcherPicker() override = default;
+
+    auto GetMarchersSelected() const { return mMarcherLabels; }
+
+private:
+    std::vector<std::string> mMarcherLabels;
+};
 
 // Given a set of marchers, and a set of selected marchers, create a dialog that allows the user to select
 // the labels of the marchers to use.
-PointPicker::PointPicker(wxWindow* parent, CalChartDoc const& show, CalChart::SelectionList const& marchersToUse, CalChart::SelectionList const& selected)
+MarcherPicker::MarcherPicker(wxWindow* parent, CalChartDoc const& show, CalChart::SelectionList const& marchersToUse, CalChart::SelectionList const& selected)
     : super(parent, wxID_ANY, "Select Marchers", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
 {
     auto labels = show.GetPointsLabel(marchersToUse);
@@ -105,4 +111,22 @@ PointPicker::PointPicker(wxWindow* parent, CalChartDoc const& show, CalChart::Se
         .fitTo(this);
 
     Center();
+}
+
+auto PromptUserToPickMarchers(wxWindow* parent, CalChartDoc const& show, CalChart::SelectionList const& marchersToUse, CalChart::SelectionList const& selected) -> std::optional<std::vector<std::string>>
+{
+    MarcherPicker dialog(parent, show, marchersToUse, selected);
+    if (dialog.ShowModal() == wxID_OK) {
+        return dialog.GetMarchersSelected();
+    }
+    return std::nullopt;
+}
+
+auto PromptUserToPickMarchers(wxWindow* parent, CalChartDoc const& show) -> std::optional<std::vector<std::string>>
+{
+    return PromptUserToPickMarchers(
+        parent,
+        show,
+        CalChart::SelectionList(std::views::iota(0, show.GetNumPoints()).begin(), std::views::iota(0, show.GetNumPoints()).end()),
+        show.GetSelectionList());
 }
