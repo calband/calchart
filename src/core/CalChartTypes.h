@@ -25,6 +25,7 @@
 
 #include <functional>
 #include <map>
+#include <ranges>
 #include <set>
 #include <string>
 
@@ -45,7 +46,7 @@ using SelectionList = std::set<MarcherIndex>;
 
 using Beats = unsigned;
 
-enum class MoveMode : uint8_t {
+enum class MoveMode {
     Normal,
     ShapeLine,
     ShapeX,

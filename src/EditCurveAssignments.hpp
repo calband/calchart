@@ -21,8 +21,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartDoc.h"
+#include <optional>
+#include <string>
 #include <vector>
-#include <wxUI/wxUI.hpp>
+
+class CalChartDoc;
+class wxWindow;
 
 auto PromptUserForCurveAssignment(wxWindow* parent, CalChartDoc const& show) -> std::optional<std::pair<size_t, std::vector<std::string>>>;

@@ -46,6 +46,7 @@ auto CommandStill::toOnlineViewerJSON() const -> nlohmann::json
         case Style::Close:
             return "close";
         }
+        return "close";
     }();
     j["beats"] = static_cast<double>(NumBeats());
     j["facing"] = ToOnlineViewer::angle(FacingDirectionAtBeat(0));

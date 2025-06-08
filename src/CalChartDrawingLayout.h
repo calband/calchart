@@ -119,6 +119,7 @@ auto VLayout(Range const& sizes, DrawSurface surface, CalChart::Draw::StackAlign
             }
             return { (availableSize - firstSize).y / 2, 0 };
         }
+        return { 0, 0 };
     }(align);
 
     auto offsets = std::vector<int>{};

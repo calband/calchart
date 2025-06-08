@@ -74,7 +74,7 @@ public:
     void OnSetBeats();
     void OnSetupMarchers();
     void OnSetupInstruments();
-    void OnPointPicker();
+    void OnMarcherPicker();
     void OnSelectAll();
     void OnEditCurveAssignments();
     void OnCmdAbout(wxCommandEvent& event);

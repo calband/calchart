@@ -28,6 +28,7 @@
 #include <stdexcept>
 #include <tuple>
 #include <utility>
+#include <vector>
 
 namespace CalChart::Ranges {
 
