@@ -153,7 +153,6 @@ public:
     void SetCurrentSelect(CalChart::Select type);
     void SetCurrentMove(CalChart::MoveMode type);
     void ToolBarSetCurrentMove(CalChart::MoveMode type);
-    void ToolBarUnsetDrawingCurve();
     float ToolBarSetZoom(float zoom); // set to an amount, returns what it was set to.
     void zoom_callback(wxCommandEvent&);
     void zoom_callback_textenter(wxCommandEvent&);
