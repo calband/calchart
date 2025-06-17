@@ -213,7 +213,6 @@ namespace {
     }
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS(AutosaveInterval, long, 60);
-IMPLEMENT_CONFIGURATION_FUNCTIONS(FeatureCurves, bool, false);
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS(FieldFrameZoom_3_6_0, double, 1.0);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(FieldCanvasScrollX, long, 0);

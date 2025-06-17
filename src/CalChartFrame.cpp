@@ -347,7 +347,7 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
     // view->GetDocumentManager()->FileHistoryUseMenu(file_menu);
 
     // Add a toolbar
-    mSelectAndMoveToolBar = CreateSelectAndMoves(this, mConfig.Get_FeatureCurves(), wxID_ANY, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW);
+    mSelectAndMoveToolBar = CreateSelectAndMoves(this, wxID_ANY, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW);
     mSelectAndMoveToolBar->SetFont(ResizeFont(mSelectAndMoveToolBar->GetFont(), GetToolBarFontSize()));
     mMarcherToolBar = CreateDotModifiers(this, wxID_ANY, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW);
     mMarcherToolBar->SetFont(ResizeFont(mMarcherToolBar->GetFont(), GetToolBarFontSize()));
@@ -829,8 +829,7 @@ void CalChartFrame::OnCmd_swap(wxCommandEvent&)
 
 void CalChartFrame::OnCmd_curve(wxCommandEvent&)
 {
-    mSelectAndMoveToolBar->ToggleTool(CALCHART__curve, true);
-    mCanvas->SetDrawingCurve(true);
+    mCanvas->SetDrawingCurve(mSelectAndMoveToolBar->GetToolToggled(CALCHART__curve));
 }
 
 void CalChartFrame::OnCmd_move(wxCommandEvent&)
@@ -1231,12 +1230,6 @@ void CalChartFrame::ToolBarSetCurrentMove(CalChart::MoveMode type)
 {
     // retoggle the tool because we want it to draw as selected
     mSelectAndMoveToolBar->ToggleTool(CALCHART__move + toUType(type), true);
-}
-
-// call by the canvas to inform that the curve draw is done.  Don't call back to canvas
-void CalChartFrame::ToolBarUnsetDrawingCurve()
-{
-    mSelectAndMoveToolBar->ToggleTool(CALCHART__curve, false);
 }
 
 void CalChartFrame::SetMode()

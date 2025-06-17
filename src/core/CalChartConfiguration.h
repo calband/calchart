@@ -133,7 +133,6 @@ private:                                           \
     mutable std::optional<Type> m##Key = {};
 
     DECLARE_CONFIGURATION_FUNCTIONS(AutosaveInterval, long);
-    DECLARE_CONFIGURATION_FUNCTIONS(FeatureCurves, bool);
 
     // page setup and zoom
     DECLARE_CONFIGURATION_FUNCTIONS(FieldFrameZoom_3_6_0, double);

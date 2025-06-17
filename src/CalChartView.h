@@ -124,7 +124,7 @@ public:
     [[nodiscard]] auto GetCurrentMove() const { return mShow->GetCurrentMove(); }
     void SetCurrentMove(CalChart::MoveMode move) { mShow->SetCurrentMove(move); }
     [[nodiscard]] auto IsDrawingCurve() const { return mShow->IsDrawingCurve(); }
-    void SetDrawingCurve(bool drawingCurve) const { return mShow->SetDrawingCurve(drawingCurve); }
+    void SetDrawingCurve(bool drawingCurve) const { mShow->SetDrawingCurve(drawingCurve); }
 
     [[nodiscard]] auto GetCurrentCurve(size_t index) const { return mShow->GetCurrentCurve(index); }
     [[nodiscard]] auto GetCurrentNumberCurves() const { return mShow->GetCurrentNumberCurves(); }

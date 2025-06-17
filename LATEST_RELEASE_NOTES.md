@@ -1,4 +1,4 @@
-## Release notes for 3.7.3
+## Release notes for 3.8.0
 
 Bugs addressed in this release:
 
@@ -30,4 +30,5 @@ Other changes:
 * [#640](../../issues/640) Clean up some of the CalChartAngles.h clang-tidy errors
 * [#643](../../issues/643) Remove sheet as point friend
 * [#645](../../issues/645) Adopt wxUI Menu widely
+* [#649](../../issues/649) It is too hard to select curve control buttons.
 

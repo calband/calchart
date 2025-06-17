@@ -94,9 +94,9 @@ std::vector<ToolBarEntry> GetSymbolsToolBar()
     return tb;
 }
 
-std::vector<ToolBarEntry> GetHalfOfMainToolBar(bool withFeatureCurves)
+std::vector<ToolBarEntry> GetHalfOfMainToolBar()
 {
-    static auto const tb = [withFeatureCurves] {
+    static auto const tb = [] {
         auto result = std::vector<ToolBarEntry>{
             { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_left))), wxT("Previous stuntsheet"), CALCHART__prev_ss, {} },
             { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_right))), wxT("Next stuntsheet"), CALCHART__next_ss, true },
@@ -104,8 +104,8 @@ std::vector<ToolBarEntry> GetHalfOfMainToolBar(bool withFeatureCurves)
             { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_poly))), wxT("Select points with polygon"), CALCHART__poly, {} },
             { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_lasso))), wxT("Select points with lasso"), CALCHART__lasso, {} },
             { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_swap))), wxT("Swap points"), CALCHART__swap, true },
+            { wxITEM_CHECK, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_curve))), wxT("Draw and Edit Curves"), CALCHART__curve, true },
             { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_mv))), wxT("Translate points"), CALCHART__move, {} },
-
             { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_shape_line))), wxT("Shape points in a line"), CALCHART__shape_line, {} },
             { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_shape_x))), wxT("Shape points in an x"), CALCHART__shape_x, {} },
             { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_shape_cross))), wxT("Shape points in a cross"), CALCHART__shape_cross, {} },
@@ -119,10 +119,6 @@ std::vector<ToolBarEntry> GetHalfOfMainToolBar(bool withFeatureCurves)
             { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_siz))), wxT("Resize block"), CALCHART__size, {} },
             { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_gen))), wxT("Genius move"), CALCHART__genius, true },
         };
-        if (withFeatureCurves) {
-            result.push_back(
-                ToolBarEntry{ wxITEM_RADIO, "", ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_curve))), wxT("Draw curve"), CALCHART__curve, true });
-        }
         return result;
     }();
     return tb;
@@ -171,10 +167,10 @@ auto CreateAuiToolBar(wxAuiToolBar* tb, T toolbarBits)
     return tb;
 }
 
-wxAuiToolBar* CreateSelectAndMoves(wxWindow* parent, bool withFeatureCurves, wxWindowID id, long style)
+wxAuiToolBar* CreateSelectAndMoves(wxWindow* parent, wxWindowID id, long style)
 {
 
-    return CreateAuiToolBar(new wxAuiToolBar(parent, id, wxDefaultPosition, wxDefaultSize, style), GetHalfOfMainToolBar(withFeatureCurves));
+    return CreateAuiToolBar(new wxAuiToolBar(parent, id, wxDefaultPosition, wxDefaultSize, style), GetHalfOfMainToolBar());
 }
 
 wxAuiToolBar* CreateDotModifiers(wxWindow* parent, wxWindowID id, long style)

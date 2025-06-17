@@ -69,7 +69,6 @@ public:
     CalChart::MoveMode GetCurrentMove() const;
     // implies a call to EndDrag()
     void SetCurrentMove(CalChart::MoveMode move);
-    [[nodiscard]] auto IsDrawingCurve() const -> bool;
     void SetDrawingCurve(bool drawingCurve);
 
     void OnChar(wxKeyEvent& event);
@@ -111,10 +110,10 @@ private:
 
     void OnMouseLeftDown_Normal(CalChart::Coord pos, bool shiftDown, bool altDown);
     void OnMouseLeftDown_Swap(CalChart::Coord pos);
-    void OnMouseLeftDown_DrawingCurve(CalChart::Coord pos);
+    void OnMouseLeftDown_DrawingCurve(CalChart::Coord pos, bool shiftDown, bool altDown);
     void OnMouseLeftDown_FoundCurveControl(size_t curveIndex, size_t curveControl, bool shiftDown, bool altDown);
     void OnMouseLeftDown_FoundCurve(size_t curveIndex);
-    void OnMouseLeftDoubleClick_Curve();
+    void OnMouseLeftDoubleClick_Curve(CalChart::Coord pos);
     void OnMouseLeftDoubleClick_FoundCurve(CalChart::Coord pos, size_t whichCurve, size_t whereToInsert);
 
     void OnMouseMove_DrawCurve(CalChart::Coord pos);
@@ -122,7 +121,7 @@ private:
     void OnDelete_Curve();
     void OnEscape_Curve();
 
-    void AbortDrawing();
+    [[nodiscard]] auto IsCurveDrawingMode() const -> bool;
 
     CalChartView* mView{};
     // The current selection
@@ -133,11 +132,17 @@ private:
     CalChart::MarcherToPosition mUncommittedMovePoints;
     CalChart::Configuration const& mConfig;
 
-    // Curve related members
-    std::optional<CalChart::Curve> mCurve;
-    std::optional<size_t> mCurveSelected;
     CalChart::Coord mDragStart;
-    std::set<size_t> mCurvePointsSelected;
-    bool mCurvePointDragging{};
-    bool mCurveShouldFlush{};
+
+    // Curve related members
+    struct ExistingCurveInfo {
+        size_t mCurveSelected{};
+        bool mShouldFlush{};
+    };
+    struct CurveDrawInfo {
+        CalChart::Curve mCurve;
+        std::set<size_t> mPointsSelected;
+        std::optional<ExistingCurveInfo> mExistingCurve;
+    };
+    std::optional<CurveDrawInfo> mCurve;
 };

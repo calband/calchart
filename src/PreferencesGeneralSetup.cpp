@@ -41,7 +41,7 @@ void GeneralSetup::CreateControls()
             wxUI::CheckBox{ "Scroll Direction: Natural" }.withProxy(mScroll_Natural),
             wxUI::CheckBox{ "Set Sheet is undo-able" }.withProxy(mSetSheet_Undo),
             wxUI::CheckBox{ "Point selection is undo-able" }.withProxy(mSelection_Undo),
-            wxUI::CheckBox{ "Enable Feature Curves" }.withProxy(mFeatureCurves),
+
         },
     }
         .fitTo(this);
@@ -56,7 +56,6 @@ void GeneralSetup::InitFromConfig()
     *mScroll_Natural = mConfig.Get_ScrollDirectionNatural();
     *mSetSheet_Undo = mConfig.Get_CommandUndoSetSheet();
     *mSelection_Undo = mConfig.Get_CommandUndoSelection();
-    *mFeatureCurves = mConfig.Get_FeatureCurves();
 }
 
 bool GeneralSetup::TransferDataToWindow()
@@ -72,7 +71,6 @@ bool GeneralSetup::TransferDataFromWindow()
     mConfig.Set_ScrollDirectionNatural(*mScroll_Natural);
     mConfig.Set_CommandUndoSetSheet(*mSetSheet_Undo);
     mConfig.Set_CommandUndoSelection(*mSelection_Undo);
-    mConfig.Set_FeatureCurves(*mFeatureCurves);
     return true;
 }
 
@@ -88,7 +86,6 @@ bool GeneralSetup::ClearValuesToDefault()
     mConfig.Clear_UseSprites();
     mConfig.Clear_SpriteBitmapScale();
     mConfig.Clear_SpriteBitmapOffsetY();
-    mConfig.Clear_FeatureCurves();
     InitFromConfig();
     TransferDataToWindow();
     return true;
