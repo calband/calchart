@@ -22,7 +22,7 @@
 
 #include "EditCurveAssignments.hpp"
 #include "CalChartDoc.h"
-#include "MarcherPicker.hpp"
+#include "PointPicker.h"
 #include <ranges>
 #include <wx/dialog.h>
 #include <wxUI/wxUI.hpp>

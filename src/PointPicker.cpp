@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "MarcherPicker.hpp"
+#include "PointPicker.h"
 #include "CalChartDoc.h"
 #include "CalChartRanges.h"
 #include "CalChartToolBar.h"
@@ -28,12 +28,12 @@
 #include <wx/dialog.h>
 #include <wxUI/wxUI.hpp>
 
-class MarcherPicker : public wxDialog {
+class PointPicker : public wxDialog {
     using super = wxDialog;
 
 public:
-    MarcherPicker(wxWindow* parent, CalChartDoc const& show, CalChart::SelectionList const& marchersToUse, CalChart::SelectionList const& selected);
-    ~MarcherPicker() override = default;
+    PointPicker(wxWindow* parent, CalChartDoc const& show, CalChart::SelectionList const& marchersToUse, CalChart::SelectionList const& selected);
+    ~PointPicker() override = default;
 
     auto GetMarchersSelected() const { return mMarcherLabels; }
 
@@ -43,7 +43,7 @@ private:
 
 // Given a set of marchers, and a set of selected marchers, create a dialog that allows the user to select
 // the labels of the marchers to use.
-MarcherPicker::MarcherPicker(wxWindow* parent, CalChartDoc const& show, CalChart::SelectionList const& marchersToUse, CalChart::SelectionList const& selected)
+PointPicker::PointPicker(wxWindow* parent, CalChartDoc const& show, CalChart::SelectionList const& marchersToUse, CalChart::SelectionList const& selected)
     : super(parent, wxID_ANY, "Select Marchers", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
 {
     auto labels = show.GetPointsLabel(marchersToUse);
@@ -115,7 +115,7 @@ MarcherPicker::MarcherPicker(wxWindow* parent, CalChartDoc const& show, CalChart
 
 auto PromptUserToPickMarchers(wxWindow* parent, CalChartDoc const& show, CalChart::SelectionList const& marchersToUse, CalChart::SelectionList const& selected) -> std::optional<std::vector<std::string>>
 {
-    MarcherPicker dialog(parent, show, marchersToUse, selected);
+    PointPicker dialog(parent, show, marchersToUse, selected);
     if (dialog.ShowModal() == wxID_OK) {
         return dialog.GetMarchersSelected();
     }

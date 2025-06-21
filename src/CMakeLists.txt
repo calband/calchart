@@ -90,8 +90,8 @@ add_executable(
   HostAppInterface.h
   ModeSetupDialog.cpp
   ModeSetupDialog.h
-  MarcherPicker.cpp
-  MarcherPicker.hpp
+  PointPicker.cpp
+  PointPicker.h
   PreferencesContCellSetup.cpp
   PreferencesContCellSetup.h
   PreferencesDrawingSetup.cpp
