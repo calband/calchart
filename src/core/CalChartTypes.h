@@ -25,6 +25,7 @@
 
 #include <functional>
 #include <map>
+#include <ranges>
 #include <set>
 #include <string>
 

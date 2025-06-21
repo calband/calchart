@@ -1,7 +1,7 @@
 #pragma once
 /*
- * PointPicker.h
- * Dialog for picking points
+ * MarcherPicker.hpp
+ * Dialog for picking Marcher
  */
 
 /*
@@ -21,22 +21,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartDoc.h"
+#include "CalChartTypes.h"
+#include <optional>
 #include <vector>
-#include <wx/docview.h>
-#include <wx/wizard.h>
-#include <wxUI/wxUI.hpp>
 
-class PointPicker : public wxDialog {
-    using super = wxDialog;
+class CalChartDoc;
+class wxWindow;
 
-public:
-    PointPicker(wxWindow* parent, CalChartDoc const& show);
-    PointPicker(wxWindow* parent, CalChartDoc const& show, CalChart::SelectionList const& marchersToUse, CalChart::SelectionList const& selected);
-    ~PointPicker() override = default;
-
-    auto GetMarchersSelected() const { return mMarcherLabels; }
-
-private:
-    std::vector<std::string> mMarcherLabels;
-};
+auto PromptUserToPickMarchers(wxWindow* parent, CalChartDoc const& show, CalChart::SelectionList const& marchersToUse, CalChart::SelectionList const& selected) -> std::optional<std::vector<std::string>>;
+auto PromptUserToPickMarchers(wxWindow* parent, CalChartDoc const& show) -> std::optional<std::vector<std::string>>;
