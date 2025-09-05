@@ -108,7 +108,7 @@ void CalChartApp::InitAppAsServer()
     wxFileSystem::AddHandler(new wxArchiveFSHandler);
 
 #if defined(__APPLE__) && (__APPLE__)
-    auto helpfile = wxString("CalChart.app/Contents/Resources");
+    auto helpfile = wxStandardPaths::Get().GetResourcesDir();
 #else
     auto helpfile = wxFileName(::wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR "docs");
 #endif
