@@ -76,7 +76,7 @@ void AnimationView::RegenerateImages()
     }
     mScaleSize = spriteScale;
 #if defined(__APPLE__) && (__APPLE__)
-    const static wxString kImageDir = "CalChart.app/Contents/Resources/default_sprite_strip.png";
+    const static wxString kImageDir = wxStandardPaths::Get().GetResourcesDir().Append("/default_sprite_strip.png");
 #else
     const static wxString kImageDir = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR "resources" PATH_SEPARATOR "default_sprite_strip.png");
 #endif

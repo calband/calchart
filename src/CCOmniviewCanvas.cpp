@@ -64,7 +64,7 @@
 auto GetImageDir()
 {
 #if defined(__APPLE__) && (__APPLE__)
-    const static wxString kImageDir = "CalChart.app/Contents/Resources/";
+    const static wxString kImageDir = wxStandardPaths::Get().GetResourcesDir().Append("/");
 #else
     const static wxString kImageDir = wxFileName(::wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR "Resources" PATH_SEPARATOR);
 #endif

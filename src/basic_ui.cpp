@@ -45,7 +45,7 @@ wxStaticBitmap* BitmapWithBandIcon(wxWindow* parent, wxSize const& size)
     wxBitmap bitmap(BITMAP_NAME(calchart));
     wxImage image;
 #if defined(__APPLE__) && (__APPLE__)
-    const static wxString kImageDir = wxT("CalChart.app/Contents/Resources/calchart.png");
+    const static wxString kImageDir = wxStandardPaths::Get().GetExecutablePath().Append("/Contents/Resources/calchart.png");
 #else
     const static wxString kImageDir = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR wxT("resources") PATH_SEPARATOR wxT("calchart.png"));
 #endif
