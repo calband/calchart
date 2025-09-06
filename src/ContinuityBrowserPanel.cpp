@@ -161,7 +161,7 @@ void ContinuityBrowserPanel::UpdateCont(Continuity const& new_cont)
 
 void ContinuityBrowserPanel::DoSetFocus(wxFocusEvent&)
 {
-    if (!mView) {
+    if (!mView || !IsShownOnScreen()) {
         return;
     }
 
