@@ -193,6 +193,14 @@ CustomListViewPanel::CustomListViewPanel(wxWindow* parent, wxWindowID winid, wxP
 void CustomListViewPanel::SetCells(std::vector<std::unique_ptr<DrawableCell>> cells)
 {
     mCells = std::move(cells);
+    if (m_selected) {
+        if (mCells.empty()) {
+            m_selected = std::nullopt;
+        } else {
+            m_selected = std::min(*m_selected, mCells.size() - 1);
+        }
+    }
+
     auto total_y = std::accumulate(mCells.begin(), mCells.end(), 0, [](auto&& a, auto&& b) {
         return a + b->Height();
     });
