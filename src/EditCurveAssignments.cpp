@@ -21,8 +21,10 @@
 */
 
 #include "EditCurveAssignments.hpp"
+#include "CalChartDoc.h"
 #include "PointPicker.h"
 #include <ranges>
+#include <wx/dialog.h>
 #include <wxUI/wxUI.hpp>
 
 namespace {
@@ -58,13 +60,12 @@ EditCurveAssignments::EditCurveAssignments(wxWindow* parent, CalChartDoc const& 
         items.push_back(show.GetPointLabel(i));
     }
     auto selections = marchers.empty() ? std::vector<int>{} : std::vector<int>{ 0 };
-    auto usePointPicker = [this, &show, listProxy](int whereToInsert) {
+    auto useMarcherPicker = [this, &show, listProxy](int whereToInsert) {
         auto marchersToUse = removeFromSet(show.MakeSelectAll(), show.MakeSelectByLabels(CalChart::Ranges::ToVector<std::string>(listProxy->GetStrings())));
-        PointPicker dialog(this, show, marchersToUse, {});
-        if (dialog.ShowModal() == wxID_OK && !dialog.GetMarchersSelected().empty()) {
-            auto labels = dialog.GetMarchersSelected();
+        if (auto labels = PromptUserToPickMarchers(this, show, marchersToUse, {});
+            labels.has_value()) {
             wxArrayString items;
-            for (auto&& label : labels) {
+            for (auto&& label : *labels) {
                 items.Add(label);
             }
             *listProxy = listProxy->Insert(items, whereToInsert);
@@ -74,23 +75,23 @@ EditCurveAssignments::EditCurveAssignments(wxWindow* parent, CalChartDoc const& 
     wxUI::VSizer{
         wxSizerFlags{}.Border(wxALL, 2).Center().Proportion(0),
         wxUI::HSizer{
-            wxUI::Button{ "Insert" }.bind([listProxy, usePointPicker] {
+            wxUI::Button{ "Insert" }.bind([listProxy, useMarcherPicker] {
                 auto whereToInsert = [&] {
                     if (auto selected = listProxy.selection().get(); selected != wxNOT_FOUND) {
                         return selected;
                     }
                     return 0;
                 }();
-                usePointPicker(whereToInsert);
+                useMarcherPicker(whereToInsert);
             }),
-            wxUI::Button{ "Append" }.bind([listProxy, usePointPicker] {
+            wxUI::Button{ "Append" }.bind([listProxy, useMarcherPicker] {
                 auto whereToInsert = [&] {
                     if (auto selected = listProxy.selection().get(); selected != wxNOT_FOUND) {
                         return selected + 1;
                     }
                     return 0;
                 }();
-                usePointPicker(whereToInsert);
+                useMarcherPicker(whereToInsert);
             }),
         },
         wxUI::HSizer{

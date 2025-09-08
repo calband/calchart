@@ -48,6 +48,7 @@ auto operator<<(std::ostream& os, FontType fontType) -> std::ostream&
     case FontType::BoldItalics:
         return os << "BoldItalics";
     }
+    return os << "BoldItalics";
 }
 
 auto operator<<(std::ostream& os, Item item) -> std::ostream&
@@ -79,6 +80,7 @@ namespace {
         case FontType::BoldItalics:
             return context.bolditalics;
         }
+        return context.bolditalics;
     }
 
     inline auto withBold(FontType fontType, bool bold)
@@ -315,6 +317,7 @@ namespace {
         case Symbol::SolidCross:
             return SYMBOL_SOLX;
         }
+        return SYMBOL_SOLX;
     }
 
     auto DrawContSymbol(double size, double pLineRatio, double sLineRatio, CalChart::SYMBOL_TYPE symbol) -> CalChart::Draw::ZStack

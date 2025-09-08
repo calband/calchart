@@ -231,6 +231,7 @@ inline auto setFont(wxDC& dc, CalChart::Font font)
         case CalChart::Font::Family::Modern:
             return wxFONTFAMILY_MODERN;
         }
+        return wxFONTFAMILY_MODERN;
     }();
     auto style = [font] {
         switch (font.style) {
@@ -239,6 +240,7 @@ inline auto setFont(wxDC& dc, CalChart::Font font)
         case CalChart::Font::Style::Italic:
             return wxFONTSTYLE_ITALIC;
         }
+        return wxFONTSTYLE_ITALIC;
     }();
     auto weight = [font] {
         switch (font.weight) {
@@ -247,6 +249,7 @@ inline auto setFont(wxDC& dc, CalChart::Font font)
         case CalChart::Font::Weight::Bold:
             return wxFONTWEIGHT_BOLD;
         }
+        return wxFONTWEIGHT_BOLD;
     }();
 
     auto size = wxSize{ 0, fDIP(font.size) };

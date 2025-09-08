@@ -1,6 +1,6 @@
 /*
- * PointPicker.cpp
- * Dialog for picking points
+ * MarcherPicker.cpp
+ * Dialog for picking marchers
  */
 
 /*
@@ -21,19 +21,25 @@
 */
 
 #include "PointPicker.h"
+#include "CalChartDoc.h"
 #include "CalChartRanges.h"
 #include "CalChartToolBar.h"
 #include <ranges>
+#include <wx/dialog.h>
 #include <wxUI/wxUI.hpp>
 
-PointPicker::PointPicker(wxWindow* parent, CalChartDoc const& show)
-    : PointPicker(
-        parent,
-        show,
-        CalChart::SelectionList(std::views::iota(0, show.GetNumPoints()).begin(), std::views::iota(0, show.GetNumPoints()).end()),
-        show.GetSelectionList())
-{
-}
+class PointPicker : public wxDialog {
+    using super = wxDialog;
+
+public:
+    PointPicker(wxWindow* parent, CalChartDoc const& show, CalChart::SelectionList const& marchersToUse, CalChart::SelectionList const& selected);
+    ~PointPicker() override = default;
+
+    auto GetMarchersSelected() const { return mMarcherLabels; }
+
+private:
+    std::vector<std::string> mMarcherLabels;
+};
 
 // Given a set of marchers, and a set of selected marchers, create a dialog that allows the user to select
 // the labels of the marchers to use.
@@ -105,4 +111,22 @@ PointPicker::PointPicker(wxWindow* parent, CalChartDoc const& show, CalChart::Se
         .fitTo(this);
 
     Center();
+}
+
+auto PromptUserToPickMarchers(wxWindow* parent, CalChartDoc const& show, CalChart::SelectionList const& marchersToUse, CalChart::SelectionList const& selected) -> std::optional<std::vector<std::string>>
+{
+    PointPicker dialog(parent, show, marchersToUse, selected);
+    if (dialog.ShowModal() == wxID_OK) {
+        return dialog.GetMarchersSelected();
+    }
+    return std::nullopt;
+}
+
+auto PromptUserToPickMarchers(wxWindow* parent, CalChartDoc const& show) -> std::optional<std::vector<std::string>>
+{
+    return PromptUserToPickMarchers(
+        parent,
+        show,
+        CalChart::SelectionList(std::views::iota(0, show.GetNumPoints()).begin(), std::views::iota(0, show.GetNumPoints()).end()),
+        show.GetSelectionList());
 }

@@ -114,8 +114,10 @@ auto TabStops(int which, bool landscape)
     switch (which) {
     case 3:
         tab += 8;
+        [[fallthrough]];
     case 2:
         tab += (landscape) ? 18 : 14;
+        [[fallthrough]];
     case 1:
         tab += (landscape) ? 10 : 6;
     }
