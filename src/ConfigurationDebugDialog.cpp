@@ -51,7 +51,7 @@ auto GetEntry(wxConfigBase& config, wxString const& entry) -> wxString
     case wxConfigBase::Type_Float: {
         auto def = double{};
         if (config.Read(entry, &def)) {
-            std::to_string(def);
+            return std::to_string(def);
         }
     } break;
     case wxConfigBase::Type_Unknown:
