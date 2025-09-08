@@ -345,12 +345,11 @@ void CalChartView::DoSetPrintContinuity(int which_sheet, wxString const& number,
 
 auto CalChartView::DoRelabel() -> std::optional<std::string>
 {
-    auto& config = mShow->GetConfiguration();
     auto sheet_num = GetCurrentSheetNum();
-    auto current_sheet = mShow->GetNthSheet(GetCurrentSheetNum());
-    auto next_sheet = current_sheet + 1;
+    auto current_marchers = mShow->GetAllMarcherPositions(GetCurrentSheetNum());
+    auto next_marchers = mShow->GetAllMarcherPositions(GetCurrentSheetNum() + 1);
     // get a relabel mapping based on the current sheet.
-    auto result = mShow->GetRelabelMapping(current_sheet, next_sheet, CalChart::Float2CoordUnits(config.Get_DotRatio()));
+    auto result = mShow->GetRelabelMapping(current_marchers, next_marchers);
     // check to see if there's a valid remapping
     if (!result.has_value()) {
         return "Stuntsheets don't match";
@@ -364,18 +363,17 @@ auto CalChartView::DoRelabel() -> std::optional<std::string>
 // append is an insert with a relabel
 auto CalChartView::DoAppendShow(std::unique_ptr<CalChartDoc> other_show) -> std::optional<std::string>
 {
-    auto& config = mShow->GetConfiguration();
     if (other_show->GetNumPoints() != mShow->GetNumPoints()) {
         return "The blocksize doesn't match";
     }
-    auto last_sheet = mShow->GetNthSheet(GetNumSheets() - 1);
-    auto next_sheet = other_show->GetSheetBegin();
-    auto result = mShow->GetRelabelMapping(last_sheet, next_sheet, CalChart::Float2CoordUnits(config.Get_DotRatio()));
+    auto last_marchers = mShow->GetAllMarcherPositions(GetNumSheets() - 1);
+    auto next_marchers = other_show->GetAllMarcherPositions(0);
+    auto result = mShow->GetRelabelMapping(last_marchers, next_marchers);
     // check to see if there's a valid remapping
     if (!result.has_value()) {
         return "Last sheet doesn't match first sheet of other show";
     }
-    auto cmd = mShow->Create_AppendShow(std::move(other_show), CalChart::Float2CoordUnits(config.Get_DotRatio()));
+    auto cmd = mShow->Create_AppendShow(std::move(other_show));
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return std::nullopt;
 }

@@ -276,3 +276,53 @@ TEST_CASE("DefaultEqual", "CalChartShowTests")
     auto empty_show = CalChart::Show::Create(CalChart::ShowMode::GetDefaultShowMode());
     CHECK(empty_show != nullptr);
 }
+
+// show with nothing should fail:
+TEST_CASE("Remapping", "CalChartShowTests")
+{
+    using namespace CalChart;
+    auto show1 = Show::Create(ShowMode::GetDefaultShowMode());
+    show1->Create_SetupMarchersCommand({ { "A", "A" }, { "B", "B" }, { "C", "C" }, { "D", "D" } }, 1, 0).first(*show1);
+    {
+        auto sheet = Sheet(4);
+        sheet.SetPosition({ 0, 0 }, 0);
+        sheet.SetPosition({ 1, 1 }, 1);
+        sheet.SetPosition({ 2, 2 }, 2);
+        sheet.SetPosition({ 3, 3 }, 3);
+        show1->Create_AddSheetsCommand({ sheet }, 0).first(*show1);
+    }
+    auto show2 = Show::Create(ShowMode::GetDefaultShowMode());
+    show2->Create_SetupMarchersCommand({ { "A", "A" }, { "B", "B" }, { "C", "C" }, { "D", "D" } }, 1, 0).first(*show2);
+    {
+        auto sheet = Sheet(4);
+        sheet.SetPosition({ 0, 0 }, 0);
+        sheet.SetPosition({ 1, 1 }, 1);
+        sheet.SetPosition({ 2, 2 }, 2);
+        sheet.SetPosition({ 3, 3 }, 3);
+        show2->Create_AddSheetsCommand({ sheet }, 0).first(*show2);
+    }
+    auto mapping = show1->GetRelabelMapping(show1->GetAllMarcherPositions(0), show2->GetAllMarcherPositions(0), 1);
+    CHECK(*mapping == std::vector<MarcherIndex>{ 0, 1, 2, 3 });
+
+    {
+        auto sheet = Sheet(4);
+        sheet.SetPosition({ 0, 0 }, 3);
+        sheet.SetPosition({ 1, 1 }, 2);
+        sheet.SetPosition({ 2, 2 }, 1);
+        sheet.SetPosition({ 3, 3 }, 0);
+        show1->Create_AddSheetsCommand({ sheet }, 0).first(*show1);
+    }
+    mapping = show1->GetRelabelMapping(show1->GetAllMarcherPositions(0), show2->GetAllMarcherPositions(0), 1);
+    CHECK(*mapping == std::vector<MarcherIndex>{ 3, 2, 1, 0 });
+
+    {
+        auto sheet = Sheet(4);
+        sheet.SetPosition({ 0, 0 }, 0);
+        sheet.SetPosition({ 1, 1 }, 1);
+        sheet.SetPosition({ 2, 2 }, 2);
+        sheet.SetPosition({ 13, 13 }, 3);
+        show1->Create_AddSheetsCommand({ sheet }, 0).first(*show1);
+    }
+    mapping = show1->GetRelabelMapping(show1->GetAllMarcherPositions(0), show2->GetAllMarcherPositions(0), 1);
+    CHECK(mapping.has_value() == false);
+}
