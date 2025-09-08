@@ -112,6 +112,7 @@ public:
     [[nodiscard]] auto FindMarcher(Coord where, Coord::units searchBound, unsigned ref = 0) const -> std::optional<MarcherIndex>;
     [[nodiscard]] auto RemapPoints(std::vector<MarcherIndex> const& table) const -> std::vector<Point>;
     [[nodiscard]] auto GetMarcherPosition(MarcherIndex i, unsigned ref = 0) const -> Coord;
+    [[nodiscard]] auto GetAllMarcherPositions(unsigned ref = 0) const -> std::vector<Coord>;
     void SetMarchers(std::vector<Point> const& points);
     void SetAllPositions(Coord val, unsigned i);
     void SetPosition(Coord val, MarcherIndex i, unsigned ref = 0);

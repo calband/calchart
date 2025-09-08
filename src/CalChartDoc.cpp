@@ -510,6 +510,11 @@ void CalChartDoc::WizardSetupNewShow(std::vector<std::pair<std::string, std::str
     UpdateAllViews();
 }
 
+auto CalChartDoc::GetRelabelMapping(std::vector<CalChart::Coord> const& source_marchers, std::vector<CalChart::Coord> const& target_marchers) const -> std::optional<std::vector<CalChart::MarcherIndex>>
+{
+    return mShow->GetRelabelMapping(source_marchers, target_marchers, CalChart::Float2CoordUnits(mConfig.Get_DotRatio()));
+}
+
 void CalChartDoc::SetSelectionList(SelectionList const& sl)
 {
     auto cmd = mShow->Create_SetSelectionListCommand(sl);
@@ -703,12 +708,12 @@ auto CalChartDoc::Create_ApplyRelabelMapping(int sheet, std::vector<MarcherIndex
     return std::make_unique<CalChartDocCommand>(*this, wxT("Point Remapping"), cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_AppendShow(std::unique_ptr<CalChartDoc> other_show, CalChart::Coord::units tolerance)
+std::unique_ptr<wxCommand> CalChartDoc::Create_AppendShow(std::unique_ptr<CalChartDoc> other_show)
 {
     auto currend = mShow->GetNumSheets();
-    auto last_sheet = static_cast<Show const&>(*mShow).GetNthSheet(currend - 1);
-    auto next_sheet = other_show->GetSheetBegin();
-    auto result = mShow->GetRelabelMapping(last_sheet, next_sheet, tolerance);
+    auto source_marchers = mShow->GetAllMarcherPositions(currend - 1);
+    auto target_marchers = other_show->GetAllMarcherPositions(0);
+    auto result = GetRelabelMapping(source_marchers, target_marchers);
     if (!result.has_value()) {
         // No way to remap, throw an error
         throw std::runtime_error("No remap information");

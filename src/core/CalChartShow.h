@@ -138,13 +138,15 @@ public:
     [[nodiscard]] auto GetPointsSymbol(CalChart::SelectionList const& sl) const -> std::vector<SYMBOL_TYPE>;
     [[nodiscard]] auto GetPointFromLabel(std::string const& label) const -> std::optional<CalChart::MarcherIndex>;
     [[nodiscard]] auto GetPointsFromLabels(std::vector<std::string> const& labels) const -> std::vector<CalChart::MarcherIndex>;
+    [[nodiscard]] auto GetAllMarcherPositions(int sheet, unsigned ref = 0) const -> std::vector<Coord>;
+    [[nodiscard]] auto GetCurrentSheetAllMarcherPositions(unsigned ref = 0) const -> std::vector<Coord>;
     [[nodiscard]] auto AlreadyHasPrintContinuity() const -> bool;
     [[nodiscard]] auto const& GetShowMode() const { return mMode; }
 
     [[nodiscard]] auto GetSheetsName() const -> std::vector<std::string>;
 
     // utility
-    [[nodiscard]] auto GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const -> std::optional<std::vector<MarcherIndex>>;
+    [[nodiscard]] static auto GetRelabelMapping(std::vector<Coord> const& source_marchers, std::vector<Coord> const& target_marchers, CalChart::Coord::units tolerance) -> std::optional<std::vector<MarcherIndex>>;
     [[nodiscard]] auto MakeSelectAll() const -> SelectionList;
     [[nodiscard]] auto MakeUnselectAll() const -> SelectionList;
     [[nodiscard]] auto MakeAddToSelection(SelectionList const& sl) const -> SelectionList;

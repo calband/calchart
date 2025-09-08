@@ -145,10 +145,7 @@ public:
     void SetCurrentSheet(int n);
 
     [[nodiscard]] auto GetNumPoints() const { return mShow->GetNumPoints(); }
-    [[nodiscard]] auto GetRelabelMapping(CalChart::Show::const_Sheet_iterator_t source_sheet, CalChart::Show::const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const
-    {
-        return mShow->GetRelabelMapping(source_sheet, target_sheets, tolerance);
-    }
+    [[nodiscard]] auto GetRelabelMapping(std::vector<CalChart::Coord> const& source_marchers, std::vector<CalChart::Coord> const& target_marchers) const -> std::optional<std::vector<CalChart::MarcherIndex>>;
 
     [[nodiscard]] auto GetPointLabel(CalChart::MarcherIndex i) const { return mShow->GetPointLabel(i); }
     [[nodiscard]] auto GetPointsLabel() const { return mShow->GetPointsLabel(); }
@@ -163,6 +160,8 @@ public:
     [[nodiscard]] auto GetPointsSymbol(CalChart::SelectionList const& sl) const { return mShow->GetPointsSymbol(sl); }
     [[nodiscard]] auto GetPointFromLabel(std::string const& label) const { return mShow->GetPointFromLabel(label); }
     [[nodiscard]] auto GetPointsFromLabels(std::vector<std::string> const& labels) const { return mShow->GetPointsFromLabels(labels); }
+    [[nodiscard]] auto GetAllMarcherPositions(int sheet, unsigned ref = 0) const { return mShow->GetAllMarcherPositions(sheet, ref); }
+    [[nodiscard]] auto GetCurrentSheetAllMarcherPositions(unsigned ref = 0) const { return mShow->GetCurrentSheetAllMarcherPositions(ref); }
 
     [[nodiscard]] auto GetContinuities() const { return GetCurrentSheet()->GetContinuities(); }
     [[nodiscard]] auto ContinuitiesInUse() const { return GetCurrentSheet()->ContinuitiesInUse(); }
@@ -258,7 +257,7 @@ public:
     [[nodiscard]] auto Create_AddSheetsCommand(CalChart::Show::Sheet_container_t const& sheets, int where) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_RemoveSheetCommand(int where) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_ApplyRelabelMapping(int sheet, std::vector<CalChart::MarcherIndex> const& mapping) -> std::unique_ptr<wxCommand>;
-    [[nodiscard]] auto Create_AppendShow(std::unique_ptr<CalChartDoc> sheets, CalChart::Coord::units tolerance) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_AppendShow(std::unique_ptr<CalChartDoc> sheets) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string>> const& data) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_MovePointsCommand(CalChart::MarcherToPosition const& new_positions) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_MovePointsCommand(unsigned whichSheet, CalChart::MarcherToPosition const& new_positions) -> std::unique_ptr<wxCommand>;

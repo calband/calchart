@@ -35,7 +35,7 @@
 #include <functional>
 #include <iostream>
 #include <iterator>
-#include <sstream>
+#include <vector>
 
 namespace CalChart {
 static constexpr auto kDefault = "default";
@@ -457,23 +457,26 @@ void Show::SetPointLabelAndInstrument(std::vector<std::pair<std::string, std::st
 
 // A relabel mapping is the mapping you would need to apply to sheet_next (and all following sheets)
 // so that they match with this current sheet
-auto Show::GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const -> std::optional<std::vector<MarcherIndex>>
+auto Show::GetRelabelMapping(std::vector<Coord> const& source_marchers, std::vector<Coord> const& target_marchers, CalChart::Coord::units tolerance) -> std::optional<std::vector<MarcherIndex>>
 {
-    std::vector<MarcherIndex> table(GetNumPoints());
-    std::vector<bool> used_table(GetNumPoints());
+    if (source_marchers.size() != target_marchers.size()) {
+        return std::nullopt;
+    }
+    std::vector<MarcherIndex> table(source_marchers.size());
+    std::vector<bool> used_table(source_marchers.size());
 
-    for (auto i = 0; i < GetNumPoints(); i++) {
-        auto j = 0;
-        for (; j < GetNumPoints(); j++) {
+    for (auto i = 0UL; i < source_marchers.size(); i++) {
+        auto j = 0UL;
+        for (; j < source_marchers.size(); j++) {
             if (!used_table[j]) {
-                if (source_sheet->GetMarcherPosition(i).Distance(target_sheets->GetMarcherPosition(j)) < tolerance) {
+                if (source_marchers.at(i).Distance(target_marchers.at(j)) < tolerance) {
                     table[i] = j;
                     used_table[j] = true;
                     break;
                 }
             }
         }
-        if (j == GetNumPoints()) {
+        if (j == source_marchers.size()) {
             // didn't find a match
             return std::nullopt;
         }
@@ -574,6 +577,16 @@ auto Show::GetPointsFromLabels(std::vector<std::string> const& labels) const -> 
         | std::views::transform([this](const std::string& label) { return GetPointFromLabel(label); })
         | std::views::filter([](const std::optional<int>& opt) { return opt.has_value(); })
         | std::views::transform([](const std::optional<int>& opt) { return *opt; }));
+}
+
+auto Show::GetAllMarcherPositions(int sheet, unsigned ref) const -> std::vector<Coord>
+{
+    return mSheets.at(sheet).GetAllMarcherPositions(ref);
+}
+
+auto Show::GetCurrentSheetAllMarcherPositions(unsigned ref) const -> std::vector<Coord>
+{
+    return mSheets.at(mSheetNum).GetAllMarcherPositions(ref);
 }
 
 auto Show::AlreadyHasPrintContinuity() const -> bool

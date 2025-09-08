@@ -744,6 +744,11 @@ auto Sheet::GetMarcherPosition(MarcherIndex i, unsigned ref) const -> Coord
     return mPoints[i].GetPos(ref);
 }
 
+auto Sheet::GetAllMarcherPositions(unsigned ref) const -> std::vector<Coord>
+{
+    return CalChart::Ranges::ToVector<Coord>(mPoints | std::views::transform([ref](auto&& point) { return point.GetPos(ref); }));
+}
+
 // Set position of point
 void Sheet::SetPosition(Coord val, MarcherIndex i, unsigned ref)
 {
