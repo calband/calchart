@@ -449,8 +449,8 @@ auto CalChartDoc::GenerateCurrentSheetPointsDrawCommands() const -> std::vector<
     auto origin = GetShowFieldOffset();
     CalChart::append(drawCmds, CalChart::CreateModeDrawCommandsWithBorderOffset(config, GetShowMode(), CalChart::HowToDraw::FieldView));
     CalChart::append(drawCmds, GenerateGhostPointsDrawCommands());
-    auto sheet = GetCurrentSheet();
-    if (sheet == GetSheetEnd()) {
+    auto sheetNum = GetCurrentSheetNum();
+    if (sheetNum >= GetNumSheets()) {
         return drawCmds;
     }
     CalChart::append(drawCmds, mShow->GenerateSheetElements(config, GetCurrentReferencePoint()));
@@ -724,7 +724,7 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_AppendShow(std::unique_ptr<CalCha
     other_show->mShow->Create_ApplyRelabelMapping(0, *result).first(*other_show->mShow);
 
     // get the sheets we want to append
-    auto sheets = Show::Sheet_container_t(other_show->GetSheetBegin(), other_show->GetSheetEnd());
+    auto sheets = other_show->CopyAllSheets();
 
     auto cmds = Create_SetSheetPair();
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_AddSheetsCommand(sheets, currend)));

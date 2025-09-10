@@ -397,6 +397,16 @@ auto Show::GetNumSheets() const -> int
     return static_cast<int>(mSheets.size());
 }
 
+auto Show::GetCurrentSheetName() const -> std::string
+{
+    return static_cast<size_t>(mSheetNum) < mSheets.size() ? mSheets.at(mSheetNum).GetName() : "";
+}
+
+auto Show::GetCurrentSheetBeats() const -> CalChart::Beats
+{
+    return static_cast<size_t>(mSheetNum) < mSheets.size() ? mSheets.at(mSheetNum).GetBeats() : 0;
+}
+
 auto Show::RemoveNthSheet(int sheetidx) -> Sheet_container_t
 {
     auto i = GetNthSheet(sheetidx);

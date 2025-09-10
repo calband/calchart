@@ -124,6 +124,9 @@ public:
     [[nodiscard]] auto GetCurrentSheet() const { return GetNthSheet(mSheetNum); }
     [[nodiscard]] auto GetNumSheets() const -> int;
     [[nodiscard]] auto GetCurrentSheetNum() const { return mSheetNum; }
+    [[nodiscard]] auto GetCurrentSheetName() const -> std::string;
+    [[nodiscard]] auto GetCurrentSheetBeats() const -> CalChart::Beats;
+    [[nodiscard]] auto CopyAllSheets() const -> Show::Sheet_container_t { return mSheets; }
     [[nodiscard]] auto GetNumPoints() const { return static_cast<int>(mDotLabelAndInstrument.size()); }
     [[nodiscard]] auto GetPointLabel(MarcherIndex i) const -> std::string;
     [[nodiscard]] auto GetPointsLabel() const -> std::vector<std::string>;
