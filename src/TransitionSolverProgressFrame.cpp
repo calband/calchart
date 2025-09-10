@@ -248,9 +248,9 @@ bool TransitionSolverProgressFrame::TransitionSolverThread::ShouldAbortCalculati
 
 void* TransitionSolverProgressFrame::TransitionSolverThread::Entry()
 {
-    CalChartDoc* doc = static_cast<CalChartDoc*>(mProgressFrame->mView->GetDocument());
+    auto* doc = static_cast<CalChartDoc*>(mProgressFrame->mView->GetDocument());
 
-    runTransitionSolver(*doc->GetCurrentSheet(), *(doc->GetCurrentSheet() + 1), mProgressFrame->mSolverParams, this);
+    doc->runTransitionSolver(mProgressFrame->mSolverParams, this);
 
     return nullptr;
 }

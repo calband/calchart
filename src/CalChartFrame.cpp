@@ -567,15 +567,13 @@ void CalChartFrame::OnCmdPreferences(wxCommandEvent&)
 
 void CalChartFrame::OnInsertBefore()
 {
-    CalChart::Show::Sheet_container_t sht(1, *GetShow()->GetCurrentSheet());
-    GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum());
+    GetFieldView()->DoInsertSheets(GetShow()->CopyCurrentSheet(), GetFieldView()->GetCurrentSheetNum());
     GetFieldView()->GoToPrevSheet();
 }
 
 void CalChartFrame::OnInsertAfter()
 {
-    CalChart::Show::Sheet_container_t sht(1, *GetShow()->GetCurrentSheet());
-    GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum() + 1);
+    GetFieldView()->DoInsertSheets(GetShow()->CopyCurrentSheet(), GetFieldView()->GetCurrentSheetNum() + 1);
     GetFieldView()->GoToNextSheet();
 }
 
@@ -629,7 +627,7 @@ void CalChartFrame::OnCopySheet()
     if (wxTheClipboard->Open()) {
         std::unique_ptr<wxCustomDataObject> clipboardObject(
             new wxCustomDataObject(kSheetDataClipboardFormat));
-        auto serializedSheet = GetShow()->GetCurrentSheet()->SerializeSheet();
+        auto serializedSheet = GetShow()->GetCurrentSheetSerialized();
 
         auto numPoints = GetShow()->GetNumPoints();
 
@@ -706,8 +704,8 @@ void CalChartFrame::OnSetSheetTitle()
     wxString s;
     if (GetShow()) {
         s = wxGetTextFromUser("Enter the sheet title",
-            GetShow()->GetCurrentSheet()->GetName(),
-            GetShow()->GetCurrentSheet()->GetName(), this);
+            GetShow()->GetCurrentSheetName(),
+            GetShow()->GetCurrentSheetName(), this);
         if (!s.IsEmpty()) {
             GetFieldView()->DoSetSheetTitle(s);
         }
@@ -719,9 +717,9 @@ void CalChartFrame::OnSetBeats()
     wxString s;
     if (GetShow()) {
         wxString buf;
-        buf.sprintf("%u", GetShow()->GetCurrentSheet()->GetBeats());
+        buf.sprintf("%u", GetShow()->GetCurrentSheetBeats());
         s = wxGetTextFromUser("Enter the number of beats",
-            GetShow()->GetCurrentSheet()->GetName(), buf, this);
+            GetShow()->GetCurrentSheetName(), buf, this);
         if (!s.empty()) {
             long val;
             if (s.ToLong(&val)) {

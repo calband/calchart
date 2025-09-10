@@ -80,7 +80,7 @@ public:
     [[nodiscard]] auto FindMarcher(CalChart::Coord pos) const { return mShow->FindMarcher(pos); }
     [[nodiscard]] auto FindCurveControlPoint(CalChart::Coord pos) const { return mShow->FindCurveControlPoint(pos); }
     [[nodiscard]] auto FindCurve(CalChart::Coord pos) const { return mShow->FindCurve(pos); }
-    [[nodiscard]] auto PointPosition(CalChart::MarcherIndex which) const { return mShow->GetCurrentSheet()->GetMarcherPosition(which, mShow->GetCurrentReferencePoint()); }
+    [[nodiscard]] auto PointPosition(CalChart::MarcherIndex which) const { return mShow->GetMarcherPositionOnCurrentSheet(which, mShow->GetCurrentReferencePoint()); }
     [[nodiscard]] auto GetCurrentSheetNum() const { return (mShow != nullptr) ? mShow->GetCurrentSheetNum() : 0; }
     [[nodiscard]] auto GetNumSheets() const { return (mShow != nullptr) ? mShow->GetNumSheets() : 0; }
     [[nodiscard]] auto GetNumPoints() const { return (mShow != nullptr) ? mShow->GetNumPoints() : 0; }

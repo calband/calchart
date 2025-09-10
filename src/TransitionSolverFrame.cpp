@@ -308,7 +308,7 @@ void TransitionSolverFrame::SyncInstructionOptionsControlWithCurrentState()
     };
 
     mInstructionOptions.clear();
-    for (auto waitBeats = CalChart::Beats{}; waitBeats < (*mDoc->GetCurrentSheet()).GetBeats(); waitBeats += 2) {
+    for (auto waitBeats = CalChart::Beats{}; waitBeats < mDoc->GetCurrentSheetBeats(); waitBeats += 2) {
         for (auto pattern : marchInstructions) {
             mInstructionOptions.emplace_back(pattern.first, waitBeats);
         }
@@ -520,7 +520,6 @@ std::pair<std::vector<std::string>, std::vector<std::string>> TransitionSolverFr
 {
     std::vector<std::string> firstSheetErrors;
     std::vector<std::string> secondSheetErrors;
-    const auto sheetIterOnFirstSheet = mDoc->GetCurrentSheet();
     const auto currentSheetNum = mDoc->GetCurrentSheetNum();
     const auto totalSheets = mDoc->GetNumSheets();
     unsigned numInstructions = 0;
@@ -535,17 +534,13 @@ std::pair<std::vector<std::string>, std::vector<std::string>> TransitionSolverFr
     }
 
     if (currentSheetNum < totalSheets) {
-        const CalChart::Sheet& firstSheet = *sheetIterOnFirstSheet;
-
-        firstSheetErrors = validateSheetForTransitionSolver(firstSheet);
+        firstSheetErrors = mDoc->validateCurrentSheetForTransitionSolver();
     } else {
         firstSheetErrors.push_back("No first sheet exists.\n");
     }
 
     if ((currentSheetNum + 1) < totalSheets) {
-        const CalChart::Sheet& secondSheet = *(sheetIterOnFirstSheet + 1);
-
-        secondSheetErrors = validateSheetForTransitionSolver(secondSheet);
+        secondSheetErrors = mDoc->validateNextSheetForTransitionSolver();
     } else {
         secondSheetErrors.push_back("No next sheet exists.\n");
     }
