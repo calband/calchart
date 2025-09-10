@@ -1333,15 +1333,12 @@ float CalChartFrame::ToolBarSetZoom(float zoom_amount)
 wxString CalChartFrame::BeatStatusText() const
 {
     wxString result;
-    auto sht = GetShow()->GetCurrentSheet();
+    auto name = GetShow()->GetCurrentSheetName();
+    auto beats = GetShow()->GetCurrentSheetBeats();
     auto num = GetShow()->GetNumSheets();
     auto curr = GetFieldView()->GetCurrentSheetNum() + 1;
 
-    result.sprintf("%s%d of %d \"%.32s\" %d beats",
-        GetShow()->IsModified() ? "* " : "", curr, num,
-        (sht != GetShow()->GetSheetEnd()) ? wxString(sht->GetName())
-                                          : "",
-        (sht != GetShow()->GetSheetEnd()) ? sht->GetBeats() : 0);
+    result.sprintf("%s%d of %d \"%.32s\" %d beats", GetShow()->IsModified() ? "* " : "", curr, num, name, beats);
     return result;
 }
 

@@ -134,14 +134,15 @@ public:
 
     [[nodiscard]] auto GetNumSheets() const { return mShow ? mShow->GetNumSheets() : 0; }
 
-    [[nodiscard]] auto GetSheetsName() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetsName(); }
+    [[nodiscard]] auto GetSheetsName() const { return mShow->GetSheetsName(); }
 
-    [[nodiscard]] auto GetSheetBegin() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetBegin(); }
-    [[nodiscard]] auto GetSheetEnd() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetEnd(); }
     [[nodiscard]] auto GetNthSheet(int n) const { return static_cast<CalChart::Show const&>(*mShow).GetNthSheet(n); }
     [[nodiscard]] auto GetCurrentSheet() const { return static_cast<CalChart::Show const&>(*mShow).GetCurrentSheet(); }
+    [[nodiscard]] auto CopyAllSheets() const { return mShow->CopyAllSheets(); }
 
-    [[nodiscard]] auto GetCurrentSheetNum() const { return static_cast<CalChart::Show const&>(*mShow).GetCurrentSheetNum(); }
+    [[nodiscard]] auto GetCurrentSheetNum() const { return mShow->GetCurrentSheetNum(); }
+    [[nodiscard]] auto GetCurrentSheetName() const { return mShow->GetCurrentSheetName(); }
+    [[nodiscard]] auto GetCurrentSheetBeats() const { return mShow->GetCurrentSheetBeats(); }
     void SetCurrentSheet(int n);
 
     [[nodiscard]] auto GetNumPoints() const { return mShow->GetNumPoints(); }

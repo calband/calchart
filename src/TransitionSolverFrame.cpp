@@ -521,7 +521,8 @@ std::pair<std::vector<std::string>, std::vector<std::string>> TransitionSolverFr
     std::vector<std::string> firstSheetErrors;
     std::vector<std::string> secondSheetErrors;
     const auto sheetIterOnFirstSheet = mDoc->GetCurrentSheet();
-    const auto endSheetIter = mDoc->GetSheetEnd();
+    const auto currentSheetNum = mDoc->GetCurrentSheetNum();
+    const auto totalSheets = mDoc->GetNumSheets();
     unsigned numInstructions = 0;
 
     for (unsigned i = 0; i < mSolverParams.availableInstructions.size(); i++) {
@@ -533,7 +534,7 @@ std::pair<std::vector<std::string>, std::vector<std::string>> TransitionSolverFr
         firstSheetErrors.push_back("No command options have been provided.");
     }
 
-    if (sheetIterOnFirstSheet != endSheetIter) {
+    if (currentSheetNum < totalSheets) {
         const CalChart::Sheet& firstSheet = *sheetIterOnFirstSheet;
 
         firstSheetErrors = validateSheetForTransitionSolver(firstSheet);
@@ -541,7 +542,7 @@ std::pair<std::vector<std::string>, std::vector<std::string>> TransitionSolverFr
         firstSheetErrors.push_back("No first sheet exists.\n");
     }
 
-    if ((sheetIterOnFirstSheet + 1) != endSheetIter) {
+    if ((currentSheetNum + 1) < totalSheets) {
         const CalChart::Sheet& secondSheet = *(sheetIterOnFirstSheet + 1);
 
         secondSheetErrors = validateSheetForTransitionSolver(secondSheet);
