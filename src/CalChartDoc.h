@@ -179,7 +179,7 @@ public:
     [[nodiscard]] auto MakeAddToSelection(CalChart::SelectionList const& sl) const { return mShow->MakeAddToSelection(sl); }
     [[nodiscard]] auto MakeRemoveFromSelection(CalChart::SelectionList const& sl) const { return mShow->MakeRemoveFromSelection(sl); }
     [[nodiscard]] auto MakeToggleSelection(CalChart::SelectionList const& sl) const { return mShow->MakeToggleSelection(sl); }
-    [[nodiscard]] auto MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon) const { return mShow->MakeSelectWithinPolygon(polygon, mCurrentReferencePoint); }
+    [[nodiscard]] auto MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon) const { return mShow->MakeSelectWithinPolygon(polygon, mShow->GetCurrentReferencePoint()); }
     [[nodiscard]] auto MakeSelectBySymbol(CalChart::SYMBOL_TYPE symbol) const { return mShow->MakeSelectBySymbol(symbol); }
     [[nodiscard]] auto MakeSelectByInstrument(std::string const& instrument) const { return mShow->MakeSelectByInstrument(instrument); }
     [[nodiscard]] auto MakeSelectByLabel(std::string const& label) const { return mShow->MakeSelectByLabel(label); }
@@ -194,7 +194,7 @@ public:
 
     [[nodiscard]] auto GetSelect() const { return mSelect; }
     void SetSelect(CalChart::Select select);
-    [[nodiscard]] auto GetCurrentReferencePoint() const { return mCurrentReferencePoint; }
+    [[nodiscard]] auto GetCurrentReferencePoint() const { return mShow->GetCurrentReferencePoint(); }
     void SetCurrentReferencePoint(int currentReferencePoint);
     [[nodiscard]] auto FindMarcher(CalChart::Coord pos) const -> std::optional<CalChart::MarcherIndex>;
     // Determine if the position is on a curve control point, if so, return which curve and which control point.
@@ -243,7 +243,7 @@ public:
     [[nodiscard]] auto GetRawPrintContinuity() const { return GetCurrentSheet()->GetRawPrintContinuity(); }
     [[nodiscard]] auto GetPrintContinuity() const { return GetCurrentSheet()->GetPrintContinuity(); }
 
-    [[nodiscard]] auto WillMovePoints(CalChart::MarcherToPosition const& new_positions) const { return mShow->WillMovePoints(new_positions, mCurrentReferencePoint); }
+    [[nodiscard]] auto WillMovePoints(CalChart::MarcherToPosition const& new_positions) const { return mShow->WillMovePoints(new_positions, mShow->GetCurrentReferencePoint()); }
     [[nodiscard]] auto PrintToPS(bool overview, int min_yards, std::set<size_t> const& isPicked, CalChart::Configuration const& config_) const -> std::tuple<std::string, int>;
 
     // create a set of commands to apply to the document.  This is the best way to interact with the doc.
@@ -324,7 +324,6 @@ private:
     std::optional<CalChart::Animation> mAnimation;
     CalChart::Select mSelect = CalChart::Select::Box;
     CalChart::MoveMode mCurrentMove = CalChart::MoveMode::Normal;
-    int mCurrentReferencePoint{};
     bool mDrawPaths{};
     bool mDrawBackground{};
     GhostSource mGhostSource = GhostSource::disabled;

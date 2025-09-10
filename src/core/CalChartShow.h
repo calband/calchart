@@ -145,8 +145,8 @@ public:
     [[nodiscard]] auto GetCurrentSheetAllMarcherPositions(unsigned ref = 0) const -> std::vector<Coord>;
     [[nodiscard]] auto AlreadyHasPrintContinuity() const -> bool;
     [[nodiscard]] auto const& GetShowMode() const { return mMode; }
-
     [[nodiscard]] auto GetSheetsName() const -> std::vector<std::string>;
+    [[nodiscard]] auto GetCurrentReferencePoint() const -> int;
 
     // utility
     [[nodiscard]] static auto GetRelabelMapping(std::vector<Coord> const& source_marchers, std::vector<Coord> const& target_marchers, CalChart::Coord::units tolerance) -> std::optional<std::vector<MarcherIndex>>;
@@ -160,6 +160,14 @@ public:
     [[nodiscard]] auto MakeSelectByInstrument(std::string const& instrumentName) const -> SelectionList;
     [[nodiscard]] auto MakeSelectByLabel(std::string const& labelName) const -> SelectionList;
     [[nodiscard]] auto MakeSelectByLabels(std::vector<std::string> const& labelName) const -> SelectionList;
+    [[nodiscard]] auto AreSheetsInAnimation() const
+    {
+        return mSheets | std::views::transform([](auto&& sheet) { return sheet.IsInAnimation(); });
+    }
+    [[nodiscard]] auto SheetsInAnimation() const
+    {
+        return mSheets | std::views::filter([](auto&& sheet) { return sheet.IsInAnimation(); });
+    }
 
     // Point selection
     [[nodiscard]] auto IsSelected(MarcherIndex i) const { return mSelectionList.contains(i); }
@@ -178,26 +186,22 @@ public:
     // Saving the show.
     [[nodiscard]] auto SerializeShow() const -> std::vector<std::byte>;
 
-    [[nodiscard]] auto AreSheetsInAnimation() const
-    {
-        return mSheets | std::views::transform([](auto&& sheet) { return sheet.IsInAnimation(); });
-    }
-
-    [[nodiscard]] auto SheetsInAnimation() const
-    {
-        return mSheets | std::views::filter([](auto&& sheet) { return sheet.IsInAnimation(); });
-    }
-
+    // Draw commands
     [[nodiscard]] auto GenerateSheetElements(
         CalChart::Configuration const& config,
         int ref) const -> std::vector<CalChart::Draw::DrawCommand>;
-
     [[nodiscard]] auto GenerateGhostPointsDrawCommands(
         CalChart::Configuration const& config,
         CalChart::SelectionList const& selection_list,
         CalChart::Sheet const& sheet) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands(
+        CalChart::Configuration const& config) const -> std::vector<std::vector<CalChart::Draw::DrawCommand>>;
 
-    [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands(CalChart::Configuration const& config) const -> std::vector<std::vector<CalChart::Draw::DrawCommand>>;
+    // modify per edit session
+    void SetCurrentReferencePoint(int currentReferencePoint)
+    {
+        mCurrentReferencePoint = currentReferencePoint;
+    }
 
 private:
     // modification of show is private, and externally done through create and exeucte commands
@@ -250,9 +254,12 @@ private:
     Sheet_container_t mSheets;
     ShowMode mMode;
 
-    // the more "transient" settings, representing a current set of manipulations by the user
+    // the more "transient" settings, representing a current set of manipulations by the user, but preserved in the show
     SelectionList mSelectionList; // order of selections
     int mSheetNum{};
+
+    // reset every time we open
+    int mCurrentReferencePoint{};
 };
 
 }
