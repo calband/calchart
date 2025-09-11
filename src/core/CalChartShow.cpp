@@ -614,6 +614,11 @@ auto Show::GetSheetsName() const -> std::vector<std::string>
     return CalChart::Ranges::ToVector<std::string>(mSheets | std::views::transform([](auto&& sheet) { return sheet.GetName(); }));
 }
 
+auto Show::GetCurrentReferencePoint() const -> int
+{
+    return mCurrentReferencePoint;
+}
+
 auto Show::WillMovePoints(MarcherToPosition const& new_positions, int ref) const -> bool
 {
     auto sheet = GetCurrentSheet();

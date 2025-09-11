@@ -539,7 +539,7 @@ void CalChartDoc::SetSelect(CalChart::Select select)
 
 void CalChartDoc::SetCurrentReferencePoint(int currentReferencePoint)
 {
-    mCurrentReferencePoint = currentReferencePoint;
+    mShow->SetCurrentReferencePoint(currentReferencePoint);
     UpdateAllViews();
 }
 
@@ -741,14 +741,14 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_SetPrintableContinuity(std::map<i
 auto CalChartDoc::Create_MovePointsCommand(CalChart::MarcherToPosition const& new_positions) -> std::unique_ptr<wxCommand>
 {
     auto cmds = Create_SetSheetAndSelectionPair();
-    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_MovePointsCommand(new_positions, mCurrentReferencePoint)));
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_MovePointsCommand(new_positions, mShow->GetCurrentReferencePoint())));
     return std::make_unique<CalChartDocCommand>(*this, wxT("Move Points"), cmds);
 }
 
 std::unique_ptr<wxCommand> CalChartDoc::Create_MovePointsCommand(unsigned whichSheet, CalChart::MarcherToPosition const& new_positions)
 {
     auto cmds = Create_SetSheetAndSelectionPair();
-    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_MovePointsCommand(whichSheet, new_positions, mCurrentReferencePoint)));
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_MovePointsCommand(whichSheet, new_positions, mShow->GetCurrentReferencePoint())));
     return std::make_unique<CalChartDocCommand>(*this, wxT("Move Points"), cmds);
 }
 
@@ -769,14 +769,14 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_DeletePointsCommand()
 std::unique_ptr<wxCommand> CalChartDoc::Create_RotatePointPositionsCommand(int rotateAmount)
 {
     auto cmds = Create_SetSheetAndSelectionPair();
-    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_RotatePointPositionsCommand(rotateAmount, mCurrentReferencePoint)));
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_RotatePointPositionsCommand(rotateAmount, mShow->GetCurrentReferencePoint())));
     return std::make_unique<CalChartDocCommand>(*this, wxT("Rotate Points"), cmds);
 }
 
 std::unique_ptr<wxCommand> CalChartDoc::Create_ResetReferencePointToRef0()
 {
     auto cmds = Create_SetSheetAndSelectionPair();
-    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_ResetReferencePointToRef0(mCurrentReferencePoint)));
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_ResetReferencePointToRef0(mShow->GetCurrentReferencePoint())));
     return std::make_unique<CalChartDocCommand>(*this, wxT("Reset Reference Point"), cmds);
 }
 
