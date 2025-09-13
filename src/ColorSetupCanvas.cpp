@@ -110,7 +110,7 @@ ColorSetupCanvas::ColorSetupCanvas(CalChart::Configuration& config, wxWindow* pa
         mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 1).first(*mShow);
     }
 
-    mShow->Create_AddSheetsCommand(Show::Sheet_container_t{ *static_cast<CalChart::Show const&>(*mShow).GetCurrentSheet() }, 1).first(*mShow);
+    mShow->Create_AddSheetsCommand(mShow->CopyCurrentSheet(), 1).first(*mShow);
     mShow->Create_SetCurrentSheetCommand(1).first(*mShow);
     for (auto i = 0; i < 4; ++i) {
         mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 0).first(*mShow);
@@ -191,9 +191,6 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent&)
     wxCalChart::setBackground(dc, mConfig.Get_CalChartBrushAndPen(CalChart::Colors::FIELD));
     dc.Clear();
 
-    auto sheet = static_cast<CalChart::Show const&>(*mShow).GetCurrentSheet();
-    auto nextSheet = sheet + 1;
-
     // Draw the field
     auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
     auto offset = mMode.Offset();
@@ -206,9 +203,9 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent&)
     // draw the ghost sheet
     CalChart::append(drawCmds,
         mShow->GenerateGhostPointsDrawCommands(
+            mShow->GetCurrentSheetNum() + 1,
             mConfig,
-            mShow->GetSelectionList(),
-            *nextSheet));
+            mShow->GetSelectionList()));
 
     // Draw the points
     CalChart::append(drawCmds, mShow->GenerateSheetElements(mConfig, 1));

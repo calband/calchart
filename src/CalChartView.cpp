@@ -608,6 +608,6 @@ void CalChartView::OnBackgroundImageDelete()
 void CalChartView::UpdateBackgroundImages()
 {
     if (mShow && mShow->GetNumSheets()) {
-        mBackgroundImages.SetBackgroundImages(mShow->GetCurrentSheet()->GetBackgroundImages());
+        mBackgroundImages.SetBackgroundImages(mShow->GetCurrentSheetBackgroundImages());
     }
 }

@@ -460,29 +460,7 @@ auto CalChartDoc::GenerateCurrentSheetPointsDrawCommands() const -> std::vector<
 
 auto CalChartDoc::GeneratePhatomPointsDrawCommands(CalChart::MarcherToPosition const& positions) const -> std::vector<CalChart::Draw::DrawCommand>
 {
-    auto sheet = GetCurrentSheet();
-    auto pointLabelFont = CalChart::Font{ CalChart::Float2CoordUnits(mConfig.Get_DotRatio() * mConfig.Get_NumRatio()) };
-
-    auto drawCmds = positions
-        | std::views::transform([this, sheet](auto&& whichPosition) {
-              auto [which, position] = whichPosition;
-              // because points draw their position, we remove it then add the new position.
-              return sheet->GetMarcher(which).GetDrawCommands(
-                         GetPointLabel(which),
-                         mConfig)
-                  + position
-                  - sheet->GetMarcher(which).GetPos();
-          })
-        | std::views::join;
-    return {
-        CalChart::Draw::withFont(
-            pointLabelFont,
-            CalChart::Draw::withBrushAndPen(
-                mConfig.Get_CalChartBrushAndPen(CalChart::Colors::GHOST_POINT),
-                CalChart::Draw::withTextForeground(
-                    mConfig.Get_CalChartBrushAndPen(CalChart::Colors::GHOST_POINT_TEXT),
-                    drawCmds)))
-    };
+    return mShow->GeneratePhatomPointsDrawCommands(mConfig, positions);
 }
 
 auto CalChartDoc::GeneratePathsDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>
@@ -526,7 +504,7 @@ auto CalChartDoc::GetSelectedPoints() const -> CalChart::MarcherToPosition
 {
     CalChart::MarcherToPosition result;
     for (auto i : GetSelectionList()) {
-        result[i] = GetCurrentSheet()->GetMarcherPosition(i, GetCurrentReferencePoint());
+        result[i] = mShow->GetMarcherPositionOnCurrentSheet(i, GetCurrentReferencePoint());
     }
     return result;
 }
@@ -545,17 +523,17 @@ void CalChartDoc::SetCurrentReferencePoint(int currentReferencePoint)
 
 auto CalChartDoc::FindMarcher(CalChart::Coord pos) const -> std::optional<CalChart::MarcherIndex>
 {
-    return GetCurrentSheet()->FindMarcher(pos, CalChart::Float2CoordUnits(mConfig.Get_DotRatio()), GetCurrentReferencePoint());
+    return mShow->FindMarcherOnCurrentSheet(pos, CalChart::Float2CoordUnits(mConfig.Get_DotRatio()));
 }
 
 auto CalChartDoc::FindCurveControlPoint(CalChart::Coord pos) const -> std::optional<std::tuple<size_t, size_t>>
 {
-    return GetCurrentSheet()->FindCurveControlPoint(pos, CalChart::Float2CoordUnits(mConfig.Get_ControlPointRatio()));
+    return mShow->FindCurveControlPointOnCurrentSheet(pos, CalChart::Float2CoordUnits(mConfig.Get_ControlPointRatio()));
 }
 
 auto CalChartDoc::FindCurve(CalChart::Coord pos) const -> std::optional<std::tuple<size_t, size_t, double>>
 {
-    return GetCurrentSheet()->FindCurve(pos, CalChart::Float2CoordUnits(mConfig.Get_ControlPointRatio()));
+    return mShow->FindCurveOnCurrentSheet(pos, CalChart::Float2CoordUnits(mConfig.Get_ControlPointRatio()));
 }
 
 void CalChartDoc::SetDrawPaths(bool drawPaths)

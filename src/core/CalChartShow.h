@@ -62,6 +62,8 @@ class Show;
 class Sheet;
 class Reader;
 struct ParseErrorHandlers;
+struct TransitionSolverParams;
+class TransitionSolverDelegate;
 
 using Show_command = std::function<void(Show&)>;
 using Show_command_pair = std::pair<Show_command, Show_command>;
@@ -121,12 +123,18 @@ public:
     [[nodiscard]] auto GetSheetBegin() const { return mSheets.begin(); }
     [[nodiscard]] auto GetSheetEnd() const { return mSheets.end(); }
     [[nodiscard]] auto GetNthSheet(unsigned n) const { return GetSheetBegin() + n; }
-    [[nodiscard]] auto GetCurrentSheet() const { return GetNthSheet(mSheetNum); }
     [[nodiscard]] auto GetNumSheets() const -> int;
     [[nodiscard]] auto GetCurrentSheetNum() const { return mSheetNum; }
     [[nodiscard]] auto GetCurrentSheetName() const -> std::string;
     [[nodiscard]] auto GetCurrentSheetBeats() const -> CalChart::Beats;
+    [[nodiscard]] auto GetCurrentSheetSymbols() const -> std::vector<SYMBOL_TYPE>;
+    [[nodiscard]] auto GetCurrentSheetPrintNumber() const -> std::string;
+    [[nodiscard]] auto GetCurrentSheetRawPrintContinuity() const -> std::string;
+    [[nodiscard]] auto GetCurrentSheetPrintContinuity() const -> PrintContinuity;
+    [[nodiscard]] auto GetCurrentSheetBackgroundImages() const -> std::vector<ImageInfo>;
     [[nodiscard]] auto CopyAllSheets() const -> Show::Sheet_container_t { return mSheets; }
+    [[nodiscard]] auto CopyCurrentSheet() const -> Show::Sheet_container_t;
+    [[nodiscard]] auto GetCurrentSheetSerialized() const -> std::vector<std::byte>;
     [[nodiscard]] auto GetNumPoints() const { return static_cast<int>(mDotLabelAndInstrument.size()); }
     [[nodiscard]] auto GetPointLabel(MarcherIndex i) const -> std::string;
     [[nodiscard]] auto GetPointsLabel() const -> std::vector<std::string>;
@@ -141,12 +149,30 @@ public:
     [[nodiscard]] auto GetPointsSymbol(CalChart::SelectionList const& sl) const -> std::vector<SYMBOL_TYPE>;
     [[nodiscard]] auto GetPointFromLabel(std::string const& label) const -> std::optional<CalChart::MarcherIndex>;
     [[nodiscard]] auto GetPointsFromLabels(std::vector<std::string> const& labels) const -> std::vector<CalChart::MarcherIndex>;
+    [[nodiscard]] auto GetMarcherPosition(int sheet, MarcherIndex i, unsigned ref = 0) const -> Coord;
+    [[nodiscard]] auto GetMarcherPositionOnCurrentSheet(MarcherIndex i, unsigned ref = 0) const -> Coord;
     [[nodiscard]] auto GetAllMarcherPositions(int sheet, unsigned ref = 0) const -> std::vector<Coord>;
-    [[nodiscard]] auto GetCurrentSheetAllMarcherPositions(unsigned ref = 0) const -> std::vector<Coord>;
+    [[nodiscard]] auto GetAllMarcherPositionsOnCurrentSheet(unsigned ref = 0) const -> std::vector<Coord>;
+    [[nodiscard]] auto GetContinuities(int sheet) const -> std::vector<Continuity>;
+    [[nodiscard]] auto GetContinuitiesOnCurrentSheet() const -> std::vector<Continuity>;
+    [[nodiscard]] auto GetContinuitiesInUse(int sheet) const -> std::vector<bool>;
+    [[nodiscard]] auto GetContinuitiesInUseOnCurrentSheet() const -> std::vector<bool>;
     [[nodiscard]] auto AlreadyHasPrintContinuity() const -> bool;
     [[nodiscard]] auto const& GetShowMode() const { return mMode; }
     [[nodiscard]] auto GetSheetsName() const -> std::vector<std::string>;
     [[nodiscard]] auto GetCurrentReferencePoint() const -> int;
+    [[nodiscard]] auto FindMarcher(int sheet, Coord where, Coord::units searchBounds) const -> std::optional<MarcherIndex>;
+    [[nodiscard]] auto FindMarcherOnCurrentSheet(Coord where, Coord::units searchBounds) const -> std::optional<MarcherIndex>;
+    [[nodiscard]] auto GetCurve(int sheet, size_t index) const -> Curve;
+    [[nodiscard]] auto GetCurveOnCurrentSheet(size_t index) const -> Curve;
+    [[nodiscard]] auto GetNumberCurves(int sheet) const -> size_t;
+    [[nodiscard]] auto GetNumberCurvesOnCurrentSheet() const -> size_t;
+    [[nodiscard]] auto GetCurveAssignments(int sheet) const -> std::vector<std::vector<MarcherIndex>>;
+    [[nodiscard]] auto GetCurveAssignmentsOnCurrentSheet() const -> std::vector<std::vector<MarcherIndex>>;
+    [[nodiscard]] auto FindCurveControlPoint(int sheet, CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t>>;
+    [[nodiscard]] auto FindCurveControlPointOnCurrentSheet(CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t>>;
+    [[nodiscard]] auto FindCurve(int sheet, CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t, double>>;
+    [[nodiscard]] auto FindCurveOnCurrentSheet(CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t, double>>;
 
     // utility
     [[nodiscard]] static auto GetRelabelMapping(std::vector<Coord> const& source_marchers, std::vector<Coord> const& target_marchers, CalChart::Coord::units tolerance) -> std::optional<std::vector<MarcherIndex>>;
@@ -174,6 +200,11 @@ public:
     [[nodiscard]] auto GetSelectionList() const { return mSelectionList; }
     [[nodiscard]] auto WillMovePoints(MarcherToPosition const& new_positions, int ref) const -> bool;
 
+    // Transition Solver
+    [[nodiscard]] auto validateCurrentSheetForTransitionSolver() const -> std::vector<std::string>;
+    [[nodiscard]] auto validateNextSheetForTransitionSolver() const -> std::vector<std::string>;
+    void runTransitionSolver(TransitionSolverParams const& params, TransitionSolverDelegate* delegate) const;
+
     /*!
      * @brief Generates a JSON that could represent this
      * show in an Online Viewer '.viewer' file.
@@ -190,10 +221,19 @@ public:
     [[nodiscard]] auto GenerateSheetElements(
         CalChart::Configuration const& config,
         int ref) const -> std::vector<CalChart::Draw::DrawCommand>;
+
+    [[nodiscard]] auto GeneratePhatomPointsDrawCommands(
+        CalChart::Configuration const& config,
+        CalChart::MarcherToPosition const& positions) const -> std::vector<CalChart::Draw::DrawCommand>;
+
     [[nodiscard]] auto GenerateGhostPointsDrawCommands(
         CalChart::Configuration const& config,
         CalChart::SelectionList const& selection_list,
         CalChart::Sheet const& sheet) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateGhostPointsDrawCommands(
+        int sheet,
+        CalChart::Configuration const& config,
+        CalChart::SelectionList const& selection_list) const -> std::vector<CalChart::Draw::DrawCommand>;
     [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands(
         CalChart::Configuration const& config) const -> std::vector<std::vector<CalChart::Draw::DrawCommand>>;
 
@@ -236,10 +276,6 @@ private:
     auto GetNthSheet(unsigned n)
     {
         return GetSheetBegin() + n;
-    }
-    auto GetCurrentSheet()
-    {
-        return GetNthSheet(mSheetNum);
     }
 
     void SetShowMode(ShowMode const&);
