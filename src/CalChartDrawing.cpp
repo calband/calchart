@@ -420,7 +420,8 @@ auto CalculatePointsPerLine(
 namespace {
     auto GeneratePrintField(
         CalChart::Configuration const& config,
-        CalChartDoc const& show,
+        CalChart::ShowMode const& mode,
+        std::vector<std::string> const& labels,
         CalChart::Sheet const& sheet,
         int ref,
         bool landscape) -> std::tuple<double, std::vector<CalChart::Draw::DrawCommand>>
@@ -429,17 +430,17 @@ namespace {
         // create a field for drawing:
         const auto pts = sheet.GetAllMarchers();
         auto boundingBox = GetMarcherBoundingBox(pts);
-        auto mode = show.GetShowMode().CreateFieldForPrinting(CalChart::CoordUnits2Int(boundingBox.first.x), CalChart::CoordUnits2Int(boundingBox.second.x), landscape);
-        auto drawCmds = CalChart::CreateModeDrawCommandsWithBorder(config, mode, CalChart::HowToDraw::Printing);
+        auto printMode = mode.CreateFieldForPrinting(CalChart::CoordUnits2Int(boundingBox.first.x), CalChart::CoordUnits2Int(boundingBox.second.x), landscape);
+        auto drawCmds = CalChart::CreateModeDrawCommandsWithBorder(config, printMode, CalChart::HowToDraw::Printing);
         CalChart::append(drawCmds,
             CalChart::Draw::toDrawCommands(std::views::iota(0u, pts.size())
                 | std::views::transform([&](auto i) {
-                      return pts.at(i).GetDrawCommands(ref, show.GetPointLabel(i), config);
+                      return pts.at(i).GetDrawCommands(ref, labels.at(i), config);
                   })
                 | std::views::join)
-                + mode.Offset());
+                + printMode.Offset());
 
-        return { static_cast<double>(mode.Size().x), drawCmds };
+        return { static_cast<double>(printMode.Size().x), drawCmds };
     }
 
     auto GenerateLargePrintElements(bool landscape, wxSize page, std::string sheetName)
@@ -488,75 +489,97 @@ namespace {
     }
 }
 
-void DrawForPrintingHelper(
+void DrawForPrintingContinuity(
     wxDC& dc,
+    wxSize pageSize,
     CalChart::Configuration const& config,
     CalChart::Sheet const& sheet,
-    bool landscape,
-    double scale_x,
-    std::vector<CalChart::Draw::DrawCommand> fieldDrawCommand)
+    bool landscape)
 {
     // set up everything to be restored after we print
     SaveAndRestore::DeviceOrigin orig_dev(dc);
     SaveAndRestore::UserScale orig_scale(dc);
     SaveAndRestore::Font orig_font(dc);
 
-    // get the page dimensions
-    auto page = dc.GetSize();
-
     // a possible future optimization would be to generate this ahead of time.
     auto printLayout = CalChart::PrintContinuityLayout::Parse(sheet.GetRawPrintContinuity());
-    auto printDrawCommands = GenerateDrawCommands(dc, config, printLayout, wxRect(wxPoint(10, page.y * kContinuityStart[landscape]), wxSize(page.x - 20, page.y - page.y * kContinuityStart[landscape])), landscape);
-
-    dc.Clear();
-    dc.SetLogicalFunction(wxCOPY);
-
-    // Print the field:
-
-    // set the origin and scaling for drawing the field
-    dc.SetDeviceOrigin(kFieldBorderOffset * page.x, kFieldTop * page.y);
-
-    // create a field for drawing:
-    auto scale = tDIP(page.x - 2 * kFieldBorderOffset * page.x) / scale_x;
-    // Because we are drawing to a bitmap, DIP isn't happening.  So we compensate by changing the scaling.
-    dc.SetUserScale(scale, scale);
-
-    // draw the field.
-    wxCalChart::Draw::DrawCommandList(dc, fieldDrawCommand);
-
-    // now reset everything to draw the rest of the text
-    dc.SetDeviceOrigin(CalChart::Int2CoordUnits(0), CalChart::Int2CoordUnits(0));
-    dc.SetBrush(*wxTRANSPARENT_BRUSH);
+    auto printDrawCommands = GenerateDrawCommands(dc, config, printLayout, wxRect(wxPoint(10, pageSize.y * kContinuityStart[landscape]), wxSize(pageSize.x - 20, pageSize.y - pageSize.y * kContinuityStart[landscape])), landscape);
 
     // set the page for drawing:
-    page = dc.GetSize();
     auto sizeX = (landscape) ? kSizeXLandscape : kSizeX;
     auto sizeY = (landscape) ? kSizeYLandscape : kSizeY;
     // because we are drawing to a bitmap, we manipulate the scaling factor so it just draws as normal
-    dc.SetUserScale(tDIP(page.x) / sizeX, tDIP(page.y) / sizeY);
-    page.x = fDIP(sizeX);
-    page.y = fDIP(sizeY);
+    dc.SetUserScale(tDIP(pageSize.x) / sizeX, tDIP(pageSize.y) / sizeY);
+    pageSize.x = fDIP(sizeX);
+    pageSize.y = fDIP(sizeY);
+
+    // now draw the continuity into its own box.  It uses Stack layout so needs to have a constrained area.
+    wxCalChart::Draw::DrawCommandList(dc,
+        wxCalChart::Draw::DrawSurface{
+            { 0, 0 },
+            wxSize(pageSize.x - 20, pageSize.y * (1 - kContinuityStart[landscape])) },
+        std::vector{ printDrawCommands } + CalChart::Coord(10, pageSize.y * kContinuityStart[landscape]));
+}
+
+void DrawForPrintingElements(
+    wxDC& dc,
+    wxSize pageSize,
+    CalChart::Sheet const& sheet,
+    bool landscape)
+{
+    // set up everything to be restored after we print
+    SaveAndRestore::DeviceOrigin orig_dev(dc);
+    SaveAndRestore::UserScale orig_scale(dc);
+    SaveAndRestore::Font orig_font(dc);
+
+    auto sizeX = (landscape) ? kSizeXLandscape : kSizeX;
+    auto sizeY = (landscape) ? kSizeYLandscape : kSizeY;
+    // because we are drawing to a bitmap, we manipulate the scaling factor so it just draws as normal
+    dc.SetUserScale(tDIP(pageSize.x) / sizeX, tDIP(pageSize.y) / sizeY);
+    pageSize.x = fDIP(sizeX);
+    pageSize.y = fDIP(sizeY);
 
     auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
 
     CalChart::append(drawCmds,
         CalChart::Draw::withFont(
             CalChart::Font{ 16, CalChart::Font::Family::Roman, CalChart::Font::Style::Normal, CalChart::Font::Weight::Bold },
-            GenerateLargePrintElements(landscape, page, sheet.GetPrintNumber())));
+            GenerateLargePrintElements(landscape, pageSize, sheet.GetPrintNumber())));
 
     CalChart::append(drawCmds,
         CalChart::Draw::withFont(
             CalChart::Font{ 8 },
             GeneratePrintElements(
                 landscape,
-                page)));
+                pageSize)));
     wxCalChart::Draw::DrawCommandList(dc, drawCmds);
-    // now draw the continuity into its own box.  It uses Stack layout so needs to have a constrained area.
-    wxCalChart::Draw::DrawCommandList(dc,
-        wxCalChart::Draw::DrawSurface{
-            { 0, 0 },
-            wxSize(page.x - 20, page.y * (1 - kContinuityStart[landscape])) },
-        std::vector{ printDrawCommands } + CalChart::Coord(10, page.y * kContinuityStart[landscape]));
+}
+
+void DrawForPrintingField(
+    wxDC& dc,
+    wxSize pageSize,
+    CalChart::Configuration const& config,
+    CalChart::ShowMode const& mode,
+    std::vector<std::string> const& labels,
+    CalChart::Sheet const& sheet,
+    int ref,
+    bool landscape)
+{
+    auto [scale_x, fieldDrawCommand] = GeneratePrintField(config, mode, labels, sheet, ref, landscape);
+    // set up everything to be restored after we print
+    SaveAndRestore::DeviceOrigin orig_dev(dc);
+    SaveAndRestore::UserScale orig_scale(dc);
+    SaveAndRestore::Font orig_font(dc);
+
+    // create a field for drawing:
+    auto scale = tDIP(pageSize.x - 2 * kFieldBorderOffset * pageSize.x) / scale_x;
+    // Because we are drawing to a bitmap, DIP isn't happening.  So we compensate by changing the scaling.
+    dc.SetUserScale(scale, scale);
+    // and because we've scaled, the offset needs to be scaled.
+    auto offset = CalChart::Coord(kFieldBorderOffset * pageSize.x, kFieldTop * pageSize.y) / scale;
+
+    // draw the field.
+    wxCalChart::Draw::DrawCommandList(dc, fieldDrawCommand + offset);
 }
 
 auto GenerateDrawCommands(wxDC& dc,
@@ -614,8 +637,13 @@ void DrawForPrinting(wxDC* printerdc, CalChart::Configuration const& config, Cal
     wxBitmap membm(bitmapWidth, bitmapHeight);
     // first convert to image
     wxMemoryDC memdc(membm);
-    auto [scale_x, drawCmds1] = GeneratePrintField(config, show, sheet, ref, should_landscape);
-    DrawForPrintingHelper(memdc, config, sheet, should_landscape, scale_x, drawCmds1);
+    memdc.Clear();
+    memdc.SetLogicalFunction(wxCOPY);
+    memdc.SetBrush(*wxTRANSPARENT_BRUSH);
+
+    DrawForPrintingElements(memdc, memdc.GetSize(), sheet, should_landscape);
+    DrawForPrintingContinuity(memdc, memdc.GetSize(), config, sheet, should_landscape);
+    DrawForPrintingField(memdc, memdc.GetSize(), config, show.GetShowMode(), show.GetPointsLabel(), sheet, ref, should_landscape);
 
     auto image = membm.ConvertToImage();
     if (forced_landscape) {

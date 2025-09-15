@@ -9,5 +9,6 @@ Other changes:
 * [#667](../../issues/667) remove CalChartDoc begin and end
 * [#669](../../issues/669) Put mCurrentReferencePoint into core/show
 * [#671](../../issues/671) Remove GetCurrentSheet from Doc
+* [#677](../../issues/677) We should have a print configuration
 * [#679](../../issues/679) Fix the broken build by updating docopt
 
