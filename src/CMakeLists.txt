@@ -139,6 +139,8 @@ add_executable(
   PreferencesGeneralSetup.h
   PreferencesPrintContinuitySetup.cpp
   PreferencesPrintContinuitySetup.h
+  PreferencesPrintingSetup.cpp
+  PreferencesPrintingSetup.hpp
   PreferencesPSPrintingSetup.cpp
   PreferencesPSPrintingSetup.h
   PreferencesShowModeSetup.cpp
@@ -149,6 +151,8 @@ add_executable(
   PrintContinuityEditor.h
   PrintContinuityPreview.cpp
   PrintContinuityPreview.h
+  PrintingPreview.cpp
+  PrintingPreview.hpp
   PrintPostScriptDialog.cpp
   PrintPostScriptDialog.h
   SetupInstruments.cpp

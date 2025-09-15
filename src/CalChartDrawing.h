@@ -45,6 +45,7 @@ struct Textline;
 using Textline_list = std::vector<Textline>;
 class Point;
 class Configuration;
+class ShowMode;
 }
 class CalChartDoc;
 
@@ -60,6 +61,29 @@ auto GenerateDrawCommands(wxDC& dc,
     bool landscape) -> CalChart::Draw::DrawCommand;
 
 void DrawForPrinting(wxDC* dc, CalChart::Configuration const& config, CalChartDoc const& show, CalChart::Sheet const& sheet, int ref, bool landscape);
+
+void DrawForPrintingContinuity(
+    wxDC& dc,
+    wxSize pageSize,
+    CalChart::Configuration const& config,
+    CalChart::Sheet const& sheet,
+    bool landscape);
+
+void DrawForPrintingElements(
+    wxDC& dc,
+    wxSize pageSize,
+    CalChart::Sheet const& sheet,
+    bool landscape);
+
+void DrawForPrintingField(
+    wxDC& dc,
+    wxSize pageSize,
+    CalChart::Configuration const& config,
+    CalChart::ShowMode const& mode,
+    std::vector<std::string> const& labels,
+    CalChart::Sheet const& sheet,
+    int ref,
+    bool landscape);
 
 }
 
