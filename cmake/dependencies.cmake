@@ -17,8 +17,8 @@ FetchContent_MakeAvailable(munkres-cpp)
 
 FetchContent_Declare(
   docopt
-  GIT_REPOSITORY "https://github.com/docopt/docopt.cpp"
-  GIT_TAG 42ebcec9dc2c99a1b3a4542787572045763ad196 # v0.6.3
+  GIT_REPOSITORY "https://github.com/rmpowell77/docopt.cpp"
+  GIT_TAG 692ba5b7061180298a3b3c290141029168e8c69b # fix for cmake
 )
 FetchContent_MakeAvailable(docopt)
 
