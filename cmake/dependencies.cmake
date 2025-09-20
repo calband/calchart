@@ -17,8 +17,8 @@ FetchContent_MakeAvailable(munkres-cpp)
 
 FetchContent_Declare(
   docopt
-  GIT_REPOSITORY "https://github.com/docopt/docopt.cpp"
-  GIT_TAG 42ebcec9dc2c99a1b3a4542787572045763ad196 # v0.6.3
+  GIT_REPOSITORY "https://github.com/rmpowell77/docopt.cpp"
+  GIT_TAG 692ba5b7061180298a3b3c290141029168e8c69b # fix for cmake
 )
 FetchContent_MakeAvailable(docopt)
 
@@ -26,7 +26,7 @@ set(JSON_BuildTests OFF CACHE INTERNAL "")
 FetchContent_Declare(
   nlohmann_json
   GIT_REPOSITORY "https://github.com/nlohmann/json"
-  GIT_TAG 4f8fba14066156b73f1189a2b8bd568bde5284c5 # v3.10.5
+  GIT_TAG 55f93686c01528224f448c19128836e7df245f72 # v3.12.0
 )
 FetchContent_MakeAvailable(nlohmann_json)
 
