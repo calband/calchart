@@ -9,4 +9,5 @@ Other changes:
 * [#667](../../667) remove CalChartDoc begin and end
 * [#669](../../669) Put mCurrentReferencePoint into core/show
 * [#671](../../671) Remove GetCurrentSheet from Doc
+* [#676](../../676) Make the name spacing of draw easier to read and put new things in
 
