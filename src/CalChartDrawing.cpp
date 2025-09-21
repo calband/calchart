@@ -67,15 +67,6 @@ static const auto kStep2 = fDIP(CalChart::Int2CoordUnits(2));
 static const auto kStep1 = fDIP(CalChart::Int2CoordUnits(1));
 
 // draw text centered around x (though still at y down)
-auto GenerateDrawCenteredText(std::string const& text) -> std::vector<CalChart::Draw::DrawCommand>
-{
-    using TextAnchor = CalChart::Draw::Text::TextAnchor;
-    return std::vector<CalChart::Draw::DrawCommand>{
-        CalChart::Draw::Text{ {}, text, TextAnchor::HorizontalCenter | TextAnchor::Top }
-    };
-}
-
-// draw text centered around x (though still at y down)
 auto GenerateDrawLineOverText(const wxString& text, int lineLength) -> std::vector<CalChart::Draw::DrawCommand>
 {
     using TextAnchor = CalChart::Draw::Text::TextAnchor;
@@ -446,11 +437,11 @@ namespace {
     {
         auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
         CalChart::append(drawCmds,
-            GenerateDrawCenteredText(kHeader) + scaleSize(page, kHeaderLocation[landscape]));
+            CalChart::Draw::toCenterText(kHeader) + scaleSize(page, kHeaderLocation[landscape]));
         CalChart::append(drawCmds,
-            GenerateDrawCenteredText(sheetName) + scaleSize(page, kNumberPosition[landscape][0]));
+            CalChart::Draw::toCenterText(sheetName) + scaleSize(page, kNumberPosition[landscape][0]));
         CalChart::append(drawCmds,
-            GenerateDrawCenteredText(sheetName) + scaleSize(page, kNumberPosition[landscape][1]));
+            CalChart::Draw::toCenterText(sheetName) + scaleSize(page, kNumberPosition[landscape][1]));
         return drawCmds;
     }
 
@@ -473,7 +464,7 @@ namespace {
             CalChart::Draw::toDrawCommands(
                 kLabels[landscape] | std::views::transform([page](auto&& labelData) {
                     auto [label, scale] = labelData;
-                    return GenerateDrawCenteredText(label) + scaleSize(page, scale);
+                    return std::vector{ CalChart::Draw::toCenterText(label) + scaleSize(page, scale) };
                 })
                 | std::views::join));
 
