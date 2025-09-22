@@ -116,6 +116,15 @@ std::pair<CalChart::Cont::Token const*, CalChart::Cont::Token*> first_unset(CalC
     return { nullptr, nullptr };
 }
 
+std::pair<CalChart::Cont::Token const*, CalChart::Cont::Token*> getFirstIfNoUnset(CalChart::Cont::Drawable const& cont)
+{
+    auto result = first_unset(cont);
+    if (result == std::pair<CalChart::Cont::Token const*, CalChart::Cont::Token*>{ nullptr, nullptr }) {
+        return { cont.self_ptr, cont.parent_ptr };
+    }
+    return result;
+}
+
 ContinuityComposerPanel::ContinuityComposerPanel(std::unique_ptr<CalChart::Cont::Procedure> starting_continuity, CalChart::Configuration const& config, wxWindow* parent,
     wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
     : wxPanel(parent, winid, pos, size, style, name)
@@ -143,9 +152,9 @@ void ContinuityComposerPanel::CreateControls()
                 return new ContinuityComposerCanvas(mConfig, parent);
             },
         },
-        wxUI::ComboBox{ {} }.withStyle(wxTE_PROCESS_ENTER).bind(wxEVT_TEXT_ENTER, [this](auto const& event) {
-                                                              OnCmdTextEnterKeyPressed(event);
-                                                          })
+        wxUI::ComboBox{}.withStyle(wxTE_PROCESS_ENTER).bind(wxEVT_TEXT_ENTER, [this](auto const& event) {
+                                                          OnCmdTextEnterKeyPressed(event);
+                                                      })
             .bind(wxEVT_COMBOBOX, [this](auto const& event) {
                 OnComboPressed(event);
             })
@@ -161,7 +170,7 @@ void ContinuityComposerPanel::CreateControls()
         mCont = std::make_unique<CalChart::Cont::ProcUnset>();
     }
     mDrawableCont = mCont->GetDrawable();
-    std::tie(mCurrentSelected, mCurrentParent) = first_unset(mDrawableCont);
+    std::tie(mCurrentSelected, mCurrentParent) = getFirstIfNoUnset(mDrawableCont);
     // preset the highlighted
     mCanvas->DoSetContinuity(mDrawableCont, mAction);
     mCanvas->SetHighlight(mCurrentSelected);

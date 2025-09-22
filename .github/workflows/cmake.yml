@@ -69,7 +69,12 @@ jobs:
 
     - name: Installing Dependencies (Windows)
       if: matrix.config.os == 'windows-latest'
-      run: choco install winflexbison
+      run: |
+        choco install winflexbison
+        choco install nsis -y
+        # Add NSIS to PATH for this session
+        $env:PATH = "$env:PATH;C:\Program Files (x86)\NSIS"
+        echo "C:\Program Files (x86)\NSIS" >> $env:GITHUB_PATH
 
     - name: Installing Dependencies (Linux)
       if: matrix.config.os == 'ubuntu-24.04'
