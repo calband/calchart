@@ -3,11 +3,11 @@
 Bugs addressed in this release:
 
 * [#674](../../issues/674) Continuity Editor Panel requires double click to populate dropdown
+* [#681](../../issues/681) CalChart Coord division by float is incorrect
 
 Other changes:
 
 * [#653](../../issues/653) Clean up point picker
-<<<<<<< HEAD
 * [#665](../../issues/665) Fix up GetRelabelMapping to not require sheet_iterator
 * [#667](../../issues/667) remove CalChartDoc begin and end
 * [#669](../../issues/669) Put mCurrentReferencePoint into core/show

@@ -96,8 +96,13 @@ struct CoordBasic {
         requires std::is_arithmetic_v<U>
     constexpr auto operator/=(U s) -> CoordBasic&
     {
-        x /= s;
-        y /= s;
+        if constexpr (std::is_unsigned_v<U>) {
+            x /= static_cast<units>(s);
+            y /= static_cast<units>(s);
+        } else {
+            x /= s;
+            y /= s;
+        }
         return *this;
     }
 
@@ -141,13 +146,25 @@ template <Arithmetic T>
 }
 
 template <Arithmetic T>
-[[nodiscard]] constexpr auto operator*(Coord c, T v) -> Coord { return Coord(c.x * v, c.y * v); }
+[[nodiscard]] constexpr auto operator*(Coord lhs, T rhs) -> Coord
+{
+    lhs *= rhs;
+    return lhs;
+}
 
 template <Arithmetic T>
-[[nodiscard]] constexpr auto operator*(T v, Coord c) -> Coord { return Coord(c.x * v, c.y * v); }
+[[nodiscard]] constexpr auto operator*(T lhs, Coord rhs) -> Coord
+{
+    rhs *= lhs;
+    return rhs;
+}
 
 template <Arithmetic T>
-[[nodiscard]] constexpr auto operator/(Coord a, T s) -> Coord { return Coord(a.x / static_cast<Coord::units>(s), a.y / static_cast<Coord::units>(s)); }
+[[nodiscard]] constexpr auto operator/(Coord lhs, T rhs) -> Coord
+{
+    lhs /= rhs;
+    return lhs;
+}
 
 [[nodiscard]] constexpr auto operator-(Coord c) -> Coord { return -1 * c; }
 
@@ -326,6 +343,11 @@ static_assert(Coord{ 1, 1 } != (Coord{ 1, 0 } + Coord{ 1, 0 }));
 static_assert(Coord{ 2, 2 } == 2 * Coord{ 1, 1 });
 static_assert(Coord{ 2, 2 } == Coord{ 1, 1 } * 2);
 static_assert(Coord{ 1, 1 } == Coord{ 2, 2 } / 2);
+static_assert(Coord{ 4, 4 } == Coord{ 2, 2 } / 0.5);
+static_assert(Coord{ -4, 4 } == Coord{ -2, 2 } / 0.5);
+static_assert(Coord{ -4, 4 } == Coord{ -8, 8 } / 2);
+static_assert(Coord{ -4, 4 } == Coord{ -8, 8 } / 2UL);
+static_assert(Coord{ -16, 5 } == Coord{ -192, 64 } / 12UL);
 static_assert(Coord{ 1, -1 } == -Coord{ -1, 1 });
 static_assert(Coord{ -1, 1 } == -Coord{ 1, -1 });
 
