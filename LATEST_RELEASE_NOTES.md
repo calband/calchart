@@ -2,6 +2,8 @@
 
 Bugs addressed in this release:
 
+* [#674](../../issues/674) Continuity Editor Panel requires double click to populate dropdown
+
 Other changes:
 
 * [#653](../../issues/653) Clean up point picker
