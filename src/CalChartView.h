@@ -97,6 +97,9 @@ public:
     [[nodiscard]] auto GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>;
     [[nodiscard]] auto GetTotalNumberAnimationBeats() const -> std::optional<CalChart::Beats>;
     [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beats whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
+    [[nodiscard]] auto BeatToSheetOffsetAndBeat(CalChart::Beats beat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>;
+    [[nodiscard]] auto BeatForSheet(int sheet) const -> CalChart::Beats;
+    [[nodiscard]] auto GetTotalNumberBeatsUpTo(int whichSheet) const -> CalChart::Beats;
 
     [[nodiscard]] auto GetContinuities() const { return mShow->GetContinuities(); }
     [[nodiscard]] auto ContinuitiesInUse() const { return mShow->ContinuitiesInUse(); }

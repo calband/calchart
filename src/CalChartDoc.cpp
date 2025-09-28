@@ -403,6 +403,30 @@ auto CalChartDoc::GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beats
     return { bounding_box_low_right - bounding_box_upper_left, (modeSize / 2) + bounding_box_upper_left };
 }
 
+auto CalChartDoc::BeatToSheetOffsetAndBeat(CalChart::Beats whichBeat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>
+{
+    if (!mAnimation) {
+        return std::nullopt;
+    }
+    return mAnimation->BeatToSheetOffsetAndBeat(whichBeat);
+}
+
+auto CalChartDoc::BeatForSheet(int whichSheet) const -> CalChart::Beats
+{
+    if (!mAnimation) {
+        return 0;
+    }
+    return mAnimation->BeatForSheet(whichSheet);
+}
+
+auto CalChartDoc::GetTotalNumberBeatsUpTo(int whichSheet) const -> CalChart::Beats
+{
+    if (!mAnimation) {
+        return 0;
+    }
+    return mAnimation->GetTotalNumberBeatsUpTo(whichSheet);
+}
+
 auto CalChartDoc::BeatHasCollision(CalChart::Beats whichBeat) const -> bool
 {
     if (!mAnimation) {

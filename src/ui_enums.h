@@ -73,6 +73,7 @@ enum {
     CALCHART__anim_next_beat_timer,
     CALCHART__anim_tempo,
     CALCHART__anim_gotobeat,
+    CALCHART__anim_gotosheet,
 
     CALCHART__ViewZoomIn,
     CALCHART__ViewZoomOut,

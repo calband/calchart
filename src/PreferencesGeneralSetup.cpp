@@ -38,6 +38,7 @@ void GeneralSetup::CreateControls()
             "General Settings",
             VLabelWidget("Autosave Interval", wxUI::TextCtrl{}.withSize({ 100, -1 }).withProxy(mAutoSave_Interval)),
             wxUI::CheckBox{ "Beep on animation collisions " }.withProxy(mBeep_On_Collisions),
+            wxUI::CheckBox{ "Show Sheet Slider" }.withProxy(mSheetSlider),
             wxUI::CheckBox{ "Scroll Direction: Natural" }.withProxy(mScroll_Natural),
             wxUI::CheckBox{ "Set Sheet is undo-able" }.withProxy(mSetSheet_Undo),
             wxUI::CheckBox{ "Point selection is undo-able" }.withProxy(mSelection_Undo),
@@ -53,6 +54,7 @@ void GeneralSetup::InitFromConfig()
 {
     *mAutoSave_Interval = std::to_string(mConfig.Get_AutosaveInterval());
     *mBeep_On_Collisions = mConfig.Get_BeepOnCollisions();
+    *mSheetSlider = mConfig.Get_AnimationFrameSheetSlider();
     *mScroll_Natural = mConfig.Get_ScrollDirectionNatural();
     *mSetSheet_Undo = mConfig.Get_CommandUndoSetSheet();
     *mSelection_Undo = mConfig.Get_CommandUndoSelection();
@@ -68,6 +70,7 @@ bool GeneralSetup::TransferDataFromWindow()
     // read out the values from the window
     mConfig.Set_AutosaveInterval(std::stol(*mAutoSave_Interval));
     mConfig.Set_BeepOnCollisions(*mBeep_On_Collisions);
+    mConfig.Set_AnimationFrameSheetSlider(*mSheetSlider);
     mConfig.Set_ScrollDirectionNatural(*mScroll_Natural);
     mConfig.Set_CommandUndoSetSheet(*mSetSheet_Undo);
     mConfig.Set_CommandUndoSelection(*mSelection_Undo);

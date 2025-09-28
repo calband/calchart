@@ -45,18 +45,19 @@ using namespace CalChart;
 
 BEGIN_EVENT_TABLE(AnimationPanel, AnimationPanel::super)
 EVT_SPINCTRL(CALCHART__anim_tempo, AnimationPanel::OnSlider_anim_tempo)
+EVT_COMMAND_SCROLL(CALCHART__anim_gotosheet, AnimationPanel::OnSlider_anim_gotosheet)
 EVT_COMMAND_SCROLL(CALCHART__anim_gotobeat, AnimationPanel::OnSlider_anim_gotobeat)
 EVT_TIMER(CALCHART__anim_next_beat_timer, AnimationPanel::OnCmd_anim_next_beat_timer)
 END_EVENT_TABLE()
 
-AnimationPanel::AnimationPanel(CalChart::Configuration& config, wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
+AnimationPanel::AnimationPanel(CalChart::Configuration& config, wxWindow* parent, bool miniMode, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
     : super(parent, winid, pos, size, style, name)
     , mCanvas(new AnimationCanvas(config, this, wxID_ANY, wxDefaultPosition, wxSize(-1, GetAnimationCanvasMinY())))
     , mOmniCanvas(new CCOmniviewCanvas(this, config))
     , mTimer(new wxTimer(this, CALCHART__anim_next_beat_timer))
     , mTempo(120)
     , mTimerOn(false)
-    , mInMiniMode(true)
+    , mInMiniMode(miniMode)
     , mConfig(config)
 {
     Init();
@@ -92,6 +93,14 @@ void AnimationPanel::CreateControls()
                     OnCmd_PlayButton();
                 })
                 .withProxy(mPlayPauseButton),
+            wxUI::LayoutIf{
+                !mInMiniMode && mConfig.Get_AnimationFrameSheetSlider(),
+                wxUI::Text{ "Sheet" },
+                wxUI::Slider{ CALCHART__anim_gotosheet, std::pair{ 1, 2 }, 1 }
+                    .withStyle(wxSL_HORIZONTAL | wxSL_LABELS)
+                    .withProxy(mSheetSlider),
+                wxUI::Text{ "Beat" },
+            },
             wxUI::Slider{ CALCHART__anim_gotobeat, std::pair{ 1, 2 }, 1 }
                 .withStyle(wxSL_HORIZONTAL | wxSL_LABELS)
                 .withFlags(ExpandSizerFlags())
@@ -147,15 +156,6 @@ void AnimationPanel::CreateControls()
     mCanvas->Show();
     mOmniCanvas->Hide();
 
-    for (auto&& i : mItemsToHide) {
-        i->Show(!mInMiniMode);
-    }
-    SetInMiniMode(mInMiniMode);
-}
-
-void AnimationPanel::SetInMiniMode(bool miniMode)
-{
-    mInMiniMode = miniMode;
     for (auto&& i : mItemsToHide) {
         i->Show(!mInMiniMode);
     }
@@ -218,7 +218,19 @@ void AnimationPanel::OnSlider_anim_tempo(wxSpinEvent& event)
 
 void AnimationPanel::OnSlider_anim_gotobeat(wxScrollEvent& event)
 {
-    mView->GotoTotalBeat(event.GetPosition());
+    if (mSheetSlider.control()) {
+        mView->GotoSheetBeat(*mSheetSlider - 1, event.GetPosition());
+    } else {
+        mView->GotoTotalBeat(event.GetPosition());
+    }
+}
+
+void AnimationPanel::OnSlider_anim_gotosheet(wxScrollEvent& event)
+{
+    if (mSheetSlider.control()) {
+        // because we want to show the sheets with offset 1, we need -1.
+        mView->GotoSheetBeat(event.GetPosition() - 1, 0);
+    }
 }
 
 void AnimationPanel::ToggleTimer()
@@ -231,31 +243,61 @@ void AnimationPanel::ToggleTimer()
     UpdatePanel();
 }
 
+namespace {
+auto disableSlider(auto& slider)
+{
+    if (slider.control() == nullptr) {
+        return;
+    }
+    slider.control()->Enable(false);
+}
+
+auto updateController(auto& slider, int num, int curr, bool zeroOffset = true)
+{
+    if (slider.control() == nullptr) {
+        return;
+    }
+    if (num > 0) {
+        slider.control()->SetRange(zeroOffset ? 0 : 1, num);
+        if (*slider != curr) {
+            *slider = curr;
+        }
+        slider.control()->Enable(true);
+    } else {
+        slider.control()->Enable(false);
+    }
+}
+}
+
 void AnimationPanel::UpdatePanel()
 {
     if (!mView) {
         return;
     }
-    // TODO Update this.
-    auto num = mView->GetTotalNumberBeats() - 1;
-    auto curr = mView->GetTotalCurrentBeat();
-
-    if (num > 0) {
-        mBeatSlider.control()->Enable(true);
-        if (mBeatSlider.control()->GetMax() != num)
-            *mBeatSlider = 0; // So Motif doesn't complain about value
-        mBeatSlider.control()->SetRange(0, num);
-        if (*mBeatSlider != curr)
-            *mBeatSlider = curr;
-    } else {
-        mBeatSlider.control()->Enable(false);
+    auto totalBeats = mView->GetTotalNumberBeats() - 1;
+    auto currentBeat = mView->GetTotalCurrentBeat();
+    auto totalSheets = mView->GetNumSheets() - 1; // gives us the total number sheets
+    auto sheetBeatStuff = mView->BeatToSheetOffsetAndBeat(currentBeat);
+    if (!sheetBeatStuff) {
+        disableSlider(mBeatSlider);
+        disableSlider(mSheetSlider);
+        return;
     }
+    auto [currentSheet, sheetBeat] = *sheetBeatStuff; // gives us which shee we are on and beat
+    auto beatsForCurrentSheet = mView->BeatForSheet(currentSheet) - 1; // gives us which shee we are on and beat
+
+    if (mSheetSlider.control()) {
+        updateController(mBeatSlider, static_cast<int>(beatsForCurrentSheet), static_cast<int>(sheetBeat));
+    } else {
+        updateController(mBeatSlider, static_cast<int>(totalBeats), static_cast<int>(currentBeat));
+    }
+    updateController(mSheetSlider, totalSheets + 1, currentSheet + 1, false);
     *mPlayPauseButton = mTimerOn;
 }
 
 bool AnimationPanel::OnBeat() const
 {
-    return *mBeatSlider & 1;
+    return mView->GetTotalCurrentBeat() & 1;
 }
 
 void AnimationPanel::SetPlayState(bool playState)

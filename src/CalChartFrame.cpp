@@ -371,11 +371,11 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
     mContinuityBrowser = new ContinuityBrowser(this, GetContinuityBrowserConstructSize(), mConfig);
     mFieldThumbnailBrowser = new FieldThumbnailBrowser(mConfig, this, wxID_ANY, wxDefaultPosition, GetFieldThumbnailBrowserConstructSize());
     mAnimationErrorsPanel = new AnimationErrorsPanel(this);
-    mAnimationPanel = new AnimationPanel(mConfig, this);
+    mAnimationPanel = new AnimationPanel(mConfig, this, true);
     mPrintContinuityEditor = new PrintContinuityEditor(this, mConfig);
 
     // for doing mini and main panels
-    mShadowAnimationPanel = new AnimationPanel(mConfig, this);
+    mShadowAnimationPanel = new AnimationPanel(mConfig, this, false);
 
     // update our lookups:
     mLookupSubWindows = {
@@ -392,9 +392,6 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
     for (auto&& [which, window] : CalChart::Ranges::enumerate_view(mLookupSubWindows)) {
         mLookupSubWindowToIndex[window] = which;
     }
-
-    mAnimationPanel->SetInMiniMode(true);
-    mShadowAnimationPanel->SetInMiniMode(false);
 
     // now patch up the controls with the views:
     SetViewsOnComponents(GetFieldView());

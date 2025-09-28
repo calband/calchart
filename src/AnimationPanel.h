@@ -48,7 +48,7 @@ class AnimationPanel : public wxPanel {
     wxDECLARE_EVENT_TABLE();
 
 public:
-    AnimationPanel(CalChart::Configuration& config, wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, wxString const& name = wxPanelNameStr);
+    AnimationPanel(CalChart::Configuration& config, wxWindow* parent, bool miniMode, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, wxString const& name = wxPanelNameStr);
     ~AnimationPanel() override;
 
     void OnUpdate(); // Refresh from the View
@@ -61,9 +61,6 @@ public:
     bool OnBeat() const;
     auto TimerOn() const { return mTimerOn; }
 
-    auto GetInMiniMode() const { return mInMiniMode; }
-    void SetInMiniMode(bool);
-
 private:
     void Init();
     void CreateControls();
@@ -72,6 +69,7 @@ private:
     void OnCmd_anim_next_beat_timer(wxTimerEvent& event);
     void OnSlider_anim_tempo(wxSpinEvent& event);
     void OnSlider_anim_gotobeat(wxScrollEvent& event);
+    void OnSlider_anim_gotosheet(wxScrollEvent& event);
     void OnCmd_PlayButton();
     void OnCmd_ToggleAnimOmni();
 
@@ -88,6 +86,7 @@ private:
     wxUI::Text::Proxy mTempoLabel{};
     wxUI::SpinCtrl::Proxy mTempoCtrl{};
     wxUI::Slider::Proxy mBeatSlider{};
+    wxUI::Slider::Proxy mSheetSlider{};
     wxUI::CheckBox::Proxy mSpritesCheckbox{};
     wxUI::CheckBox::Proxy mZoomCheckbox{};
     wxUI::CheckBox::Proxy mCollisionCheckbox{};
@@ -97,7 +96,7 @@ private:
     wxTimer* mTimer{};
     unsigned mTempo{};
     bool mTimerOn{};
-    bool mInMiniMode{};
+    const bool mInMiniMode{};
     bool mShowOmni{};
     std::vector<wxWindow*> mItemsToHide;
     CalChart::Configuration& mConfig;

@@ -243,6 +243,9 @@ public:
         std::optional<bool> onBeat,
         CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>;
     [[nodiscard]] auto GetTotalNumberAnimationBeats() const -> std::optional<CalChart::Beats>;
+    [[nodiscard]] auto BeatToSheetOffsetAndBeat(CalChart::Beats whichBeat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>;
+    [[nodiscard]] auto BeatForSheet(int whichSheet) const -> CalChart::Beats;
+    [[nodiscard]] auto GetTotalNumberBeatsUpTo(int whichSheet) const -> CalChart::Beats;
     [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beats whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
     [[nodiscard]] auto BeatHasCollision(CalChart::Beats whichBeat) const -> bool;
     [[nodiscard]] auto GetAnimationBeatForCurrentSheet() const -> CalChart::Beats;
