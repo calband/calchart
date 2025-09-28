@@ -14,4 +14,6 @@ Other changes:
 * [#671](../../issues/671) Remove GetCurrentSheet from Doc
 * [#676](../../issues/676) Make the name spacing of draw easier to read and put new things in
 * [#679](../../issues/679) Fix the broken build by updating docopt
+* [#689](../../issues/689) Update wxWidgets to 3.3.1
+
 
