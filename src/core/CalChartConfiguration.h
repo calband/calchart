@@ -212,6 +212,7 @@ private:                                           \
     DECLARE_CONFIGURATION_FUNCTIONS(AnimationFrameOmniAnimation, bool);
     DECLARE_CONFIGURATION_FUNCTIONS(AnimationFrameSplitScreen, bool);
     DECLARE_CONFIGURATION_FUNCTIONS(AnimationFrameSplitVertical, bool);
+    DECLARE_CONFIGURATION_FUNCTIONS(AnimationFrameSheetSlider, bool);
 
     DECLARE_CONFIGURATION_FUNCTIONS(UseSprites, bool);
     DECLARE_CONFIGURATION_FUNCTIONS(SpriteBitmapScale, double);

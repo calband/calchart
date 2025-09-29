@@ -68,6 +68,7 @@ private:
 
     wxUI::TextCtrl::Proxy mAutoSave_Interval{};
     wxUI::CheckBox::Proxy mBeep_On_Collisions{};
+    wxUI::CheckBox::Proxy mSheetSlider{};
     wxUI::CheckBox::Proxy mScroll_Natural{};
     wxUI::CheckBox::Proxy mSetSheet_Undo{};
     wxUI::CheckBox::Proxy mSelection_Undo{};

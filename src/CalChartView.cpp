@@ -454,6 +454,21 @@ auto CalChartView::GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beat
     return mShow->GetAnimationBoundingBox(zoomInOnMarchers, whichBeat);
 }
 
+auto CalChartView::BeatToSheetOffsetAndBeat(CalChart::Beats beat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>
+{
+    return mShow->BeatToSheetOffsetAndBeat(beat);
+}
+
+auto CalChartView::BeatForSheet(int sheet) const -> CalChart::Beats
+{
+    return mShow->BeatForSheet(sheet);
+}
+
+auto CalChartView::GetTotalNumberBeatsUpTo(int whichSheet) const -> CalChart::Beats
+{
+    return mShow->GetTotalNumberBeatsUpTo(whichSheet);
+}
+
 auto CalChartView::BeatHasCollision(CalChart::Beats whichBeat) const -> bool
 {
     return mShow->BeatHasCollision(whichBeat);

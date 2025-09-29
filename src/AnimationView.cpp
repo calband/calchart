@@ -146,13 +146,28 @@ void AnimationView::RefreshAnimationSheet()
     RefreshFrame();
 }
 
-int AnimationView::GetTotalNumberBeats() const
+auto AnimationView::GetTotalNumberBeats() const -> CalChart::Beats
 {
     auto totalBeats = mView->GetTotalNumberAnimationBeats();
     return totalBeats.value_or(0);
 }
 
-int AnimationView::GetTotalCurrentBeat() const
+auto AnimationView::GetNumSheets() const -> size_t
+{
+    return mView->GetNumSheets();
+}
+
+auto AnimationView::BeatToSheetOffsetAndBeat(CalChart::Beats beat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>
+{
+    return mView->BeatToSheetOffsetAndBeat(beat);
+}
+
+auto AnimationView::BeatForSheet(int sheet) const -> CalChart::Beats
+{
+    return mView->BeatForSheet(sheet);
+}
+
+auto AnimationView::GetTotalCurrentBeat() const -> CalChart::Beats
 {
     return mCurrentBeat;
 }
@@ -188,6 +203,12 @@ void AnimationView::NextBeat()
 void AnimationView::GotoTotalBeat(CalChart::Beats whichBeat)
 {
     mCurrentBeat = whichBeat;
+    RefreshFrame();
+}
+
+void AnimationView::GotoSheetBeat(int whichSheet, CalChart::Beats whichBeat)
+{
+    mCurrentBeat = whichBeat + mView->GetTotalNumberBeatsUpTo(whichSheet);
     RefreshFrame();
 }
 

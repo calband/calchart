@@ -12,6 +12,7 @@ Other changes:
 * [#667](../../issues/667) remove CalChartDoc begin and end
 * [#669](../../issues/669) Put mCurrentReferencePoint into core/show
 * [#671](../../issues/671) Remove GetCurrentSheet from Doc
+* [#675](../../issues/675) User setting for beat slider in viewer
 * [#676](../../issues/676) Make the name spacing of draw easier to read and put new things in
 * [#679](../../issues/679) Fix the broken build by updating docopt
 
