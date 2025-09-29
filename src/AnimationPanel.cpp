@@ -50,9 +50,17 @@ EVT_COMMAND_SCROLL(CALCHART__anim_gotobeat, AnimationPanel::OnSlider_anim_gotobe
 EVT_TIMER(CALCHART__anim_next_beat_timer, AnimationPanel::OnCmd_anim_next_beat_timer)
 END_EVENT_TABLE()
 
-AnimationPanel::AnimationPanel(CalChart::Configuration& config, wxWindow* parent, bool miniMode, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
+AnimationPanel::AnimationPanel(
+    CalChart::Configuration& config,
+    wxWindow* parent,
+    bool miniMode,
+    wxWindowID winid,
+    wxPoint const& pos,
+    wxSize const& size,
+    long style,
+    wxString const& name)
     : super(parent, winid, pos, size, style, name)
-    , mCanvas(new AnimationCanvas(config, this, wxID_ANY, wxDefaultPosition, wxSize(-1, GetAnimationCanvasMinY())))
+    , mCanvas(new AnimationCanvas(config, *this, wxSize(-1, GetAnimationCanvasMinY())))
     , mOmniCanvas(new CCOmniviewCanvas(this, config))
     , mTimer(new wxTimer(this, CALCHART__anim_next_beat_timer))
     , mTempo(120)
@@ -152,6 +160,7 @@ void AnimationPanel::CreateControls()
     mItemsToHide.push_back(mCollisionCheckbox.control());
     mItemsToHide.push_back(mTempoLabel.control());
     mItemsToHide.push_back(mTempoCtrl.control());
+
     SetTempo(tmp);
     mCanvas->Show();
     mOmniCanvas->Hide();
@@ -162,6 +171,26 @@ void AnimationPanel::CreateControls()
     // expand the slider to fill everything!
     mBeatSlider.control()->SetSizeHints(mInMiniMode ? -1 : GetAnimationViewBeatSliderInNonMinimode(), -1);
     Layout();
+}
+
+auto AnimationPanel::GenerateDrawCommands() -> std::vector<CalChart::Draw::DrawCommand>
+{
+    if (!mCalChartView) {
+        return {};
+    }
+    mSprites.RegenerateImages(mConfig);
+
+    auto onBeat = std::optional<bool>{ std::nullopt };
+    if (mTimerOn) {
+        onBeat = OnBeat();
+    }
+    return mCalChartView->GenerateAnimationDrawCommands(
+        mCurrentBeat,
+        mDrawCollisionWarning,
+        onBeat,
+        [this](CalChart::Radian angle, CalChart::Animation::ImageBeat imageBeat, bool selected) {
+            return mSprites.GetImage(angle, imageBeat, selected);
+        });
 }
 
 void AnimationPanel::OnCmd_anim_next_beat_timer(wxTimerEvent&)
@@ -293,11 +322,66 @@ void AnimationPanel::UpdatePanel()
     }
     updateController(mSheetSlider, totalSheets + 1, currentSheet + 1, false);
     *mPlayPauseButton = mTimerOn;
+    if (mPlayCollisionWarning && mCalChartView->BeatHasCollision(mCurrentBeat) && mConfig.Get_BeepOnCollisions()) {
+        wxBell();
+    }
 }
 
 bool AnimationPanel::OnBeat() const
 {
     return mView->GetTotalCurrentBeat() & 1;
+}
+
+void AnimationPanel::UnselectAll()
+{
+    mCalChartView->UnselectAll();
+}
+
+void AnimationPanel::SelectMarchersInBox(wxPoint const& mouseStart, wxPoint const& mouseEnd, bool altDown)
+{
+    auto mouseStartTranslated = tDIP(mouseStart);
+    auto mouseEndTranslated = tDIP(mouseEnd);
+
+    auto [x_off, y_off] = mCalChartView->GetShowFieldOffset();
+    auto polygon = CalChart::RawPolygon_t{
+        CalChart::Coord(mouseStartTranslated.x - x_off, mouseStartTranslated.y - y_off),
+        CalChart::Coord(mouseStartTranslated.x - x_off, mouseEndTranslated.y - y_off),
+        CalChart::Coord(mouseEndTranslated.x - x_off, mouseEndTranslated.y - y_off),
+        CalChart::Coord(mouseEndTranslated.x - x_off, mouseStartTranslated.y - y_off),
+    };
+    mCalChartView->SelectWithinPolygon(polygon, altDown);
+}
+
+auto AnimationPanel::GetAnimationBoundingBox(bool zoomInOnMarchers) const -> std::pair<CalChart::Coord, CalChart::Coord>
+{
+    return mCalChartView->GetAnimationBoundingBox(zoomInOnMarchers, mCurrentBeat);
+}
+
+void AnimationPanel::PrevBeat()
+{
+    if (mCurrentBeat == 0) {
+        return;
+    }
+    mCurrentBeat -= 1;
+    UpdatePanel();
+}
+
+void AnimationPanel::NextBeat()
+{
+    auto totalBeats = mCalChartView->GetTotalNumberAnimationBeats();
+    if (totalBeats) {
+        if (mCurrentBeat >= (*totalBeats - 1)) {
+            return;
+        }
+        mCurrentBeat += 1;
+        UpdatePanel();
+    }
+}
+
+void AnimationPanel::GotoTotalBeat(CalChart::Beats whichBeat)
+{
+    mCurrentBeat = whichBeat;
+    UpdatePanel();
 }
 
 void AnimationPanel::SetPlayState(bool playState)
@@ -330,12 +414,13 @@ void AnimationPanel::OnUpdate()
         return;
     }
     UpdatePanel();
-    mView->RefreshAnimationSheet();
+    mCurrentBeat = mCalChartView->GetAnimationBeatForCurrentSheet();
     Refresh();
 }
 
 void AnimationPanel::SetView(CalChartView* view)
 {
+    mCalChartView = view;
     if (!view) {
         mView = nullptr;
         return;
@@ -345,8 +430,131 @@ void AnimationPanel::SetView(CalChartView* view)
     // at this point the document is manging the view.
     mView->SetFrame(this);
     mView->SetPlayCollisionWarning(!mInMiniMode);
-    mCanvas->SetView(mView);
     mOmniCanvas->SetView(mView);
 
     *mCollisionCheckbox = mView->GetDrawCollisionWarning();
 }
+
+#if 0
+void AnimationPanel::RefreshAnimationSheet()
+{
+    mCurrentBeat = mCalChartView->GetAnimationBeatForCurrentSheet();
+    UpdatePanel();
+}
+
+int AnimationView::GetTotalNumberBeats() const
+{
+    auto totalBeats = mView->GetTotalNumberAnimationBeats();
+    return totalBeats.value_or(0);
+}
+
+int AnimationView::GetTotalCurrentBeat() const
+{
+    return mCurrentBeat;
+}
+
+// #define GENERATE_SHOW_DUMP 1
+
+void AnimationView::Generate()
+{
+    mCurrentBeat = 0;
+}
+
+void AnimationView::PrevBeat()
+{
+    if (mCurrentBeat == 0) {
+        return;
+    }
+    mCurrentBeat -= 1;
+    RefreshFrame();
+}
+
+void AnimationView::NextBeat()
+{
+    auto totalBeats = mView->GetTotalNumberAnimationBeats();
+    if (totalBeats) {
+        if (mCurrentBeat >= (*totalBeats - 1)) {
+            return;
+        }
+        mCurrentBeat += 1;
+        RefreshFrame();
+    }
+}
+
+void AnimationView::GotoTotalBeat(CalChart::Beats whichBeat)
+{
+    mCurrentBeat = whichBeat;
+    RefreshFrame();
+}
+
+auto AnimationView::AtEndOfShow() const -> bool
+{
+    auto totalBeats = mView->GetTotalNumberAnimationBeats();
+    if (totalBeats) {
+        return (mCurrentBeat == *totalBeats);
+    }
+    return false;
+}
+
+auto AnimationView::GetAnimationBoundingBox(bool zoomInOnMarchers) const -> std::pair<CalChart::Coord, CalChart::Coord>
+{
+    return mView->GetAnimationBoundingBox(zoomInOnMarchers, mCurrentBeat);
+}
+
+void AnimationView::UnselectAll()
+{
+    mView->UnselectAll();
+}
+
+void AnimationView::SelectMarchersInBox(wxPoint const& mouseStart, wxPoint const& mouseEnd, bool altDown)
+{
+    auto mouseStartTranslated = tDIP(mouseStart);
+    auto mouseEndTranslated = tDIP(mouseEnd);
+
+    auto [x_off, y_off] = mView->GetShowFieldOffset();
+    auto polygon = CalChart::RawPolygon_t{
+        CalChart::Coord(mouseStartTranslated.x - x_off, mouseStartTranslated.y - y_off),
+        CalChart::Coord(mouseStartTranslated.x - x_off, mouseEndTranslated.y - y_off),
+        CalChart::Coord(mouseEndTranslated.x - x_off, mouseEndTranslated.y - y_off),
+        CalChart::Coord(mouseEndTranslated.x - x_off, mouseStartTranslated.y - y_off),
+    };
+    mView->SelectWithinPolygon(polygon, altDown);
+}
+
+// Keystroke command toggles the timer, but the timer
+// lives in the Frame.  So we have this weird path...
+void AnimationView::ToggleTimer()
+{
+    GetAnimationFrame()->ToggleTimer();
+}
+
+auto AnimationView::OnBeat() const -> bool
+{
+    return GetAnimationFrame()->OnBeat();
+}
+
+auto AnimationView::GetAnimationFrame() const -> AnimationPanel const*
+{
+    return static_cast<AnimationPanel const*>(GetFrame());
+}
+
+auto AnimationView::GetAnimationFrame() -> AnimationPanel*
+{
+    return static_cast<AnimationPanel*>(GetFrame());
+}
+
+auto AnimationView::GetShowFieldSize() const -> CalChart::Coord
+{
+    return mView->GetShowFieldSize();
+}
+
+auto AnimationView::GetMarcherInfo(int which) const -> std::optional<CalChart::Animate::Info>
+{
+    return mView->GetAnimationInfo(mCurrentBeat, which);
+}
+
+auto AnimationView::GetMarchersByDistance(float fromX, float fromY) const -> std::multimap<double, CalChart::Animate::Info>
+{
+    return mView->GetSelectedAnimationInfoWithDistanceFromPoint(mCurrentBeat, CalChart::Coord(fromX, fromY));
+}
+#endif

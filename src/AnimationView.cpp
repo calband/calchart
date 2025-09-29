@@ -54,23 +54,9 @@ auto GenerateSpriteImages(wxImage const& image, int numberImages, int imageX, in
 
 }
 
-AnimationView::AnimationView(CalChartView* view, CalChart::Configuration const& config, wxWindow* frame)
-    : mView(view)
-    , mConfig(config)
-    , mMeasure{ "AnimationViewDraw" }
+void AnimationSprites::RegenerateImages(CalChart::Configuration const& config)
 {
-    SetFrame(frame);
-
-    RegenerateImages();
-}
-
-AnimationView::~AnimationView()
-{
-}
-
-void AnimationView::RegenerateImages()
-{
-    auto spriteScale = mConfig.Get_SpriteBitmapScale();
+    auto spriteScale = config.Get_SpriteBitmapScale();
     if (spriteScale == mScaleSize) {
         return;
     }
@@ -100,11 +86,32 @@ void AnimationView::RegenerateImages()
     });
 }
 
+auto AnimationSprites::GetImage(CalChart::Radian angle, CalChart::Animation::ImageBeat imageBeat, bool selected) const -> BitmapSize_t
+{
+    auto imageIndex = CalChart::AngleToQuadrant(angle) + CalChart::toUType(imageBeat) * 8;
+    return selected ? mSelectedSpriteCalChartImages[imageIndex] : mSpriteCalChartImages[imageIndex];
+}
+
+AnimationView::AnimationView(CalChartView* view, CalChart::Configuration const& config, wxWindow* frame)
+    : mView(view)
+    , mConfig(config)
+    , mMeasure{ "AnimationViewDraw" }
+{
+    SetFrame(frame);
+
+    mSprites.RegenerateImages(mConfig);
+}
+
+AnimationView::~AnimationView()
+{
+}
+
 void AnimationView::OnDraw(wxDC* dc)
 {
     // std::cout << mMeasure << "\n";
     // auto snapshot = mMeasure.doMeasurement();
-    RegenerateImages();
+    mSprites.RegenerateImages(mConfig);
+
     auto onBeat = std::optional<bool>{ std::nullopt };
     if (GetAnimationFrame()->TimerOn()) {
         onBeat = OnBeat();
@@ -115,8 +122,7 @@ void AnimationView::OnDraw(wxDC* dc)
             mDrawCollisionWarning,
             onBeat,
             [this](CalChart::Radian angle, CalChart::Animation::ImageBeat imageBeat, bool selected) {
-                auto imageIndex = CalChart::AngleToQuadrant(angle) + CalChart::toUType(imageBeat) * 8;
-                return selected ? mSelectedSpriteCalChartImages[imageIndex] : mSpriteCalChartImages[imageIndex];
+                return mSprites.GetImage(angle, imageBeat, selected);
             }));
 }
 

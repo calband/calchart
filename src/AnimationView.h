@@ -40,6 +40,21 @@ class Continuity;
 class ShowMode;
 }
 
+class AnimationSprites {
+public:
+    void RegenerateImages(CalChart::Configuration const& config);
+
+    using BitmapSize_t = std::tuple<std::shared_ptr<CalChart::Draw::OpaqueImageData>, CalChart::Coord>;
+    [[nodiscard]] auto GetImage(CalChart::Radian angle, CalChart::Animation::ImageBeat imageBeat, bool selected) const
+        -> BitmapSize_t;
+
+private:
+    static constexpr auto kAngles = 8;
+    double mScaleSize = 0;
+    std::array<BitmapSize_t, kAngles * CalChart::toUType(CalChart::Animation::ImageBeat::Size)> mSpriteCalChartImages;
+    std::array<BitmapSize_t, kAngles * CalChart::toUType(CalChart::Animation::ImageBeat::Size)> mSelectedSpriteCalChartImages;
+};
+
 // AnimationView is sort of a "proxy" view.  It allows a separate view for Animation into the show.
 // So it sort-of wraps CalChartView.
 class AnimationView : public wxView {
@@ -96,10 +111,6 @@ private:
     void Generate();
     void RefreshFrame();
 
-    void RegenerateImages();
-    [[nodiscard]] auto GenerateDraw(CalChart::Configuration const& config) const -> std::vector<CalChart::Draw::DrawCommand>;
-    [[nodiscard]] auto GenerateDrawSprites(CalChart::Configuration const& config, CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>;
-
     [[nodiscard]] auto GetAnimationFrame() const -> AnimationPanel const*;
     [[nodiscard]] auto GetAnimationFrame() -> AnimationPanel*;
 
@@ -111,11 +122,7 @@ private:
     bool mDrawCollisionWarning = true;
     bool mPlayCollisionWarning = false;
 
-    static constexpr auto kAngles = 8;
-    double mScaleSize = 0;
-    using BitmapSize_t = std::tuple<std::shared_ptr<wxCalChart::BitmapHolder>, CalChart::Coord>;
-    std::array<BitmapSize_t, kAngles * CalChart::toUType(CalChart::Animation::ImageBeat::Size)> mSpriteCalChartImages;
-    std::array<BitmapSize_t, kAngles * CalChart::toUType(CalChart::Animation::ImageBeat::Size)> mSelectedSpriteCalChartImages;
+    AnimationSprites mSprites;
 
     CalChart::MeasureDuration mMeasure;
 };
