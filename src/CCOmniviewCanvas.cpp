@@ -25,7 +25,7 @@
 #endif
 
 #include "CCOmniviewCanvas.h"
-#include "AnimationView.h"
+#include "AnimationPanel.h"
 #include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
 #include "CalChartShowMode.h"
@@ -587,8 +587,9 @@ void CCOmniView_GLContext::Draw3dMarcher(MarcherInfo const& info, CCOmniviewCanv
     DrawTextureOnBox(points, 1, 1, m_textures[face]);
 }
 
-CCOmniviewCanvas::CCOmniviewCanvas(wxWindow* parent, CalChart::Configuration& config)
-    : wxGLCanvas(parent, wxID_ANY, NULL, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE)
+CCOmniviewCanvas::CCOmniviewCanvas(AnimationPanel& parent, CalChart::Configuration& config)
+    : wxGLCanvas(&parent, wxID_ANY, NULL, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE)
+    , mPanel{ parent }
     , m_glContext(new CCOmniView_GLContext(this))
     , mConfig(config)
     , mViewPoint(kStartingViewPoint)
@@ -608,11 +609,6 @@ void CCOmniviewCanvas::Init()
 void CCOmniviewCanvas::CreateControls()
 {
     wxUI::VSizer{}.fitTo(this);
-}
-
-void CCOmniviewCanvas::SetView(AnimationView* view)
-{
-    mView = view;
 }
 
 // rolling my own gluperspective
@@ -705,7 +701,7 @@ void CCOmniviewCanvas::OnPaint(wxPaintEvent&)
 
     glViewport(0, 0, ClientSize.x, ClientSize.y);
 
-    CalChart::Coord fieldSize = mView ? mView->GetShowFieldSize() : CalChart::Coord(160, 80);
+    CalChart::Coord fieldSize = mPanel.GetShowFieldSize();
     auto FieldEW = CalChart::CoordUnits2Float(fieldSize.y);
     auto FieldNS = CalChart::CoordUnits2Float(fieldSize.x);
 
@@ -716,8 +712,8 @@ void CCOmniviewCanvas::OnPaint(wxPaintEvent&)
     myGLUPerspective(mFOV, static_cast<float>(ClientSize.x) / static_cast<float>(ClientSize.y), 0.1, 2 * FieldNS);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    if (mFollowMarcher && mView) {
-        if (auto animateInfo = mView->GetMarcherInfo(*mFollowMarcher); animateInfo.has_value()) {
+    if (mFollowMarcher) {
+        if (auto animateInfo = mPanel.GetMarcherInfo(*mFollowMarcher); animateInfo.has_value()) {
             auto info = AnimateInfoToMarcherInfo(*animateInfo);
             mViewPoint.x = info.x;
             mViewPoint.y = info.y;
@@ -731,12 +727,10 @@ void CCOmniviewCanvas::OnPaint(wxPaintEvent&)
 
     // Render the graphics and swap the buffers.
     m_glContext->DrawField(FieldEW, FieldNS, mCrowdOn);
-    if (mView) {
-        auto marchers = mView->GetMarchersByDistance(mViewPoint.x, mViewPoint.y);
-        for (auto i = marchers.rbegin(); i != marchers.rend(); ++i) {
-            auto info = AnimateInfoToMarcherInfo(i->second);
-            m_glContext->Draw3dMarcher(info, mViewPoint, mShowMarching ? (mView->OnBeat() ? WhichMarchingStyle::kLeftHSHup : WhichMarchingStyle::kRightHSHup) : WhichMarchingStyle::kClosed);
-        }
+    auto marchers = mPanel.GetMarchersByDistance(mViewPoint.x, mViewPoint.y);
+    for (auto i = marchers.rbegin(); i != marchers.rend(); ++i) {
+        auto info = AnimateInfoToMarcherInfo(i->second);
+        m_glContext->Draw3dMarcher(info, mViewPoint, mShowMarching ? (mPanel.OnBeat() ? WhichMarchingStyle::kLeftHSHup : WhichMarchingStyle::kRightHSHup) : WhichMarchingStyle::kClosed);
     }
 
     SwapBuffers();
@@ -910,13 +904,13 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
         break;
 
     case WXK_LEFT:
-        mView->PrevBeat();
+        mPanel.PrevBeat();
         break;
     case WXK_RIGHT:
-        mView->NextBeat();
+        mPanel.NextBeat();
         break;
     case WXK_SPACE:
-        mView->ToggleTimer();
+        mPanel.ToggleTimer();
         break;
 
     default:
