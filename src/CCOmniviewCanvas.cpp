@@ -394,7 +394,7 @@ CCOmniView_GLContext::CCOmniView_GLContext(wxGLCanvas* canvas)
 
     for (auto i : ListOfImageFiles) {
         if (!LoadTexture(GetImageDir() + i.second, m_textures[i.first])) {
-            wxLogError(wxT("Could not load ") + i.second);
+            wxLogError(std::string{ "Could not load " } + i.second);
         }
     }
 

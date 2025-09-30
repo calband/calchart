@@ -35,10 +35,11 @@ set(wxBUILD_SHARED OFF)
 set(wxUSE_STL ON)
 set(wxUSE_STC OFF)
 set(wxUSE_STD_CONTAINERS ON)
+set(wxUSE_STD_STRING_CONV_IN_WXSTRING ON)
 FetchContent_Declare(
   wxWidgets
   GIT_REPOSITORY "https://github.com/wxWidgets/wxWidgets.git"
-  GIT_TAG 8aef5f40b93958719771331ca03866b7b6fff6bf # v3.2.8
+  GIT_TAG 49c6810948f40c457e3d0848b9111627b5b61de5 # v3.3.1
 )
 FetchContent_MakeAvailable(wxWidgets)
 
