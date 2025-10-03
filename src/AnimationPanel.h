@@ -21,12 +21,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "AnimationView.h"
+#include "AnimationSprites.hpp"
 #include "CalChartDrawCommand.h"
 #include <wx/wx.h>
 #include <wxUI/wxUI.hpp>
 
-class AnimationView;
 class AnimationCanvas;
 class CalChartView;
 class wxBitmapToggleButton;
@@ -70,10 +69,24 @@ public:
     auto TimerOn() const { return mTimerOn; }
     void UnselectAll();
     void SelectMarchersInBox(wxPoint const& mouseStart, wxPoint const& mouseEnd, bool altDown);
+
+    // info
+    [[nodiscard]] auto GetTotalNumberBeats() const -> CalChart::Beats;
+    [[nodiscard]] auto GetNumSheets() const -> size_t;
+    [[nodiscard]] auto BeatToSheetOffsetAndBeat(CalChart::Beats beat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>;
+    [[nodiscard]] auto BeatForSheet(int sheet) const -> CalChart::Beats;
+    [[nodiscard]] auto GetSheetBeatSheetFromTotalCurrentBeat() const -> CalChart::Beats;
+
     [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers) const -> std::pair<CalChart::Coord, CalChart::Coord>;
+    [[nodiscard]] auto GetShowFieldSize() const -> CalChart::Coord;
+    [[nodiscard]] auto GetMarcherInfo(int which) const -> std::optional<CalChart::Animate::Info>;
+    [[nodiscard]] auto GetMarchersByDistance(float fromX, float fromY) const -> std::multimap<double, CalChart::Animate::Info>;
+
     void PrevBeat();
     void NextBeat();
     void GotoTotalBeat(CalChart::Beats whichBeat);
+    void GotoSheetBeat(int whichSheet, CalChart::Beats whichBeat);
+    [[nodiscard]] auto AtEndOfShow() const -> bool;
 
     [[nodiscard]] auto GenerateDrawCommands() -> std::vector<CalChart::Draw::DrawCommand>;
 
@@ -96,8 +109,7 @@ private:
     auto GetTempo() const { return mTempo; }
     void SetTempo(unsigned tempo) { mTempo = tempo; }
 
-    AnimationView* mView{};
-    CalChartView* mCalChartView{};
+    CalChartView* mView{};
     AnimationCanvas* mCanvas{};
     CCOmniviewCanvas* mOmniCanvas{};
     wxUI::Text::Proxy mTempoLabel{};

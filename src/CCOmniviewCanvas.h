@@ -28,7 +28,7 @@
 #include <optional>
 #include <wx/glcanvas.h>
 
-class AnimationView;
+class AnimationPanel;
 class CCOmniView_GLContext;
 namespace CalChart {
 class Configuration;
@@ -43,12 +43,10 @@ public:
         float x, y, z;
     };
 
-    CCOmniviewCanvas(wxWindow* parent, CalChart::Configuration& config);
+    CCOmniviewCanvas(AnimationPanel& parent, CalChart::Configuration& config);
     ~CCOmniviewCanvas() override = default;
 
     void OnUpdate(); // Refresh from the View
-    void SetView(AnimationView* view);
-    auto GetView() const { return mView; }
 
     void OnCmd_ShowKeyboardControls();
 
@@ -67,8 +65,8 @@ private:
     void OnCmd_ToggleMarching();
     void OnCmd_ToggleShowOnlySelected();
 
+    AnimationPanel& mPanel;
     std::shared_ptr<CCOmniView_GLContext> m_glContext;
-    AnimationView* mView{};
     CalChart::Configuration& mConfig;
 
     ViewPoint mViewPoint{};

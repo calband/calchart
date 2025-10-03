@@ -22,7 +22,6 @@
 
 #include "AnimationCanvas.h"
 #include "AnimationPanel.h"
-#include "AnimationView.h"
 #include "CalChartConfiguration.h"
 #include "CalChartCoord.h"
 #include "CalChartDrawPrimativesHelper.h"

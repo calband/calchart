@@ -23,7 +23,6 @@
 
 #include <wx/wx.h>
 
-class AnimationView;
 class AnimationPanel;
 namespace CalChart {
 class Configuration;

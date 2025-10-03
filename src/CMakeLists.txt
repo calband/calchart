@@ -27,8 +27,8 @@ add_executable(
   AnimationErrorsPanel.h
   AnimationPanel.cpp
   AnimationPanel.h
-  AnimationView.cpp
-  AnimationView.h
+  AnimationSprites.cpp
+  AnimationSprites.hpp
   BackgroundImages.cpp
   BackgroundImages.h
   CCOmniviewCanvas.cpp
