@@ -3,6 +3,7 @@
 # CalChart requires BISON/FLEX for the grammar
 find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
+find_package(CURL REQUIRED)
 
 # calchart_core
 BISON_TARGET(
@@ -81,6 +82,8 @@ add_library(
   prolog2.h
   setup0.h
   setup2.h
+  UpdateChecker.cpp
+  UpdateChecker.h
   viewer_translate.cpp
   viewer_translate.h
   ${BISON_calchart_core_parser_OUTPUTS}
@@ -102,6 +105,8 @@ target_include_directories(
 target_link_libraries(calchart_core PRIVATE
   nlohmann_json::nlohmann_json
   munkres
+  wx::net
+  CURL::libcurl
 )
  
 
