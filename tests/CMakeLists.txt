@@ -30,6 +30,7 @@ add_executable(CalChartTests
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartUtilsTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DCSaveRestoreTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/PrintToPSTests.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/UpdateCheckerTests.cpp
 )
 
 SetupCompilerForTarget(CalChartTests)

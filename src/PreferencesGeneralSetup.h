@@ -67,6 +67,7 @@ private:
     void OnCmdResetAll(wxCommandEvent&);
 
     wxUI::TextCtrl::Proxy mAutoSave_Interval{};
+    wxUI::TextCtrl::Proxy mIgnoredUpdateVersion{};
     wxUI::CheckBox::Proxy mBeep_On_Collisions{};
     wxUI::CheckBox::Proxy mSheetSlider{};
     wxUI::CheckBox::Proxy mScroll_Natural{};

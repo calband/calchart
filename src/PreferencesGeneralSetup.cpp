@@ -37,6 +37,7 @@ void GeneralSetup::CreateControls()
         wxUI::VSizer{
             "General Settings",
             VLabelWidget("Autosave Interval", wxUI::TextCtrl{}.withSize({ 100, -1 }).withProxy(mAutoSave_Interval)),
+            VLabelWidget("Ignored update version", wxUI::TextCtrl{}.withSize({ 300, -1 }).withProxy(mIgnoredUpdateVersion)),
             wxUI::CheckBox{ "Beep on animation collisions " }.withProxy(mBeep_On_Collisions),
             wxUI::CheckBox{ "Show Sheet Slider" }.withProxy(mSheetSlider),
             wxUI::CheckBox{ "Scroll Direction: Natural" }.withProxy(mScroll_Natural),
@@ -53,6 +54,7 @@ void GeneralSetup::CreateControls()
 void GeneralSetup::InitFromConfig()
 {
     *mAutoSave_Interval = std::to_string(mConfig.Get_AutosaveInterval());
+    *mIgnoredUpdateVersion = mConfig.Get_IgnoredUpdateVersion();
     *mBeep_On_Collisions = mConfig.Get_BeepOnCollisions();
     *mSheetSlider = mConfig.Get_AnimationFrameSheetSlider();
     *mScroll_Natural = mConfig.Get_ScrollDirectionNatural();
@@ -69,6 +71,7 @@ bool GeneralSetup::TransferDataFromWindow()
 {
     // read out the values from the window
     mConfig.Set_AutosaveInterval(std::stol(*mAutoSave_Interval));
+    mConfig.Set_IgnoredUpdateVersion(*mIgnoredUpdateVersion);
     mConfig.Set_BeepOnCollisions(*mBeep_On_Collisions);
     mConfig.Set_AnimationFrameSheetSlider(*mSheetSlider);
     mConfig.Set_ScrollDirectionNatural(*mScroll_Natural);
@@ -80,6 +83,7 @@ bool GeneralSetup::TransferDataFromWindow()
 bool GeneralSetup::ClearValuesToDefault()
 {
     mConfig.Clear_AutosaveInterval();
+    mConfig.Clear_IgnoredUpdateVersion();
     mConfig.Clear_CalChartFrameAUILayout_3_6_1();
     mConfig.Clear_FieldFrameZoom_3_6_0();
     mConfig.Clear_FieldFrameWidth();

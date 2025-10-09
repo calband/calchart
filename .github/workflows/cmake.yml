@@ -70,15 +70,20 @@ jobs:
     - name: Installing Dependencies (Windows)
       if: matrix.config.os == 'windows-latest'
       run: |
-        choco install winflexbison
-        choco install nsis -y
+        # Install required build helpers and tools via choco
+        choco install -y winflexbison nsis curl openssl.light pkgconfiglite git
         # Add NSIS to PATH for this session
         $env:PATH = "$env:PATH;C:\Program Files (x86)\NSIS"
         echo "C:\Program Files (x86)\NSIS" >> $env:GITHUB_PATH
+        # Bootstrap vcpkg and install libcurl (x64) so CMake can find CURL on Windows
+        git clone https://github.com/microsoft/vcpkg.git "$Env:GITHUB_WORKSPACE\vcpkg"
+        & "$Env:GITHUB_WORKSPACE\vcpkg\bootstrap-vcpkg.bat"
+        & "$Env:GITHUB_WORKSPACE\vcpkg\vcpkg.exe" install curl:x64-windows
+        & "$Env:GITHUB_WORKSPACE\vcpkg\vcpkg.exe" integrate install
 
     - name: Installing Dependencies (Linux)
       if: matrix.config.os == 'ubuntu-24.04'
-      run: sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev
+      run: sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev libcurl4-openssl-dev
 
     - name: Updating to gcc 14 (Linux)
       if: matrix.config.os == 'ubuntu-24.04'
@@ -88,7 +93,12 @@ jobs:
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 100 --slave /usr/bin/g++ g++ /usr/bin/g++-14 --slave /usr/bin/gcov gcov /usr/bin/gcov-14
         sudo update-alternatives --set gcc /usr/bin/gcc-14
 
-    - name: Configure CMake
+    - name: Configure CMake (Windows)
+      if: matrix.config.os == 'windows-latest'
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake
+
+    - name: Configure CMake (non-Windows)
+      if: matrix.config.os != 'windows-latest'
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}}

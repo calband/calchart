@@ -315,6 +315,8 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS(ContCellBoxPadding, long, 4);
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS(ActiveColorPalette, long, 0);
 
+IMPLEMENT_CONFIGURATION_FUNCTIONS(IgnoredUpdateVersion, std::string, "");
+
 // OBSOLETE Settings
 // "MainFrameZoom" now obsolete with version post 3.2, use "MainFrameZoom2"
 // IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameZoom, float, 0.5);
