@@ -42,56 +42,13 @@ constexpr auto kYUpperPadding = 4;
 constexpr auto kYNamePadding = 4;
 constexpr auto kYBottomPadding = 4;
 constexpr auto kHighlightWidth = 5;
-}
 
-BEGIN_EVENT_TABLE(FieldThumbnailBrowser, wxScrolledWindow)
-EVT_PAINT(FieldThumbnailBrowser::OnPaint)
-EVT_CHAR(FieldThumbnailBrowser::HandleKey)
-EVT_LEFT_DOWN(FieldThumbnailBrowser::HandleMouseDown)
-EVT_SIZE(FieldThumbnailBrowser::HandleSizeEvent)
-END_EVENT_TABLE()
-
-FieldThumbnailBrowser::FieldThumbnailBrowser(CalChart::Configuration const& config, wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-    : wxScrolledWindow(parent, id, pos, size, style, name)
-    , mXScrollPadding(wxSystemSettings::GetMetric(wxSYS_VSCROLL_X))
-    , mYNameSize(GetThumbnailFontSize())
-    , mYScrollPadding(wxSystemSettings::GetMetric(wxSYS_HSCROLL_Y))
-    , mLayoutHorizontal{ true }
-    , mConfig(config)
+auto toAspectRatio(CalChart::Coord coord) -> double
 {
-    SetBackgroundStyle(wxBG_STYLE_PAINT);
-    // now update the current screen
-    OnUpdate();
+    return coord.x / static_cast<double>(coord.y);
 }
 
-// calculate the size of the panel depending on orientation
-wxSize FieldThumbnailBrowser::SizeOfOneCell(bool horizontal) const
-{
-    if (!mView) {
-        return { 1, 1 };
-    }
-
-    auto mode_size = fDIP(mView->GetShowFullSize());
-    if (horizontal) {
-        auto current_size_y = GetSize().y - kYUpperPadding - mYNameSize - kYNamePadding - kYBottomPadding - mYScrollPadding;
-        auto box_size_x = mode_size.x * (current_size_y / double(mode_size.y));
-        return { int(box_size_x) + kXLeftPadding + kXRightPadding, GetSize().y };
-    }
-    auto current_size_x = GetSize().x - kXLeftPadding - kXRightPadding - mXScrollPadding;
-    auto box_size_y = mode_size.y * (current_size_x / double(mode_size.x));
-    return { GetSize().x, int(box_size_y) + kYUpperPadding + mYNameSize + kYNamePadding };
-}
-
-// calculate which sheet the user clicked in
-int FieldThumbnailBrowser::WhichCell(wxPoint const& p) const
-{
-    auto size_of_one = SizeOfOneCell(mLayoutHorizontal);
-    return (mLayoutHorizontal) ? p.x / size_of_one.x : p.y / size_of_one.y;
-}
-
-namespace {
-
-auto CalcUserScale(wxSize const& box_size, wxSize const& mode_size)
+auto CalcUserScale(wxSize box_size, CalChart::Coord mode_size)
 {
     auto newX = static_cast<float>(box_size.x);
     auto newY = static_cast<float>(box_size.y);
@@ -100,17 +57,13 @@ auto CalcUserScale(wxSize const& box_size, wxSize const& mode_size)
 
     auto showAspectRatio = showSizeX / showSizeY;
     auto newSizeRatio = newX / newY;
-    auto newvalue = 1.0;
     // always choose x when the new aspect ratio is smaller than the show.
     // This will keep the whole field on in the canvas
     if (newSizeRatio < showAspectRatio) {
-        newvalue = newX / (float)CalChart::CoordUnits2Int(showSizeX);
+        return newX / showSizeX;
     } else {
-        newvalue = newY / (float)CalChart::CoordUnits2Int(showSizeY);
+        return newY / showSizeY;
     }
-    auto userScale = newvalue * (CalChart::CoordUnits2Int(1 << 16) / 65536.0);
-
-    return userScale;
 }
 
 auto LayoutSheetThumbnails(CalChartView const& view, CalChart::Configuration const& config, int YNameSize, CalChart::Coord thumbnail_offset, CalChart::Coord box_size, CalChart::Coord box_offset)
@@ -138,7 +91,56 @@ auto LayoutSheetThumbnails(CalChartView const& view, CalChart::Configuration con
     }
     + CalChart::Coord(kXLeftPadding, kYUpperPadding);
 }
+}
 
+BEGIN_EVENT_TABLE(FieldThumbnailBrowser, wxScrolledWindow)
+EVT_PAINT(FieldThumbnailBrowser::OnPaint)
+EVT_CHAR(FieldThumbnailBrowser::HandleKey)
+EVT_LEFT_DOWN(FieldThumbnailBrowser::HandleMouseDown)
+EVT_SIZE(FieldThumbnailBrowser::HandleSizeEvent)
+END_EVENT_TABLE()
+
+FieldThumbnailBrowser::FieldThumbnailBrowser(
+    CalChart::Configuration const& config,
+    wxWindow* parent,
+    wxWindowID id,
+    const wxPoint& pos,
+    const wxSize& size)
+    : wxScrolledWindow(parent, id, pos, size)
+    , mXScrollPadding(wxSystemSettings::GetMetric(wxSYS_VSCROLL_X))
+    , mYNameSize(GetThumbnailFontSize())
+    , mYScrollPadding(wxSystemSettings::GetMetric(wxSYS_HSCROLL_Y))
+    , mLayoutHorizontal{ true }
+    , mConfig(config)
+{
+    SetBackgroundStyle(wxBG_STYLE_PAINT);
+    // now update the current screen
+    OnUpdate();
+}
+
+// calculate the size of the panel depending on orientation
+auto FieldThumbnailBrowser::SizeOfOneCell(bool horizontal) const -> wxSize
+{
+    if (!mView) {
+        return { 1, 1 };
+    }
+
+    auto modeAspectRatio = toAspectRatio(mView->GetShowFullSize());
+    if (horizontal) {
+        auto current_size_y = GetSize().y - kYUpperPadding - mYNameSize - kYNamePadding - kYBottomPadding - mYScrollPadding;
+        auto box_size_x = current_size_y * modeAspectRatio;
+        return { static_cast<int>(box_size_x) + kXLeftPadding + kXRightPadding, GetSize().y };
+    }
+    auto current_size_x = GetSize().x - kXLeftPadding - kXRightPadding - mXScrollPadding;
+    auto box_size_y = current_size_x / modeAspectRatio;
+    return { GetSize().x, static_cast<int>(box_size_y) + kYUpperPadding + mYNameSize + kYNamePadding };
+}
+
+// calculate which sheet the user clicked in
+auto FieldThumbnailBrowser::WhichCell(wxPoint const& p) const -> int
+{
+    auto size_of_one = SizeOfOneCell(mLayoutHorizontal);
+    return (mLayoutHorizontal) ? p.x / size_of_one.x : p.y / size_of_one.y;
 }
 
 // Define the repainting behaviour
@@ -149,7 +151,7 @@ auto LayoutSheetThumbnails(CalChartView const& view, CalChart::Configuration con
 // with a boundary of 4 above and below.
 
 // auto gFieldThumbnailMeasure = CalChart::MeasureDuration{ "FieldThumbnail" };
-void FieldThumbnailBrowser::OnPaint(wxPaintEvent&)
+void FieldThumbnailBrowser::OnPaint([[maybe_unused]] wxPaintEvent& event)
 {
     // for profiling purposes
     // std::cout << gFieldThumbnailMeasure << "\n";
@@ -164,7 +166,7 @@ void FieldThumbnailBrowser::OnPaint(wxPaintEvent&)
     dc.Clear();
 
     // let's draw the boxes
-    auto mode_size = fDIP(mView->GetShowFullSize());
+    auto mode_size = mView->GetShowFullSize();
     auto current_size = GetSize() - wxSize(kXLeftPadding + kXRightPadding + mXScrollPadding, mYNameSize + kYNamePadding + kYUpperPadding + kYBottomPadding + mYScrollPadding);
     auto box_size = mLayoutHorizontal
         ? wxSize(mode_size.x * (current_size.y / static_cast<double>(mode_size.y)), current_size.y)
@@ -251,8 +253,8 @@ void FieldThumbnailBrowser::HandleMouseDown(wxMouseEvent& event)
 void FieldThumbnailBrowser::HandleSizeEvent(wxSizeEvent& event)
 {
     auto mode_size = mView->GetShowFullSize();
-    auto ratioMode = mode_size.y ? mode_size.x / float(mode_size.y) : 0;
-    auto ratioSize = event.m_size.y ? event.m_size.x / float(event.m_size.y) : 0;
+    auto ratioMode = mode_size.y ? mode_size.x / static_cast<float>(mode_size.y) : 0;
+    auto ratioSize = event.m_size.y ? event.m_size.x / static_cast<float>(event.m_size.y) : 0;
 
     mLayoutHorizontal = ratioSize > ratioMode;
     OnUpdate();
