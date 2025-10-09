@@ -36,11 +36,9 @@ public:
         CalChart::Configuration const& config,
         wxWindow* parent,
         wxWindowID id = wxID_ANY,
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxScrolledWindowStyle,
-        const wxString& name = wxPanelNameStr);
-    virtual ~FieldThumbnailBrowser() override = default;
+        wxPoint const& pos = wxDefaultPosition,
+        wxSize const& size = wxDefaultSize);
+    ~FieldThumbnailBrowser() override = default;
 
     void OnUpdate(); // Refresh from the View
     void SetView(CalChartView* view) { mView = view; }
@@ -52,9 +50,8 @@ private:
     void HandleMouseDown(wxMouseEvent& event);
     void HandleSizeEvent(wxSizeEvent& event);
 
-    wxSize SizeOfOneCell() const;
-    wxSize SizeOfOneCell(bool horizontal) const;
-    int WhichCell(wxPoint const& p) const;
+    auto SizeOfOneCell(bool horizontal) const -> wxSize;
+    auto WhichCell(wxPoint const& p) const -> int;
 
     CalChartView* mView{};
 
