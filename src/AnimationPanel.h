@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2024  Richard Michael Powell
+   Copyright (C) 1995-2025  Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -79,8 +79,8 @@ public:
 
     [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers) const -> std::pair<CalChart::Coord, CalChart::Coord>;
     [[nodiscard]] auto GetShowFieldSize() const -> CalChart::Coord;
+    [[nodiscard]] auto GetMarcherInfo() const -> std::vector<CalChart::Animate::Info>;
     [[nodiscard]] auto GetMarcherInfo(int which) const -> std::optional<CalChart::Animate::Info>;
-    [[nodiscard]] auto GetMarchersByDistance(float fromX, float fromY) const -> std::multimap<double, CalChart::Animate::Info>;
 
     void PrevBeat();
     void NextBeat();

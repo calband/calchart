@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2025  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -233,8 +233,8 @@ public:
     [[nodiscard]] auto GetShowFieldOffset() const { return GetShowMode().Offset(); }
     [[nodiscard]] CalChart::Configuration& GetConfiguration() const { return mConfig; }
 
+    [[nodiscard]] auto GetAnimationInfo(CalChart::Beats whichBeat) const -> std::vector<CalChart::Animate::Info>;
     [[nodiscard]] auto GetAnimationInfo(CalChart::Beats whichBeat, int which) const -> std::optional<CalChart::Animate::Info>;
-    [[nodiscard]] auto GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::Beats whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>;
     [[nodiscard]] auto GetAnimationErrors() const -> std::vector<CalChart::Animate::Errors>;
     [[nodiscard]] auto GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>;
     [[nodiscard]] auto GenerateAnimationDrawCommands(

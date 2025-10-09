@@ -432,14 +432,14 @@ auto CalChartView::GenerateAnimationDrawCommands(
         imageFunction);
 }
 
+auto CalChartView::GetAnimationInfo(CalChart::Beats whichBeat) const -> std::vector<CalChart::Animate::Info>
+{
+    return mShow->GetAnimationInfo(whichBeat);
+}
+
 auto CalChartView::GetAnimationInfo(CalChart::Beats whichBeat, CalChart::MarcherIndex which) const -> std::optional<CalChart::Animate::Info>
 {
     return mShow->GetAnimationInfo(whichBeat, which);
-}
-
-auto CalChartView::GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::Beats whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>
-{
-    return mShow->GetSelectedAnimationInfoWithDistanceFromPoint(whichBeat, origin);
 }
 
 auto CalChartView::GetTotalNumberAnimationBeats() const -> std::optional<CalChart::Beats>

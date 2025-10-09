@@ -3,7 +3,7 @@
  */
 
 /*
-   Copyright (C) 1995-2024  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2025  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -364,23 +364,23 @@ auto CalChartDoc::GenerateAnimationDrawCommands(
         imageFunction);
 }
 
+auto CalChartDoc::GetAnimationInfo(CalChart::Beats whichBeat) const -> std::vector<CalChart::Animate::Info>
+{
+    if (!mAnimation) {
+        return {};
+    }
+    if (mShow->GetSelectionList().empty()) {
+        return mAnimation->GetAllAnimateInfo(whichBeat);
+    }
+    return mAnimation->GetAllAnimateInfo(whichBeat, mShow->GetSelectionList());
+}
+
 auto CalChartDoc::GetAnimationInfo(CalChart::Beats whichBeat, int which) const -> std::optional<CalChart::Animate::Info>
 {
     if (!mAnimation) {
         return std::nullopt;
     }
     return mAnimation->GetAnimateInfo(whichBeat, which);
-}
-
-auto CalChartDoc::GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::Beats whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>
-{
-    if (!mAnimation) {
-        return {};
-    }
-    if (mShow->GetSelectionList().empty()) {
-        return mAnimation->GetAnimateInfoWithDistanceFromPoint(whichBeat, origin);
-    }
-    return mAnimation->GetAnimateInfoWithDistanceFromPoint(whichBeat, mShow->GetSelectionList(), origin);
 }
 
 auto CalChartDoc::GetTotalNumberAnimationBeats() const -> std::optional<CalChart::Beats>

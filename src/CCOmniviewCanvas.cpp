@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2024  Richard Michael Powell
+   Copyright (C) 1995-2025  Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -351,15 +351,21 @@ struct MarcherInfo {
 
 auto AnimateInfoToMarcherInfo(CalChart::Animate::Info const& animateInfo) -> MarcherInfo
 {
-    MarcherInfo info{};
-    info.direction = CalChart::NormalizeAngle(animateInfo.mMarcherInfo.mFacingDirection);
+    return {
+        .direction = CalChart::NormalizeAngle(animateInfo.mMarcherInfo.mFacingDirection),
+        .x = static_cast<float>(CalChart::CoordUnits2Float(animateInfo.mMarcherInfo.mPosition.x)),
+        .y = static_cast<float>(-1.0 * CalChart::CoordUnits2Float(animateInfo.mMarcherInfo.mPosition.y)),
+    };
+}
 
-    auto position = animateInfo.mMarcherInfo.mPosition;
-    info.x = CalChart::CoordUnits2Float(position.x);
-    // because the coordinate system for continuity and OpenGL are different,
-    // correct here.
-    info.y = -1.0 * CalChart::CoordUnits2Float(position.y);
-    return info;
+template <std::ranges::input_range Range>
+    requires(std::is_convertible_v<std::ranges::range_value_t<Range>, MarcherInfo>)
+auto SortByDistances(Range&& range, float originX, float originY) -> std::multimap<double, MarcherInfo>
+{
+    return std::accumulate(range.begin(), range.end(), std::multimap<double, MarcherInfo>{}, [originX, originY](auto&& acc, auto&& item) {
+        acc.insert({ std::hypot(originX - item.x, originY - item.y), item });
+        return acc;
+    });
 }
 
 }
@@ -727,10 +733,13 @@ void CCOmniviewCanvas::OnPaint(wxPaintEvent&)
 
     // Render the graphics and swap the buffers.
     m_glContext->DrawField(FieldEW, FieldNS, mCrowdOn);
-    auto marchers = mPanel.GetMarchersByDistance(mViewPoint.x, mViewPoint.y);
+    auto marchers = SortByDistances(mPanel.GetMarcherInfo() | std::views::transform([](auto& info) {
+        return AnimateInfoToMarcherInfo(info);
+    }),
+        mViewPoint.x,
+        mViewPoint.y);
     for (auto i = marchers.rbegin(); i != marchers.rend(); ++i) {
-        auto info = AnimateInfoToMarcherInfo(i->second);
-        m_glContext->Draw3dMarcher(info, mViewPoint, mShowMarching ? (mPanel.OnBeat() ? WhichMarchingStyle::kLeftHSHup : WhichMarchingStyle::kRightHSHup) : WhichMarchingStyle::kClosed);
+        m_glContext->Draw3dMarcher(i->second, mViewPoint, mShowMarching ? (mPanel.OnBeat() ? WhichMarchingStyle::kLeftHSHup : WhichMarchingStyle::kRightHSHup) : WhichMarchingStyle::kClosed);
     }
 
     SwapBuffers();
@@ -966,27 +975,27 @@ void CCOmniviewCanvas::OnCmd_ShowKeyboardControls()
 {
     wxMessageDialog dialog(
         this,
-        wxT("1, 2, 3 : Select different camera angles (student, field, upper corner)\n")
-            wxT("shift-1, shift-2, shift-3 : Select ALUMNI different camera angles (Alumni, field viewing east, upper corner)\n")
-                wxT("4, 5, 6 : Select custom camera angles (set to student, field, upper corner by default)\n")
-                    wxT("shift-4, shift-5, shift-6 : Set custom camera angle\n")
-                        wxT("+ : Move camera up\n")
-                            wxT("- : Move camera down\n")
-                                wxT("w : Move camera forward\n")
-                                    wxT("s : Move camera backward\n")
-                                        wxT("a : Move camera left\n")
-                                            wxT("d : Move camera right\n")
-                                                wxT("q : Pan camera left\n")
-                                                    wxT("e : Pan camera right\n")
-                                                        wxT("r : Pan camera up\n")
-                                                            wxT("f : Pan camera down\n")
-                                                                wxT("< : Decrease Field Of View\n")
-                                                                    wxT("> : Increase Field Of View\n")
-                                                                        wxT("o : Toggle Crowd\n")
-                                                                            wxT("left arrow : Back 1 beat\n")
-                                                                                wxT("right arrow : Forward 1 beat\n")
-                                                                                    wxT("space : Toggle Marching\n"),
-        wxT("Keyboard Commands"),
+        "1, 2, 3 : Select different camera angles (student, field, upper corner)\n"
+        "shift-1, shift-2, shift-3 : Select ALUMNI different camera angles (Alumni, field viewing east, upper corner)\n"
+        "4, 5, 6 : Select custom camera angles (set to student, field, upper corner by default)\n"
+        "shift-4, shift-5, shift-6 : Set custom camera angle\n"
+        "+ : Move camera up\n"
+        "- : Move camera down\n"
+        "w : Move camera forward\n"
+        "s : Move camera backward\n"
+        "a : Move camera left\n"
+        "d : Move camera right\n"
+        "q : Pan camera left\n"
+        "e : Pan camera right\n"
+        "r : Pan camera up\n"
+        "f : Pan camera down\n"
+        "< : Decrease Field Of View\n"
+        "> : Increase Field Of View\n"
+        "o : Toggle Crowd\n"
+        "left arrow : Back 1 beat\n"
+        "right arrow : Forward 1 beat\n"
+        "space : Toggle Marching\n",
+        "Keyboard Commands",
         wxOK);
     dialog.ShowModal();
     return;

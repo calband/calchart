@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2024  Richard Michael Powell
+   Copyright (C) 1995-2025  Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -389,14 +389,14 @@ auto AnimationPanel::GetShowFieldSize() const -> CalChart::Coord
     return mView->GetShowFieldSize();
 }
 
+auto AnimationPanel::GetMarcherInfo() const -> std::vector<CalChart::Animate::Info>
+{
+    return mView->GetAnimationInfo(mCurrentBeat);
+}
+
 auto AnimationPanel::GetMarcherInfo(int which) const -> std::optional<CalChart::Animate::Info>
 {
     return mView->GetAnimationInfo(mCurrentBeat, which);
-}
-
-auto AnimationPanel::GetMarchersByDistance(float fromX, float fromY) const -> std::multimap<double, CalChart::Animate::Info>
-{
-    return mView->GetSelectedAnimationInfoWithDistanceFromPoint(mCurrentBeat, CalChart::Coord(fromX, fromY));
 }
 
 void AnimationPanel::PrevBeat()
