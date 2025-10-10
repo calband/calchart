@@ -21,10 +21,11 @@
 */
 
 #include "AnimationCanvas.h"
-#include "AnimationView.h"
+#include "AnimationPanel.h"
 #include "CalChartConfiguration.h"
 #include "CalChartCoord.h"
 #include "CalChartDrawPrimativesHelper.h"
+#include "CalChartDrawing.h"
 #include "basic_ui.h"
 #include "ui_enums.h"
 #include <wx/dcbuffer.h>
@@ -38,8 +39,12 @@ EVT_MOTION(AnimationCanvas::OnMouseMove)
 EVT_PAINT(AnimationCanvas::OnPaint)
 END_EVENT_TABLE()
 
-AnimationCanvas::AnimationCanvas(CalChart::Configuration const& config, wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size)
-    : super(parent, winid, pos, size, wxTAB_TRAVERSAL | wxNO_BORDER)
+AnimationCanvas::AnimationCanvas(
+    CalChart::Configuration const& config,
+    AnimationPanel& parent,
+    wxSize const& size)
+    : super(&parent, wxID_ANY, wxDefaultPosition, size)
+    , mPanel{ parent }
     , mConfig(config)
 {
     SetBackgroundStyle(wxBG_STYLE_PAINT);
@@ -108,9 +113,6 @@ void AnimationCanvas::OnUpdate()
 
 void AnimationCanvas::OnPaint(wxPaintEvent&)
 {
-    if (!mView) {
-        return;
-    }
     // update the scale and origin
     UpdateScaleAndOrigin();
 
@@ -127,19 +129,16 @@ void AnimationCanvas::OnPaint(wxPaintEvent&)
         wxCalChart::setPen(dc, mConfig.Get_CalChartBrushAndPen(CalChart::Colors::SHAPES));
         dc.DrawRectangle(mMouseStart.x, mMouseStart.y, mMouseEnd.x - mMouseStart.x, mMouseEnd.y - mMouseStart.y);
     }
-    // draw the view
-    mView->OnDraw(&dc);
+    wxCalChart::Draw::DrawCommandList(dc,
+        mPanel.GenerateDrawCommands());
 }
 
 void AnimationCanvas::OnLeftDownMouseEvent(wxMouseEvent& event)
 {
-    if (!mView) {
-        return;
-    }
     auto point = TranslatePosition(event.GetPosition());
 
     if (!event.AltDown() && !event.ShiftDown()) {
-        mView->UnselectAll();
+        mPanel.UnselectAll();
     }
 
     mMouseEnd = mMouseStart = point;
@@ -148,9 +147,6 @@ void AnimationCanvas::OnLeftDownMouseEvent(wxMouseEvent& event)
 
 void AnimationCanvas::OnLeftUpMouseEvent(wxMouseEvent& event)
 {
-    if (!mView) {
-        return;
-    }
     auto point = TranslatePosition(event.GetPosition());
     mMouseEnd = point;
     mMouseDown = false;
@@ -158,9 +154,9 @@ void AnimationCanvas::OnLeftUpMouseEvent(wxMouseEvent& event)
     // if mouse lifted very close to where clicked, then it is a previous beat
     // move
     if ((std::abs(mMouseEnd.x - mMouseStart.x) < CalChart::Int2CoordUnits(1) / 2) && (std::abs(mMouseEnd.y - mMouseStart.y) < CalChart::Int2CoordUnits(1) / 2)) {
-        mView->ToggleTimer();
+        mPanel.ToggleTimer();
     } else {
-        mView->SelectMarchersInBox(mMouseStart, mMouseEnd, event.AltDown());
+        mPanel.SelectMarchersInBox(mMouseStart, mMouseEnd, event.AltDown());
     }
     Refresh();
 }
@@ -175,23 +171,19 @@ void AnimationCanvas::OnMouseMove(wxMouseEvent& event)
 
 void AnimationCanvas::OnChar(wxKeyEvent& event)
 {
-    if (!mView) {
-        event.Skip();
-        return;
-    }
     if (event.GetKeyCode() == WXK_LEFT)
-        mView->PrevBeat();
+        mPanel.PrevBeat();
     else if (event.GetKeyCode() == WXK_RIGHT)
-        mView->NextBeat();
+        mPanel.NextBeat();
     else if (event.GetKeyCode() == WXK_SPACE) {
-        mView->ToggleTimer();
+        mPanel.ToggleTimer();
     } else {
         event.Skip();
     }
     Refresh();
 }
 
-wxPoint AnimationCanvas::TranslatePosition(wxPoint const& point)
+auto AnimationCanvas::TranslatePosition(wxPoint const& point) -> wxPoint
 {
     wxClientDC dc{ this };
     dc.SetUserScale(mUserScale, mUserScale);
@@ -218,11 +210,8 @@ auto towxBox(std::pair<CalChart::Coord, CalChart::Coord> input) -> std::pair<wxS
 
 void AnimationCanvas::UpdateScaleAndOrigin()
 {
-    if (!mView) {
-        return;
-    }
     auto window_size = GetSize();
-    auto boundingBox = towxBox(mView->GetAnimationBoundingBox(mZoomOnMarchers));
+    auto boundingBox = towxBox(mPanel.GetAnimationBoundingBox(mZoomOnMarchers));
     if (mZoomOnMarchers) {
         auto amount = CalChart::Int2CoordUnits(mStepsOutForMarcherZoom);
         boundingBox.first += wxSize(amount, amount) * 2;
