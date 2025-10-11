@@ -879,19 +879,24 @@ namespace {
         std::array<Colors, 4> color) -> std::vector<CalChart::Draw::DrawCommand>
     {
 
+        auto pointLabelFont = CalChart::Font{ Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio()) };
         return {
-            CalChart::Draw::withBrushAndPen(
-                config.Get_CalChartBrushAndPen(std::get<0>(color)),
-                CalChart::Draw::withTextForeground(
-                    config.Get_CalChartBrushAndPen(std::get<2>(color)),
-                    NegativeIntersection(selection_list, labels.size())
-                        | TransformIndexToDrawCommands(sheet, labels, ref, config))),
-            CalChart::Draw::withBrushAndPen(
-                config.Get_CalChartBrushAndPen(std::get<1>(color)),
-                CalChart::Draw::withTextForeground(
-                    config.Get_CalChartBrushAndPen(std::get<3>(color)),
-                    selection_list
-                        | TransformIndexToDrawCommands(sheet, labels, ref, config))),
+            CalChart::Draw::withFont(
+                pointLabelFont,
+                std::vector{
+                    CalChart::Draw::withBrushAndPen(
+                        config.Get_CalChartBrushAndPen(std::get<0>(color)),
+                        CalChart::Draw::withTextForeground(
+                            config.Get_CalChartBrushAndPen(std::get<2>(color)),
+                            NegativeIntersection(selection_list, labels.size())
+                                | TransformIndexToDrawCommands(sheet, labels, ref, config))),
+                    CalChart::Draw::withBrushAndPen(
+                        config.Get_CalChartBrushAndPen(std::get<1>(color)),
+                        CalChart::Draw::withTextForeground(
+                            config.Get_CalChartBrushAndPen(std::get<3>(color)),
+                            selection_list
+                                | TransformIndexToDrawCommands(sheet, labels, ref, config))),
+                })
         };
     }
 
