@@ -335,9 +335,12 @@ BackgroundImages::~BackgroundImages() = default;
 
 void BackgroundImages::SetBackgroundImages(std::vector<CalChart::ImageInfo> const& images)
 {
+    auto previousSize = mBackgroundImages.size();
     mBackgroundImages = CalChart::Ranges::ToVector<BackgroundImage>(
         images | std::views::transform([](auto&& image) { return BackgroundImage{ image }; }));
-    mWhichBackgroundIndex = std::nullopt;
+    if (mBackgroundImages.size() != previousSize) {
+        mWhichBackgroundIndex = std::nullopt;
+    }
 }
 
 void BackgroundImages::OnPaint(wxDC& dc) const

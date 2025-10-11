@@ -7,6 +7,7 @@ Bugs addressed in this release:
 * [#692](../../issues/692) CalChart Windows Field Thumbnails Appear Incorrectly
 * [#702](../../issues/702) libcurl is not found on windows
 * [#704](../../issues/704) Reset All in Settings doesn't seem to be working
+* [#705](../../issues/705) Cannot delete image
 
 Other changes:
 
