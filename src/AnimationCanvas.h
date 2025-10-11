@@ -23,7 +23,7 @@
 
 #include <wx/wx.h>
 
-class AnimationView;
+class AnimationPanel;
 namespace CalChart {
 class Configuration;
 }
@@ -34,16 +34,17 @@ class AnimationCanvas : public wxPanel {
     wxDECLARE_EVENT_TABLE();
 
 public:
-    AnimationCanvas(CalChart::Configuration const& config, wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize);
+    AnimationCanvas(
+        CalChart::Configuration const& config,
+        AnimationPanel& parent,
+        wxSize const& size);
     ~AnimationCanvas() override = default;
 
     void OnUpdate(); // Refresh from the View
-    auto GetView() const { return mView; }
-    void SetView(AnimationView* view) { mView = view; }
 
-    auto GetZoomOnMarchers() const { return mZoomOnMarchers; }
+    [[nodiscard]] auto GetZoomOnMarchers() const { return mZoomOnMarchers; }
     void SetZoomOnMarchers(bool zoomOnMarchers);
-    auto GetStepsOutForMarchersZoom() const { return mStepsOutForMarcherZoom; }
+    [[nodiscard]] auto GetStepsOutForMarchersZoom() const { return mStepsOutForMarcherZoom; }
     void SetStepsOutForMarchersZoom(int steps);
 
 private:
@@ -58,12 +59,12 @@ private:
     void OnChar(wxKeyEvent& event);
 
     // Internals
-    wxPoint TranslatePosition(wxPoint const& point);
+    auto TranslatePosition(wxPoint const& point) -> wxPoint;
     void UpdateScaleAndOrigin();
 
-    AnimationView* mView{};
+    AnimationPanel& mPanel;
 
-    float mUserScale = 1.0f;
+    float mUserScale = 1.0F;
     std::pair<wxCoord, wxCoord> mUserOrigin = { 0, 0 };
     bool mZoomOnMarchers = true;
     int mStepsOutForMarcherZoom = 8;

@@ -27,6 +27,7 @@
 #include "CalChartView.h"
 #include "HostAppInterface.h"
 #include "SystemConfiguration.h"
+#include "UpdateChecker.h"
 #include "basic_ui.h"
 #include "platconf.h"
 
@@ -35,6 +36,7 @@
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
 #include <wx/stdpaths.h>
+#include <wxUI/wxUI.hpp>
 
 // This statement initializes the whole application and calls OnInit
 IMPLEMENT_APP(CalChartApp)
@@ -121,6 +123,42 @@ void CalChartApp::InitAppAsServer()
     frame->Show(true);
 #endif // ndef __WXMAC__
     SetTopWindow(frame);
+
+    // Start background update check: pass the current CC_VERSION and the user's ignored version from config.
+    auto currentVersion = std::string(CC_VERSION);
+    auto ignored = wxCalChart::GetGlobalConfig().Get_IgnoredUpdateVersion();
+    CalChart::StartBackgroundCheck(currentVersion, ignored, [frame](std::string latestTag) {
+        // Core invokes this callback on the worker thread. Marshal to the UI thread here.
+        if (!wxTheApp) {
+            // No wx application available; best-effort: log and do nothing.
+            std::cerr << "[CalChartApp] wxTheApp not available to show update dialog for tag=" << latestTag << "\n";
+        }
+        wxTheApp->CallAfter([frame, latestTag]() {
+            // Build a small dialog with a checkbox "Never show this again for this release".
+            wxDialog dlg(frame, wxID_ANY, "CalChart Update", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
+            using namespace wxUI;
+            CheckBox::Proxy neverBox;
+            VSizer{
+                wxSizerFlags().Expand().Border(wxALL, 10),
+                Text{ std::format("A new version of CalChart is available: {}\nWould you like to open the releases page?", latestTag) },
+                CheckBox{ "Never show this again for this release" }.withProxy(neverBox),
+                HSizer{
+                    wxSizerFlags().Center().Border(wxALL, 5),
+                    Button{ wxID_OK, "Open Releases" },
+                    Button{ wxID_CANCEL, "Dismiss" },
+                },
+            }
+                .fitTo(&dlg);
+            auto res = dlg.ShowModal();
+            if (*neverBox) {
+                wxCalChart::GetGlobalConfig().Set_IgnoredUpdateVersion(latestTag);
+                wxCalChart::GetGlobalConfig().FlushWriteQueue();
+            }
+            if (res == wxID_OK) {
+                wxLaunchDefaultBrowser("https://github.com/calband/calchart/releases/latest");
+            }
+        });
+    });
 
     // Get the file history
     auto* config = wxConfigBase::Get();

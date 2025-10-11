@@ -235,6 +235,9 @@ private:                                           \
 
     DECLARE_CONFIGURATION_FUNCTIONS(ActiveColorPalette, long);
 
+    // Update check: version string the user chose to ignore/dismiss (empty = none)
+    DECLARE_CONFIGURATION_FUNCTIONS(IgnoredUpdateVersion, std::string);
+
 public:
     // color palettes:  The color Palettes allow you to set different "blocks" of
     // colors.

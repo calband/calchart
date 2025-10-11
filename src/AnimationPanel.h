@@ -21,11 +21,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <wx/docview.h>
+#include "AnimationSprites.hpp"
+#include "CalChartDrawCommand.h"
 #include <wx/wx.h>
 #include <wxUI/wxUI.hpp>
 
-class AnimationView;
 class AnimationCanvas;
 class CalChartView;
 class wxBitmapToggleButton;
@@ -38,28 +38,57 @@ namespace CalChart {
 class Configuration;
 }
 
-// Animiation Panel is a little bit different because it has it's own view.
-// When we are animating a show we are taking an CalChart animation object
-// and having a copy that animates on it's own.  So AnimiationView handles
-// that complexity of updating state of this panel.
-
 class AnimationPanel : public wxPanel {
     using super = wxPanel;
     wxDECLARE_EVENT_TABLE();
 
 public:
-    AnimationPanel(CalChart::Configuration& config, wxWindow* parent, bool miniMode, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, wxString const& name = wxPanelNameStr);
+    AnimationPanel(
+        CalChart::Configuration& config,
+        wxWindow* parent,
+        bool miniMode,
+        wxWindowID winid = wxID_ANY,
+        wxPoint const& pos = wxDefaultPosition,
+        wxSize const& size = wxDefaultSize,
+        long style = wxTAB_TRAVERSAL | wxNO_BORDER,
+        wxString const& name = wxPanelNameStr);
     ~AnimationPanel() override;
 
+    AnimationPanel(AnimationPanel const&) = delete;
+    AnimationPanel(AnimationPanel&&) = delete;
+    auto operator=(AnimationPanel&) -> AnimationPanel& = delete;
+    auto operator=(AnimationPanel&&) -> AnimationPanel& = delete;
+
     void OnUpdate(); // Refresh from the View
+    void UpdatePanel(); // specfically to update the controls
     void SetView(CalChartView* view);
 
-    // Called by the view
     void SetPlayState(bool playState);
     void ToggleTimer();
-    void UpdatePanel(); // specfically to update the controls
-    bool OnBeat() const;
+    auto OnBeat() const -> bool;
     auto TimerOn() const { return mTimerOn; }
+    void UnselectAll();
+    void SelectMarchersInBox(wxPoint const& mouseStart, wxPoint const& mouseEnd, bool altDown);
+
+    // info
+    [[nodiscard]] auto GetTotalNumberBeats() const -> CalChart::Beats;
+    [[nodiscard]] auto GetNumSheets() const -> size_t;
+    [[nodiscard]] auto BeatToSheetOffsetAndBeat(CalChart::Beats beat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>;
+    [[nodiscard]] auto BeatForSheet(int sheet) const -> CalChart::Beats;
+    [[nodiscard]] auto GetSheetBeatSheetFromTotalCurrentBeat() const -> CalChart::Beats;
+
+    [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers) const -> std::pair<CalChart::Coord, CalChart::Coord>;
+    [[nodiscard]] auto GetShowFieldSize() const -> CalChart::Coord;
+    [[nodiscard]] auto GetMarcherInfo(int which) const -> std::optional<CalChart::Animate::Info>;
+    [[nodiscard]] auto GetMarchersByDistance(float fromX, float fromY) const -> std::multimap<double, CalChart::Animate::Info>;
+
+    void PrevBeat();
+    void NextBeat();
+    void GotoTotalBeat(CalChart::Beats whichBeat);
+    void GotoSheetBeat(int whichSheet, CalChart::Beats whichBeat);
+    [[nodiscard]] auto AtEndOfShow() const -> bool;
+
+    [[nodiscard]] auto GenerateDrawCommands() -> std::vector<CalChart::Draw::DrawCommand>;
 
 private:
     void Init();
@@ -80,7 +109,7 @@ private:
     auto GetTempo() const { return mTempo; }
     void SetTempo(unsigned tempo) { mTempo = tempo; }
 
-    AnimationView* mView{};
+    CalChartView* mView{};
     AnimationCanvas* mCanvas{};
     CCOmniviewCanvas* mOmniCanvas{};
     wxUI::Text::Proxy mTempoLabel{};
@@ -93,11 +122,18 @@ private:
     wxUI::BitmapToggleButton::Proxy mPlayPauseButton{};
     wxUI::Button::Proxy mAnimateOmniToggle{};
     wxUI::Button::Proxy mOmniHelpButton{};
+    std::vector<wxWindow*> mItemsToHide;
+
     wxTimer* mTimer{};
     unsigned mTempo{};
     bool mTimerOn{};
     const bool mInMiniMode{};
     bool mShowOmni{};
-    std::vector<wxWindow*> mItemsToHide;
+
+    CalChart::Beats mCurrentBeat{};
+    bool mDrawCollisionWarning = true;
+    bool mPlayCollisionWarning = false;
+
     CalChart::Configuration& mConfig;
+    AnimationSprites mSprites;
 };
