@@ -22,6 +22,7 @@
 */
 
 #include "basic_ui.h"
+#include <optional>
 #include <wx/wx.h>
 
 namespace CalChart {
@@ -37,7 +38,7 @@ class Configuration;
 // Yes.
 class PreferencePage : public wxPanel {
     using super = wxPanel;
-    DECLARE_ABSTRACT_CLASS(GeneralSetup)
+    DECLARE_ABSTRACT_CLASS(PreferencePage)
 public:
     PreferencePage(CalChart::Configuration& config, wxWindow* parent, const wxString& caption)
         : super(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU, caption)
@@ -56,9 +57,9 @@ public:
     }
 
     // use these to get and set default values
-    virtual bool TransferDataToWindow() override = 0;
-    virtual bool TransferDataFromWindow() override = 0;
-    virtual bool ClearValuesToDefault() = 0;
+    auto TransferDataToWindow() -> bool override = 0;
+    auto TransferDataFromWindow() -> bool override = 0;
+    virtual auto ClearValuesToDefault() -> bool = 0;
 
 private:
     virtual void CreateControls() = 0;
@@ -68,3 +69,12 @@ protected:
     virtual void InitFromConfig() = 0;
     CalChart::Configuration& mConfig;
 };
+
+inline auto toDouble(wxString const& v) -> std::optional<double>
+{
+    double value{};
+    if (v.ToDouble(&value)) {
+        return value;
+    }
+    return std::nullopt;
+}

@@ -36,9 +36,9 @@ class DrawingSetup : public PreferencePage {
     DECLARE_EVENT_TABLE()
 
 public:
-    static DrawingSetup* CreatePreference(CalChart::Configuration& config, wxWindow* parent)
+    static auto CreatePreference(CalChart::Configuration& config, wxWindow* parent) -> DrawingSetup*
     {
-        auto pref = new DrawingSetup(config, parent);
+        auto* pref = new DrawingSetup(config, parent);
         pref->Initialize();
         return pref;
     }
@@ -51,16 +51,16 @@ public:
     ~DrawingSetup() override = default;
 
     // use these to get and set default values
-    bool TransferDataToWindow() override;
-    bool TransferDataFromWindow() override;
-    bool ClearValuesToDefault() override;
+    auto TransferDataToWindow() -> bool override;
+    auto TransferDataFromWindow() -> bool override;
+    auto ClearValuesToDefault() -> bool override;
 
 private:
     void InitFromConfig() override;
     void CreateControls() override;
 
     void OnCmdSelectColors();
-    void OnCmdSelectWidth(wxSpinEvent&);
+    void SelectPenWidth(int width);
     void OnCmdResetColors();
     void OnCmdResetAll(wxCommandEvent&);
     void OnCmdChooseNewColor(wxCommandEvent&);
@@ -75,6 +75,14 @@ private:
     wxUI::BitmapComboBox::Proxy mNameBox{};
     wxUI::BitmapComboBox::Proxy mPaletteNameBox{};
     wxUI::SpinCtrl::Proxy mSpin{};
+
+    wxUI::TextCtrl::Proxy mDotRatio{};
+    wxUI::TextCtrl::Proxy mNumRatio{};
+    wxUI::TextCtrl::Proxy mPLineRatio{};
+    wxUI::TextCtrl::Proxy mSLineRatio{};
+    wxUI::TextCtrl::Proxy mSpriteScale{};
+    wxUI::TextCtrl::Proxy mSpriteHeight{};
+    wxUI::TextCtrl::Proxy mCurveControl{};
 
     int mActiveColorPalette{};
     std::vector<std::string> mColorPaletteNames;

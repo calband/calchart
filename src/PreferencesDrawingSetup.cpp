@@ -41,11 +41,9 @@
 #include <wx/statline.h>
 #include <wx/stattext.h>
 
-using namespace CalChart;
-
+namespace {
 enum {
-    SPIN_WIDTH = 1000,
-    NEW_COLOR_CHOICE,
+    NEW_COLOR_CHOICE = 1000,
     DOTRATIO,
     NUMRATIO,
     PLINERATIO,
@@ -56,8 +54,9 @@ enum {
     NEW_COLOR_PALETTE,
 };
 
+}
+
 BEGIN_EVENT_TABLE(DrawingSetup, PreferencePage)
-EVT_SPINCTRL(SPIN_WIDTH, DrawingSetup::OnCmdSelectWidth)
 EVT_COMBOBOX(NEW_COLOR_CHOICE, DrawingSetup::OnCmdChooseNewColor)
 EVT_COMBOBOX(NEW_COLOR_PALETTE, DrawingSetup::OnCmdChooseNewPalette)
 EVT_TEXT_ENTER(DOTRATIO, DrawingSetup::OnCmdTextChanged)
@@ -124,9 +123,12 @@ void DrawingSetup::CreateControls()
                         .withSize({ 200, -1 })
                         .withStyle(wxCB_READONLY | wxCB_DROPDOWN)
                         .withProxy(mNameBox),
-                    wxUI::SpinCtrl(SPIN_WIDTH, std::pair{ 1, 10 }, mCalChartPens[mActiveColorPalette][0].GetWidth())
+                    wxUI::SpinCtrl(std::pair{ 1, 10 }, mCalChartPens[mActiveColorPalette][0].GetWidth())
                         .withStyle(wxSP_ARROW_KEYS)
-                        .withProxy(mSpin),
+                        .withProxy(mSpin)
+                        .bind([this](wxSpinEvent& e) {
+                            SelectPenWidth(e.GetPosition());
+                        }),
                 },
 
                 wxUI::HSizer{
@@ -139,13 +141,13 @@ void DrawingSetup::CreateControls()
         },
         wxUI::HSizer{
             "ratios",
-            VLabelWidget("Dot Ratio:", wxUI::TextCtrl{ DOTRATIO }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER)),
-            VLabelWidget("Num Ratio:", wxUI::TextCtrl{ NUMRATIO }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER)),
-            VLabelWidget("P-Line Ratio:", wxUI::TextCtrl{ PLINERATIO }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER)),
-            VLabelWidget("S-Line Ratio:", wxUI::TextCtrl{ SLINERATIO }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER)),
-            VLabelWidget("Sprite Scale:", wxUI::TextCtrl{ SPRITESCALE }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER)),
-            VLabelWidget("Sprite Height:", wxUI::TextCtrl{ SPRITEHEIGHT }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER)),
-            VLabelWidget("Curve Box:", wxUI::TextCtrl{ CURVECONTROL }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER)),
+            VLabelWidget("Dot Ratio:", wxUI::TextCtrl{ DOTRATIO }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER).withProxy(mDotRatio)),
+            VLabelWidget("Num Ratio:", wxUI::TextCtrl{ NUMRATIO }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER).withProxy(mNumRatio)),
+            VLabelWidget("P-Line Ratio:", wxUI::TextCtrl{ PLINERATIO }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER).withProxy(mPLineRatio)),
+            VLabelWidget("S-Line Ratio:", wxUI::TextCtrl{ SLINERATIO }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER).withProxy(mSLineRatio)),
+            VLabelWidget("Sprite Scale:", wxUI::TextCtrl{ SPRITESCALE }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER).withProxy(mSpriteScale)),
+            VLabelWidget("Sprite Height:", wxUI::TextCtrl{ SPRITEHEIGHT }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER).withProxy(mSpriteHeight)),
+            VLabelWidget("Curve Box:", wxUI::TextCtrl{ CURVECONTROL }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER).withProxy(mCurveControl)),
         },
         wxUI::Generic{ ExpandSizerFlags(), new ColorSetupCanvas(mConfig, this) },
     }
@@ -193,29 +195,15 @@ bool DrawingSetup::TransferDataToWindow()
     }
     *mSpin = mCalChartPens[mActiveColorPalette][static_cast<int>(mNameBox.selection())].GetWidth();
 
-    wxString buf;
-    wxTextCtrl* text = (wxTextCtrl*)FindWindow(DOTRATIO);
-    buf.Printf(wxT("%.2f"), mDrawingValues[0]);
-    text->SetValue(buf);
-    text = (wxTextCtrl*)FindWindow(NUMRATIO);
-    buf.Printf(wxT("%.2f"), mDrawingValues[1]);
-    text->SetValue(buf);
-    text = (wxTextCtrl*)FindWindow(PLINERATIO);
-    buf.Printf(wxT("%.2f"), mDrawingValues[2]);
-    text->SetValue(buf);
-    text = (wxTextCtrl*)FindWindow(SLINERATIO);
-    buf.Printf(wxT("%.2f"), mDrawingValues[3]);
-    text->SetValue(buf);
-    text = (wxTextCtrl*)FindWindow(SPRITESCALE);
-    buf.Printf(wxT("%.2f"), mDrawingValues[4]);
-    text->SetValue(buf);
-    text = (wxTextCtrl*)FindWindow(SPRITEHEIGHT);
-    buf.Printf(wxT("%.2f"), mDrawingValues[5]);
-    text->SetValue(buf);
-    text = (wxTextCtrl*)FindWindow(CURVECONTROL);
-    buf.Printf(wxT("%.2f"), mDrawingValues[6]);
-    text->SetValue(buf);
+    *mDotRatio = std::format("{:.2f}", mDrawingValues[0]);
+    *mNumRatio = std::format("{:.2f}", mDrawingValues[1]);
+    *mPLineRatio = std::format("{:.2f}", mDrawingValues[2]);
+    *mSLineRatio = std::format("{:.2f}", mDrawingValues[3]);
+    *mSpriteScale = std::format("{:.2f}", mDrawingValues[4]);
+    *mSpriteHeight = std::format("{:.2f}", mDrawingValues[5]);
+    *mCurveControl = std::format("{:.2f}", mDrawingValues[6]);
 
+    Refresh();
     return true;
 }
 
@@ -239,6 +227,15 @@ bool DrawingSetup::ClearValuesToDefault()
             mConfig.Clear_CalChartConfigColor(palette, i);
         }
     }
+
+    mConfig.Clear_DotRatio();
+    mConfig.Clear_NumRatio();
+    mConfig.Clear_PLineRatio();
+    mConfig.Clear_SLineRatio();
+    mConfig.Clear_SpriteBitmapScale();
+    mConfig.Clear_SpriteBitmapOffsetY();
+    mConfig.Clear_ControlPointRatio();
+
     InitFromConfig();
     return TransferDataToWindow();
 }
@@ -286,9 +283,7 @@ void DrawingSetup::OnCmdSelectColors()
     data.SetColour(mCalChartBrushes[mActiveColorPalette][selection].GetColour());
     wxColourDialog dialog(this, &data);
     if (dialog.ShowModal() == wxID_OK) {
-        wxColourData retdata = dialog.GetColourData();
-        wxColour c = retdata.GetColour();
-        SetColor(selection, mCalChartPens[mActiveColorPalette][selection].GetWidth(), c);
+        SetColor(selection, mCalChartPens[mActiveColorPalette][selection].GetWidth(), dialog.GetColourData().GetColour());
     }
     Refresh();
 }
@@ -319,10 +314,10 @@ void DrawingSetup::OnCmdChangePaletteName()
     Refresh();
 }
 
-void DrawingSetup::OnCmdSelectWidth(wxSpinEvent& e)
+void DrawingSetup::SelectPenWidth(int width)
 {
     int selection = mNameBox.selection();
-    SetColor(selection, e.GetPosition(), mCalChartPens[mActiveColorPalette][selection].GetColour());
+    SetColor(selection, width, mCalChartPens[mActiveColorPalette][selection].GetColour());
 }
 
 void DrawingSetup::OnCmdResetColors()
