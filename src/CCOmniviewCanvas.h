@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2024  Richard Michael Powell
+   Copyright (C) 1995-2025  Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -46,8 +46,6 @@ public:
     CCOmniviewCanvas(AnimationPanel& parent, CalChart::Configuration& config);
     ~CCOmniviewCanvas() override = default;
 
-    void OnUpdate(); // Refresh from the View
-
     void OnCmd_ShowKeyboardControls();
 
 private:
@@ -63,7 +61,6 @@ private:
     void OnCmd_GoToCameraAngle(size_t which);
     void OnCmd_ToggleCrowd();
     void OnCmd_ToggleMarching();
-    void OnCmd_ToggleShowOnlySelected();
 
     AnimationPanel& mPanel;
     std::shared_ptr<CCOmniView_GLContext> m_glContext;

@@ -91,8 +91,8 @@ public:
     [[nodiscard]] auto GetPrintNumber() const { return mShow->GetPrintNumber(); }
     [[nodiscard]] auto GetRawPrintContinuity() const { return mShow->GetRawPrintContinuity(); }
     [[nodiscard]] auto GetPrintContinuity() const { return mShow->GetPrintContinuity(); }
+    [[nodiscard]] auto GetAnimationInfo(CalChart::Beats whichBeat) const -> std::vector<CalChart::Animate::Info>;
     [[nodiscard]] auto GetAnimationInfo(CalChart::Beats whichBeat, CalChart::MarcherIndex which) const -> std::optional<CalChart::Animate::Info>;
-    [[nodiscard]] auto GetSelectedAnimationInfoWithDistanceFromPoint(CalChart::Beats whichBeat, CalChart::Coord origin) const -> std::multimap<double, CalChart::Animate::Info>;
     [[nodiscard]] auto GetAnimationErrors() const -> std::vector<CalChart::Animate::Errors>;
     [[nodiscard]] auto GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>;
     [[nodiscard]] auto GetTotalNumberAnimationBeats() const -> std::optional<CalChart::Beats>;

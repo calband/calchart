@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2025  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -123,7 +123,7 @@ template <std::ranges::input_range Range>
 auto AddDistanceFromPointInfo(Range&& range, CalChart::Coord origin) -> std::multimap<double, CalChart::Animate::Info>
 {
     return std::accumulate(range.begin(), range.end(), std::multimap<double, CalChart::Animate::Info>{}, [origin](auto&& acc, auto&& item) {
-        acc.insert({ origin.Distance(item.mMarcherInfo.mPosition.x), item });
+        acc.insert({ origin.Distance(item.mMarcherInfo.mPosition), item });
         return acc;
     });
 }
@@ -160,6 +160,12 @@ auto Animation::GetBoundingBox(Beats whichBeat) const -> std::pair<CalChart::Coo
     };
 }
 
+auto Animation::GetAllAnimateInfo(Beats whichBeat, SelectionList const& selectionList) const -> std::vector<Animate::Info>
+{
+    return CalChart::Ranges::ToVector<Animate::Info>(GetAllAnimateInfo(whichBeat)
+        | std::views::filter([&selectionList](auto&& info) { return selectionList.contains(info.mIndex); }));
+}
+
 auto Animation::GetAnimateInfoWithDistanceFromPoint(Beats whichBeat, CalChart::Coord origin) const -> std::multimap<double, Animate::Info>
 {
     return AddDistanceFromPointInfo(GetAllAnimateInfo(whichBeat), origin);
@@ -171,7 +177,7 @@ auto Animation::GetAnimateInfoWithDistanceFromPoint(Beats whichBeat, SelectionLi
         | std::views::filter([&selectionList](auto&& info) { return selectionList.contains(info.mIndex); });
 
     return std::accumulate(allSelected.begin(), allSelected.end(), std::multimap<double, Animate::Info>{}, [origin](auto&& acc, auto&& item) {
-        acc.insert({ origin.Distance(item.mMarcherInfo.mPosition.x), item });
+        acc.insert({ origin.Distance(item.mMarcherInfo.mPosition), item });
         return acc;
     });
 }

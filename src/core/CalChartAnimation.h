@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2025  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -77,6 +77,7 @@ public:
 
     [[nodiscard]] auto GetAnimateInfo(Beats whichBeat, int which) const -> Animate::Info { return mSheets.AnimateInfoAtBeat(whichBeat, which); }
     [[nodiscard]] auto GetAllAnimateInfo(Beats whichBeat) const -> std::vector<Animate::Info> { return mSheets.AllAnimateInfoAtBeat(whichBeat); }
+    [[nodiscard]] auto GetAllAnimateInfo(Beats whichBeat, SelectionList const& selectionList) const -> std::vector<Animate::Info>;
 
     [[nodiscard]] auto GetAnimateInfoWithDistanceFromPoint(Beats whichBeat, CalChart::Coord origin) const -> std::multimap<double, Animate::Info>;
     [[nodiscard]] auto GetAnimateInfoWithDistanceFromPoint(Beats whichBeat, SelectionList const& selectionList, CalChart::Coord origin) const -> std::multimap<double, Animate::Info>;
