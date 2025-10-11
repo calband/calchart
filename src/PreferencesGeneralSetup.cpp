@@ -84,6 +84,12 @@ bool GeneralSetup::ClearValuesToDefault()
 {
     mConfig.Clear_AutosaveInterval();
     mConfig.Clear_IgnoredUpdateVersion();
+    mConfig.Clear_BeepOnCollisions();
+    mConfig.Clear_AnimationFrameSheetSlider();
+    mConfig.Clear_ScrollDirectionNatural();
+    mConfig.Clear_CommandUndoSetSheet();
+    mConfig.Clear_CommandUndoSelection();
+    // the extra ones to reset:
     mConfig.Clear_CalChartFrameAUILayout_3_6_1();
     mConfig.Clear_FieldFrameZoom_3_6_0();
     mConfig.Clear_FieldFrameWidth();

@@ -40,7 +40,7 @@ class GeneralSetup : public PreferencePage {
 public:
     static GeneralSetup* CreatePreference(CalChart::Configuration& config, wxWindow* parent)
     {
-        auto pref = new GeneralSetup(config, parent);
+        auto* pref = new GeneralSetup(config, parent);
         pref->Initialize();
         return pref;
     }
