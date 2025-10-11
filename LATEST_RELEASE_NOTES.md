@@ -3,6 +3,7 @@
 Bugs addressed in this release:
 
 * [#690](../../issues/690) ASAN crash when you close a show with X and then reopen
+* [#702](../../issues/702) libcurl is not found on windows
 
 Other changes:
 
