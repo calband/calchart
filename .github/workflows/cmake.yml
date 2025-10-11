@@ -78,7 +78,8 @@ jobs:
         # Bootstrap vcpkg and install libcurl (x64) so CMake can find CURL on Windows
         git clone https://github.com/microsoft/vcpkg.git "$Env:GITHUB_WORKSPACE\vcpkg"
         & "$Env:GITHUB_WORKSPACE\vcpkg\bootstrap-vcpkg.bat"
-        & "$Env:GITHUB_WORKSPACE\vcpkg\vcpkg.exe" install curl:x64-windows
+        # Install the static curl triplet so CI builds a statically-linked libcurl
+        & "$Env:GITHUB_WORKSPACE\vcpkg\vcpkg.exe" install curl:x64-windows-static
         & "$Env:GITHUB_WORKSPACE\vcpkg\vcpkg.exe" integrate install
 
     - name: Installing Dependencies (Linux)
@@ -95,7 +96,8 @@ jobs:
 
     - name: Configure CMake (Windows)
       if: matrix.config.os == 'windows-latest'
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake
+      # Tell vcpkg's CMake toolchain to use the static triplet so CMake finds static libs
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows-static
 
     - name: Configure CMake (non-Windows)
       if: matrix.config.os != 'windows-latest'

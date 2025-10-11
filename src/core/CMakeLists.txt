@@ -108,5 +108,11 @@ target_link_libraries(calchart_core PRIVATE
   wx::net
   CURL::libcurl
 )
+
+# When building on Windows with a static libcurl from vcpkg, define CURL_STATICLIB
+# so curl headers avoid __declspec(dllimport) and we link statically.
+if (WIN32)
+  target_compile_definitions(calchart_core PRIVATE CURL_STATICLIB)
+endif()
  
 
