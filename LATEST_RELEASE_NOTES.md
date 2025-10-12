@@ -6,6 +6,7 @@ Bugs addressed in this release:
 * [#690](../../issues/690) ASAN crash when you close a show with X and then reopen
 * [#692](../../issues/692) CalChart Windows Field Thumbnails Appear Incorrectly
 * [#702](../../issues/702) libcurl is not found on windows
+* [#703](../../issues/703) Num ratio is not working right, numbers don't get bigger
 * [#704](../../issues/704) Reset All in Settings doesn't seem to be working
 
 Other changes:
