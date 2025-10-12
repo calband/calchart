@@ -9,6 +9,7 @@ Bugs addressed in this release:
 * [#703](../../issues/703) Num ratio is not working right, numbers don't get bigger
 * [#704](../../issues/704) Reset All in Settings doesn't seem to be working
 * [#705](../../issues/705) Cannot delete image
+* [#708](../../issues/708) Beat slider with dual sliders doesn't work right
 
 Other changes:
 
