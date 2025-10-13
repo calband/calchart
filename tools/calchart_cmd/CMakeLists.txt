@@ -12,6 +12,7 @@ SetupCompilerForTarget(calchart_cmd)
 target_include_directories(
   calchart_cmd
   PRIVATE
+  ${PROJECT_SOURCE_DIR}/core
 )
 
 target_link_libraries(

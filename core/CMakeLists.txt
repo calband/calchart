@@ -97,9 +97,9 @@ SetupCompilerForTarget(calchart_core)
 target_include_directories(
   calchart_core
   PRIVATE
-  ${PROJECT_SOURCE_DIR}/src/core
+  ${PROJECT_SOURCE_DIR}/core
   INTERFACE
-  ${PROJECT_SOURCE_DIR}/src/core
+  ${PROJECT_SOURCE_DIR}/core
 )
 
 target_link_libraries(calchart_core PRIVATE

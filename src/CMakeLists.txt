@@ -1,16 +1,14 @@
 # CalChart CMake
 
-# CalChart
-add_subdirectory(core)
-
+# CalChart docs
 file(
   GLOB CalChartDocs
-    "${PROJECT_SOURCE_DIR}/docs/*"
+    "${PROJECT_SOURCE_DIR}/docs/source/*"
 )
 
 file(
   GLOB CalChartResources
-    "${PROJECT_SOURCE_DIR}/resources/*"
+    "${PROJECT_SOURCE_DIR}/resources/common/*"
 )
 
 source_group(
@@ -159,7 +157,7 @@ SetupCompilerForTarget(CalChart)
 target_include_directories(
   CalChart
   PRIVATE
-  "${PROJECT_SOURCE_DIR}/resources"
+  "${PROJECT_SOURCE_DIR}/resources/common"
 )
 
 target_link_libraries(
@@ -175,7 +173,7 @@ if(APPLE)
 
 set_target_properties(
   CalChart PROPERTIES
-  MACOSX_BUNDLE_INFO_PLIST "${PROJECT_SOURCE_DIR}/resources-macos/CalChart-Info.plist.in"
+  MACOSX_BUNDLE_INFO_PLIST "${PROJECT_SOURCE_DIR}/resources/macos/CalChart-Info.plist.in"
   MACOSX_BUNDLE_ICON_FILE calchart.icns
   MACOSX_BUNDLE TRUE
   MACOSX_FRAMEWORK_IDENTIFIER com.calband.CalChart
@@ -205,7 +203,7 @@ add_custom_command(
   "${PROJECT_SOURCE_DIR}/docs" $<TARGET_FILE_DIR:CalChart>/docs
 )
 
-target_sources(CalChart PRIVATE ${PROJECT_SOURCE_DIR}/resources-windows/WindowsHiDPI.manifest)
+target_sources(CalChart PRIVATE ${PROJECT_SOURCE_DIR}/resources/windows/WindowsHiDPI.manifest)
 
 endif ()
 
