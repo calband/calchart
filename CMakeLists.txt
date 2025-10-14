@@ -31,12 +31,15 @@ configure_file(
   )
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/version)
 
-# calchart_cmd, Mac, Linux only
+# Core library
+add_subdirectory(core)
+
+# calchart_cmd, Mac, Linux only (depends on core)
 if(NOT MSVC)
-  add_subdirectory(calchart_cmd)
+  add_subdirectory(tools/calchart_cmd)
 endif()
 
-# CalChart
+# CalChart (GUI)
 add_subdirectory(src)
 
 # CTests section
@@ -63,12 +66,12 @@ endif()
 # information about the DragNDrop installer was from:
 # https://blog.kitware.com/creating-mac-os-x-packages-with-cmake/
 include(InstallRequiredSystemLibraries)
-set(CPACK_DMG_DS_STORE_SETUP_SCRIPT "${PROJECT_SOURCE_DIR}/resources-macos/CalChart_CMakeDMGSetup.scpt")
-set(CPACK_DMG_BACKGROUND_IMAGE "${PROJECT_SOURCE_DIR}/resources-macos/CalChart_DMGBackground.png")
+set(CPACK_DMG_DS_STORE_SETUP_SCRIPT "${PROJECT_SOURCE_DIR}/resources/macos/CalChart_CMakeDMGSetup.scpt")
+set(CPACK_DMG_BACKGROUND_IMAGE "${PROJECT_SOURCE_DIR}/resources/macos/CalChart_DMGBackground.png")
 
 # information about windows NSIS installer
-set(CPACK_NSIS_MUI_ICON "${PROJECT_SOURCE_DIR}/resources/calchart.ico")
-set(CPACK_NSIS_MUI_UNIICON "${PROJECT_SOURCE_DIR}/resources/calchart.ico")
+set(CPACK_NSIS_MUI_ICON "${PROJECT_SOURCE_DIR}/resources/common/calchart.ico")
+set(CPACK_NSIS_MUI_UNIICON "${PROJECT_SOURCE_DIR}/resources/common/calchart.ico")
 
 set(CPACK_PACKAGE_VERSION_MAJOR "${CalChart_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${CalChart_VERSION_MINOR}")

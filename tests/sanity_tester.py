@@ -157,7 +157,7 @@ def main():
     output_directory = args.output if args.output is not None else tempfile.mkdtemp()
 
     # what command to run
-    calchart_cmd = args.calchart_cmd if args.calchart_cmd is not None else "./build/calchart_cmd/calchart_cmd"
+    calchart_cmd = args.calchart_cmd if args.calchart_cmd is not None else "./build/tools/calchart_cmd/calchart_cmd"
 
     # Number of CPU cores
     num_cores = multiprocessing.cpu_count() * 2
