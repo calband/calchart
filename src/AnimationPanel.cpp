@@ -249,6 +249,7 @@ void AnimationPanel::OnSlider_anim_gotobeat(wxScrollEvent& event)
     } else {
         GotoTotalBeat(event.GetPosition());
     }
+    Refresh();
 }
 
 void AnimationPanel::OnSlider_anim_gotosheet(wxScrollEvent& event)
@@ -257,6 +258,7 @@ void AnimationPanel::OnSlider_anim_gotosheet(wxScrollEvent& event)
         // because we want to show the sheets with offset 1, we need -1.
         GotoSheetBeat(event.GetPosition() - 1, 0);
     }
+    Refresh();
 }
 
 void AnimationPanel::ToggleTimer()
