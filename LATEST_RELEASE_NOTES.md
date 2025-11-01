@@ -10,6 +10,7 @@ Bugs addressed in this release:
 * [#704](../../issues/704) Reset All in Settings doesn't seem to be working
 * [#705](../../issues/705) Cannot delete image
 * [#708](../../issues/708) Beat slider with dual sliders doesn't work right
+* [#713](../../issues/713) Path tool doesn't work in 3.8.1
 
 Other changes:
 
