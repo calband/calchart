@@ -57,11 +57,9 @@ set(CPACK_PACKAGE_VENDOR "The University of California Marching Band Computer Co
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "CalChart, the tool to chart shows for the Cal Band.")
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
-if(MSVC)
-  set(CPACK_COMPONENTS_ALL applications Docs Resources)
-else()
-  set(CPACK_COMPONENTS_ALL applications)
-endif()
+## Ensure all packaging components are available to CPack on all platforms
+## so that docs and resources are included in created packages (e.g. macOS DragNDrop DMG).
+set(CPACK_COMPONENTS_ALL applications Docs Resources)
 
 # information about the DragNDrop installer was from:
 # https://blog.kitware.com/creating-mac-os-x-packages-with-cmake/
