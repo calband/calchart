@@ -3,8 +3,20 @@
 # CalChart docs
 file(
   GLOB CalChartDocs
-    "${PROJECT_SOURCE_DIR}/docs/source/*"
+    "${PROJECT_SOURCE_DIR}/docs/*"
 )
+
+# Split CalChartDocs into plain files and directories so we can install them
+# appropriately (install FILES cannot be given directories).
+set(CalChartDocFiles)
+set(CalChartDocDirs)
+foreach(_doc ${CalChartDocs})
+  if(IS_DIRECTORY ${_doc})
+    list(APPEND CalChartDocDirs ${_doc})
+  else()
+    list(APPEND CalChartDocFiles ${_doc})
+  endif()
+endforeach()
 
 file(
   GLOB CalChartResources
@@ -209,11 +221,25 @@ endif ()
 
 # we add some targets for docs and images so we can pack them for windows
 # see http://yanivresearch.info/software/CPackWindowsTutorial/CPackForWindows.html
-install(
-  FILES ${CalChartDocs}
-  DESTINATION docs
-  COMPONENT Docs
-)
+## Install top-level doc files and the docs/source directory (if present)
+if(CalChartDocFiles)
+  install(
+    FILES
+      ${CalChartDocFiles}
+    DESTINATION docs
+    COMPONENT Docs
+  )
+endif()
+
+# Install any subdirectories found under docs/ (e.g. docs/source)
+foreach(_docdir ${CalChartDocDirs})
+  get_filename_component(_basename ${_docdir} NAME)
+  install(
+    DIRECTORY "${_docdir}/"
+    DESTINATION docs/${_basename}
+    COMPONENT Docs
+  )
+endforeach()
 
 install(
   FILES ${CalChartResources}

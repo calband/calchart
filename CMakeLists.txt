@@ -57,6 +57,8 @@ set(CPACK_PACKAGE_VENDOR "The University of California Marching Band Computer Co
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "CalChart, the tool to chart shows for the Cal Band.")
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
+## Ensure all packaging components are available to CPack on all platforms
+## so that docs and resources are included in created packages (e.g. macOS DragNDrop DMG).
 if(MSVC)
   set(CPACK_COMPONENTS_ALL applications Docs Resources)
 else()
