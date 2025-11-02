@@ -59,7 +59,11 @@ set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
 ## Ensure all packaging components are available to CPack on all platforms
 ## so that docs and resources are included in created packages (e.g. macOS DragNDrop DMG).
-set(CPACK_COMPONENTS_ALL applications Docs Resources)
+if(MSVC)
+  set(CPACK_COMPONENTS_ALL applications Docs Resources)
+else()
+  set(CPACK_COMPONENTS_ALL applications)
+endif()
 
 # information about the DragNDrop installer was from:
 # https://blog.kitware.com/creating-mac-os-x-packages-with-cmake/
