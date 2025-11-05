@@ -61,6 +61,15 @@ jobs:
     - name: Checkout submodules
       run: git submodule update --init --recursive
 
+    - name: Cache vcpkg installed (Windows)
+      if: matrix.config.os == 'windows-latest'
+      uses: actions/cache@v4
+      with:
+        path: vcpkg/installed
+        key: vcpkg-${{ runner.os }}-x64-windows-static-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+          vcpkg-${{ runner.os }}-x64-windows-static-
+
     - name: Installing Xcode (MacOS)
       if: matrix.config.os == 'macos-14'
       uses: maxim-lobanov/setup-xcode@v1
@@ -83,15 +92,11 @@ jobs:
         # Add NSIS to PATH for this session
         $env:PATH = "$env:PATH;C:\Program Files (x86)\NSIS"
         echo "C:\Program Files (x86)\NSIS" >> $env:GITHUB_PATH
-        # Bootstrap vcpkg and install libcurl (x64) so CMake can find CURL on Windows
+        # Bootstrap vcpkg
         git clone https://github.com/microsoft/vcpkg.git "$Env:GITHUB_WORKSPACE\vcpkg"
         & "$Env:GITHUB_WORKSPACE\vcpkg\bootstrap-vcpkg.bat"
-        # Install the curl, wxWidgets, catch2, nlohman to CI.
-        # Use static triplet to match the rest of our static linking policy.
-        & "$Env:GITHUB_WORKSPACE\vcpkg\vcpkg.exe" install curl:x64-windows-static
-        & "$Env:GITHUB_WORKSPACE\vcpkg\vcpkg.exe" install wxwidgets:x64-windows-static
-        & "$Env:GITHUB_WORKSPACE\vcpkg\vcpkg.exe" install catch2:x64-windows-static
-        & "$Env:GITHUB_WORKSPACE\vcpkg\vcpkg.exe" install nlohmann-json:x64-windows-static
+        # Use vcpkg manifest mode to install declared ports from vcpkg.json
+        & "$Env:GITHUB_WORKSPACE\vcpkg\vcpkg.exe" install --triplet x64-windows-static --manifest
         & "$Env:GITHUB_WORKSPACE\vcpkg\vcpkg.exe" integrate install
 
     - name: Installing Dependencies (Linux)
