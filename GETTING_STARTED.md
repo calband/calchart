@@ -42,6 +42,79 @@ We recommend using apt-get to install `git`, `cmake`, `bison`, `flex`, and the g
 sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev git cmake bison flex clang-format
 ```
 
+## Dependency modes and CI behavior
+
+CalChart now supports two dependency modes to speed up developer and CI builds while still allowing fully reproducible release builds:
+
+- USE_SYSTEM_DEPENDENCIES (default ON): prefer system-installed libraries via package managers (brew/apt/vcpkg). This gives much faster configure/build cycles for local development and pull-request CI runs.
+- FORCE_VENDOR_DEPENDENCIES (default OFF): force building dependencies from source using CMake's FetchContent. This is slower but produces a self-contained, reproducible build (used for releases).
+
+CI behavior
+- Pull request and branch builds (default) use system dependencies so CI is fast. The workflow will not set `FORCE_VENDOR_DEPENDENCIES`.
+- Tag/release builds explicitly enable `FORCE_VENDOR_DEPENDENCIES=ON` when configuring CMake so releases are built from vendor sources (this ensures reproducibility of release artifacts).
+
+Fastest local build (recommended)
+1. Install dependencies with your package manager. On macOS (Homebrew):
+
+```bash
+brew install cmake clang-format wxwidgets nlohmann-json catch2
+```
+
+On Ubuntu/Debian (APT):
+
+```bash
+sudo apt-get update
+sudo apt-get install build-essential libgtk-3-dev libwxgtk3.0-gtk3-dev libcurl4-openssl-dev cmake bison flex clang-format
+```
+
+2. Configure and build using system dependencies (fast):
+
+```bash
+cmake -B build -S . -DUSE_SYSTEM_DEPENDENCIES=ON -DCMAKE_BUILD_TYPE=Debug
+cmake --build build --config Debug -j$(nproc)
+```
+
+Notes about wxWidgets and Homebrew
+- Homebrew installs `wx-config` and the wx libraries, but on some Homebrew packages a CMake package config (which provides `wx::core`, `wx::net`, `wx::gl` imported targets) is not installed. CalChart includes a small compatibility shim that creates lightweight `wx::` imported targets from the legacy `wxWidgets_*` variables when the modern targets are not present — this lets you use the Homebrew install for fast local builds.
+- If you do have a wxWidgets install that provides a CMake config/targets (in `/opt/homebrew/.../lib/cmake` or similar) you can point CMake to it with `-DCMAKE_PREFIX_PATH=/opt/homebrew/opt/wxwidgets/lib/cmake`.
+
+Reproducible release build (slow)
+- To reproduce a release (or when building on CI for a tagged release), build with vendor dependencies enabled. This downloads and builds all vendor sources (including wxWidgets) and can take substantially longer.
+
+```bash
+cmake -B build -S . -DUSE_SYSTEM_DEPENDENCIES=OFF -DFORCE_VENDOR_DEPENDENCIES=ON -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release -j$(nproc)
+```
+
+Forcing vendor deps in CI
+- The GitHub Actions workflow has been updated so that when a workflow run is for a tag (releases), the configure step will pass `-DFORCE_VENDOR_DEPENDENCIES=ON` automatically. You don't need to change CI by hand unless you want a different policy.
+
+Troubleshooting
+- If CMake fails saying a package is missing, either install the system package for your platform (brew/apt/vcpkg) or re-run CMake with `-DFORCE_VENDOR_DEPENDENCIES=ON` to let CMake fetch the source automatically (useful offline or in release automation).
+
+CI packages installed for fast builds
+-----------------------------------
+
+The CI workflow installs system packages for PR/branch builds to keep CI fast. If you want your local environment to match CI, install the same set of packages listed below.
+
+macOS (Homebrew) packages installed in CI:
+
+```bash
+brew update
+brew install cmake wxwidgets nlohmann-json catch2 pkg-config
+```
+
+Ubuntu (apt) packages installed in CI:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y build-essential libgtk-3-dev libcurl4-openssl-dev \
+	libwxgtk3.0-gtk3-dev libnlohmann-json-dev catch2 pkg-config
+```
+
+These are used by the CI job to satisfy `find_package` calls and avoid long vendor builds during PRs and branch testing.
+
+
 ## Getting the CalChart3 source code -- estimated time: 5 minutes
 
 The CalChart3 source code lives on [Github](https://github.com/calband/calchart).  We use submodules to package several projects sources together for the final project.  To get the source code to your machine, you will need to clone the repository to a local copy.  You should choose a target directory that you can find easily on your machine.  In this guide, we use the default directory location.

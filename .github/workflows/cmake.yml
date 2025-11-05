@@ -67,6 +67,14 @@ jobs:
       with:
         xcode-version: '15.4'
 
+    - name: Installing Dependencies (macOS)
+      if: matrix.config.os == 'macos-14'
+      run: |
+        # Install fast, system-deps used in developer/CI builds to speed up
+        # configure/build. Homebrew is available on macOS runners.
+        brew update
+        brew install cmake wxwidgets nlohmann-json catch2 pkg-config
+
     - name: Installing Dependencies (Windows)
       if: matrix.config.os == 'windows-latest'
       run: |
@@ -78,13 +86,21 @@ jobs:
         # Bootstrap vcpkg and install libcurl (x64) so CMake can find CURL on Windows
         git clone https://github.com/microsoft/vcpkg.git "$Env:GITHUB_WORKSPACE\vcpkg"
         & "$Env:GITHUB_WORKSPACE\vcpkg\bootstrap-vcpkg.bat"
-        # Install the static curl triplet so CI builds a statically-linked libcurl
+        # Install the curl, wxWidgets, catch2, nlohman to CI.
+        # Use static triplet to match the rest of our static linking policy.
         & "$Env:GITHUB_WORKSPACE\vcpkg\vcpkg.exe" install curl:x64-windows-static
+        & "$Env:GITHUB_WORKSPACE\vcpkg\vcpkg.exe" install wxwidgets:x64-windows-static
+        & "$Env:GITHUB_WORKSPACE\vcpkg\vcpkg.exe" install catch2:x64-windows-static
+        & "$Env:GITHUB_WORKSPACE\vcpkg\vcpkg.exe" install nlohmann-json:x64-windows-static
         & "$Env:GITHUB_WORKSPACE\vcpkg\vcpkg.exe" integrate install
 
     - name: Installing Dependencies (Linux)
       if: matrix.config.os == 'ubuntu-24.04'
-      run: sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev libcurl4-openssl-dev
+      run: |
+        sudo apt-get update
+        # Install core build tools and system libraries used by CalChart.
+        sudo apt-get install -y build-essential libgtk-3-dev libcurl4-openssl-dev \
+          libwxgtk3.0-gtk3-dev libnlohmann-json-dev catch2 pkg-config
 
     - name: Updating to gcc 14 (Linux)
       if: matrix.config.os == 'ubuntu-24.04'
@@ -97,13 +113,25 @@ jobs:
     - name: Configure CMake (Windows)
       if: matrix.config.os == 'windows-latest'
       # Tell vcpkg's CMake toolchain to use the static triplet so CMake finds static libs
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows-static
+      run: |
+        $extra = ""
+        if ($env:GITHUB_REF -like 'refs/tags/*') {
+          Write-Host "Tag build detected: enabling vendor dependencies for reproducible release build"
+          $extra = '-DFORCE_VENDOR_DEPENDENCIES=ON'
+        }
+        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows-static $extra
 
     - name: Configure CMake (non-Windows)
       if: matrix.config.os != 'windows-latest'
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+      run: |
+        EXTRA_FLAGS=""
+        if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+          echo "Tag build detected: enabling vendor dependencies for reproducible release build"
+          EXTRA_FLAGS="-DFORCE_VENDOR_DEPENDENCIES=ON"
+        fi
+        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} ${EXTRA_FLAGS}
  
     - name: Build
       # Build your program with the given configuration
