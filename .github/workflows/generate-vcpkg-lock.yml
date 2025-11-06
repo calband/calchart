@@ -27,9 +27,17 @@ jobs:
           git clone https://github.com/microsoft/vcpkg.git vcpkg
           .\vcpkg\bootstrap-vcpkg.bat
 
-      - name: Install manifest ports and attempt to generate lockfile
+      - name: Debug vcpkg and workspace
         run: |
-          .\vcpkg\vcpkg.exe install --triplet x64-windows-static --manifest
+          .\vcpkg\vcpkg.exe version || true
+          dir
+          type vcpkg.json || echo "vcpkg.json not found"
+
+      - name: Install ports (manifest auto-detect)
+        run: |
+          # Some vcpkg builds don't accept a --manifest switch; plain 'install' will
+          # auto-detect the top-level vcpkg.json when run from the repo root.
+          .\vcpkg\vcpkg.exe install --triplet x64-windows-static
 
       - name: Ensure lockfile is at repo root
         run: |
