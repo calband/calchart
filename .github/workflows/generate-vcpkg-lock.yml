@@ -24,7 +24,18 @@ jobs:
 
       - name: Clone & bootstrap vcpkg
         run: |
+          # Clone the vcpkg repo and ensure we use a recent upstream commit that
+          # supports lockfile generation. We'll try to checkout origin/main then
+          # fallback to origin/master.
           git clone https://github.com/microsoft/vcpkg.git vcpkg
+          pushd vcpkg
+          git fetch --all --tags
+          if (git show-ref --verify --quiet refs/remotes/origin/main) {
+            git checkout origin/main
+          } else {
+            git checkout origin/master
+          }
+          popd
           .\vcpkg\bootstrap-vcpkg.bat
 
       - name: Debug vcpkg and workspace
