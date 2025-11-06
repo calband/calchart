@@ -1,0 +1,10 @@
+{
+    "name": "calchart",
+    "version-string": "3.8.3",
+    "dependencies": [
+        "wxwidgets",
+        "nlohmann-json",
+        "catch2",
+        "curl"
+    ]
+}
