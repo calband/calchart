@@ -43,9 +43,9 @@ void AnimationSprites::RegenerateImages(CalChart::Configuration const& config)
     }
     mScaleSize = spriteScale;
 #if defined(__APPLE__) && (__APPLE__)
-    const static wxString kImageDir = wxStandardPaths::Get().GetResourcesDir().Append("/default_sprite_strip.png");
+    const static auto kImageDir = wxStandardPaths::Get().GetResourcesDir().Append("/default_sprite_strip.png");
 #else
-    const static wxString kImageDir = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR "resources" PATH_SEPARATOR "default_sprite_strip.png");
+    const static auto kImageDir = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR "resources" PATH_SEPARATOR "default_sprite_strip.png");
 #endif
     auto image = []() {
         wxImage image;

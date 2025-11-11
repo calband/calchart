@@ -64,9 +64,9 @@
 auto GetImageDir()
 {
 #if defined(__APPLE__) && (__APPLE__)
-    const static wxString kImageDir = wxStandardPaths::Get().GetResourcesDir().Append("/");
+    const static auto kImageDir = wxStandardPaths::Get().GetResourcesDir().Append("/");
 #else
-    const static wxString kImageDir = wxFileName(::wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR "Resources" PATH_SEPARATOR);
+    const static auto kImageDir = wxFileName(::wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR "Resources" PATH_SEPARATOR);
 #endif
     return kImageDir;
 }
@@ -234,7 +234,7 @@ static auto LoadTextureWithImage(wxImage const& image, GLuint const& texture)
     return true;
 }
 
-static auto LoadTexture(wxString const& filename, GLuint const& texture)
+static auto LoadTexture(std::string const& filename, GLuint const& texture)
 {
     wxImage image;
     if (!image.LoadFile(filename)) {

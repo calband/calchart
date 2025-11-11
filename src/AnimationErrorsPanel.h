@@ -35,7 +35,7 @@ class AnimationErrorsPanel : public wxPanel {
     DECLARE_EVENT_TABLE()
 
 public:
-    AnimationErrorsPanel(wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, wxString const& name = wxPanelNameStr);
+    AnimationErrorsPanel(wxWindow* parent);
     ~AnimationErrorsPanel() override = default;
 
     void OnUpdate(); // Refresh from the View

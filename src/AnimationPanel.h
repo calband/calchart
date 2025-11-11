@@ -46,12 +46,7 @@ public:
     AnimationPanel(
         CalChart::Configuration& config,
         wxWindow* parent,
-        bool miniMode,
-        wxWindowID winid = wxID_ANY,
-        wxPoint const& pos = wxDefaultPosition,
-        wxSize const& size = wxDefaultSize,
-        long style = wxTAB_TRAVERSAL | wxNO_BORDER,
-        wxString const& name = wxPanelNameStr);
+        bool miniMode);
     ~AnimationPanel() override;
 
     AnimationPanel(AnimationPanel const&) = delete;

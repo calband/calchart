@@ -243,7 +243,7 @@ void CalChartView::DoSetInstruments(std::map<CalChart::MarcherIndex, std::string
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-void CalChartView::DoSetSheetTitle(const wxString& descr)
+void CalChartView::DoSetSheetTitle(std::string const& descr)
 {
     auto cmd = mShow->Create_SetSheetTitleCommand(descr);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
@@ -336,9 +336,9 @@ void CalChartView::DoImportPrintableContinuity(std::string const& file)
     }
 }
 
-void CalChartView::DoSetPrintContinuity(int which_sheet, wxString const& number, wxString const& cont)
+void CalChartView::DoSetPrintContinuity(int which_sheet, std::string const& number, std::string const& cont)
 {
-    std::map<int, std::pair<std::string, std::string>> data{ { which_sheet, { number.ToStdString(), cont.ToStdString() } } };
+    std::map<int, std::pair<std::string, std::string>> data{ { which_sheet, { number, cont } } };
     auto cmd = static_cast<CalChartDoc*>(GetDocument())->Create_SetPrintableContinuity(data);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }

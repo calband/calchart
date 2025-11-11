@@ -71,7 +71,7 @@ private:
 
     void SetColor(int selection, int width, const wxColour& color);
     void SetPaletteColor(int selection, const wxColour& color);
-    void SetPaletteName(int selection, const wxString& name);
+    void SetPaletteName(int selection, const std::string& name);
     wxUI::BitmapComboBox::Proxy mNameBox{};
     wxUI::BitmapComboBox::Proxy mPaletteNameBox{};
     wxUI::SpinCtrl::Proxy mSpin{};

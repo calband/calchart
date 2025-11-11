@@ -129,19 +129,19 @@ bool PSPrintingSetUp::TransferDataFromWindow()
 {
     // read out the values from the window
     wxTextCtrl* text = (wxTextCtrl*)FindWindow(HEADFONT);
-    mFontNames[0] = text->GetValue();
+    mFontNames[0] = text->GetValue().ToStdString();
     text = (wxTextCtrl*)FindWindow(MAINFONT);
-    mFontNames[1] = text->GetValue();
+    mFontNames[1] = text->GetValue().ToStdString();
     text = (wxTextCtrl*)FindWindow(NUMBERFONT);
-    mFontNames[2] = text->GetValue();
+    mFontNames[2] = text->GetValue().ToStdString();
     text = (wxTextCtrl*)FindWindow(CONTFONT);
-    mFontNames[3] = text->GetValue();
+    mFontNames[3] = text->GetValue().ToStdString();
     text = (wxTextCtrl*)FindWindow(BOLDFONT);
-    mFontNames[4] = text->GetValue();
+    mFontNames[4] = text->GetValue().ToStdString();
     text = (wxTextCtrl*)FindWindow(ITALFONT);
-    mFontNames[5] = text->GetValue();
+    mFontNames[5] = text->GetValue().ToStdString();
     text = (wxTextCtrl*)FindWindow(BOLDITALFONT);
-    mFontNames[6] = text->GetValue();
+    mFontNames[6] = text->GetValue().ToStdString();
     text = (wxTextCtrl*)FindWindow(HEADERSIZE);
     text->GetValue().ToDouble(&mPrintValues[0]);
     text = (wxTextCtrl*)FindWindow(YARDSSIZE);

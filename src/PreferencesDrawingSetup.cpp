@@ -264,7 +264,7 @@ void DrawingSetup::SetPaletteColor(int selection, wxColour const& color)
     Refresh();
 }
 
-void DrawingSetup::SetPaletteName(int selection, wxString const& name)
+void DrawingSetup::SetPaletteName(int selection, std::string const& name)
 {
     mColorPaletteNames.at(selection) = name;
 
@@ -309,7 +309,7 @@ void DrawingSetup::OnCmdChangePaletteName()
     auto v = static_cast<std::string>(*mPaletteNameBox);
     wxTextEntryDialog dialog(this, wxT("Enter name for Palette"), wxT("Enter name for Palette"), v, wxOK | wxCANCEL);
     if (dialog.ShowModal() == wxID_OK) {
-        SetPaletteName(selection, dialog.GetValue());
+        SetPaletteName(selection, dialog.GetValue().ToStdString());
     }
     Refresh();
 }

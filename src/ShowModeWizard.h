@@ -31,7 +31,7 @@ class FancyTextWin;
 class ShowModeWizard : public wxWizardPageSimple {
 public:
     ShowModeWizard(wxWizard* parent);
-    wxString GetValue();
+    std::string GetValue();
 
 private:
     wxUI::Choice::Proxy mChoice;

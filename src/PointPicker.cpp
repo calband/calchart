@@ -56,7 +56,9 @@ PointPicker::PointPicker(wxWindow* parent, CalChartDoc const& show, CalChart::Se
         wxUI::HSizer{
             wxUI::Button{ "&All" }
                 .bind([this, mList] {
-                    mMarcherLabels = CalChart::Ranges::ToVector<std::string>(mList->GetStrings());
+                    mMarcherLabels = CalChart::Ranges::ToVector<std::string>(mList->GetStrings() | std::views::transform([](auto&& string) {
+                        return string.ToStdString();
+                    }));
                     EndModal(wxID_OK);
                 }),
             wxUI::Button{ "&None" }
@@ -73,7 +75,9 @@ PointPicker::PointPicker(wxWindow* parent, CalChartDoc const& show, CalChart::Se
                         wxUI::BitmapButton{ bitmap }
                             .bind([this, which, &show, mList] {
                                 // given a symbol, we go through the labels, and see if it matches
-                                mMarcherLabels = CalChart::Ranges::ToVector<std::string>(mList->GetStrings() | std::views::filter([which, &show](auto&& label) {
+                                mMarcherLabels = CalChart::Ranges::ToVector<std::string>(mList->GetStrings() | std::views::transform([](auto&& string) {
+                                    return string.ToStdString();
+                                }) | std::views::filter([which, &show](auto&& label) {
                                     return show.GetPointSymbol(label) == static_cast<CalChart::SYMBOL_TYPE>(which);
                                 }));
                                 EndModal(wxID_OK);
@@ -88,7 +92,9 @@ PointPicker::PointPicker(wxWindow* parent, CalChartDoc const& show, CalChart::Se
                 .withSelection(wxNOT_FOUND)
                 .bind([this, &show, mList](wxCommandEvent& e) {
                     // given the instrument, we go through the labels, and see if it matches
-                    mMarcherLabels = CalChart::Ranges::ToVector<std::string>(mList->GetStrings() | std::views::filter([&show, e](auto&& label) {
+                    mMarcherLabels = CalChart::Ranges::ToVector<std::string>(mList->GetStrings() | std::views::transform([](auto&& string) {
+                        return string.ToStdString();
+                    }) | std::views::filter([&show, e](auto&& label) {
                         return show.GetPointInstrument(label) == e.GetString();
                     }));
                     EndModal(wxID_OK);
@@ -101,11 +107,13 @@ PointPicker::PointPicker(wxWindow* parent, CalChartDoc const& show, CalChart::Se
             .withSelections(std::vector<int>{ selected.begin(), selected.end() })
             .bind([this, mList] {
                 mMarcherLabels = CalChart::Ranges::ToVector<std::string>(mList.selections().get() | std::views::transform([mList](auto&& i) {
-                    return mList->GetString(i);
+                    return mList->GetString(i).ToStdString();
                 }));
             })
             .bindDClick([this, mList] {
-                mMarcherLabels = CalChart::Ranges::ToVector<std::string>(mList->GetStrings());
+                mMarcherLabels = CalChart::Ranges::ToVector<std::string>(mList->GetStrings() | std::views::transform([](auto&& string) {
+                    return string.ToStdString();
+                }));
             }),
     }
         .fitTo(this);

@@ -70,7 +70,7 @@
 #include <wx/cmdproc.h>
 #include <wx/tglbtn.h>
 
-const wxString kSheetDataClipboardFormat = "CC_sheet_clipboard_v1";
+static constexpr auto kSheetDataClipboardFormat = "CC_sheet_clipboard_v1";
 
 static const wxChar* file_wild = FILE_WILDCARDS;
 
@@ -141,7 +141,7 @@ END_EVENT_TABLE()
 
 class CalChartPrintout : public wxPrintout {
 public:
-    CalChartPrintout(wxString const& title, CalChartDoc const& show, CalChart::Configuration const& config_)
+    CalChartPrintout(std::string const& title, CalChartDoc const& show, CalChart::Configuration const& config_)
         : wxPrintout(title)
         , mShow(show)
         , mConfig(config_)
@@ -467,7 +467,7 @@ void CalChartFrame::OnClose()
 
     // just to make sure we never end up hiding the Field
     ShowFieldAndHideAnimation(true);
-    mConfig.Set_CalChartFrameAUILayout_3_6_1(mAUIManager->SavePerspective());
+    mConfig.Set_CalChartFrameAUILayout_3_6_1(mAUIManager->SavePerspective().ToStdString());
     SetViewsOnComponents(nullptr);
 }
 
@@ -544,7 +544,7 @@ void CalChartFrame::OnExportViewerFile()
         if (saveFileDialog.ShowModal() == wxID_CANCEL)
             return;
 
-        if (!GetShow()->exportViewerFile(saveFileDialog.GetPath())) {
+        if (!GetShow()->exportViewerFile(std::filesystem::path{ saveFileDialog.GetPath().ToStdString() })) {
             wxMessageBox("There was a problem exporting the viewer file.\n" + saveFileDialog.GetPath(), "Exporting Viewer File");
             return;
         }
@@ -589,21 +589,21 @@ void CalChartFrame::OnInsertFromOtherShow()
         (void)wxMessageBox("The blocksize doesn't match", "Import Error");
         return;
     }
-    auto prompt = "Enter the %s sheet number (highest possible: %i)";
+    constexpr auto prompt = "Enter the {} sheet number (highest possible: {})";
     auto begin = wxGetTextFromUser(
-        wxString::Format(prompt, "beginning", (&show)->GetNumSheets()),
+        std::format(prompt, "beginning", show.GetNumSheets()),
         "First Sheet Number", "1", this);
     long beginValue;
-    if (!begin || !begin.ToLong(&beginValue) || beginValue < 1 || beginValue > (&show)->GetNumSheets()) {
+    if (!begin || !begin.ToLong(&beginValue) || beginValue < 1 || beginValue > show.GetNumSheets()) {
         (void)wxMessageBox("Not a valid sheet number", "Insert Failed");
         return;
     }
     long endValue;
     if (beginValue != (&show)->GetNumSheets()) {
-        wxString end = wxGetTextFromUser(
-            wxString::Format(prompt, "ending", (&show)->GetNumSheets()),
+        auto end = wxGetTextFromUser(
+            std::format(prompt, "ending", (&show)->GetNumSheets()),
             "Last Sheet Number", begin, this);
-        if (!end || !end.ToLong(&endValue) || endValue < beginValue || endValue > (&show)->GetNumSheets()) {
+        if (!end || !end.ToLong(&endValue) || endValue < beginValue || endValue > show.GetNumSheets()) {
             (void)wxMessageBox("Not a valid sheet number", "Insert Failed");
             return;
         }
@@ -623,7 +623,7 @@ void CalChartFrame::OnCopySheet()
 {
     if (wxTheClipboard->Open()) {
         std::unique_ptr<wxCustomDataObject> clipboardObject(
-            new wxCustomDataObject(kSheetDataClipboardFormat));
+            new wxCustomDataObject(wxString{ kSheetDataClipboardFormat }));
         auto serializedSheet = GetShow()->GetCurrentSheetSerialized();
 
         auto numPoints = GetShow()->GetNumPoints();
@@ -646,14 +646,14 @@ void CalChartFrame::OnCopySheet()
 void CalChartFrame::OnPasteSheet()
 {
     if (wxTheClipboard->Open()) {
-        if (wxTheClipboard->IsSupported(kSheetDataClipboardFormat)) {
-            wxCustomDataObject clipboardObject(kSheetDataClipboardFormat);
+        if (wxTheClipboard->IsSupported(wxString{ kSheetDataClipboardFormat })) {
+            wxCustomDataObject clipboardObject(wxString{ kSheetDataClipboardFormat });
             wxTheClipboard->GetData(clipboardObject);
 
             auto numPoints = GetShow()->GetNumPoints();
             memcpy(&numPoints, clipboardObject.GetData(), sizeof(numPoints));
             if (numPoints != GetShow()->GetNumPoints()) {
-                wxMessageBox(wxString::Format("Cannot paste - number of points in pasted sheet (%i) does not match number of points in current show (%i)",
+                wxMessageBox(std::format("Cannot paste - number of points in pasted sheet ({}) does not match number of points in current show ({})",
                     numPoints, GetShow()->GetNumPoints()));
                 wxTheClipboard->Close();
                 return;
@@ -698,12 +698,11 @@ void CalChartFrame::OnEditPrintContinuity()
 
 void CalChartFrame::OnSetSheetTitle()
 {
-    wxString s;
     if (GetShow()) {
-        s = wxGetTextFromUser("Enter the sheet title",
-            GetShow()->GetCurrentSheetName(),
-            GetShow()->GetCurrentSheetName(), this);
-        if (!s.IsEmpty()) {
+        if (auto s = wxGetTextFromUser("Enter the sheet title",
+                GetShow()->GetCurrentSheetName(),
+                GetShow()->GetCurrentSheetName(), this);
+            !s.IsEmpty()) {
             GetFieldView()->DoSetSheetTitle(s);
         }
     }
@@ -711,14 +710,12 @@ void CalChartFrame::OnSetSheetTitle()
 
 void CalChartFrame::OnSetBeats()
 {
-    wxString s;
     if (GetShow()) {
-        wxString buf;
-        buf.sprintf("%u", GetShow()->GetCurrentSheetBeats());
-        s = wxGetTextFromUser("Enter the number of beats",
-            GetShow()->GetCurrentSheetName(), buf, this);
-        if (!s.empty()) {
-            long val;
+        std::string buf = std::format("{}", GetShow()->GetCurrentSheetBeats());
+        if (auto s = wxGetTextFromUser("Enter the number of beats",
+                GetShow()->GetCurrentSheetName(), buf, this);
+            !s.empty()) {
+            long val{};
             if (s.ToLong(&val)) {
                 GetFieldView()->DoSetSheetBeats(static_cast<int>(val));
             }
@@ -965,8 +962,7 @@ void CalChartFrame::OnChar(wxKeyEvent& event) { mCanvas->OnChar(event); }
 
 void CalChartFrame::OnAddBackgroundImage()
 {
-    wxString filename;
-    filename = wxLoadFileSelector("Select a background image",
+    auto filename = wxLoadFileSelector("Select a background image",
         "BMP files (*.bmp)|*.bmp"
 #if wxUSE_LIBPNG
         "|PNG files (*.png)|*.png"
@@ -1045,7 +1041,7 @@ void CalChartFrame::OnGhostOption(GhostSource option)
         GetFieldView()->SetGhostSource(GhostSource::previous);
         break;
     case GhostSource::specific: {
-        wxString targetSheet = wxGetTextFromUser("Enter the sheet number to ghost:", "Ghost Sheet", "1", this);
+        auto targetSheet = wxGetTextFromUser("Enter the sheet number to ghost:", "Ghost Sheet", "1", this);
         long targetSheetNum = 0;
         if (targetSheet.ToLong(&targetSheetNum)) {
             GetFieldView()->SetGhostSource(GhostSource::specific, static_cast<int>(targetSheetNum) - 1);
@@ -1061,7 +1057,7 @@ void CalChartFrame::OnGhostOption(GhostSource option)
 void CalChartFrame::OnCmd_InstrumentSelection(wxCommandEvent&)
 {
     auto choice = static_cast<wxChoice*>(FindWindow(CALCHART__InstrumentChoice));
-    auto selection = choice->GetString(choice->GetSelection());
+    auto selection = choice->GetString(choice->GetSelection()).ToStdString();
     if (selection != "" && GetShow()) {
         GetShow()->SetSelectionList(GetShow()->MakeSelectByInstrument(selection));
     }
@@ -1070,7 +1066,7 @@ void CalChartFrame::OnCmd_InstrumentSelection(wxCommandEvent&)
 void CalChartFrame::OnCmd_SymbolSelection(wxCommandEvent&)
 {
     auto choice = static_cast<wxChoice*>(FindWindow(CALCHART__SymbolChoice));
-    auto selection = choice->GetString(choice->GetSelection());
+    auto selection = choice->GetString(choice->GetSelection()).ToStdString();
     if (selection != "" && GetShow()) {
         GetShow()->SetSelectionList(GetShow()->MakeSelectByInstrument(selection));
     }
@@ -1079,7 +1075,7 @@ void CalChartFrame::OnCmd_SymbolSelection(wxCommandEvent&)
 void CalChartFrame::OnCmd_MarcherSelection(wxCommandEvent&)
 {
     auto choice = static_cast<wxChoice*>(FindWindow(CALCHART__MarcherChoice));
-    auto selection = choice->GetString(choice->GetSelection());
+    auto selection = choice->GetString(choice->GetSelection()).ToStdString();
     if (selection != "" && GetShow()) {
         GetShow()->SetSelectionList(GetShow()->MakeSelectByLabel(selection));
     }
@@ -1185,7 +1181,7 @@ void CalChartFrame::AppendShow()
 // Append a show with file selector
 void CalChartFrame::ImportContFile()
 {
-    if (std::string s = wxFileSelector("Import Continuity", wxEmptyString, wxEmptyString, wxEmptyString, "*.txt");
+    if (auto s = wxFileSelector("Import Continuity", wxEmptyString, wxEmptyString, wxEmptyString, "*.txt").ToStdString();
         !s.empty()) {
         GetFieldView()->DoImportPrintableContinuity(s);
     }
@@ -1303,8 +1299,7 @@ void CalChartFrame::zoom_callback_textenter(wxCommandEvent& event)
     if (zoomtxt.ToDouble(&zoom_amount)) {
         zoom_amount /= 100.0;
     } else {
-        wxString msg("Please enter a valid number\n");
-        wxMessageBox(msg, "Invalid number", wxICON_INFORMATION | wxOK);
+        wxMessageBox("Please enter a valid number\n", "Invalid number", wxICON_INFORMATION | wxOK);
         // return if not valid
         return;
     }
@@ -1325,40 +1320,36 @@ float CalChartFrame::ToolBarSetZoom(float zoom_amount)
     return zoom_amount;
 }
 
-wxString CalChartFrame::BeatStatusText() const
+std::string CalChartFrame::BeatStatusText() const
 {
-    wxString result;
     auto name = GetShow()->GetCurrentSheetName();
     auto beats = GetShow()->GetCurrentSheetBeats();
     auto num = GetShow()->GetNumSheets();
     auto curr = GetFieldView()->GetCurrentSheetNum() + 1;
 
-    result.sprintf("%s%d of %d \"%.32s\" %d beats", GetShow()->IsModified() ? "* " : "", curr, num, name, beats);
-    return result;
+    return std::format("{}{} of {} \"{:.32}\" {} beats", GetShow()->IsModified() ? "* " : "", curr, num, name, beats);
 }
 
-wxString CalChartFrame::PointStatusText() const
+std::string CalChartFrame::PointStatusText() const
 {
     auto const* show = GetShow();
-    wxString result;
     auto sl = show->GetSelectionList();
-    result << show->GetSelectionList().size() << " of "
-           << show->GetNumPoints() << " selected";
+    std::string result = std::format("{} of {}", show->GetSelectionList().size(), show->GetNumPoints());
     std::set<std::string> instruments;
     std::transform(sl.begin(), sl.end(), std::inserter(instruments, instruments.begin()), [&show](auto&& i) {
         return show->GetPointInstrument(i);
     });
     if (instruments.size()) {
-        result << " [ ";
+        result += " [ ";
         auto firstTime = true;
         for (auto&& i : instruments) {
             if (!firstTime) {
-                result << ", ";
+                result += ", ";
             }
             firstTime = false;
-            result << i;
+            result += i;
         }
-        result << " ]";
+        result += " ]";
     }
     return result;
 }

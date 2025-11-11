@@ -1,18 +1,8 @@
-## Release notes for 3.8.3
+## Release notes for 3.8.4
 
 Bugs addressed in this release:
 
-* [#673](../../issues/673) Omniview doesn't look right
-* [#690](../../issues/690) ASAN crash when you close a show with X and then reopen
-* [#692](../../issues/692) CalChart Windows Field Thumbnails Appear Incorrectly
-* [#702](../../issues/702) libcurl is not found on windows
-* [#703](../../issues/703) Num ratio is not working right, numbers don't get bigger
-* [#704](../../issues/704) Reset All in Settings doesn't seem to be working
-* [#705](../../issues/705) Cannot delete image
-* [#708](../../issues/708) Beat slider with dual sliders doesn't work right
-* [#713](../../issues/713) Path tool doesn't work in 3.8.1
-
 Other changes:
 
-* [#696](../../issues/696) We should have something that checks for a new version is available and prompts the user to download it.
+* [#635](../../issues/635) Reduce usage of wxString
 

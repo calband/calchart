@@ -117,7 +117,7 @@ public:
      * expects a viewer file to end with the '.viewer' extension.
      * @return True if the file was saved successfully; false otherwise.
      */
-    bool exportViewerFile(wxString const& filepath);
+    bool exportViewerFile(std::filesystem::path const& filepath);
 
 private:
     template <typename T>

@@ -52,13 +52,8 @@ END_EVENT_TABLE()
 AnimationPanel::AnimationPanel(
     CalChart::Configuration& config,
     wxWindow* parent,
-    bool miniMode,
-    wxWindowID winid,
-    wxPoint const& pos,
-    wxSize const& size,
-    long style,
-    wxString const& name)
-    : super(parent, winid, pos, size, style, name)
+    bool miniMode)
+    : super(parent)
     , mCanvas(new AnimationCanvas(config, *this, wxSize(-1, GetAnimationCanvasMinY())))
     , mOmniCanvas(new CCOmniviewCanvas(*this, config))
     , mTimer(new wxTimer(this, CALCHART__anim_next_beat_timer))
