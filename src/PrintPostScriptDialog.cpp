@@ -84,7 +84,7 @@ void PrintPostScriptDialog::Init() { }
 void PrintPostScriptDialog::PrintShow()
 {
 #ifdef PRINT__RUN_CMD
-    wxString buf;
+    std::string buf;
 #endif
 
     long minyards;
@@ -100,7 +100,7 @@ void PrintPostScriptDialog::PrintShow()
     case CC_PRINT_ACTION_PREVIEW: {
 #ifdef PRINT__RUN_CMD
         s = wxFileName::CreateTempFileName("cc_");
-        buf.sprintf("%s %s \"%s\"", mConfig.Get_PrintViewCmd().c_str(), mConfig.Get_PrintViewCmd().c_str(), s.c_str());
+        buf = std::format("{} {} \"{}\"", mConfig.Get_PrintViewCmd(), mConfig.Get_PrintViewCmd(), s.ToStdString());
 #endif
     } break;
     case CC_PRINT_ACTION_FILE:
@@ -111,7 +111,7 @@ void PrintPostScriptDialog::PrintShow()
     case CC_PRINT_ACTION_PRINTER: {
 #ifdef PRINT__RUN_CMD
         s = wxFileName::CreateTempFileName("cc_");
-        buf.sprintf("%s %s \"%s\"", mConfig.Get_PrintCmd().c_str(), mConfig.Get_PrintOpts().c_str(), s.c_str());
+        buf = std::format("{} {} \"{}\"", mConfig.Get_PrintViewCmd(), mConfig.Get_PrintViewCmd(), s.ToStdString());
 #else
 #endif
     } break;
@@ -129,15 +129,13 @@ void PrintPostScriptDialog::PrintShow()
         break;
     default:
         // intentionally ignoring the result
-        (void)system(buf.utf8_str());
+        (void)system(buf.c_str());
         wxRemoveFile(s);
         break;
     }
 #endif
 
-    wxString tempbuf;
-    tempbuf.sprintf("Printed %d pages.", n);
-    (void)wxMessageBox(tempbuf, mShow->GetTitle());
+    (void)wxMessageBox(std::format("Printed {} pages.", n), mShow->GetTitle());
 }
 
 void PrintPostScriptDialog::ShowPrintSelect(wxCommandEvent&)
@@ -322,10 +320,10 @@ bool PrintPostScriptDialog::TransferDataToWindow()
 bool PrintPostScriptDialog::TransferDataFromWindow()
 {
 #ifdef PRINT__RUN_CMD
-    mConfig.Set_PrintCmd(text_cmd->GetValue());
-    mConfig.Set_PrintOpts(text_opts->GetValue());
-    mConfig.Set_PrintViewCmd(text_view_cmd->GetValue());
-    mConfig.Set_PrintViewOpts(text_view_opts->GetValue());
+    mConfig.Set_PrintCmd(text_cmd->GetValue().ToStdString());
+    mConfig.Set_PrintOpts(text_opts->GetValue().ToStdString());
+    mConfig.Set_PrintViewCmd(text_view_cmd->GetValue().ToStdString());
+    mConfig.Set_PrintViewOpts(text_view_opts->GetValue().ToStdString());
 #else
     mConfig.Set_PrintFile(text_cmd->GetValue());
 #endif

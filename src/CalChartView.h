@@ -58,7 +58,7 @@ public:
     void DoSetMode(CalChart::ShowMode const& mode);
     void DoSetupMarchers(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int numColumns);
     void DoSetInstruments(std::map<CalChart::MarcherIndex, std::string> const& dotToInstrument);
-    void DoSetSheetTitle(wxString const& descr);
+    void DoSetSheetTitle(std::string const& descr);
     void DoSetSheetBeats(CalChart::Beats beats);
     void DoSetPointsLabel(bool right);
     void DoSetPointsLabelVisibility(bool isVisible);
@@ -67,7 +67,7 @@ public:
     void DoInsertSheets(CalChart::Show::Sheet_container_t const& sht, int where);
     void DoDeleteSheet(int where);
     void DoImportPrintableContinuity(std::string const& file);
-    void DoSetPrintContinuity(int which_sheet, const wxString& number, const wxString& cont);
+    void DoSetPrintContinuity(int which_sheet, std::string const& number, std::string const& cont);
     void DoSetContinuityCommand(CalChart::SYMBOL_TYPE sym, CalChart::Continuity const& new_cont);
     void DoAddSheetCurveCommand(CalChart::Curve const& curve);
     void DoReplaceSheetCurveCommand(CalChart::Curve const& curve, int whichCurve);

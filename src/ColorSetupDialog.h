@@ -75,7 +75,7 @@ private:
 
     void SetColor(int selection, int width, const wxColour& color);
     void SetPaletteColor(const wxColour& color);
-    void SetPaletteName(const wxString& name);
+    void SetPaletteName(std::string const& name);
     bool ClearValuesToDefault();
 
     nlohmann::json Export() const;

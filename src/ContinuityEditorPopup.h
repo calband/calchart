@@ -33,18 +33,18 @@ class ContinuityEditorPopup : public wxDialog {
 
 public:
     // all in one function for editing
-    static wxString ProcessEditContinuity(wxWindow* parent, wxString const& whatError, wxString const& input, int line, int column);
+    static std::string ProcessEditContinuity(wxWindow* parent, std::string const& whatError, std::string const& input, int line, int column);
 
-    ContinuityEditorPopup(wxString const& whatError, wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Edit Continuity"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
+    ContinuityEditorPopup(std::string const& whatError, wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Edit Continuity"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
     virtual ~ContinuityEditorPopup() override = default;
 
     auto GetValue() const { return mUserInput->GetValue(); }
-    void SetValue(wxString const& value, int line, int column);
+    void SetValue(std::string const& value, int line, int column);
 
 private:
     void CreateControls();
 
-    wxString mWhatError;
-    wxString mStartingValue;
+    std::string mWhatError;
+    std::string mStartingValue;
     wxUI::TextCtrl::Proxy mUserInput;
 };

@@ -181,8 +181,8 @@ private:
     void ChangeMainFieldVisibility(bool show);
     void ShowFieldAndHideAnimation(bool showField);
     void SetViewsOnComponents(CalChartView* showField);
-    wxString BeatStatusText() const;
-    wxString PointStatusText() const;
+    std::string BeatStatusText() const;
+    std::string PointStatusText() const;
 
     // the components
     FieldCanvas* mCanvas{};

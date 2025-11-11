@@ -27,13 +27,13 @@
 
 namespace {
 
-auto GetEntry(wxConfigBase& config, wxString const& entry) -> wxString
+auto GetEntry(wxConfigBase& config, std::string const& entry) -> std::string
 {
     switch (config.GetEntryType(entry)) {
     case wxConfigBase::Type_String: {
         auto def = wxString{};
         if (config.Read(entry, &def)) {
-            return def;
+            return def.ToStdString();
         }
     } break;
     case wxConfigBase::Type_Boolean: {

@@ -32,8 +32,8 @@ EVT_TREELIST_SELECTION_CHANGED(wxID_ANY, AnimationErrorsPanel::OnSelectionChange
 EVT_TREELIST_ITEM_ACTIVATED(wxID_ANY, AnimationErrorsPanel::OnItemActivated)
 END_EVENT_TABLE()
 
-AnimationErrorsPanel::AnimationErrorsPanel(wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
-    : super(parent, winid, pos, size, style, name)
+AnimationErrorsPanel::AnimationErrorsPanel(wxWindow* parent)
+    : super(parent)
 {
     Init();
     CreateControls();

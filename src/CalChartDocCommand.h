@@ -31,8 +31,8 @@ public:
     using CC_doc_command = std::function<void(CalChartDoc&)>;
     using CC_doc_command_pair = std::pair<CC_doc_command, CC_doc_command>;
 
-    CalChartDocCommand(CalChartDoc& doc, const wxString& cmd_descr, CC_doc_command_pair const& cmds);
-    CalChartDocCommand(CalChartDoc& doc, const wxString& cmd_descr, std::vector<CC_doc_command_pair> const& cmds);
+    CalChartDocCommand(CalChartDoc& doc, std::string const& cmd_descr, CC_doc_command_pair const& cmds);
+    CalChartDocCommand(CalChartDoc& doc, std::string const& cmd_descr, std::vector<CC_doc_command_pair> const& cmds);
 
     virtual bool Do();
     virtual bool Undo();

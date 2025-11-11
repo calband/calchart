@@ -87,7 +87,7 @@ auto CreateTempBitmap(CalChart::Color c)
 
 void ColorSetupDialog::CreateControls()
 {
-    auto colorNames = std::vector<std::tuple<wxString, wxBitmap>>{};
+    auto colorNames = std::vector<std::tuple<std::string, wxBitmap>>{};
     for (auto i : CalChart::ColorsIterator{}) {
         colorNames.push_back({ CalChart::GetColorNames().at(toUType(i)), CreateItemBitmap(wxCalChart::toBrush(mConfig.Get_CalChartBrushAndPen(i))) });
     }
@@ -168,7 +168,7 @@ bool ColorSetupDialog::TransferDataToWindow()
 bool ColorSetupDialog::TransferDataFromWindow()
 {
     auto text = static_cast<wxTextCtrl*>(FindWindow(PALETTE_NAME));
-    mConfig.SetColorPaletteName(mActiveColorPalette, text->GetValue());
+    mConfig.SetColorPaletteName(mActiveColorPalette, text->GetValue().ToStdString());
     return true;
 }
 
@@ -210,7 +210,7 @@ void ColorSetupDialog::SetPaletteColor(const wxColour& color)
     Refresh();
 }
 
-void ColorSetupDialog::SetPaletteName(const wxString& name)
+void ColorSetupDialog::SetPaletteName(std::string const& name)
 {
     mColorPaletteNames.at(mActiveColorPalette) = name;
 
@@ -275,7 +275,7 @@ void ColorSetupDialog::OnCmdTextChanged(wxCommandEvent& e)
     if (id == PALETTE_NAME) {
         auto text = static_cast<wxTextCtrl*>(FindWindow(id));
         mColorPaletteNames.at(mActiveColorPalette) = text->GetValue();
-        mConfig.SetColorPaletteName(mActiveColorPalette, text->GetValue());
+        mConfig.SetColorPaletteName(mActiveColorPalette, text->GetValue().ToStdString());
     }
     Refresh();
 }
@@ -317,7 +317,7 @@ nlohmann::json ColorSetupDialog::Export() const
 void ColorSetupDialog::Import(nlohmann::json const& j)
 {
     // Read all values and after they are read, then write them out.
-    wxString newName{};
+    std::string newName{};
     wxColor newColor{};
     wxColor newFieldColors[toUType(CalChart::Colors::NUM)] = {};
     int newFieldColorsWidths[toUType(CalChart::Colors::NUM)] = {};
@@ -361,10 +361,11 @@ void ColorSetupDialog::Import(nlohmann::json const& j)
 
 void ColorSetupDialog::OnCmdExport(wxCommandEvent&)
 {
-    wxString s = wxFileSelector("Export CalChart Color Palette", wxEmptyString,
+    auto s = wxFileSelector("Export CalChart Color Palette", wxEmptyString,
         wxEmptyString, wxEmptyString, "calchart color palette (*.ccpalette)|*.ccpalette", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-    if (s.IsEmpty())
+    if (s.IsEmpty()) {
         return;
+    }
     auto j = Export();
     auto o = std::ofstream(s.ToStdString());
     o << std::setw(4) << j << std::endl;
@@ -372,10 +373,11 @@ void ColorSetupDialog::OnCmdExport(wxCommandEvent&)
 
 void ColorSetupDialog::OnCmdImport(wxCommandEvent&)
 {
-    wxString s = wxFileSelector(wxT("Import CalChart Color Palette"), wxEmptyString,
+    auto s = wxFileSelector(wxT("Import CalChart Color Palette"), wxEmptyString,
         wxEmptyString, wxEmptyString, "calchart color palette (*.ccpalette)|*.ccpalette");
-    if (s.IsEmpty())
+    if (s.IsEmpty()) {
         return;
+    }
     auto j = nlohmann::json{};
     auto input = std::ifstream(s.ToStdString());
     input >> j;

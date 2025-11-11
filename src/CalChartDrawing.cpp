@@ -67,7 +67,7 @@ static const auto kStep2 = fDIP(CalChart::Int2CoordUnits(2));
 static const auto kStep1 = fDIP(CalChart::Int2CoordUnits(1));
 
 // draw text centered around x (though still at y down)
-auto GenerateDrawLineOverText(const wxString& text, int lineLength) -> std::vector<CalChart::Draw::DrawCommand>
+auto GenerateDrawLineOverText(std::string const& text, int lineLength) -> std::vector<CalChart::Draw::DrawCommand>
 {
     using TextAnchor = CalChart::Draw::Text::TextAnchor;
     return std::vector<CalChart::Draw::DrawCommand>{

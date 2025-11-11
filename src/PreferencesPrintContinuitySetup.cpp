@@ -110,7 +110,7 @@ void PrintContinuitySetup::CreateControls()
 
     mUserInput->SetValue(DefaultText);
 
-    mPrintContDisplay->SetPrintContinuity(CalChart::PrintContinuity("", mUserInput->GetValue()));
+    mPrintContDisplay->SetPrintContinuity(CalChart::PrintContinuity("", mUserInput->GetValue().ToStdString()));
     TransferDataToWindow();
 }
 
@@ -189,6 +189,6 @@ bool PrintContinuitySetup::ClearValuesToDefault()
 
 void PrintContinuitySetup::OnKeyPress(wxCommandEvent&)
 {
-    mPrintContDisplay->SetPrintContinuity(CalChart::PrintContinuity("", mUserInput->GetValue()));
+    mPrintContDisplay->SetPrintContinuity(CalChart::PrintContinuity("", mUserInput->GetValue().ToStdString()));
     Refresh();
 }

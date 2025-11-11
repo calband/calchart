@@ -23,12 +23,12 @@
 #include "CalChartDocCommand.h"
 #include "CalChartDoc.h"
 
-CalChartDocCommand::CalChartDocCommand(CalChartDoc& doc, const wxString& cmd_descr, CC_doc_command_pair const& cmds)
+CalChartDocCommand::CalChartDocCommand(CalChartDoc& doc, std::string const& cmd_descr, CC_doc_command_pair const& cmds)
     : CalChartDocCommand(doc, cmd_descr, std::vector<CC_doc_command_pair>{ cmds })
 {
 }
 
-CalChartDocCommand::CalChartDocCommand(CalChartDoc& doc, const wxString& cmd_descr, std::vector<CC_doc_command_pair> const& cmds)
+CalChartDocCommand::CalChartDocCommand(CalChartDoc& doc, std::string const& cmd_descr, std::vector<CC_doc_command_pair> const& cmds)
     : wxCommand(true, cmd_descr)
     , mDoc(doc)
     , mDocModified(doc.IsModified())

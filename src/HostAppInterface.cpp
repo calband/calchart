@@ -22,7 +22,7 @@ struct CCAppServerConnection;
 struct CCAppServer : public wxServer {
     static auto GetServerName()
     {
-        auto name = wxGetUserId() + wxStandardPaths::Get().GetExecutablePath();
+        auto name = (wxGetUserId() + wxStandardPaths::Get().GetExecutablePath()).ToStdString();
         return std::to_string(static_cast<int16_t>(std::hash<std::string>{}(name)));
     }
 

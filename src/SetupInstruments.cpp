@@ -325,7 +325,7 @@ void SetupInstruments::OnCmdChoice()
         mInstrumentChoice->SetSelection(wxNOT_FOUND);
         return;
     }
-    auto result = mInstrumentChoice->GetString(mInstrumentChoice->GetSelection());
+    auto result = mInstrumentChoice->GetString(mInstrumentChoice->GetSelection()).ToStdString();
     if (result == kMultiple) {
         return;
     }

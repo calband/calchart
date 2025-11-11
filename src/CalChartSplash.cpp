@@ -66,9 +66,9 @@ auto BitmapWithBandIcon(wxSize const& size)
 
     wxImage image;
 #if defined(__APPLE__) && (__APPLE__)
-    const static wxString kImageDir = wxStandardPaths::Get().GetResourcesDir().Append("/calchart.png");
+    const static auto kImageDir = wxStandardPaths::Get().GetResourcesDir().Append("/calchart.png");
 #else
-    const static wxString kImageDir = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR wxT("resources") PATH_SEPARATOR wxT("calchart.png"));
+    const static auto kImageDir = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR wxT("resources") PATH_SEPARATOR wxT("calchart.png"));
 #endif
     if (image.LoadFile(kImageDir)) {
         if (size != wxDefaultSize) {
@@ -79,7 +79,7 @@ auto BitmapWithBandIcon(wxSize const& size)
     return wxBitmap(BITMAP_NAME(calchart));
 }
 
-CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString const& title, CalChart::Configuration& config)
+CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, std::string const& title, CalChart::Configuration& config)
     : super(manager, frame, wxID_ANY, title)
     , mConfig(config)
 {

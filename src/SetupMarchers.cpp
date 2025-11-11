@@ -173,7 +173,7 @@ static auto GenLetterLabels(int numPerLetter, int num, wxListBox const* label_le
             if (label_letters->IsSelected(letr)) {
                 auto n = std::min(num, numPerLetter);
                 for (auto i = 0; i < n; ++i) {
-                    results.push_back({ label_letters->GetString(letr) + std::to_string(i), kDefaultInstrument });
+                    results.push_back({ label_letters->GetString(letr).ToStdString() + std::to_string(i), kDefaultInstrument });
                 }
                 num -= n;
             }
@@ -190,7 +190,7 @@ static auto GenLetterLabels(int numPerLetter, int num, wxListBox const* label_le
                 } else {
                     buffer.Printf(wxT("%c%u"), 'A' + letr, i);
                 }
-                results.push_back({ buffer, "" });
+                results.push_back({ buffer.ToStdString(), "" });
             }
             num -= n;
             ++letr;

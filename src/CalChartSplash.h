@@ -33,7 +33,7 @@ class CalChartSplash : public wxDocParentFrame {
     using super = wxDocParentFrame;
     DECLARE_CLASS(CalChartSplash)
 public:
-    CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString const& title, CalChart::Configuration& config);
+    CalChartSplash(wxDocManager* manager, wxFrame* frame, std::string const& title, CalChart::Configuration& config);
     ~CalChartSplash() = default;
 
     static void About();

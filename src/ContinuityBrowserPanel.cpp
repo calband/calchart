@@ -100,7 +100,7 @@ void ContinuityBrowserPanel::OnNewEntry(int cell)
         copied_cont.insert(copied_cont.begin() + cell, dialog.GetContinuity());
         UpdateCont(CalChart::Continuity{ std::move(copied_cont) });
     } catch (std::runtime_error const& e) {
-        wxMessageBox(wxT("Error: ") + wxString{ e.what() }, wxT("Parsing Error"), wxOK | wxICON_INFORMATION, this);
+        wxMessageBox(std::string{ "Error: " } + e.what(), "Parsing Error", wxOK | wxICON_INFORMATION, this);
         return;
     }
 }
@@ -118,7 +118,7 @@ void ContinuityBrowserPanel::OnEditEntry(int cell)
         copied_cont.at(cell) = dialog.GetContinuity();
         UpdateCont(CalChart::Continuity{ std::move(copied_cont) });
     } catch (std::runtime_error const& e) {
-        wxMessageBox(wxT("Error: ") + wxString{ e.what() }, wxT("Parsing Error"), wxOK | wxICON_INFORMATION, this);
+        wxMessageBox(std::string{ "Error: " } + e.what(), wxT("Parsing Error"), wxOK | wxICON_INFORMATION, this);
         return;
     }
 }

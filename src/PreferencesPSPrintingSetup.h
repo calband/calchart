@@ -59,6 +59,6 @@ private:
     void InitFromConfig() override;
     void CreateControls() override;
 
-    wxString mFontNames[7];
+    std::string mFontNames[7];
     double mPrintValues[8];
 };

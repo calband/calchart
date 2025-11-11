@@ -40,7 +40,7 @@ ShowModeWizard::ShowModeWizard(wxWizard* parent)
         .fitTo(this);
 }
 
-wxString ShowModeWizard::GetValue()
+std::string ShowModeWizard::GetValue()
 {
-    return mChoice->GetString(*mChoice);
+    return mChoice->GetString(*mChoice).ToStdString();
 }

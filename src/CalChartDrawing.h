@@ -39,7 +39,6 @@
 #include <wx/dc.h>
 
 class wxBrush;
-class wxString;
 namespace CalChart {
 class Sheet;
 struct Textline;
