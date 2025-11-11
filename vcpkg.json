@@ -2,9 +2,21 @@
     "name": "calchart",
     "version-string": "3.8.3",
     "dependencies": [
-        "wxwidgets",
+        {
+            "name": "wxwidgets",
+            "version>=": "3.2.8.1"
+        },
         "nlohmann-json",
         "catch2",
-        "curl"
-    ]
+        "curl",
+        {
+            "name": "bison",
+            "platform": "windows"
+        },
+        {
+            "name": "flex",
+            "platform": "windows"
+        }
+    ],
+    "builtin-baseline": "365f6444ab40ee87c73c947b475b3a267b3cb77c"
 }
