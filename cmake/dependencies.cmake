@@ -70,6 +70,13 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(docopt)
 
 FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2
+  GIT_TAG        6e79e68 # v3.4.0
+)
+FetchContent_MakeAvailable(Catch2)
+
+FetchContent_Declare(
   wxUI
   GIT_REPOSITORY https://github.com/rmpowell77/wxUI.git
   GIT_TAG        aea5c52fb5d5525c2770954574acacaae24f9b3b # v0.2.2
@@ -89,6 +96,10 @@ if(USE_SYSTEM_DEPENDENCIES)
   find_package(wxWidgets CONFIG REQUIRED COMPONENTS core base net gl xml adv QUIET)
 endif()
 
+set(wxBUILD_SHARED OFF)
+set(wxUSE_STL ON)
+set(wxUSE_STC OFF)
+set(wxUSE_STD_CONTAINERS ON)
 if(wxWidgets_FOUND OR TARGET wx::core)
   # If the find_package produced imported targets (wx::core, wx::net, wx::gl etc)
   # then we can use them directly. Otherwise, the system wxWidgets may only
@@ -108,10 +119,6 @@ if(wxWidgets_FOUND OR TARGET wx::core)
     if(FORCE_VENDOR_DEPENDENCIES)
       message(WARNING "System wxWidgets found but does not provide modern imported targets (wx::core, wx::net, wx::gl). Falling back to vendor build.")
       # Have wxWidgets build as static libraries
-      set(wxBUILD_SHARED OFF)
-      set(wxUSE_STL ON)
-      set(wxUSE_STC OFF)
-      set(wxUSE_STD_CONTAINERS ON)
       FetchContent_Declare(
         wxWidgets
         GIT_REPOSITORY "https://github.com/wxWidgets/wxWidgets.git"
@@ -167,10 +174,6 @@ else()
   if(FORCE_VENDOR_DEPENDENCIES)
     message(STATUS "Fetching wxWidgets sources for vendor build (this can be slow).")
     # Have wxWidgets build as static libraries
-    set(wxBUILD_SHARED OFF)
-    set(wxUSE_STL ON)
-    set(wxUSE_STC OFF)
-    set(wxUSE_STD_CONTAINERS ON)
     FetchContent_Declare(
       wxWidgets
       GIT_REPOSITORY "https://github.com/wxWidgets/wxWidgets.git"
@@ -182,7 +185,3 @@ else()
     message(FATAL_ERROR "wxWidgets not found. On macOS: brew install wxwidgets; On Ubuntu: apt install libwxgtk3.0-dev. Or re-run with -DFORCE_VENDOR_DEPENDENCIES=ON to fetch and build wxWidgets from source (release mode).")
   endif()
 endif()
-
-
-# Catch2 (tests) — try to find system package, otherwise fetch
-try_find_or_fetch(Catch2 Catch2 https://github.com/catchorg/Catch2 6e79e68)
