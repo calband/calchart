@@ -61,31 +61,12 @@ jobs:
     - name: Checkout submodules
       run: git submodule update --init --recursive
 
-    - name: Cache vcpkg
-      uses: actions/cache@v3
+      - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
       with:
-        path: |
-          vcpkg_installed
-          ${{ github.workspace }}/vcpkg
-        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
-        restore-keys: |
-          vcpkg-${{ runner.os }}-
-
-    - name: Setup vcpkg
-      run: |
-        if [ ! -d "vcpkg" ]; then
-          git clone https://github.com/microsoft/vcpkg.git
-        fi
-
-    - name: Setup vcpkg (windows)
-      if: matrix.config.os == 'windows-latest'
-      run: |
-        ./vcpkg/bootstrap-vcpkg.bat
-
-    - name: Setup vcpkg (non-windows)
-      if: matrix.config.os != 'windows-latest'
-      run: |
-        ./vcpkg/bootstrap-vcpkg.sh
+        vcpkgJsonGlob: 'vcpkg.json'
+      env:
+        VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
 
     - name: Installing Xcode (MacOS)
       if: matrix.config.os == 'macos-14'
@@ -106,7 +87,7 @@ jobs:
       if: matrix.config.os == 'ubuntu-24.04'
       run: |
         sudo apt-get update
-        sudo apt-get install -y autoconf autoconf-archive automake libtoolize
+        sudo apt-get install -y autoconf autoconf-archive automake
         sudo apt-get install -y build-essential libgtk-3-dev libcurl4-openssl-dev pkg-config ninja-build
 
     - name: Updating to gcc 14 (Linux)
@@ -120,12 +101,12 @@ jobs:
     - name: Configure CMake (Windows)
       if: matrix.config.os == 'windows-latest'
       # Use vcpkg toolchain file provided by setup-vcpkg; force static triplet
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-static
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-static
 
     - name: Configure CMake (non-Windows)
       if: matrix.config.os != 'windows-latest'
       # Use vcpkg toolchain on macOS/Linux; triplet auto-selected (x64-osx / x64-linux)
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
  
     - name: Build
       # Build your program with the given configuration
