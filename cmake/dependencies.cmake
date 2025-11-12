@@ -88,7 +88,7 @@ if(USE_SYSTEM_DEPENDENCIES)
   # and wx::net are created by the find_package call.
   find_package(wxWidgets CONFIG REQUIRED COMPONENTS core base net gl xml adv QUIET)
 endif()
- 
+
 if(wxWidgets_FOUND OR TARGET wx::core)
   # If the find_package produced imported targets (wx::core, wx::net, wx::gl etc)
   # then we can use them directly. Otherwise, the system wxWidgets may only
