@@ -19,11 +19,6 @@ jobs:
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
-    env:
-      # Enable manifest mode (uses vcpkg.json) and binary caching to speed up CI builds
-      VCPKG_FEATURE_FLAGS: manifests,binarycaching
-      # Use GitHub Actions cache integration for vcpkg artifacts
-      VCPKG_BINARY_SOURCES: clear;x-gha,readwrite
     strategy:
       fail-fast: false
       matrix:
@@ -66,15 +61,27 @@ jobs:
     - name: Checkout submodules
       run: git submodule update --init --recursive
 
-    # Setup vcpkg (will bootstrap and install dependencies declared in vcpkg.json).
-    # Action provides caching automatically via GitHub Actions cache with the env flags above.
-    - name: Setup vcpkg
-      id: setup-vcpkg
-      uses: microsoft/setup-vcpkg@v1.2.0
+    - name: Cache vcpkg
+      uses: actions/cache@v3
       with:
-        vcpkgJson: '${{ github.workspace }}/vcpkg.json'
-        # Optional: specify additional commits or registry configuration here if needed later.
-        # By default this uses latest bootstrap from the action.
+        path: |
+          vcpkg_installed
+          ${{ github.workspace }}/vcpkg
+        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+          vcpkg-${{ runner.os }}-
+    
+    - name: Setup vcpkg (windows)
+      if: matrix.config.os == 'windows-latest'
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git
+        ./vcpkg/bootstrap-vcpkg.bat
+
+    - name: Setup vcpkg (non-windows)
+      if: matrix.config.os != 'windows-latest'
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git
+        ./vcpkg/bootstrap-vcpkg.sh
 
     - name: Installing Xcode (MacOS)
       if: matrix.config.os == 'macos-14'
