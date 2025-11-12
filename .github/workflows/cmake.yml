@@ -61,7 +61,7 @@ jobs:
     - name: Checkout submodules
       run: git submodule update --init --recursive
 
-      - name: Setup vcpkg
+    - name: Setup vcpkg
       uses: lukka/run-vcpkg@v11
       with:
         vcpkgJsonGlob: 'vcpkg.json'
