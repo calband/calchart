@@ -113,12 +113,12 @@ jobs:
     - name: Configure CMake (Windows)
       if: matrix.config.os == 'windows-latest'
       # Use vcpkg toolchain file provided by setup-vcpkg; force static triplet
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE="${{ steps.setup-vcpkg.outputs.vcpkgRoot }}/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-static
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-static
 
     - name: Configure CMake (non-Windows)
       if: matrix.config.os != 'windows-latest'
       # Use vcpkg toolchain on macOS/Linux; triplet auto-selected (x64-osx / x64-linux)
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE="${{ steps.setup-vcpkg.outputs.vcpkgRoot }}/scripts/buildsystems/vcpkg.cmake"
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake"
  
     - name: Build
       # Build your program with the given configuration
