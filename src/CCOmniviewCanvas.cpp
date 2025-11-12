@@ -234,11 +234,11 @@ static auto LoadTextureWithImage(wxImage const& image, GLuint const& texture)
     return true;
 }
 
-static auto LoadTexture(std::string const& filename, GLuint const& texture)
+static auto LoadTexture(wxString const& filename, GLuint const& texture)
 {
     wxImage image;
     if (!image.LoadFile(filename)) {
-        wxLogError(wxT("Couldn't load image from ") + filename + wxT("."));
+        wxLogError(std::format("Couldn't load image from {}.", filename.ToStdString()));
         return false;
     }
     return LoadTextureWithImage(image, texture);

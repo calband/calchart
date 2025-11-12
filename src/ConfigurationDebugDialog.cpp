@@ -119,7 +119,7 @@ private:
     wxString mPath{};
 };
 
-auto PrintEntry(std::ostream& os, wxConfigBase& config, wxString const& entry) -> std::ostream&
+auto PrintEntry(std::ostream& os, wxConfigBase& config, std::string const& entry) -> std::ostream&
 {
     return os << GetEntry(config, entry);
 }
@@ -140,7 +140,7 @@ auto PrintConfigHelper(std::ostream& os, wxConfigBase& config, int depth) -> std
     result = config.GetFirstEntry(str, entry);
     while (result) {
         os << std::string(depth * 4 - 2, ' ') << str << " : ";
-        PrintEntry(os, config, str);
+        PrintEntry(os, config, str.ToStdString());
         os << "\n";
 
         result = config.GetNextEntry(str, entry);
@@ -169,7 +169,7 @@ void AddEntries(wxConfigBase& config, wxTreeListCtrl& ctrl, wxTreeListItem& root
     auto result = config.GetFirstEntry(str, entry);
     while (result) {
         auto item = ctrl.AppendItem(root, str);
-        ctrl.SetItemText(item, 1, GetEntry(config, str));
+        ctrl.SetItemText(item, 1, GetEntry(config, str.ToStdString()));
         result = config.GetNextEntry(str, entry);
     }
 }

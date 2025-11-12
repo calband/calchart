@@ -67,7 +67,7 @@ void OnWizardSetup(CalChartDoc& show, wxWindow* parent)
     if (wizard->RunWizard(page1)) {
         auto labels = page1->GetLabelsAndInstruments();
         auto columns = page1->GetNumberColumns();
-        auto newmode = GetConfigShowMode(config, page2->GetValue().ToStdString());
+        auto newmode = GetConfigShowMode(config, page2->GetValue());
 
         show.WizardSetupNewShow(labels, columns, newmode);
         SetupInstruments dialog(show, parent);
