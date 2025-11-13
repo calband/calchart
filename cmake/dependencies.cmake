@@ -127,6 +127,7 @@ if(wxWidgets_FOUND OR TARGET wx::core)
       FetchContent_MakeAvailable(wxWidgets)
       set(wxwidgets_found TRUE)
     else()
+      include(${PROJECT_SOURCE_DIR}/cmake/winmsvc.cmake)
       # Create lightweight compatibility imported targets from the legacy
       # FindwxWidgets variables so developer builds using brew/pkg can work
       # without requiring a full wxWidgets vendor build. These targets are
