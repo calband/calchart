@@ -89,7 +89,7 @@ try_find_or_fetch(nlohmann_json nlohmann_json https://github.com/nlohmann/json 5
 
 if(USE_SYSTEM_DEPENDENCIES)
   if(MSVC)
-    include(${CMAKE_SOURCE_DIR}/winmsvc.cmake)
+    include(${PROJECT_SOURCE_DIR}/cmake/winmsvc.cmake)
   else()
     find_package(wxWidgets REQUIRED COMPONENTS net core base gl aui html)
     include(${wxWidgets_USE_FILE})
