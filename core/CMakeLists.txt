@@ -105,7 +105,6 @@ target_include_directories(
 target_link_libraries(calchart_core PRIVATE
   nlohmann_json::nlohmann_json
   munkres
-  wx::net
   CURL::libcurl
 )
 

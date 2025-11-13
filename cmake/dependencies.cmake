@@ -87,102 +87,22 @@ FetchContent_MakeAvailable(wxUI)
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 try_find_or_fetch(nlohmann_json nlohmann_json https://github.com/nlohmann/json 55f93686c01528224f448c19128836e7df245f72)
 
-# wxWidgets — special handling: prefer system wxWidgets, otherwise fetch and
-# attempt a vendor build with the same options used before.
 if(USE_SYSTEM_DEPENDENCIES)
-  message(STATUS "Trying to find system wxWidgets...")
-  # Request the components the project needs so imported targets like wx::core
-  # and wx::net are created by the find_package call.
-  find_package(wxWidgets CONFIG REQUIRED COMPONENTS core base net gl xml adv QUIET)
-endif()
-
-set(wxBUILD_SHARED OFF)
-set(wxUSE_STL ON)
-set(wxUSE_STC OFF)
-set(wxUSE_STD_CONTAINERS ON)
-if(wxWidgets_FOUND OR TARGET wx::core)
-  # If the find_package produced imported targets (wx::core, wx::net, wx::gl etc)
-  # then we can use them directly. Otherwise, the system wxWidgets may only
-  # provide variables (wxWidgets_LIBRARIES) and not the modern imported targets
-  # this project expects. Detect that case and fall back to vendor build if
-  # allowed.
-  set(_wx_targets_ok TRUE)
-  foreach(_comp core net gl)
-    if(NOT TARGET wx::${_comp})
-      set(_wx_targets_ok FALSE)
-    endif()
-  endforeach()
-  if(_wx_targets_ok)
-    message(STATUS "Using system wxWidgets ${wxWidgets_VERSION_STRING} (imported targets available)")
-    set(wxwidgets_found TRUE)
+  if(MSVC)
+    include(${CMAKE_SOURCE_DIR}/winmsvc.cmake)
   else()
-    if(FORCE_VENDOR_DEPENDENCIES)
-      message(WARNING "System wxWidgets found but does not provide modern imported targets (wx::core, wx::net, wx::gl). Falling back to vendor build.")
-      # Have wxWidgets build as static libraries
-      FetchContent_Declare(
-        wxWidgets
-        GIT_REPOSITORY "https://github.com/wxWidgets/wxWidgets.git"
-        GIT_TAG 8aef5f40b93958719771331ca03866b7b6fff6bf # v3.2.8
-      )
-      FetchContent_MakeAvailable(wxWidgets)
-      set(wxwidgets_found TRUE)
-    else()
-      include(${PROJECT_SOURCE_DIR}/cmake/winmsvc.cmake)
-      # Create lightweight compatibility imported targets from the legacy
-      # FindwxWidgets variables so developer builds using brew/pkg can work
-      # without requiring a full wxWidgets vendor build. These targets are
-      # pragmatic shims and may not capture every transitive usage requirement
-      # of an upstream CMake config, but are sufficient for most builds.
-      message(WARNING "System wxWidgets found but does not provide modern imported targets (wx::core, wx::net, wx::gl). Creating compatibility imported targets from legacy variables.")
-
-      if(NOT TARGET wx::core)
-        add_library(wx::core UNKNOWN IMPORTED)
-        set_target_properties(wx::core PROPERTIES
-          INTERFACE_INCLUDE_DIRECTORIES "${wxWidgets_INCLUDE_DIRS}"
-          INTERFACE_LINK_LIBRARIES "${wxWidgets_LIBRARIES}"
-        )
-        if(DEFINED wxWidgets_COMPILE_DEFINITIONS)
-          target_compile_definitions(wx::core INTERFACE ${wxWidgets_COMPILE_DEFINITIONS})
-        endif()
-      endif()
-
-      if(NOT TARGET wx::net)
-        add_library(wx::net UNKNOWN IMPORTED)
-        set_target_properties(wx::net PROPERTIES
-          INTERFACE_INCLUDE_DIRECTORIES "${wxWidgets_INCLUDE_DIRS}"
-          INTERFACE_LINK_LIBRARIES "${wxWidgets_LIBRARIES}"
-        )
-        if(DEFINED wxWidgets_COMPILE_DEFINITIONS)
-          target_compile_definitions(wx::net INTERFACE ${wxWidgets_COMPILE_DEFINITIONS})
-        endif()
-      endif()
-
-      if(NOT TARGET wx::gl)
-        add_library(wx::gl UNKNOWN IMPORTED)
-        set_target_properties(wx::gl PROPERTIES
-          INTERFACE_INCLUDE_DIRECTORIES "${wxWidgets_INCLUDE_DIRS}"
-          INTERFACE_LINK_LIBRARIES "${wxWidgets_LIBRARIES}"
-        )
-        if(DEFINED wxWidgets_COMPILE_DEFINITIONS)
-          target_compile_definitions(wx::gl INTERFACE ${wxWidgets_COMPILE_DEFINITIONS})
-        endif()
-      endif()
-
-      set(wxwidgets_found TRUE)
-    endif()
+    find_package(wxWidgets REQUIRED COMPONENTS net core base gl aui html)
+    include(${wxWidgets_USE_FILE})
   endif()
+elseif(FORCE_VENDOR_DEPENDENCIES)
+  message(STATUS "Fetching wxWidgets sources for vendor build (this can be slow).")
+  # Have wxWidgets build as static libraries
+  FetchContent_Declare(
+    wxWidgets
+    GIT_REPOSITORY "https://github.com/wxWidgets/wxWidgets.git"
+    GIT_TAG 8aef5f40b93958719771331ca03866b7b6fff6bf # v3.2.8
+  )
+  FetchContent_MakeAvailable(wxWidgets)
 else()
-  if(FORCE_VENDOR_DEPENDENCIES)
-    message(STATUS "Fetching wxWidgets sources for vendor build (this can be slow).")
-    # Have wxWidgets build as static libraries
-    FetchContent_Declare(
-      wxWidgets
-      GIT_REPOSITORY "https://github.com/wxWidgets/wxWidgets.git"
-      GIT_TAG 8aef5f40b93958719771331ca03866b7b6fff6bf # v3.2.8
-    )
-    FetchContent_MakeAvailable(wxWidgets)
-    set(wxwidgets_found TRUE)
-  else()
-    message(FATAL_ERROR "wxWidgets not found. On macOS: brew install wxwidgets; On Ubuntu: apt install libwxgtk3.0-dev. Or re-run with -DFORCE_VENDOR_DEPENDENCIES=ON to fetch and build wxWidgets from source (release mode).")
-  endif()
+  message(FATAL_ERROR "wxWidgets not found. On macOS: brew install wxwidgets; On Ubuntu: apt install libwxgtk3.0-dev. Or re-run with -DFORCE_VENDOR_DEPENDENCIES=ON to fetch and build wxWidgets from source (release mode).")
 endif()
