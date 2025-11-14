@@ -61,6 +61,14 @@ jobs:
     - name: Checkout submodules
       run: git submodule update --init --recursive
 
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgJsonGlob: 'vcpkg.json'
+        doNotCache: false
+      env:
+        VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
+
     - name: Installing Xcode (MacOS)
       if: matrix.config.os == 'macos-14'
       uses: maxim-lobanov/setup-xcode@v1
@@ -75,16 +83,13 @@ jobs:
         # Add NSIS to PATH for this session
         $env:PATH = "$env:PATH;C:\Program Files (x86)\NSIS"
         echo "C:\Program Files (x86)\NSIS" >> $env:GITHUB_PATH
-        # Bootstrap vcpkg and install libcurl (x64) so CMake can find CURL on Windows
-        git clone https://github.com/microsoft/vcpkg.git "$Env:GITHUB_WORKSPACE\vcpkg"
-        & "$Env:GITHUB_WORKSPACE\vcpkg\bootstrap-vcpkg.bat"
-        # Install the static curl triplet so CI builds a statically-linked libcurl
-        & "$Env:GITHUB_WORKSPACE\vcpkg\vcpkg.exe" install curl:x64-windows-static
-        & "$Env:GITHUB_WORKSPACE\vcpkg\vcpkg.exe" integrate install
 
     - name: Installing Dependencies (Linux)
       if: matrix.config.os == 'ubuntu-24.04'
-      run: sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev libcurl4-openssl-dev
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y autoconf autoconf-archive automake libltdl-dev
+        sudo apt-get install -y build-essential libgtk-3-dev libcurl4-openssl-dev pkg-config ninja-build
 
     - name: Updating to gcc 14 (Linux)
       if: matrix.config.os == 'ubuntu-24.04'
@@ -96,14 +101,13 @@ jobs:
 
     - name: Configure CMake (Windows)
       if: matrix.config.os == 'windows-latest'
-      # Tell vcpkg's CMake toolchain to use the static triplet so CMake finds static libs
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows-static
+      # Use vcpkg toolchain file provided by setup-vcpkg; force static triplet
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-static
 
     - name: Configure CMake (non-Windows)
       if: matrix.config.os != 'windows-latest'
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+      # Use vcpkg toolchain on macOS/Linux; triplet auto-selected (x64-osx / x64-linux)
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
  
     - name: Build
       # Build your program with the given configuration

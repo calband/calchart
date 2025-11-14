@@ -176,7 +176,7 @@ target_link_libraries(
   CalChart
   calchart_core
   nlohmann_json::nlohmann_json
-  wx::gl wx::core wx::base wx::adv wx::html wx::net wx::aui
+  ${wxWidgets_LIBRARIES}
   wxUI
 )
 

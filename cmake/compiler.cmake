@@ -21,6 +21,10 @@ macro(SetupCompilerForTarget arg)
   set_target_properties(${arg} PROPERTIES CXX_STANDARD 23)
 endmacro()
 
+if(MSVC)
+    add_definitions(/MP)
+endif()
+
 option(ENABLE_ASAN "Enable AddressSanitizer in Debug" ON)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND ENABLE_ASAN)
     set(SANITIZER_FLAGS "-fsanitize=address")
