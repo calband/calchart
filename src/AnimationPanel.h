@@ -75,7 +75,7 @@ public:
     [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers) const -> std::pair<CalChart::Coord, CalChart::Coord>;
     [[nodiscard]] auto GetShowFieldSize() const -> CalChart::Coord;
     [[nodiscard]] auto GetMarcherInfo() const -> std::vector<CalChart::Animate::Info>;
-    [[nodiscard]] auto GetMarcherInfo(int which) const -> std::optional<CalChart::Animate::Info>;
+    [[nodiscard]] auto GetMarcherInfo(CalChart::MarcherIndex whichMarcher) const -> std::optional<CalChart::Animate::Info>;
 
     void PrevBeat();
     void NextBeat();

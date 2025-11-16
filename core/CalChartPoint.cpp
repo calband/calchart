@@ -179,18 +179,18 @@ namespace {
 
     auto CreatePointCross(CalChart::SYMBOL_TYPE symbol, double dotRatio, double pLineRatio, double sLineRatio) -> std::vector<Draw::DrawCommand>
     {
-        auto const plineoff = CalChart::Float2CoordUnits(dotRatio * pLineRatio) / 2.0;
-        auto const slineoff = CalChart::Float2CoordUnits(dotRatio * sLineRatio) / 2.0;
+        auto const plineoff = static_cast<Coord::units>(CalChart::Float2CoordUnits(dotRatio * pLineRatio) / 2.0);
+        auto const slineoff = static_cast<Coord::units>(CalChart::Float2CoordUnits(dotRatio * sLineRatio) / 2.0);
 
         auto drawCmds = std::vector<Draw::DrawCommand>{};
         switch (symbol) {
         case CalChart::SYMBOL_SL:
         case CalChart::SYMBOL_X:
-            drawCmds.push_back(Draw::Line(-plineoff, plineoff, plineoff, -plineoff));
+            drawCmds.push_back(Draw::Line{ -plineoff, plineoff, plineoff, -plineoff });
             break;
         case CalChart::SYMBOL_SOLSL:
         case CalChart::SYMBOL_SOLX:
-            drawCmds.push_back(Draw::Line(-slineoff, slineoff, slineoff, -slineoff));
+            drawCmds.push_back(Draw::Line{ -slineoff, slineoff, slineoff, -slineoff });
             break;
         default:
             break;
@@ -198,11 +198,11 @@ namespace {
         switch (symbol) {
         case CalChart::SYMBOL_BKSL:
         case CalChart::SYMBOL_X:
-            drawCmds.push_back(Draw::Line(-plineoff, -plineoff, plineoff, plineoff));
+            drawCmds.push_back(Draw::Line{ -plineoff, -plineoff, plineoff, plineoff });
             break;
         case CalChart::SYMBOL_SOLBKSL:
         case CalChart::SYMBOL_SOLX:
-            drawCmds.push_back(Draw::Line(-slineoff, -slineoff, slineoff, slineoff));
+            drawCmds.push_back(Draw::Line{ -slineoff, -slineoff, slineoff, slineoff });
             break;
         default:
             break;

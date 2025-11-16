@@ -327,7 +327,7 @@ inline auto GetDistance(RawPolygon_t const& polygon) -> double
     if (polygon.empty()) {
         return {};
     }
-    return std::inner_product(polygon.begin(), polygon.end() - 1, polygon.begin() + 1, 0.F, std::plus(), [](auto a, auto b) {
+    return std::inner_product(polygon.begin(), polygon.end() - 1, polygon.begin() + 1, 0.0, std::plus(), [](auto a, auto b) {
         return b.Distance(a);
     });
 }

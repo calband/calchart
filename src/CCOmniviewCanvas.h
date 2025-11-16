@@ -22,6 +22,7 @@
 */
 
 #include "CalChartAngles.h"
+#include "CalChartTypes.h"
 #include "DCSaveRestore.h"
 #include <map>
 #include <memory>
@@ -69,7 +70,7 @@ private:
     ViewPoint mViewPoint{};
 
     // a -1 means not following any marcher
-    std::optional<int> mFollowMarcher;
+    std::optional<CalChart::MarcherIndex> mFollowMarcher;
     bool mCrowdOn = false;
     bool mShowMarching = true;
     CalChart::Radian mViewAngle{};

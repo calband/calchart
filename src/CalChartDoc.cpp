@@ -374,12 +374,12 @@ auto CalChartDoc::GetAnimationInfo(CalChart::Beats whichBeat) const -> std::vect
     return mAnimation->GetAllAnimateInfo(whichBeat, mShow->GetSelectionList());
 }
 
-auto CalChartDoc::GetAnimationInfo(CalChart::Beats whichBeat, int which) const -> std::optional<CalChart::Animate::Info>
+auto CalChartDoc::GetAnimationInfo(MarcherIndex whichMarcher, CalChart::Beats whichBeat) const -> std::optional<CalChart::Animate::Info>
 {
     if (!mAnimation) {
         return std::nullopt;
     }
-    return mAnimation->GetAnimateInfo(whichBeat, which);
+    return mAnimation->GetAnimateInfo(whichMarcher, whichBeat);
 }
 
 auto CalChartDoc::GetTotalNumberAnimationBeats() const -> std::optional<CalChart::Beats>

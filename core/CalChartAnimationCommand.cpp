@@ -91,7 +91,7 @@ auto CommandMove::toOnlineViewerJSON() const -> nlohmann::json
 CommandRotate::CommandRotate(
     unsigned beats,
     Coord cntr,
-    float radius,
+    double radius,
     CalChart::Degree ang1,
     CalChart::Degree ang2,
     bool backwards)
@@ -209,11 +209,11 @@ namespace {
 
 }
 
-auto Commands::BeatToCommandOffsetAndBeat(unsigned beat) const -> std::pair<std::pair<size_t, Beats>, std::pair<size_t, Beats>>
+auto Commands::BeatToCommandOffsetAndBeat(Beats beat) const -> std::pair<std::pair<size_t, Beats>, std::pair<size_t, Beats>>
 {
     // count the number of 0s
-    auto leadingBeats = LeadingBeatsAre0(mCommands);
-    if (LeadingBeatsAre0(mCommands) > 0 && beat == 0) {
+    auto leadingBeats = static_cast<Beats>(LeadingBeatsAre0(mCommands));
+    if (leadingBeats > 0 && beat == 0) {
         return { { 1, 0 }, { 0, 0 } };
     }
     beat -= leadingBeats;

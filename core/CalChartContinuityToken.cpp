@@ -32,7 +32,7 @@
 #include <cmath>
 
 // for serialization we need to pre-register all of the different types that can exist in the inuity AST.
-
+namespace {
 enum class SerializationToken {
     Token,
     PointUnset,
@@ -84,7 +84,7 @@ enum class SerializationToken {
     ProcStandAndPlay,
 };
 
-const std::string s_var_names[] = {
+constexpr std::array<std::string_view, 9> s_var_names = {
     "A",
     "B",
     "C",
@@ -96,33 +96,36 @@ const std::string s_var_names[] = {
     "DOH",
 };
 
-namespace CalChart::Cont {
-
-static const std::string DefinedValue_strings[] = {
+constexpr std::array<std::string_view, 15> DefinedValue_strings = {
     "N", "NW", "W", "SW", "S", "SE", "E", "NE",
     "HS", "MM", "SH", "JS", "GV", "M", "DM"
 };
 
-int float2int(Animate::Compile& anim, float f)
+template <typename Float>
+auto float2int(CalChart::Animate::Compile& anim, Float f) -> int
 {
-    auto v = (int)floor(f + 0.5);
-    if (std::abs(f - (float)v) >= kCoordDecimal) {
-        anim.RegisterError(Animate::Error::NONINT);
+    static_assert(std::is_floating_point_v<Float>, "float2int requires float");
+    auto v = static_cast<int>(floor(f + 0.5));
+    if (std::abs(f - v) >= CalChart::kCoordDecimal) {
+        anim.RegisterError(CalChart::Animate::Error::NONINT);
     }
     return v;
 }
 
-unsigned float2unsigned(Animate::Compile& anim,
-    float f)
+template <typename Float>
+auto float2unsigned(CalChart::Animate::Compile& anim, Float f) -> unsigned
 {
+    static_assert(std::is_floating_point_v<Float>, "float2unsigned requires float");
     auto v = float2int(anim, f);
     if (v < 0) {
-        anim.RegisterError(Animate::Error::NEGINT);
+        anim.RegisterError(CalChart::Animate::Error::NEGINT);
         return 0;
-    } else {
-        return (unsigned)v;
     }
+    return static_cast<unsigned>(v);
 }
+}
+
+namespace CalChart::Cont {
 
 void DoCounterMarch(Animate::Compile& anim,
     const Point& pnt1, const Point& pnt2,
@@ -181,10 +184,10 @@ void DoCounterMarch(Animate::Compile& anim,
 
     while (beats > 0) {
         v1 = p[leg] - anim.GetPointPosition();
-        c = v1.DM_Magnitude();
-        if (c <= beats) {
-            beats -= c;
-            if (!anim.Append(Animate::CommandMove{ anim.GetPointPosition(), float2unsigned(anim, c), v1 })) {
+        auto distance = static_cast<float>(v1.DM_Magnitude());
+        if (distance <= beats) {
+            beats -= distance;
+            if (!anim.Append(Animate::CommandMove{ anim.GetPointPosition(), float2unsigned(anim, distance), v1 })) {
                 return;
             }
         } else {
@@ -805,7 +808,7 @@ Drawable ValueDefined::GetDrawable() const
     default:
         type = Type::steptype;
     }
-    return { this, parent_ptr, type, DefinedValue_strings[val], DefinedValue_strings[val], {} };
+    return { this, parent_ptr, type, std::string{ DefinedValue_strings[val] }, std::string{ DefinedValue_strings[val] }, {} };
 }
 
 auto ValueDefined::Serialize() const -> std::vector<std::byte>
@@ -1067,9 +1070,9 @@ Reader ValueNeg::Deserialize(Reader reader)
 }
 
 // ValueREM
-float ValueREM::Get(Animate::Compile const& anim) const
+auto ValueREM::Get(Animate::Compile const& anim) const -> float
 {
-    return anim.GetBeatsRemaining();
+    return static_cast<float>(anim.GetBeatsRemaining());
 }
 
 std::ostream& ValueREM::Print(std::ostream& os) const
@@ -1127,8 +1130,8 @@ Drawable ValueVar::GetDrawable() const
     return {
         this, parent_ptr,
         Type::value,
-        s_var_names[toUType(varnum)],
-        s_var_names[toUType(varnum)],
+        std::string{ s_var_names[toUType(varnum)] },
+        std::string{ s_var_names[toUType(varnum)] },
         {}
     };
 }
@@ -1189,13 +1192,13 @@ Reader ValueVarUnset::Deserialize(Reader reader)
 }
 
 // FuncDir
-float FuncDir::Get(Animate::Compile const& anim) const
+auto FuncDir::Get(Animate::Compile const& anim) const -> float
 {
     auto c = pnt->Get(anim);
     if (c == anim.GetPointPosition()) {
         anim.RegisterError(Animate::Error::UNDEFINED);
     }
-    return CalChart::Degree{ anim.GetPointPosition().Direction(c) }.getValue();
+    return static_cast<float>(CalChart::Degree{ anim.GetPointPosition().Direction(c) }.getValue());
 }
 
 std::ostream& FuncDir::Print(std::ostream& os) const
@@ -1239,14 +1242,14 @@ Reader FuncDir::Deserialize(Reader reader)
 }
 
 // FuncDirFrom
-float FuncDirFrom::Get(Animate::Compile const& anim) const
+auto FuncDirFrom::Get(Animate::Compile const& anim) const -> float
 {
     auto start = pnt_start->Get(anim);
     auto end = pnt_end->Get(anim);
     if (start == end) {
         anim.RegisterError(Animate::Error::UNDEFINED);
     }
-    return CalChart::Degree{ start.Direction(end) }.getValue();
+    return static_cast<float>(CalChart::Degree{ start.Direction(end) }.getValue());
 }
 
 std::ostream& FuncDirFrom::Print(std::ostream& os) const
@@ -2875,7 +2878,7 @@ void ProcRotate::Compile(Animate::Compile& anim)
         (unsigned)std::abs(b), c,
         // Don't use Magnitude() because
         // we want Coord numbers
-        sqrt(static_cast<float>(rad.x * rad.x + rad.y * rad.y)),
+        sqrt(rad.x * rad.x + rad.y * rad.y),
         start_ang, start_ang + angle, backwards));
 }
 

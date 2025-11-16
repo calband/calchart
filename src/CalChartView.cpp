@@ -437,9 +437,9 @@ auto CalChartView::GetAnimationInfo(CalChart::Beats whichBeat) const -> std::vec
     return mShow->GetAnimationInfo(whichBeat);
 }
 
-auto CalChartView::GetAnimationInfo(CalChart::Beats whichBeat, CalChart::MarcherIndex which) const -> std::optional<CalChart::Animate::Info>
+auto CalChartView::GetAnimationInfo(CalChart::MarcherIndex whichMarcher, CalChart::Beats whichBeat) const -> std::optional<CalChart::Animate::Info>
 {
-    return mShow->GetAnimationInfo(whichBeat, which);
+    return mShow->GetAnimationInfo(whichMarcher, whichBeat);
 }
 
 auto CalChartView::GetTotalNumberAnimationBeats() const -> std::optional<CalChart::Beats>

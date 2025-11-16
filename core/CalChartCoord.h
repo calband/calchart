@@ -87,8 +87,8 @@ struct CoordBasic {
         requires std::is_arithmetic_v<U>
     constexpr auto operator*=(U s) -> CoordBasic&
     {
-        x *= s;
-        y *= s;
+        x = static_cast<units>(x * s);
+        y = static_cast<units>(y * s);
         return *this;
     }
 
@@ -100,8 +100,8 @@ struct CoordBasic {
             x /= static_cast<units>(s);
             y /= static_cast<units>(s);
         } else {
-            x /= s;
-            y /= s;
+            x = static_cast<units>(x / s);
+            y = static_cast<units>(y / s);
         }
         return *this;
     }

@@ -30,6 +30,14 @@
 #include <cassert>
 #include <ranges>
 
+namespace {
+template <typename T>
+auto CoordPair_cast(CalChart::Coord const coord) -> std::pair<T, T>
+{
+    return { static_cast<T>(coord.x), static_cast<T>(coord.y) };
+}
+}
+
 namespace CalChart {
 
 class MovePointsTool_Normal : public MovePointsTool {
@@ -161,11 +169,11 @@ static auto GetTransformedPoints(const Matrix<T>& transmat, MarcherToPosition co
 {
     MarcherToPosition result;
     for (auto i : select_list) {
-        auto c = i.second;
-        Vector<T> v(c.x, c.y, 0);
+        auto [c_x, c_y] = CoordPair_cast<T>(i.second);
+        Vector<T> v{ c_x, c_y, 0 };
         v = transmat * v;
         v.Homogenize();
-        c = CalChart::Coord(RoundToCoordUnits(v.GetX()), RoundToCoordUnits(v.GetY()));
+        auto c = CalChart::Coord(RoundToCoordUnits(v.GetX()), RoundToCoordUnits(v.GetY()));
         result[i.first] = c;
     }
     return result;
@@ -287,12 +295,14 @@ auto MovePointsTool_MoveRotate::TransformPoints(MarcherToPosition const& select_
 {
     if (m_shape_list.size() < 2) {
         return select_list;
-    } else {
-        auto start = dynamic_cast<CalChart::Shape_1point const&>(*m_shape_list[0]).GetOrigin();
-        auto r = -((CalChart::Shape_arc*)m_shape_list.back().get())->GetAngle();
-        auto m = TranslationMatrix(Vector<double>(-start.x, -start.y, 0)) * ZRotationMatrix(r.getValue()) * TranslationMatrix(Vector<double>(start.x, start.y, 0));
-        return GetTransformedPoints(m, select_list);
     }
+    auto start = dynamic_cast<CalChart::Shape_1point const&>(*m_shape_list[0]).GetOrigin();
+    auto [start_x, start_y] = CoordPair_cast<double>(start);
+    auto r = -((CalChart::Shape_arc*)m_shape_list.back().get())->GetAngle();
+    auto m = TranslationMatrix{ Vector<double>{ -start_x, -start_y, 0 } }
+        * ZRotationMatrix(r.getValue())
+        * TranslationMatrix{ Vector<double>{ start_x, start_y, 0 } };
+    return GetTransformedPoints(m, select_list);
 }
 
 void MovePointsTool_MoveRotate::OnClickUp(CalChart::Coord pos)
@@ -348,7 +358,12 @@ auto MovePointsTool_MoveShear::TransformPoints(MarcherToPosition const& select_l
         amount = -amount;
     }
     auto ang = -v1.Direction();
-    auto m = TranslationMatrix(Vector<double>(-start.x, -start.y, 0)) * ZRotationMatrix(-ang.getValue()) * YXShearMatrix(amount) * ZRotationMatrix(ang.getValue()) * TranslationMatrix(Vector<double>(start.x, start.y, 0));
+    auto [start_x, start_y] = CoordPair_cast<double>(start);
+    auto m = TranslationMatrix{ Vector<double>{ -start_x, -start_y, 0 } }
+        * ZRotationMatrix(-ang.getValue())
+        * YXShearMatrix(amount)
+        * ZRotationMatrix(ang.getValue())
+        * TranslationMatrix{ Vector<double>{ start_x, start_y, 0 } };
     return GetTransformedPoints(m, select_list);
 }
 
@@ -387,9 +402,14 @@ auto MovePointsTool_MoveReflect::TransformPoints(MarcherToPosition const& select
     assert(m_shape_list.size() == 1);
     auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
     auto c1 = shape->GetOrigin();
+    auto [c1_x, c1_y] = CoordPair_cast<double>(c1);
     auto c2 = shape->GetPoint() - c1;
     auto ang = -c2.Direction();
-    auto m = TranslationMatrix(Vector<double>(-c1.x, -c1.y, 0)) * ZRotationMatrix(-ang.getValue()) * YReflectionMatrix<double>() * ZRotationMatrix(ang.getValue()) * TranslationMatrix(Vector<double>(c1.x, c1.y, 0));
+    auto m = TranslationMatrix{ Vector<double>{ -c1_x, -c1_y, 0 } }
+        * ZRotationMatrix(-ang.getValue())
+        * YReflectionMatrix<double>()
+        * ZRotationMatrix(ang.getValue())
+        * TranslationMatrix{ Vector<double>{ c1_x, c1_y, 0 } };
     return GetTransformedPoints(m, select_list);
 }
 
@@ -407,30 +427,31 @@ auto MovePointsTool_MoveSize::TransformPoints(MarcherToPosition const& select_li
 {
     if (m_shape_list.size() < 2) {
         return select_list;
-    } else {
-        auto& origin = dynamic_cast<CalChart::Shape_1point&>(*m_shape_list[0]);
-        auto c1 = origin.GetOrigin();
-        auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
-        auto c2 = shape->GetPoint() - c1;
-        float sx = c2.x;
-        float sy = c2.y;
-        c2 = shape->GetOrigin() - c1;
-        if ((c2.x != 0) || (c2.y != 0)) {
-            if (c2.x != 0) {
-                sx /= c2.x;
-            } else {
-                sx = 1;
-            }
-            if (c2.y != 0) {
-                sy /= c2.y;
-            } else {
-                sy = 1;
-            }
-            auto m = TranslationMatrix(Vector<float>(-c1.x, -c1.y, 0)) * ScaleMatrix(Vector<float>(sx, sy, 0)) * TranslationMatrix(Vector<float>(c1.x, c1.y, 0));
-            return GetTransformedPoints(m, select_list);
-        }
-        return {};
     }
+    auto& origin = dynamic_cast<CalChart::Shape_1point&>(*m_shape_list[0]);
+    auto c1 = origin.GetOrigin();
+    auto [c1_x, c1_y] = CoordPair_cast<float>(c1);
+    auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
+    auto c2 = shape->GetPoint() - c1;
+    auto [sx, sy] = CoordPair_cast<float>(c2);
+    c2 = shape->GetOrigin() - c1;
+    if ((c2.x != 0) || (c2.y != 0)) {
+        if (c2.x != 0) {
+            sx = sx / static_cast<float>(c2.x);
+        } else {
+            sx = 1;
+        }
+        if (c2.y != 0) {
+            sy = sy / static_cast<float>(c2.y);
+        } else {
+            sy = 1;
+        }
+        auto m = TranslationMatrix{ Vector<float>{ -c1_x, -c1_y, 0 } }
+            * ScaleMatrix{ Vector<float>{ sx, sy, 0 } }
+            * TranslationMatrix{ Vector<float>{ c1_x, c1_y, 0 } };
+        return GetTransformedPoints(m, select_list);
+    }
+    return {};
 }
 
 void MovePointsTool_MoveSize::OnClickUp(CalChart::Coord pos)
@@ -444,17 +465,14 @@ void MovePointsTool_MoveSize::OnClickUp(CalChart::Coord pos)
     }
 }
 
-bool MovePointsTool_MoveSize::IsDone() const
+auto MovePointsTool_MoveSize::IsDone() const -> bool
 {
     return IsReadyForMoving();
 }
 
-bool MovePointsTool_MoveSize::IsReadyForMoving() const
+auto MovePointsTool_MoveSize::IsReadyForMoving() const -> bool
 {
-    if (m_shape_list.size() > 1) {
-        return true;
-    }
-    return false;
+    return m_shape_list.size() > 1;
 }
 
 void MovePointsTool_MoveGenius::OnClickDown(CalChart::Coord pos)
@@ -469,36 +487,42 @@ auto MovePointsTool_MoveGenius::TransformPoints(MarcherToPosition const& select_
 {
     if (m_shape_list.size() < 3) {
         return select_list;
-    } else {
-        auto* v1 = (CalChart::Shape_2point*)m_shape_list[0].get();
-        auto* v2 = (CalChart::Shape_2point*)m_shape_list[1].get();
-        auto* v3 = (CalChart::Shape_2point*)m_shape_list[2].get();
-
-        auto s1 = v1->GetOrigin();
-        auto e1 = v1->GetPoint();
-        auto s2 = v2->GetOrigin();
-        auto e2 = v2->GetPoint();
-        auto s3 = v3->GetOrigin();
-        auto e3 = v3->GetPoint();
-        auto d = (float)s1.x * (float)s2.y - (float)s2.x * (float)s1.y + (float)s3.x * (float)s1.y - (float)s1.x * (float)s3.y + (float)s2.x * (float)s3.y - (float)s3.x * (float)s2.y;
-        if (IS_ZERO(d)) {
-            return {};
-        } else {
-            auto A = Matrix(Vector<float>(e1.x, e2.x, 0, e3.x), Vector<float>(e1.y, e2.y, 0, e3.y),
-                Vector<float>(0, 0, 0, 0), Vector<float>(1, 1, 0, 1));
-            auto Binv = Matrix(
-                Vector<float>((float)s2.y - (float)s3.y, (float)s3.x - (float)s2.x, 0,
-                    (float)s2.x * (float)s3.y - (float)s3.x * (float)s2.y),
-                Vector<float>((float)s3.y - (float)s1.y, (float)s1.x - (float)s3.x, 0,
-                    (float)s3.x * (float)s1.y - (float)s1.x * (float)s3.y),
-                Vector<float>(0, 0, 0, 0),
-                Vector<float>((float)s1.y - (float)s2.y, (float)s2.x - (float)s1.x, 0,
-                    (float)s1.x * (float)s2.y - (float)s2.x * (float)s1.y));
-            Binv /= d;
-            Matrix m = Binv * A;
-            return GetTransformedPoints(m, select_list);
-        }
     }
+
+    auto* v1 = (CalChart::Shape_2point*)m_shape_list[0].get();
+    auto* v2 = (CalChart::Shape_2point*)m_shape_list[1].get();
+    auto* v3 = (CalChart::Shape_2point*)m_shape_list[2].get();
+
+    auto [s1_x, s1_y] = CoordPair_cast<float>(v1->GetOrigin());
+    auto [e1_x, e1_y] = CoordPair_cast<float>(v1->GetPoint());
+    auto [s2_x, s2_y] = CoordPair_cast<float>(v2->GetOrigin());
+    auto [e2_x, e2_y] = CoordPair_cast<float>(v2->GetPoint());
+    auto [s3_x, s3_y] = CoordPair_cast<float>(v3->GetOrigin());
+    auto [e3_x, e3_y] = CoordPair_cast<float>(v3->GetPoint());
+    auto d = s1_x * s2_y
+        - s2_x * s1_y
+        + s3_x * s1_y
+        - s1_x * s3_y
+        + s2_x * s3_y
+        - s3_x * s2_y;
+    if (IS_ZERO(d)) {
+        return {};
+    }
+    auto A = Matrix{
+        Vector<float>{ e1_x, e2_x, 0, e3_x },
+        Vector<float>{ e1_y, e2_y, 0, e3_y },
+        Vector<float>{ 0, 0, 0, 0 },
+        Vector<float>{ 1, 1, 0, 1 }
+    };
+    auto Binv = Matrix{
+        Vector<float>{ s2_y - s3_y, s3_x - s2_x, 0, s2_x * s3_y - s3_x * s2_y },
+        Vector<float>{ s3_y - s1_y, s1_x - s3_x, 0, s3_x * s1_y - s1_x * s3_y },
+        Vector<float>{ 0, 0, 0, 0 },
+        Vector<float>{ s1_y - s2_y, s2_x - s1_x, 0, s1_x * s2_y - s2_x * s1_y }
+    };
+    Binv /= d;
+    Matrix m = Binv * A;
+    return GetTransformedPoints(m, select_list);
 }
 
 void MovePointsTool_MoveGenius::OnClickUp(CalChart::Coord)
@@ -717,5 +741,4 @@ auto MovePointsTool_ShapeCross::TransformPoints(MarcherToPosition const& select_
     assert(iter == select_list.end());
     return result;
 }
-
 }
