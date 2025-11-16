@@ -49,7 +49,7 @@ namespace {
 }
 
 Sheet::Sheet(std::string name, unsigned numBeats, std::vector<CompileResult> const& commands)
-    : mName{ name }
+    : mName{ std::move(name) }
     , mNumBeats{ numBeats }
     , mCommands{ CalChart::Ranges::ToVector<Commands>(commands | std::views::transform([](auto&& item) { return Commands(item.first); })) }
     , mErrors{ [](auto&& cmds) {
@@ -65,12 +65,12 @@ Sheet::Sheet(std::string name, unsigned numBeats, std::vector<CompileResult> con
     mCollisions = FindAllCollisions();
 }
 
-auto Sheet::MarcherInfoAtBeat(size_t whichMarcher, Beats beat) const -> MarcherInfo
+auto Sheet::MarcherInfoAtBeat(MarcherIndex whichMarcher, Beats beat) const -> MarcherInfo
 {
     return mCommands.at(whichMarcher).MarcherInfoAtBeat(beat);
 }
 
-auto Sheet::CollisionAtBeat(size_t whichMarcher, Beats beat) const -> CalChart::Coord::CollisionType
+auto Sheet::CollisionAtBeat(MarcherIndex whichMarcher, Beats beat) const -> CalChart::Coord::CollisionType
 {
     if (auto where = mCollisions.find({ whichMarcher, beat }); where != mCollisions.end()) {
         return where->second;
@@ -108,10 +108,10 @@ namespace {
 
     template <std::ranges::input_range Range>
         requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Coord>)
-    auto FindAllCollisions(Range range) -> std::map<size_t, Coord::CollisionType>
+    auto FindAllCollisions(Range range) -> std::map<MarcherIndex, Coord::CollisionType>
     {
         auto points = CalChart::Ranges::ToVector<CalChart::Coord>(range);
-        auto results = std::map<size_t, Coord::CollisionType>{};
+        auto results = std::map<MarcherIndex, Coord::CollisionType>{};
         for (auto i : std::views::iota(0UL, points.size() - 1)) {
             for (auto j : std::views::iota(i + 1, points.size())) {
                 auto collisionResult = points.at(i).DetectCollision(points.at(j));
@@ -129,9 +129,9 @@ namespace {
     }
 }
 
-auto Sheet::FindAllCollisions() const -> std::map<std::tuple<size_t, Beats>, Coord::CollisionType>
+auto Sheet::FindAllCollisions() const -> std::map<std::tuple<MarcherIndex, Beats>, Coord::CollisionType>
 {
-    auto results = std::map<std::tuple<size_t, Beats>, Coord::CollisionType>{};
+    auto results = std::map<std::tuple<MarcherIndex, Beats>, Coord::CollisionType>{};
     for (auto beat : std::views::iota(0U, GetNumBeats())) {
         auto allCollisions = Animate::FindAllCollisions(AllMarcherInfoAtBeat(beat) | std::views::transform([](auto info) { return info.mPosition; }));
         results = std::accumulate(allCollisions.begin(), allCollisions.end(), results, [beat](auto acc, auto item) {
@@ -176,9 +176,9 @@ namespace {
 
 auto Sheet::AllAnimateInfoAtBeat(Beats beat) const -> std::vector<Info>
 {
-    auto animates = CalChart::Ranges::ToVector<Info>(std::views::iota(0UL, mCommands.size()) | std::views::transform([this, beat](auto whichMarcher) -> Info {
+    auto animates = CalChart::Ranges::ToVector<Info>(std::views::iota(0U, mCommands.size()) | std::views::transform([this, beat](auto whichMarcher) -> Info {
         return {
-            static_cast<int>(whichMarcher),
+            whichMarcher,
             CollisionAtBeat(whichMarcher, beat),
             MarcherInfoAtBeat(whichMarcher, beat)
         };
@@ -230,7 +230,7 @@ auto Sheets::BeatToSheetOffsetAndBeat(Beats beat) const -> std::tuple<size_t, Be
     return { index, beat - (*where - mSheets.at(index).GetNumBeats()) };
 }
 
-auto Sheets::MarcherInfoAtBeat(Beats beat, int whichMarcher) const -> MarcherInfo
+auto Sheets::MarcherInfoAtBeat(MarcherIndex whichMarcher, Beats beat) const -> MarcherInfo
 {
     auto [which, newBeat] = BeatToSheetOffsetAndBeat(beat);
     if (which >= mSheets.size()) {
@@ -239,7 +239,7 @@ auto Sheets::MarcherInfoAtBeat(Beats beat, int whichMarcher) const -> MarcherInf
     return mSheets.at(which).MarcherInfoAtBeat(whichMarcher, newBeat);
 }
 
-auto Sheets::CollisionAtBeat(Beats beat, int whichMarcher) const -> Coord::CollisionType
+auto Sheets::CollisionAtBeat(MarcherIndex whichMarcher, Beats beat) const -> Coord::CollisionType
 {
     // this is because Calchart-3.7 and earlier would skip the first beat for collision detection.
     if (beat == 0) {

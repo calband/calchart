@@ -391,9 +391,9 @@ auto AnimationPanel::GetMarcherInfo() const -> std::vector<CalChart::Animate::In
     return mView->GetAnimationInfo(mCurrentBeat);
 }
 
-auto AnimationPanel::GetMarcherInfo(int which) const -> std::optional<CalChart::Animate::Info>
+auto AnimationPanel::GetMarcherInfo(CalChart::MarcherIndex whichMarcher) const -> std::optional<CalChart::Animate::Info>
 {
-    return mView->GetAnimationInfo(mCurrentBeat, which);
+    return mView->GetAnimationInfo(whichMarcher, mCurrentBeat);
 }
 
 void AnimationPanel::PrevBeat()

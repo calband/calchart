@@ -75,7 +75,7 @@ class Animation {
 public:
     explicit Animation(const Show& show);
 
-    [[nodiscard]] auto GetAnimateInfo(Beats whichBeat, int which) const -> Animate::Info { return mSheets.AnimateInfoAtBeat(whichBeat, which); }
+    [[nodiscard]] auto GetAnimateInfo(MarcherIndex whichMarcher, Beats whichBeat) const -> Animate::Info { return mSheets.AnimateInfoAtBeat(whichMarcher, whichBeat); }
     [[nodiscard]] auto GetAllAnimateInfo(Beats whichBeat) const -> std::vector<Animate::Info> { return mSheets.AllAnimateInfoAtBeat(whichBeat); }
     [[nodiscard]] auto GetAllAnimateInfo(Beats whichBeat, SelectionList const& selectionList) const -> std::vector<Animate::Info>;
 

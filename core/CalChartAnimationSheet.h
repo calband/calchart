@@ -39,7 +39,7 @@ namespace CalChart::Animate {
 using CompileResult = std::pair<std::vector<Command>, ErrorsEncountered>;
 
 struct Info {
-    int mIndex;
+    MarcherIndex mIndex;
     CalChart::Coord::CollisionType mCollision = CalChart::Coord::CollisionType::none;
     MarcherInfo mMarcherInfo{};
 };
@@ -50,12 +50,12 @@ struct Info {
 // collisions that exist.
 class Sheet {
 public:
-    Sheet(std::string name, unsigned numBeats, std::vector<CompileResult> const& commands);
+    Sheet(std::string name, Beats numBeats, std::vector<CompileResult> const& commands);
 
     [[nodiscard]] auto GetName() const { return mName; }
     [[nodiscard]] auto GetNumBeats() const { return mNumBeats; }
 
-    [[nodiscard]] auto MarcherInfoAtBeat(size_t whichMarcher, Beats beat) const -> MarcherInfo;
+    [[nodiscard]] auto MarcherInfoAtBeat(MarcherIndex whichMarcher, Beats beat) const -> MarcherInfo;
 
     [[nodiscard]] auto AllMarcherInfoAtBeat(Beats beat) const
     {
@@ -73,13 +73,13 @@ public:
             return acc;
         });
     }
-    [[nodiscard]] auto CollisionAtBeat(size_t whichMarcher, Beats beat) const -> Coord::CollisionType;
-    [[nodiscard]] auto GeneratePathToDraw(int whichMarcher, Coord::units endRadius) const -> std::vector<Draw::DrawCommand>
+    [[nodiscard]] auto CollisionAtBeat(MarcherIndex whichMarcher, Beats beat) const -> Coord::CollisionType;
+    [[nodiscard]] auto GeneratePathToDraw(MarcherIndex whichMarcher, Coord::units endRadius) const -> std::vector<Draw::DrawCommand>
     {
         return mCommands.at(whichMarcher).GeneratePathToDraw(endRadius);
     }
 
-    [[nodiscard]] auto toOnlineViewerJSON(int whichMarcher) const -> std::vector<nlohmann::json>
+    [[nodiscard]] auto toOnlineViewerJSON(MarcherIndex whichMarcher) const -> std::vector<nlohmann::json>
     {
         return mCommands.at(whichMarcher).toOnlineViewerJSON();
     }
@@ -95,11 +95,11 @@ public:
     }
 
 private:
-    [[nodiscard]] auto FindAllCollisions() const -> std::map<std::tuple<size_t, Beats>, Coord::CollisionType>;
+    [[nodiscard]] auto FindAllCollisions() const -> std::map<std::tuple<MarcherIndex, Beats>, Coord::CollisionType>;
     std::string mName;
     Beats mNumBeats;
     std::vector<Commands> mCommands;
-    std::map<std::tuple<size_t, Beats>, Coord::CollisionType> mCollisions;
+    std::map<std::tuple<MarcherIndex, Beats>, Coord::CollisionType> mCollisions;
     Errors mErrors;
 };
 
@@ -117,14 +117,14 @@ public:
         return mRunningBeatCount.at(whichSheet - 1);
     }
     [[nodiscard]] auto BeatForSheet(size_t whichSheet) const -> Beats { return mSheets.at(whichSheet).GetNumBeats(); }
-    [[nodiscard]] auto MarcherInfoAtBeat(Beats beat, int whichMarcher) const -> MarcherInfo;
-    [[nodiscard]] auto CollisionAtBeat(Beats beat, int whichMarcher) const -> Coord::CollisionType;
-    [[nodiscard]] auto AnimateInfoAtBeat(Beats beat, int whichMarcher) const -> Info
+    [[nodiscard]] auto MarcherInfoAtBeat(MarcherIndex whichMarcher, Beats beat) const -> MarcherInfo;
+    [[nodiscard]] auto CollisionAtBeat(MarcherIndex whichMarcher, Beats beat) const -> Coord::CollisionType;
+    [[nodiscard]] auto AnimateInfoAtBeat(MarcherIndex whichMarcher, Beats beat) const -> Info
     {
         return {
             whichMarcher,
-            CollisionAtBeat(beat, whichMarcher),
-            MarcherInfoAtBeat(beat, whichMarcher)
+            CollisionAtBeat(whichMarcher, beat),
+            MarcherInfoAtBeat(whichMarcher, beat)
         };
     }
 
@@ -155,7 +155,7 @@ public:
         return result;
     }
 
-    [[nodiscard]] auto GeneratePathToDraw(int whichSheet, int whichMarcher, Coord::units endRadius) const -> std::vector<Draw::DrawCommand>
+    [[nodiscard]] auto GeneratePathToDraw(int whichSheet, MarcherIndex whichMarcher, Coord::units endRadius) const -> std::vector<Draw::DrawCommand>
     {
         return mSheets.at(whichSheet).GeneratePathToDraw(whichMarcher, endRadius);
     }

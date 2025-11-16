@@ -234,7 +234,7 @@ public:
     [[nodiscard]] CalChart::Configuration& GetConfiguration() const { return mConfig; }
 
     [[nodiscard]] auto GetAnimationInfo(CalChart::Beats whichBeat) const -> std::vector<CalChart::Animate::Info>;
-    [[nodiscard]] auto GetAnimationInfo(CalChart::Beats whichBeat, int which) const -> std::optional<CalChart::Animate::Info>;
+    [[nodiscard]] auto GetAnimationInfo(CalChart::MarcherIndex whichMarcher, CalChart::Beats whichBeat) const -> std::optional<CalChart::Animate::Info>;
     [[nodiscard]] auto GetAnimationErrors() const -> std::vector<CalChart::Animate::Errors>;
     [[nodiscard]] auto GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>;
     [[nodiscard]] auto GenerateAnimationDrawCommands(

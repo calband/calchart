@@ -185,7 +185,7 @@ public:
     CommandRotate(
         Beats beats,
         Coord cntr,
-        float radius,
+        double radius,
         CalChart::Degree ang1,
         CalChart::Degree ang2,
         bool backwards = false);
@@ -193,7 +193,7 @@ public:
         Coord start,
         Beats beats,
         Coord cntr,
-        float radius,
+        double radius,
         CalChart::Degree ang1,
         CalChart::Degree ang2,
         CalChart::Degree face)
@@ -229,7 +229,7 @@ private:
     Coord mStart;
     Beats mNumBeats;
     Coord mOrigin;
-    float mRadius;
+    double mRadius;
     CalChart::Degree mAngStart;
     CalChart::Degree mAngEnd;
     CalChart::Degree mFace;

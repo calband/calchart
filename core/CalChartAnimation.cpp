@@ -239,7 +239,7 @@ auto Animation::GenerateSpritesDrawCommands(Beats whichBeat, SelectionList const
             }();
             auto [image, size] = imageFunction(info.mMarcherInfo.mFacingDirection, image_offset, selectionList.contains(info.mIndex));
             auto position = info.mMarcherInfo.mPosition;
-            auto offset = CalChart::Coord(size.x * comp_X, size.y * comp_Y);
+            auto offset = CalChart::Coord{ static_cast<int>(size.x * comp_X), static_cast<int>(size.y * comp_Y) };
 
             return CalChart::Draw::Image{ position, image } - offset;
         }));

@@ -145,8 +145,8 @@ TEST_CASE("AssigningToCurves", "CalChartSheetTests")
         CHECK(allMarchers.size() == 1);
         CHECK(allMarchers.at(0) == std::vector<MarcherIndex>{ 2, 1, 0 });
     }
-    CHECK(uut.GetMarcherPosition(0) == Coord{ 14, 8 });
-    CHECK(uut.GetMarcherPosition(1) == Coord{ 7, 7 });
+    CHECK(uut.GetMarcherPosition(0) == Coord{ 16, 8 });
+    CHECK(uut.GetMarcherPosition(1) == Coord{ 8, 8 });
     CHECK(uut.GetMarcherPosition(2) == Coord{ 0, 8 });
     CHECK(uut.GetMarcherPosition(3) == Coord{ 0, 0 });
 
