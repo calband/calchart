@@ -127,18 +127,14 @@ static void LayoutShowInfo(wxWindow* parent, bool putLastRowButtons)
             },
         },
         // How do we do this with an wxUI::If?
-        wxUI::Custom{
-            [putLastRowButtons](wxWindow* window, wxSizer* sizer, wxSizerFlags flags) {
-                if (!putLastRowButtons) {
-                    return;
-                }
-                wxUI::HSizer{
-                    wxUI::Button{ wxID_RESET, "&Reset" },
-                    wxUI::Button{ wxID_OK },
-                    wxUI::Button{ wxID_CANCEL },
-                }
-                    .createAndAdd(window, sizer, flags);
-            } },
+        wxUI::HSizer{
+            wxUI::LayoutIf{
+                putLastRowButtons,
+                wxUI::Button{ wxID_RESET, "&Reset" },
+                wxUI::Button{ wxID_OK },
+                wxUI::Button{ wxID_CANCEL },
+            },
+        }
     }
         .fitTo(parent);
 }

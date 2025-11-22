@@ -68,24 +68,24 @@ PointPicker::PointPicker(wxWindow* parent, CalChartDoc const& show, CalChart::Se
                 }),
             wxUI::Button{ wxID_OK }.setDefault(),
         },
-        wxUI::HSizer{
-            wxUI::Custom{ [this, &show, mList](wxWindow* w, wxSizer* s, wxSizerFlags flags) {
-                for (auto&& [which, bitmap] : CalChart::Ranges::enumerate_view(GetSymbolsBitmap())) {
-                    if (!show.MakeSelectBySymbol(static_cast<CalChart::SYMBOL_TYPE>(which)).empty()) {
-                        wxUI::BitmapButton{ bitmap }
-                            .bind([this, which, &show, mList] {
-                                // given a symbol, we go through the labels, and see if it matches
-                                mMarcherLabels = CalChart::Ranges::ToVector<std::string>(mList->GetStrings() | std::views::transform([](auto&& string) {
-                                    return string.ToStdString();
-                                }) | std::views::filter([which, &show](auto&& label) {
-                                    return show.GetPointSymbol(label) == static_cast<CalChart::SYMBOL_TYPE>(which);
-                                }));
-                                EndModal(wxID_OK);
-                            })
-                            .createAndAdd(w, s, flags);
-                    }
-                }
-            } } },
+        wxUI::HForEach(
+            CalChart::Ranges::enumerate_view(GetSymbolsBitmap())
+                | std::views::filter([&](auto item) {
+                      return !show.MakeSelectBySymbol(static_cast<CalChart::SYMBOL_TYPE>(std::get<0>(item))).empty();
+                  }),
+            [this, &show, mList](auto&& item) {
+                auto&& [which, bitmap] = item;
+                return wxUI::BitmapButton{ bitmap }
+                    .bind([this, which, &show, mList] {
+                        // given a symbol, we go through the labels, and see if it matches
+                        mMarcherLabels = CalChart::Ranges::ToVector<std::string>(mList->GetStrings() | std::views::transform([](auto&& string) {
+                            return string.ToStdString();
+                        }) | std::views::filter([which, &show](auto&& label) {
+                            return show.GetPointSymbol(label) == static_cast<CalChart::SYMBOL_TYPE>(which);
+                        }));
+                        EndModal(wxID_OK);
+                    });
+            }),
         wxUI::HSizer{
             wxUI::Text{ "Select Instrument" },
             wxUI::Choice{ currentInstruments }
