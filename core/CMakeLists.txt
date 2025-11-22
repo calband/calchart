@@ -114,5 +114,7 @@ target_link_libraries(calchart_core PRIVATE
 if (WIN32)
   target_compile_definitions(calchart_core PRIVATE CURL_STATICLIB)
 endif()
- 
 
+if(NOT MSVC)
+  add_subdirectory(tests)
+endif()
