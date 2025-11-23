@@ -325,7 +325,7 @@ bool PrintPostScriptDialog::TransferDataFromWindow()
     mConfig.Set_PrintViewCmd(text_view_cmd->GetValue().ToStdString());
     mConfig.Set_PrintViewOpts(text_view_opts->GetValue().ToStdString());
 #else
-    mConfig.Set_PrintFile(text_cmd->GetValue());
+    mConfig.Set_PrintFile(text_cmd->GetValue().ToStdString());
 #endif
     mConfig.Set_PrintPSLandscape(radio_orient->GetSelection() == CC_PRINT_ORIENT_LANDSCAPE);
     mConfig.Set_PrintPSModes(radio_method->GetSelection());
