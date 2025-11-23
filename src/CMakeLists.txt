@@ -247,4 +247,6 @@ install(
   COMPONENT Resources
 )
 
-
+if(NOT MSVC)
+  add_subdirectory(tests)
+endif()
