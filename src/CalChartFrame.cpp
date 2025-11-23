@@ -701,8 +701,9 @@ void CalChartFrame::OnSetSheetTitle()
     if (GetShow()) {
         if (auto s = wxGetTextFromUser("Enter the sheet title",
                 GetShow()->GetCurrentSheetName(),
-                GetShow()->GetCurrentSheetName(), this);
-            !s.IsEmpty()) {
+                GetShow()->GetCurrentSheetName(), this)
+                         .ToStdString();
+            !s.empty()) {
             GetFieldView()->DoSetSheetTitle(s);
         }
     }

@@ -171,8 +171,8 @@ void PrintContinuityEditor::FlushText()
     try {
         if ((mUserInput->GetValue() != mView->GetRawPrintContinuity()) || (text->GetValue() != mView->GetPrintNumber())) {
             mView->DoSetPrintContinuity(
-                current_sheet_num, text->GetValue(),
-                mUserInput->GetValue());
+                current_sheet_num, text->GetValue().ToStdString(),
+                mUserInput->GetValue().ToStdString());
         }
     } catch (const std::runtime_error& e) {
         wxString message = wxT("Error encountered:\n");
