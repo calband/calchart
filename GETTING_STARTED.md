@@ -24,23 +24,80 @@ Note:
 Avoid using macport version of cmake due to this issue:
 https://trac.macports.org/ticket/58450
 
+#### Installing vcpkg
+
+CalChart uses [vcpkg](https://vcpkg.io) to manage C++ dependencies. Install vcpkg and set up the environment variable:
+
+```bash
+# Clone vcpkg to a location of your choice (e.g., ~/vcpkg)
+git clone https://github.com/microsoft/vcpkg.git ~/vcpkg
+cd ~/vcpkg
+./bootstrap-vcpkg.sh
+
+# Set the VCPKG_ROOT environment variable (add to ~/.zshrc or ~/.bash_profile)
+echo 'export VCPKG_ROOT="$HOME/vcpkg"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+After setting the environment variable, restart your terminal for the changes to take effect.
+
 ### Windows Steps
 
 We recommend using [chocolatey](https://chocolatey.org) for the package manager for Windows.  
 
-First, go to https://chocolatey.org/install and follow the installation instructions.  Once installed, open powershell.exe and install `cmake`, `git`, and `winbisonflex`:
+First, go to https://chocolatey.org/install and follow the installation instructions. You'll need to run PowerShell as Administrator:
+1. Press Windows key, type "PowerShell"
+2. Right-click on "Windows PowerShell" and select "Run as administrator"
+3. Follow the Chocolatey installation instructions from the website
+
+Once Chocolatey is installed, install the required dependencies (in an admin PowerShell):
 
 ```
-choco install cmake git winflexbison clang-format
+choco install cmake git winflexbison ninja clang-format
 ```
+
+**Note**: `ninja` is required for building with CMake presets. If you encounter issues with Ninja not being found, close and reopen your terminal after installation.
+
+#### Installing vcpkg
+
+CalChart uses [vcpkg](https://vcpkg.io) to manage C++ dependencies. Install vcpkg and set up the environment variable:
+
+```powershell
+# Clone vcpkg to a location of your choice (e.g., C:\vcpkg)
+git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
+cd C:\vcpkg
+.\bootstrap-vcpkg.bat
+
+# Set the VCPKG_ROOT environment variable (required for CMake to find vcpkg)
+[System.Environment]::SetEnvironmentVariable('VCPKG_ROOT', 'C:\vcpkg', [System.EnvironmentVariableTarget]::User)
+```
+
+After setting the environment variable, close and reopen your terminal/VS Code for the changes to take effect.
 
 ### Linux Steps
 
 We recommend using apt-get to install `git`, `cmake`, `bison`, `flex`, and the gtk:
 
 ```
-sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev git cmake bison flex clang-format
+sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev git cmake bison flex clang-format ninja-build
 ```
+
+#### Installing vcpkg
+
+CalChart uses [vcpkg](https://vcpkg.io) to manage C++ dependencies. Install vcpkg and set up the environment variable:
+
+```bash
+# Clone vcpkg to a location of your choice (e.g., ~/vcpkg)
+git clone https://github.com/microsoft/vcpkg.git ~/vcpkg
+cd ~/vcpkg
+./bootstrap-vcpkg.sh
+
+# Set the VCPKG_ROOT environment variable (add to ~/.bashrc)
+echo 'export VCPKG_ROOT="$HOME/vcpkg"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+After setting the environment variable, restart your terminal for the changes to take effect.
 
 ## Getting the CalChart3 source code -- estimated time: 5 minutes
 
