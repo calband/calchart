@@ -172,6 +172,8 @@ target_include_directories(
   "${PROJECT_SOURCE_DIR}/resources/common"
 )
 
+find_package(WebP CONFIG REQUIRED)
+
 target_link_libraries(
   CalChart
   calchart_core
