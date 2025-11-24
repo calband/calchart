@@ -17,7 +17,7 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.config.name }}
+    name: ${{ matrix.config.name }} - ${{ matrix.build_type }}
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
@@ -52,6 +52,18 @@ jobs:
             build_type: Debug
 
     steps:
+    - name: Free disk space (Linux)
+      if: matrix.config.os == 'ubuntu-24.04'
+      run: |
+        # Free up disk space on Ubuntu runners to prevent "No space left on device" during vcpkg builds
+        # Reference: https://github.com/actions/runner-images/issues/2840
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /opt/hostedtoolcache/CodeQL
+        sudo docker image prune --all --force
+        df -h
+
     - name: checkout
       uses: actions/checkout@v3
 
@@ -60,6 +72,42 @@ jobs:
 
     - name: Checkout submodules
       run: git submodule update --init --recursive
+
+    - name: Get vcpkg baseline
+      id: vcpkg-baseline
+      run: |
+        BASELINE=$(grep -o '"builtin-baseline": "[^"]*"' vcpkg.json | cut -d'"' -f4)
+        echo "hash=$BASELINE" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Cache vcpkg
+      id: cache-vcpkg
+      uses: actions/cache@v4
+      with:
+        path: ${{github.workspace}}/vcpkg
+        key: vcpkg-install-${{ runner.os }}-${{ steps.vcpkg-baseline.outputs.hash }}
+
+    - name: Setup vcpkg
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true'
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git "$GITHUB_WORKSPACE/vcpkg"
+        cd "$GITHUB_WORKSPACE/vcpkg"
+        git checkout ${{ steps.vcpkg-baseline.outputs.hash }}
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          ./bootstrap-vcpkg.bat
+        else
+          ./bootstrap-vcpkg.sh
+        fi
+      shell: bash
+
+    - name: Cache vcpkg binary cache
+      uses: actions/cache@v4
+      with:
+        path: ${{github.workspace}}/vcpkg-cache
+        key: vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('vcpkg.json') }}-${{ steps.vcpkg-baseline.outputs.hash }}
+        restore-keys: |
+          vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('vcpkg.json') }}-
+          vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-
 
     - name: Installing Xcode (MacOS)
       if: matrix.config.os == 'macos-14'
@@ -75,16 +123,15 @@ jobs:
         # Add NSIS to PATH for this session
         $env:PATH = "$env:PATH;C:\Program Files (x86)\NSIS"
         echo "C:\Program Files (x86)\NSIS" >> $env:GITHUB_PATH
-        # Bootstrap vcpkg and install libcurl (x64) so CMake can find CURL on Windows
-        git clone https://github.com/microsoft/vcpkg.git "$Env:GITHUB_WORKSPACE\vcpkg"
-        & "$Env:GITHUB_WORKSPACE\vcpkg\bootstrap-vcpkg.bat"
-        # Install the static curl triplet so CI builds a statically-linked libcurl
-        & "$Env:GITHUB_WORKSPACE\vcpkg\vcpkg.exe" install curl:x64-windows-static
-        & "$Env:GITHUB_WORKSPACE\vcpkg\vcpkg.exe" integrate install
 
     - name: Installing Dependencies (Linux)
       if: matrix.config.os == 'ubuntu-24.04'
-      run: sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev libcurl4-openssl-dev
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y autoconf autoconf-archive automake libltdl-dev
+        sudo apt-get install -y build-essential libgtk-3-dev libcurl4-openssl-dev pkg-config ninja-build
+        # Additional dependencies for vcpkg and wxWidgets building
+        sudo apt-get install -y bison flex zip unzip tar curl
 
     - name: Updating to gcc 14 (Linux)
       if: matrix.config.os == 'ubuntu-24.04'
@@ -96,14 +143,17 @@ jobs:
 
     - name: Configure CMake (Windows)
       if: matrix.config.os == 'windows-latest'
-      # Tell vcpkg's CMake toolchain to use the static triplet so CMake finds static libs
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows-static
+      # Use vcpkg toolchain file with static triplet; force static runtime for CalChart too
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-static
+      env:
+        VCPKG_BINARY_SOURCES: 'clear;files,${{github.workspace}}/vcpkg-cache,readwrite'
 
-    - name: Configure CMake (non-Windows)
+    - name: Configure CMake (macOS/Linux)
       if: matrix.config.os != 'windows-latest'
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+      # Use vcpkg toolchain; triplet auto-selected by vcpkg
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+      env:
+        VCPKG_BINARY_SOURCES: 'clear;files,${{github.workspace}}/vcpkg-cache,readwrite'
  
     - name: Build
       # Build your program with the given configuration

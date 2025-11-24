@@ -176,8 +176,10 @@ target_link_libraries(
   CalChart
   calchart_core
   nlohmann_json::nlohmann_json
-  wx::gl wx::core wx::base wx::adv wx::html wx::net wx::aui
+  ${wxWidgets_LIBRARIES}
   wxUI
+  WebP::webp
+  WebP::webpdemux
 )
 
 # Special stuff for Mac
@@ -199,10 +201,10 @@ set_target_properties(
 endif()
 
 # special stuff for Windows
-if(MSVC)
+if(WIN32)
 
 set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT "CalChart")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
+set_target_properties(CalChart PROPERTIES WIN32_EXECUTABLE TRUE)
 add_custom_command(
   TARGET CalChart POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
