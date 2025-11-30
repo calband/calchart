@@ -30,10 +30,6 @@
 #include <wx/colordlg.h>
 #include <wxUI/wxUI.hpp>
 
-#ifndef wxHAS_STD_STRING_VIEW
-#error
-#endif
-
 using namespace CalChart;
 
 // how the preferences work:
