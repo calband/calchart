@@ -8,4 +8,5 @@ Other changes:
 * [#729](../../issues/729) Reduce the number of warnings from windows builds
 * [#731](../../issues/731) Move tests into the right places
 * [#732](../../issues/732) remove wxUI::Custom
+* [#737](../../issues/737) Print the version of wxWidgets used
 
