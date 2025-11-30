@@ -2,6 +2,7 @@ build*
 contgram.output
 contgram.tab.c
 generated/*
+vcpkg*
 .DS_Store
 *~
 .vagrant

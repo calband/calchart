@@ -17,14 +17,14 @@ target_include_directories(
 target_link_libraries(
   CalChartTests
   PRIVATE
+  calchart_core
+  nlohmann_json::nlohmann_json
   Catch2::Catch2WithMain
-  wx::core
+  ${wxWidgets_LIBRARIES}
 )
 
 # CTests section
 if(NOT MSVC)
-  include(CTest)
   add_test(NAME CalChartTests COMMAND $<TARGET_FILE:CalChartTests>)
 endif()
-
 

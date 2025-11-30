@@ -187,7 +187,7 @@ public:
 private:
     std::vector<Continuity> mAnimationContinuity;
     PrintContinuity mPrintableContinuity;
-    Beats mBeats;
+    Beats mBeats{};
     std::vector<Point> mPoints;
     std::string mName;
     std::vector<ImageInfo> mBackgroundImages;
