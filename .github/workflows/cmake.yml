@@ -62,7 +62,6 @@ jobs:
       run: git submodule update --init --recursive
 
     - name: Get vcpkg baseline
-      if: matrix.config.os != 'ubuntu-24.04'
       id: vcpkg-baseline
       run: |
         BASELINE=$(grep -o '"builtin-baseline": "[^"]*"' vcpkg.json | cut -d'"' -f4)
@@ -70,7 +69,6 @@ jobs:
       shell: bash
 
     - name: Cache vcpkg
-      if: matrix.config.os != 'ubuntu-24.04'
       id: cache-vcpkg
       uses: actions/cache@v4
       with:
@@ -78,7 +76,7 @@ jobs:
         key: vcpkg-install-${{ runner.os }}-${{ steps.vcpkg-baseline.outputs.hash }}
 
     - name: Setup vcpkg
-      if: matrix.config.os != 'ubuntu-24.04' && steps.cache-vcpkg.outputs.cache-hit != 'true'
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true'
       run: |
         git clone https://github.com/microsoft/vcpkg.git "$GITHUB_WORKSPACE/vcpkg"
         cd "$GITHUB_WORKSPACE/vcpkg"
@@ -91,7 +89,6 @@ jobs:
       shell: bash
 
     - name: Cache vcpkg binary cache
-      if: matrix.config.os != 'ubuntu-24.04'
       uses: actions/cache@v4
       with:
         path: ${{github.workspace}}/vcpkg-cache
@@ -120,6 +117,8 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y autoconf autoconf-archive automake libltdl-dev
         sudo apt-get install -y build-essential libgtk-3-dev libcurl4-openssl-dev pkg-config ninja-build
+        # Additional dependencies for vcpkg and wxWidgets building
+        sudo apt-get install -y bison flex zip unzip tar curl
 
     - name: Updating to gcc 14 (Linux)
       if: matrix.config.os == 'ubuntu-24.04'
@@ -145,8 +144,10 @@ jobs:
 
     - name: Configure CMake (Linux)
       if: matrix.config.os == 'ubuntu-24.04'
-      # Build wxWidgets from source using FetchContent (vendor mode)
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DUSE_SYSTEM_DEPENDENCIES=OFF -DFORCE_VENDOR_DEPENDENCIES=ON
+      # Use vcpkg toolchain for Linux dependencies
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+      env:
+        VCPKG_BINARY_SOURCES: 'clear;files,${{github.workspace}}/vcpkg-cache,readwrite'
  
     - name: Build
       # Build your program with the given configuration
