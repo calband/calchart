@@ -16,13 +16,24 @@
             }
         },
         {
-            "name": "mac",
-            "displayName": "Mac - Ninja",
-            "description": "Mac generator for macOS/Linux",
+            "name": "mac-release",
+            "displayName": "Mac - Release",
+            "description": "Mac Release build with Ninja",
             "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build/${presetName}",
+            "binaryDir": "${sourceDir}/build/mac-release",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+            }
+        },
+        {
+            "name": "mac-debug",
+            "displayName": "Mac - Debug",
+            "description": "Mac Debug build with Ninja",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/mac-debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
             }
         }
@@ -40,8 +51,11 @@
         },
         {
             "name": "mac-release",
-            "configurePreset": "mac",
-            "configuration": "Release"
+            "configurePreset": "mac-release"
+        },
+        {
+            "name": "mac-debug",
+            "configurePreset": "mac-debug"
         }
     ]
 }
