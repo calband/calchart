@@ -31,6 +31,33 @@ Project conventions and patterns
 - AddressSanitizer: enabled for Debug by default via `cmake/compiler.cmake` (option `ENABLE_ASAN`). Useful for memory bug detection.
 - JSON uses `nlohmann_json` (declared in `src/CMakeLists.txt` and linked into `calchart_core` and GUI).
 
+## Bug Reporting Feature
+
+CalChart includes built-in bug reporting via GitHub issues (new as of v3.8.4).
+
+**Architecture**:
+- Core library (`src/core/CalChartGitHubIssueSubmitter.cpp`) provides pure formatting: `FormatBugReportAsMarkdown(report)`
+- UI layer (`src/GitHubIssueSubmitter.cpp`) handles wxWidgets integration: `StartBackgroundIssueSubmission(report, callback)`
+  - Uses libcurl for HTTPS requests to GitHub REST API
+  - Background thread with wxApp::CallAfter() for UI thread callbacks
+  - Reads CALCHART_GITHUB_TOKEN env var for authentication
+  - Clipboard fallback when token is not configured
+- Dialog (`src/BugReportDialog.h/cpp`) collects user input with privacy controls
+- User entry: Help menu → "Report a Bug..." (Ctrl+Shift+B)
+- Crash handler: Global exception handler offers to file bug on crash
+
+**When modifying bug reporting code**:
+- Keep diagnostic collection in `src/core/CalChartDiagnosticInfo.*` (platform-agnostic)
+- Keep GitHub API code in `src/GitHubIssueSubmitter.cpp` (wxWidgets-dependent)
+- Keep dialog UI in `src/BugReportDialog.cpp` (wxUI builder pattern)
+- Add tests in `core/tests/CalChartGitHubIssueSubmitterTests.cpp` for formatting
+- See `docs/BugReporting.md` for user documentation and token setup instructions
+
+**Testing**:
+- Unit tests: `ctest --test-dir build --output-on-failure | grep CalChartCoreTests`
+- Full suite: `ctest --test-dir build --output-on-failure`
+- Manual: Open CalChart, press Ctrl+Shift+B, verify dialog appears and privacy notice is clear
+
 Integration points and external dependencies
 - wxWidgets: UI framework — code that adapts draw primitives to wx lives in `src/CalChartDrawPrimativesHelper.h` and many UI files (e.g. `CalChartApp.*`, `CalChartFrame.*`).
 - Bison/Flex: grammar files in `src/core/contgram.y` and `src/core/contscan.l` produce `contgram.cpp` and `contscan.cpp` into the build tree.

@@ -21,6 +21,7 @@
 */
 
 #include "CalChartApp.h"
+#include "BugReportDialog.h"
 #include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
 #include "CalChartSplash.h"
@@ -35,6 +36,7 @@
 #include <wx/fs_zip.h>
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
+#include <wx/msgdlg.h>
 #include <wx/stdpaths.h>
 #include <wxUI/wxUI.hpp>
 
@@ -55,6 +57,57 @@ int CalChartApp::OnExit()
 {
     mHostInterface.reset(); // calls ExitApp for client or server
     return wxApp::OnExit();
+}
+
+auto CalChartApp::OnExceptionInMainLoop() -> bool
+{
+    // Handle exceptions in the main event loop
+    // This is called when an unhandled exception occurs
+    try {
+        // Re-throw to get the exception
+        throw;
+    } catch (const std::exception& e) {
+        // Standard library exception
+        auto result = wxMessageDialog{
+            nullptr,
+            wxString::Format(
+                "An unexpected error occurred:\n\n%s\n\n"
+                "Would you like to open the bug report dialog?",
+                e.what()),
+            "CalChart Error",
+            wxYES_NO | wxICON_ERROR
+        }
+                          .ShowModal();
+        if (result == wxID_YES) {
+            BugReportDialog{ wxCalChart::GetGlobalConfig(),
+                nullptr,
+                dynamic_cast<wxFrame*>(GetTopWindow()),
+                "Report a Bug - Crash Report" }
+                .ShowModal();
+        } else {
+            throw e;
+        }
+    } catch (...) {
+        // Unknown exception
+        auto result = wxMessageDialog{
+            nullptr,
+            "An unexpected error occurred.\n\n"
+            "Would you like to open the bug report dialog?",
+            "CalChart Error",
+            wxYES_NO | wxICON_ERROR
+        }
+                          .ShowModal();
+        if (result == wxID_YES) {
+            BugReportDialog{ wxCalChart::GetGlobalConfig(),
+                nullptr,
+                dynamic_cast<wxFrame*>(GetTopWindow()),
+                "Report a Bug - Crash Report" }
+                .ShowModal();
+        } else {
+            throw;
+        }
+    }
+    return true;
 }
 
 void CalChartApp::OpenFile(wxString const& fileName)

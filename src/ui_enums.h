@@ -24,6 +24,7 @@
 enum {
     CALCHART__prev_ss = wxID_HIGHEST,
     CALCHART__next_ss,
+    CALCHART__file_bug,
     CALCHART__box,
     CALCHART__poly,
     CALCHART__lasso,

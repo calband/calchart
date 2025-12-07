@@ -28,6 +28,7 @@
 
 #include "AnimationErrorsPanel.h"
 #include "AnimationPanel.h"
+#include "BugReportDialog.h"
 #include "CalChartAnimationErrors.h"
 #include "CalChartApp.h"
 #include "CalChartConfiguration.h"
@@ -95,6 +96,7 @@ EVT_TOOL(CALCHART__ViewZoomIn, CalChartFrame::OnCmd_ZoomIn)
 EVT_TOOL(CALCHART__ViewZoomOut, CalChartFrame::OnCmd_ZoomOut)
 EVT_MENU(CALCHART__prev_ss, CalChartFrame::OnCmd_prev_ss)
 EVT_MENU(CALCHART__next_ss, CalChartFrame::OnCmd_next_ss)
+EVT_MENU(CALCHART__file_bug, CalChartFrame::OnReportBug)
 EVT_MENU(CALCHART__box, CalChartFrame::OnCmd_box)
 EVT_MENU(CALCHART__poly, CalChartFrame::OnCmd_poly)
 EVT_MENU(CALCHART__lasso, CalChartFrame::OnCmd_lasso)
@@ -340,6 +342,9 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
             "&Help",
             wxUI::Item{ wxID_ABOUT, "&About CalChart...", "Information about the program" },
             wxUI::Item{ wxID_HELP, "&Help on CalChart...\tCTRL-H", "Help on using CalChart" },
+            wxUI::Item{ "Report a &Bug...\tCTRL-SHIFT-B", "Report a bug to GitHub", [this](wxCommandEvent& e) {
+                           OnReportBug(e);
+                       } },
         }
     }.fitTo(this);
     // A nice touch: a history of files visited. Use this menu.
@@ -788,6 +793,14 @@ void CalChartFrame::ShowFieldAndHideAnimation(bool showField)
 void CalChartFrame::OnCmdAbout(wxCommandEvent&) { CalChartSplash::About(); }
 
 void CalChartFrame::OnCmdHelp(wxCommandEvent&) { CalChartSplash::Help(); }
+
+void CalChartFrame::OnReportBug(wxCommandEvent&)
+{
+    // Create and show the bug report dialog, passing the current document if available
+    auto* doc = dynamic_cast<CalChartDoc*>(GetDocument());
+    BugReportDialog dialog(doc->GetConfiguration(), doc, this);
+    dialog.ShowModal();
+}
 
 void CalChartFrame::OnCmd_prev_ss(wxCommandEvent&)
 {

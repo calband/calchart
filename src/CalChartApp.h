@@ -44,6 +44,7 @@ class CalChartApp : public wxApp {
 public:
     virtual bool OnInit() override;
     int OnExit() override;
+    auto OnExceptionInMainLoop() -> bool override;
 
     void OpenFile(wxString const& fileName);
     void OpenFileOnHost(wxString const& filename);

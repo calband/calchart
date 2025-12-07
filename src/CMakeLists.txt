@@ -41,6 +41,10 @@ add_executable(
   AnimationSprites.hpp
   BackgroundImages.cpp
   BackgroundImages.h
+  BugReportDialog.cpp
+  BugReportDialog.h
+  GitHubIssueSubmitter.cpp
+  GitHubIssueSubmitter.hpp
   CCOmniviewCanvas.cpp
   CCOmniviewCanvas.h
   CalChartApp.cpp
@@ -51,6 +55,8 @@ add_executable(
   CalChartDocCommand.cpp
   CalChartDocCommand.h
   CalChartDrawing.h
+  DiagnosticInfo.cpp
+  DiagnosticInfo.h
   CalChartDrawing.cpp
   CalChartDrawingGetMinSize.h
   CalChartDrawingLayout.h
