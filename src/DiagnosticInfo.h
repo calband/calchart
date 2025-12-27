@@ -35,6 +35,6 @@ namespace wxCalChart {
 
 // Collect all diagnostic information
 // Returns a complete CalChart::DiagnosticInfo with both Core and system info
-[[nodiscard]] auto CollectDiagnosticInfo(CalChartDoc const* doc = nullptr) -> CalChart::DiagnosticInfo;
+[[nodiscard]] auto CollectDiagnosticInfo(CalChartDoc const* doc = nullptr, CalChart::CircularLogBuffer const& logs = CalChart::CircularLogBuffer{}) -> CalChart::DiagnosticInfo;
 
 } // namespace wxCalChart

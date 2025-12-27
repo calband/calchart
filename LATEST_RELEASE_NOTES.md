@@ -25,4 +25,5 @@ Other changes:
 * [#732](../../issues/732) remove wxUI::Custom
 * [#735](../../issues/735) Update the CI to have the release or debug in the name
 * [#737](../../issues/737) Print the version of wxWidgets used
+* [#751](../../issues/751) Add logs to bug report
 

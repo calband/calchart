@@ -21,6 +21,7 @@
 */
 
 #include "BugReportDialog.h"
+#include "CalChartApp.h"
 #include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
 #include "DiagnosticInfo.h"
@@ -155,7 +156,7 @@ BugReportDialog::BugReportDialog(
     : super{ parent, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU }
     , mConfig{ config }
     , mDoc(doc)
-    , mDiagnosticInfo{ wxCalChart::CollectDiagnosticInfo(mDoc) }
+    , mDiagnosticInfo{ wxCalChart::CollectDiagnosticInfo(mDoc, wxGetApp().GetLogBuffer()) }
     , mShowHasLoaded{ doc != nullptr }
 {
     constexpr auto minLargeWidth = 400;

@@ -50,6 +50,8 @@ add_executable(
   CalChartApp.cpp
   CalChartApp.h
   CalChartCoordHelper.h
+  CalChartLogTarget.cpp
+  CalChartLogTarget.h
   CalChartDoc.cpp
   CalChartDoc.h
   CalChartDocCommand.cpp
