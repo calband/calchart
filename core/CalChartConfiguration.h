@@ -238,6 +238,9 @@ private:                                           \
     // Update check: version string the user chose to ignore/dismiss (empty = none)
     DECLARE_CONFIGURATION_FUNCTIONS(IgnoredUpdateVersion, std::string);
 
+    // GitHub token: personal access token for bug report submission
+    DECLARE_CONFIGURATION_FUNCTIONS(GitHubToken, std::string);
+
 public:
     // color palettes:  The color Palettes allow you to set different "blocks" of
     // colors.

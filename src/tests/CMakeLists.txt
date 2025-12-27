@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 3.11)
 
 add_executable(CalChartTests
   ${CMAKE_CURRENT_SOURCE_DIR}/DCSaveRestoreTests.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/DiagnosticInfoTests.cpp
+  ${PROJECT_SOURCE_DIR}/src/DiagnosticInfo.cpp
 )
 
 SetupCompilerForTarget(CalChartTests)

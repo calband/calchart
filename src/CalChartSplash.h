@@ -38,6 +38,7 @@ public:
 
     static void About();
     static void Help();
+    static void ReportBug();
 
 private:
     void Preferences();

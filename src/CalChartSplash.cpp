@@ -20,6 +20,7 @@
 */
 
 #include "CalChartSplash.h"
+#include "BugReportDialog.h"
 #include "CalChartApp.h"
 #include "CalChartConfiguration.h"
 #include "CalChartPreferences.h"
@@ -113,6 +114,9 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, std::strin
             wxUI::Item{ wxID_HELP, "&Help on CalChart...\tCTRL-H", "Help on using CalChart ", [] {
                            Help();
                        } },
+            wxUI::Item{ "Report a &Bug...\tCTRL-SHIFT-B", "Report a bug to GitHub", [] {
+                           ReportBug();
+                       } },
         }
     }.fitTo(this);
 
@@ -140,9 +144,12 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, std::strin
                 .withStyle(wxHL_DEFAULT_STYLE),
             wxUI::Text{ "        " }
                 .withFont(fontSubTitle),
-            wxUI::Hyperlink{ "Report an issue.", "https://github.com/calband/calchart/issues/new" }
+            wxUI::Button{ "Report a Bug." }
                 .withFont(fontSubTitle)
-                .withStyle(wxHL_DEFAULT_STYLE),
+                .withStyle(wxHL_DEFAULT_STYLE)
+                .bind([]() {
+                    ReportBug();
+                }),
         },
         wxUI::Line{}
             .withSize({ GetLogoLineSize(), -1 }),
@@ -184,6 +191,14 @@ void CalChartSplash::Help()
 {
     wxGetApp().GetGlobalHelpController().LoadFile();
     wxGetApp().GetGlobalHelpController().DisplayContents();
+}
+
+void CalChartSplash::ReportBug()
+{
+    // Create and show the bug report dialog
+    BugReportDialog dialog(wxCalChart::GetGlobalConfig(),
+        nullptr, dynamic_cast<wxFrame*>(wxGetApp().GetTopWindow()));
+    dialog.ShowModal();
 }
 
 void CalChartSplash::Preferences()

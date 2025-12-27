@@ -26,6 +26,7 @@
 #include "ui_enums.h"
 
 #include "tb_box.xbm"
+#include "tb_bug.xbm"
 #include "tb_curve.xbm"
 #include "tb_gen.xbm"
 #include "tb_lasso.xbm"
@@ -100,6 +101,7 @@ std::vector<ToolBarEntry> GetHalfOfMainToolBar()
         auto result = std::vector<ToolBarEntry>{
             { wxITEM_NORMAL, {}, ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_left))), "Previous stuntsheet", CALCHART__prev_ss, {} },
             { wxITEM_NORMAL, {}, ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_right))), "Next stuntsheet", CALCHART__next_ss, true },
+            { wxITEM_NORMAL, {}, ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_bug))), "Report a bug", CALCHART__file_bug, {} },
             { wxITEM_RADIO, {}, ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_box))), "Select points with box", CALCHART__box, {} },
             { wxITEM_RADIO, {}, ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_poly))), "Select points with polygon", CALCHART__poly, {} },
             { wxITEM_RADIO, {}, ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_lasso))), "Select points with lasso", CALCHART__lasso, {} },

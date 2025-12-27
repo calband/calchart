@@ -42,7 +42,11 @@ add_library(
   CalChartContinuityToken.cpp
   CalChartContinuityToken.h
   CalChartCoord.h
+  CalChartDiagnosticInfo.cpp
+  CalChartDiagnosticInfo.hpp
   CalChartCoroutine.h
+  CalChartGitHubIssueSubmitter.cpp
+  CalChartGitHubIssueSubmitter.hpp
   CalChartDrawCommand.cpp
   CalChartDrawCommand.h
   CalChartDrawPrimatives.h

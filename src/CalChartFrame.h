@@ -79,6 +79,7 @@ public:
     void OnEditCurveAssignments();
     void OnCmdAbout(wxCommandEvent& event);
     void OnCmdHelp(wxCommandEvent& event);
+    void OnReportBug(wxCommandEvent& event);
 
     void OnCmd_prev_ss(wxCommandEvent& event);
     void OnCmd_next_ss(wxCommandEvent& event);
