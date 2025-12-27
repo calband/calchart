@@ -10,8 +10,18 @@
 #include "CalChartAnimationErrors.h"
 #include "CalChartPrintShowToPS.hpp"
 #include "CalChartShow.h"
+#include <condition_variable>
 #include <fstream>
+#include <functional>
+#include <future>
+#include <iostream>
+#include <memory>
+#include <mutex>
+#include <queue>
 #include <ranges>
+#include <sstream>
+#include <thread>
+#include <vector>
 
 namespace {
 
@@ -125,23 +135,28 @@ namespace CalChartCmd {
 constexpr auto Parse = [](auto args, auto& os) {
     auto list_of_files = args["<shows>"].asStringList();
 
+    // Process files sequentially
     for (auto&& file : list_of_files) {
-        auto show = OpenShow(file);
+        try {
+            auto show = OpenShow(file);
 
-        if (args["--print_show"].asBool()) {
-            PrintShow(*show, os);
-        }
-        if (args["--animate_show"].asBool()) {
-            AnimateShow(*show, os);
-        }
-        if (args["--dump_continuity"].asBool()) {
-            DumpContinuity(*show, os);
-        }
-        if (args["--check_flag"].asBool()) {
-            DumpFileCheck(os);
-        }
-        if (args["--json"].asBool()) {
-            DumpJSON(*show, os);
+            if (args["--print_show"].asBool()) {
+                PrintShow(*show, os);
+            }
+            if (args["--animate_show"].asBool()) {
+                AnimateShow(*show, os);
+            }
+            if (args["--dump_continuity"].asBool()) {
+                DumpContinuity(*show, os);
+            }
+            if (args["--check_flag"].asBool()) {
+                DumpFileCheck(os);
+            }
+            if (args["--json"].asBool()) {
+                DumpJSON(*show, os);
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "Error processing file " << file << ": " << e.what() << "\n";
         }
     }
 };
