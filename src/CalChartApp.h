@@ -33,8 +33,10 @@ class HostAppInterface;
 class wxHtmlHelpController;
 class wxDocManager;
 class wxPrintDialogData;
+class CalChartLogTarget;
 namespace CalChart {
 class ShowMode;
+class CircularLogBuffer;
 }
 
 DECLARE_APP(CalChartApp)
@@ -57,6 +59,9 @@ public:
     wxHtmlHelpController& GetGlobalHelpController();
     wxPrintDialogData& GetGlobalPrintDialog();
 
+    // Get a copy of the global log buffer for bug reporting
+    CalChart::CircularLogBuffer GetLogBuffer() const;
+
 private:
     void ProcessArguments();
 
@@ -69,4 +74,6 @@ private:
     std::unique_ptr<wxHtmlHelpController> mHelpController;
     std::unique_ptr<HostAppInterface> mHostInterface;
     std::unique_ptr<wxPrintDialogData> mPrintDialogData;
+    CalChartLogTarget* mLogTarget = nullptr; // Owned by wxLog, don't delete
+    std::unique_ptr<wxLogChain> mLogChain;
 };

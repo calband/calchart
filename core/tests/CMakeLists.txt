@@ -9,6 +9,7 @@ add_executable(CalChartCoreTests
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartContinuityTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartContinuityTokenTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartCoordTests.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/CircularLogBufferTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartDiagnosticInfoTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartDrawCommandTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartDrawPrimativesTests.cpp

@@ -28,7 +28,7 @@
 TEST_CASE("wxCalChart::CollectDiagnosticInfo", "DiagnosticInfo")
 {
     // Collect without document
-    auto info = wxCalChart::CollectDiagnosticInfo(nullptr);
+    auto info = wxCalChart::CollectDiagnosticInfo();
 
     // Verify Core information is populated (from CalChart::DiagnosticInfo::Create)
     CHECK_FALSE(info.calchart_version.empty());
@@ -62,7 +62,7 @@ TEST_CASE("wxCalChart::CollectDiagnosticInfo", "DiagnosticInfo")
 
 TEST_CASE("wxCalChart::CollectDiagnosticInfo::SystemInfo", "DiagnosticInfo")
 {
-    auto info = wxCalChart::CollectDiagnosticInfo(nullptr);
+    auto info = wxCalChart::CollectDiagnosticInfo();
 
     // Check that system information looks reasonable
     // Note: We can't check for specific values as they vary by platform and CI environment
@@ -91,7 +91,7 @@ TEST_CASE("wxCalChart::CollectDiagnosticInfo::SystemInfo", "DiagnosticInfo")
 
 TEST_CASE("wxCalChart::CollectDiagnosticInfo::JSON", "DiagnosticInfo")
 {
-    auto info = wxCalChart::CollectDiagnosticInfo(nullptr);
+    auto info = wxCalChart::CollectDiagnosticInfo();
 
     // Convert to JSON to verify it's JSON-serializable
     auto json = info.toJSON();
@@ -108,7 +108,7 @@ TEST_CASE("wxCalChart::CollectDiagnosticInfo::JSON", "DiagnosticInfo")
 
 TEST_CASE("wxCalChart::CollectDiagnosticInfo::StringOutput", "DiagnosticInfo")
 {
-    auto info = wxCalChart::CollectDiagnosticInfo(nullptr);
+    auto info = wxCalChart::CollectDiagnosticInfo();
 
     // Convert to string to verify it's user-readable
     auto str = info.toString();

@@ -24,6 +24,7 @@
 #include "BugReportDialog.h"
 #include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
+#include "CalChartLogTarget.h"
 #include "CalChartSplash.h"
 #include "CalChartView.h"
 #include "HostAppInterface.h"
@@ -32,6 +33,7 @@
 #include "basic_ui.h"
 #include "platconf.h"
 
+#include "CircularLogBuffer.hpp"
 #include <wx/config.h>
 #include <wx/fs_zip.h>
 #include <wx/help.h>
@@ -144,8 +146,26 @@ wxPrintDialogData& CalChartApp::GetGlobalPrintDialog()
     return *mPrintDialogData;
 }
 
+CalChart::CircularLogBuffer CalChartApp::GetLogBuffer() const
+{
+    return mLogTarget->GetLogBuffer();
+}
+
 void CalChartApp::InitAppAsServer()
 {
+    // Create log target (wxLog will take ownership and delete it)
+    mLogTarget = new CalChartLogTarget(CalChart::CircularLogBuffer{ 100 });
+
+    // Get the current active logger (if any) and chain it
+    auto oldLogTarget = wxLog::SetActiveTarget(mLogTarget);
+
+    // Create a log chain that preserves the old logger in the chain
+    if (oldLogTarget && oldLogTarget != mLogTarget) {
+        mLogChain = std::make_unique<wxLogChain>(oldLogTarget);
+        // Chain the old logger to our target so messages flow through both
+        mLogTarget->SetNextTarget(mLogChain.get());
+    }
+
     //// Create a document manager
     mDocManager = new wxDocManager;
 

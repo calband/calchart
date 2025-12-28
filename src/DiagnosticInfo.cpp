@@ -21,6 +21,7 @@
 */
 
 #include "DiagnosticInfo.h"
+#include "CalChartApp.h"
 #include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
 #include "CalChartShow.h"
@@ -145,7 +146,7 @@ namespace {
 
 } // anonymous namespace
 
-auto CollectDiagnosticInfo(CalChartDoc const* doc) -> CalChart::DiagnosticInfo
+auto CollectDiagnosticInfo(CalChartDoc const* doc, CalChart::CircularLogBuffer const& logs) -> CalChart::DiagnosticInfo
 {
     // Start with Core diagnostic info
     auto info = CalChart::DiagnosticInfo::Create();
@@ -171,6 +172,8 @@ auto CollectDiagnosticInfo(CalChartDoc const* doc) -> CalChart::DiagnosticInfo
             info.additional_info["Config:" + key] = value;
         }
     }
+
+    info.recent_logs = logs.GetMessages();
 
     return info;
 }

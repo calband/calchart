@@ -23,6 +23,7 @@
 #include "CalChartDiagnosticInfo.hpp"
 #include "CalChartShow.h"
 #include "CalChartShowMode.h"
+#include "CircularLogBuffer.hpp"
 #include "ccvers.h"
 #include <format>
 
@@ -82,6 +83,12 @@ auto DiagnosticInfo::toString() const -> std::string
         result += "- No show currently loaded\n";
     }
     result += "\n";
+
+    // Include recent log messages if available
+    if (!recent_logs.empty()) {
+        result += "## Recent Log Messages\n";
+        result += CalChart::FormatLogMessages(recent_logs) + "\n\n";
+    }
 
     if (!additional_info.empty()) {
         result += "## Additional Information\n";

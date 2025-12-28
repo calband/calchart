@@ -21,9 +21,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CircularLogBuffer.hpp"
+#include <map>
 #include <nlohmann/json.hpp>
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace CalChart {
 
@@ -48,6 +51,9 @@ struct DiagnosticInfo {
         std::string show_mode;
         std::string file_format_version;
     } show_info;
+
+    // Recent log messages
+    std::vector<LogMessage> recent_logs;
 
     // Generic key-value pairs for additional info
     std::map<std::string, std::string> additional_info;
