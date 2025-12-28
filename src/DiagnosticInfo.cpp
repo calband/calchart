@@ -81,10 +81,23 @@ namespace {
             auto geometry = primary_display.GetGeometry();
             auto dpi = primary_display.GetPPI();
 
+            // Get content scale factor (DPI scaling, important for High DPI displays)
+            auto contentScaleFactor = wxAppBase::GetMainTopWindow() != nullptr
+                ? wxAppBase::GetMainTopWindow()->GetContentScaleFactor()
+                : 1.0;
+
+            // Test DIP conversion functions to diagnose scaling issues
+            // tDIP converts pixels to DIP (Device Independent Pixels)
+            // fDIP converts DIP to pixels
+            auto test_pixel_value = 100;
+            auto test_dip = wxWindow::ToDIP(test_pixel_value, nullptr);
+            auto test_pixel = wxWindow::FromDIP(test_dip, nullptr);
+
             auto ss = std::stringstream{};
             ss << display_count << " display(s), Primary: "
                << geometry.width << "x" << geometry.height
-               << " @ " << dpi.x << " DPI";
+               << " @ " << dpi.x << " DPI, Scale: " << contentScaleFactor
+               << ", DIP(100px): " << test_dip << "DIP, FromDIP: " << test_pixel << "px";
             info.display_info = ss.str();
         } else {
             info.display_info = "No displays detected";

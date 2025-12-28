@@ -180,10 +180,21 @@ void FieldThumbnailBrowser::OnPaint([[maybe_unused]] wxPaintEvent& event)
 
     auto field_offset = CalChart::Coord(0, mYNameSize + kYNamePadding);
 
-    wxCalChart::Draw::DrawCommandList(dc, LayoutSheetThumbnails(*mView, mConfig, mYNameSize, thumbnail_offset, CalChart::Coord(box_size.x, box_size.y), field_offset));
-
     // we manipulate the scale and origin to create repeating copies of the field
     auto origin = dc.GetDeviceOrigin();
+
+    // Need information to help debug DPI issues
+    wxLogInfo("FieldThumbnailBrowser DPI Debug Info:");
+    wxLogInfo("  GetSize(): %dx%d", GetSize().x, GetSize().y);
+    wxLogInfo("  mode_size: %dx%d", mode_size.x, mode_size.y);
+    wxLogInfo("  current_size: %dx%d", current_size.x, current_size.y);
+    wxLogInfo("  box_size: %dx%d", box_size.x, box_size.y);
+    wxLogInfo("  userScale: %f", userScale);
+    wxLogInfo("  origin: (%d, %d)", origin.x, origin.y);
+    wxLogInfo("  mLayoutHorizontal: %s", mLayoutHorizontal ? "true" : "false");
+
+    wxCalChart::Draw::DrawCommandList(dc, LayoutSheetThumbnails(*mView, mConfig, mYNameSize, thumbnail_offset, CalChart::Coord(box_size.x, box_size.y), field_offset));
+
     dc.SetUserScale(userScale, userScale);
     for (auto [which, sheet] : CalChart::Ranges::enumerate_view(mView->GenerateFieldWithMarchersDrawCommands())) {
         auto newOrigin = which * thumbnail_offset;

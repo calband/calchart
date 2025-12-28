@@ -26,4 +26,5 @@ Other changes:
 * [#735](../../issues/735) Update the CI to have the release or debug in the name
 * [#737](../../issues/737) Print the version of wxWidgets used
 * [#751](../../issues/751) Add logs to bug report
+* [#754](../../issues/754) Add display logging to help debug display issues
 
