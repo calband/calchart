@@ -267,6 +267,91 @@ jobs:
       if: matrix.config.os == 'macos-14'
       run: pushd ${{github.workspace}}/build && cpack -G DragNDrop
 
+    # Windows Code Signing Prerequisites:
+    # ✅ Step 1: Purchase a Code Signing Certificate
+    #   Get an EV Code Signing Certificate or Standard Code Signing Certificate from:
+    #     - DigiCert (https://www.digicert.com/signing/code-signing-certificates)
+    #     - Sectigo (https://sectigo.com/ssl-certificates-tls/code-signing)
+    #     - SSL.com (https://www.ssl.com/certificates/code-signing/)
+    #   EV certificates provide immediate SmartScreen reputation (~$300-500/year)
+    #   Standard certificates require building reputation over time (~$100-300/year)
+    # ✅ Step 2: Export Certificate as PFX
+    #   After receiving your certificate, export it as a .pfx (PKCS#12) file with private key
+    #   Set a strong password when exporting
+    # ✅ Step 3: Base64 Encode and Store in GitHub Secrets
+    #   Windows PowerShell:
+    #     $fileContent = Get-Content -Path "certificate.pfx" -Encoding Byte
+    #     $base64 = [System.Convert]::ToBase64String($fileContent)
+    #     $base64 | Set-Clipboard
+    #   Or Git Bash:
+    #     base64 -w 0 certificate.pfx | clip
+    #   Then in GitHub → Settings → Secrets and variables → Actions, add:
+    #     WINDOWS_CERTIFICATE (Paste base64 contents)
+    #     WINDOWS_CERTIFICATE_PASSWORD (The password for the PFX file)
+    #     WINDOWS_CERT_THUMBPRINT (optional, certificate thumbprint/SHA1 hash)
+
+    - name: Setup code signing certificate (Windows)
+      if: matrix.config.os == 'windows-latest' && github.event_name != 'pull_request'
+      env:
+        WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+        WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+      run: |
+        if ($env:WINDOWS_CERTIFICATE) {
+          $certPath = "${{github.workspace}}\certificate.pfx"
+          $certBytes = [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE)
+          [IO.File]::WriteAllBytes($certPath, $certBytes)
+          
+          # Import certificate to local machine store
+          $pwd = ConvertTo-SecureString -String $env:WINDOWS_CERTIFICATE_PASSWORD -Force -AsPlainText
+          Import-PfxCertificate -FilePath $certPath -CertStoreLocation Cert:\CurrentUser\My -Password $pwd
+          
+          Write-Host "Certificate imported successfully"
+        } else {
+          Write-Host "No certificate configured - skipping signing"
+        }
+      shell: powershell
+
+    - name: Sign executable (Windows)
+      if: matrix.config.os == 'windows-latest' && github.event_name != 'pull_request'
+      env:
+        WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+      run: |
+        if (Test-Path "${{github.workspace}}\certificate.pfx") {
+          # Find signtool (installed with Windows SDK)
+          $signtool = Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+          
+          if (-not $signtool) {
+            Write-Error "signtool.exe not found. Windows SDK may not be installed."
+            exit 1
+          }
+          
+          Write-Host "Using signtool: $($signtool.FullName)"
+          
+          # Sign the main executable
+          $exePath = "${{github.workspace}}\build\src\${{matrix.build_type}}\CalChart.exe"
+          
+          if (Test-Path $exePath) {
+            Write-Host "Signing $exePath"
+            & $signtool.FullName sign /f "${{github.workspace}}\certificate.pfx" /p "$env:WINDOWS_CERTIFICATE_PASSWORD" /tr http://timestamp.digicert.com /td SHA256 /fd SHA256 $exePath
+            
+            if ($LASTEXITCODE -eq 0) {
+              Write-Host "Successfully signed CalChart.exe"
+              
+              # Verify the signature
+              & $signtool.FullName verify /pa /v $exePath
+            } else {
+              Write-Error "Failed to sign executable. Exit code: $LASTEXITCODE"
+              exit 1
+            }
+          } else {
+            Write-Error "Executable not found at $exePath"
+            exit 1
+          }
+        } else {
+          Write-Host "No certificate available - skipping signing (PRs or missing secrets)"
+        }
+      shell: powershell
+
     - name: Pack (Windows)
       if: matrix.config.os == 'windows-latest'
       # it seems that the cmake command provided by chocolatey conflicts with cmake.
@@ -276,6 +361,25 @@ jobs:
         $cpack_cmd = Join-Path -Path $cmdpath -ChildPath cpack
         pushd ${{github.workspace}}/build
         & $cpack_cmd
+        
+        # Sign the installer after CPack creates it
+        if (Test-Path "${{github.workspace}}\certificate.pfx") {
+          $signtool = Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+          $installerPath = Get-ChildItem -Path . -Filter "CalChart-*.exe" | Select-Object -First 1
+          
+          if ($installerPath -and $signtool) {
+            Write-Host "Signing installer: $($installerPath.Name)"
+            & $signtool.FullName sign /f "${{github.workspace}}\certificate.pfx" /p "$env:WINDOWS_CERTIFICATE_PASSWORD" /tr http://timestamp.digicert.com /td SHA256 /fd SHA256 $installerPath.FullName
+            
+            if ($LASTEXITCODE -eq 0) {
+              Write-Host "Successfully signed installer"
+              & $signtool.FullName verify /pa /v $installerPath.FullName
+            }
+          }
+        }
+      env:
+        WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+      shell: powershell
 
     - name: Strip (Linux)
       if: matrix.config.os == 'ubuntu-24.04'
