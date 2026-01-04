@@ -25,6 +25,7 @@
 #include "CalChartConfiguration.h"
 #include "CalChartPreferences.h"
 #include "ConfigurationDebugDialog.h"
+#include "HelpDialog.hpp"
 #include "StackDrawPlayground.h"
 #include "SystemConfiguration.h"
 #include "basic_ui.h"
@@ -199,8 +200,25 @@ void CalChartSplash::About()
 
 void CalChartSplash::Help()
 {
-    wxGetApp().GetGlobalHelpController().LoadFile();
-    wxGetApp().GetGlobalHelpController().DisplayContents();
+#if wxUSE_WEBVIEW
+    // Create and show the help dialog (modeless)
+    wxWindow* parent = wxGetActiveWindow();
+    if (!parent) {
+        parent = nullptr; // Will use the app's top-level window
+    }
+    auto* helpDialog = new HelpDialog(parent, wxGetApp().GetGlobalHelpManager());
+    helpDialog->DisplayIndex();
+    helpDialog->Show();
+    // Dialog is modeless and will delete itself on close
+#else
+    wxMessageBox(
+        "Help system is not available.\n\n"
+        "This build was compiled without wxWebView support.\n"
+        "Please refer to the online documentation at:\n"
+        "https://github.com/calband/calchart",
+        "Help Not Available",
+        wxOK | wxICON_INFORMATION);
+#endif
 }
 
 void CalChartSplash::ReportBug()

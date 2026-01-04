@@ -10,15 +10,22 @@ It's highly recommended that you use clang-format to help keep the coding style 
 
 The CalChart3 code tries to be self contained, but it has several external dependencies.
 
+- **Python 3**: Required for building the help system documentation
+- **Pandoc**: Required for converting help documentation from Markdown to HTML
+- **CMake**: Build system generator
+- **vcpkg**: C++ dependency manager
+
 ### macOS Steps
 
-Next, you will need to install a package manager to install `cmake`. I recommend using [brew](https://brew.sh) to install the tools that may be missing on your Mac.
+Install the required build tools using [brew](https://brew.sh):
 
-First, go to https://brew.sh and follow the installation instructions.  Next, open the Terminal Applicaton and enter the following command:
+First, go to https://brew.sh and follow the installation instructions.  Next, open the Terminal Application and enter the following command:
 
 ```
-brew install cmake clang-format
+brew install cmake clang-format python3 pandoc
 ```
+
+**Note:** Pandoc is required for converting help documentation from Markdown to HTML during the build process.
 
 Note:
 Avoid using macport version of cmake due to this issue:
@@ -53,10 +60,10 @@ First, go to https://chocolatey.org/install and follow the installation instruct
 Once Chocolatey is installed, install the required dependencies (in an admin PowerShell):
 
 ```
-choco install cmake git winflexbison ninja clang-format
+choco install cmake git winflexbison ninja clang-format python3 pandoc
 ```
 
-**Note**: `ninja` is required for building with CMake presets. If you encounter issues with Ninja not being found, close and reopen your terminal after installation.
+**Note**: `ninja` is required for building with CMake presets. Pandoc is required for converting help documentation from Markdown to HTML. If you encounter issues with Ninja not being found, close and reopen your terminal after installation.
 
 #### Installing vcpkg
 
@@ -76,11 +83,13 @@ After setting the environment variable, close and reopen your terminal/VS Code f
 
 ### Linux Steps
 
-We recommend using apt-get to install `git`, `cmake`, `bison`, `flex`, and the gtk:
+We recommend using apt-get to install the required build tools:
 
 ```
-sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev git cmake bison flex clang-format ninja-build
+sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev git cmake bison flex clang-format ninja-build python3 pandoc
 ```
+
+**Note:** Pandoc is required for converting help documentation from Markdown to HTML during the build process.
 
 #### Installing vcpkg
 
