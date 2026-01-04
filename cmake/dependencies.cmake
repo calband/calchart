@@ -83,7 +83,7 @@ try_find_or_fetch(nlohmann_json nlohmann_json https://github.com/nlohmann/json 5
 try_find_or_fetch(Catch2 Catch2 https://github.com/catchorg/Catch2 6e79e68) # v3.4.0
 
 if(USE_SYSTEM_DEPENDENCIES)
-  find_package(wxWidgets REQUIRED COMPONENTS net core base gl aui html)
+  find_package(wxWidgets REQUIRED COMPONENTS net core base gl aui html webview)
   include(${wxWidgets_USE_FILE})
 elseif(FORCE_VENDOR_DEPENDENCIES)
   message(STATUS "Fetching wxWidgets sources for vendor build (this can be slow).")
@@ -92,10 +92,11 @@ elseif(FORCE_VENDOR_DEPENDENCIES)
   set(wxUSE_STL ON)
   set(wxUSE_STC OFF)
   set(wxUSE_STD_CONTAINERS ON)
+  set(wxUSE_WEBVIEW ON)
   FetchContent_Declare(
     wxWidgets
     GIT_REPOSITORY "https://github.com/wxWidgets/wxWidgets.git"
-    GIT_TAG 8aef5f40b93958719771331ca03866b7b6fff6bf # v3.2.8
+    GIT_TAG 49c6810948f40c457e3d0848b9111627b5b61de5 # v3.3.1
   )
   FetchContent_MakeAvailable(wxWidgets)
 else()

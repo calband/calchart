@@ -148,6 +148,8 @@ add_executable(
   TransitionSolverProgressFrame.h
   TransitionSolverView.cpp
   TransitionSolverView.h
+  WebViewDemoDialog.cpp
+  WebViewDemoDialog.h
   basic_ui.cpp
   basic_ui.h
   calchart.rc
