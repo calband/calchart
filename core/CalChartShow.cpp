@@ -457,19 +457,9 @@ auto Show::GetCurrentSheetPrintNumber() const -> std::string
     return mSheets.at(mSheetNum).GetPrintNumber();
 }
 
-auto Show::GetCurrentSheetRawPrintContinuity() const -> std::string
-{
-    return mSheets.at(mSheetNum).GetRawPrintContinuity();
-}
-
 auto Show::GetCurrentSheetBackgroundImages() const -> std::vector<ImageInfo>
 {
     return mSheets.at(mSheetNum).GetBackgroundImages();
-}
-
-auto Show::GetCurrentSheetPrintContinuity() const -> PrintContinuity
-{
-    return mSheets.at(mSheetNum).GetPrintContinuity();
 }
 
 auto Show::CopyCurrentSheet() const -> Show::Sheet_container_t
@@ -704,6 +694,16 @@ auto Show::GetContinuitiesInUseOnCurrentSheet() const -> std::vector<bool>
     return GetContinuitiesInUse(mSheetNum);
 }
 
+auto Show::GetCurrentSheetRawPrintContinuity() const -> std::string
+{
+    return mSheets.at(mSheetNum).GetRawPrintContinuity();
+}
+
+auto Show::GetCurrentSheetPrintContinuity() const -> PrintContinuity
+{
+    return mSheets.at(mSheetNum).GetPrintContinuity();
+}
+
 auto Show::AlreadyHasPrintContinuity() const -> bool
 {
     for (auto& i : mSheets) {
@@ -712,6 +712,16 @@ auto Show::AlreadyHasPrintContinuity() const -> bool
         }
     }
     return false;
+}
+
+auto Show::GetAllRawPrintContinuity() const -> std::vector<std::string>
+{
+    return CalChart::Ranges::ToVector<std::string>(mSheets | std::views::transform([](auto&& sheet) { return sheet.GetRawPrintContinuity(); }));
+}
+
+auto Show::GetAllPrintContinuity() const -> std::vector<PrintContinuity>
+{
+    return CalChart::Ranges::ToVector<PrintContinuity>(mSheets | std::views::transform([](auto&& sheet) { return sheet.GetPrintContinuity(); }));
 }
 
 auto Show::GetSheetsName() const -> std::vector<std::string>

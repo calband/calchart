@@ -31,7 +31,8 @@ Usage:
 Options:
     --print_show            Parse option to print out the show.
     --check_flag            Parse option to perform check and print results.
-    --dump_continuity       Parse option to dump the continuting.
+    --dump_continuity       Parse option to dump the continuity.
+    --dump_print_continuity  Parse option to dump the print continuity.
     --animate_show          Parse option to print the animation.
     --json                  Parse option to dump the JSON for the viewer.
     --profile               Print profiling data.

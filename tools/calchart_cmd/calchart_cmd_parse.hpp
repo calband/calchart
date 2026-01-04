@@ -118,6 +118,18 @@ auto DumpJSON(CalChart::Show const& show, std::ostream& os)
     os << std::setw(4) << json << "\n";
 }
 
+auto DumpPrintContinuity(CalChart::Show const& show, std::ostream& os)
+{
+    auto print_continuities = show.GetAllRawPrintContinuity();
+    for (auto&& [index, pc] : CalChart::Ranges::enumerate_view(print_continuities)) {
+        if (pc.empty()) {
+            continue;
+        }
+        os << "Sheet: " << index << "\n";
+        os << pc << "\n";
+    }
+}
+
 }
 
 namespace CalChartCmd {
@@ -143,6 +155,10 @@ constexpr auto Parse = [](auto args, auto& os) {
         if (args["--json"].asBool()) {
             DumpJSON(*show, os);
         }
+        if (args["--dump_print_continuity"].asBool()) {
+            DumpPrintContinuity(*show, os);
+        }
     }
 };
+
 }
