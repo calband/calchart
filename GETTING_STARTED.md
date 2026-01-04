@@ -114,7 +114,11 @@ The CalChart3 source code lives on [Github](https://github.com/calband/calchart)
 
 ```
 git clone https://github.com/calband/calchart.git ./calchart
+cd calchart
+git submodule update --init --recursive
 ```
+
+**Note:** The CalChart viewer will be built automatically as part of the CMake build process if Node.js is installed. If you don't have Node.js and want the full viewer functionality, install it from [nodejs.org](https://nodejs.org/) before building.
 
 You should see the project being downloaded, and it should appear to be similar to:
 ```

@@ -259,6 +259,19 @@ wxSTD istream& CalChartDoc::LoadObject(wxSTD istream& stream)
 
 bool CalChartDoc::exportViewerFile(std::filesystem::path const& filepath)
 {
+    auto j = toViewerFileJSON();
+    auto o = std::ofstream(filepath);
+    o << std::setw(4) << j << std::endl;
+    return true;
+}
+
+nlohmann::json CalChartDoc::toViewerJSON() const
+{
+    return mShow->toOnlineViewerJSON(Animation(*mShow));
+}
+
+nlohmann::json CalChartDoc::toViewerFileJSON() const
+{
     nlohmann::json j;
 
     j["meta"] = {
@@ -267,11 +280,9 @@ bool CalChartDoc::exportViewerFile(std::filesystem::path const& filepath)
         { "type", "viewer" },
     };
 
-    j["show"] = mShow->toOnlineViewerJSON(Animation(*mShow));
+    j["show"] = toViewerJSON();
 
-    auto o = std::ofstream(filepath);
-    o << std::setw(4) << j << std::endl;
-    return true;
+    return j;
 }
 
 void CalChartDoc::FlushAllTextWindows()

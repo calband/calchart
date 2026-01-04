@@ -43,7 +43,6 @@ void GeneralSetup::CreateControls()
             wxUI::CheckBox{ "Scroll Direction: Natural" }.withProxy(mScroll_Natural),
             wxUI::CheckBox{ "Set Sheet is undo-able" }.withProxy(mSetSheet_Undo),
             wxUI::CheckBox{ "Point selection is undo-able" }.withProxy(mSelection_Undo),
-
         },
     }
         .fitTo(this);

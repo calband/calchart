@@ -31,6 +31,9 @@
 #include "HostAppInterface.h"
 #include "SystemConfiguration.h"
 #include "UpdateChecker.h"
+#if CALCHART_HAS_WEBVIEW
+#include "ViewerServer.h"
+#endif
 #include "basic_ui.h"
 #include "platconf.h"
 
@@ -147,6 +150,13 @@ wxPrintDialogData& CalChartApp::GetGlobalPrintDialog()
     return *mPrintDialogData;
 }
 
+#if CALCHART_HAS_WEBVIEW
+ViewerServer& CalChartApp::GetViewerServer()
+{
+    return *mViewerServer;
+}
+#endif
+
 CalChart::CircularLogBuffer CalChartApp::GetLogBuffer() const
 {
     return mLogTarget->GetLogBuffer();
@@ -154,8 +164,7 @@ CalChart::CircularLogBuffer CalChartApp::GetLogBuffer() const
 
 void CalChartApp::InitAppAsServer()
 {
-    wxLogDebug("Initializing CalChart as server...");
-
+    wxLogDebug("CalChartApp: Initializing as Server");
     // Create log target (wxLog will take ownership and delete it)
     mLogTarget = new CalChartLogTarget(CalChart::CircularLogBuffer{ 100 });
 
@@ -176,6 +185,14 @@ void CalChartApp::InitAppAsServer()
 
     mHelpManager = std::make_unique<HelpManager>();
     mPrintDialogData = std::make_unique<wxPrintDialogData>();
+
+#if CALCHART_HAS_WEBVIEW
+    // Start the viewer server
+    wxLogDebug("CalChartApp: Creating and starting ViewerServer");
+    mViewerServer = std::make_unique<ViewerServer>();
+    mViewerServer->Start(1868);
+    wxLogDebug("CalChartApp: ViewerServer started");
+#endif
 
     //// Create the main frame window
     auto frame = new CalChartSplash(mDocManager, nullptr, "CalChart", wxCalChart::GetGlobalConfig());
@@ -226,7 +243,7 @@ void CalChartApp::InitAppAsServer()
         // Core invokes this callback on the worker thread. Marshal to the UI thread here.
         if (!wxTheApp) {
             // No wx application available; best-effort: log and do nothing.
-            std::cerr << "[CalChartApp] wxTheApp not available to show update dialog for tag=" << latestTag << "\n";
+            wxLogWarning("CalChartApp: wxTheApp not available to show update dialog for tag=%s", latestTag.c_str());
         }
         wxTheApp->CallAfter([frame, latestTag]() {
             // Build a small dialog with a checkbox "Never show this again for this release".
@@ -277,6 +294,15 @@ void CalChartApp::ProcessArguments()
 
 void CalChartApp::ExitAppAsServer()
 {
+#if CALCHART_HAS_WEBVIEW
+    // Stop the viewer server
+    wxLogDebug("CalChartApp: Stopping ViewerServer");
+    if (mViewerServer) {
+        mViewerServer->Stop();
+        wxLogDebug("CalChartApp: ViewerServer stopped");
+    }
+#endif
+
     // Flush out the other commands
     wxCalChart::GetGlobalConfig().FlushWriteQueue();
     // Get the file history
