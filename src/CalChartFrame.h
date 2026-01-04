@@ -42,6 +42,7 @@ class FieldCanvas;
 class FieldFrameControls;
 class FieldThumbnailBrowser;
 class PrintContinuityEditor;
+class ViewerPanel;
 class wxAuiToolBar;
 namespace CalChart {
 class Configuration;
@@ -128,6 +129,7 @@ public:
     void OnCmd_MarcherSelection(wxCommandEvent& event);
     void OnAdjustViews(size_t which);
     void OnSwapAnimation();
+    void OnToggleViewerPanel();
 
     void OnResetReferencePoint();
 
@@ -178,9 +180,16 @@ public:
 private:
     void refreshGhostOptionStates();
     void refreshInUse();
+    enum class CenterViewMode {
+        Field,
+        Animation,
+        Viewer
+    };
+
     void ChangePaneVisibility(bool show, size_t itemid);
-    void ChangeMainFieldVisibility(bool show);
-    void ShowFieldAndHideAnimation(bool showField);
+    void SetCenterViewMode(CenterViewMode mode);
+    void CycleToNextCenterView();
+    void ShowCenterView(CenterViewMode mode);
     void SetViewsOnComponents(CalChartView* showField);
     std::string BeatStatusText() const;
     std::string PointStatusText() const;
@@ -191,6 +200,7 @@ private:
     ContinuityBrowser* mContinuityBrowser{};
     AnimationErrorsPanel* mAnimationErrorsPanel{};
     AnimationPanel* mAnimationPanel{};
+    ViewerPanel* mViewerPanel{};
     AnimationPanel* mShadowAnimationPanel{};
     PrintContinuityEditor* mPrintContinuityEditor{};
     wxAuiToolBar* mControls;
@@ -203,12 +213,13 @@ private:
     CalChart::Configuration& mConfig;
     wxAuiManager* mAUIManager;
 
-    bool mMainFieldVisible = true;
+    CenterViewMode mCurrentCenterView = CenterViewMode::Field;
 
     wxUI::MenuItemProxy mShowBackgroundImages;
     wxUI::MenuItemProxy mAdjustBackgroundImageMode;
     wxUI::MenuItemProxy mGhostOff;
     wxUI::MenuItemProxy mViewSwapFieldAndAnimate;
+    wxUI::MenuItemProxy mToggleViewerPanel;
     wxUI::MenuItemProxy mDrawPaths;
     std::vector<wxUI::MenuItemProxy> mAdjustPaneIndex;
 

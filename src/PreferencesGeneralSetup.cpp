@@ -43,6 +43,7 @@ void GeneralSetup::CreateControls()
             wxUI::CheckBox{ "Scroll Direction: Natural" }.withProxy(mScroll_Natural),
             wxUI::CheckBox{ "Set Sheet is undo-able" }.withProxy(mSetSheet_Undo),
             wxUI::CheckBox{ "Point selection is undo-able" }.withProxy(mSelection_Undo),
+            wxUI::CheckBox{ "Enable Viewer (experimental)" }.withProxy(mAllowViewer),
 
         },
     }
@@ -60,6 +61,7 @@ void GeneralSetup::InitFromConfig()
     *mScroll_Natural = mConfig.Get_ScrollDirectionNatural();
     *mSetSheet_Undo = mConfig.Get_CommandUndoSetSheet();
     *mSelection_Undo = mConfig.Get_CommandUndoSelection();
+    *mAllowViewer = mConfig.Get_AllowViewer();
 }
 
 bool GeneralSetup::TransferDataToWindow()
@@ -77,6 +79,7 @@ bool GeneralSetup::TransferDataFromWindow()
     mConfig.Set_ScrollDirectionNatural(*mScroll_Natural);
     mConfig.Set_CommandUndoSetSheet(*mSetSheet_Undo);
     mConfig.Set_CommandUndoSelection(*mSelection_Undo);
+    mConfig.Set_AllowViewer(*mAllowViewer);
     return true;
 }
 
@@ -89,6 +92,7 @@ bool GeneralSetup::ClearValuesToDefault()
     mConfig.Clear_ScrollDirectionNatural();
     mConfig.Clear_CommandUndoSetSheet();
     mConfig.Clear_CommandUndoSelection();
+    mConfig.Clear_AllowViewer();
     // the extra ones to reset:
     mConfig.Clear_CalChartFrameAUILayout_3_6_1();
     mConfig.Clear_FieldFrameZoom_3_6_0();

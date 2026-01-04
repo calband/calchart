@@ -73,4 +73,5 @@ private:
     wxUI::CheckBox::Proxy mScroll_Natural{};
     wxUI::CheckBox::Proxy mSetSheet_Undo{};
     wxUI::CheckBox::Proxy mSelection_Undo{};
+    wxUI::CheckBox::Proxy mAllowViewer{};
 };
