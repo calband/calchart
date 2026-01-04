@@ -128,6 +128,7 @@ public:
     void OnCmd_MarcherSelection(wxCommandEvent& event);
     void OnAdjustViews(size_t which);
     void OnSwapAnimation();
+    void OnLaunchViewerPreview();
 
     void OnResetReferencePoint();
 

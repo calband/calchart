@@ -57,6 +57,7 @@
 #include "SystemConfiguration.h"
 #include "TransitionSolverFrame.h"
 #include "TransitionSolverView.h"
+#include "ViewerPreviewDialog.h"
 #include "ccvers.h"
 #include "platconf.h"
 #include "ui_enums.h"
@@ -286,6 +287,10 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
                            OnSwapAnimation();
                        } }
                 .withProxy(mViewSwapFieldAndAnimate),
+            wxUI::Separator{},
+            wxUI::Item{ "Preview in Viewer (experimental)...", "Open the built-in CalChart Viewer preview", [this] {
+                           OnLaunchViewerPreview();
+                       } },
             wxUI::Separator{},
             wxUI::MenuForEach{ CalChart::Ranges::enumerate_view(kAUINames), [this](auto&& whichAndName) {
                                   auto&& [which, name] = whichAndName;
@@ -707,7 +712,7 @@ void CalChartFrame::OnSetSheetTitle()
         if (auto s = wxGetTextFromUser("Enter the sheet title",
                 GetShow()->GetCurrentSheetName(),
                 GetShow()->GetCurrentSheetName(), this)
-                         .ToStdString();
+                .ToStdString();
             !s.empty()) {
             GetFieldView()->DoSetSheetTitle(s);
         }
@@ -1121,6 +1126,17 @@ void CalChartFrame::OnAdjustViews(size_t which)
 void CalChartFrame::OnSwapAnimation()
 {
     ChangeMainFieldVisibility(!mMainFieldVisible);
+}
+
+void CalChartFrame::OnLaunchViewerPreview()
+{
+    auto* doc = GetShow();
+    if (!doc) {
+        return;
+    }
+
+    ViewerPreviewDialog dialog(this, doc);
+    dialog.ShowModal();
 }
 
 void CalChartFrame::AUIIsClose(wxAuiManagerEvent& event)

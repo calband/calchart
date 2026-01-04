@@ -83,6 +83,9 @@ FetchContent_MakeAvailable(wxUI)
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 try_find_or_fetch(nlohmann_json nlohmann_json https://github.com/nlohmann/json 55f93686c01528224f448c19128836e7df245f72)
 
+# cpp-httplib (header-only). Prefer system (config package), fallback to fetch.
+try_find_or_fetch(httplib httplib https://github.com/yhirose/cpp-httplib v0.9.8)
+
 try_find_or_fetch(Catch2 Catch2 https://github.com/catchorg/Catch2 6e79e68) # v3.4.0
 
 if(USE_SYSTEM_DEPENDENCIES)

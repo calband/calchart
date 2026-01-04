@@ -20,6 +20,7 @@
             "platform": "windows"
         },
         "nlohmann-json",
+        "cpp-httplib",
         {
             "name": "catch2",
             "version>=": "3.4.0"

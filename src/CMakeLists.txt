@@ -1,5 +1,22 @@
 # CalChart CMake
 
+# Include viewer HTML embedding support
+include(${PROJECT_SOURCE_DIR}/cmake/EmbedViewerHtml.cmake)
+
+# Build the viewer as a subdirectory (uses viewer/CMakeLists.txt)
+add_subdirectory(${PROJECT_SOURCE_DIR}/viewer ${CMAKE_CURRENT_BINARY_DIR}/viewer)
+
+# Generate viewer HTML header from submodule
+set(VIEWER_HTML_HEADER "${CMAKE_CURRENT_BINARY_DIR}/generated/CalChartViewerHtml.h")
+embed_viewer_html(CalChart "${PROJECT_SOURCE_DIR}/viewer" "${VIEWER_HTML_HEADER}")
+
+# Inform developers about viewer integration mode
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  message(STATUS "CalChart Viewer: Debug mode - will serve from ${PROJECT_SOURCE_DIR}/viewer (live editing enabled)")
+else()
+  message(STATUS "CalChart Viewer: Release mode - using embedded HTML")
+endif()
+
 # CalChart docs (excludes developer-only docs in DeveloperDocs/)
 file(
   GLOB CalChartDocs
@@ -154,6 +171,13 @@ add_executable(
   TransitionSolverView.h
   WebViewDemoDialog.cpp
   WebViewDemoDialog.h
+  ViewerPanel.cpp
+  ViewerPanel.h
+  ViewerPreviewDialog.cpp
+  ViewerPreviewDialog.h
+  ViewerServer.cpp
+  ViewerServer.h
+  ${VIEWER_HTML_HEADER}
   basic_ui.cpp
   basic_ui.h
   calchart.rc
@@ -184,6 +208,17 @@ target_include_directories(
   CalChart
   PRIVATE
   "${PROJECT_SOURCE_DIR}/resources/common"
+  "${CMAKE_CURRENT_BINARY_DIR}/generated"
+)
+
+# In debug builds, define the viewer source directory for live editing
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  target_compile_definitions(
+    CalChart
+    PRIVATE
+    CMAKE_VIEWER_SOURCE_DIR="${PROJECT_SOURCE_DIR}/viewer"
+  )
+endif(  "${cpp_httplib_SOURCE_DIR}"
 )
 
 target_link_libraries(
