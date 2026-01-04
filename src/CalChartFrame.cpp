@@ -57,6 +57,7 @@
 #include "SystemConfiguration.h"
 #include "TransitionSolverFrame.h"
 #include "TransitionSolverView.h"
+#include "ViewerPanel.h"
 #include "ccvers.h"
 #include "platconf.h"
 #include "ui_enums.h"
@@ -287,6 +288,11 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
                        } }
                 .withProxy(mViewSwapFieldAndAnimate),
             wxUI::Separator{},
+            wxUI::Item{ "Preview in Viewer (experimental)...", "Open the built-in CalChart Viewer preview", [this] {
+                           OnToggleViewerPanel();
+                       } }
+                .withProxy(mToggleViewerPanel),
+            wxUI::Separator{},
             wxUI::MenuForEach{ CalChart::Ranges::enumerate_view(kAUINames), [this](auto&& whichAndName) {
                                   auto&& [which, name] = whichAndName;
                                   return wxUI::Item{ std::string("Show ") + name, std::string("Controls Displaying ") + name, [this, which] {
@@ -427,7 +433,7 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
         ChangePaneVisibility(mAUIManager->GetPane(mLookupSubWindows.at(i)).IsShown(), i);
     }
 
-    ChangeMainFieldVisibility(mMainFieldVisible);
+    SetCenterViewMode(mCurrentCenterView);
 
     SetTitle(static_cast<CalChartDoc*>(doc)->GetTitle());
 
@@ -471,7 +477,7 @@ void CalChartFrame::OnClose()
     mConfig.Set_FieldCanvasScrollY(mCanvas->GetViewStart().y);
 
     // just to make sure we never end up hiding the Field
-    ShowFieldAndHideAnimation(true);
+    SetCenterViewMode(CenterViewMode::Field);
     mConfig.Set_CalChartFrameAUILayout_3_6_1(mAUIManager->SavePerspective().ToStdString());
     SetViewsOnComponents(nullptr);
 }
@@ -779,14 +785,42 @@ void CalChartFrame::OnEditCurveAssignments()
     }
 }
 
-void CalChartFrame::ShowFieldAndHideAnimation(bool showField)
+void CalChartFrame::ShowCenterView(CenterViewMode mode)
 {
-    // when we are going to show field, pause the animation
-    if (showField) {
+    // Pause animation when leaving animation view
+    if (mCurrentCenterView == CenterViewMode::Animation) {
         mShadowAnimationPanel->SetPlayState(false);
     }
-    mAUIManager->GetPane("Field").Show(showField);
-    mAUIManager->GetPane("ShadowAnimation").Show(!showField);
+
+    // Hide all center panes
+    mAUIManager->GetPane("Field").Show(false);
+    mAUIManager->GetPane("ShadowAnimation").Show(false);
+    if (mViewerPanel) {
+        mAUIManager->GetPane("ViewerPanel").Show(false);
+    }
+
+    // Show the requested pane
+    switch (mode) {
+    case CenterViewMode::Field:
+        mAUIManager->GetPane("Field").Show(true);
+        break;
+    case CenterViewMode::Animation:
+        mAUIManager->GetPane("ShadowAnimation").Show(true);
+        break;
+    case CenterViewMode::Viewer:
+        // Create viewer panel if it doesn't exist
+        if (!mViewerPanel) {
+            mViewerPanel = new ViewerPanel(this, GetShow());
+            mAUIManager->AddPane(mViewerPanel, wxAuiPaneInfo().Name("ViewerPanel").CenterPane().Hide());
+        } else {
+            // If panel already exists, update the show data
+            // (new panels will load data automatically when page loads)
+            mViewerPanel->UpdateShowData();
+        }
+        mAUIManager->GetPane("ViewerPanel").Show(true);
+        break;
+    }
+
     mAUIManager->Update();
 }
 
@@ -1120,7 +1154,17 @@ void CalChartFrame::OnAdjustViews(size_t which)
 
 void CalChartFrame::OnSwapAnimation()
 {
-    ChangeMainFieldVisibility(!mMainFieldVisible);
+    CycleToNextCenterView();
+}
+
+void CalChartFrame::OnToggleViewerPanel()
+{
+    // Toggle to viewer mode (or back to field if already in viewer)
+    if (mCurrentCenterView == CenterViewMode::Viewer) {
+        SetCenterViewMode(CenterViewMode::Field);
+    } else {
+        SetCenterViewMode(CenterViewMode::Viewer);
+    }
 }
 
 void CalChartFrame::AUIIsClose(wxAuiManagerEvent& event)
@@ -1144,15 +1188,45 @@ void CalChartFrame::ChangePaneVisibility(bool show, size_t which)
     mAUIManager->Update();
 }
 
-void CalChartFrame::ChangeMainFieldVisibility(bool show)
+void CalChartFrame::SetCenterViewMode(CenterViewMode mode)
 {
-    mMainFieldVisible = show;
-    if (mMainFieldVisible) {
+    mCurrentCenterView = mode;
+
+    // Update menu label based on what comes next
+    switch (mode) {
+    case CenterViewMode::Field:
         mViewSwapFieldAndAnimate->SetItemLabel("View Animation\tCTRL-RETURN");
-    } else {
+        break;
+    case CenterViewMode::Animation:
+        mViewSwapFieldAndAnimate->SetItemLabel("View Viewer\tCTRL-RETURN");
+        break;
+    case CenterViewMode::Viewer:
         mViewSwapFieldAndAnimate->SetItemLabel("View Field\tCTRL-RETURN");
+        break;
     }
-    ShowFieldAndHideAnimation(mMainFieldVisible);
+
+    ShowCenterView(mCurrentCenterView);
+}
+
+void CalChartFrame::CycleToNextCenterView()
+{
+    auto* doc = dynamic_cast<CalChartDoc*>(GetDocument());
+    bool allowViewer = doc && doc->GetConfiguration().Get_AllowViewer();
+
+    CenterViewMode nextMode;
+    switch (mCurrentCenterView) {
+    case CenterViewMode::Field:
+        nextMode = CenterViewMode::Animation;
+        break;
+    case CenterViewMode::Animation:
+        // Skip viewer if not allowed
+        nextMode = allowViewer ? CenterViewMode::Viewer : CenterViewMode::Field;
+        break;
+    case CenterViewMode::Viewer:
+        nextMode = CenterViewMode::Field;
+        break;
+    }
+    SetCenterViewMode(nextMode);
 }
 
 void CalChartFrame::OnResetReferencePoint()
@@ -1383,6 +1457,11 @@ void CalChartFrame::OnUpdate()
     mPrintContinuityEditor->OnUpdate();
 
     mShadowAnimationPanel->OnUpdate();
+
+    // Update viewer panel if it exists and is visible
+    if (mViewerPanel && mCurrentCenterView == CenterViewMode::Viewer) {
+        mViewerPanel->UpdateShowData();
+    }
 
     refreshInUse();
 }

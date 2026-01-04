@@ -119,6 +119,12 @@ public:
      */
     bool exportViewerFile(std::filesystem::path const& filepath);
 
+    /*!
+     * @brief Generates JSON representation of the show for the CalChart Online Viewer.
+     * @return A JSON object representing the show in viewer format.
+     */
+    [[nodiscard]] nlohmann::json toViewerJSON() const;
+
 private:
     template <typename T>
     T& LoadObjectGeneric(T& stream);

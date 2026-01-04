@@ -24,13 +24,11 @@
 #include <memory>
 #include <wx/wx.h>
 
-// CalChartApp represents the wxWidgets App for CalChart.  The document manager creates
-// the actual CalChart Document instances.  This just serves the purpose of being the first
-// thing that runs, holds much of the top level logic.
-
+// Forward declarations
 class CalChartApp;
 class HostAppInterface;
 class HelpManager;
+class ViewerServer;
 class wxDocManager;
 class wxPrintDialogData;
 class CalChartLogTarget;
@@ -62,6 +60,9 @@ public:
     // Get a copy of the global log buffer for bug reporting
     CalChart::CircularLogBuffer GetLogBuffer() const;
 
+    // Get the viewer server
+    ViewerServer& GetViewerServer();
+
 private:
     void ProcessArguments();
 
@@ -74,5 +75,6 @@ private:
     std::unique_ptr<HelpManager> mHelpManager;
     std::unique_ptr<HostAppInterface> mHostInterface;
     std::unique_ptr<wxPrintDialogData> mPrintDialogData;
+    std::unique_ptr<ViewerServer> mViewerServer;
     CalChartLogTarget* mLogTarget = nullptr; // Owned by wxLog, don't delete
 };

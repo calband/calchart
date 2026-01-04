@@ -274,6 +274,11 @@ bool CalChartDoc::exportViewerFile(std::filesystem::path const& filepath)
     return true;
 }
 
+nlohmann::json CalChartDoc::toViewerJSON() const
+{
+    return mShow->toOnlineViewerJSON(Animation(*mShow));
+}
+
 void CalChartDoc::FlushAllTextWindows()
 {
     CalChartDoc_FlushAllViews flushMod;
