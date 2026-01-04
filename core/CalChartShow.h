@@ -129,8 +129,6 @@ public:
     [[nodiscard]] auto GetCurrentSheetBeats() const -> CalChart::Beats;
     [[nodiscard]] auto GetCurrentSheetSymbols() const -> std::vector<SYMBOL_TYPE>;
     [[nodiscard]] auto GetCurrentSheetPrintNumber() const -> std::string;
-    [[nodiscard]] auto GetCurrentSheetRawPrintContinuity() const -> std::string;
-    [[nodiscard]] auto GetCurrentSheetPrintContinuity() const -> PrintContinuity;
     [[nodiscard]] auto GetCurrentSheetBackgroundImages() const -> std::vector<ImageInfo>;
     [[nodiscard]] auto CopyAllSheets() const -> Show::Sheet_container_t { return mSheets; }
     [[nodiscard]] auto CopyCurrentSheet() const -> Show::Sheet_container_t;
@@ -157,7 +155,13 @@ public:
     [[nodiscard]] auto GetContinuitiesOnCurrentSheet() const -> std::vector<Continuity>;
     [[nodiscard]] auto GetContinuitiesInUse(int sheet) const -> std::vector<bool>;
     [[nodiscard]] auto GetContinuitiesInUseOnCurrentSheet() const -> std::vector<bool>;
+
+    [[nodiscard]] auto GetCurrentSheetRawPrintContinuity() const -> std::string;
+    [[nodiscard]] auto GetCurrentSheetPrintContinuity() const -> PrintContinuity;
     [[nodiscard]] auto AlreadyHasPrintContinuity() const -> bool;
+    [[nodiscard]] auto GetAllRawPrintContinuity() const -> std::vector<std::string>;
+    [[nodiscard]] auto GetAllPrintContinuity() const -> std::vector<PrintContinuity>;
+
     [[nodiscard]] auto const& GetShowMode() const { return mMode; }
     [[nodiscard]] auto GetSheetsName() const -> std::vector<std::string>;
     [[nodiscard]] auto GetCurrentReferencePoint() const -> int;
