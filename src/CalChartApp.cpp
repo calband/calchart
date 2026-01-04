@@ -27,6 +27,7 @@
 #include "CalChartLogTarget.h"
 #include "CalChartSplash.h"
 #include "CalChartView.h"
+#include "HelpManager.hpp"
 #include "HostAppInterface.h"
 #include "SystemConfiguration.h"
 #include "UpdateChecker.h"
@@ -136,9 +137,9 @@ void CalChartApp::MacOpenFiles(wxArrayString const& fileNames)
 }
 #endif // defined(__APPLE__) && (__APPLE__)
 
-wxHtmlHelpController& CalChartApp::GetGlobalHelpController()
+HelpManager& CalChartApp::GetGlobalHelpManager()
 {
-    return *mHelpController;
+    return *mHelpManager;
 }
 
 wxPrintDialogData& CalChartApp::GetGlobalPrintDialog()
@@ -172,24 +173,44 @@ void CalChartApp::InitAppAsServer()
     //// Create a template relating drawing documents to their views
     (void)new wxDocTemplate(mDocManager, "CalChart Show", "*.shw", "", "shw", "CalChart Doc", "CalChart View", CLASSINFO(CalChartDoc), CLASSINFO(CalChartView));
 
-    mHelpController = std::make_unique<wxHtmlHelpController>();
+    mHelpManager = std::make_unique<HelpManager>();
     mPrintDialogData = std::make_unique<wxPrintDialogData>();
 
     //// Create the main frame window
     auto frame = new CalChartSplash(mDocManager, nullptr, "CalChart", wxCalChart::GetGlobalConfig());
 
-    // Required for advanced HTML help
-    wxFileSystem::AddHandler(new wxZipFSHandler);
-    wxFileSystem::AddHandler(new wxArchiveFSHandler);
-
+    // Load help files - try pre-built HTML first, then fall back to Markdown conversion
 #if defined(__APPLE__) && (__APPLE__)
-    auto helpfile = wxStandardPaths::Get().GetResourcesDir();
+    auto htmlPath = wxStandardPaths::Get().GetResourcesDir();
+    htmlPath.Append(wxFILE_SEP_PATH);
+    htmlPath.Append("docs");
+    htmlPath.Append(wxFILE_SEP_PATH);
+    htmlPath.Append("html");
+
+    auto helpPath = wxStandardPaths::Get().GetResourcesDir();
+    helpPath.Append(wxFILE_SEP_PATH);
+    helpPath.Append("docs");
+    helpPath.Append(wxFILE_SEP_PATH);
+    helpPath.Append("md");
 #else
-    auto helpfile = wxFileName(::wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR "docs");
+    auto htmlPath = wxFileName(::wxStandardPaths::Get().GetExecutablePath()).GetPath();
+    htmlPath.Append(wxFILE_SEP_PATH);
+    htmlPath.Append("docs");
+    htmlPath.Append(wxFILE_SEP_PATH);
+    htmlPath.Append("html");
+
+    auto helpPath = wxFileName(::wxStandardPaths::Get().GetExecutablePath()).GetPath();
+    helpPath.Append(wxFILE_SEP_PATH);
+    helpPath.Append("docs");
+    helpPath.Append(wxFILE_SEP_PATH);
+    helpPath.Append("md");
 #endif
-    helpfile.Append(PATH_SEPARATOR "charthlp.hhp");
-    if (!GetGlobalHelpController().AddBook(wxFileName(helpfile))) {
-        wxLogError("Cannot find the help system.");
+
+    // Load pre-built HTML help files
+    if (!mHelpManager->LoadHelpHtmlDirectory(std::string(htmlPath.mb_str()))) {
+        wxLogWarning("Could not load help system from: %s", htmlPath);
+    } else {
+        wxLogInfo("Loaded help system from pre-built HTML at: %s", htmlPath);
     }
 
 #ifndef __WXMAC__
@@ -266,7 +287,7 @@ void CalChartApp::ExitAppAsServer()
     // delete the doc manager
     delete wxDocManager::GetDocumentManager();
 
-    mHelpController.reset();
+    mHelpManager.reset();
 }
 
 void CalChartApp::ExitAppAsClient() { }
