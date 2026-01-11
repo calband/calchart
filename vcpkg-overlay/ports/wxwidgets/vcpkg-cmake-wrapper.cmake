@@ -82,6 +82,16 @@ if(WIN32 AND "@VCPKG_LIBRARY_LINKAGE@" STREQUAL "static" AND NOT "wx::core" IN_L
         ${TIFF_LIBRARIES}
         ${ZLIB_LIBRARIES}
     )
+    
+    # Add WebView2 support if available for static Windows builds
+    # The WebView2 package may be installed via nuget in WEBVIEW2_LIB_PATH environment variable
+    if(DEFINED WEBVIEW2_LIB_PATH)
+        find_library(WEBVIEW2_LOADER_LIB WebView2LoaderStatic PATHS "${WEBVIEW2_LIB_PATH}" NO_DEFAULT_PATH)
+        if(WEBVIEW2_LOADER_LIB)
+            list(APPEND wxWidgets_LIBRARIES ${WEBVIEW2_LOADER_LIB})
+            message(STATUS "Found WebView2LoaderStatic: ${WEBVIEW2_LOADER_LIB}")
+        endif()
+    endif()
 endif()
 
 cmake_policy(POP)
