@@ -13,6 +13,9 @@ include(FetchContent)
 option(USE_SYSTEM_DEPENDENCIES "Prefer system-installed dependencies (find_package) when available" ON)
 option(FORCE_VENDOR_DEPENDENCIES "Force building dependencies from source (using FetchContent). Useful for reproducible release builds." OFF)
 
+# WebView2 support for Windows builds
+set(WEBVIEW2_LIB_PATH "" CACHE PATH "Path to WebView2 loader static library directory for Windows builds")
+
 # Helper macro: try to find a package with find_package; if not found and
 # FORCE_VENDOR_DEPENDENCIES is ON then fetch via FetchContent (git repo + tag).
 # Usage: try_find_or_fetch(<pkg_var_prefix> PACKAGE_NAME GIT_REPO GIT_TAG [EXTRA_BEFORE_FETCH...])
@@ -83,7 +86,13 @@ try_find_or_fetch(nlohmann_json nlohmann_json https://github.com/nlohmann/json 5
 try_find_or_fetch(Catch2 Catch2 https://github.com/catchorg/Catch2 6e79e68) # v3.4.0
 
 if(USE_SYSTEM_DEPENDENCIES)
-  find_package(wxWidgets REQUIRED COMPONENTS net core base gl aui html)
+  if(LINUX)
+    # Linux doesn't use webview support
+    find_package(wxWidgets REQUIRED COMPONENTS net core base gl aui html)
+  else()
+    # macOS and Windows use webview support
+    find_package(wxWidgets REQUIRED COMPONENTS net core base gl aui html webview)
+  endif()
   include(${wxWidgets_USE_FILE})
 elseif(FORCE_VENDOR_DEPENDENCIES)
   message(STATUS "Fetching wxWidgets sources for vendor build (this can be slow).")
@@ -92,10 +101,16 @@ elseif(FORCE_VENDOR_DEPENDENCIES)
   set(wxUSE_STL ON)
   set(wxUSE_STC OFF)
   set(wxUSE_STD_CONTAINERS ON)
+  # Enable webview on macOS and Windows (not Linux)
+  if(LINUX)
+    set(wxUSE_WEBVIEW OFF)
+  else()
+    set(wxUSE_WEBVIEW ON)
+  endif()
   FetchContent_Declare(
     wxWidgets
     GIT_REPOSITORY "https://github.com/wxWidgets/wxWidgets.git"
-    GIT_TAG 8aef5f40b93958719771331ca03866b7b6fff6bf # v3.2.8
+    GIT_TAG 49c6810948f40c457e3d0848b9111627b5b61de5 # v3.3.1
   )
   FetchContent_MakeAvailable(wxWidgets)
 else()
