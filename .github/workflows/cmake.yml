@@ -123,6 +123,17 @@ jobs:
         # Add NSIS to PATH for this session
         $env:PATH = "$env:PATH;C:\Program Files (x86)\NSIS"
         echo "C:\Program Files (x86)\NSIS" >> $env:GITHUB_PATH
+        # Install WebView2 SDK for building wxWidgets with webview support
+        nuget install Microsoft.Web.WebView2 -OutputDirectory "${{ github.workspace }}\packages"
+        # Find the WebView2 library directory and add it to the environment
+        # The package structure is Microsoft.Web.WebView2.*/build/native/x64
+        Get-ChildItem "${{ github.workspace }}\packages" -Filter "Microsoft.Web.WebView2*" -Directory | ForEach-Object {
+          $x64Path = Join-Path $_.FullName "build\native\x64"
+          if (Test-Path $x64Path) {
+            echo "WEBVIEW2_LIB_PATH=$x64Path" >> $env:GITHUB_ENV
+            echo "WebView2 library path found: $x64Path"
+          }
+        }
 
     - name: Installing Dependencies (Linux)
       if: matrix.config.os == 'ubuntu-24.04'
@@ -144,16 +155,18 @@ jobs:
     - name: Configure CMake (Windows)
       if: matrix.config.os == 'windows-latest'
       # Use vcpkg toolchain file with static triplet; force static runtime for CalChart too
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-static
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-static -DVCPKG_OVERLAY_PORTS="${{github.workspace}}/vcpkg-overlay/ports" -DWEBVIEW2_LIB_PATH="${{env.WEBVIEW2_LIB_PATH}}"
       env:
         VCPKG_BINARY_SOURCES: 'clear;files,${{github.workspace}}/vcpkg-cache,readwrite'
+        VCPKG_OVERLAY_PORTS: ${{github.workspace}}/vcpkg-overlay/ports
 
     - name: Configure CMake (macOS/Linux)
       if: matrix.config.os != 'windows-latest'
       # Use vcpkg toolchain; triplet auto-selected by vcpkg
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_OVERLAY_PORTS="${{github.workspace}}/vcpkg-overlay/ports"
       env:
         VCPKG_BINARY_SOURCES: 'clear;files,${{github.workspace}}/vcpkg-cache,readwrite'
+        VCPKG_OVERLAY_PORTS: ${{github.workspace}}/vcpkg-overlay/ports
  
     - name: Build
       # Build your program with the given configuration

@@ -30,6 +30,11 @@
 #include "basic_ui.h"
 #include "ccvers.h"
 
+#include <wx/setup.h>
+#if wxUSE_WEBVIEW
+#include "WebViewDemoDialog.h"
+#endif
+
 #include <wx/dnd.h>
 #include <wx/filename.h>
 #include <wx/html/helpctrl.h>
@@ -105,6 +110,11 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, std::strin
             wxUI::Item{ "Debug Configuration", [this] {
                            ConfigurationDebug(this, wxConfigBase::Get()).ShowModal();
                        } },
+#if wxUSE_WEBVIEW
+            wxUI::Item{ "wxWebView Demo", [this] {
+                           WebViewDemoDialog(this).ShowModal();
+                       } },
+#endif
         },
         wxUI::Menu{
             "&Help",
