@@ -253,27 +253,35 @@ jobs:
         # Sign all frameworks and dylibs first (from inside out)
         find "$APP_PATH/Contents/Frameworks" -name "*.framework" -o -name "*.dylib" 2>/dev/null | while read framework; do
           echo "Signing: $framework"
-          codesign --force --verify --verbose --timestamp --options runtime \
+          codesign --force --verbose --timestamp --options runtime \
             --sign "$DEVELOPER_ID_APP" \
             "$framework" || true
         done
         
-        # Sign any executables in MacOS directory (excluding main executable)
+        # Sign any helper executables in MacOS directory (excluding main executable)
         find "$APP_PATH/Contents/MacOS" -type f -perm +111 ! -name "CalChart" 2>/dev/null | while read executable; do
-          echo "Signing executable: $executable"
-          codesign --force --verify --verbose --timestamp --options runtime \
+          echo "Signing helper executable: $executable"
+          codesign --force --verbose --timestamp --options runtime \
             --sign "$DEVELOPER_ID_APP" \
             "$executable" || true
         done
         
-        # Finally, sign the main app bundle (without --deep)
-        echo "Signing main app bundle..."
-        codesign --force --verify --verbose --timestamp --options runtime \
+        # Sign the main executable explicitly
+        echo "Signing main executable..."
+        codesign --force --verbose --timestamp --options runtime \
+          --sign "$DEVELOPER_ID_APP" \
+          "$APP_PATH/Contents/MacOS/CalChart"
+        
+        # Finally, sign the entire app bundle
+        echo "Signing app bundle..."
+        codesign --force --verbose --timestamp --options runtime \
           --sign "$DEVELOPER_ID_APP" \
           "$APP_PATH"
         
-        # Verify the signature is valid (notarization check happens after DMG creation)
+        # Verify the signatures
+        echo "Verifying app bundle signature..."
         codesign --verify --verbose=4 "$APP_PATH"
+        codesign --verify --verbose=4 "$APP_PATH/Contents/MacOS/CalChart"
 
     - name: Pack DMG (macOS)
       if: matrix.config.os == 'macos-14'
