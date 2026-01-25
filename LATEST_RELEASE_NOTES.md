@@ -5,6 +5,7 @@
 Bugs addressed in this release:
 
 * [#763](../../issues/763) wxLogDebug hits infinite recursion
+* [#765](../../issues/765) MacOS CI version not launching
 
 Other changes:
 
