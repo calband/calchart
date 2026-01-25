@@ -100,13 +100,26 @@ jobs:
         fi
       shell: bash
 
+    - name: Log vcpkg cache status
+      run: |
+        echo "Vcpkg installation cache hit: ${{ steps.cache-vcpkg.outputs.cache-hit }}"
+        echo "Vcpkg binary cache directory: ${{github.workspace}}/vcpkg-cache"
+        if [ -d "${{github.workspace}}/vcpkg-cache" ]; then
+          echo "Binary cache size: $(du -sh ${{github.workspace}}/vcpkg-cache 2>/dev/null || echo 'empty')"
+          echo "Binary cache file count: $(find ${{github.workspace}}/vcpkg-cache -type f 2>/dev/null | wc -l)"
+        else
+          echo "Binary cache directory does not exist yet"
+        fi
+      shell: bash
+
     - name: Cache vcpkg binary cache
       uses: actions/cache@v4
       with:
         path: ${{github.workspace}}/vcpkg-cache
-        key: vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('vcpkg.json') }}-${{ steps.vcpkg-baseline.outputs.hash }}
+        key: vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-${{ hashFiles('vcpkg.json', 'vcpkg-overlay/**') }}-${{ steps.vcpkg-baseline.outputs.hash }}
         restore-keys: |
-          vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('vcpkg.json') }}-
+          vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-${{ hashFiles('vcpkg.json', 'vcpkg-overlay/**') }}-
+          vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-
           vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-
 
     - name: Installing Xcode (MacOS)
@@ -164,6 +177,24 @@ jobs:
         VCPKG_BINARY_SOURCES: 'clear;files,${{github.workspace}}/vcpkg-cache,readwrite'
         VCPKG_OVERLAY_PORTS: ${{github.workspace}}/vcpkg-overlay/ports
 
+    - name: Log vcpkg build info (Windows)
+      if: matrix.config.os == 'windows-latest'
+      run: |
+        Write-Host "=== vcpkg binary cache after configure ==="
+        if (Test-Path "${{github.workspace}}/vcpkg-cache") {
+          $cacheSize = (Get-ChildItem "${{github.workspace}}/vcpkg-cache" -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB
+          Write-Host "Binary cache size: $([math]::Round($cacheSize, 2)) MB"
+          $fileCount = (Get-ChildItem "${{github.workspace}}/vcpkg-cache" -Recurse -File).Count
+          Write-Host "Binary cache file count: $fileCount"
+          Write-Host "Recent cache entries:"
+          Get-ChildItem "${{github.workspace}}/vcpkg-cache" -Recurse -File -Filter "*.zip" | Select-Object -First 10 | ForEach-Object { Write-Host $_.FullName }
+        }
+        Write-Host "=== vcpkg installed packages ==="
+        if (Test-Path "${{github.workspace}}/vcpkg/installed") {
+          $installSize = (Get-ChildItem "${{github.workspace}}/vcpkg/installed" -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB
+          Write-Host "Installed size: $([math]::Round($installSize, 2)) MB"
+        }
+
     - name: Configure CMake (macOS/Linux)
       if: matrix.config.os != 'windows-latest'
       # Use vcpkg toolchain; triplet auto-selected by vcpkg
@@ -171,6 +202,22 @@ jobs:
       env:
         VCPKG_BINARY_SOURCES: 'clear;files,${{github.workspace}}/vcpkg-cache,readwrite'
         VCPKG_OVERLAY_PORTS: ${{github.workspace}}/vcpkg-overlay/ports
+
+    - name: Log vcpkg build info (macOS/Linux)
+      if: matrix.config.os != 'windows-latest'
+      run: |
+        echo "=== vcpkg binary cache after configure ==="
+        if [ -d "${{github.workspace}}/vcpkg-cache" ]; then
+          echo "Binary cache size: $(du -sh ${{github.workspace}}/vcpkg-cache)"
+          echo "Binary cache file count: $(find ${{github.workspace}}/vcpkg-cache -type f | wc -l)"
+          echo "Recent cache entries:"
+          find ${{github.workspace}}/vcpkg-cache -type f -name '*.zip' 2>/dev/null | head -10 || echo "No .zip files found"
+        fi
+        echo "=== vcpkg installed packages ==="
+        if [ -d "${{github.workspace}}/vcpkg/installed" ]; then
+          du -sh ${{github.workspace}}/vcpkg/installed
+        fi
+      shell: bash
  
     - name: Build
       # Build your program with the given configuration
@@ -178,6 +225,29 @@ jobs:
 
     - name: Run tests
       run: ctest --verbose --test-dir ${{github.workspace}}/build
+
+    - name: Pack initial DMG (macOS)
+      if: matrix.config.os == 'macos-14'
+      run: pushd ${{github.workspace}}/build && cpack -G DragNDrop
+
+    - name: Pack (Windows)
+      if: matrix.config.os == 'windows-latest'
+      # it seems that the cmake command provided by chocolatey conflicts with cmake.
+      # explicitly running cpack from the cmake directory.
+      run: |
+        $cmdpath = split-path -parent (get-command cmake).Path
+        $cpack_cmd = Join-Path -Path $cmdpath -ChildPath cpack
+        pushd ${{github.workspace}}/build
+        & $cpack_cmd
+
+    - name: Strip (Linux)
+      if: matrix.config.os == 'ubuntu-24.04'
+      run: cmake --install build --prefix instdir --strip
+
+    - name: Pack (Linux)
+      if: matrix.config.os == 'ubuntu-24.04'
+      working-directory: instdir
+      run: cmake -E tar cJfv ${{github.workspace}}/build/CalChart.tar.xz .
 
     # Codesigning and Notorizing for Mac:
     # These are the steps you need to do before we run CI to Codesign and Notorize
@@ -247,62 +317,109 @@ jobs:
         security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
         security set-key-partition-list -S apple-tool:,apple: -s -k "CalChart" build.keychain
 
-    - name: Code sign the app
+    - name: Extract, sign, notarize, and staple app (macOS)
       if: matrix.config.os == 'macos-14'
       env:
         DEVELOPER_ID_APP: ${{ secrets.DEVELOPER_ID_APP }}
-      run: |
-        codesign --deep --force --verify --verbose --timestamp --options runtime \
-          --sign "$DEVELOPER_ID_APP" \
-          ${{github.workspace}}/build/src/CalChart.app
-
-    # Notarizing involves
-    # 1. Zip the file up
-    # 2. Notarize using the password and IDs for notarytool
-    - name: Zip for notarization (macOS)
-      if: matrix.config.os == 'macos-14'
-      run: ditto -c -k --keepParent ${{github.workspace}}/build/src/CalChart.app ${{github.workspace}}/build/src/CalChart.zip
-
-    - name: Notarize (macOS)
-      if: matrix.config.os == 'macos-14'
-      run: |
-        xcrun notarytool submit ${{github.workspace}}/build/src/CalChart.zip \
-          --apple-id "$APPLE_ID" \
-          --team-id "$APPLE_TEAM_ID" \
-          --password "$APP_SPECIFIC_PASSWORD" \
-          --wait
-      env:
         APPLE_ID: ${{ secrets.APPLE_ID }}
         APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
-
-    - name: Staple notarization ticket
-      if: matrix.config.os == 'macos-14'
-      run: xcrun stapler staple ${{github.workspace}}/build/src/CalChart.app
-
-    - name: Pack (macOS)
-      if: matrix.config.os == 'macos-14'
-      run: pushd ${{github.workspace}}/build && cpack -G DragNDrop
-
-    - name: Pack (Windows)
-      if: matrix.config.os == 'windows-latest'
-      # it seems that the cmake command provided by chocolatey conflicts with cmake.
-      # explicitly running cpack from the cmake directory.
       run: |
-        $cmdpath = split-path -parent (get-command cmake).Path
-        $cpack_cmd = Join-Path -Path $cmdpath -ChildPath cpack
-        pushd ${{github.workspace}}/build
-        & $cpack_cmd
+        echo "===== STEP 1: Extracting and signing app ====="
 
-    - name: Strip (Linux)
-      if: matrix.config.os == 'ubuntu-24.04'
-      run: cmake --install build --prefix instdir --strip
-    
-    - name: Pack (Linux)
-      if: matrix.config.os == 'ubuntu-24.04'
-      working-directory: instdir
-      run: cmake -E tar cJfv ${{github.workspace}}/build/CalChart.tar.xz .
-    
+        ORIGINAL_DMG=$(find ${{github.workspace}}/build -name "CalChart-*.dmg" -print -quit)
+        echo "Found original DMG: $ORIGINAL_DMG"
+
+        # Convert DMG to read-write format and mount it
+        RW_DMG="${{github.workspace}}/build/CalChart_rw.dmg"
+        hdiutil convert "$ORIGINAL_DMG" -format UDRW -o "$RW_DMG"
+        hdiutil attach "$RW_DMG" -mountpoint /Volumes/CalChart -nobrowse -noverify
+
+        # Copy the app OUT of the DMG to the filesystem for signing
+        TEMP_APP="${{github.workspace}}/build/CalChart_temp.app"
+        cp -R /Volumes/CalChart/CalChart.app "$TEMP_APP"
+        ENTITLEMENTS="${{github.workspace}}/resources/macos/CalChart.entitlements"
+
+        # Sign the main executable explicitly with entitlements
+        echo "Signing main executable..."
+        codesign --deep --force --verify --verbose --timestamp --options runtime \
+          --entitlements "$ENTITLEMENTS" \
+          --sign "$DEVELOPER_ID_APP" \
+          "$TEMP_APP"
+
+        # Verify the signatures
+        echo "Verifying app bundle signature..."
+        codesign --verify --verbose=4 "$TEMP_APP"
+        codesign --verify --verbose=4 "$TEMP_APP/Contents/MacOS/CalChart"
+        codesign --display --entitlements - "$TEMP_APP"
+
+        echo "===== STEP 2: Notarizing app ====="
+
+        # Notarizing involves
+        # 1. Zip the file up
+        # 2. Notarize using the password and IDs for notarytool
+        ditto -c -k --keepParent "$TEMP_APP" ${{github.workspace}}/build/src/CalChart.zip
+        xcrun notarytool submit ${{github.workspace}}/build/src/CalChart.zip \
+           --apple-id "$APPLE_ID" \
+           --team-id "$APPLE_TEAM_ID" \
+           --password "$APP_SPECIFIC_PASSWORD" \
+           --wait
+
+        xcrun stapler staple "$TEMP_APP"
+        xcrun stapler validate "$TEMP_APP"
+
+        echo "===== STEP 3: Repack app ====="
+        rm -rf /Volumes/CalChart/CalChart.app
+        cp -R "$TEMP_APP" /Volumes/CalChart/CalChart.app
+        hdiutil detach /Volumes/CalChart
+        rm "$ORIGINAL_DMG"
+        hdiutil convert "$RW_DMG" -format UDZO -o "$ORIGINAL_DMG"
+        rm "$RW_DMG"
+
+        # Clean up temp app
+        rm -rf "$TEMP_APP"
+
+        echo "===== STEP 4: Signing DMG ====="
+        codesign --force --sign "$DEVELOPER_ID_APP" --timestamp --options runtime "$ORIGINAL_DMG"
+        codesign --verify --verbose=4 "$ORIGINAL_DMG"
+
+        # ===== STEP 5: Notarize the DMG =====
+        echo "===== Notarizing DMG ====="
+        SUBMISSION_OUTPUT=$(xcrun notarytool submit "$ORIGINAL_DMG" \
+          --apple-id "$APPLE_ID" \
+          --team-id "$APPLE_TEAM_ID" \
+          --password "$APP_SPECIFIC_PASSWORD" \
+          --wait \
+          --output-format json)
+
+        echo "Notarization response:"
+        echo "$SUBMISSION_OUTPUT"
+
+        # Check if notarization was successful
+        STATUS=$(echo "$SUBMISSION_OUTPUT" | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
+        echo "Notarization status: $STATUS"
+
+        if [ "$STATUS" != "Accepted" ]; then
+          echo "Notarization failed with status: $STATUS"
+          SUBMISSION_ID=$(echo "$SUBMISSION_OUTPUT" | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
+          if [ -n "$SUBMISSION_ID" ]; then
+            echo "Fetching notarization log..."
+            xcrun notarytool log "$SUBMISSION_ID" \
+              --apple-id "$APPLE_ID" \
+              --team-id "$APPLE_TEAM_ID" \
+              --password "$APP_SPECIFIC_PASSWORD"
+          fi
+          exit 1
+        fi
+
+        echo "===== STEP 5: Stapling notarization tickets ====="
+
+        # Staple to DMG
+        xcrun stapler staple "$ORIGINAL_DMG"
+        xcrun stapler validate "$ORIGINAL_DMG"
+
+        echo "✅ DMG successfully signed, notarized, and stapled!"
+
     - name: Upload
       if: matrix.build_type == 'Release'
       uses: actions/upload-artifact@v4
