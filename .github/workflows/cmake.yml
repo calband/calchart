@@ -272,9 +272,8 @@ jobs:
           --sign "$DEVELOPER_ID_APP" \
           "$APP_PATH"
         
-        # Verify the signature
+        # Verify the signature is valid (notarization check happens after DMG creation)
         codesign --verify --verbose=4 "$APP_PATH"
-        spctl --assess --verbose=4 "$APP_PATH"
 
     - name: Pack DMG (macOS)
       if: matrix.config.os == 'macos-14'
