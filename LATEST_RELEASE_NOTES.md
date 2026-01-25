@@ -4,6 +4,8 @@
 
 Bugs addressed in this release:
 
+* [#763](../../issues/763) wxLogDebug hits infinite recursion
+
 Other changes:
 
 * [#757](../../issues/757) Add ability to dump print continuities
