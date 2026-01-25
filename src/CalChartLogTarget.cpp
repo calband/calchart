@@ -29,14 +29,14 @@ CalChartLogTarget::CalChartLogTarget(CalChart::CircularLogBuffer buffer)
 }
 
 void CalChartLogTarget::DoLogRecord(wxLogLevel level, const wxString& msg,
-    [[maybe_unused]] const wxLogRecordInfo& info)
+    const wxLogRecordInfo& info)
 {
     // Capture the log message into our circular buffer
     buffer_.AddMessage(GetLevelString(level), std::string(msg.mb_str(wxConvUTF8)));
 
     // Forward to the next logger in the chain if one exists
     if (next_target_) {
-        next_target_->OnLog(level, msg, 0);
+        next_target_->LogRecord(level, msg, info);
     }
 }
 

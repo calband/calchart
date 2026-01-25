@@ -153,18 +153,19 @@ CalChart::CircularLogBuffer CalChartApp::GetLogBuffer() const
 
 void CalChartApp::InitAppAsServer()
 {
+    wxLogDebug("Initializing CalChart as server...");
+
     // Create log target (wxLog will take ownership and delete it)
     mLogTarget = new CalChartLogTarget(CalChart::CircularLogBuffer{ 100 });
 
-    // Get the current active logger (if any) and chain it
+    // Get the current active logger (if any) and chain it directly
     auto oldLogTarget = wxLog::SetActiveTarget(mLogTarget);
 
-    // Create a log chain that preserves the old logger in the chain
+    // Chain the old logger to our target so messages flow through both
     if (oldLogTarget && oldLogTarget != mLogTarget) {
-        mLogChain = std::make_unique<wxLogChain>(oldLogTarget);
-        // Chain the old logger to our target so messages flow through both
-        mLogTarget->SetNextTarget(mLogChain.get());
+        mLogTarget->SetNextTarget(oldLogTarget);
     }
+    wxLogDebug("Post Set up logging system...");
 
     //// Create a document manager
     mDocManager = new wxDocManager;

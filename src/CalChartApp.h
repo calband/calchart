@@ -75,5 +75,4 @@ private:
     std::unique_ptr<HostAppInterface> mHostInterface;
     std::unique_ptr<wxPrintDialogData> mPrintDialogData;
     CalChartLogTarget* mLogTarget = nullptr; // Owned by wxLog, don't delete
-    std::unique_ptr<wxLogChain> mLogChain;
 };
