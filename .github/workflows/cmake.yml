@@ -249,6 +249,7 @@ jobs:
         DEVELOPER_ID_APP: ${{ secrets.DEVELOPER_ID_APP }}
       run: |
         APP_PATH="${{github.workspace}}/build/src/CalChart.app"
+        ENTITLEMENTS="${{github.workspace}}/resources/macos/CalChart.entitlements"
         
         # Sign all frameworks and dylibs first (from inside out)
         find "$APP_PATH/Contents/Frameworks" -name "*.framework" -o -name "*.dylib" 2>/dev/null | while read framework; do
@@ -262,19 +263,22 @@ jobs:
         find "$APP_PATH/Contents/MacOS" -type f -perm +111 ! -name "CalChart" 2>/dev/null | while read executable; do
           echo "Signing helper executable: $executable"
           codesign --force --verbose --timestamp --options runtime \
+            --entitlements "$ENTITLEMENTS" \
             --sign "$DEVELOPER_ID_APP" \
             "$executable" || true
         done
         
-        # Sign the main executable explicitly
+        # Sign the main executable explicitly with entitlements
         echo "Signing main executable..."
         codesign --force --verbose --timestamp --options runtime \
+          --entitlements "$ENTITLEMENTS" \
           --sign "$DEVELOPER_ID_APP" \
           "$APP_PATH/Contents/MacOS/CalChart"
         
-        # Finally, sign the entire app bundle
+        # Finally, sign the entire app bundle with entitlements
         echo "Signing app bundle..."
         codesign --force --verbose --timestamp --options runtime \
+          --entitlements "$ENTITLEMENTS" \
           --sign "$DEVELOPER_ID_APP" \
           "$APP_PATH"
         
@@ -282,6 +286,7 @@ jobs:
         echo "Verifying app bundle signature..."
         codesign --verify --verbose=4 "$APP_PATH"
         codesign --verify --verbose=4 "$APP_PATH/Contents/MacOS/CalChart"
+        codesign --display --entitlements - "$APP_PATH"
 
     - name: Pack DMG (macOS)
       if: matrix.config.os == 'macos-14'
