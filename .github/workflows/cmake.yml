@@ -249,8 +249,17 @@ jobs:
         DEVELOPER_ID_APP: ${{ secrets.DEVELOPER_ID_APP }}
       run: |
         codesign --deep --force --verify --verbose --timestamp --options runtime \
+          --entitlements ${{github.workspace}}/entitlements.plist \
           --sign "$DEVELOPER_ID_APP" \
           ${{github.workspace}}/build/src/CalChart.app
+
+    - name: Verify code signature (macOS)
+      if: matrix.config.os == 'macos-14'
+      run: |
+        echo "=== Verifying signature ==="
+        codesign -vvv --deep --strict ${{github.workspace}}/build/src/CalChart.app
+        echo "=== Checking entitlements ==="
+        codesign -d --entitlements - ${{github.workspace}}/build/src/CalChart.app
 
     # Notarizing involves
     # 1. Zip the file up
