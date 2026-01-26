@@ -243,12 +243,24 @@ jobs:
         security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
         security set-key-partition-list -S apple-tool:,apple: -s -k "CalChart" build.keychain
 
-    - name: Code sign the app
+    - name: Pack DMG (macOS)
+      if: matrix.config.os == 'macos-14'
+      run: pushd ${{github.workspace}}/build && cpack -G DragNDrop
+
+    - name: Code sign the app in DMG
       if: matrix.config.os == 'macos-14'
       env:
         DEVELOPER_ID_APP: ${{ secrets.DEVELOPER_ID_APP }}
       run: |
-        APP_PATH="${{github.workspace}}/build/src/CalChart.app"
+        # Find the DMG
+        DMG_PATH=$(find ${{github.workspace}}/build -name "CalChart-*.dmg" -print -quit)
+        echo "Found DMG: $DMG_PATH"
+        
+        # Mount the DMG to access the app bundle
+        echo "Mounting DMG..."
+        hdiutil attach "$DMG_PATH" -mountpoint /Volumes/CalChart -nobrowse
+        
+        APP_PATH="/Volumes/CalChart/CalChart.app"
         ENTITLEMENTS="${{github.workspace}}/resources/macos/CalChart.entitlements"
         
         # Sign all frameworks and dylibs first (from inside out)
@@ -287,10 +299,10 @@ jobs:
         codesign --verify --verbose=4 "$APP_PATH"
         codesign --verify --verbose=4 "$APP_PATH/Contents/MacOS/CalChart"
         codesign --display --entitlements - "$APP_PATH"
-
-    - name: Pack DMG (macOS)
-      if: matrix.config.os == 'macos-14'
-      run: pushd ${{github.workspace}}/build && cpack -G DragNDrop
+        
+        # Unmount the DMG
+        echo "Unmounting DMG..."
+        hdiutil detach /Volumes/CalChart
 
     - name: Sign DMG (macOS)
       if: matrix.config.os == 'macos-14'
