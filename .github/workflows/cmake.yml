@@ -249,7 +249,7 @@ jobs:
         DEVELOPER_ID_APP: ${{ secrets.DEVELOPER_ID_APP }}
       run: |
         codesign --deep --force --verify --verbose --timestamp --options runtime \
-          --entitlements ${{github.workspace}}/entitlements.plist \
+          --entitlements ${{github.workspace}}/resources/macos/CalChart.entitlements \
           --sign "$DEVELOPER_ID_APP" \
           ${{github.workspace}}/build/src/CalChart.app
 
