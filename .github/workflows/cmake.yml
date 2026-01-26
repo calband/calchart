@@ -243,28 +243,38 @@ jobs:
         security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
         security set-key-partition-list -S apple-tool:,apple: -s -k "CalChart" build.keychain
 
-    - name: Pack DMG (macOS)
+    - name: Pack initial DMG (macOS)
       if: matrix.config.os == 'macos-14'
       run: pushd ${{github.workspace}}/build && cpack -G DragNDrop
 
-    - name: Code sign the app in DMG
+    - name: Extract, sign, and repackage DMG (macOS)
       if: matrix.config.os == 'macos-14'
       env:
         DEVELOPER_ID_APP: ${{ secrets.DEVELOPER_ID_APP }}
       run: |
-        # Find the DMG
-        DMG_PATH=$(find ${{github.workspace}}/build -name "CalChart-*.dmg" -print -quit)
-        echo "Found DMG: $DMG_PATH"
+        # Find the CPack-generated DMG
+        ORIGINAL_DMG=$(find ${{github.workspace}}/build -name "CalChart-*.dmg" -print -quit)
+        echo "Found original DMG: $ORIGINAL_DMG"
+        DMG_NAME=$(basename "$ORIGINAL_DMG")
         
-        # Mount the DMG to access the app bundle
-        echo "Mounting DMG..."
-        hdiutil attach "$DMG_PATH" -mountpoint /Volumes/CalChart -nobrowse
+        # Mount the DMG to extract the app (which has CPack's modifications)
+        echo "Mounting original DMG..."
+        hdiutil attach "$ORIGINAL_DMG" -mountpoint /Volumes/CalChart -nobrowse -readonly
         
-        APP_PATH="/Volumes/CalChart/CalChart.app"
+        # Copy the app out to a temporary location
+        TEMP_APP="${{github.workspace}}/build/CalChart_temp.app"
+        echo "Extracting app from DMG..."
+        cp -R /Volumes/CalChart/CalChart.app "$TEMP_APP"
+        
+        # Unmount the original DMG
+        echo "Unmounting original DMG..."
+        hdiutil detach /Volumes/CalChart
+        
+        # Now sign the extracted app
         ENTITLEMENTS="${{github.workspace}}/resources/macos/CalChart.entitlements"
         
         # Sign all frameworks and dylibs first (from inside out)
-        find "$APP_PATH/Contents/Frameworks" -name "*.framework" -o -name "*.dylib" 2>/dev/null | while read framework; do
+        find "$TEMP_APP/Contents/Frameworks" -name "*.framework" -o -name "*.dylib" 2>/dev/null | while read framework; do
           echo "Signing: $framework"
           codesign --force --verbose --timestamp --options runtime \
             --sign "$DEVELOPER_ID_APP" \
@@ -272,7 +282,7 @@ jobs:
         done
         
         # Sign any helper executables in MacOS directory (excluding main executable)
-        find "$APP_PATH/Contents/MacOS" -type f -perm +111 ! -name "CalChart" 2>/dev/null | while read executable; do
+        find "$TEMP_APP/Contents/MacOS" -type f -perm +111 ! -name "CalChart" 2>/dev/null | while read executable; do
           echo "Signing helper executable: $executable"
           codesign --force --verbose --timestamp --options runtime \
             --entitlements "$ENTITLEMENTS" \
@@ -285,24 +295,40 @@ jobs:
         codesign --force --verbose --timestamp --options runtime \
           --entitlements "$ENTITLEMENTS" \
           --sign "$DEVELOPER_ID_APP" \
-          "$APP_PATH/Contents/MacOS/CalChart"
+          "$TEMP_APP/Contents/MacOS/CalChart"
         
         # Finally, sign the entire app bundle with entitlements
         echo "Signing app bundle..."
         codesign --force --verbose --timestamp --options runtime \
           --entitlements "$ENTITLEMENTS" \
           --sign "$DEVELOPER_ID_APP" \
-          "$APP_PATH"
+          "$TEMP_APP"
         
         # Verify the signatures
         echo "Verifying app bundle signature..."
-        codesign --verify --verbose=4 "$APP_PATH"
-        codesign --verify --verbose=4 "$APP_PATH/Contents/MacOS/CalChart"
-        codesign --display --entitlements - "$APP_PATH"
+        codesign --verify --verbose=4 "$TEMP_APP"
+        codesign --verify --verbose=4 "$TEMP_APP/Contents/MacOS/CalChart"
+        codesign --display --entitlements - "$TEMP_APP"
         
-        # Unmount the DMG
-        echo "Unmounting DMG..."
-        hdiutil detach /Volumes/CalChart
+        # Create a new DMG with the signed app
+        echo "Creating new DMG with signed app..."
+        rm "$ORIGINAL_DMG"
+        
+        # Create temporary folder for DMG contents
+        DMG_STAGING="${{github.workspace}}/build/dmg_staging"
+        mkdir -p "$DMG_STAGING"
+        mv "$TEMP_APP" "$DMG_STAGING/CalChart.app"
+        
+        # Create symbolic link to Applications
+        ln -s /Applications "$DMG_STAGING/Applications"
+        
+        # Create the DMG
+        hdiutil create -volname "CalChart" -srcfolder "$DMG_STAGING" -ov -format UDZO "$ORIGINAL_DMG"
+        
+        # Clean up staging
+        rm -rf "$DMG_STAGING"
+        
+        echo "New DMG created: $ORIGINAL_DMG"
 
     - name: Sign DMG (macOS)
       if: matrix.config.os == 'macos-14'
