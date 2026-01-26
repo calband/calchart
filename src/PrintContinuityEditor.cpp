@@ -24,6 +24,7 @@
 #include "CalChartApp.h"
 #include "CalChartDrawing.h"
 #include "CalChartSheet.h"
+#include "CalChartSplash.h"
 #include "CalChartText.h"
 #include "CalChartView.h"
 #include "PrintContinuityPreview.h"
@@ -119,8 +120,7 @@ void PrintContinuityEditor::CreateControls()
 
 void PrintContinuityEditor::OnCmdHelp(wxCommandEvent&)
 {
-    wxGetApp().GetGlobalHelpController().LoadFile();
-    wxGetApp().GetGlobalHelpController().KeywordSearch(wxT("Animation Commands"));
+    CalChartSplash::Help();
 }
 
 void PrintContinuityEditor::Update()

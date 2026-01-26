@@ -39,7 +39,6 @@ struct Font;
 struct BrushAndPen;
 
 static constexpr auto kSprLineTextValues = 5;
-
 static constexpr auto kFieldStepSizeNorthSouth = std::array{ 96, 160 };
 static constexpr auto kFieldStepSizeEastWest = 84;
 static constexpr auto kFieldStepSizeSouthEdgeFromCenter = std::array{ 48, 80 };

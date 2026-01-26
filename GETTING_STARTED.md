@@ -17,8 +17,10 @@ Next, you will need to install a package manager to install `cmake`. I recommend
 First, go to https://brew.sh and follow the installation instructions.  Next, open the Terminal Applicaton and enter the following command:
 
 ```
-brew install cmake clang-format
+brew install cmake clang-format pandoc
 ```
+
+**Note:** Pandoc is required for converting help documentation from Markdown to HTML during the build process.
 
 Note:
 Avoid using macport version of cmake due to this issue:
@@ -53,10 +55,10 @@ First, go to https://chocolatey.org/install and follow the installation instruct
 Once Chocolatey is installed, install the required dependencies (in an admin PowerShell):
 
 ```
-choco install cmake git winflexbison ninja clang-format
+choco install cmake git winflexbison ninja clang-format pandoc
 ```
 
-**Note**: `ninja` is required for building with CMake presets. If you encounter issues with Ninja not being found, close and reopen your terminal after installation.
+**Note**: `ninja` is required for building with CMake presets. Pandoc is required for converting help documentation from Markdown to HTML. If you encounter issues with Ninja not being found, close and reopen your terminal after installation.
 
 #### Installing vcpkg
 
@@ -76,11 +78,13 @@ After setting the environment variable, close and reopen your terminal/VS Code f
 
 ### Linux Steps
 
-We recommend using apt-get to install `git`, `cmake`, `bison`, `flex`, and the gtk:
+We recommend using apt-get to install `git`, `cmake`, `bison`, `flex`, pandoc, and the gtk:
 
 ```
-sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev git cmake bison flex clang-format ninja-build
+sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev git cmake bison flex clang-format ninja-build pandoc
 ```
+
+**Note:** Pandoc is required for converting help documentation from Markdown to HTML during the build process.
 
 #### Installing vcpkg
 
