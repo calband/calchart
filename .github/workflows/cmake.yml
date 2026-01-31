@@ -243,6 +243,32 @@ jobs:
         security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
         security set-key-partition-list -S apple-tool:,apple: -s -k "CalChart" build.keychain
 
+    # First run CPack to let it do its library fixups (which modifies binaries)
+    # Then we'll sign the modified app
+    - name: Pack (macOS) - Initial DMG creation
+      if: matrix.config.os == 'macos-14'
+      run: pushd ${{github.workspace}}/build && cpack -G DragNDrop
+
+    # Extract the app from the DMG so we can sign the final version
+    - name: Extract app from DMG for signing
+      if: matrix.config.os == 'macos-14'
+      run: |
+        # Find the DMG file
+        DMG_FILE=$(find ${{github.workspace}}/build -name "CalChart-*.dmg" -print -quit)
+        echo "Found DMG: $DMG_FILE"
+        
+        # Mount the DMG
+        hdiutil attach "$DMG_FILE" -mountpoint /Volumes/CalChart
+        
+        # Copy the app out
+        cp -R /Volumes/CalChart/CalChart.app ${{github.workspace}}/build/CalChart-signed.app
+        
+        # Unmount
+        hdiutil detach /Volumes/CalChart
+        
+        # Remove the unsigned DMG
+        rm "$DMG_FILE"
+
     - name: Code sign the app
       if: matrix.config.os == 'macos-14'
       env:
@@ -251,27 +277,27 @@ jobs:
         codesign --deep --force --verify --verbose --timestamp --options runtime \
           --entitlements ${{github.workspace}}/resources/macos/CalChart.entitlements \
           --sign "$DEVELOPER_ID_APP" \
-          ${{github.workspace}}/build/src/CalChart.app
+          ${{github.workspace}}/build/CalChart-signed.app
 
     - name: Verify code signature (macOS)
       if: matrix.config.os == 'macos-14'
       run: |
         echo "=== Verifying signature ==="
-        codesign -vvv --deep --strict ${{github.workspace}}/build/src/CalChart.app
+        codesign -vvv --deep --strict ${{github.workspace}}/build/CalChart-signed.app
         echo "=== Checking entitlements ==="
-        codesign -d --entitlements - ${{github.workspace}}/build/src/CalChart.app
+        codesign -d --entitlements - ${{github.workspace}}/build/CalChart-signed.app
 
     # Notarizing involves
     # 1. Zip the file up
     # 2. Notarize using the password and IDs for notarytool
     - name: Zip for notarization (macOS)
       if: matrix.config.os == 'macos-14'
-      run: ditto -c -k --keepParent ${{github.workspace}}/build/src/CalChart.app ${{github.workspace}}/build/src/CalChart.zip
+      run: ditto -c -k --keepParent ${{github.workspace}}/build/CalChart-signed.app ${{github.workspace}}/build/CalChart.zip
 
     - name: Notarize (macOS)
       if: matrix.config.os == 'macos-14'
       run: |
-        xcrun notarytool submit ${{github.workspace}}/build/src/CalChart.zip \
+        xcrun notarytool submit ${{github.workspace}}/build/CalChart.zip \
           --apple-id "$APPLE_ID" \
           --team-id "$APPLE_TEAM_ID" \
           --password "$APP_SPECIFIC_PASSWORD" \
@@ -283,11 +309,30 @@ jobs:
 
     - name: Staple notarization ticket
       if: matrix.config.os == 'macos-14'
-      run: xcrun stapler staple ${{github.workspace}}/build/src/CalChart.app
+      run: xcrun stapler staple ${{github.workspace}}/build/CalChart-signed.app
 
-    - name: Pack (macOS)
+    # Rebuild the DMG with the signed and notarized app
+    - name: Create final signed DMG
       if: matrix.config.os == 'macos-14'
-      run: pushd ${{github.workspace}}/build && cpack -G DragNDrop
+      run: |
+        # Get the version for naming
+        VERSION=$(git describe --tags --always)
+        DMG_NAME="CalChart-${VERSION}.dmg"
+        
+        # Create a temporary directory for the DMG contents
+        mkdir -p /tmp/CalChart-dmg
+        cp -R ${{github.workspace}}/build/CalChart-signed.app /tmp/CalChart-dmg/CalChart.app
+        
+        # Create the DMG
+        hdiutil create -volname "CalChart" \
+          -srcfolder /tmp/CalChart-dmg \
+          -ov -format UDZO \
+          ${{github.workspace}}/build/${DMG_NAME}
+        
+        # Clean up
+        rm -rf /tmp/CalChart-dmg
+        rm -rf ${{github.workspace}}/build/CalChart-signed.app
+        rm ${{github.workspace}}/build/CalChart.zip
 
     - name: Pack (Windows)
       if: matrix.config.os == 'windows-latest'
