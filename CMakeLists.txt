@@ -69,7 +69,21 @@ endif()
 
 # information about the DragNDrop installer was from:
 # https://blog.kitware.com/creating-mac-os-x-packages-with-cmake/
-include(InstallRequiredSystemLibraries)
+
+# On macOS, all libraries are system frameworks or properly configured with @rpath
+# We don't need InstallRequiredSystemLibraries to modify our binaries
+# (it would break code signatures by running install_name_tool)
+if(NOT APPLE)
+  include(InstallRequiredSystemLibraries)
+endif()
+
+# Configure CPack to not run fixup_bundle or modify binaries on macOS
+# This preserves code signatures during packaging
+if(APPLE)
+  set(CMAKE_INSTALL_DO_STRIP OFF)
+  set(CPACK_STRIP_FILES OFF)
+endif()
+
 set(CPACK_DMG_DS_STORE_SETUP_SCRIPT "${PROJECT_SOURCE_DIR}/resources/macos/CalChart_CMakeDMGSetup.scpt")
 set(CPACK_DMG_BACKGROUND_IMAGE "${PROJECT_SOURCE_DIR}/resources/macos/CalChart_DMGBackground.png")
 
