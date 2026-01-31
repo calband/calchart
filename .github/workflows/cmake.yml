@@ -115,11 +115,15 @@ jobs:
       with:
         xcode-version: '15.4'
 
+    - name: Installing Dependencies (macOS)
+      if: matrix.config.os == 'macos-14'
+      run: brew install pandoc
+
     - name: Installing Dependencies (Windows)
       if: matrix.config.os == 'windows-latest'
       run: |
         # Install required build helpers and tools via choco
-        choco install -y winflexbison nsis curl openssl.light pkgconfiglite git
+        choco install -y winflexbison nsis curl openssl.light pkgconfiglite git pandoc
         # Add NSIS to PATH for this session
         $env:PATH = "$env:PATH;C:\Program Files (x86)\NSIS"
         echo "C:\Program Files (x86)\NSIS" >> $env:GITHUB_PATH
@@ -142,7 +146,7 @@ jobs:
         sudo apt-get install -y autoconf autoconf-archive automake libltdl-dev
         sudo apt-get install -y build-essential libgtk-3-dev libcurl4-openssl-dev pkg-config ninja-build
         # Additional dependencies for vcpkg and wxWidgets building
-        sudo apt-get install -y bison flex zip unzip tar curl
+        sudo apt-get install -y bison flex zip unzip tar curl pandoc
 
     - name: Updating to gcc 14 (Linux)
       if: matrix.config.os == 'ubuntu-24.04'

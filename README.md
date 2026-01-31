@@ -52,9 +52,6 @@ desired behavior.
 
 Please check out the [Getting Started](GETTING_STARTED.md) guide.
 
-If you need to regenerate the help documentation, see the [README-docs.txt](README-docs.txt).
-
-
 # Release notes
 ## Release notes for 3.8.4
 

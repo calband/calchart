@@ -24,6 +24,7 @@
 #include "CalChartApp.h"
 #include "CalChartConfiguration.h"
 #include "CalChartSheet.h"
+#include "CalChartSplash.h"
 #include "CalChartView.h"
 #include "ContinuityBrowserPanel.h"
 #include "basic_ui.h"
@@ -138,8 +139,7 @@ void ContinuityBrowser::CreateControls(CalChart::Configuration const& config)
         wxUI::HSizer{
             wxUI::Button{ wxID_HELP, "&Help" }
                 .bind([] {
-                    wxGetApp().GetGlobalHelpController().LoadFile();
-                    wxGetApp().GetGlobalHelpController().KeywordSearch(wxT("Animation Commands"));
+                    CalChartSplash::Help();
                 }),
         },
     }

@@ -15,6 +15,12 @@ cmake_minimum_required(VERSION 3.11)
 
 project(CalChart)
 
+# Find Python for build scripts
+find_package(Python3 COMPONENTS Interpreter)
+if(NOT Python3_FOUND)
+    find_package(Python COMPONENTS Interpreter)
+endif()
+
 # prevent In-source builds:
 # https://towardsdatascience.com/7-tips-for-clean-cmake-scripts-c8d276587389
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
@@ -35,6 +41,9 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/version)
 if(NOT MSVC)
   include(CTest)
 endif()
+
+# Documentation
+add_subdirectory(docs)
 
 # Core library
 add_subdirectory(core)

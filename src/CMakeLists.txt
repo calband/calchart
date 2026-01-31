@@ -1,6 +1,6 @@
 # CalChart CMake
 
-# CalChart docs
+# CalChart docs (excludes developer-only docs in DeveloperDocs/)
 file(
   GLOB CalChartDocs
     "${PROJECT_SOURCE_DIR}/docs/*"
@@ -84,6 +84,10 @@ add_executable(
   ConfigurationDebugDialog.cpp
   ConfigurationDebugDialog.h
   ContinuityBoxDrawer.cpp
+  HelpManager.cpp
+  HelpManager.hpp
+  HelpDialog.cpp
+  HelpDialog.hpp
   ContinuityBoxDrawer.h
   ContinuityBrowser.cpp
   ContinuityBrowser.h
@@ -208,6 +212,36 @@ set_target_properties(
   MACOSX_BUNDLE_LONG_VERSION_STRING ${CalChart_VERSION}
 )
 
+# Ensure CalChart rebuilds when help HTML is updated
+if(TARGET build_help_html)
+  add_dependencies(CalChart build_help_html)
+  
+  # Make CalChart depend on the stamp file so it knows when HTML was regenerated
+  set(HELP_STAMP_FILE "${CMAKE_BINARY_DIR}/docs/.html_built")
+  if(EXISTS "${HELP_STAMP_FILE}" OR TARGET build_help_html)
+    add_custom_command(
+      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/help_html_copied.stamp"
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_BINARY_DIR}/docs/html" "$<TARGET_FILE_DIR:CalChart>/../Resources/docs/html"
+      COMMAND ${CMAKE_COMMAND} -E touch "${CMAKE_CURRENT_BINARY_DIR}/help_html_copied.stamp"
+      DEPENDS ${HELP_STAMP_FILE}
+      COMMENT "Copying pre-built HTML help files to app bundle"
+    )
+    add_custom_target(copy_help_html ALL
+      DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/help_html_copied.stamp"
+    )
+    add_dependencies(copy_help_html build_help_html CalChart)
+  endif()
+endif()
+
+# Copy docs directory to the bundle's Resources
+add_custom_command(
+  TARGET CalChart POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  "${PROJECT_SOURCE_DIR}/docs" "$<TARGET_FILE_DIR:CalChart>/../Resources/docs"
+)
+
+
 endif()
 
 # special stuff for Windows
@@ -227,9 +261,34 @@ add_custom_command(
   "${PROJECT_SOURCE_DIR}/docs" $<TARGET_FILE_DIR:CalChart>/docs
 )
 
+# Copy generated HTML docs
+add_custom_command(
+  TARGET CalChart POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  "${CMAKE_BINARY_DIR}/docs/html" $<TARGET_FILE_DIR:CalChart>/docs/html
+  DEPENDS build_help_html
+)
+
 target_sources(CalChart PRIVATE ${PROJECT_SOURCE_DIR}/resources/windows/WindowsHiDPI.manifest)
 
 endif ()
+
+# Copy docs for Linux/Unix (non-Windows, non-Apple)
+if(NOT WIN32 AND NOT APPLE)
+add_custom_command(
+  TARGET CalChart POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  "${PROJECT_SOURCE_DIR}/docs" "$<TARGET_FILE_DIR:CalChart>/docs"
+)
+
+# Copy generated HTML docs
+add_custom_command(
+  TARGET CalChart POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  "${CMAKE_BINARY_DIR}/docs/html" "$<TARGET_FILE_DIR:CalChart>/docs/html"
+  DEPENDS build_help_html
+)
+endif()
 
 # we add some targets for docs and images so we can pack them for windows
 # see http://yanivresearch.info/software/CPackWindowsTutorial/CPackForWindows.html

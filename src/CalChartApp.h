@@ -30,7 +30,7 @@
 
 class CalChartApp;
 class HostAppInterface;
-class wxHtmlHelpController;
+class HelpManager;
 class wxDocManager;
 class wxPrintDialogData;
 class CalChartLogTarget;
@@ -56,7 +56,7 @@ public:
 #endif // defined(__APPLE__) && (__APPLE__)
 
     // the global help system:
-    wxHtmlHelpController& GetGlobalHelpController();
+    HelpManager& GetGlobalHelpManager();
     wxPrintDialogData& GetGlobalPrintDialog();
 
     // Get a copy of the global log buffer for bug reporting
@@ -71,7 +71,7 @@ private:
     void ExitAppAsClient();
 
     wxDocManager* mDocManager{};
-    std::unique_ptr<wxHtmlHelpController> mHelpController;
+    std::unique_ptr<HelpManager> mHelpManager;
     std::unique_ptr<HostAppInterface> mHostInterface;
     std::unique_ptr<wxPrintDialogData> mPrintDialogData;
     CalChartLogTarget* mLogTarget = nullptr; // Owned by wxLog, don't delete
