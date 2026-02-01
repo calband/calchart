@@ -196,6 +196,31 @@ target_link_libraries(
   WebP::webpdemux
 )
 
+# Add WebView2 support for static Windows builds
+# The WebView2 package may be installed via nuget and its location specified
+# through WEBVIEW2_LIB_PATH cmake cache variable or environment variable
+if(WIN32 AND NOT BUILD_SHARED_LIBS)
+  if(DEFINED ENV{WEBVIEW2_LIB_PATH} AND NOT WEBVIEW2_LIB_PATH)
+    set(WEBVIEW2_LIB_PATH "$ENV{WEBVIEW2_LIB_PATH}" CACHE PATH "Path to WebView2 loader static library directory" FORCE)
+  endif()
+
+  if(WEBVIEW2_LIB_PATH)
+    find_library(WEBVIEW2_LOADER_LIB
+      NAMES WebView2LoaderStatic
+      PATHS "${WEBVIEW2_LIB_PATH}"
+      NO_DEFAULT_PATH
+    )
+    if(WEBVIEW2_LOADER_LIB)
+      target_link_libraries(CalChart ${WEBVIEW2_LOADER_LIB})
+      message(STATUS "Found WebView2LoaderStatic: ${WEBVIEW2_LOADER_LIB}")
+    else()
+      message(WARNING "WEBVIEW2_LIB_PATH set but WebView2LoaderStatic.lib not found in: ${WEBVIEW2_LIB_PATH}")
+    endif()
+  else()
+    message(STATUS "WEBVIEW2_LIB_PATH not set; WebView2 may not link correctly on Windows static builds")
+  endif()
+endif()
+
 # Special stuff for Mac
 if(APPLE)
 
