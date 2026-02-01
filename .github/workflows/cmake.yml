@@ -113,6 +113,7 @@ jobs:
       shell: bash
 
     - name: Cache vcpkg binary cache
+      id: cache-vcpkg-binary
       uses: actions/cache@v4
       with:
         path: ${{github.workspace}}/vcpkg-cache
@@ -121,6 +122,22 @@ jobs:
           vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-${{ hashFiles('vcpkg.json', 'vcpkg-overlay/**') }}-
           vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-
           vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-
+
+    - name: Log vcpkg cache status
+      run: |
+        echo "=== Vcpkg Cache Status ==="
+        echo "Vcpkg installation cache hit: ${{ steps.cache-vcpkg.outputs.cache-hit }}"
+        echo "Vcpkg binary cache hit: ${{ steps.cache-vcpkg-binary.outputs.cache-hit }}"
+        echo "Binary cache key: vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-${{ hashFiles('vcpkg.json', 'vcpkg-overlay/**') }}-${{ steps.vcpkg-baseline.outputs.hash }}"
+        if [ -d "${{github.workspace}}/vcpkg-cache" ]; then
+          echo "Binary cache size: $(du -sh ${{github.workspace}}/vcpkg-cache 2>/dev/null || echo 'empty')"
+          echo "Binary cache file count: $(find ${{github.workspace}}/vcpkg-cache -type f 2>/dev/null | wc -l)"
+          echo "Sample cache files:"
+          find ${{github.workspace}}/vcpkg-cache -type f 2>/dev/null | head -5 || echo "No files found"
+        else
+          echo "Binary cache directory does not exist"
+        fi
+      shell: bash
 
     - name: Installing Xcode (MacOS)
       if: matrix.config.os == 'macos-14'
