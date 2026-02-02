@@ -189,10 +189,9 @@ jobs:
     - name: Configure CMake (Windows)
       if: matrix.config.os == 'windows-latest'
       # Use vcpkg toolchain file with static triplet; force static runtime for CalChart too
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-static -DVCPKG_OVERLAY_PORTS="${{github.workspace}}/vcpkg-overlay/ports" -DWEBVIEW2_LIB_PATH="${{env.WEBVIEW2_LIB_PATH}}"
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-static -DWEBVIEW2_LIB_PATH="${{env.WEBVIEW2_LIB_PATH}}"
       env:
         VCPKG_BINARY_SOURCES: 'clear;files,${{github.workspace}}/vcpkg-cache,readwrite'
-        VCPKG_OVERLAY_PORTS: ${{github.workspace}}/vcpkg-overlay/ports
 
     - name: Log vcpkg build info (Windows)
       if: matrix.config.os == 'windows-latest'
@@ -215,10 +214,9 @@ jobs:
     - name: Configure CMake (macOS/Linux)
       if: matrix.config.os != 'windows-latest'
       # Use vcpkg toolchain; triplet auto-selected by vcpkg
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_OVERLAY_PORTS="${{github.workspace}}/vcpkg-overlay/ports"
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake"
       env:
         VCPKG_BINARY_SOURCES: 'clear;files,${{github.workspace}}/vcpkg-cache,readwrite'
-        VCPKG_OVERLAY_PORTS: ${{github.workspace}}/vcpkg-overlay/ports
 
     - name: Log vcpkg build info (macOS/Linux)
       if: matrix.config.os != 'windows-latest'
