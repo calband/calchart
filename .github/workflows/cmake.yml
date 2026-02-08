@@ -5,15 +5,10 @@ name: CI action for CalChart
 
 on:
   push:
-    branches:
-    - main
-    - calchart-3.6
-    tags:
-    - '*'
+    branches: [main, calchart-3.6]
+    tags: ['*']
   pull_request:
-    branches:
-    - main
-    - calchart-3.6
+    branches: [main, calchart-3.6]
 
 jobs:
   build:
@@ -43,35 +38,21 @@ jobs:
           }
         build_type: [Debug, Release]
         exclude:
-          - config: {
-              name: "Windows Latest MSVC",
-              artifact: "CalChart-*.exe",
-              artifact_name: "CalChart-Windows",
-              os: windows-latest,
-            }
+          - config: {os: windows-latest}
             build_type: Debug
 
     steps:
     - name: Free disk space (Linux)
       if: matrix.config.os == 'ubuntu-24.04'
       run: |
-        # Free up disk space on Ubuntu runners to prevent "No space left on device" during vcpkg builds
-        # Reference: https://github.com/actions/runner-images/issues/2840
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /usr/local/lib/android
-        sudo rm -rf /opt/ghc
-        sudo rm -rf /opt/hostedtoolcache/CodeQL
+        sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
         sudo docker image prune --all --force
-        df -h
 
-    - name: checkout
-      uses: actions/checkout@v3
-
-    - name: Checkout unshallow
-      run: git fetch --unshallow
-
-    - name: Checkout submodules
-      run: git submodule update --init --recursive
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
 
     - name: Get vcpkg baseline
       id: vcpkg-baseline
@@ -100,348 +81,152 @@ jobs:
         fi
       shell: bash
 
-    - name: Log vcpkg cache status
-      run: |
-        echo "Vcpkg installation cache hit: ${{ steps.cache-vcpkg.outputs.cache-hit }}"
-        echo "Vcpkg binary cache directory: ${{github.workspace}}/vcpkg-cache"
-        if [ -d "${{github.workspace}}/vcpkg-cache" ]; then
-          echo "Binary cache size: $(du -sh ${{github.workspace}}/vcpkg-cache 2>/dev/null || echo 'empty')"
-          echo "Binary cache file count: $(find ${{github.workspace}}/vcpkg-cache -type f 2>/dev/null | wc -l)"
-        else
-          echo "Binary cache directory does not exist yet"
-        fi
-      shell: bash
-
     - name: Cache vcpkg binary cache
-      id: cache-vcpkg-binary
       uses: actions/cache@v4
       with:
         path: ${{github.workspace}}/vcpkg-cache
-        key: vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-${{ hashFiles('vcpkg.json', 'vcpkg-overlay/**') }}-${{ steps.vcpkg-baseline.outputs.hash }}
+        key: vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-${{ hashFiles('vcpkg.json') }}-${{ steps.vcpkg-baseline.outputs.hash }}
         restore-keys: |
-          vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-${{ hashFiles('vcpkg.json', 'vcpkg-overlay/**') }}-
           vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-
-          vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-
 
-    - name: Log vcpkg cache status
-      run: |
-        echo "=== Vcpkg Cache Status ==="
-        echo "Vcpkg installation cache hit: ${{ steps.cache-vcpkg.outputs.cache-hit }}"
-        echo "Vcpkg binary cache hit: ${{ steps.cache-vcpkg-binary.outputs.cache-hit }}"
-        echo "Binary cache key: vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-${{ hashFiles('vcpkg.json', 'vcpkg-overlay/**') }}-${{ steps.vcpkg-baseline.outputs.hash }}"
-        if [ -d "${{github.workspace}}/vcpkg-cache" ]; then
-          echo "Binary cache size: $(du -sh ${{github.workspace}}/vcpkg-cache 2>/dev/null || echo 'empty')"
-          echo "Binary cache file count: $(find ${{github.workspace}}/vcpkg-cache -type f 2>/dev/null | wc -l)"
-          echo "Sample cache files:"
-          find ${{github.workspace}}/vcpkg-cache -type f 2>/dev/null | head -5 || echo "No files found"
-        else
-          echo "Binary cache directory does not exist"
-        fi
-      shell: bash
-
-    - name: Installing Xcode (MacOS)
+    - name: Install Xcode (macOS)
       if: matrix.config.os == 'macos-14'
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: '15.4'
 
-    - name: Installing Dependencies (macOS)
+    - name: Install Dependencies (macOS)
       if: matrix.config.os == 'macos-14'
       run: brew install pandoc
 
-    - name: Installing Dependencies (Windows)
+    - name: Install Dependencies (Windows)
       if: matrix.config.os == 'windows-latest'
       run: |
-        # Install required build helpers and tools via choco
         choco install -y winflexbison nsis curl openssl.light pkgconfiglite git pandoc
-        # Add NSIS to PATH for this session
-        $env:PATH = "$env:PATH;C:\Program Files (x86)\NSIS"
         echo "C:\Program Files (x86)\NSIS" >> $env:GITHUB_PATH
-        # Install WebView2 SDK for building wxWidgets with webview support
         nuget install Microsoft.Web.WebView2 -OutputDirectory "${{ github.workspace }}\packages"
-        # Find the WebView2 library directory and add it to the environment
-        # The package structure is Microsoft.Web.WebView2.*/build/native/x64
         Get-ChildItem "${{ github.workspace }}\packages" -Filter "Microsoft.Web.WebView2*" -Directory | ForEach-Object {
           $x64Path = Join-Path $_.FullName "build\native\x64"
           if (Test-Path $x64Path) {
             echo "WEBVIEW2_LIB_PATH=$x64Path" >> $env:GITHUB_ENV
-            echo "WebView2 library path found: $x64Path"
           }
         }
 
-    - name: Installing Dependencies (Linux)
+    - name: Install Dependencies (Linux)
       if: matrix.config.os == 'ubuntu-24.04'
       run: |
         sudo apt-get update
-        sudo apt-get install -y autoconf autoconf-archive automake libltdl-dev
-        sudo apt-get install -y build-essential libgtk-3-dev libcurl4-openssl-dev pkg-config ninja-build
-        # Additional dependencies for vcpkg and wxWidgets building
-        sudo apt-get install -y bison flex zip unzip tar curl pandoc
+        sudo apt-get install -y autoconf autoconf-archive automake libltdl-dev \
+          build-essential libgtk-3-dev libcurl4-openssl-dev pkg-config ninja-build \
+          bison flex zip unzip tar curl pandoc
+        sudo apt install -y gcc-14 g++-14
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 100 \
+          --slave /usr/bin/g++ g++ /usr/bin/g++-14 --slave /usr/bin/gcov gcov /usr/bin/gcov-14
 
-    - name: Updating to gcc 14 (Linux)
-      if: matrix.config.os == 'ubuntu-24.04'
-      run: |
-        sudo apt update
-        sudo apt install gcc-14 g++-14
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 100 --slave /usr/bin/g++ g++ /usr/bin/g++-14 --slave /usr/bin/gcov gcov /usr/bin/gcov-14
-        sudo update-alternatives --set gcc /usr/bin/gcc-14
-
+    # Configure & Build
     - name: Configure CMake (Windows)
       if: matrix.config.os == 'windows-latest'
-      # Use vcpkg toolchain file with static triplet; force static runtime for CalChart too
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-static -DWEBVIEW2_LIB_PATH="${{env.WEBVIEW2_LIB_PATH}}"
       env:
         VCPKG_BINARY_SOURCES: 'clear;files,${{github.workspace}}/vcpkg-cache,readwrite'
-
-    - name: Log vcpkg build info (Windows)
-      if: matrix.config.os == 'windows-latest'
-      run: |
-        Write-Host "=== vcpkg binary cache after configure ==="
-        if (Test-Path "${{github.workspace}}/vcpkg-cache") {
-          $cacheSize = (Get-ChildItem "${{github.workspace}}/vcpkg-cache" -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB
-          Write-Host "Binary cache size: $([math]::Round($cacheSize, 2)) MB"
-          $fileCount = (Get-ChildItem "${{github.workspace}}/vcpkg-cache" -Recurse -File).Count
-          Write-Host "Binary cache file count: $fileCount"
-          Write-Host "Recent cache entries:"
-          Get-ChildItem "${{github.workspace}}/vcpkg-cache" -Recurse -File -Filter "*.zip" | Select-Object -First 10 | ForEach-Object { Write-Host $_.FullName }
-        }
-        Write-Host "=== vcpkg installed packages ==="
-        if (Test-Path "${{github.workspace}}/vcpkg/installed") {
-          $installSize = (Get-ChildItem "${{github.workspace}}/vcpkg/installed" -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB
-          Write-Host "Installed size: $([math]::Round($installSize, 2)) MB"
-        }
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-static -DWEBVIEW2_LIB_PATH="${{env.WEBVIEW2_LIB_PATH}}"
 
     - name: Configure CMake (macOS/Linux)
       if: matrix.config.os != 'windows-latest'
-      # Use vcpkg toolchain; triplet auto-selected by vcpkg
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake"
       env:
         VCPKG_BINARY_SOURCES: 'clear;files,${{github.workspace}}/vcpkg-cache,readwrite'
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
-    - name: Log vcpkg build info (macOS/Linux)
-      if: matrix.config.os != 'windows-latest'
-      run: |
-        echo "=== vcpkg binary cache after configure ==="
-        if [ -d "${{github.workspace}}/vcpkg-cache" ]; then
-          echo "Binary cache size: $(du -sh ${{github.workspace}}/vcpkg-cache)"
-          echo "Binary cache file count: $(find ${{github.workspace}}/vcpkg-cache -type f | wc -l)"
-          echo "Recent cache entries:"
-          find ${{github.workspace}}/vcpkg-cache -type f -name '*.zip' 2>/dev/null | head -10 || echo "No .zip files found"
-        fi
-        echo "=== vcpkg installed packages ==="
-        if [ -d "${{github.workspace}}/vcpkg/installed" ]; then
-          du -sh ${{github.workspace}}/vcpkg/installed
-        fi
-      shell: bash
- 
     - name: Build
-      # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
 
-    - name: Run tests
+    - name: Test
       run: ctest --verbose --test-dir ${{github.workspace}}/build
 
-    - name: Pack initial DMG (macOS)
+    # Packaging
+    - name: Package (macOS - initial)
       if: matrix.config.os == 'macos-14'
       run: pushd ${{github.workspace}}/build && cpack -G DragNDrop
 
-    - name: Pack (Windows)
+    - name: Package (Windows)
       if: matrix.config.os == 'windows-latest'
-      # it seems that the cmake command provided by chocolatey conflicts with cmake.
-      # explicitly running cpack from the cmake directory.
       run: |
         $cmdpath = split-path -parent (get-command cmake).Path
         $cpack_cmd = Join-Path -Path $cmdpath -ChildPath cpack
         pushd ${{github.workspace}}/build
         & $cpack_cmd
 
-    - name: Strip (Linux)
+    - name: Package (Linux)
       if: matrix.config.os == 'ubuntu-24.04'
-      run: cmake --install build --prefix instdir --strip
+      run: |
+        cmake --install build --prefix instdir --strip
+        cd instdir && cmake -E tar cJfv ${{github.workspace}}/build/CalChart.tar.xz .
 
-    - name: Pack (Linux)
-      if: matrix.config.os == 'ubuntu-24.04'
-      working-directory: instdir
-      run: cmake -E tar cJfv ${{github.workspace}}/build/CalChart.tar.xz .
-
-    # Codesigning and Notorizing for Mac:
-    # These are the steps you need to do before we run CI to Codesign and Notorize
-    # prerequisites: You need an Apple Developer Account (Apple ID)
-    # ✅ Step 1: Generate a Certificate Signing Request (CSR)
-    #   On your Mac, open Keychain Access
-    #   In the menu bar, select:
-    #     Keychain Access → Certificate Assistant → Request a Certificate From a Certificate Authority…
-    #   Fill in:
-    #     User Email Address: your Apple ID
-    #     Common Name: something like Developer ID for CalChart
-    #     CA Email: leave blank
-    #     Request is: ✔ Save to disk
-    #   Click Continue, and save the .certSigningRequest file
-    # ✅ Step 2: Create a Developer ID Application Certificate
-    #   Go to https://developer.apple.com/account/
-    #   Navigate to Certificates, Identifiers & Profiles
-    #   Under Certificates, click the ➕ button
-    #   Choose:
-    #    Type: Developer ID Application
-    #   Click Continue
-    #    Upload your .certSigningRequest
-    #   Click Continue, then Download the .cer file
-    # ✅ Step 3: Import the Certificate to Keychain
-    #   Double-click the downloaded .cer file
-    #   It will appear in your login keychain
-    #   Make sure the certificate appears with a private key (expand the triangle in Keychain)
-    #   🔒 If there's no private key: Something went wrong during CSR generation. Try again from Step 1.
-    # ✅ Step 4: Export as .p12 for GitHub Use
-    #   In Keychain Access, right-click the certificate → Export
-    #   Choose .p12 format
-    #   Set a strong password (you’ll store this in GitHub Secrets as MACOS_CERTIFICATE_PASSWORD)
-    #   Save the file as DeveloperID.p12
-    # ✅ Step 5: App-Specific Password for notarytool
-    #   notarytool is going to access the server as you, so create an app-specific password
-    #   If you haven’t already, create an App-Specific Password for your Apple ID .
-    #   https://account.apple.com/account/manage
-    #   Create a password for notarytool (you’ll store this in GitHub Secrets as APP_SPECIFIC_PASSWORD)
-    # ✅ Step 5: Base64 Encode and Store in GitHub
-    #   Run:
-    #     base64 DeveloperID.p12 | pbcopy
-    #   Then in GitHub, Go to Settings → Secrets and variables → Actions
-    #   Add these secrets:
-    #     MACOS_CERTIFICATE (Paste base64 contents)
-    #     MACOS_CERTIFICATE_PASSWORD (The password you set for export)
-    #     DEVELOPER_ID_APP "Developer ID Application: Your Name (TEAMID)"
-    #     APPLE_ID (Your developer Apple ID)
-    #     APPLE_TEAM_ID (Your developer team (usually 10 alphanumeric digits))
-    #     APP_SPECIFIC_PASSWORD (The notarytool password)
-    #   To get the full identity name, run:
-    #     security find-identity -p codesigning -v
-    #   You'll see:
-    # 
-    #     1) XXXXXXXX "Developer ID Application: Richard Powell (ABCDE12345)"
-    #   Use that full quoted string in DEVELOPER_ID_APP.
-
-    - name: Setup keychain with cert p12 (macOS)
-      if: matrix.config.os == 'macos-14'
+    # macOS Codesigning (see DeveloperDocs/MacOSCodesigning.md for setup instructions)
+    - name: Setup Keychain (macOS)
+      if: matrix.config.os == 'macos-14' && matrix.build_type == 'Release'
       env:
         MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
         MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
       run: |
-        echo $MACOS_CERTIFICATE | base64 --decode > ${{github.workspace}}/certificate.p12
+        echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
         security create-keychain -p "CalChart" build.keychain
         security default-keychain -s build.keychain
         security unlock-keychain -p "CalChart" build.keychain
         security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
         security set-key-partition-list -S apple-tool:,apple: -s -k "CalChart" build.keychain
 
-    - name: Extract, sign, notarize, and staple app (macOS)
-      if: matrix.config.os == 'macos-14'
+    - name: Sign and Notarize (macOS)
+      if: matrix.config.os == 'macos-14' && matrix.build_type == 'Release'
       env:
         DEVELOPER_ID_APP: ${{ secrets.DEVELOPER_ID_APP }}
         APPLE_ID: ${{ secrets.APPLE_ID }}
         APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
       run: |
-        echo "===== STEP 1: Extracting and signing app ====="
-
-        ORIGINAL_DMG=$(find ${{github.workspace}}/build -name "CalChart-*.dmg" -print -quit)
-        echo "Found original DMG: $ORIGINAL_DMG"
-
-        # Convert DMG to read-write format and mount it
-        RW_DMG="${{github.workspace}}/build/CalChart_rw.dmg"
-        hdiutil convert "$ORIGINAL_DMG" -format UDRW -o "$RW_DMG"
-        hdiutil attach "$RW_DMG" -mountpoint /Volumes/CalChart -nobrowse -noverify
-
-        # Copy the app OUT of the DMG to the filesystem for signing
-        TEMP_APP="${{github.workspace}}/build/CalChart_temp.app"
-        cp -R /Volumes/CalChart/CalChart.app "$TEMP_APP"
-        ENTITLEMENTS="${{github.workspace}}/resources/macos/CalChart.entitlements"
-
-        # Sign the main executable explicitly with entitlements
-        echo "Signing main executable..."
+        # Extract DMG, sign app, repackage
+        ORIGINAL_DMG=$(find build -name "CalChart-*.dmg" -print -quit)
+        hdiutil convert "$ORIGINAL_DMG" -format UDRW -o build/CalChart_rw.dmg
+        hdiutil attach build/CalChart_rw.dmg -mountpoint /Volumes/CalChart -nobrowse -noverify
+        
+        cp -R /Volumes/CalChart/CalChart.app build/CalChart_temp.app
         codesign --deep --force --verify --verbose --timestamp --options runtime \
-          --entitlements "$ENTITLEMENTS" \
-          --sign "$DEVELOPER_ID_APP" \
-          "$TEMP_APP"
-
-        # Verify the signatures
-        echo "Verifying app bundle signature..."
-        codesign --verify --verbose=4 "$TEMP_APP"
-        codesign --verify --verbose=4 "$TEMP_APP/Contents/MacOS/CalChart"
-        codesign --display --entitlements - "$TEMP_APP"
-
-        echo "===== STEP 2: Notarizing app ====="
-
-        # Notarizing involves
-        # 1. Zip the file up
-        # 2. Notarize using the password and IDs for notarytool
-        ditto -c -k --keepParent "$TEMP_APP" ${{github.workspace}}/build/src/CalChart.zip
-        xcrun notarytool submit ${{github.workspace}}/build/src/CalChart.zip \
-           --apple-id "$APPLE_ID" \
-           --team-id "$APPLE_TEAM_ID" \
-           --password "$APP_SPECIFIC_PASSWORD" \
-           --wait
-
-        xcrun stapler staple "$TEMP_APP"
-        xcrun stapler validate "$TEMP_APP"
-
-        echo "===== STEP 3: Repack app ====="
+          --entitlements resources/macos/CalChart.entitlements \
+          --sign "$DEVELOPER_ID_APP" build/CalChart_temp.app
+        
+        # Notarize app bundle
+        ditto -c -k --keepParent build/CalChart_temp.app build/CalChart.zip
+        xcrun notarytool submit build/CalChart.zip \
+          --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" \
+          --password "$APP_SPECIFIC_PASSWORD" --wait
+        xcrun stapler staple build/CalChart_temp.app
+        
+        # Repack DMG
         rm -rf /Volumes/CalChart/CalChart.app
-        cp -R "$TEMP_APP" /Volumes/CalChart/CalChart.app
+        cp -R build/CalChart_temp.app /Volumes/CalChart/CalChart.app
         hdiutil detach /Volumes/CalChart
         rm "$ORIGINAL_DMG"
-        hdiutil convert "$RW_DMG" -format UDZO -o "$ORIGINAL_DMG"
-        rm "$RW_DMG"
-
-        # Clean up temp app
-        rm -rf "$TEMP_APP"
-
-        echo "===== STEP 4: Signing DMG ====="
+        hdiutil convert build/CalChart_rw.dmg -format UDZO -o "$ORIGINAL_DMG"
+        
+        # Sign and notarize DMG
         codesign --force --sign "$DEVELOPER_ID_APP" --timestamp --options runtime "$ORIGINAL_DMG"
-        codesign --verify --verbose=4 "$ORIGINAL_DMG"
-
-        # ===== STEP 5: Notarize the DMG =====
-        echo "===== Notarizing DMG ====="
         SUBMISSION_OUTPUT=$(xcrun notarytool submit "$ORIGINAL_DMG" \
-          --apple-id "$APPLE_ID" \
-          --team-id "$APPLE_TEAM_ID" \
-          --password "$APP_SPECIFIC_PASSWORD" \
-          --wait \
-          --output-format json)
-
-        echo "Notarization response:"
-        echo "$SUBMISSION_OUTPUT"
-
-        # Check if notarization was successful
+          --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" \
+          --password "$APP_SPECIFIC_PASSWORD" --wait --output-format json)
+        
         STATUS=$(echo "$SUBMISSION_OUTPUT" | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
-        echo "Notarization status: $STATUS"
-
         if [ "$STATUS" != "Accepted" ]; then
-          echo "Notarization failed with status: $STATUS"
-          SUBMISSION_ID=$(echo "$SUBMISSION_OUTPUT" | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
-          if [ -n "$SUBMISSION_ID" ]; then
-            echo "Fetching notarization log..."
-            xcrun notarytool log "$SUBMISSION_ID" \
-              --apple-id "$APPLE_ID" \
-              --team-id "$APPLE_TEAM_ID" \
-              --password "$APP_SPECIFIC_PASSWORD"
-          fi
+          echo "Notarization failed: $STATUS"
           exit 1
         fi
-
-        echo "===== STEP 5: Stapling notarization tickets ====="
-
-        # Staple to DMG
+        
         xcrun stapler staple "$ORIGINAL_DMG"
-        xcrun stapler validate "$ORIGINAL_DMG"
 
-        echo "✅ DMG successfully signed, notarized, and stapled!"
-
-    - name: Upload
+    - name: Upload Artifacts
       if: matrix.build_type == 'Release'
       uses: actions/upload-artifact@v4
       with:
         path: ${{github.workspace}}/build/${{ matrix.config.artifact }}
         name: ${{ matrix.config.artifact_name }}
-
 
   release:
     if: contains(github.ref, 'tags/v')
@@ -449,23 +234,17 @@ jobs:
     runs-on: ubuntu-24.04
     needs: build
     steps:
-    - name: checkout
-      uses: actions/checkout@v3
-
-    - name: Download artifact
+    - uses: actions/checkout@v4
+    
+    - name: Download Artifacts
       uses: actions/download-artifact@v4
       with:
         path: ./
 
-    - name: Display structure of downloaded files
-      run: ls -R
-
-      # using https://github.com/ncipollo/release-action
-    - name: Release
+    - name: Create Release
       uses: ncipollo/release-action@v1
       with:
         artifacts: CalChart-*/*
         bodyFile: ./LATEST_RELEASE_NOTES.md
         draft: true
         token: ${{ secrets.GITHUB_TOKEN }}
- 
