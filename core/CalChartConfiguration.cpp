@@ -199,7 +199,7 @@ namespace {
 #define IMPLEMENT_CONFIGURATION_FUNCTIONS(KeyName, Type, TheValue)                                   \
     static const auto k##KeyName##Key = #KeyName;                                                    \
     static const Type k##KeyName##Value = (TheValue);                                                \
-    auto Configuration::Get_##KeyName() const -> Type                                                \
+    auto Configuration::Get_##KeyName() const->Type                                                  \
     {                                                                                                \
         return GetCachedConfigValue(m##KeyName, mDetails.get(), k##KeyName##Key, k##KeyName##Value); \
     }                                                                                                \
