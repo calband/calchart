@@ -27,11 +27,9 @@ The current calchart version is 3.8.6.  In all commands below, substitute that n
 awk '//; /^# Release notes/{while(getline<"LATEST_RELEASE_NOTES.md"){print}}' README.md > tmp && mv tmp README.md
 ```
 
- 5. Clear out LATEST_RELEASE_NOTES.md for next development effort. Update $CCVER+1 in RELEASE_INSTRUCTIONS.md.
+ 5. Merge the branch into main
 
- 6. Merge the branch into main
-
- 7. Tag the depot
+ 6. Tag the depot
 
 ```
 $ git tag -a v3.8.6 -m "calchart-3.8.6"
@@ -39,6 +37,8 @@ $ git push origin v3.8.6
 ```
 
 This should trigger the github action, which should publish release notes in Draft form.
+
+ 7. Do a comment where we clear out LATEST_RELEASE_NOTES.md for next development effort. Update $CCVER+1 in RELEASE_INSTRUCTIONS.md.
 
  8. Once the Release information looks good, Press the Publish Release button.
 

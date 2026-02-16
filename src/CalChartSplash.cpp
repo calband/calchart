@@ -28,6 +28,7 @@
 #include "HelpDialog.hpp"
 #include "StackDrawPlayground.h"
 #include "SystemConfiguration.h"
+#include "WebViewDemoDialog.h"
 #include "basic_ui.h"
 #include "ccvers.h"
 

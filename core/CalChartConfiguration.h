@@ -241,6 +241,9 @@ private:                                           \
     // GitHub token: personal access token for bug report submission
     DECLARE_CONFIGURATION_FUNCTIONS(GitHubToken, std::string);
 
+    // Viewer: enable experimental viewer feature
+    DECLARE_CONFIGURATION_FUNCTIONS(AllowViewer, bool);
+
 public:
     // color palettes:  The color Palettes allow you to set different "blocks" of
     // colors.
