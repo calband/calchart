@@ -2,15 +2,23 @@
 
 #include <iostream>
 #include <wx/timer.h>
+
+#if CALCHART_HAS_WEBVIEW
 #include <wx/webview.h>
+#endif
 
 #include "CalChartApp.h"
 #include "CalChartDoc.h"
+
+#if CALCHART_HAS_WEBVIEW
 #include "ViewerServer.h"
+#endif
 
 wxBEGIN_EVENT_TABLE(ViewerPanel, wxPanel)
     EVT_TIMER(wxID_ANY, ViewerPanel::OnRefreshTimer)
+#if CALCHART_HAS_WEBVIEW
         EVT_WEBVIEW_LOADED(wxID_ANY, ViewerPanel::OnPageLoaded)
+#endif
             wxEND_EVENT_TABLE()
 
                 ViewerPanel::ViewerPanel(wxWindow* parent, CalChartDoc* doc)
@@ -18,6 +26,7 @@ wxBEGIN_EVENT_TABLE(ViewerPanel, wxPanel)
     , mDoc(doc)
     , mRefreshTimer(this)
 {
+#if CALCHART_HAS_WEBVIEW
     wxLogDebug("ViewerPanel: Constructing ViewerPanel");
     auto sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -48,37 +57,61 @@ wxBEGIN_EVENT_TABLE(ViewerPanel, wxPanel)
 
     // Navigate to the viewer
     GoHome();
+#else
+    // On platforms without wxWebView support, show a message
+    wxLogDebug("ViewerPanel: wxWebView not available on this platform");
+    auto sizer = new wxBoxSizer(wxVERTICAL);
+
+    mMessageText = new wxStaticText(this, wxID_ANY,
+        "CalChart Viewer is not available on this platform.\n\n"
+        "The viewer requires wxWebView, which is not supported on this system.\n"
+        "You can still export shows to .viewer files and view them\n"
+        "in a web browser using the standalone CalChart Online Viewer.",
+        wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
+
+    sizer->AddStretchSpacer();
+    sizer->Add(mMessageText, 0, wxALIGN_CENTER | wxALL, 20);
+    sizer->AddStretchSpacer();
+    SetSizer(sizer);
+#endif
 }
 
 ViewerPanel::~ViewerPanel()
 {
     mRefreshTimer.Stop();
+#if CALCHART_HAS_WEBVIEW
     // Clear the server's current doc reference
     if (mDoc) {
         auto& app = *wxGetApp().GetInstance();
         CalChartApp* pApp = static_cast<CalChartApp*>(&app);
         pApp->GetViewerServer().SetCurrentDoc(nullptr);
     }
+#endif
 }
 
 void ViewerPanel::RefreshViewer()
 {
+#if CALCHART_HAS_WEBVIEW
     if (mWebView) {
         mWebView->Reload();
     }
+#endif
 }
 
 void ViewerPanel::UpdateShowData()
 {
+#if CALCHART_HAS_WEBVIEW
     if (mWebView) {
         // Trigger the viewer's loadCalChartShow() function to refresh show data
         // This function is exposed by the viewer's application.js
         mWebView->RunScript("if (typeof loadCalChartShow === 'function') { loadCalChartShow(); }");
     }
+#endif
 }
 
 void ViewerPanel::InjectShowData(const std::string& jsonData)
 {
+#if CALCHART_HAS_WEBVIEW
     if (!mWebView) {
         wxLogWarning("ViewerPanel: Cannot inject show data - webview not initialized");
         return;
@@ -149,10 +182,12 @@ void ViewerPanel::InjectShowData(const std::string& jsonData)
     if (!mWebView->RunScript(script, &result) || result != "true") {
         wxLogWarning("ViewerPanel: Failed to inject show data");
     }
+#endif
 }
 
 void ViewerPanel::GoHome()
 {
+#if CALCHART_HAS_WEBVIEW
     if (mWebView) {
         auto& app = *wxGetApp().GetInstance();
         CalChartApp* pApp = static_cast<CalChartApp*>(&app);
@@ -162,13 +197,16 @@ void ViewerPanel::GoHome()
     } else {
         wxLogWarning("ViewerPanel: mWebView is null in GoHome()");
     }
+#endif
 }
 
+#if CALCHART_HAS_WEBVIEW
 void ViewerPanel::OnDocumentChanged(wxNotifyEvent& event)
 {
     RefreshViewer();
     event.Skip();
 }
+#endif
 
 void ViewerPanel::OnRefreshTimer(wxTimerEvent&)
 {
@@ -176,6 +214,7 @@ void ViewerPanel::OnRefreshTimer(wxTimerEvent&)
     // This allows the page to stay loaded and update content without full page reloads
 }
 
+#if CALCHART_HAS_WEBVIEW
 void ViewerPanel::OnPageLoaded(wxWebViewEvent& event)
 {
     wxLogDebug("ViewerPanel: Page loaded event fired for: %s", event.GetURL().c_str());
@@ -185,3 +224,4 @@ void ViewerPanel::OnPageLoaded(wxWebViewEvent& event)
     // whether to use UpdateShowData() or InjectShowData()
     wxLogDebug("ViewerPanel: Page ready for data injection");
 }
+#endif

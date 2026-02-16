@@ -24,11 +24,20 @@
 #include <memory>
 #include <wx/wx.h>
 
+// Check if wxWebView is available - needed for ViewerServer
+#if wxUSE_WEBVIEW
+#define CALCHART_HAS_WEBVIEW 1
+#else
+#define CALCHART_HAS_WEBVIEW 0
+#endif
+
 // Forward declarations
 class CalChartApp;
 class HostAppInterface;
 class HelpManager;
+#if CALCHART_HAS_WEBVIEW
 class ViewerServer;
+#endif
 class wxDocManager;
 class wxPrintDialogData;
 class CalChartLogTarget;
@@ -60,8 +69,10 @@ public:
     // Get a copy of the global log buffer for bug reporting
     CalChart::CircularLogBuffer GetLogBuffer() const;
 
+#if CALCHART_HAS_WEBVIEW
     // Get the viewer server
     ViewerServer& GetViewerServer();
+#endif
 
 private:
     void ProcessArguments();
@@ -75,6 +86,8 @@ private:
     std::unique_ptr<HelpManager> mHelpManager;
     std::unique_ptr<HostAppInterface> mHostInterface;
     std::unique_ptr<wxPrintDialogData> mPrintDialogData;
+#if CALCHART_HAS_WEBVIEW
     std::unique_ptr<ViewerServer> mViewerServer;
+#endif
     CalChartLogTarget* mLogTarget = nullptr; // Owned by wxLog, don't delete
 };

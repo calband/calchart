@@ -713,7 +713,7 @@ void CalChartFrame::OnSetSheetTitle()
         if (auto s = wxGetTextFromUser("Enter the sheet title",
                 GetShow()->GetCurrentSheetName(),
                 GetShow()->GetCurrentSheetName(), this)
-                         .ToStdString();
+                .ToStdString();
             !s.empty()) {
             GetFieldView()->DoSetSheetTitle(s);
         }
@@ -1460,18 +1460,58 @@ void CalChartFrame::OnUpdate()
 
     // Update viewer panel if it exists and is visible
     if (mViewerPanel && mCurrentCenterView == CenterViewMode::Viewer) {
-        // Use the actual document's viewer JSON format
-        if (auto* doc = GetShow(); doc) {
-            nlohmann::json viewerJson;
-            viewerJson["meta"] = {
-                { "version", "1.0.0" },
-                { "type", "viewer" }
-            };
-            viewerJson["show"] = doc->toViewerJSON();
+        // Create a dummy test show with 2 sheets
+        std::string testShowJson = R"({
+            "meta": {
+                "version": "1.0.0"
+            },
+            "show": {
+                "title": "Test Show",
+                "year": "2026",
+                "description": "A simple test show with 2 sheets",
+                "dotLabels": ["A1", "A2", "B1", "B2"],
+                "sheets": [
+                    {
+                        "name": "Opener",
+                        "duration": 16,
+                        "dots": {
+                            "A1": [
+                                {"type": "stand", "beats": 16, "x": -20, "y": -10}
+                            ],
+                            "A2": [
+                                {"type": "stand", "beats": 16, "x": -20, "y": 10}
+                            ],
+                            "B1": [
+                                {"type": "stand", "beats": 16, "x": 20, "y": -10}
+                            ],
+                            "B2": [
+                                {"type": "stand", "beats": 16, "x": 20, "y": 10}
+                            ]
+                        }
+                    },
+                    {
+                        "name": "Second Sheet",
+                        "duration": 12,
+                        "dots": {
+                            "A1": [
+                                {"type": "move", "beats": 12, "x": 0, "y": 0, "direction": 0}
+                            ],
+                            "A2": [
+                                {"type": "move", "beats": 12, "x": 0, "y": 20, "direction": 0}
+                            ],
+                            "B1": [
+                                {"type": "move", "beats": 12, "x": 10, "y": 0, "direction": 90}
+                            ],
+                            "B2": [
+                                {"type": "move", "beats": 12, "x": 10, "y": 20, "direction": 90}
+                            ]
+                        }
+                    }
+                ]
+            }
+        })";
 
-            std::string jsonString = viewerJson.dump();
-            mViewerPanel->InjectShowData(jsonString);
-        }
+        mViewerPanel->InjectShowData(testShowJson);
     }
 
     refreshInUse();
