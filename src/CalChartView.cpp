@@ -255,6 +255,12 @@ void CalChartView::DoSetSheetBeats(CalChart::Beats beats)
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
+void CalChartView::DoSetSheetTempo(CalChart::Tempo tempo)
+{
+    auto cmd = mShow->Create_SetSheetTempoCommand(tempo);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+}
+
 void CalChartView::DoSetPointsLabel(bool right)
 {
     if (mShow->GetSelectionList().size() == 0) {
@@ -467,6 +473,11 @@ auto CalChartView::BeatForSheet(int sheet) const -> CalChart::Beats
 auto CalChartView::GetTotalNumberBeatsUpTo(int whichSheet) const -> CalChart::Beats
 {
     return mShow->GetTotalNumberBeatsUpTo(whichSheet);
+}
+
+auto CalChartView::GetTempoForBeat(CalChart::Beats whichBeat) const -> CalChart::Tempo
+{
+    return mShow->GetTempoForBeat(whichBeat);
 }
 
 auto CalChartView::BeatHasCollision(CalChart::Beats whichBeat) const -> bool

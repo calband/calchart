@@ -9,4 +9,5 @@ Other changes:
 * [#760](../../issues/760) Switch away from VCPKG_OVERLAY_PORTS when we can
 * [#773](../../issues/773) Add the minimal integration of CalChart-Viewer
 * [#775](../../issues/775) Don't bother signing debug versions of calchart
+* [#781](../../issues/781) Add per sheet tempo
 
