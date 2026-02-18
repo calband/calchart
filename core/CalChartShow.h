@@ -93,6 +93,7 @@ public:
     [[nodiscard]] auto Create_SetInstrumentsCommand(std::map<MarcherIndex, std::string> const& dotToInstrument) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetSheetTitleCommand(std::string const& newname) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetSheetBeatsCommand(Beats beats) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetSheetTempoCommand(Tempo tempo) const -> Show_command_pair;
     [[nodiscard]] auto Create_AddSheetsCommand(Show::Sheet_container_t const& sheets, int where) const -> Show_command_pair;
     [[nodiscard]] auto Create_RemoveSheetCommand(int where) const -> Show_command_pair;
     [[nodiscard]] auto Create_ApplyRelabelMapping(int sheet_num_first, std::vector<MarcherIndex> const& mapping) const -> Show_command_pair;
@@ -127,6 +128,7 @@ public:
     [[nodiscard]] auto GetCurrentSheetNum() const { return mSheetNum; }
     [[nodiscard]] auto GetCurrentSheetName() const -> std::string;
     [[nodiscard]] auto GetCurrentSheetBeats() const -> CalChart::Beats;
+    [[nodiscard]] auto GetCurrentSheetTempo() const -> CalChart::Tempo;
     [[nodiscard]] auto GetCurrentSheetSymbols() const -> std::vector<SYMBOL_TYPE>;
     [[nodiscard]] auto GetCurrentSheetPrintNumber() const -> std::string;
     [[nodiscard]] auto GetCurrentSheetBackgroundImages() const -> std::vector<ImageInfo>;

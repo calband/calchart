@@ -101,6 +101,10 @@ public:
     void SetBeats(Beats b) { mBeats = b; }
     [[nodiscard]] auto IsInAnimation() const { return (GetBeats() != 0); }
 
+    // tempo
+    [[nodiscard]] auto GetTempo() const { return mTempo; }
+    void SetTempo(Tempo t) { mTempo = t; }
+
     // Marchers
     [[nodiscard]] auto GetMarcher(MarcherIndex i) const -> Point;
     [[nodiscard]] auto GetAllMarchers() const { return mPoints; }
@@ -188,6 +192,7 @@ private:
     std::vector<Continuity> mAnimationContinuity;
     PrintContinuity mPrintableContinuity;
     Beats mBeats{};
+    Tempo mTempo = 120;
     std::vector<Point> mPoints;
     std::string mName;
     std::vector<ImageInfo> mBackgroundImages;

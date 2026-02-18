@@ -45,6 +45,7 @@ using MarcherIndex = unsigned;
 using SelectionList = std::set<MarcherIndex>;
 
 using Beats = unsigned;
+using Tempo = unsigned; // tempo is in BPM
 
 enum class MoveMode {
     Normal,

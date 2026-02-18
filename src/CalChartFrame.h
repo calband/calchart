@@ -72,6 +72,7 @@ public:
     void OnEditPrintContinuity();
     void OnSetSheetTitle();
     void OnSetBeats();
+    void OnSetTempo();
     void OnSetupMarchers();
     void OnSetupInstruments();
     void OnMarcherPicker();
