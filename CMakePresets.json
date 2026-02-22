@@ -21,12 +21,10 @@
             "description": "Mac Release build with Ninja",
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/mac-release",
-            "environment": {
-                "VCPKG_TARGET_TRIPLET": "arm64-osx"
-            },
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "VCPKG_TARGET_TRIPLET": "arm64-osx"
             }
         },
         {
@@ -35,12 +33,11 @@
             "description": "Mac Debug build with Ninja",
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/mac-debug",
-            "environment": {
-                "VCPKG_TARGET_TRIPLET": "arm64-osx-debug"
-            },
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg-triplets",
+                "VCPKG_TARGET_TRIPLET": "arm64-osx-asan"
             }
         }
     ],
