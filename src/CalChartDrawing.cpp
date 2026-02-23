@@ -309,7 +309,7 @@ void DrawCont(wxDC& dc, [[maybe_unused]] CalChart::Configuration const& config, 
                             const float top_y = y + texth - textd - textw;
 
                             for (std::string::const_iterator s = c.text.begin(); s != c.text.end();
-                                 s++) {
+                                s++) {
                                 {
                                     dc.SetPen(*wxBLACK_PEN);
                                     CalChart::SYMBOL_TYPE sym = (CalChart::SYMBOL_TYPE)(*s - 'A');
@@ -422,13 +422,16 @@ namespace {
         auto boundingBox = GetMarcherBoundingBox(pts);
         auto mode = show.GetShowMode().CreateFieldForPrinting(CalChart::CoordUnits2Int(boundingBox.first.x), CalChart::CoordUnits2Int(boundingBox.second.x), landscape);
         auto drawCmds = CalChart::CreateModeDrawCommandsWithBorder(config, mode, CalChart::HowToDraw::Printing);
+        auto pointBrush = CalChart::Brush{ CalChart::Color::Black() };
         CalChart::append(drawCmds,
-            CalChart::Draw::toDrawCommands(std::views::iota(0u, pts.size())
-                | std::views::transform([&](auto i) {
-                      return pts.at(i).GetDrawCommands(ref, show.GetPointLabel(i), config);
-                  })
-                | std::views::join)
-                + mode.Offset());
+            CalChart::Draw::withBrush(
+                pointBrush,
+                CalChart::Draw::toDrawCommands(std::views::iota(0u, pts.size())
+                    | std::views::transform([&](auto i) {
+                          return pts.at(i).GetDrawCommands(ref, show.GetPointLabel(i), config);
+                      })
+                    | std::views::join)
+                    + mode.Offset()));
 
         return { static_cast<double>(mode.Size().x), drawCmds };
     }
