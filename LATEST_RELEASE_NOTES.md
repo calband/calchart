@@ -10,4 +10,5 @@ Other changes:
 * [#773](../../issues/773) Add the minimal integration of CalChart-Viewer
 * [#775](../../issues/775) Don't bother signing debug versions of calchart
 * [#781](../../issues/781) Add per sheet tempo
+* [#783](../../issues/783) Why are we crashing in the Continuity editor
 
