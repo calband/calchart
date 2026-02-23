@@ -316,6 +316,12 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
         }
         sheet->mBeats = reader.Get<uint32_t>();
     };
+    auto parse_INGL_TMPO = [](Sheet* sheet, Reader reader) {
+        if (reader.size() != 4) {
+            throw CC_FileException("Incorrect size", INGL_TMPO);
+        }
+        sheet->mTempo = reader.Get<uint32_t>();
+    };
     auto parse_INGL_PNTS = [](Sheet* sheet, Reader reader) {
         for (auto i = 0u; i < sheet->mPoints.size(); ++i) {
             auto this_size = reader.Get<uint8_t>();
@@ -426,6 +432,7 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
         = {
               { INGL_NAME, parse_INGL_NAME },
               { INGL_DURA, parse_INGL_DURA },
+              { INGL_TMPO, parse_INGL_TMPO },
               { INGL_PNTS, parse_INGL_PNTS },
               { INGL_CONT, parse_INGL_CONT },
               { INGL_VCNT, parse_INGL_VCNT },
@@ -514,7 +521,7 @@ auto Sheet::SerializeCurveAssigments() const -> std::vector<std::byte>
 
 auto Sheet::SerializeSheetData() const -> std::vector<std::byte>
 {
-    // SHEET_DATA         = NAME , DURATION , ALL_POINTS , CONTINUITY,
+    // SHEET_DATA         = NAME , DURATION , TEMPO , ALL_POINTS , CONTINUITY,
     // PRINT_CONTINUITY ;
 
     std::vector<std::byte> result;
@@ -526,6 +533,8 @@ auto Sheet::SerializeSheetData() const -> std::vector<std::byte>
 
     // Write DURATION
     Parser::Append(result, Parser::Construct_block(INGL_DURA, uint32_t{ GetBeats() }));
+    // Write TEMPO
+    Parser::Append(result, Parser::Construct_block(INGL_TMPO, uint32_t{ GetTempo() }));
 
     // Write ALL_POINTS
     Parser::Append(result, Parser::Construct_block(INGL_PNTS, SerializeAllPoints()));

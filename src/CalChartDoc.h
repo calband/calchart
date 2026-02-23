@@ -158,6 +158,7 @@ public:
     [[nodiscard]] auto GetCurrentSheetNum() const { return mShow->GetCurrentSheetNum(); }
     [[nodiscard]] auto GetCurrentSheetName() const { return mShow->GetCurrentSheetName(); }
     [[nodiscard]] auto GetCurrentSheetBeats() const { return mShow->GetCurrentSheetBeats(); }
+    [[nodiscard]] auto GetCurrentSheetTempo() const { return mShow->GetCurrentSheetTempo(); }
     [[nodiscard]] auto GetCurrentSheetSymbols() const { return mShow->GetCurrentSheetSymbols(); }
     [[nodiscard]] auto GetCurrentSheetBackgroundImages() const { return mShow->GetCurrentSheetBackgroundImages(); }
     void SetCurrentSheet(int n);
@@ -258,6 +259,7 @@ public:
     [[nodiscard]] auto BeatToSheetOffsetAndBeat(CalChart::Beats whichBeat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>;
     [[nodiscard]] auto BeatForSheet(int whichSheet) const -> CalChart::Beats;
     [[nodiscard]] auto GetTotalNumberBeatsUpTo(int whichSheet) const -> CalChart::Beats;
+    [[nodiscard]] auto GetTempoForBeat(CalChart::Beats whichBeat) const -> CalChart::Tempo;
     [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beats whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
     [[nodiscard]] auto BeatHasCollision(CalChart::Beats whichBeat) const -> bool;
     [[nodiscard]] auto GetAnimationBeatForCurrentSheet() const -> CalChart::Beats;
@@ -285,6 +287,7 @@ public:
     [[nodiscard]] auto Create_SetInstrumentsCommand(std::map<CalChart::MarcherIndex, std::string> const& dotToInstrument) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_SetSheetTitleCommand(wxString const& newname) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_SetSheetBeatsCommand(CalChart::Beats beats) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_SetSheetTempoCommand(CalChart::Tempo tempo) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_AddSheetsCommand(CalChart::Show::Sheet_container_t const& sheets, int where) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_RemoveSheetCommand(int where) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_ApplyRelabelMapping(int sheet, std::vector<CalChart::MarcherIndex> const& mapping) -> std::unique_ptr<wxCommand>;

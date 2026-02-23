@@ -269,6 +269,9 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
             wxUI::Item{ "Set &Beats...\tCTRL-B", "Change the number of beats for this stuntsheet", [this] {
                            OnSetBeats();
                        } },
+            wxUI::Item{ "Set Tempo...", "Change the tempo for this stuntsheet", [this] {
+                           OnSetTempo();
+                       } },
             wxUI::Item{ "Reset reference point...", "Reset the current reference point", [this] {
                            OnResetReferencePoint();
                        } },
@@ -729,6 +732,21 @@ void CalChartFrame::OnSetBeats()
             long val{};
             if (s.ToLong(&val)) {
                 GetFieldView()->DoSetSheetBeats(static_cast<int>(val));
+            }
+        }
+    }
+}
+
+void CalChartFrame::OnSetTempo()
+{
+    if (GetShow()) {
+        std::string buf = std::format("{}", GetShow()->GetCurrentSheetTempo());
+        if (auto s = wxGetTextFromUser("Enter the tempo",
+                GetShow()->GetCurrentSheetName(), buf, this);
+            !s.empty()) {
+            long val{};
+            if (s.ToLong(&val)) {
+                GetFieldView()->DoSetSheetTempo(static_cast<int>(val));
             }
         }
     }
@@ -1356,8 +1374,9 @@ std::string CalChartFrame::BeatStatusText() const
     auto beats = GetShow()->GetCurrentSheetBeats();
     auto num = GetShow()->GetNumSheets();
     auto curr = GetFieldView()->GetCurrentSheetNum() + 1;
+    auto tempo = GetShow()->GetCurrentSheetTempo();
 
-    return std::format("{}{} of {} \"{:.32}\" {} beats", GetShow()->IsModified() ? "* " : "", curr, num, name, beats);
+    return std::format("{}{} of {} \"{:.32}\" {} beats at {} bpm", GetShow()->IsModified() ? "* " : "", curr, num, name, beats, tempo);
 }
 
 std::string CalChartFrame::PointStatusText() const

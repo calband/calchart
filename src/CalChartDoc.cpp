@@ -437,6 +437,19 @@ auto CalChartDoc::GetTotalNumberBeatsUpTo(int whichSheet) const -> CalChart::Bea
     return mAnimation->GetTotalNumberBeatsUpTo(whichSheet);
 }
 
+auto CalChartDoc::GetTempoForBeat(CalChart::Beats whichBeat) const -> CalChart::Tempo
+{
+    auto sheetInfo = BeatToSheetOffsetAndBeat(whichBeat);
+    if (!sheetInfo || !mShow) {
+        return 120; // Default tempo
+    }
+    auto [sheetIndex, beatOffset] = *sheetInfo;
+    if (sheetIndex >= static_cast<size_t>(mShow->GetNumSheets())) {
+        return 120; // Default tempo if out of bounds
+    }
+    return GetNthSheet(sheetIndex)->GetTempo();
+}
+
 auto CalChartDoc::BeatHasCollision(CalChart::Beats whichBeat) const -> bool
 {
     if (!mAnimation) {
@@ -697,6 +710,13 @@ auto CalChartDoc::Create_SetSheetBeatsCommand(CalChart::Beats beats) -> std::uni
     auto cmds = Create_SetSheetPair();
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetSheetBeatsCommand(beats)));
     return std::make_unique<CalChartDocCommand>(*this, "Set beats", cmds);
+}
+
+auto CalChartDoc::Create_SetSheetTempoCommand(CalChart::Tempo tempo) -> std::unique_ptr<wxCommand>
+{
+    auto cmds = Create_SetSheetPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetSheetTempoCommand(tempo)));
+    return std::make_unique<CalChartDocCommand>(*this, "Set tempo", cmds);
 }
 
 auto CalChartDoc::Create_AddSheetsCommand(Show::Sheet_container_t const& sheets, int where) -> std::unique_ptr<wxCommand>

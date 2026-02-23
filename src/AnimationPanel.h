@@ -91,7 +91,6 @@ private:
 
     // Event Handlers
     void OnCmd_anim_next_beat_timer(wxTimerEvent& event);
-    void OnSlider_anim_tempo(wxSpinEvent& event);
     void OnSlider_anim_gotobeat(wxScrollEvent& event);
     void OnSlider_anim_gotosheet(wxScrollEvent& event);
     void OnCmd_PlayButton();
@@ -101,6 +100,7 @@ private:
     // timer stuff:
     void StartTimer();
     void StopTimer();
+    void UpdateTempoIfChanged();
     auto GetTempo() const { return mTempo; }
     void SetTempo(unsigned tempo) { mTempo = tempo; }
 
@@ -108,7 +108,7 @@ private:
     AnimationCanvas* mCanvas{};
     CCOmniviewCanvas* mOmniCanvas{};
     wxUI::Text::Proxy mTempoLabel{};
-    wxUI::SpinCtrl::Proxy mTempoCtrl{};
+    wxUI::Text::Proxy mTempoValue{};
     wxUI::Slider::Proxy mBeatSlider{};
     wxUI::Slider::Proxy mSheetSlider{};
     wxUI::CheckBox::Proxy mSpritesCheckbox{};

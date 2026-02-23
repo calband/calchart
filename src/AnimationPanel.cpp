@@ -43,7 +43,6 @@
 using namespace CalChart;
 
 BEGIN_EVENT_TABLE(AnimationPanel, AnimationPanel::super)
-EVT_SPINCTRL(CALCHART__anim_tempo, AnimationPanel::OnSlider_anim_tempo)
 EVT_COMMAND_SCROLL(CALCHART__anim_gotosheet, AnimationPanel::OnSlider_anim_gotosheet)
 EVT_COMMAND_SCROLL(CALCHART__anim_gotobeat, AnimationPanel::OnSlider_anim_gotobeat)
 EVT_TIMER(CALCHART__anim_next_beat_timer, AnimationPanel::OnCmd_anim_next_beat_timer)
@@ -110,7 +109,7 @@ void AnimationPanel::CreateControls()
                 .withProxy(mBeatSlider),
             wxUI::VSizer{
                 wxUI::Text{ "Tempo" }.withProxy(mTempoLabel),
-                wxUI::SpinCtrl{ CALCHART__anim_tempo, std::pair(10, 300), tmp }.withProxy(mTempoCtrl),
+                wxUI::Text{ std::to_string(tmp) }.withProxy(mTempoValue),
             },
             wxUI::VSizer{
                 wxUI::CheckBox{ "Sprites" }
@@ -152,7 +151,7 @@ void AnimationPanel::CreateControls()
     mItemsToHide.push_back(mZoomCheckbox.control());
     mItemsToHide.push_back(mCollisionCheckbox.control());
     mItemsToHide.push_back(mTempoLabel.control());
-    mItemsToHide.push_back(mTempoCtrl.control());
+    mItemsToHide.push_back(mTempoValue.control());
 
     *mCollisionCheckbox = mDrawCollisionWarning;
 
@@ -225,16 +224,6 @@ void AnimationPanel::OnCmd_ToggleAnimOmni()
     }
     Layout();
     Refresh();
-}
-
-void AnimationPanel::OnSlider_anim_tempo(wxSpinEvent& event)
-{
-    SetTempo(event.GetPosition());
-    if (mTimerOn) {
-        StopTimer();
-        StartTimer();
-    }
-    UpdatePanel();
 }
 
 void AnimationPanel::OnSlider_anim_gotobeat(wxScrollEvent& event)
@@ -313,6 +302,14 @@ void AnimationPanel::UpdatePanel()
     }
     updateController(mSheetSlider, totalSheets + 1, currentSheet + 1, false);
     *mPlayPauseButton = mTimerOn;
+
+    // Update tempo display
+    if (mView && mTempoValue.control()) {
+        auto currentTempo = mView->GetTempoForBeat(mCurrentBeat);
+        *mTempoValue = std::to_string(currentTempo);
+        SetTempo(currentTempo);
+    }
+
     if (mPlayCollisionWarning && mView->BeatHasCollision(mCurrentBeat) && mConfig.Get_BeepOnCollisions()) {
         wxBell();
     }
@@ -402,6 +399,7 @@ void AnimationPanel::PrevBeat()
         return;
     }
     mCurrentBeat -= 1;
+    UpdateTempoIfChanged();
     UpdatePanel();
 }
 
@@ -416,6 +414,7 @@ void AnimationPanel::NextBeat()
             return;
         }
         mCurrentBeat += 1;
+        UpdateTempoIfChanged();
         UpdatePanel();
     }
 }
@@ -423,12 +422,14 @@ void AnimationPanel::NextBeat()
 void AnimationPanel::GotoTotalBeat(CalChart::Beats whichBeat)
 {
     mCurrentBeat = whichBeat;
+    UpdateTempoIfChanged();
     UpdatePanel();
 }
 
 void AnimationPanel::GotoSheetBeat(int whichSheet, CalChart::Beats whichBeat)
 {
     mCurrentBeat = whichBeat + mView->GetTotalNumberBeatsUpTo(whichSheet);
+    UpdateTempoIfChanged();
     UpdatePanel();
 }
 
@@ -465,11 +466,26 @@ void AnimationPanel::StopTimer()
     mTimerOn = false;
 }
 
+void AnimationPanel::UpdateTempoIfChanged()
+{
+    if (!mView || !mTimerOn) {
+        return;
+    }
+
+    auto newTempo = mView->GetTempoForBeat(mCurrentBeat);
+    if (newTempo != GetTempo()) {
+        SetTempo(newTempo);
+        StopTimer();
+        StartTimer();
+    }
+}
+
 void AnimationPanel::OnUpdate()
 {
     if (mView) {
         mCurrentBeat = mView->GetAnimationBeatForCurrentSheet();
     }
+    UpdateTempoIfChanged();
     UpdatePanel();
 }
 

@@ -447,6 +447,11 @@ auto Show::GetCurrentSheetBeats() const -> CalChart::Beats
     return static_cast<size_t>(mSheetNum) < mSheets.size() ? mSheets.at(mSheetNum).GetBeats() : 0;
 }
 
+auto Show::GetCurrentSheetTempo() const -> CalChart::Tempo
+{
+    return static_cast<size_t>(mSheetNum) < mSheets.size() ? mSheets.at(mSheetNum).GetTempo() : 0;
+}
+
 auto Show::GetCurrentSheetSymbols() const -> std::vector<SYMBOL_TYPE>
 {
     return mSheets.at(mSheetNum).GetSymbols();
@@ -1051,6 +1056,13 @@ auto Show::Create_SetSheetBeatsCommand(Beats beats) const -> Show_command_pair
     return { action, reaction };
 }
 
+auto Show::Create_SetSheetTempoCommand(Tempo tempo) const -> Show_command_pair
+{
+    auto action = [whichSheet = mSheetNum, tempo](Show& show) { show.mSheets.at(whichSheet).SetTempo(tempo); };
+    auto reaction = [whichSheet = mSheetNum, tempo = mSheets.at(mSheetNum).GetTempo()](Show& show) { show.mSheets.at(whichSheet).SetTempo(tempo); };
+    return { action, reaction };
+}
+
 auto Show::Create_AddSheetsCommand(const Show::Sheet_container_t& sheets, int where) const -> Show_command_pair
 {
     auto action = [sheets, where](Show& show) { show.InsertSheet(sheets, where); };
@@ -1381,7 +1393,7 @@ auto Show::Create_RemoveBackgroundImageCommand(int which) const -> Show_command_
 {
     auto& sheet = mSheets.at(mSheetNum);
     if (static_cast<size_t>(which) >= sheet.GetNumberBackgroundImages()) {
-        return { [](Show&) {}, [](Show&) {} };
+        return { [](Show&) { }, [](Show&) { } };
     }
     auto action = [sheet_num = mSheetNum, which](Show& show) {
         auto sheet = show.GetNthSheet(sheet_num);

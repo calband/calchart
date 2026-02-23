@@ -60,6 +60,7 @@ public:
     void DoSetInstruments(std::map<CalChart::MarcherIndex, std::string> const& dotToInstrument);
     void DoSetSheetTitle(std::string const& descr);
     void DoSetSheetBeats(CalChart::Beats beats);
+    void DoSetSheetTempo(CalChart::Tempo tempo);
     void DoSetPointsLabel(bool right);
     void DoSetPointsLabelVisibility(bool isVisible);
     void DoSetPointsLabelFlip();
@@ -100,6 +101,7 @@ public:
     [[nodiscard]] auto BeatToSheetOffsetAndBeat(CalChart::Beats beat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>;
     [[nodiscard]] auto BeatForSheet(int sheet) const -> CalChart::Beats;
     [[nodiscard]] auto GetTotalNumberBeatsUpTo(int whichSheet) const -> CalChart::Beats;
+    [[nodiscard]] auto GetTempoForBeat(CalChart::Beats whichBeat) const -> CalChart::Tempo;
 
     [[nodiscard]] auto GetContinuities() const { return mShow->GetContinuities(); }
     [[nodiscard]] auto ContinuitiesInUse() const { return mShow->ContinuitiesInUse(); }
