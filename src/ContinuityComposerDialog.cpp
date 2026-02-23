@@ -417,9 +417,9 @@ const std::pair<std::string, std::function<std::unique_ptr<CalChart::Cont::Point
     { "Point", []() { return std::make_unique<CalChart::Cont::Point>(); } },
     { "Starting Point", []() { return std::make_unique<CalChart::Cont::StartPoint>(); } },
     { "Next Point", []() { return std::make_unique<CalChart::Cont::NextPoint>(); } },
-    { "Ref Point 1", []() { return std::make_unique<CalChart::Cont::RefPoint>(1); } },
-    { "Ref Point 2", []() { return std::make_unique<CalChart::Cont::RefPoint>(2); } },
-    { "Ref Point 3", []() { return std::make_unique<CalChart::Cont::RefPoint>(3); } },
+    { "Ref point 1", []() { return std::make_unique<CalChart::Cont::RefPoint>(1); } },
+    { "Ref point 2", []() { return std::make_unique<CalChart::Cont::RefPoint>(2); } },
+    { "Ref point 3", []() { return std::make_unique<CalChart::Cont::RefPoint>(3); } },
 };
 
 static_assert(sizeof(ValueMap) / sizeof(ValueMap[0]) == static_cast<int>(ContValue::LAST), "");
@@ -457,10 +457,10 @@ const auto PointMapStrings = []() {
 }();
 
 // if the entry matches the upper case letters
-bool string_matches_upper_case(std::string const& target, std::string const& check_against)
+bool string_matches_upper_case_or_num(std::string const& target, std::string const& check_against)
 {
     std::string new_string;
-    std::copy_if(check_against.begin(), check_against.end(), std::back_inserter(new_string), [](auto&& i) { return isupper(i); });
+    std::copy_if(check_against.begin(), check_against.end(), std::back_inserter(new_string), [](auto&& i) { return isupper(i) || isdigit(i); });
     return std::equal(target.begin(), target.end(), new_string.begin(), new_string.end(), [](auto&& a, auto&& b) { return tolower(a) == tolower(b); });
 }
 
@@ -513,7 +513,7 @@ auto find_exact_match_then_string_match(Table const& table, Value const& v)
     });
     if (theEntry == std::end(table)) {
         theEntry = std::find_if(std::begin(table), std::end(table), [&v](auto&& entry) {
-            return string_matches_upper_case(v, entry.first);
+            return string_matches_upper_case_or_num(v, entry.first);
         });
     }
     return theEntry;
