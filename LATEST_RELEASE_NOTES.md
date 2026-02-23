@@ -4,6 +4,8 @@
 
 Bugs addressed in this release:
 
+* [#612](../../issues/612) Dots don't look filled on pdf print out
+ 
 Other changes:
 
 * [#714](../../issues/714) When adding continuities, writing R1 and pressing return should select the R1 tile (Ref Point 1 in the dropdown)
