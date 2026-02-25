@@ -385,11 +385,11 @@ PrintShowToPS::PrintShowToPS(
     ShowMode const& mode,
     CalChart::Configuration const& config)
     : PrintShowToPS(show, printLandscape, printDoCont, printDoContSheet, printOverview, minYards, mode,
-        { config.Get_HeadFont(), config.Get_MainFont(), config.Get_NumberFont(), config.Get_ContFont(), config.Get_BoldFont(), config.Get_ItalFont(), config.Get_BoldItalFont() },
-        { config.Get_PageWidth(), config.Get_PageHeight(), config.Get_PageOffsetX(), config.Get_PageOffsetY(), config.Get_PaperLength() },
-        { config.Get_HeaderSize(), config.Get_YardsSize(), config.Get_TextSize() },
-        { config.Get_DotRatio(), config.Get_NumRatio(), config.Get_PLineRatio(), config.Get_SLineRatio(), config.Get_ContRatio() },
-        mode.Get_yard_text())
+          { config.Get_HeadFont(), config.Get_MainFont(), config.Get_NumberFont(), config.Get_ContFont(), config.Get_BoldFont(), config.Get_ItalFont(), config.Get_BoldItalFont() },
+          { config.Get_PageWidth(), config.Get_PageHeight(), config.Get_PageOffsetX(), config.Get_PageOffsetY(), config.Get_PaperLength() },
+          { config.Get_HeaderSize(), config.Get_YardsSize(), config.Get_TextSize() },
+          { config.Get_DotRatio(), config.Get_NumRatio(), config.Get_PLineRatio(), config.Get_SLineRatio(), config.Get_ContRatio() },
+          mode.Get_yard_text())
 {
 }
 
@@ -504,18 +504,18 @@ auto PrintShowToPS::GenerateFieldDefinition() const -> std::string
 auto PrintShowToPS::GenerateSheets(std::set<size_t> const& isPicked, int numPagesSoFar) const -> std::tuple<std::string, int>
 {
     auto result = std::string{};
-    for (auto sheet = mShow.GetSheetBegin(); sheet != mShow.GetSheetEnd(); ++sheet) {
-        if ((isPicked.count(std::distance(mShow.GetSheetBegin(), sheet)) != 0)) {
+    for (auto [index, sheet] : CalChart::Ranges::enumerate_view(mShow.CopySheets())) {
+        if ((isPicked.count(index) != 0)) {
             ++numPagesSoFar;
             if (!mOverview) {
-                result += GenerateStandard(*sheet, false);
-                if (IsSplitSheet(*sheet)) {
+                result += GenerateStandard(sheet, false);
+                if (IsSplitSheet(sheet)) {
                     result += GeneratePageBreak();
                     ++numPagesSoFar;
-                    result += GenerateStandard(*sheet, true);
+                    result += GenerateStandard(sheet, true);
                 }
             } else {
-                result += GenerateOverview(*sheet);
+                result += GenerateOverview(sheet);
             }
             result += GeneratePageBreak();
         }
@@ -528,8 +528,8 @@ auto PrintShowToPS::GenerateContinuitySheets(int numPagesSoFar) const -> std::tu
     auto lines_left = 0;
     auto need_eject = false;
     auto result = std::string{};
-    for (auto sheet = mShow.GetSheetBegin(); sheet != mShow.GetSheetEnd(); ++sheet) {
-        auto continuity = sheet->GetPrintableContinuity();
+    for (auto const& sheet : mShow.CopySheets()) {
+        auto continuity = sheet.GetPrintableContinuity();
         for (auto& text : continuity) {
             if (!text.on_main) {
                 continue;

@@ -162,10 +162,10 @@ public:
     bool OnPrintPage(int pageNum) override
     {
         auto dc = wxPrintout::GetDC();
-        auto sheet = mShow.GetNthSheet(pageNum - 1);
+        auto sheet = mShow.CopySheet(static_cast<unsigned>(pageNum - 1));
         auto size = wxGetApp().GetGlobalPrintDialog().GetPrintData().GetOrientation();
 
-        CalChartDraw::DrawForPrinting(dc, mConfig, mShow, *sheet, 0, 2 == size);
+        CalChartDraw::DrawForPrinting(dc, mConfig, mShow, sheet, 0, 2 == size);
         return true;
     }
     CalChartDoc const& mShow;
@@ -577,13 +577,13 @@ void CalChartFrame::OnCmdPreferences(wxCommandEvent&)
 
 void CalChartFrame::OnInsertBefore()
 {
-    GetFieldView()->DoInsertSheets(GetShow()->CopyCurrentSheet(), GetFieldView()->GetCurrentSheetNum());
+    GetFieldView()->DoInsertSheets({ GetShow()->CopyCurrentSheet() }, GetFieldView()->GetCurrentSheetNum());
     GetFieldView()->GoToPrevSheet();
 }
 
 void CalChartFrame::OnInsertAfter()
 {
-    GetFieldView()->DoInsertSheets(GetShow()->CopyCurrentSheet(), GetFieldView()->GetCurrentSheetNum() + 1);
+    GetFieldView()->DoInsertSheets({ GetShow()->CopyCurrentSheet() }, GetFieldView()->GetCurrentSheetNum() + 1);
     GetFieldView()->GoToNextSheet();
 }
 
@@ -626,10 +626,12 @@ void CalChartFrame::OnInsertFromOtherShow()
         endValue = beginValue;
     }
 
-    CalChart::Show::Sheet_container_t sheets((&show)->GetNthSheet(static_cast<int>(beginValue) - 1),
-        (&show)->GetNthSheet(static_cast<int>(endValue)));
+    auto sheets = (&show)->CopySheets()
+        | std::views::drop(static_cast<unsigned>(beginValue - 1))
+        | std::views::take(static_cast<unsigned>(endValue - beginValue + 1));
     GetFieldView()->DoInsertSheets(
-        sheets, GetFieldView()->GetCurrentSheetNum() + 1);
+        CalChart::Show::Sheet_container_t(sheets.begin(), sheets.end()),
+        GetFieldView()->GetCurrentSheetNum() + 1);
 }
 
 void CalChartFrame::OnCopySheet()

@@ -71,8 +71,6 @@ using Show_command_pair = std::pair<Show_command, Show_command>;
 class Show {
 public:
     using Sheet_container_t = std::vector<Sheet>;
-    using Sheet_iterator_t = Sheet_container_t::iterator;
-    using const_Sheet_iterator_t = Sheet_container_t::const_iterator;
 
     // you can create a show in two ways, from nothing, or from an input stream
     static auto Create(ShowMode const& mode) -> std::unique_ptr<Show>;
@@ -121,19 +119,25 @@ public:
     [[nodiscard]] auto Create_RemoveSheetCurveCommand(int whichCurve) const -> Show_command_pair;
 
     // Accessors
-    [[nodiscard]] auto GetSheetBegin() const { return mSheets.begin(); }
-    [[nodiscard]] auto GetSheetEnd() const { return mSheets.end(); }
-    [[nodiscard]] auto GetNthSheet(unsigned n) const { return GetSheetBegin() + n; }
+    [[nodiscard]] auto CopySheet(unsigned n) const -> Sheet;
+    [[nodiscard]] auto CopyCurrentSheet() const { return CopySheet(mSheetNum); }
+    [[nodiscard]] auto CopySheets() const { return mSheets; }
     [[nodiscard]] auto GetNumSheets() const -> int;
     [[nodiscard]] auto GetCurrentSheetNum() const { return mSheetNum; }
     [[nodiscard]] auto GetCurrentSheetName() const -> std::string;
     [[nodiscard]] auto GetCurrentSheetBeats() const -> CalChart::Beats;
     [[nodiscard]] auto GetCurrentSheetTempo() const -> CalChart::Tempo;
+    [[nodiscard]] auto GetSheetTempo(unsigned n) const
+    {
+        return mSheets.at(n).GetTempo();
+    }
+    [[nodiscard]] auto GetSheetsTempo() const
+    {
+        return mSheets | std::views::transform([](auto&& sheet) { return sheet.GetTempo(); });
+    }
     [[nodiscard]] auto GetCurrentSheetSymbols() const -> std::vector<SYMBOL_TYPE>;
     [[nodiscard]] auto GetCurrentSheetPrintNumber() const -> std::string;
     [[nodiscard]] auto GetCurrentSheetBackgroundImages() const -> std::vector<ImageInfo>;
-    [[nodiscard]] auto CopyAllSheets() const -> Show::Sheet_container_t { return mSheets; }
-    [[nodiscard]] auto CopyCurrentSheet() const -> Show::Sheet_container_t;
     [[nodiscard]] auto GetCurrentSheetSerialized() const -> std::vector<std::byte>;
     [[nodiscard]] auto GetNumPoints() const { return static_cast<int>(mDotLabelAndInstrument.size()); }
     [[nodiscard]] auto GetPointLabel(MarcherIndex i) const -> std::string;
@@ -269,19 +273,6 @@ private:
     void SetDescr(std::string const& newdescr)
     {
         mDescr = newdescr;
-    }
-
-    auto GetSheetBegin()
-    {
-        return mSheets.begin();
-    }
-    auto GetSheetEnd()
-    {
-        return mSheets.end();
-    }
-    auto GetNthSheet(unsigned n)
-    {
-        return GetSheetBegin() + n;
     }
 
     void SetShowMode(ShowMode const&);

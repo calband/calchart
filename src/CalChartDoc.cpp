@@ -447,7 +447,7 @@ auto CalChartDoc::GetTempoForBeat(CalChart::Beats whichBeat) const -> CalChart::
     if (sheetIndex >= static_cast<size_t>(mShow->GetNumSheets())) {
         return 120; // Default tempo if out of bounds
     }
-    return GetNthSheet(sheetIndex)->GetTempo();
+    return mShow->GetSheetTempo(static_cast<unsigned>(sheetIndex));
 }
 
 auto CalChartDoc::BeatHasCollision(CalChart::Beats whichBeat) const -> bool
@@ -480,7 +480,7 @@ auto TransformIndexToDrawPathCommands(CalChart::Animation const& animation, unsi
 
 auto CalChartDoc::GenerateGhostPointsDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>
 {
-    if (const auto* ghostSheet = GetGhostSheet(); ghostSheet != nullptr) {
+    if (auto ghostSheet = GetGhostSheet()) {
         return mShow->GenerateGhostPointsDrawCommands(
             GetConfiguration(),
             CalChart::SelectionList(),
@@ -601,18 +601,18 @@ void CalChartDoc::SetCurrentMove(CalChart::MoveMode move)
     UpdateAllViews();
 }
 
-auto CalChartDoc::GetGhostSheet() const -> CalChart::Sheet const*
+auto CalChartDoc::GetGhostSheet() const -> std::optional<CalChart::Sheet>
 {
     auto currentSheet = GetCurrentSheetNum();
     if (!GetGhostModuleIsActive()) {
-        return nullptr;
+        return std::nullopt;
     }
     auto targetSheet = (mGhostSource == GhostSource::next) ? currentSheet + 1 : (mGhostSource == GhostSource::previous) ? currentSheet - 1
                                                                                                                         : mGhostSheet;
     if (targetSheet >= 0 && targetSheet < GetNumSheets()) {
-        return &(*(GetNthSheet(targetSheet)));
+        return mShow->CopySheet(static_cast<unsigned>(targetSheet));
     }
-    return nullptr;
+    return std::nullopt;
 }
 
 void CalChartDoc::SetGhostSource(GhostSource source, int which)
@@ -756,7 +756,7 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_AppendShow(std::unique_ptr<CalCha
     other_show->mShow->Create_ApplyRelabelMapping(0, *result).first(*other_show->mShow);
 
     // get the sheets we want to append
-    auto sheets = other_show->CopyAllSheets();
+    auto sheets = other_show->CopySheets();
 
     auto cmds = Create_SetSheetPair();
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_AddSheetsCommand(sheets, currend)));

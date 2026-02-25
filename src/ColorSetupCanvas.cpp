@@ -110,7 +110,7 @@ ColorSetupCanvas::ColorSetupCanvas(CalChart::Configuration& config, wxWindow* pa
         mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 1).first(*mShow);
     }
 
-    mShow->Create_AddSheetsCommand(mShow->CopyCurrentSheet(), 1).first(*mShow);
+    mShow->Create_AddSheetsCommand({ mShow->CopyCurrentSheet() }, 1).first(*mShow);
     mShow->Create_SetCurrentSheetCommand(1).first(*mShow);
     for (auto i = 0; i < 4; ++i) {
         mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 0).first(*mShow);
