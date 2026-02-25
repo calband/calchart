@@ -210,6 +210,9 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
             wxUI::Item{ "Export for Online Viewer...", "Export show to be viewed using the CalChart Online Viewer", [this] {
                            OnExportViewerFile();
                        } },
+            wxUI::Item{ "Export Viewer Beats...", "Export beats timing for the CalChart Online Viewer", [this] {
+                           OnExportViewerBeats();
+                       } },
             wxUI::Item{ wxID_PREFERENCES, "&Preferences\tCTRL-," },
             wxUI::Item{ wxID_CLOSE, "Close Window\tCTRL-W", "Close this window" },
             wxUI::Item{ wxID_EXIT, "&Quit\tCTRL-Q", "Quit CalChart" },
@@ -561,6 +564,35 @@ void CalChartFrame::OnExportViewerFile()
             wxMessageBox("There was a problem exporting the viewer file.\n" + saveFileDialog.GetPath(), "Exporting Viewer File");
             return;
         }
+    }
+}
+
+void CalChartFrame::OnExportViewerBeats()
+{
+    if (!GetShow()) {
+        return;
+    }
+
+    auto showTitle = GetShow()->GetTitle().ToStdString();
+    if (showTitle.empty()) {
+        showTitle = "untitled";
+    }
+
+    wxFileDialog saveFileDialog(
+        this,
+        _("Save viewer beats file"),
+        "",
+        showTitle + ".beats.json",
+        "beats files (*.beats.json)|*.beats.json",
+        wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+    if (saveFileDialog.ShowModal() == wxID_CANCEL) {
+        return;
+    }
+
+    if (!GetShow()->exportViewerBeatsFile(std::filesystem::path{ saveFileDialog.GetPath().ToStdString() })) {
+        wxMessageBox("There was a problem exporting the beats file.\n" + saveFileDialog.GetPath(), "Exporting Beats File");
+        return;
     }
 }
 

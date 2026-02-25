@@ -69,7 +69,7 @@ public:
     [[nodiscard]] auto GetTotalNumberBeats() const -> CalChart::Beats;
     [[nodiscard]] auto GetNumSheets() const -> size_t;
     [[nodiscard]] auto BeatToSheetOffsetAndBeat(CalChart::Beats beat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>;
-    [[nodiscard]] auto BeatForSheet(int sheet) const -> CalChart::Beats;
+    [[nodiscard]] auto BeatsForSheet(int sheet) const -> CalChart::Beats;
     [[nodiscard]] auto GetSheetBeatSheetFromTotalCurrentBeat() const -> CalChart::Beats;
 
     [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers) const -> std::pair<CalChart::Coord, CalChart::Coord>;

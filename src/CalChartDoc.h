@@ -121,6 +121,14 @@ public:
     bool exportViewerFile(std::filesystem::path const& filepath);
 
     /*!
+     * @brief Exports beats timing data to a JSON file for the CalChart Online Viewer.
+     * @param filepath The filepath (relative or absolute) to which the
+     * beats file will be saved. The beats file should end with '.beats.json'.
+     * @return True if the file was saved successfully; false otherwise.
+     */
+    bool exportViewerBeatsFile(std::filesystem::path const& filepath);
+
+    /*!
      * @brief Generates JSON representation of the show for the CalChart Online Viewer.
      * @return A JSON object representing the show in viewer format.
      */
@@ -131,6 +139,12 @@ public:
      * @return A JSON object matching the .viewer file contents.
      */
     [[nodiscard]] nlohmann::json toViewerFileJSON() const;
+
+    /*!
+     * @brief Generates the beats file JSON (meta + beats array).
+     * @return A JSON object matching the beats file contents.
+     */
+    [[nodiscard]] nlohmann::json toViewerBeatsJSON() const;
 
 private:
     template <typename T>
@@ -148,51 +162,103 @@ public:
 
     void WizardSetupNewShow(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int columns, CalChart::ShowMode const& newmode);
 
+    // Accessors
+    // General show info
     [[nodiscard]] auto GetNumSheets() const { return mShow ? mShow->GetNumSheets() : 0; }
+    [[nodiscard]] auto GetCurrentSheetNum() const { return mShow->GetCurrentSheetNum(); }
+    [[nodiscard]] auto GetShowMode() const -> CalChart::ShowMode const& { return mShow->GetShowMode(); }
+    [[nodiscard]] auto GetShowFieldOffset() const { return GetShowMode().Offset(); }
+    [[nodiscard]] auto GetNumPoints() const -> size_t { return mShow->GetNumPoints(); }
+    [[nodiscard]] auto GetCurrentReferencePoint() const { return mShow->GetCurrentReferencePoint(); }
 
-    [[nodiscard]] auto GetSheetsName() const { return mShow->GetSheetsName(); }
-
+    // Sheet copying
     [[nodiscard]] auto CopySheet(unsigned n) const { return mShow->CopySheet(n); }
     [[nodiscard]] auto CopySheets() const { return mShow->CopySheets(); }
     [[nodiscard]] auto CopyCurrentSheet() const { return mShow->CopyCurrentSheet(); }
 
-    [[nodiscard]] auto GetCurrentSheetNum() const { return mShow->GetCurrentSheetNum(); }
+    // Sheet name
+    [[nodiscard]] auto GetSheetsName() const { return mShow->GetSheetsName(); }
     [[nodiscard]] auto GetSheetNameOnCurrentSheet() const { return mShow->GetSheetNameOnCurrentSheet(); }
+
+    // Sheet beats
+    [[nodiscard]] auto GetSheetsBeats() const -> std::vector<CalChart::Beats> { return mShow->GetSheetsBeats(); }
     [[nodiscard]] auto GetSheetBeatsOnCurrentSheet() const { return mShow->GetSheetBeatsOnCurrentSheet(); }
-    [[nodiscard]] auto GetSheetTempoOnCurrentSheet() const { return mShow->GetSheetTempoOnCurrentSheet(); }
+
+    // Sheet tempo
     [[nodiscard]] auto GetSheetTempo(unsigned n) const { return mShow->GetSheetTempo(n); }
     [[nodiscard]] auto GetSheetsTempo() const { return mShow->GetSheetsTempo(); }
+    [[nodiscard]] auto GetSheetTempoOnCurrentSheet() const { return mShow->GetSheetTempoOnCurrentSheet(); }
+
+    // Sheet symbols
     [[nodiscard]] auto GetSheetSymbolsOnCurrentSheet() const { return mShow->GetSheetSymbolsOnCurrentSheet(); }
+
+    // Sheet print number
+    [[nodiscard]] auto GetSheetPrintNumberOnCurrentSheet() const { return mShow->GetSheetPrintNumberOnCurrentSheet(); }
+
+    // Sheet background images
     [[nodiscard]] auto GetSheetBackgroundImagesOnCurrentSheet() const { return mShow->GetSheetBackgroundImagesOnCurrentSheet(); }
-    void SetCurrentSheet(size_t n);
 
-    [[nodiscard]] auto GetNumPoints() const -> size_t { return mShow->GetNumPoints(); }
-    [[nodiscard]] auto GetRelabelMapping(std::vector<CalChart::Coord> const& source_marchers, std::vector<CalChart::Coord> const& target_marchers) const -> std::optional<std::vector<CalChart::MarcherIndex>>;
+    // Sheet serialized
+    [[nodiscard]] auto GetSheetSerializedOnCurrentSheet() const { return mShow->GetSheetSerializedOnCurrentSheet(); }
 
+    // Continuities
+    [[nodiscard]] auto GetContinuities() const { return mShow->GetContinuitiesOnCurrentSheet(); }
+
+    // Continuities in use
+    [[nodiscard]] auto ContinuitiesInUse() const { return mShow->GetContinuitiesInUseOnCurrentSheet(); }
+
+    // Raw print continuity
+    [[nodiscard]] auto GetSheetRawPrintContinuityOnCurrentSheet() const { return mShow->GetSheetRawPrintContinuityOnCurrentSheet(); }
+
+    // Print continuity
+    [[nodiscard]] auto GetSheetPrintContinuityOnCurrentSheet() const { return mShow->GetSheetPrintContinuityOnCurrentSheet(); }
+
+    // Point label
     [[nodiscard]] auto GetPointLabel(CalChart::MarcherIndex i) const { return mShow->GetPointLabel(i); }
     [[nodiscard]] auto GetPointsLabel() const { return mShow->GetPointsLabel(); }
     [[nodiscard]] auto GetPointsLabel(CalChart::SelectionList const& sl) const { return mShow->GetPointsLabel(sl); }
+
+    // Point instrument
     [[nodiscard]] auto GetPointInstrument(CalChart::MarcherIndex i) const { return mShow->GetPointInstrument(i); }
-    [[nodiscard]] auto GetPointInstrument(std::string const& label) const { return mShow->GetPointInstrument(label); }
     [[nodiscard]] auto GetPointsInstrument() const { return mShow->GetPointsInstrument(); }
+    [[nodiscard]] auto GetPointInstrument(std::string const& label) const { return mShow->GetPointInstrument(label); }
     [[nodiscard]] auto GetPointsInstrument(CalChart::SelectionList const& sl) const { return mShow->GetPointsInstrument(sl); }
+
+    // Point symbol
     [[nodiscard]] auto GetPointSymbolOnCurrentSheet(CalChart::MarcherIndex i) const { return mShow->GetPointSymbolOnCurrentSheet(i); }
     [[nodiscard]] auto GetPointSymbolOnCurrentSheet(std::string const& label) const { return mShow->GetPointSymbolOnCurrentSheet(label); }
     [[nodiscard]] auto GetPointsSymbolOnCurrentSheet() const { return mShow->GetPointsSymbolOnCurrentSheet(); }
     [[nodiscard]] auto GetPointsSymbolOnCurrentSheet(CalChart::SelectionList const& sl) const { return mShow->GetPointsSymbolOnCurrentSheet(sl); }
+
+    // Point lookup
     [[nodiscard]] auto GetPointFromLabel(std::string const& label) const { return mShow->GetPointFromLabel(label); }
     [[nodiscard]] auto GetPointsFromLabels(std::vector<std::string> const& labels) const { return mShow->GetPointsFromLabels(labels); }
+
+    // Marcher position
     [[nodiscard]] auto GetMarcherPositionOnCurrentSheet(CalChart::MarcherIndex i, unsigned ref = 0) const { return mShow->GetMarcherPositionOnCurrentSheet(i, ref); }
     [[nodiscard]] auto GetAllMarcherPositions(size_t sheet, unsigned ref = 0) const { return mShow->GetAllMarcherPositions(sheet, ref); }
     [[nodiscard]] auto GetAllMarcherPositionsOnCurrentSheet(unsigned ref = 0) const { return mShow->GetAllMarcherPositionsOnCurrentSheet(ref); }
 
-    [[nodiscard]] auto GetContinuities() const { return mShow->GetContinuitiesOnCurrentSheet(); }
-    [[nodiscard]] auto ContinuitiesInUse() const { return mShow->GetContinuitiesInUseOnCurrentSheet(); }
+    // Find marcher
+    [[nodiscard]] auto FindMarcher(CalChart::Coord pos) const -> std::optional<CalChart::MarcherIndex>;
 
-    [[nodiscard]] auto GetCurrentCurve(size_t index) const { return mShow->GetCurveOnCurrentSheet(index); }
-    [[nodiscard]] auto GetCurrentNumberCurves() const { return mShow->GetNumberCurvesOnCurrentSheet(); }
+    // Curve
+    [[nodiscard]] auto GetCurveOnCurrentSheet(size_t index) const { return mShow->GetCurveOnCurrentSheet(index); }
+
+    // Number of curves
+    [[nodiscard]] auto GetNumberCurvesOnCurrentSheet() const { return mShow->GetNumberCurvesOnCurrentSheet(); }
+
+    // Curve assignments
     [[nodiscard]] auto GetMarchersAssignedToCurve(size_t whichCurve) const { return mShow->GetCurveAssignmentsOnCurrentSheet().at(whichCurve); }
-    [[nodiscard]] auto GetSheetSerializedOnCurrentSheet() const { return mShow->GetSheetSerializedOnCurrentSheet(); }
+
+    // Find curve control point
+    [[nodiscard]] auto FindCurveControlPoint(CalChart::Coord pos) const -> std::optional<std::tuple<size_t, size_t>>;
+
+    // Find curve
+    // if found curve, return which curve, the control point lower to where we clicked, the distance [0.0, 1.0] of the pos
+    [[nodiscard]] auto FindCurve(CalChart::Coord pos) const -> std::optional<std::tuple<size_t, size_t, double>>;
+
+    [[nodiscard]] auto GetRelabelMapping(std::vector<CalChart::Coord> const& source_marchers, std::vector<CalChart::Coord> const& target_marchers) const -> std::optional<std::vector<CalChart::MarcherIndex>>;
 
     // Transition Solver
     [[nodiscard]] auto validateCurrentSheetForTransitionSolver() const { return mShow->validateCurrentSheetForTransitionSolver(); }
@@ -201,6 +267,8 @@ public:
     {
         return mShow->runTransitionSolver(params, delegate);
     }
+
+    void SetCurrentSheet(size_t n);
 
     // how to select points
     // Utility functions for constructing new selection lists
@@ -225,13 +293,7 @@ public:
 
     [[nodiscard]] auto GetSelect() const { return mSelect; }
     void SetSelect(CalChart::Select select);
-    [[nodiscard]] auto GetCurrentReferencePoint() const { return mShow->GetCurrentReferencePoint(); }
     void SetCurrentReferencePoint(int currentReferencePoint);
-    [[nodiscard]] auto FindMarcher(CalChart::Coord pos) const -> std::optional<CalChart::MarcherIndex>;
-    // Determine if the position is on a curve control point, if so, return which curve and which control point.
-    [[nodiscard]] auto FindCurveControlPoint(CalChart::Coord pos) const -> std::optional<std::tuple<size_t, size_t>>;
-    // if found curve, return which curve, the control point lower to where we clicked, the distance [0.0, 1.0] of the pos
-    [[nodiscard]] auto FindCurve(CalChart::Coord pos) const -> std::optional<std::tuple<size_t, size_t, double>>;
     [[nodiscard]] auto GetDrawPaths() const { return mDrawPaths; }
     void SetDrawPaths(bool drawPaths);
     [[nodiscard]] auto GetDrawBackground() const { return mDrawBackground; }
@@ -245,8 +307,6 @@ public:
     [[nodiscard]] auto GetGhostSource() const { return mGhostSource; };
     void SetGhostSource(GhostSource source, int which = 0);
 
-    [[nodiscard]] CalChart::ShowMode const& GetShowMode() const;
-    [[nodiscard]] auto GetShowFieldOffset() const { return GetShowMode().Offset(); }
     [[nodiscard]] CalChart::Configuration& GetConfiguration() const { return mConfig; }
 
     [[nodiscard]] auto GetAnimationInfo(CalChart::Beats whichBeat) const -> std::vector<CalChart::Animate::Info>;
@@ -259,10 +319,10 @@ public:
         std::optional<bool> onBeat,
         CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>;
     [[nodiscard]] auto GetTotalNumberAnimationBeats() const -> std::optional<CalChart::Beats>;
-    [[nodiscard]] auto BeatToSheetOffsetAndBeat(CalChart::Beats whichBeat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>;
-    [[nodiscard]] auto BeatForSheet(int whichSheet) const -> CalChart::Beats;
-    [[nodiscard]] auto GetTotalNumberBeatsUpTo(int whichSheet) const -> CalChart::Beats;
-    [[nodiscard]] auto GetTempoForBeat(CalChart::Beats whichBeat) const -> CalChart::Tempo;
+    [[nodiscard]] auto AnimationBeatToSheetOffsetAndBeat(CalChart::Beats whichBeat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>;
+    [[nodiscard]] auto AnimationBeatsForSheet(int whichSheet) const -> CalChart::Beats;
+    [[nodiscard]] auto GetTotalNumberAnimationBeatsUpTo(int whichSheet) const -> CalChart::Beats;
+    [[nodiscard]] auto GetTempoForAnimationBeat(CalChart::Beats whichBeat) const -> CalChart::Tempo;
     [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beats whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
     [[nodiscard]] auto BeatHasCollision(CalChart::Beats whichBeat) const -> bool;
     [[nodiscard]] auto GetAnimationBeatForCurrentSheet() const -> CalChart::Beats;
@@ -274,9 +334,6 @@ public:
     [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands() const { return mShow->GenerateFieldWithMarchersDrawCommands(mConfig); }
 
     [[nodiscard]] auto AlreadyHasPrintContinuity() const { return mShow->AlreadyHasPrintContinuity(); }
-    [[nodiscard]] auto GetSheetPrintNumberOnCurrentSheet() const { return mShow->GetSheetPrintNumberOnCurrentSheet(); }
-    [[nodiscard]] auto GetSheetRawPrintContinuityOnCurrentSheet() const { return mShow->GetSheetRawPrintContinuityOnCurrentSheet(); }
-    [[nodiscard]] auto GetSheetPrintContinuityOnCurrentSheet() const { return mShow->GetSheetPrintContinuityOnCurrentSheet(); }
 
     [[nodiscard]] auto WillMovePoints(CalChart::MarcherToPosition const& new_positions) const { return mShow->WillMovePoints(new_positions, mShow->GetCurrentReferencePoint()); }
     [[nodiscard]] auto PrintToPS(bool overview, int min_yards, std::set<size_t> const& isPicked, CalChart::Configuration const& config_) const -> std::tuple<std::string, int>;

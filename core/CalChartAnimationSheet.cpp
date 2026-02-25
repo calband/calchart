@@ -266,7 +266,7 @@ auto Sheets::DebugAnimateInfoAtBeat(Beats beat) const -> std::pair<std::string, 
     auto [whichSheet, newBeat] = BeatToSheetOffsetAndBeat(beat);
     std::ostringstream output;
     output << GetSheetName(whichSheet) << " (" << whichSheet << " of " << mSheets.size() << ")\n";
-    output << "beat " << newBeat << " of " << BeatForSheet(whichSheet) << "\n";
+    output << "beat " << newBeat << " of " << BeatsForSheet(whichSheet) << "\n";
     auto each = mSheets.at(whichSheet).DebugAnimateInfoAtBeat(newBeat, beat == 0);
     return { output.str(), each };
 }

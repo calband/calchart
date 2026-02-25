@@ -159,7 +159,7 @@ EditCurveAssignments::EditCurveAssignments(wxWindow* parent, CalChartDoc const& 
 
 auto PromptUserForCurveAssignment(wxWindow* parent, CalChartDoc const& show) -> std::optional<std::pair<size_t, std::vector<std::string>>>
 {
-    auto numberCurves = show.GetCurrentNumberCurves();
+    auto numberCurves = show.GetNumberCurvesOnCurrentSheet();
     if (numberCurves == 0) {
         wxMessageBox("Sorry, no curves available to edit.", "No Curves", wxOK | wxICON_INFORMATION);
         return std::nullopt;

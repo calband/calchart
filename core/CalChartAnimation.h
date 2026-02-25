@@ -86,7 +86,7 @@ public:
     [[nodiscard]] auto GetTotalNumberBeatsUpTo(int sheet) const -> Beats { return mSheets.GetTotalNumberBeatsUpTo(sheet); }
     [[nodiscard]] auto GetTotalNumberBeats() const { return mSheets.TotalBeats(); }
     [[nodiscard]] auto BeatToSheetOffsetAndBeat(Beats beat) const { return mSheets.BeatToSheetOffsetAndBeat(beat); }
-    [[nodiscard]] auto BeatForSheet(size_t whichSheet) const -> Beats { return mSheets.BeatForSheet(whichSheet); }
+    [[nodiscard]] auto BeatsForSheet(size_t whichSheet) const -> Beats { return mSheets.BeatsForSheet(whichSheet); }
 
     [[nodiscard]] auto GetErrors() const { return mSheets.GetAnimationErrors(); }
 

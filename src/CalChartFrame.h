@@ -61,6 +61,7 @@ public:
     void OnLegacyPrint();
     void OnCmdPageSetup(wxCommandEvent& event);
     void OnExportViewerFile();
+    void OnExportViewerBeats();
     void OnCmdPreferences(wxCommandEvent& event);
     void OnInsertBefore();
     void OnInsertAfter();

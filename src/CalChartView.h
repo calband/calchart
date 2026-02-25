@@ -98,10 +98,10 @@ public:
     [[nodiscard]] auto GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>;
     [[nodiscard]] auto GetTotalNumberAnimationBeats() const -> std::optional<CalChart::Beats>;
     [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beats whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
-    [[nodiscard]] auto BeatToSheetOffsetAndBeat(CalChart::Beats beat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>;
-    [[nodiscard]] auto BeatForSheet(int sheet) const -> CalChart::Beats;
-    [[nodiscard]] auto GetTotalNumberBeatsUpTo(int whichSheet) const -> CalChart::Beats;
-    [[nodiscard]] auto GetTempoForBeat(CalChart::Beats whichBeat) const -> CalChart::Tempo;
+    [[nodiscard]] auto AnimationBeatToSheetOffsetAndBeat(CalChart::Beats beat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>;
+    [[nodiscard]] auto AnimationBeatsForSheet(int sheet) const -> CalChart::Beats;
+    [[nodiscard]] auto GetTotalNumberAnimationBeatsUpTo(int whichSheet) const -> CalChart::Beats;
+    [[nodiscard]] auto GetTempoForAnimationBeat(CalChart::Beats whichBeat) const -> CalChart::Tempo;
 
     [[nodiscard]] auto GetContinuities() const { return mShow->GetContinuities(); }
     [[nodiscard]] auto ContinuitiesInUse() const { return mShow->ContinuitiesInUse(); }
@@ -141,8 +141,8 @@ public:
     [[nodiscard]] auto IsDrawingCurve() const { return mShow->IsDrawingCurve(); }
     void SetDrawingCurve(bool drawingCurve) const { mShow->SetDrawingCurve(drawingCurve); }
 
-    [[nodiscard]] auto GetCurrentCurve(size_t index) const { return mShow->GetCurrentCurve(index); }
-    [[nodiscard]] auto GetCurrentNumberCurves() const { return mShow->GetCurrentNumberCurves(); }
+    [[nodiscard]] auto GetCurveOnCurrentSheet(size_t index) const { return mShow->GetCurveOnCurrentSheet(index); }
+    [[nodiscard]] auto GetNumberCurvesOnCurrentSheet() const { return mShow->GetNumberCurvesOnCurrentSheet(); }
     [[nodiscard]] auto GetMarchersAssignedToCurve(size_t whichCurve) const { return mShow->GetMarchersAssignedToCurve(whichCurve); }
 
     [[nodiscard]] auto GetGhostModuleIsActive() const { return mShow->GetGhostModuleIsActive(); }
