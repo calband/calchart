@@ -155,6 +155,71 @@ auto ShowMode::Serialize() const -> std::vector<std::byte>
     return result;
 }
 
+auto ShowMode::toJSON() const -> nlohmann::json
+{
+    return nlohmann::json{
+        { "size", std::array{ mSize.x, mSize.y } },
+        { "offset", std::array{ mOffset.x, mOffset.y } },
+        { "border1", std::array{ mBorder1.x, mBorder1.y } },
+        { "border2", std::array{ mBorder2.x, mBorder2.y } },
+        { "hash_west", mHashW },
+        { "hash_east", mHashE },
+        { "yard_lines", mYardLines }
+    };
+}
+
+auto CreateShowModeFromJSON(nlohmann::json const& json) -> ShowMode
+{
+    try {
+        if (!json.is_object()) {
+            throw CC_FileException("bad ShowMode JSON: root must be an object");
+        }
+
+        if (!json.contains("size") || !json.at("size").is_array() || json.at("size").size() != 2) {
+            throw CC_FileException("bad ShowMode JSON: missing or invalid 'size' field");
+        }
+        auto sizeArray = json.at("size").get<std::array<Coord::units, 2>>();
+        auto size = Coord{ sizeArray[0], sizeArray[1] };
+
+        if (!json.contains("offset") || !json.at("offset").is_array() || json.at("offset").size() != 2) {
+            throw CC_FileException("bad ShowMode JSON: missing or invalid 'offset' field");
+        }
+        auto offsetArray = json.at("offset").get<std::array<Coord::units, 2>>();
+        auto offset = Coord{ offsetArray[0], offsetArray[1] };
+
+        if (!json.contains("border1") || !json.at("border1").is_array() || json.at("border1").size() != 2) {
+            throw CC_FileException("bad ShowMode JSON: missing or invalid 'border1' field");
+        }
+        auto border1Array = json.at("border1").get<std::array<Coord::units, 2>>();
+        auto border1 = Coord{ border1Array[0], border1Array[1] };
+
+        if (!json.contains("border2") || !json.at("border2").is_array() || json.at("border2").size() != 2) {
+            throw CC_FileException("bad ShowMode JSON: missing or invalid 'border2' field");
+        }
+        auto border2Array = json.at("border2").get<std::array<Coord::units, 2>>();
+        auto border2 = Coord{ border2Array[0], border2Array[1] };
+
+        if (!json.contains("hash_west") || !json.at("hash_west").is_number_unsigned()) {
+            throw CC_FileException("bad ShowMode JSON: missing or invalid 'hash_west' field");
+        }
+        auto hashW = json.at("hash_west").get<uint16_t>();
+
+        if (!json.contains("hash_east") || !json.at("hash_east").is_number_unsigned()) {
+            throw CC_FileException("bad ShowMode JSON: missing or invalid 'hash_east' field");
+        }
+        auto hashE = json.at("hash_east").get<uint16_t>();
+
+        if (!json.contains("yard_lines") || !json.at("yard_lines").is_array()) {
+            throw CC_FileException("bad ShowMode JSON: missing or invalid 'yard_lines' field");
+        }
+        auto yardLines = json.at("yard_lines").get<YardLinesInfo_t>();
+
+        return ShowMode::CreateShowMode(size, offset, border1, border2, hashW, hashE, yardLines);
+    } catch (nlohmann::json::exception const& e) {
+        throw CC_FileException(std::string("bad ShowMode JSON: ") + e.what());
+    }
+}
+
 auto ShowMode::GetDefaultShowMode() -> ShowMode
 {
     // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)

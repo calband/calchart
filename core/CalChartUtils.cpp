@@ -24,6 +24,7 @@
 #include "CalChartFileFormat.h"
 #include "CalChartTypes.h"
 #include <charconv>
+#include <cppcodec/base64_rfc4648.hpp>
 #include <fstream>
 #include <map>
 #include <optional>
@@ -144,13 +145,31 @@ auto ToFileData(const std::filesystem::path& path) -> std::optional<FileData>
 auto ToFileData(CalChart::Reader reader) -> FileData
 {
     auto table = reader.ParseOutLabels();
-    auto dataIter = std::find_if(table.begin(), table.end(), [](auto&& entry) { return std::get<0>(entry) == INGL_DATA; });
-    auto nameIter = std::find_if(table.begin(), table.end(), [](auto&& entry) { return std::get<0>(entry) == INGL_NAME; });
+    auto dataIter
+        = std::find_if(table.begin(), table.end(), [](auto&& entry) { return std::get<0>(entry) == INGL_DATA; });
+    auto nameIter
+        = std::find_if(table.begin(), table.end(), [](auto&& entry) { return std::get<0>(entry) == INGL_NAME; });
     if (dataIter == table.end() || nameIter == table.end()) {
         throw CC_FileException("missing required data or name chunk");
     }
     auto data = std::get<1>(*dataIter).GetVector<std::byte>();
     auto name = std::get<1>(*nameIter).Get<std::string>();
+
+    return FileData{ data, name };
+}
+
+auto ToFileData(nlohmann::json const& json) -> FileData
+{
+    if (!json.is_object()) {
+        throw std::invalid_argument("FileData JSON must be an object");
+    }
+
+    if (!json.contains("name") || !json.contains("data")) {
+        throw std::invalid_argument("FileData JSON missing required fields");
+    }
+
+    auto name = json.at("name").get<std::string>();
+    auto data = DecodeBase64(json.at("data").get<std::string>());
 
     return FileData{ data, name };
 }
@@ -168,6 +187,35 @@ auto SerializeFileData(CalChart::FileData const& fileData) -> std::vector<std::b
     Parser::AppendAndNullTerminate(tstring, std::get<1>(fileData));
     Parser::Append(result, Parser::Construct_block(INGL_NAME, tstring));
 
+    return result;
+}
+
+auto FileDataToJSON(FileData const& fileData) -> nlohmann::json
+{
+    return nlohmann::json{ { "name", std::get<1>(fileData) }, { "data", EncodeBase64(std::get<0>(fileData)) } };
+}
+
+auto EncodeBase64(std::vector<std::byte> const& data) -> std::string
+{
+    if (data.empty()) {
+        return "";
+    }
+    auto* ptr = reinterpret_cast<unsigned char const*>(data.data());
+
+    return cppcodec::base64_rfc4648::encode(ptr, data.size());
+}
+
+auto DecodeBase64(std::string const& encoded) -> std::vector<std::byte>
+{
+    if (encoded.empty()) {
+        return {};
+    }
+
+    auto decoded = cppcodec::base64_rfc4648::decode(encoded);
+    std::vector<std::byte> result;
+    result.reserve(decoded.size());
+    std::transform(decoded.begin(), decoded.end(), std::back_inserter(result),
+        [](unsigned char c) { return static_cast<std::byte>(c); });
     return result;
 }
 

@@ -33,8 +33,8 @@ void DebugContinuityBrowser(wxWindow* parent, CalChart::Configuration& config)
         wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
     auto* browser = new ContinuityBrowser(dialog, wxSize(800, 600), config);
 
-    auto plainCont = CalChart::Continuity{ "mt E REM\nnsew np" };
-    auto solCont = CalChart::Continuity{ "nsew np" };
+    auto plainCont = CalChart::Continuity{ "mt E REM\nnsew np", {} };
+    auto solCont = CalChart::Continuity{ "nsew np", {} };
 
     browser->SetHandlers(GetDebugContinuityHandlers(
         plainCont, solCont,

@@ -37,6 +37,7 @@
 #include "CalChartFileFormat.h"
 
 #include <memory>
+#include <nlohmann/json.hpp>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -52,8 +53,13 @@ class Continuity {
 public:
     // this could throw runtime_error on bad parses.
     explicit Continuity(std::string const& s = "", ParseErrorHandlers const* correction = nullptr);
+    explicit Continuity(char const* s, ParseErrorHandlers const* correction = nullptr)
+        : Continuity(std::string{ s }, correction)
+    {
+    }
     explicit Continuity(std::vector<std::unique_ptr<Cont::Procedure>>);
     explicit Continuity(Reader);
+    explicit Continuity(nlohmann::json const& json);
     ~Continuity();
 
     Continuity(Continuity const&);
@@ -62,6 +68,7 @@ public:
     Continuity& operator=(Continuity&&) noexcept;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte>;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json;
 
     std::vector<std::unique_ptr<Cont::Procedure>> const& GetParsedContinuity() const noexcept { return m_parsedContinuity; }
     [[nodiscard]] auto HasParsedContinuity() const { return !m_parsedContinuity.empty(); }

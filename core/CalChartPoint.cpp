@@ -22,9 +22,11 @@
 
 #include "CalChartPoint.h"
 #include "CalChartConfiguration.h"
+#include "CalChartConstants.h"
 #include "CalChartFileFormat.h"
 
 #include <cassert>
+#include <cmath>
 #include <sstream>
 #include <stdexcept>
 
@@ -58,6 +60,42 @@ auto WritePositionData(Coord pos)
     return result;
 }
 
+auto ReadPositionJSON(nlohmann::json const& json)
+{
+    auto readUnit = [](nlohmann::json const& value) {
+        if (!value.is_number()) {
+            throw CC_FileException("bad Point JSON: coordinate value must be numeric");
+        }
+        return CalChart::RoundToCoordUnits(value.get<double>());
+    };
+
+    if (!json.is_array() || json.size() != 2) {
+        throw CC_FileException("bad Point JSON: position must be [x, y]");
+    }
+    return Coord{ readUnit(json.at(0)), readUnit(json.at(1)) };
+}
+
+auto ReadPositionFromRootJSON(nlohmann::json const& json)
+{
+    if (json.contains("pos")) {
+        return ReadPositionJSON(json.at("pos"));
+    }
+    throw CC_FileException("bad Point JSON: missing pos");
+}
+
+auto ReadPointSymbolJSON(nlohmann::json const& json)
+{
+    if (!json.is_string()) {
+        throw CC_FileException("bad Point JSON: symbol must be a string");
+    }
+    auto const symbolName = json.get<std::string>();
+    auto const symbol = GetSymbolForName(symbolName);
+    if (symbol >= MAX_NUM_SYMBOLS) {
+        throw CC_FileException("bad Point JSON: invalid symbol name '" + symbolName + "'");
+    }
+    return symbol;
+}
+
 // EACH_POINT_DATA    = BigEndianInt8(Size_rest_of_EACH_POINT_DATA) ,
 // POSITION_DATA , REF_POSITION_DATA , POINT_SYMBOL_DATA , POINT_LABEL_FLIP ;
 // POSITION_DATA      = BigEndianInt16( x ) , BigEndianInt16( y ) ;
@@ -81,6 +119,40 @@ Point::Point(Reader reader)
     mFlags.set(kPointLabelFlipped, (reader.Get<uint8_t>()) > 0);
     if (reader.size() != 0) {
         throw CC_FileException("bad POS chunk");
+    }
+}
+
+Point::Point(nlohmann::json const& json)
+    : mSym(SYMBOL_PLAIN)
+{
+    try {
+        if (!json.is_object()) {
+            throw CC_FileException("bad Point JSON: root must be an object");
+        }
+
+        mPos = ReadPositionFromRootJSON(json);
+        mRef.fill(mPos);
+
+        if (json.contains("ref")) {
+            auto const& refs = json.at("ref");
+            if (!refs.is_array() || refs.size() > kNumRefPoints) {
+                throw CC_FileException("bad Point JSON: ref must be an array of up to 3 points");
+            }
+            for (auto i = 0U; i < refs.size(); ++i) {
+                auto const& oneRef = refs.at(i);
+                mRef.at(i) = ReadPositionJSON(oneRef);
+            }
+        }
+
+        mSym = ReadPointSymbolJSON(json.at("symbol"));
+        if (json.contains("flip")) {
+            mFlags.set(kPointLabelFlipped, json.at("flip").get<bool>());
+        }
+        if (json.contains("label_invisible")) {
+            mFlags.set(kLabelIsInvisible, json.at("label_invisible").get<bool>());
+        }
+    } catch (nlohmann::json::exception const& e) {
+        throw CC_FileException(std::string("bad Point JSON: ") + e.what());
     }
 }
 
@@ -124,6 +196,34 @@ auto Point::Serialize() const -> std::vector<std::byte>
     std::vector<std::byte> result;
     Parser::Append(result, static_cast<uint8_t>(serializedData.size()));
     Parser::Append(result, serializedData);
+    return result;
+}
+
+auto Point::toJSON() const -> nlohmann::json
+{
+    auto ref = nlohmann::json::array();
+    // find the last ref point that is different from the main point, and only serialize up to that one
+    for (auto i = kNumRefPoints; i > 0; --i) {
+        if (GetPos(i) != GetPos(0)) {
+            for (auto j = 1; j <= i; ++j) {
+                ref.push_back(nlohmann::json::array({ GetPos(j).x, GetPos(j).y }));
+            }
+            break;
+        }
+    }
+
+    auto const pos = GetPos();
+    auto result = nlohmann::json{ { "pos", nlohmann::json::array({ pos.x, pos.y }) },
+        { "symbol", GetNameForSymbol(GetSymbol()) } };
+    if (!ref.empty()) {
+        result["ref"] = ref;
+    }
+    if (GetFlip()) {
+        result["flip"] = true;
+    }
+    if (!LabelIsVisible()) {
+        result["label_invisible"] = true;
+    }
     return result;
 }
 
@@ -177,7 +277,8 @@ namespace {
         return { Draw::Circle({ 0, 0 }, circ_r, filled) };
     }
 
-    auto CreatePointCross(CalChart::SYMBOL_TYPE symbol, double dotRatio, double pLineRatio, double sLineRatio) -> std::vector<Draw::DrawCommand>
+    auto CreatePointCross(CalChart::SYMBOL_TYPE symbol, double dotRatio, double pLineRatio, double sLineRatio)
+        -> std::vector<Draw::DrawCommand>
     {
         auto const plineoff = static_cast<Coord::units>(CalChart::Float2CoordUnits(dotRatio * pLineRatio) / 2.0);
         auto const slineoff = static_cast<Coord::units>(CalChart::Float2CoordUnits(dotRatio * sLineRatio) / 2.0);
@@ -210,7 +311,8 @@ namespace {
         return drawCmds;
     }
 
-    auto CreatePointLabel(CalChart::Point const& point, std::string const& label, double dotRatio) -> std::vector<Draw::DrawCommand>
+    auto CreatePointLabel(CalChart::Point const& point, std::string const& label, double dotRatio)
+        -> std::vector<Draw::DrawCommand>
     {
         if (!point.LabelIsVisible()) {
             return {};
@@ -221,37 +323,41 @@ namespace {
         return { Draw::Text(-CalChart::Coord(0, circ_r), label, anchor) };
     }
 
-    auto CreatePoint(SYMBOL_TYPE sym, double dotRatio, double pLineRatio, double sLineRatio) -> std::vector<Draw::DrawCommand>
+    auto CreatePoint(SYMBOL_TYPE sym, double dotRatio, double pLineRatio, double sLineRatio)
+        -> std::vector<Draw::DrawCommand>
     {
         return CalChart::append(
-            CreatePointCircle(sym, dotRatio),
-            CreatePointCross(sym, dotRatio, pLineRatio, sLineRatio));
+            CreatePointCircle(sym, dotRatio), CreatePointCross(sym, dotRatio, pLineRatio, sLineRatio));
     }
 
-    auto CreatePoint(CalChart::Point const& point, SYMBOL_TYPE sym, std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) -> std::vector<Draw::DrawCommand>
+    auto CreatePoint(CalChart::Point const& point, SYMBOL_TYPE sym, std::string const& label, double dotRatio,
+        double pLineRatio, double sLineRatio) -> std::vector<Draw::DrawCommand>
     {
         return CalChart::append(
-            CreatePoint(sym, dotRatio, pLineRatio, sLineRatio),
-            CreatePointLabel(point, label, dotRatio));
+            CreatePoint(sym, dotRatio, pLineRatio, sLineRatio), CreatePointLabel(point, label, dotRatio));
     }
 }
 
-auto Point::GetDrawCommands(unsigned ref, std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) const -> std::vector<Draw::DrawCommand>
+auto Point::GetDrawCommands(unsigned ref, std::string const& label, double dotRatio, double pLineRatio,
+    double sLineRatio) const -> std::vector<Draw::DrawCommand>
 {
     return CreatePoint(*this, GetSymbol(), label, dotRatio, pLineRatio, sLineRatio) + GetPos(ref);
 }
 
-auto Point::GetDrawCommands(unsigned ref, std::string const& label, Configuration const& config) const -> std::vector<Draw::DrawCommand>
+auto Point::GetDrawCommands(unsigned ref, std::string const& label, Configuration const& config) const
+    -> std::vector<Draw::DrawCommand>
 {
     return GetDrawCommands(ref, label, config.Get_DotRatio(), config.Get_PLineRatio(), config.Get_SLineRatio());
 }
 
-auto Point::GetDrawCommands(std::string const& label, Configuration const& config) const -> std::vector<Draw::DrawCommand>
+auto Point::GetDrawCommands(std::string const& label, Configuration const& config) const
+    -> std::vector<Draw::DrawCommand>
 {
     return GetDrawCommands(label, config.Get_DotRatio(), config.Get_PLineRatio(), config.Get_SLineRatio());
 }
 
-auto Point::GetDrawCommands(double dotRatio, double pLineRatio, double sLineRatio) const -> std::vector<Draw::DrawCommand>
+auto Point::GetDrawCommands(double dotRatio, double pLineRatio, double sLineRatio) const
+    -> std::vector<Draw::DrawCommand>
 {
     return CreatePoint(GetSymbol(), dotRatio, pLineRatio, sLineRatio) + GetPos(0);
 }

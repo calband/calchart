@@ -28,6 +28,7 @@
 #include <array>
 #include <functional>
 #include <memory>
+#include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
 
@@ -72,6 +73,7 @@ public:
     [[nodiscard]] auto CreateFieldForPrinting(int left_limit, int right_limit, bool landscape) const -> CalChart::ShowMode;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte>;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json;
 
     [[nodiscard]] auto GetShowModeData() const -> ShowModeData_t;
 
@@ -140,5 +142,7 @@ auto CreateModeDrawCommandsWithBorderOffset(
     Configuration const& config,
     ShowMode const& mode,
     HowToDraw howToDraw) -> std::vector<CalChart::Draw::DrawCommand>;
+
+auto CreateShowModeFromJSON(nlohmann::json const& json) -> ShowMode;
 
 }

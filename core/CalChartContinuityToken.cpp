@@ -29,10 +29,14 @@
 #include "CalChartUtils.h"
 #include "parse.h"
 
+#include <algorithm>
 #include <cmath>
 #include <format>
+#include <optional>
 
-// for serialization we need to pre-register all of the different types that can exist in the inuity AST.
+// for serialization we need to pre-register all of the different types that can exist in the continuity AST.  Note:
+// because this is serialized, take care when adding new tokens to handle backward compatiblity.  If you need to add a
+// new token, add it to the end of the list and make sure to handle missing tokens in the Deserialize function.
 namespace {
 enum class SerializationToken {
     Token,
@@ -97,13 +101,10 @@ constexpr std::array<std::string_view, 9> s_var_names = {
     "DOH",
 };
 
-constexpr std::array<std::string_view, 15> DefinedValue_strings = {
-    "N", "NW", "W", "SW", "S", "SE", "E", "NE",
-    "HS", "MM", "SH", "JS", "GV", "M", "DM"
-};
+constexpr std::array<std::string_view, 15> DefinedValue_strings
+    = { "N", "NW", "W", "SW", "S", "SE", "E", "NE", "HS", "MM", "SH", "JS", "GV", "M", "DM" };
 
-template <typename Float>
-auto float2int(CalChart::Animate::Compile& anim, Float f) -> int
+template <typename Float> auto float2int(CalChart::Animate::Compile& anim, Float f) -> int
 {
     static_assert(std::is_floating_point_v<Float>, "float2int requires float");
     auto v = static_cast<int>(floor(f + 0.5));
@@ -113,8 +114,7 @@ auto float2int(CalChart::Animate::Compile& anim, Float f) -> int
     return v;
 }
 
-template <typename Float>
-auto float2unsigned(CalChart::Animate::Compile& anim, Float f) -> unsigned
+template <typename Float> auto float2unsigned(CalChart::Animate::Compile& anim, Float f) -> unsigned
 {
     static_assert(std::is_floating_point_v<Float>, "float2unsigned requires float");
     auto v = float2int(anim, f);
@@ -124,13 +124,256 @@ auto float2unsigned(CalChart::Animate::Compile& anim, Float f) -> unsigned
     }
     return static_cast<unsigned>(v);
 }
+
+auto EnsureObject(nlohmann::json const& json, std::string_view context) -> nlohmann::json const&
+{
+    if (!json.is_object()) {
+        throw std::runtime_error("bad Procedure JSON: " + std::string{ context } + " must be an object");
+    }
+    return json;
+}
+
+auto EnsureTypeName(nlohmann::json const& json, std::string_view context) -> std::string
+{
+    auto const& object = EnsureObject(json, context);
+    auto const iter = object.find("type");
+    if (iter == object.end() || !iter->is_string()) {
+        throw std::runtime_error("bad Procedure JSON: " + std::string{ context } + " must contain string field 'type'");
+    }
+    return iter->get<std::string>();
+}
+
+auto RequireField(nlohmann::json const& json, std::string_view field, std::string_view context) -> nlohmann::json const&
+{
+    auto const& object = EnsureObject(json, context);
+    auto const iter = object.find(field);
+    if (iter == object.end()) {
+        throw std::runtime_error(
+            "bad Procedure JSON: missing field '" + std::string{ field } + "' in " + std::string{ context });
+    }
+    return *iter;
+}
+
+auto OptionalField(nlohmann::json const& json, std::string_view field) -> nlohmann::json const*
+{
+    auto const iter = json.find(field);
+    if (iter == json.end()) {
+        return nullptr;
+    }
+    return &*iter;
+}
+
+auto AddTokenLocation(nlohmann::json json, CalChart::Cont::Token const& token) -> nlohmann::json
+{
+    json["line"] = token.GetLine();
+    json["col"] = token.GetCol();
+    return json;
+}
+
+void ApplyTokenLocation(CalChart::Cont::Token& token, nlohmann::json const& json)
+{
+    auto const* line = OptionalField(json, "line");
+    auto const* col = OptionalField(json, "col");
+    if (line == nullptr && col == nullptr) {
+        return;
+    }
+    if (line == nullptr || col == nullptr) {
+        throw std::runtime_error("bad Procedure JSON: token location requires both 'line' and 'col'");
+    }
+    if (!line->is_number_unsigned() || !col->is_number_unsigned()) {
+        throw std::runtime_error("bad Procedure JSON: token location fields must be unsigned integers");
+    }
+    token.SetSourceLocation(line->get<uint32_t>(), col->get<uint32_t>());
+}
+
+template <typename TokenPtr> auto ApplyTokenLocationToPtr(TokenPtr token, nlohmann::json const& json) -> TokenPtr
+{
+    ApplyTokenLocation(*token, json);
+    return token;
+}
+
+auto ParseDefinedValue(std::string const& value) -> CalChart::Cont::DefinedValue
+{
+    auto const iter = std::find(DefinedValue_strings.begin(), DefinedValue_strings.end(), value);
+    if (iter == DefinedValue_strings.end()) {
+        throw std::runtime_error("bad Procedure JSON: invalid defined value '" + value + "'");
+    }
+    return static_cast<CalChart::Cont::DefinedValue>(std::distance(DefinedValue_strings.begin(), iter));
+}
+
+auto ParseVariable(std::string const& value) -> CalChart::Cont::Variable
+{
+    auto const iter = std::find(s_var_names.begin(), s_var_names.end(), value);
+    if (iter == s_var_names.end()) {
+        throw std::runtime_error("bad Procedure JSON: invalid variable '" + value + "'");
+    }
+    return static_cast<CalChart::Cont::Variable>(std::distance(s_var_names.begin(), iter));
+}
+
+auto PointFromJSON(nlohmann::json const& json) -> std::unique_ptr<CalChart::Cont::Point>;
+auto ValueFromJSON(nlohmann::json const& json) -> std::unique_ptr<CalChart::Cont::Value>;
+auto ProcedureFromJSONNode(nlohmann::json const& json) -> std::unique_ptr<CalChart::Cont::Procedure>;
+
+auto PointFromJSON(nlohmann::json const& json) -> std::unique_ptr<CalChart::Cont::Point>
+{
+    namespace C = CalChart::Cont;
+    auto const type = EnsureTypeName(json, "point node");
+    if (type == "Point") {
+        return C::Point::fromJSON(json);
+    }
+    if (type == "PointUnset") {
+        return C::PointUnset::fromJSON(json);
+    }
+    if (type == "StartPoint") {
+        return C::StartPoint::fromJSON(json);
+    }
+    if (type == "NextPoint") {
+        return C::NextPoint::fromJSON(json);
+    }
+    if (type == "RefPoint") {
+        return C::RefPoint::fromJSON(json);
+    }
+    throw std::runtime_error("bad Procedure JSON: unknown point type '" + type + "'");
+}
+
+auto ValueFromJSON(nlohmann::json const& json) -> std::unique_ptr<CalChart::Cont::Value>
+{
+    namespace C = CalChart::Cont;
+    auto const type = EnsureTypeName(json, "value node");
+    if (type == "ValueUnset") {
+        return C::ValueUnset::fromJSON(json);
+    }
+    if (type == "ValueFloat") {
+        return C::ValueFloat::fromJSON(json);
+    }
+    if (type == "ValueDefined") {
+        return C::ValueDefined::fromJSON(json);
+    }
+    if (type == "ValueAdd") {
+        return C::ValueAdd::fromJSON(json);
+    }
+    if (type == "ValueSub") {
+        return C::ValueSub::fromJSON(json);
+    }
+    if (type == "ValueMult") {
+        return C::ValueMult::fromJSON(json);
+    }
+    if (type == "ValueDiv") {
+        return C::ValueDiv::fromJSON(json);
+    }
+    if (type == "ValueNeg") {
+        return C::ValueNeg::fromJSON(json);
+    }
+    if (type == "ValueREM") {
+        return C::ValueREM::fromJSON(json);
+    }
+    if (type == "ValueVar") {
+        return C::ValueVar::fromJSON(json);
+    }
+    if (type == "ValueVarUnset") {
+        return C::ValueVarUnset::fromJSON(json);
+    }
+    if (type == "FuncDir") {
+        return C::FuncDir::fromJSON(json);
+    }
+    if (type == "FuncDirFrom") {
+        return C::FuncDirFrom::fromJSON(json);
+    }
+    if (type == "FuncDist") {
+        return C::FuncDist::fromJSON(json);
+    }
+    if (type == "FuncDistFrom") {
+        return C::FuncDistFrom::fromJSON(json);
+    }
+    if (type == "FuncEither") {
+        return C::FuncEither::fromJSON(json);
+    }
+    if (type == "FuncOpp") {
+        return C::FuncOpp::fromJSON(json);
+    }
+    if (type == "FuncStep") {
+        return C::FuncStep::fromJSON(json);
+    }
+    throw std::runtime_error("bad Procedure JSON: unknown value type '" + type + "'");
+}
+
+auto ProcedureFromJSONNode(nlohmann::json const& json) -> std::unique_ptr<CalChart::Cont::Procedure>
+{
+    namespace C = CalChart::Cont;
+    auto const type = EnsureTypeName(json, "procedure node");
+    if (type == "ProcUnset") {
+        return C::ProcUnset::fromJSON(json);
+    }
+    if (type == "ProcSet") {
+        return C::ProcSet::fromJSON(json);
+    }
+    if (type == "ProcBlam") {
+        return C::ProcBlam::fromJSON(json);
+    }
+    if (type == "ProcClose") {
+        return C::ProcClose::fromJSON(json);
+    }
+    if (type == "ProcCM") {
+        return C::ProcCM::fromJSON(json);
+    }
+    if (type == "ProcDMCM") {
+        return C::ProcDMCM::fromJSON(json);
+    }
+    if (type == "ProcDMHS") {
+        return C::ProcDMHS::fromJSON(json);
+    }
+    if (type == "ProcEven") {
+        return C::ProcEven::fromJSON(json);
+    }
+    if (type == "ProcEWNS") {
+        return C::ProcEWNS::fromJSON(json);
+    }
+    if (type == "ProcFountain") {
+        return C::ProcFountain::fromJSON(json);
+    }
+    if (type == "ProcFM") {
+        return C::ProcFM::fromJSON(json);
+    }
+    if (type == "ProcFMTO") {
+        return C::ProcFMTO::fromJSON(json);
+    }
+    if (type == "ProcGrid") {
+        return C::ProcGrid::fromJSON(json);
+    }
+    if (type == "ProcHSCM") {
+        return C::ProcHSCM::fromJSON(json);
+    }
+    if (type == "ProcHSDM") {
+        return C::ProcHSDM::fromJSON(json);
+    }
+    if (type == "ProcMagic") {
+        return C::ProcMagic::fromJSON(json);
+    }
+    if (type == "ProcMarch") {
+        return C::ProcMarch::fromJSON(json);
+    }
+    if (type == "ProcMT") {
+        return C::ProcMT::fromJSON(json);
+    }
+    if (type == "ProcMTRM") {
+        return C::ProcMTRM::fromJSON(json);
+    }
+    if (type == "ProcNSEW") {
+        return C::ProcNSEW::fromJSON(json);
+    }
+    if (type == "ProcRotate") {
+        return C::ProcRotate::fromJSON(json);
+    }
+    if (type == "ProcStandAndPlay") {
+        return C::ProcStandAndPlay::fromJSON(json);
+    }
+    throw std::runtime_error("bad Procedure JSON: unknown procedure type '" + type + "'");
+}
 }
 
 namespace CalChart::Cont {
 
-void DoCounterMarch(Animate::Compile& anim,
-    const Point& pnt1, const Point& pnt2,
-    const Value& stps, const Value& dir1,
+void DoCounterMarch(Animate::Compile& anim, const Point& pnt1, const Point& pnt2, const Value& stps, const Value& dir1,
     const Value& dir2, const Value& numbeats)
 {
     auto d1 = CalChart::Degree{ dir1.Get(anim) };
@@ -217,8 +460,7 @@ void DoCounterMarch(Animate::Compile& anim,
 
 #define CheckForToken(reader, minSize, serialToken) CheckForTokenImpl(reader, minSize, serialToken, #serialToken)
 
-template <typename T, typename U>
-auto CheckForTokenImpl(Reader reader, size_t minSize, T serialToken, U tokenName)
+template <typename T, typename U> auto CheckForTokenImpl(Reader reader, size_t minSize, T serialToken, U tokenName)
 {
     using namespace std::string_literals;
     if (reader.size() < minSize) {
@@ -310,6 +552,17 @@ std::tuple<std::unique_ptr<Procedure>, Reader> DeserializeProcedure(Reader reade
     }
     auto b = v->Deserialize(reader);
     return { std::move(v), b };
+}
+
+auto Procedure::FromJSON(nlohmann::json const& json) -> std::unique_ptr<Procedure>
+{
+    try {
+        return ProcedureFromJSONNode(json);
+    } catch (std::runtime_error const&) {
+        throw;
+    } catch (nlohmann::json::exception const& e) {
+        throw std::runtime_error(std::string{ "bad Procedure JSON: " } + e.what());
+    }
 }
 
 static std::tuple<std::unique_ptr<Point>, Reader> DeserializePoint(Reader reader)
@@ -436,10 +689,7 @@ Token::Token()
 {
 }
 
-auto Token::ToString() const -> std::string
-{
-    return "[CT]";
-}
+auto Token::ToString() const -> std::string { return "[CT]"; }
 
 void Token::replace(Token const* /*which*/, std::unique_ptr<Token> /*v*/)
 {
@@ -464,25 +714,24 @@ Reader Token::Deserialize(Reader reader)
 }
 
 // Point
-Coord Point::Get(Animate::Compile const& anim) const
+Coord Point::Get(Animate::Compile const& anim) const { return anim.GetPointPosition(); }
+
+auto Point::ToString() const -> std::string { return std::format("{}[CP]Point:", super::ToString()); }
+
+Drawable Point::GetDrawable() const { return { this, parent_ptr, Type::point, "Point", "P", {} }; }
+
+auto Point::toJSON() const -> nlohmann::json
 {
-    return anim.GetPointPosition();
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "Point" },
+        },
+        *this);
 }
 
-auto Point::ToString() const -> std::string
+auto Point::fromJSON(nlohmann::json const& json) -> std::unique_ptr<Point>
 {
-    return std::format("{}[CP]Point:", super::ToString());
-}
-
-Drawable Point::GetDrawable() const
-{
-    return {
-        this, parent_ptr,
-        Type::point,
-        "Point",
-        "P",
-        {}
-    };
+    return ApplyTokenLocationToPtr(std::make_unique<Point>(), json);
 }
 
 auto Point::Serialize() const -> std::vector<std::byte>
@@ -500,20 +749,22 @@ Reader Point::Deserialize(Reader reader)
 }
 
 // PointUnset
-auto PointUnset::ToString() const -> std::string
+auto PointUnset::ToString() const -> std::string { return std::format("{}[CPU]Unset", super::ToString()); }
+
+Drawable PointUnset::GetDrawable() const { return { this, parent_ptr, Type::unset, "unset point", "unset point", {} }; }
+
+auto PointUnset::toJSON() const -> nlohmann::json
 {
-    return std::format("{}[CPU]Unset", super::ToString());
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "PointUnset" },
+        },
+        *this);
 }
 
-Drawable PointUnset::GetDrawable() const
+auto PointUnset::fromJSON(nlohmann::json const& json) -> std::unique_ptr<PointUnset>
 {
-    return {
-        this, parent_ptr,
-        Type::unset,
-        "unset point",
-        "unset point",
-        {}
-    };
+    return ApplyTokenLocationToPtr(std::make_unique<PointUnset>(), json);
 }
 
 auto PointUnset::Serialize() const -> std::vector<std::byte>
@@ -531,25 +782,24 @@ Reader PointUnset::Deserialize(Reader reader)
 }
 
 // StartPoint
-Coord StartPoint::Get(Animate::Compile const& anim) const
+Coord StartPoint::Get(Animate::Compile const& anim) const { return anim.GetStartingPosition(); }
+
+auto StartPoint::ToString() const -> std::string { return std::format("{}[CSP]Start Point", super::ToString()); }
+
+Drawable StartPoint::GetDrawable() const { return { this, parent_ptr, Type::point, "Start Point", "SP", {} }; }
+
+auto StartPoint::toJSON() const -> nlohmann::json
 {
-    return anim.GetStartingPosition();
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "StartPoint" },
+        },
+        *this);
 }
 
-auto StartPoint::ToString() const -> std::string
+auto StartPoint::fromJSON(nlohmann::json const& json) -> std::unique_ptr<StartPoint>
 {
-    return std::format("{}[CSP]Start Point", super::ToString());
-}
-
-Drawable StartPoint::GetDrawable() const
-{
-    return {
-        this, parent_ptr,
-        Type::point,
-        "Start Point",
-        "SP",
-        {}
-    };
+    return ApplyTokenLocationToPtr(std::make_unique<StartPoint>(), json);
 }
 
 auto StartPoint::Serialize() const -> std::vector<std::byte>
@@ -567,25 +817,24 @@ Reader StartPoint::Deserialize(Reader reader)
 }
 
 // NextPoint
-Coord NextPoint::Get(Animate::Compile const& anim) const
+Coord NextPoint::Get(Animate::Compile const& anim) const { return anim.GetEndingPosition(); }
+
+auto NextPoint::ToString() const -> std::string { return std::format("{}[CNP]Next Point", super::ToString()); }
+
+Drawable NextPoint::GetDrawable() const { return { this, parent_ptr, Type::point, "Next Point", "NP", {} }; }
+
+auto NextPoint::toJSON() const -> nlohmann::json
 {
-    return anim.GetEndingPosition();
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "NextPoint" },
+        },
+        *this);
 }
 
-auto NextPoint::ToString() const -> std::string
+auto NextPoint::fromJSON(nlohmann::json const& json) -> std::unique_ptr<NextPoint>
 {
-    return std::format("{}[CNP]Next Point", super::ToString());
-}
-
-Drawable NextPoint::GetDrawable() const
-{
-    return {
-        this, parent_ptr,
-        Type::point,
-        "Next Point",
-        "NP",
-        {}
-    };
+    return ApplyTokenLocationToPtr(std::make_unique<NextPoint>(), json);
 }
 
 auto NextPoint::Serialize() const -> std::vector<std::byte>
@@ -608,25 +857,33 @@ RefPoint::RefPoint(unsigned n)
 {
 }
 
-Coord RefPoint::Get(Animate::Compile const& anim) const
-{
-    return anim.GetReferencePointPosition(refnum);
-}
+Coord RefPoint::Get(Animate::Compile const& anim) const { return anim.GetReferencePointPosition(refnum); }
 
-auto RefPoint::ToString() const -> std::string
-{
-    return std::format("{}[CRP]Ref Point {}", super::ToString(), refnum);
-}
+auto RefPoint::ToString() const -> std::string { return std::format("{}[CRP]Ref Point {}", super::ToString(), refnum); }
 
 Drawable RefPoint::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::point,
-        std::string("Ref Point ") + std::to_string(refnum),
-        std::string("R") + std::to_string(refnum),
-        {}
-    };
+    return { this, parent_ptr, Type::point, std::string("Ref Point ") + std::to_string(refnum),
+        std::string("R") + std::to_string(refnum), {} };
+}
+
+auto RefPoint::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "RefPoint" },
+            { "refnum", refnum },
+        },
+        *this);
+}
+
+auto RefPoint::fromJSON(nlohmann::json const& json) -> std::unique_ptr<RefPoint>
+{
+    auto const& refnum = RequireField(json, "refnum", "RefPoint");
+    if (!refnum.is_number_unsigned()) {
+        throw std::runtime_error("bad Procedure JSON: RefPoint.refnum must be an unsigned integer");
+    }
+    return ApplyTokenLocationToPtr(std::make_unique<RefPoint>(refnum.get<unsigned>()), json);
 }
 
 auto RefPoint::Serialize() const -> std::vector<std::byte>
@@ -647,10 +904,7 @@ Reader RefPoint::Deserialize(Reader reader)
 }
 
 // Value
-auto Value::ToString() const -> std::string
-{
-    return std::format("{}[CV]Value:", super::ToString());
-}
+auto Value::ToString() const -> std::string { return std::format("{}[CV]Value:", super::ToString()); }
 
 auto Value::Serialize() const -> std::vector<std::byte>
 {
@@ -667,20 +921,22 @@ Reader Value::Deserialize(Reader reader)
 }
 
 // ValueUnset
-auto ValueUnset::ToString() const -> std::string
+auto ValueUnset::ToString() const -> std::string { return std::format("{}[CVU]Unset", super::ToString()); }
+
+Drawable ValueUnset::GetDrawable() const { return { this, parent_ptr, Type::unset, "unset value", "unset value", {} }; }
+
+auto ValueUnset::toJSON() const -> nlohmann::json
 {
-    return std::format("{}[CVU]Unset", super::ToString());
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ValueUnset" },
+        },
+        *this);
 }
 
-Drawable ValueUnset::GetDrawable() const
+auto ValueUnset::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueUnset>
 {
-    return {
-        this, parent_ptr,
-        Type::unset,
-        "unset value",
-        "unset value",
-        {}
-    };
+    return ApplyTokenLocationToPtr(std::make_unique<ValueUnset>(), json);
 }
 
 auto ValueUnset::Serialize() const -> std::vector<std::byte>
@@ -705,10 +961,7 @@ ValueFloat::ValueFloat(float v)
 
 float ValueFloat::Get(Animate::Compile const&) const { return val; }
 
-auto ValueFloat::ToString() const -> std::string
-{
-    return std::format("{}[CVF]{}", super::ToString(), val);
-}
+auto ValueFloat::ToString() const -> std::string { return std::format("{}[CVF]{}", super::ToString(), val); }
 
 Drawable ValueFloat::GetDrawable() const
 {
@@ -717,6 +970,25 @@ Drawable ValueFloat::GetDrawable() const
         return { this, parent_ptr, Type::value, std::to_string(int(val)), std::to_string(int(val)), {} };
     }
     return { this, parent_ptr, Type::value, std::to_string(val), std::to_string(val), {} };
+}
+
+auto ValueFloat::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ValueFloat" },
+            { "val", val },
+        },
+        *this);
+}
+
+auto ValueFloat::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueFloat>
+{
+    auto const& val = RequireField(json, "val", "ValueFloat");
+    if (!val.is_number()) {
+        throw std::runtime_error("bad Procedure JSON: ValueFloat.val must be numeric");
+    }
+    return ApplyTokenLocationToPtr(std::make_unique<ValueFloat>(val.get<float>()), json);
 }
 
 auto ValueFloat::Serialize() const -> std::vector<std::byte>
@@ -790,7 +1062,27 @@ Drawable ValueDefined::GetDrawable() const
     default:
         type = Type::steptype;
     }
-    return { this, parent_ptr, type, std::string{ DefinedValue_strings[val] }, std::string{ DefinedValue_strings[val] }, {} };
+    return { this, parent_ptr, type, std::string{ DefinedValue_strings[val] }, std::string{ DefinedValue_strings[val] },
+        {} };
+}
+
+auto ValueDefined::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ValueDefined" },
+            { "defined", std::string{ DefinedValue_strings.at(val) } },
+        },
+        *this);
+}
+
+auto ValueDefined::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueDefined>
+{
+    auto const& defined = RequireField(json, "defined", "ValueDefined");
+    if (!defined.is_string()) {
+        throw std::runtime_error("bad Procedure JSON: ValueDefined.defined must be a string");
+    }
+    return ApplyTokenLocationToPtr(std::make_unique<ValueDefined>(ParseDefinedValue(defined.get<std::string>())), json);
 }
 
 auto ValueDefined::Serialize() const -> std::vector<std::byte>
@@ -811,10 +1103,7 @@ Reader ValueDefined::Deserialize(Reader reader)
 }
 
 // ValueAdd
-float ValueAdd::Get(Animate::Compile const& anim) const
-{
-    return (val1->Get(anim) + val2->Get(anim));
-}
+float ValueAdd::Get(Animate::Compile const& anim) const { return (val1->Get(anim) + val2->Get(anim)); }
 
 auto ValueAdd::ToString() const -> std::string
 {
@@ -823,13 +1112,25 @@ auto ValueAdd::ToString() const -> std::string
 
 Drawable ValueAdd::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::function,
-        "( %@ + %@ )",
-        "(%@+%@)",
-        { val1->GetDrawable(), val2->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::function, "( %@ + %@ )", "(%@+%@)", { val1->GetDrawable(), val2->GetDrawable() } };
+}
+
+auto ValueAdd::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ValueAdd" },
+            { "val1", val1->toJSON() },
+            { "val2", val2->toJSON() },
+        },
+        *this);
+}
+
+auto ValueAdd::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueAdd>
+{
+    return ApplyTokenLocationToPtr(std::make_unique<ValueAdd>(ValueFromJSON(RequireField(json, "val1", "ValueAdd")),
+                                       ValueFromJSON(RequireField(json, "val2", "ValueAdd"))),
+        json);
 }
 
 void ValueAdd::replace(Token const* which, std::unique_ptr<Token> v)
@@ -857,10 +1158,7 @@ Reader ValueAdd::Deserialize(Reader reader)
 }
 
 // ValueSub
-float ValueSub::Get(Animate::Compile const& anim) const
-{
-    return (val1->Get(anim) - val2->Get(anim));
-}
+float ValueSub::Get(Animate::Compile const& anim) const { return (val1->Get(anim) - val2->Get(anim)); }
 
 auto ValueSub::ToString() const -> std::string
 {
@@ -869,13 +1167,25 @@ auto ValueSub::ToString() const -> std::string
 
 Drawable ValueSub::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::function,
-        "( %@ - %@ )",
-        "(%@-%@)",
-        { val1->GetDrawable(), val2->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::function, "( %@ - %@ )", "(%@-%@)", { val1->GetDrawable(), val2->GetDrawable() } };
+}
+
+auto ValueSub::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ValueSub" },
+            { "val1", val1->toJSON() },
+            { "val2", val2->toJSON() },
+        },
+        *this);
+}
+
+auto ValueSub::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueSub>
+{
+    return ApplyTokenLocationToPtr(std::make_unique<ValueSub>(ValueFromJSON(RequireField(json, "val1", "ValueSub")),
+                                       ValueFromJSON(RequireField(json, "val2", "ValueSub"))),
+        json);
 }
 
 void ValueSub::replace(Token const* which, std::unique_ptr<Token> v)
@@ -903,10 +1213,7 @@ Reader ValueSub::Deserialize(Reader reader)
 }
 
 // ValueMult
-float ValueMult::Get(Animate::Compile const& anim) const
-{
-    return (val1->Get(anim) * val2->Get(anim));
-}
+float ValueMult::Get(Animate::Compile const& anim) const { return (val1->Get(anim) * val2->Get(anim)); }
 
 auto ValueMult::ToString() const -> std::string
 {
@@ -915,13 +1222,25 @@ auto ValueMult::ToString() const -> std::string
 
 Drawable ValueMult::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::function,
-        "( %@ * %@ )",
-        "(%@*%@)",
-        { val1->GetDrawable(), val2->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::function, "( %@ * %@ )", "(%@*%@)", { val1->GetDrawable(), val2->GetDrawable() } };
+}
+
+auto ValueMult::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ValueMult" },
+            { "val1", val1->toJSON() },
+            { "val2", val2->toJSON() },
+        },
+        *this);
+}
+
+auto ValueMult::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueMult>
+{
+    return ApplyTokenLocationToPtr(std::make_unique<ValueMult>(ValueFromJSON(RequireField(json, "val1", "ValueMult")),
+                                       ValueFromJSON(RequireField(json, "val2", "ValueMult"))),
+        json);
 }
 
 void ValueMult::replace(Token const* which, std::unique_ptr<Token> v)
@@ -967,13 +1286,25 @@ auto ValueDiv::ToString() const -> std::string
 
 Drawable ValueDiv::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::function,
-        "( %@ / %@ )",
-        "(%@/%@)",
-        { val1->GetDrawable(), val2->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::function, "( %@ / %@ )", "(%@/%@)", { val1->GetDrawable(), val2->GetDrawable() } };
+}
+
+auto ValueDiv::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ValueDiv" },
+            { "val1", val1->toJSON() },
+            { "val2", val2->toJSON() },
+        },
+        *this);
+}
+
+auto ValueDiv::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueDiv>
+{
+    return ApplyTokenLocationToPtr(std::make_unique<ValueDiv>(ValueFromJSON(RequireField(json, "val1", "ValueDiv")),
+                                       ValueFromJSON(RequireField(json, "val2", "ValueDiv"))),
+        json);
 }
 
 void ValueDiv::replace(Token const* which, std::unique_ptr<Token> v)
@@ -1003,26 +1334,30 @@ Reader ValueDiv::Deserialize(Reader reader)
 // ValueNeg
 float ValueNeg::Get(Animate::Compile const& anim) const { return -val->Get(anim); }
 
-auto ValueNeg::ToString() const -> std::string
-{
-    return std::format("{}[CVN]- {}", super::ToString(), *val);
-}
+auto ValueNeg::ToString() const -> std::string { return std::format("{}[CVN]- {}", super::ToString(), *val); }
 
 Drawable ValueNeg::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::function,
-        "-%@",
-        "-%@",
-        { val->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::function, "-%@", "-%@", { val->GetDrawable() } };
 }
 
-void ValueNeg::replace(Token const* which, std::unique_ptr<Token> v)
+auto ValueNeg::toJSON() const -> nlohmann::json
 {
-    replace_helper<NumParts>(this, which, v, val);
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ValueNeg" },
+            { "val", val->toJSON() },
+        },
+        *this);
 }
+
+auto ValueNeg::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueNeg>
+{
+    return ApplyTokenLocationToPtr(
+        std::make_unique<ValueNeg>(ValueFromJSON(RequireField(json, "val", "ValueNeg"))), json);
+}
+
+void ValueNeg::replace(Token const* which, std::unique_ptr<Token> v) { replace_helper<NumParts>(this, which, v, val); }
 
 auto ValueNeg::Serialize() const -> std::vector<std::byte>
 {
@@ -1042,25 +1377,24 @@ Reader ValueNeg::Deserialize(Reader reader)
 }
 
 // ValueREM
-auto ValueREM::Get(Animate::Compile const& anim) const -> float
+auto ValueREM::Get(Animate::Compile const& anim) const -> float { return static_cast<float>(anim.GetBeatsRemaining()); }
+
+auto ValueREM::ToString() const -> std::string { return std::format("{}[CVR]REM", super::ToString()); }
+
+Drawable ValueREM::GetDrawable() const { return { this, parent_ptr, Type::value, "Remaining", "REM", {} }; }
+
+auto ValueREM::toJSON() const -> nlohmann::json
 {
-    return static_cast<float>(anim.GetBeatsRemaining());
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ValueREM" },
+        },
+        *this);
 }
 
-auto ValueREM::ToString() const -> std::string
+auto ValueREM::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueREM>
 {
-    return std::format("{}[CVR]REM", super::ToString());
-}
-
-Drawable ValueREM::GetDrawable() const
-{
-    return {
-        this, parent_ptr,
-        Type::value,
-        "Remaining",
-        "REM",
-        {}
-    };
+    return ApplyTokenLocationToPtr(std::make_unique<ValueREM>(), json);
 }
 
 auto ValueREM::Serialize() const -> std::vector<std::byte>
@@ -1083,10 +1417,7 @@ ValueVar::ValueVar(Cont::Variable num)
 {
 }
 
-float ValueVar::Get(Animate::Compile const& anim) const
-{
-    return anim.GetVarValue(varnum);
-}
+float ValueVar::Get(Animate::Compile const& anim) const { return anim.GetVarValue(varnum); }
 
 auto ValueVar::ToString() const -> std::string
 {
@@ -1095,19 +1426,30 @@ auto ValueVar::ToString() const -> std::string
 
 Drawable ValueVar::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::value,
-        std::string{ s_var_names[toUType(varnum)] },
-        std::string{ s_var_names[toUType(varnum)] },
-        {}
-    };
+    return { this, parent_ptr, Type::value, std::string{ s_var_names[toUType(varnum)] },
+        std::string{ s_var_names[toUType(varnum)] }, {} };
 }
 
-void ValueVar::Set(Animate::Compile& anim, float v)
+auto ValueVar::toJSON() const -> nlohmann::json
 {
-    anim.SetVarValue(varnum, v);
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ValueVar" },
+            { "variable", std::string{ s_var_names.at(CalChart::toUType(varnum)) } },
+        },
+        *this);
 }
+
+auto ValueVar::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueVar>
+{
+    auto const& variable = RequireField(json, "variable", "ValueVar");
+    if (!variable.is_string()) {
+        throw std::runtime_error("bad Procedure JSON: ValueVar.variable must be a string");
+    }
+    return ApplyTokenLocationToPtr(std::make_unique<ValueVar>(ParseVariable(variable.get<std::string>())), json);
+}
+
+void ValueVar::Set(Animate::Compile& anim, float v) { anim.SetVarValue(varnum, v); }
 
 auto ValueVar::Serialize() const -> std::vector<std::byte>
 {
@@ -1127,20 +1469,25 @@ Reader ValueVar::Deserialize(Reader reader)
 }
 
 // ValueVarUnset
-auto ValueVarUnset::ToString() const -> std::string
-{
-    return std::format("{}[CVVU]Unset", super::ToString());
-}
+auto ValueVarUnset::ToString() const -> std::string { return std::format("{}[CVVU]Unset", super::ToString()); }
 
 Drawable ValueVarUnset::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::unset,
-        "unset value var",
-        "unset value var",
-        {}
-    };
+    return { this, parent_ptr, Type::unset, "unset value var", "unset value var", {} };
+}
+
+auto ValueVarUnset::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ValueVarUnset" },
+        },
+        *this);
+}
+
+auto ValueVarUnset::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueVarUnset>
+{
+    return ApplyTokenLocationToPtr(std::make_unique<ValueVarUnset>(), json);
 }
 
 auto ValueVarUnset::Serialize() const -> std::vector<std::byte>
@@ -1167,26 +1514,30 @@ auto FuncDir::Get(Animate::Compile const& anim) const -> float
     return static_cast<float>(CalChart::Degree{ anim.GetPointPosition().Direction(c) }.getValue());
 }
 
-auto FuncDir::ToString() const -> std::string
-{
-    return std::format("{}[CFD]Direction to {}", super::ToString(), *pnt);
-}
+auto FuncDir::ToString() const -> std::string { return std::format("{}[CFD]Direction to {}", super::ToString(), *pnt); }
 
 Drawable FuncDir::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::function,
-        "Direction to %@",
-        "DIR %@",
-        { pnt->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::function, "Direction to %@", "DIR %@", { pnt->GetDrawable() } };
 }
 
-void FuncDir::replace(Token const* which, std::unique_ptr<Token> v)
+auto FuncDir::toJSON() const -> nlohmann::json
 {
-    replace_helper<NumParts>(this, which, v, pnt);
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "FuncDir" },
+            { "pnt", pnt->toJSON() },
+        },
+        *this);
 }
+
+auto FuncDir::fromJSON(nlohmann::json const& json) -> std::unique_ptr<FuncDir>
+{
+    return ApplyTokenLocationToPtr(
+        std::make_unique<FuncDir>(PointFromJSON(RequireField(json, "pnt", "FuncDir"))), json);
+}
+
+void FuncDir::replace(Token const* which, std::unique_ptr<Token> v) { replace_helper<NumParts>(this, which, v, pnt); }
 
 auto FuncDir::Serialize() const -> std::vector<std::byte>
 {
@@ -1223,13 +1574,27 @@ auto FuncDirFrom::ToString() const -> std::string
 
 Drawable FuncDirFrom::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::function,
-        "Direction from %@ to %@",
-        "DIRFROM %@ to %@",
-        { pnt_start->GetDrawable(), pnt_end->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::function, "Direction from %@ to %@", "DIRFROM %@ to %@",
+        { pnt_start->GetDrawable(), pnt_end->GetDrawable() } };
+}
+
+auto FuncDirFrom::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "FuncDirFrom" },
+            { "pnt1", pnt_start->toJSON() },
+            { "pnt2", pnt_end->toJSON() },
+        },
+        *this);
+}
+
+auto FuncDirFrom::fromJSON(nlohmann::json const& json) -> std::unique_ptr<FuncDirFrom>
+{
+    return ApplyTokenLocationToPtr(
+        std::make_unique<FuncDirFrom>(PointFromJSON(RequireField(json, "pnt1", "FuncDirFrom")),
+            PointFromJSON(RequireField(json, "pnt2", "FuncDirFrom"))),
+        json);
 }
 
 void FuncDirFrom::replace(Token const* which, std::unique_ptr<Token> v)
@@ -1263,26 +1628,30 @@ float FuncDist::Get(Animate::Compile const& anim) const
     return vector.DM_Magnitude();
 }
 
-auto FuncDist::ToString() const -> std::string
-{
-    return std::format("{}[CFd]Distance to {}", super::ToString(), *pnt);
-}
+auto FuncDist::ToString() const -> std::string { return std::format("{}[CFd]Distance to {}", super::ToString(), *pnt); }
 
 Drawable FuncDist::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::function,
-        "Distance to %@",
-        "DIST %@",
-        { pnt->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::function, "Distance to %@", "DIST %@", { pnt->GetDrawable() } };
 }
 
-void FuncDist::replace(Token const* which, std::unique_ptr<Token> v)
+auto FuncDist::toJSON() const -> nlohmann::json
 {
-    replace_helper<NumParts>(this, which, v, pnt);
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "FuncDist" },
+            { "pnt", pnt->toJSON() },
+        },
+        *this);
 }
+
+auto FuncDist::fromJSON(nlohmann::json const& json) -> std::unique_ptr<FuncDist>
+{
+    return ApplyTokenLocationToPtr(
+        std::make_unique<FuncDist>(PointFromJSON(RequireField(json, "pnt", "FuncDist"))), json);
+}
+
+void FuncDist::replace(Token const* which, std::unique_ptr<Token> v) { replace_helper<NumParts>(this, which, v, pnt); }
 
 auto FuncDist::Serialize() const -> std::vector<std::byte>
 {
@@ -1315,13 +1684,27 @@ auto FuncDistFrom::ToString() const -> std::string
 
 Drawable FuncDistFrom::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::function,
-        "Distance from %@ to %@",
-        "DISTFROM %@ to %@",
-        { pnt_start->GetDrawable(), pnt_end->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::function, "Distance from %@ to %@", "DISTFROM %@ to %@",
+        { pnt_start->GetDrawable(), pnt_end->GetDrawable() } };
+}
+
+auto FuncDistFrom::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "FuncDistFrom" },
+            { "pnt1", pnt_start->toJSON() },
+            { "pnt2", pnt_end->toJSON() },
+        },
+        *this);
+}
+
+auto FuncDistFrom::fromJSON(nlohmann::json const& json) -> std::unique_ptr<FuncDistFrom>
+{
+    return ApplyTokenLocationToPtr(
+        std::make_unique<FuncDistFrom>(PointFromJSON(RequireField(json, "pnt1", "FuncDistFrom")),
+            PointFromJSON(RequireField(json, "pnt2", "FuncDistFrom"))),
+        json);
 }
 
 void FuncDistFrom::replace(Token const* which, std::unique_ptr<Token> v)
@@ -1370,13 +1753,29 @@ auto FuncEither::ToString() const -> std::string
 
 Drawable FuncEither::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::function,
-        "Either direction to %@ or %@, depending on whichever is a shorter angle to %@",
-        "EITHER %@ or %@, by %@",
-        { dir1->GetDrawable(), dir2->GetDrawable(), pnt->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::function,
+        "Either direction to %@ or %@, depending on whichever is a shorter angle to %@", "EITHER %@ or %@, by %@",
+        { dir1->GetDrawable(), dir2->GetDrawable(), pnt->GetDrawable() } };
+}
+
+auto FuncEither::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "FuncEither" },
+            { "dir1", dir1->toJSON() },
+            { "dir2", dir2->toJSON() },
+            { "pnt", pnt->toJSON() },
+        },
+        *this);
+}
+
+auto FuncEither::fromJSON(nlohmann::json const& json) -> std::unique_ptr<FuncEither>
+{
+    return ApplyTokenLocationToPtr(std::make_unique<FuncEither>(ValueFromJSON(RequireField(json, "dir1", "FuncEither")),
+                                       ValueFromJSON(RequireField(json, "dir2", "FuncEither")),
+                                       PointFromJSON(RequireField(json, "pnt", "FuncEither"))),
+        json);
 }
 
 void FuncEither::replace(Token const* which, std::unique_ptr<Token> v)
@@ -1406,10 +1805,7 @@ Reader FuncEither::Deserialize(Reader reader)
 }
 
 // FuncOpp
-float FuncOpp::Get(Animate::Compile const& anim) const
-{
-    return (dir->Get(anim) + 180.0f);
-}
+float FuncOpp::Get(Animate::Compile const& anim) const { return (dir->Get(anim) + 180.0f); }
 
 auto FuncOpp::ToString() const -> std::string
 {
@@ -1418,19 +1814,26 @@ auto FuncOpp::ToString() const -> std::string
 
 Drawable FuncOpp::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::function,
-        "opposite direction of %@",
-        "OPP %@",
-        { dir->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::function, "opposite direction of %@", "OPP %@", { dir->GetDrawable() } };
 }
 
-void FuncOpp::replace(Token const* which, std::unique_ptr<Token> v)
+auto FuncOpp::toJSON() const -> nlohmann::json
 {
-    replace_helper<NumParts>(this, which, v, dir);
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "FuncOpp" },
+            { "dir", dir->toJSON() },
+        },
+        *this);
 }
+
+auto FuncOpp::fromJSON(nlohmann::json const& json) -> std::unique_ptr<FuncOpp>
+{
+    return ApplyTokenLocationToPtr(
+        std::make_unique<FuncOpp>(ValueFromJSON(RequireField(json, "dir", "FuncOpp"))), json);
+}
+
+void FuncOpp::replace(Token const* which, std::unique_ptr<Token> v) { replace_helper<NumParts>(this, which, v, dir); }
 
 auto FuncOpp::Serialize() const -> std::vector<std::byte>
 {
@@ -1459,19 +1862,34 @@ float FuncStep::Get(Animate::Compile const& anim) const
 
 auto FuncStep::ToString() const -> std::string
 {
-    return std::format("{}[CFS]Step drill at {} beats for a block size of {} from point {}",
-        super::ToString(), *numbeats, *blksize, *pnt);
+    return std::format("{}[CFS]Step drill at {} beats for a block size of {} from point {}", super::ToString(),
+        *numbeats, *blksize, *pnt);
 }
 
 Drawable FuncStep::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::function,
-        "Step drill at %@ beats for a block size of %@ from point %@",
-        "STEP %@ Beats, %@ size, from %@",
-        { numbeats->GetDrawable(), blksize->GetDrawable(), pnt->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::function, "Step drill at %@ beats for a block size of %@ from point %@",
+        "STEP %@ Beats, %@ size, from %@", { numbeats->GetDrawable(), blksize->GetDrawable(), pnt->GetDrawable() } };
+}
+
+auto FuncStep::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "FuncStep" },
+            { "numbeats", numbeats->toJSON() },
+            { "blksize", blksize->toJSON() },
+            { "pnt", pnt->toJSON() },
+        },
+        *this);
+}
+
+auto FuncStep::fromJSON(nlohmann::json const& json) -> std::unique_ptr<FuncStep>
+{
+    return ApplyTokenLocationToPtr(std::make_unique<FuncStep>(ValueFromJSON(RequireField(json, "numbeats", "FuncStep")),
+                                       ValueFromJSON(RequireField(json, "blksize", "FuncStep")),
+                                       PointFromJSON(RequireField(json, "pnt", "FuncStep"))),
+        json);
 }
 
 void FuncStep::replace(Token const* which, std::unique_ptr<Token> v)
@@ -1501,10 +1919,7 @@ Reader FuncStep::Deserialize(Reader reader)
 }
 
 // Procedure
-auto Procedure::ToString() const -> std::string
-{
-    return std::format("{}[CPr]Procedure: ", super::ToString());
-}
+auto Procedure::ToString() const -> std::string { return std::format("{}[CPr]Procedure: ", super::ToString()); }
 
 auto Procedure::Serialize() const -> std::vector<std::byte>
 {
@@ -1521,20 +1936,25 @@ Reader Procedure::Deserialize(Reader reader)
 }
 
 // ProcUnset
-auto ProcUnset::ToString() const -> std::string
-{
-    return std::format("{}[CPrU]Unset", super::ToString());
-}
+auto ProcUnset::ToString() const -> std::string { return std::format("{}[CPrU]Unset", super::ToString()); }
 
 Drawable ProcUnset::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::unset,
-        "unset continuity",
-        "unset continuity",
-        {}
-    };
+    return { this, parent_ptr, Type::unset, "unset continuity", "unset continuity", {} };
+}
+
+auto ProcUnset::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ProcUnset" },
+        },
+        *this);
+}
+
+auto ProcUnset::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcUnset>
+{
+    return ApplyTokenLocationToPtr(std::make_unique<ProcUnset>(), json);
 }
 
 auto ProcUnset::Serialize() const -> std::vector<std::byte>
@@ -1552,10 +1972,7 @@ Reader ProcUnset::Deserialize(Reader reader)
 }
 
 // ProcSet
-void ProcSet::Compile(Animate::Compile& anim)
-{
-    var->Set(anim, val->Get(anim));
-}
+void ProcSet::Compile(Animate::Compile& anim) { var->Set(anim, val->Get(anim)); }
 
 auto ProcSet::ToString() const -> std::string
 {
@@ -1564,13 +1981,30 @@ auto ProcSet::ToString() const -> std::string
 
 Drawable ProcSet::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "variable %@ = %@",
-        "%@ = %@",
-        { var->GetDrawable(), val->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::procedure, "variable %@ = %@", "%@ = %@",
+        { var->GetDrawable(), val->GetDrawable() } };
+}
+
+auto ProcSet::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ProcSet" },
+            { "var", var->toJSON() },
+            { "val", val->toJSON() },
+        },
+        *this);
+}
+
+auto ProcSet::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcSet>
+{
+    auto var = ValueFromJSON(RequireField(json, "var", "ProcSet"));
+    auto varAsValueVar = dynamic_unique_ptr_cast<ValueVar>(std::move(var));
+    if (!varAsValueVar) {
+        throw std::runtime_error("bad Procedure JSON: ProcSet.var must be ValueVar or ValueVarUnset");
+    }
+    return ApplyTokenLocationToPtr(
+        std::make_unique<ProcSet>(std::move(varAsValueVar), ValueFromJSON(RequireField(json, "val", "ProcSet"))), json);
 }
 
 std::unique_ptr<Procedure> ProcSet::clone() const
@@ -1632,20 +2066,22 @@ void ProcBlam::Compile(Animate::Compile& anim)
     anim.Append(Animate::CommandMove{ anim.GetPointPosition(), anim.GetBeatsRemaining(), c });
 }
 
-auto ProcBlam::ToString() const -> std::string
+auto ProcBlam::ToString() const -> std::string { return std::format("{}[CPrB]BLAM", super::ToString()); }
+
+Drawable ProcBlam::GetDrawable() const { return { this, parent_ptr, Type::procedure, "BLAM", "BLAM", {} }; }
+
+auto ProcBlam::toJSON() const -> nlohmann::json
 {
-    return std::format("{}[CPrB]BLAM", super::ToString());
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ProcBlam" },
+        },
+        *this);
 }
 
-Drawable ProcBlam::GetDrawable() const
+auto ProcBlam::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcBlam>
 {
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "BLAM",
-        "BLAM",
-        {}
-    };
+    return ApplyTokenLocationToPtr(std::make_unique<ProcBlam>(), json);
 }
 
 auto ProcBlam::Serialize() const -> std::vector<std::byte>
@@ -1665,7 +2101,8 @@ Reader ProcBlam::Deserialize(Reader reader)
 // ProcClose
 void ProcClose::Compile(Animate::Compile& anim)
 {
-    anim.Append(Animate::CommandStill{ anim.GetPointPosition(), anim.GetBeatsRemaining(), Animate::CommandStill::Style::Close, CalChart::Degree{ dir->Get(anim) } });
+    anim.Append(Animate::CommandStill{ anim.GetPointPosition(), anim.GetBeatsRemaining(),
+        Animate::CommandStill::Style::Close, CalChart::Degree{ dir->Get(anim) } });
 }
 
 auto ProcClose::ToString() const -> std::string
@@ -1675,19 +2112,26 @@ auto ProcClose::ToString() const -> std::string
 
 Drawable ProcClose::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "Close %@",
-        "Close %@",
-        { dir->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::procedure, "Close %@", "Close %@", { dir->GetDrawable() } };
 }
 
-void ProcClose::replace(Token const* which, std::unique_ptr<Token> v)
+auto ProcClose::toJSON() const -> nlohmann::json
 {
-    replace_helper<NumParts>(this, which, v, dir);
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ProcClose" },
+            { "dir", dir->toJSON() },
+        },
+        *this);
 }
+
+auto ProcClose::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcClose>
+{
+    return ApplyTokenLocationToPtr(
+        std::make_unique<ProcClose>(ValueFromJSON(RequireField(json, "dir", "ProcClose"))), json);
+}
+
+void ProcClose::replace(Token const* which, std::unique_ptr<Token> v) { replace_helper<NumParts>(this, which, v, dir); }
 
 auto ProcClose::Serialize() const -> std::vector<std::byte>
 {
@@ -1707,26 +2151,48 @@ Reader ProcClose::Deserialize(Reader reader)
 }
 
 // ProcCM
-void ProcCM::Compile(Animate::Compile& anim)
-{
-    DoCounterMarch(anim, *pnt1, *pnt2, *stps, *dir1, *dir2, *numbeats);
-}
+void ProcCM::Compile(Animate::Compile& anim) { DoCounterMarch(anim, *pnt1, *pnt2, *stps, *dir1, *dir2, *numbeats); }
 
 auto ProcCM::ToString() const -> std::string
 {
-    return std::format("{}[CPrCM]CounterMarch starting at {} passing through {} stepping {} off points, first moving {} then {} for number beats {}",
+    return std::format("{}[CPrCM]CounterMarch starting at {} passing through {} stepping {} off points, first moving "
+                       "{} then {} for number beats {}",
         super::ToString(), *pnt1, *pnt2, *stps, *dir1, *dir2, *numbeats);
 }
 
 Drawable ProcCM::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "CounterMarch starting at %@ passing through %@ stepping %@ off points, first moving %@ then %@ for number beats %@",
+    return { this, parent_ptr, Type::procedure,
+        "CounterMarch starting at %@ passing through %@ stepping %@ off points, first moving %@ then %@ for number "
+        "beats %@",
         "COUNTERMARCH %@ %@ %@, first %@ then %@ for beats %@",
-        { pnt1->GetDrawable(), pnt2->GetDrawable(), stps->GetDrawable(), dir1->GetDrawable(), dir2->GetDrawable(), numbeats->GetDrawable() }
-    };
+        { pnt1->GetDrawable(), pnt2->GetDrawable(), stps->GetDrawable(), dir1->GetDrawable(), dir2->GetDrawable(),
+            numbeats->GetDrawable() } };
+}
+
+auto ProcCM::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ProcCM" },
+            { "pnt1", pnt1->toJSON() },
+            { "pnt2", pnt2->toJSON() },
+            { "stps", stps->toJSON() },
+            { "dir1", dir1->toJSON() },
+            { "dir2", dir2->toJSON() },
+            { "numbeats", numbeats->toJSON() },
+        },
+        *this);
+}
+
+auto ProcCM::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcCM>
+{
+    return ApplyTokenLocationToPtr(
+        std::make_unique<ProcCM>(PointFromJSON(RequireField(json, "pnt1", "ProcCM")),
+            PointFromJSON(RequireField(json, "pnt2", "ProcCM")), ValueFromJSON(RequireField(json, "stps", "ProcCM")),
+            ValueFromJSON(RequireField(json, "dir1", "ProcCM")), ValueFromJSON(RequireField(json, "dir2", "ProcCM")),
+            ValueFromJSON(RequireField(json, "numbeats", "ProcCM"))),
+        json);
 }
 
 void ProcCM::replace(Token const* which, std::unique_ptr<Token> v)
@@ -1809,13 +2275,29 @@ auto ProcDMCM::ToString() const -> std::string
 
 Drawable ProcDMCM::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "Diagonal march CounterMarch starting at %@ passing through %@ for number beats %@",
-        "DMCM %@ %@ for beats %@",
-        { pnt1->GetDrawable(), pnt2->GetDrawable(), numbeats->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::procedure,
+        "Diagonal march CounterMarch starting at %@ passing through %@ for number beats %@", "DMCM %@ %@ for beats %@",
+        { pnt1->GetDrawable(), pnt2->GetDrawable(), numbeats->GetDrawable() } };
+}
+
+auto ProcDMCM::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ProcDMCM" },
+            { "pnt1", pnt1->toJSON() },
+            { "pnt2", pnt2->toJSON() },
+            { "numbeats", numbeats->toJSON() },
+        },
+        *this);
+}
+
+auto ProcDMCM::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcDMCM>
+{
+    return ApplyTokenLocationToPtr(std::make_unique<ProcDMCM>(PointFromJSON(RequireField(json, "pnt1", "ProcDMCM")),
+                                       PointFromJSON(RequireField(json, "pnt2", "ProcDMCM")),
+                                       ValueFromJSON(RequireField(json, "numbeats", "ProcDMCM"))),
+        json);
 }
 
 void ProcDMCM::replace(Token const* which, std::unique_ptr<Token> v)
@@ -1886,19 +2368,27 @@ auto ProcDMHS::ToString() const -> std::string
 
 Drawable ProcDMHS::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "Diagonal march then HighStep to %@",
-        "DMHS %@",
-        { pnt->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::procedure, "Diagonal march then HighStep to %@", "DMHS %@",
+        { pnt->GetDrawable() } };
 }
 
-void ProcDMHS::replace(Token const* which, std::unique_ptr<Token> v)
+auto ProcDMHS::toJSON() const -> nlohmann::json
 {
-    replace_helper<NumParts>(this, which, v, pnt);
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ProcDMHS" },
+            { "pnt", pnt->toJSON() },
+        },
+        *this);
 }
+
+auto ProcDMHS::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcDMHS>
+{
+    return ApplyTokenLocationToPtr(
+        std::make_unique<ProcDMHS>(PointFromJSON(RequireField(json, "pnt", "ProcDMHS"))), json);
+}
+
+void ProcDMHS::replace(Token const* which, std::unique_ptr<Token> v) { replace_helper<NumParts>(this, which, v, pnt); }
 
 auto ProcDMHS::Serialize() const -> std::vector<std::byte>
 {
@@ -1923,7 +2413,8 @@ void ProcEven::Compile(Animate::Compile& anim)
     auto c = pnt->Get(anim) - anim.GetPointPosition();
     auto steps = float2int(anim, stps->Get(anim));
     if (steps < 0) {
-        anim.Append(Animate::CommandMove(anim.GetPointPosition(), (unsigned)-steps, c, -CalChart::Degree{ c.Direction() }));
+        anim.Append(
+            Animate::CommandMove(anim.GetPointPosition(), (unsigned)-steps, c, -CalChart::Degree{ c.Direction() }));
     } else {
         anim.Append(Animate::CommandMove(anim.GetPointPosition(), (unsigned)steps, c));
     }
@@ -1936,13 +2427,26 @@ auto ProcEven::ToString() const -> std::string
 
 Drawable ProcEven::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "Even march %@ to %@",
-        "EVEN %@ %@",
-        { stps->GetDrawable(), pnt->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::procedure, "Even march %@ to %@", "EVEN %@ %@",
+        { stps->GetDrawable(), pnt->GetDrawable() } };
+}
+
+auto ProcEven::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ProcEven" },
+            { "stps", stps->toJSON() },
+            { "pnt", pnt->toJSON() },
+        },
+        *this);
+}
+
+auto ProcEven::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcEven>
+{
+    return ApplyTokenLocationToPtr(std::make_unique<ProcEven>(ValueFromJSON(RequireField(json, "stps", "ProcEven")),
+                                       PointFromJSON(RequireField(json, "pnt", "ProcEven"))),
+        json);
 }
 
 void ProcEven::replace(Token const* which, std::unique_ptr<Token> v)
@@ -1996,19 +2500,26 @@ auto ProcEWNS::ToString() const -> std::string
 
 Drawable ProcEWNS::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "EastWest/NorthSouth to %@",
-        "EW/NS to %@",
-        { pnt->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::procedure, "EastWest/NorthSouth to %@", "EW/NS to %@", { pnt->GetDrawable() } };
 }
 
-void ProcEWNS::replace(Token const* which, std::unique_ptr<Token> v)
+auto ProcEWNS::toJSON() const -> nlohmann::json
 {
-    replace_helper<NumParts>(this, which, v, pnt);
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ProcEWNS" },
+            { "pnt", pnt->toJSON() },
+        },
+        *this);
 }
+
+auto ProcEWNS::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcEWNS>
+{
+    return ApplyTokenLocationToPtr(
+        std::make_unique<ProcEWNS>(PointFromJSON(RequireField(json, "pnt", "ProcEWNS"))), json);
+}
+
+void ProcEWNS::replace(Token const* which, std::unique_ptr<Token> v) { replace_helper<NumParts>(this, which, v, pnt); }
 
 auto ProcEWNS::Serialize() const -> std::vector<std::byte>
 {
@@ -2087,8 +2598,7 @@ void ProcFountain::Compile(Animate::Compile& anim)
 
 auto ProcFountain::ToString() const -> std::string
 {
-    std::string result = std::format("{}[CPrF]Fountain step, first going {} then {}",
-        super::ToString(), *dir1, *dir2);
+    std::string result = std::format("{}[CPrF]Fountain step, first going {} then {}", super::ToString(), *dir1, *dir2);
     if (stepsize1)
         result += std::format(", first at {}", *stepsize1);
     if (stepsize2)
@@ -2100,39 +2610,56 @@ auto ProcFountain::ToString() const -> std::string
 Drawable ProcFountain::GetDrawable() const
 {
     if (stepsize1 && stepsize2) {
-        return {
-            this, parent_ptr,
-            Type::procedure,
+        return { this, parent_ptr, Type::procedure,
             "Fountain step, first going %@ then %@, first at %@, then at %@, ending at %@",
             "FOUNTAIN %@ -> %@, Step %@, then %@, ending %@",
-            { dir1->GetDrawable(), dir2->GetDrawable(), stepsize1->GetDrawable(), stepsize2->GetDrawable(), pnt->GetDrawable() }
-        };
+            { dir1->GetDrawable(), dir2->GetDrawable(), stepsize1->GetDrawable(), stepsize2->GetDrawable(),
+                pnt->GetDrawable() } };
     }
     if (stepsize1) {
-        return {
-            this, parent_ptr,
-            Type::procedure,
-            "Fountain step, first going %@ then %@, first at %@, ending at %@",
+        return { this, parent_ptr, Type::procedure, "Fountain step, first going %@ then %@, first at %@, ending at %@",
             "FOUNTAIN %@ -> %@, Step %@ ending %@",
-            { dir1->GetDrawable(), dir2->GetDrawable(), stepsize1->GetDrawable(), pnt->GetDrawable() }
-        };
+            { dir1->GetDrawable(), dir2->GetDrawable(), stepsize1->GetDrawable(), pnt->GetDrawable() } };
     }
     if (stepsize2) {
-        return {
-            this, parent_ptr,
-            Type::procedure,
-            "Fountain step, first going %@ then %@, then at %@, ending at %@",
+        return { this, parent_ptr, Type::procedure, "Fountain step, first going %@ then %@, then at %@, ending at %@",
             "FOUNTAIN %@ -> %@, Step %@, ending %@",
-            { dir1->GetDrawable(), dir2->GetDrawable(), stepsize2->GetDrawable(), pnt->GetDrawable() }
-        };
+            { dir1->GetDrawable(), dir2->GetDrawable(), stepsize2->GetDrawable(), pnt->GetDrawable() } };
     }
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "Fountain step, first going %@ then %@, ending at %@",
-        "FOUNTAIN %@ -> %@, ending %@",
-        { dir1->GetDrawable(), dir2->GetDrawable(), pnt->GetDrawable() }
+    return { this, parent_ptr, Type::procedure, "Fountain step, first going %@ then %@, ending at %@",
+        "FOUNTAIN %@ -> %@, ending %@", { dir1->GetDrawable(), dir2->GetDrawable(), pnt->GetDrawable() } };
+}
+
+auto ProcFountain::toJSON() const -> nlohmann::json
+{
+    auto json = nlohmann::json{
+        { "type", "ProcFountain" },
+        { "dir1", dir1->toJSON() },
+        { "dir2", dir2->toJSON() },
+        { "pnt", pnt->toJSON() },
     };
+    json["stepsize1"] = stepsize1 ? stepsize1->toJSON() : nlohmann::json(nullptr);
+    json["stepsize2"] = stepsize2 ? stepsize2->toJSON() : nlohmann::json(nullptr);
+    return AddTokenLocation(std::move(json), *this);
+}
+
+auto ProcFountain::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcFountain>
+{
+    auto const* stepsize1 = OptionalField(json, "stepsize1");
+    auto const* stepsize2 = OptionalField(json, "stepsize2");
+    auto parsedStep1 = std::unique_ptr<Value>{};
+    auto parsedStep2 = std::unique_ptr<Value>{};
+    if (stepsize1 && !stepsize1->is_null()) {
+        parsedStep1 = ValueFromJSON(*stepsize1);
+    }
+    if (stepsize2 && !stepsize2->is_null()) {
+        parsedStep2 = ValueFromJSON(*stepsize2);
+    }
+    return ApplyTokenLocationToPtr(
+        std::make_unique<ProcFountain>(ValueFromJSON(RequireField(json, "dir1", "ProcFountain")),
+            ValueFromJSON(RequireField(json, "dir2", "ProcFountain")), std::move(parsedStep1), std::move(parsedStep2),
+            PointFromJSON(RequireField(json, "pnt", "ProcFountain"))),
+        json);
 }
 
 void ProcFountain::replace(Token const* which, std::unique_ptr<Token> v)
@@ -2185,7 +2712,8 @@ void ProcFM::Compile(Animate::Compile& anim)
         auto c = CreateCalChartVector(CalChart::Degree{ dir->Get(anim) }, stps->Get(anim));
         if (c != Coord{ 0 }) {
             if (b < 0) {
-                anim.Append(Animate::CommandMove(anim.GetPointPosition(), (unsigned)-b, c, -CalChart::Degree{ c.Direction() }));
+                anim.Append(
+                    Animate::CommandMove(anim.GetPointPosition(), (unsigned)-b, c, -CalChart::Degree{ c.Direction() }));
             } else {
                 anim.Append(Animate::CommandMove(anim.GetPointPosition(), (unsigned)b, c));
             }
@@ -2200,13 +2728,26 @@ auto ProcFM::ToString() const -> std::string
 
 Drawable ProcFM::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "Forward march %@ %@",
-        "FM %@ %@",
-        { stps->GetDrawable(), dir->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::procedure, "Forward march %@ %@", "FM %@ %@",
+        { stps->GetDrawable(), dir->GetDrawable() } };
+}
+
+auto ProcFM::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ProcFM" },
+            { "stps", stps->toJSON() },
+            { "dir", dir->toJSON() },
+        },
+        *this);
+}
+
+auto ProcFM::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcFM>
+{
+    return ApplyTokenLocationToPtr(std::make_unique<ProcFM>(ValueFromJSON(RequireField(json, "stps", "ProcFM")),
+                                       ValueFromJSON(RequireField(json, "dir", "ProcFM"))),
+        json);
 }
 
 void ProcFM::replace(Token const* which, std::unique_ptr<Token> v)
@@ -2249,19 +2790,26 @@ auto ProcFMTO::ToString() const -> std::string
 
 Drawable ProcFMTO::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "Forward march to %@",
-        "FMTO %@",
-        { pnt->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::procedure, "Forward march to %@", "FMTO %@", { pnt->GetDrawable() } };
 }
 
-void ProcFMTO::replace(Token const* which, std::unique_ptr<Token> v)
+auto ProcFMTO::toJSON() const -> nlohmann::json
 {
-    replace_helper<NumParts>(this, which, v, pnt);
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ProcFMTO" },
+            { "pnt", pnt->toJSON() },
+        },
+        *this);
 }
+
+auto ProcFMTO::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcFMTO>
+{
+    return ApplyTokenLocationToPtr(
+        std::make_unique<ProcFMTO>(PointFromJSON(RequireField(json, "pnt", "ProcFMTO"))), json);
+}
+
+void ProcFMTO::replace(Token const* which, std::unique_ptr<Token> v) { replace_helper<NumParts>(this, which, v, pnt); }
 
 static inline Coord::units roundcoord(Coord::units a, Coord::units mod)
 {
@@ -2316,19 +2864,26 @@ auto ProcGrid::ToString() const -> std::string
 
 Drawable ProcGrid::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "Move on Grid of %@ spacing",
-        "GRID %@",
-        { grid->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::procedure, "Move on Grid of %@ spacing", "GRID %@", { grid->GetDrawable() } };
 }
 
-void ProcGrid::replace(Token const* which, std::unique_ptr<Token> v)
+auto ProcGrid::toJSON() const -> nlohmann::json
 {
-    replace_helper<NumParts>(this, which, v, grid);
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ProcGrid" },
+            { "grid", grid->toJSON() },
+        },
+        *this);
 }
+
+auto ProcGrid::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcGrid>
+{
+    return ApplyTokenLocationToPtr(
+        std::make_unique<ProcGrid>(ValueFromJSON(RequireField(json, "grid", "ProcGrid"))), json);
+}
+
+void ProcGrid::replace(Token const* which, std::unique_ptr<Token> v) { replace_helper<NumParts>(this, which, v, grid); }
 
 auto ProcGrid::Serialize() const -> std::vector<std::byte>
 {
@@ -2380,13 +2935,29 @@ auto ProcHSCM::ToString() const -> std::string
 
 Drawable ProcHSCM::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "High Step CounterMarch starting at %@ passing through %@ for number beats %@",
-        "HSCM %@ -> %@ for beats %@",
-        { pnt1->GetDrawable(), pnt2->GetDrawable(), numbeats->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::procedure,
+        "High Step CounterMarch starting at %@ passing through %@ for number beats %@", "HSCM %@ -> %@ for beats %@",
+        { pnt1->GetDrawable(), pnt2->GetDrawable(), numbeats->GetDrawable() } };
+}
+
+auto ProcHSCM::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ProcHSCM" },
+            { "pnt1", pnt1->toJSON() },
+            { "pnt2", pnt2->toJSON() },
+            { "numbeats", numbeats->toJSON() },
+        },
+        *this);
+}
+
+auto ProcHSCM::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcHSCM>
+{
+    return ApplyTokenLocationToPtr(std::make_unique<ProcHSCM>(PointFromJSON(RequireField(json, "pnt1", "ProcHSCM")),
+                                       PointFromJSON(RequireField(json, "pnt2", "ProcHSCM")),
+                                       ValueFromJSON(RequireField(json, "numbeats", "ProcHSCM"))),
+        json);
 }
 
 void ProcHSCM::replace(Token const* which, std::unique_ptr<Token> v)
@@ -2457,19 +3028,27 @@ auto ProcHSDM::ToString() const -> std::string
 
 Drawable ProcHSDM::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "HighStep then Diagonal march to %@",
-        "HSDM %@",
-        { pnt->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::procedure, "HighStep then Diagonal march to %@", "HSDM %@",
+        { pnt->GetDrawable() } };
 }
 
-void ProcHSDM::replace(Token const* which, std::unique_ptr<Token> v)
+auto ProcHSDM::toJSON() const -> nlohmann::json
 {
-    replace_helper<NumParts>(this, which, v, pnt);
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ProcHSDM" },
+            { "pnt", pnt->toJSON() },
+        },
+        *this);
 }
+
+auto ProcHSDM::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcHSDM>
+{
+    return ApplyTokenLocationToPtr(
+        std::make_unique<ProcHSDM>(PointFromJSON(RequireField(json, "pnt", "ProcHSDM"))), json);
+}
+
+void ProcHSDM::replace(Token const* which, std::unique_ptr<Token> v) { replace_helper<NumParts>(this, which, v, pnt); }
 
 auto ProcHSDM::Serialize() const -> std::vector<std::byte>
 {
@@ -2502,19 +3081,26 @@ auto ProcMagic::ToString() const -> std::string
 
 Drawable ProcMagic::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "Magic step to %@",
-        "MAGIC %@",
-        { pnt->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::procedure, "Magic step to %@", "MAGIC %@", { pnt->GetDrawable() } };
 }
 
-void ProcMagic::replace(Token const* which, std::unique_ptr<Token> v)
+auto ProcMagic::toJSON() const -> nlohmann::json
 {
-    replace_helper<NumParts>(this, which, v, pnt);
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ProcMagic" },
+            { "pnt", pnt->toJSON() },
+        },
+        *this);
 }
+
+auto ProcMagic::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcMagic>
+{
+    return ApplyTokenLocationToPtr(
+        std::make_unique<ProcMagic>(PointFromJSON(RequireField(json, "pnt", "ProcMagic"))), json);
+}
+
+void ProcMagic::replace(Token const* which, std::unique_ptr<Token> v) { replace_helper<NumParts>(this, which, v, pnt); }
 
 auto ProcMagic::Serialize() const -> std::vector<std::byte>
 {
@@ -2543,9 +3129,11 @@ void ProcMarch::Compile(Animate::Compile& anim)
         Coord c{ Float2CoordUnits(cos(angle) * mag), static_cast<Coord::units>(-Float2CoordUnits(sin(angle) * mag)) };
         if (c != Coord{ 0 }) {
             if (facedir)
-                anim.Append(Animate::CommandMove(anim.GetPointPosition(), (unsigned)std::abs(b), c, CalChart::Degree{ facedir->Get(anim) }));
+                anim.Append(Animate::CommandMove(
+                    anim.GetPointPosition(), (unsigned)std::abs(b), c, CalChart::Degree{ facedir->Get(anim) }));
             else if (b < 0) {
-                anim.Append(Animate::CommandMove(anim.GetPointPosition(), (unsigned)-b, c, -CalChart::Degree{ c.Direction() }));
+                anim.Append(
+                    Animate::CommandMove(anim.GetPointPosition(), (unsigned)-b, c, -CalChart::Degree{ c.Direction() }));
             } else {
                 anim.Append(Animate::CommandMove(anim.GetPointPosition(), (unsigned)b, c));
             }
@@ -2555,27 +3143,45 @@ void ProcMarch::Compile(Animate::Compile& anim)
 
 auto ProcMarch::ToString() const -> std::string
 {
-    return std::format("{}[CPrm]March step size {} for steps {} in direction {}{}", super::ToString(), *stpsize, *stps, *dir, facedir ? std::format(" facing {}", *facedir) : "");
+    return std::format("{}[CPrm]March step size {} for steps {} in direction {}{}", super::ToString(), *stpsize, *stps,
+        *dir, facedir ? std::format(" facing {}", *facedir) : "");
 }
 
 Drawable ProcMarch::GetDrawable() const
 {
     if (facedir) {
-        return {
-            this, parent_ptr,
-            Type::procedure,
-            "March step size %@ for %@ in direction %@ facing %@",
+        return { this, parent_ptr, Type::procedure, "March step size %@ for %@ in direction %@ facing %@",
             "MARCH %@ for %@ DIR %@ FACING %@",
-            { stpsize->GetDrawable(), stps->GetDrawable(), dir->GetDrawable(), facedir->GetDrawable() }
-        };
+            { stpsize->GetDrawable(), stps->GetDrawable(), dir->GetDrawable(), facedir->GetDrawable() } };
     }
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "March step size %@ for steps %@ in direction %@",
-        "MARCH %@ for %@ DIR %@",
-        { stpsize->GetDrawable(), stps->GetDrawable(), dir->GetDrawable() }
+    return { this, parent_ptr, Type::procedure, "March step size %@ for steps %@ in direction %@",
+        "MARCH %@ for %@ DIR %@", { stpsize->GetDrawable(), stps->GetDrawable(), dir->GetDrawable() } };
+}
+
+auto ProcMarch::toJSON() const -> nlohmann::json
+{
+    auto json = nlohmann::json{
+        { "type", "ProcMarch" },
+        { "stpsize", stpsize->toJSON() },
+        { "stps", stps->toJSON() },
+        { "dir", dir->toJSON() },
     };
+    json["facedir"] = facedir ? facedir->toJSON() : nlohmann::json(nullptr);
+    return AddTokenLocation(std::move(json), *this);
+}
+
+auto ProcMarch::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcMarch>
+{
+    auto const* facedir = OptionalField(json, "facedir");
+    auto parsedFace = std::unique_ptr<Value>{};
+    if (facedir && !facedir->is_null()) {
+        parsedFace = ValueFromJSON(*facedir);
+    }
+    return ApplyTokenLocationToPtr(
+        std::make_unique<ProcMarch>(ValueFromJSON(RequireField(json, "stpsize", "ProcMarch")),
+            ValueFromJSON(RequireField(json, "stps", "ProcMarch")),
+            ValueFromJSON(RequireField(json, "dir", "ProcMarch")), std::move(parsedFace)),
+        json);
 }
 
 void ProcMarch::replace(Token const* which, std::unique_ptr<Token> v)
@@ -2617,7 +3223,8 @@ void ProcMT::Compile(Animate::Compile& anim)
 {
     auto b = float2int(anim, numbeats->Get(anim));
     if (b != 0) {
-        anim.Append(Animate::CommandStill(anim.GetPointPosition(), (unsigned)std::abs(b), Animate::CommandStill::Style::MarkTime, CalChart::Degree{ dir->Get(anim) }));
+        anim.Append(Animate::CommandStill(anim.GetPointPosition(), (unsigned)std::abs(b),
+            Animate::CommandStill::Style::MarkTime, CalChart::Degree{ dir->Get(anim) }));
     }
 }
 
@@ -2628,13 +3235,26 @@ auto ProcMT::ToString() const -> std::string
 
 Drawable ProcMT::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "MarkTime %@ %@",
-        "MT %@ %@",
-        { numbeats->GetDrawable(), dir->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::procedure, "MarkTime %@ %@", "MT %@ %@",
+        { numbeats->GetDrawable(), dir->GetDrawable() } };
+}
+
+auto ProcMT::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ProcMT" },
+            { "numbeats", numbeats->toJSON() },
+            { "dir", dir->toJSON() },
+        },
+        *this);
+}
+
+auto ProcMT::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcMT>
+{
+    return ApplyTokenLocationToPtr(std::make_unique<ProcMT>(ValueFromJSON(RequireField(json, "numbeats", "ProcMT")),
+                                       ValueFromJSON(RequireField(json, "dir", "ProcMT"))),
+        json);
 }
 
 void ProcMT::replace(Token const* which, std::unique_ptr<Token> v)
@@ -2664,7 +3284,8 @@ Reader ProcMT::Deserialize(Reader reader)
 // ProcMTRM
 void ProcMTRM::Compile(Animate::Compile& anim)
 {
-    anim.Append(Animate::CommandStill(anim.GetPointPosition(), anim.GetBeatsRemaining(), Animate::CommandStill::Style::MarkTime, CalChart::Degree{ dir->Get(anim) }));
+    anim.Append(Animate::CommandStill(anim.GetPointPosition(), anim.GetBeatsRemaining(),
+        Animate::CommandStill::Style::MarkTime, CalChart::Degree{ dir->Get(anim) }));
 }
 
 auto ProcMTRM::ToString() const -> std::string
@@ -2673,19 +3294,26 @@ auto ProcMTRM::ToString() const -> std::string
 }
 Drawable ProcMTRM::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "MarkTime for Remaining %@",
-        "MTRM %@",
-        { dir->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::procedure, "MarkTime for Remaining %@", "MTRM %@", { dir->GetDrawable() } };
 }
 
-void ProcMTRM::replace(Token const* which, std::unique_ptr<Token> v)
+auto ProcMTRM::toJSON() const -> nlohmann::json
 {
-    replace_helper<NumParts>(this, which, v, dir);
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ProcMTRM" },
+            { "dir", dir->toJSON() },
+        },
+        *this);
 }
+
+auto ProcMTRM::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcMTRM>
+{
+    return ApplyTokenLocationToPtr(
+        std::make_unique<ProcMTRM>(ValueFromJSON(RequireField(json, "dir", "ProcMTRM"))), json);
+}
+
+void ProcMTRM::replace(Token const* which, std::unique_ptr<Token> v) { replace_helper<NumParts>(this, which, v, dir); }
 
 auto ProcMTRM::Serialize() const -> std::vector<std::byte>
 {
@@ -2731,19 +3359,26 @@ auto ProcNSEW::ToString() const -> std::string
 
 Drawable ProcNSEW::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "NorthSouth/EastWest to %@",
-        "NSEW %@",
-        { pnt->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::procedure, "NorthSouth/EastWest to %@", "NSEW %@", { pnt->GetDrawable() } };
 }
 
-void ProcNSEW::replace(Token const* which, std::unique_ptr<Token> v)
+auto ProcNSEW::toJSON() const -> nlohmann::json
 {
-    replace_helper<NumParts>(this, which, v, pnt);
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ProcNSEW" },
+            { "pnt", pnt->toJSON() },
+        },
+        *this);
 }
+
+auto ProcNSEW::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcNSEW>
+{
+    return ApplyTokenLocationToPtr(
+        std::make_unique<ProcNSEW>(PointFromJSON(RequireField(json, "pnt", "ProcNSEW"))), json);
+}
+
+void ProcNSEW::replace(Token const* which, std::unique_ptr<Token> v) { replace_helper<NumParts>(this, which, v, pnt); }
 
 auto ProcNSEW::Serialize() const -> std::vector<std::byte>
 {
@@ -2780,12 +3415,10 @@ void ProcRotate::Compile(Animate::Compile& anim)
     if (b < 0) {
         backwards = true;
     }
-    anim.Append(Animate::CommandRotate(
-        (unsigned)std::abs(b), c,
+    anim.Append(Animate::CommandRotate((unsigned)std::abs(b), c,
         // Don't use Magnitude() because
         // we want Coord numbers
-        sqrt(rad.x * rad.x + rad.y * rad.y),
-        start_ang, start_ang + angle, backwards));
+        sqrt(rad.x * rad.x + rad.y * rad.y), start_ang, start_ang + angle, backwards));
 }
 
 auto ProcRotate::ToString() const -> std::string
@@ -2795,13 +3428,28 @@ auto ProcRotate::ToString() const -> std::string
 
 Drawable ProcRotate::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "Rotate at angle %@ for steps %@ around pivot point %@",
-        "ROTATE %@ for %@ around %@",
-        { ang->GetDrawable(), stps->GetDrawable(), pnt->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::procedure, "Rotate at angle %@ for steps %@ around pivot point %@",
+        "ROTATE %@ for %@ around %@", { ang->GetDrawable(), stps->GetDrawable(), pnt->GetDrawable() } };
+}
+
+auto ProcRotate::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ProcRotate" },
+            { "ang", ang->toJSON() },
+            { "stps", stps->toJSON() },
+            { "pnt", pnt->toJSON() },
+        },
+        *this);
+}
+
+auto ProcRotate::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcRotate>
+{
+    return ApplyTokenLocationToPtr(std::make_unique<ProcRotate>(ValueFromJSON(RequireField(json, "ang", "ProcRotate")),
+                                       ValueFromJSON(RequireField(json, "stps", "ProcRotate")),
+                                       PointFromJSON(RequireField(json, "pnt", "ProcRotate"))),
+        json);
 }
 
 void ProcRotate::replace(Token const* which, std::unique_ptr<Token> v)
@@ -2835,7 +3483,8 @@ void ProcStandAndPlay::Compile(Animate::Compile& anim)
 {
     auto b = float2int(anim, numbeats->Get(anim));
     if (b != 0) {
-        anim.Append(Animate::CommandStill(anim.GetPointPosition(), (unsigned)std::abs(b), Animate::CommandStill::Style::StandAndPlay, CalChart::Degree{ dir->Get(anim) }));
+        anim.Append(Animate::CommandStill(anim.GetPointPosition(), (unsigned)std::abs(b),
+            Animate::CommandStill::Style::StandAndPlay, CalChart::Degree{ dir->Get(anim) }));
     }
 }
 
@@ -2846,13 +3495,27 @@ auto ProcStandAndPlay::ToString() const -> std::string
 
 Drawable ProcStandAndPlay::GetDrawable() const
 {
-    return {
-        this, parent_ptr,
-        Type::procedure,
-        "Stand & Play %@ %@",
-        "Stand %@ %@",
-        { numbeats->GetDrawable(), dir->GetDrawable() }
-    };
+    return { this, parent_ptr, Type::procedure, "Stand & Play %@ %@", "Stand %@ %@",
+        { numbeats->GetDrawable(), dir->GetDrawable() } };
+}
+
+auto ProcStandAndPlay::toJSON() const -> nlohmann::json
+{
+    return AddTokenLocation(
+        nlohmann::json{
+            { "type", "ProcStandAndPlay" },
+            { "numbeats", numbeats->toJSON() },
+            { "dir", dir->toJSON() },
+        },
+        *this);
+}
+
+auto ProcStandAndPlay::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcStandAndPlay>
+{
+    return ApplyTokenLocationToPtr(
+        std::make_unique<ProcStandAndPlay>(ValueFromJSON(RequireField(json, "numbeats", "ProcStandAndPlay")),
+            ValueFromJSON(RequireField(json, "dir", "ProcStandAndPlay"))),
+        json);
 }
 
 void ProcStandAndPlay::replace(Token const* which, std::unique_ptr<Token> v)

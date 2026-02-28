@@ -69,7 +69,7 @@
  *  should be "cloned" into a new datastructure to preserve the runtime data structure.
  *
  * Serialization and Deserialization
- *  In order to be saved and restored from a file, the inuites need to be able to be serailized and deserialized.  Serialization is
+ *  In order to be saved and restored from a file, the continuites need to be able to be serialized and deserialized.  Serialization is
  *  straight forward; each object can serialize itself and it's children into a vector of bytes.  Deserializtion is a little more complicated.
  *  Essentially we give the object a pointer to the beginning of a datablob and the end.  It will deserialize members and from the data,
  *  and return the data pointer where it ended the parse.  If at the conclusion of the process, if the data pointer end and the original end
@@ -86,6 +86,7 @@
 #include <format>
 #include <iosfwd>
 #include <memory>
+#include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
 
@@ -186,6 +187,13 @@ public:
     virtual ~Token() = default;
     virtual auto ToString() const -> std::string;
     void SetParentPtr(Token* p) { parent_ptr = p; }
+    auto GetLine() const { return line; }
+    auto GetCol() const { return col; }
+    void SetSourceLocation(uint32_t sourceLine, uint32_t sourceCol)
+    {
+        line = sourceLine;
+        col = sourceCol;
+    }
     virtual void replace(Token const* which, std::unique_ptr<Token> v);
 
     [[nodiscard]] virtual auto Serialize() const -> std::vector<std::byte>;
@@ -220,6 +228,8 @@ public:
     virtual Coord Get(Animate::Compile const& anim) const;
     auto ToString() const -> std::string override;
     virtual Drawable GetDrawable() const;
+    [[nodiscard]] virtual auto toJSON() const -> nlohmann::json;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<Point>;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
@@ -235,6 +245,8 @@ public:
     virtual std::unique_ptr<Point> clone() const override { return std::make_unique<PointUnset>(); }
     auto ToString() const -> std::string override;
     virtual Drawable GetDrawable() const override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<PointUnset>;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
@@ -253,6 +265,8 @@ public:
     virtual Coord Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
     virtual Drawable GetDrawable() const override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<StartPoint>;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
@@ -271,6 +285,8 @@ public:
     virtual Coord Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
     virtual Drawable GetDrawable() const override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<NextPoint>;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
@@ -290,6 +306,8 @@ public:
     virtual Coord Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
     virtual Drawable GetDrawable() const override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<RefPoint>;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
@@ -320,6 +338,7 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] virtual auto toJSON() const -> nlohmann::json = 0;
 
 private:
     static constexpr auto NumParts = 0;
@@ -337,6 +356,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueUnset>;
 
 private:
     static constexpr auto NumParts = 0;
@@ -356,6 +377,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueFloat>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -382,6 +405,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueDefined>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -418,6 +443,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueAdd>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -455,6 +482,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueSub>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -492,6 +521,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueMult>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -529,6 +560,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueDiv>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -565,6 +598,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueNeg>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -589,6 +624,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueREM>;
 
 private:
     static constexpr auto NumParts = 0;
@@ -609,6 +646,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueVar>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -633,6 +672,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ValueVarUnset>;
 
 private:
     static constexpr auto NumParts = 0;
@@ -661,6 +702,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<FuncDir>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -697,6 +740,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<FuncDirFrom>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -733,6 +778,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<FuncDist>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -769,6 +816,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<FuncDistFrom>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -807,6 +856,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<FuncEither>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -844,6 +895,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<FuncOpp>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -881,6 +934,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<FuncStep>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -909,6 +964,9 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+
+    [[nodiscard]] virtual auto toJSON() const -> nlohmann::json = 0;
+    static auto FromJSON(nlohmann::json const& json) -> std::unique_ptr<Procedure>;
 };
 
 class ProcUnset : public Procedure {
@@ -923,6 +981,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcUnset>;
 
 private:
     static constexpr auto NumParts = 0;
@@ -952,6 +1012,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcSet>;
 
     struct ReplaceError_NotAVar : std::exception {
     };
@@ -981,6 +1043,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcBlam>;
 
 protected:
     // we use the assumption that we've already checked that the types match before calling.
@@ -1016,6 +1080,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcClose>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -1058,6 +1124,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcCM>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -1097,6 +1165,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcDMCM>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -1134,6 +1204,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcDMHS>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -1171,6 +1243,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcEven>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -1208,6 +1282,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcEWNS>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -1248,6 +1324,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcFountain>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -1301,6 +1379,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcFM>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -1337,6 +1417,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcFMTO>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -1373,6 +1455,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcGrid>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -1411,6 +1495,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcHSCM>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -1448,6 +1534,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcHSDM>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -1484,6 +1572,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcMagic>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -1524,6 +1614,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcMarch>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -1571,6 +1663,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcMT>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -1607,6 +1701,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcMTRM>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -1643,6 +1739,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcNSEW>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -1681,6 +1779,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcRotate>;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -1719,6 +1819,8 @@ public:
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json override;
+    static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcStandAndPlay>;
 
 protected:
     virtual bool is_equal(Token const& other) const override

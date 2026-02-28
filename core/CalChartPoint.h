@@ -35,10 +35,12 @@
 #include "CalChartConstants.h"
 #include "CalChartCoord.h"
 #include "CalChartDrawCommand.h"
+#include "CalChartFileFormat.h"
 #include "CalChartTypes.h"
 
 #include <array>
 #include <bitset>
+#include <nlohmann/json.hpp>
 #include <vector>
 
 namespace CalChart {
@@ -51,11 +53,15 @@ public:
     static constexpr auto kNumRefPoints = 3;
     Point();
     explicit Point(Coord const& pos)
-        : Point(pos, SYMBOL_PLAIN){};
+        : Point(pos, SYMBOL_PLAIN)
+    {
+    }
     Point(Coord const& pos, SYMBOL_TYPE sym);
 
     explicit Point(Reader);
+    explicit Point(nlohmann::json const& json);
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte>;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json;
 
     [[nodiscard]] auto GetFlip() const { return mFlags.test(kPointLabelFlipped); }
     void Flip(bool val = true);
@@ -67,11 +73,19 @@ public:
     [[nodiscard]] auto GetPos(unsigned ref = 0) const -> Coord;
     void SetPos(Coord c, unsigned ref = 0);
 
-    [[nodiscard]] auto GetDrawCommands(unsigned ref, std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) const -> std::vector<Draw::DrawCommand>;
-    [[nodiscard]] auto GetDrawCommands(unsigned ref, std::string const& label, Configuration const& config) const -> std::vector<Draw::DrawCommand>;
-    [[nodiscard]] auto GetDrawCommands(std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) const { return GetDrawCommands(0, label, dotRatio, pLineRatio, sLineRatio); }
-    [[nodiscard]] auto GetDrawCommands(std::string const& label, Configuration const& config) const -> std::vector<Draw::DrawCommand>;
-    [[nodiscard]] auto GetDrawCommands(double dotRatio, double pLineRatio, double sLineRatio) const -> std::vector<Draw::DrawCommand>;
+    [[nodiscard]] auto GetDrawCommands(unsigned ref, std::string const& label, double dotRatio, double pLineRatio,
+        double sLineRatio) const -> std::vector<Draw::DrawCommand>;
+    [[nodiscard]] auto GetDrawCommands(unsigned ref, std::string const& label, Configuration const& config) const
+        -> std::vector<Draw::DrawCommand>;
+    [[nodiscard]] auto GetDrawCommands(
+        std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) const
+    {
+        return GetDrawCommands(0, label, dotRatio, pLineRatio, sLineRatio);
+    }
+    [[nodiscard]] auto GetDrawCommands(std::string const& label, Configuration const& config) const
+        -> std::vector<Draw::DrawCommand>;
+    [[nodiscard]] auto GetDrawCommands(double dotRatio, double pLineRatio, double sLineRatio) const
+        -> std::vector<Draw::DrawCommand>;
     [[nodiscard]] auto GetDrawCommands(Configuration const& config) const -> std::vector<Draw::DrawCommand>;
 
     [[nodiscard]] auto GetSymbol() const { return mSym; }
@@ -81,7 +95,7 @@ private:
     enum {
         kPointLabelFlipped,
         kLabelIsInvisible,
-        kTotalBits
+        kTotalBits,
     };
 
     std::bitset<kTotalBits> mFlags{};

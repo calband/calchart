@@ -1,0 +1,1660 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/calband/calchart/tree/main/schemas/show/v3.8/schema.json",
+  "title": "CalChart Show (v3.8.x)",
+  "description": "Schema for CalChart show files as produced by CalChart v3.8.x. Designed to be forward-compatible: additionalProperties is true throughout, so files written by a *newer* CalChart version that add new optional fields will still validate against this schema. Detecting and listing which specific fields a v3.8 reader does not understand is an application-level concern (diff actual object keys against this schema's declared 'properties'), not something JSON Schema validation reports on its own.",
+  "type": "object",
+  "$defs": {
+    "symbolEnum": {
+      "type": "string",
+      "enum": [
+        "Plain",
+        "Sol",
+        "Bksl",
+        "Sl",
+        "X",
+        "Solbksl",
+        "Solsl",
+        "Solx"
+      ],
+      "description": "Known symbol set for v3.8.x. A future version that adds a new symbol would require bumping this schema (or loosening this enum) -- see notes."
+    },
+    "coordPair": {
+      "type": "array",
+      "description": "[x, y] in Coord::units. Accepts integer or floating-point numbers.",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "labelAndInstrument": {
+      "type": "object",
+      "description": "Marcher label and instrument.  If no instrument is supplied it will be default",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "instrument": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label"
+      ],
+      "additionalProperties": true
+    },
+    "fermataPair": {
+      "type": "object",
+      "properties": {
+        "beat": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "seconds": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "showMode": {
+      "type": "object",
+      "properties": {
+        "size": {
+          "$ref": "#/$defs/coordPair"
+        },
+        "offset": {
+          "$ref": "#/$defs/coordPair"
+        },
+        "border1": {
+          "$ref": "#/$defs/coordPair"
+        },
+        "border2": {
+          "$ref": "#/$defs/coordPair"
+        },
+        "hash_west": {
+          "type": "integer"
+        },
+        "hash_east": {
+          "type": "integer"
+        },
+        "yard_lines": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "size",
+        "offset",
+        "border1",
+        "border2",
+        "hash_west",
+        "hash_east",
+        "yard_lines"
+      ],
+      "additionalProperties": true
+    },
+    "marcherPoint": {
+      "type": "object",
+      "properties": {
+        "pos": {
+          "$ref": "#/$defs/coordPair"
+        },
+        "ref": {
+          "type": "array",
+          "description": "Reference positions. Missing entries default to 'pos' at read time.",
+          "items": {
+            "$ref": "#/$defs/coordPair"
+          }
+        },
+        "symbol": {
+          "$ref": "#/$defs/symbolEnum"
+        },
+        "flip": {
+          "type": "boolean",
+          "description": "Flips display orientation.  If not supplied, is false."
+        },
+        "label_invisible": {
+          "type": "boolean",
+          "description": "control label invisible.  If not supplied, is false."
+        }
+      },
+      "required": [
+        "pos",
+        "symbol"
+      ],
+      "additionalProperties": true
+    },
+    "valueNode": {
+      "description": "A Value AST node (basic value, arithmetic op, variable, or function call).",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ValueUnset"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ValueFloat"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "val": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "type",
+            "val"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ValueDefined"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "defined": {
+              "type": "string",
+              "enum": [
+                "N",
+                "NW",
+                "W",
+                "SW",
+                "S",
+                "SE",
+                "E",
+                "NE",
+                "HS",
+                "MM",
+                "SH",
+                "JS",
+                "GV",
+                "M",
+                "DM"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "defined"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ValueREM"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ValueAdd"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "val1": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "val2": {
+              "$ref": "#/$defs/valueNode"
+            }
+          },
+          "required": [
+            "type",
+            "val1",
+            "val2"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ValueSub"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "val1": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "val2": {
+              "$ref": "#/$defs/valueNode"
+            }
+          },
+          "required": [
+            "type",
+            "val1",
+            "val2"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ValueMult"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "val1": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "val2": {
+              "$ref": "#/$defs/valueNode"
+            }
+          },
+          "required": [
+            "type",
+            "val1",
+            "val2"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ValueDiv"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "val1": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "val2": {
+              "$ref": "#/$defs/valueNode"
+            }
+          },
+          "required": [
+            "type",
+            "val1",
+            "val2"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ValueNeg"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "val": {
+              "$ref": "#/$defs/valueNode"
+            }
+          },
+          "required": [
+            "type",
+            "val"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ValueVar"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "variable": {
+              "type": "string",
+              "enum": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "X",
+                "Y",
+                "Z",
+                "DOF",
+                "DOH"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "variable"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ValueVarUnset"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "FuncDir"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pnt": {
+              "$ref": "#/$defs/astPointNode"
+            }
+          },
+          "required": [
+            "type",
+            "pnt"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "FuncDirFrom"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pnt1": {
+              "$ref": "#/$defs/astPointNode"
+            },
+            "pnt2": {
+              "$ref": "#/$defs/astPointNode"
+            }
+          },
+          "required": [
+            "type",
+            "pnt1",
+            "pnt2"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "FuncDist"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pnt": {
+              "$ref": "#/$defs/astPointNode"
+            }
+          },
+          "required": [
+            "type",
+            "pnt"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "FuncDistFrom"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pnt1": {
+              "$ref": "#/$defs/astPointNode"
+            },
+            "pnt2": {
+              "$ref": "#/$defs/astPointNode"
+            }
+          },
+          "required": [
+            "type",
+            "pnt1",
+            "pnt2"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "FuncEither"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "dir1": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "dir2": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "pnt": {
+              "$ref": "#/$defs/astPointNode"
+            }
+          },
+          "required": [
+            "type",
+            "dir1",
+            "dir2",
+            "pnt"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "FuncOpp"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "dir": {
+              "$ref": "#/$defs/valueNode"
+            }
+          },
+          "required": [
+            "type",
+            "dir"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "FuncStep"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "numbeats": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "blksize": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "pnt": {
+              "$ref": "#/$defs/astPointNode"
+            }
+          },
+          "required": [
+            "type",
+            "numbeats",
+            "blksize",
+            "pnt"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "description": "Forward-compatibility fallback: matches any value node whose 'type' value is not one recognized by this schema version (e.g. a node type added in a later CalChart format version). Structure of unrecognized nodes is not validated further.",
+          "properties": {
+            "type": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": true
+        }
+      ]
+    },
+    "astPointNode": {
+      "description": "A Point-reference AST node used inside continuity procedures.",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "Point"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "PointUnset"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "StartPoint"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "NextPoint"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "RefPoint"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "refnum": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "type",
+            "refnum"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "description": "Forward-compatibility fallback: matches any point node whose 'type' value is not one recognized by this schema version (e.g. a node type added in a later CalChart format version). Structure of unrecognized nodes is not validated further.",
+          "properties": {
+            "type": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": true
+        }
+      ]
+    },
+    "procedureNode": {
+      "description": "A single continuity procedure step in the AST.",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcUnset"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcSet"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "var": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "val": {
+              "$ref": "#/$defs/valueNode"
+            }
+          },
+          "required": [
+            "type",
+            "var",
+            "val"
+          ],
+          "additionalProperties": true,
+          "description": "'var' is expected to be a ValueVar or ValueVarUnset node."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcBlam"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcClose"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "dir": {
+              "$ref": "#/$defs/valueNode"
+            }
+          },
+          "required": [
+            "type",
+            "dir"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcCM"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pnt1": {
+              "$ref": "#/$defs/astPointNode"
+            },
+            "pnt2": {
+              "$ref": "#/$defs/astPointNode"
+            },
+            "stps": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "dir1": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "dir2": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "numbeats": {
+              "$ref": "#/$defs/valueNode"
+            }
+          },
+          "required": [
+            "type",
+            "pnt1",
+            "pnt2",
+            "stps",
+            "dir1",
+            "dir2",
+            "numbeats"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcDMCM"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pnt1": {
+              "$ref": "#/$defs/astPointNode"
+            },
+            "pnt2": {
+              "$ref": "#/$defs/astPointNode"
+            },
+            "numbeats": {
+              "$ref": "#/$defs/valueNode"
+            }
+          },
+          "required": [
+            "type",
+            "pnt1",
+            "pnt2",
+            "numbeats"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcDMHS"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pnt": {
+              "$ref": "#/$defs/astPointNode"
+            }
+          },
+          "required": [
+            "type",
+            "pnt"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcEven"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "stps": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "pnt": {
+              "$ref": "#/$defs/astPointNode"
+            }
+          },
+          "required": [
+            "type",
+            "stps",
+            "pnt"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcEWNS"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pnt": {
+              "$ref": "#/$defs/astPointNode"
+            }
+          },
+          "required": [
+            "type",
+            "pnt"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcFountain"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "dir1": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "dir2": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "stepsize1": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/valueNode"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "stepsize2": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/valueNode"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "pnt": {
+              "$ref": "#/$defs/astPointNode"
+            }
+          },
+          "required": [
+            "type",
+            "dir1",
+            "dir2",
+            "pnt"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcFM"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "stps": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "dir": {
+              "$ref": "#/$defs/valueNode"
+            }
+          },
+          "required": [
+            "type",
+            "stps",
+            "dir"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcFMTO"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pnt": {
+              "$ref": "#/$defs/astPointNode"
+            }
+          },
+          "required": [
+            "type",
+            "pnt"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcGrid"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "grid": {
+              "$ref": "#/$defs/valueNode"
+            }
+          },
+          "required": [
+            "type",
+            "grid"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcHSCM"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pnt1": {
+              "$ref": "#/$defs/astPointNode"
+            },
+            "pnt2": {
+              "$ref": "#/$defs/astPointNode"
+            },
+            "numbeats": {
+              "$ref": "#/$defs/valueNode"
+            }
+          },
+          "required": [
+            "type",
+            "pnt1",
+            "pnt2",
+            "numbeats"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcHSDM"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pnt": {
+              "$ref": "#/$defs/astPointNode"
+            }
+          },
+          "required": [
+            "type",
+            "pnt"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcMagic"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pnt": {
+              "$ref": "#/$defs/astPointNode"
+            }
+          },
+          "required": [
+            "type",
+            "pnt"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcMarch"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "stpsize": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "stps": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "dir": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "facedir": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/valueNode"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "stpsize",
+            "stps",
+            "dir"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcMT"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "numbeats": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "dir": {
+              "$ref": "#/$defs/valueNode"
+            }
+          },
+          "required": [
+            "type",
+            "numbeats",
+            "dir"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcMTRM"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "dir": {
+              "$ref": "#/$defs/valueNode"
+            }
+          },
+          "required": [
+            "type",
+            "dir"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcNSEW"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pnt": {
+              "$ref": "#/$defs/astPointNode"
+            }
+          },
+          "required": [
+            "type",
+            "pnt"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcRotate"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "ang": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "stps": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "pnt": {
+              "$ref": "#/$defs/astPointNode"
+            }
+          },
+          "required": [
+            "type",
+            "ang",
+            "stps",
+            "pnt"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ProcStandAndPlay"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "col": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "numbeats": {
+              "$ref": "#/$defs/valueNode"
+            },
+            "dir": {
+              "$ref": "#/$defs/valueNode"
+            }
+          },
+          "required": [
+            "type",
+            "numbeats",
+            "dir"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "description": "Forward-compatibility fallback: matches any procedure node whose 'type' value is not one recognized by this schema version (e.g. a node type added in a later CalChart format version). Structure of unrecognized nodes is not validated further.",
+          "properties": {
+            "type": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": true
+        }
+      ]
+    },
+    "continuity": {
+      "type": "object",
+      "properties": {
+        "procedures": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/procedureNode"
+          }
+        },
+        "legacy_text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "procedures"
+      ],
+      "additionalProperties": true
+    },
+    "printContinuity": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "type": "string"
+        },
+        "data": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "number",
+        "data"
+      ],
+      "additionalProperties": true
+    },
+    "curve": {
+      "type": "object",
+      "properties": {
+        "control_points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/coordPair"
+          },
+          "minItems": 2
+        }
+      },
+      "required": [
+        "control_points"
+      ],
+      "additionalProperties": true
+    },
+    "curveAssignment": {
+      "type": "object",
+      "properties": {
+        "curve": {
+          "$ref": "#/$defs/curve"
+        },
+        "point_indices": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "required": [
+        "curve",
+        "point_indices"
+      ],
+      "additionalProperties": true
+    },
+    "imageData": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "data": {
+          "type": "string",
+          "description": "Base64-encoded RGB data. May be empty string."
+        },
+        "alpha": {
+          "type": "string",
+          "description": "Base64-encoded alpha channel. May be empty string."
+        }
+      },
+      "required": [
+        "width",
+        "height",
+        "data",
+        "alpha"
+      ],
+      "additionalProperties": true
+    },
+    "imageInfo": {
+      "type": "object",
+      "properties": {
+        "left": {
+          "type": "integer"
+        },
+        "top": {
+          "type": "integer"
+        },
+        "scaledWidth": {
+          "type": "integer"
+        },
+        "scaledHeight": {
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/$defs/imageData"
+        }
+      },
+      "required": [
+        "left",
+        "top",
+        "scaledWidth",
+        "scaledHeight",
+        "data"
+      ],
+      "additionalProperties": true
+    },
+    "media": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Media name."
+        },
+        "data": {
+          "type": "string",
+          "description": "Base64-encoded media data."
+        }
+      },
+      "required": [
+        "name",
+        "data"
+      ],
+      "additionalProperties": true
+    },
+    "sheet": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "beats": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tempo": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/marcherPoint"
+          }
+        },
+        "continuities": {
+          "type": "object",
+          "description": "Continuity data keyed by symbol name. Each key must be a valid marcher symbol.",
+          "propertyNames": {
+            "$ref": "#/$defs/symbolEnum"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/continuity"
+          }
+        },
+        "print_continuities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/printContinuity"
+          }
+        },
+        "fermata": {
+          "type": "array",
+          "description": "Pairs of Beat to fermata time in seconds",
+          "items": {
+            "$ref": "#/$defs/fermataPair"
+          }
+        },
+        "background_images": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/imageInfo"
+          }
+        },
+        "curves_with_assignments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/curveAssignment"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "beats",
+        "tempo",
+        "points"
+      ],
+      "additionalProperties": true
+    }
+  },
+  "properties": {
+    "formatVersion": {
+      "type": "integer",
+      "default": 1,
+      "description": "Version of the CalChart show file format this document conforms to."
+    },
+    "description": {
+      "type": "string"
+    },
+    "labels_and_instruments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/labelAndInstrument"
+      }
+    },
+    "sheets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/sheet"
+      }
+    },
+    "mode": {
+      "$ref": "#/$defs/showMode"
+    },
+    "media": {
+      "$ref": "#/$defs/media"
+    },
+    "selection_list": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "current_sheet": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "formatVersion",
+    "labels_and_instruments",
+    "sheets",
+    "mode",
+    "current_sheet"
+  ],
+  "additionalProperties": true
+}

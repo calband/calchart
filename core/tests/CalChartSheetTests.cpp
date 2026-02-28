@@ -156,3 +156,69 @@ TEST_CASE("AssigningToCurves", "CalChartSheetTests")
     CHECK(uut.GetMarcherPosition(1) == Coord{ 3, 3 });
     CHECK(uut.GetMarcherPosition(2) == Coord{ 0, 4 });
 }
+
+TEST_CASE("Sheet_JSONSerializeDeserialize", "CalChartSheetTests")
+{
+    using namespace CalChart;
+
+    SECTION("Empty sheet")
+    {
+        auto uut = Sheet(0, "test_sheet");
+        auto json = uut.toJSON();
+        auto reconstructed = Sheet{ json };
+
+        CHECK(reconstructed.GetName() == uut.GetName());
+        CHECK(reconstructed.GetNumberPoints() == uut.GetNumberPoints());
+        CHECK(reconstructed.GetBeats() == uut.GetBeats());
+        CHECK(reconstructed.GetTempo() == uut.GetTempo());
+    }
+
+    SECTION("Sheet with points and continuity")
+    {
+        auto uut = Sheet(2, "complex_sheet");
+        uut.SetBeats(16);
+        uut.SetTempo(140);
+        uut.SetPosition(Coord(10, 10), 0);
+        uut.SetPosition(Coord(20, 20), 1);
+        uut.SetContinuity(SYMBOL_PLAIN, Continuity{ "MT E REM" });
+        uut.SetPrintableContinuity("M1", "Test continuity text");
+
+        auto json = uut.toJSON();
+        auto reconstructed = Sheet{ json };
+
+        CHECK(reconstructed.GetName() == uut.GetName());
+        CHECK(reconstructed.GetNumberPoints() == uut.GetNumberPoints());
+        CHECK(reconstructed.GetBeats() == uut.GetBeats());
+        CHECK(reconstructed.GetTempo() == uut.GetTempo());
+        CHECK(reconstructed.GetMarcherPosition(0) == uut.GetMarcherPosition(0));
+        CHECK(reconstructed.GetMarcherPosition(1) == uut.GetMarcherPosition(1));
+        CHECK(reconstructed.GetPrintNumber() == uut.GetPrintNumber());
+    }
+
+    SECTION("Sheet with curves")
+    {
+        auto uut = Sheet(4, "sheet_with_curves");
+        uut.SetPosition({ 0, 0 }, 0);
+        uut.SetPosition({ 1, 1 }, 1);
+        uut.SetPosition({ 2, 2 }, 2);
+        uut.SetPosition({ 3, 3 }, 3);
+
+        auto curve = Curve{ { { 0, 8 }, { 8, 8 }, { 16, 8 } } };
+        uut.AddCurve(curve, 0);
+        uut.SetCurveAssignment(uut.GetCurveAssignmentsWithNewAssignments(0, { 0, 1 }));
+
+        auto json = uut.toJSON();
+        auto reconstructed = Sheet{ json };
+
+        CHECK(reconstructed.GetName() == uut.GetName());
+        CHECK(reconstructed.GetNumberPoints() == uut.GetNumberPoints());
+        CHECK(reconstructed.GetNumberCurves() == uut.GetNumberCurves());
+
+        auto origAssignments = uut.GetCurveAssignments();
+        auto reconAssignments = reconstructed.GetCurveAssignments();
+        CHECK(origAssignments.size() == reconAssignments.size());
+        if (!origAssignments.empty()) {
+            CHECK(origAssignments[0] == reconAssignments[0]);
+        }
+    }
+}

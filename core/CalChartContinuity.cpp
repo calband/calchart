@@ -42,7 +42,7 @@ std::runtime_error ParseError(std::string const& str, int l, int c)
     return std::runtime_error{ std::string("ParseError of ") + str + " at " + std::to_string(l) + ", " + std::to_string(c) };
 }
 
-std::vector<std::unique_ptr<Cont::Procedure>> ParseContinuity(std::string const& s, ParseErrorHandlers const* correct)
+std::vector<std::unique_ptr<Cont::Procedure>> ParseContinuity(std::string const& s, ParseErrorHandlers const* correction)
 {
     ParsedContinuity = std::vector<std::unique_ptr<CalChart::Cont::Procedure>>{};
     std::string thisParse = s;
@@ -52,9 +52,9 @@ std::vector<std::unique_ptr<Cont::Procedure>> ParseContinuity(std::string const&
         if (parsecontinuity() == 0) {
             return std::move(ParsedContinuity);
         }
-        if (correct && correct->mContinuityParseCorrectionHandler) {
+        if (correction && correction->mContinuityParseCorrectionHandler) {
             // give the user a chance to correct.
-            thisParse = correct->mContinuityParseCorrectionHandler(std::string("Could not parse line ") + std::to_string(yylloc.first_line) + " at " + std::to_string(yylloc.first_column), thisParse, yylloc.first_line, yylloc.first_column);
+            thisParse = correction->mContinuityParseCorrectionHandler(std::string("Could not parse line ") + std::to_string(yylloc.first_line) + " at " + std::to_string(yylloc.first_column), thisParse, yylloc.first_line, yylloc.first_column);
         } else {
             throw ParseError(s, 0, 0);
         }
@@ -101,6 +101,30 @@ Continuity::Continuity(Reader reader)
 {
 }
 
+Continuity::Continuity(nlohmann::json const& json)
+{
+    try {
+        if (!json.is_object()) {
+            throw std::runtime_error("bad Continuity JSON: root must be an object");
+        }
+
+        auto const& procedures = json.at("procedures");
+        if (!procedures.is_array()) {
+            throw std::runtime_error("bad Continuity JSON: procedures must be an array");
+        }
+
+        for (auto const& procedureJSON : procedures) {
+            m_parsedContinuity.push_back(Cont::Procedure::FromJSON(procedureJSON));
+        }
+
+        if (json.contains("legacy_text")) {
+            m_legacyText = json.at("legacy_text").get<std::string>();
+        }
+    } catch (nlohmann::json::exception const& e) {
+        throw std::runtime_error(std::string("bad Continuity JSON: ") + e.what());
+    }
+}
+
 Continuity& Continuity::operator=(Continuity const& other)
 {
     Continuity copy(other);
@@ -123,6 +147,22 @@ auto Continuity::Serialize() const -> std::vector<std::byte>
     std::vector<std::byte> result;
     for (auto&& i : m_parsedContinuity) {
         Parser::Append(result, i->Serialize());
+    }
+    return result;
+}
+
+auto Continuity::toJSON() const -> nlohmann::json
+{
+    auto procedures = nlohmann::json::array();
+    for (auto const& procedure : m_parsedContinuity) {
+        procedures.push_back(procedure->toJSON());
+    }
+
+    auto result = nlohmann::json{
+        { "procedures", procedures },
+    };
+    if (!m_legacyText.empty()) {
+        result["legacy_text"] = m_legacyText;
     }
     return result;
 }

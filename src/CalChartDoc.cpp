@@ -31,15 +31,21 @@
 #include "CalChartPrintShowToPS.hpp"
 #include "CalChartShapes.h"
 #include "CalChartSheet.h"
+#include "CalChartShowJsonValidator.h"
 #include "CalChartShowMode.h"
 #include "CalChartUtils.h"
 #include "ContinuityEditorPopup.h"
 #include "SystemConfiguration.h"
+#include "ccvers.h"
 #include "platconf.h"
 
 #include <cmath>
 #include <fstream>
 #include <iomanip>
+#include <regex>
+#include <wx/dir.h>
+#include <wx/filename.h>
+#include <wx/stdpaths.h>
 #include <wx/textfile.h>
 #include <wx/wfstream.h>
 
@@ -51,6 +57,74 @@ IMPLEMENT_DYNAMIC_CLASS(CalChartDoc_FinishedLoading, wxObject)
 IMPLEMENT_DYNAMIC_CLASS(CalChartDoc_setup, wxObject)
 
 IMPLEMENT_DYNAMIC_CLASS(CalChartDoc, CalChartDoc::super);
+
+namespace {
+
+// Scans the resources directory for show schema files and loads them into a ShowSchemas map.
+// Schema files are expected to be named "show_schema_v<version>.json" (e.g., "show_schema_v1.json").
+auto FindShowSchemas() -> CalChart::ShowSchemas
+{
+    // Get the resources directory path
+#if defined(__APPLE__) && (__APPLE__)
+    auto resourcesDir = wxStandardPaths::Get().GetResourcesDir();
+#else
+    auto resourcesDir = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath();
+    resourcesDir.Append(PATH_SEPARATOR wxT("resources"));
+#endif
+
+    // Check if the resources directory exists
+    if (!wxDir::Exists(resourcesDir)) {
+        return {}; // Return empty map if directory doesn't exist
+    }
+
+    wxDir dir(resourcesDir);
+    if (!dir.IsOpened()) {
+        return {}; // Return empty map if directory can't be opened
+    }
+
+    // Scan for schema files matching the pattern "show_schema_*.json"
+    wxString filename;
+    auto found = dir.GetFirst(&filename, wxT("show_schema_v*.json"), wxDIR_FILES);
+
+    std::regex versionPattern(R"(show_schema_v(\d+)\.json)");
+
+    CalChart::ShowSchemas schemas;
+
+    while (found) {
+        auto filenameStr = filename.ToStdString();
+        auto match = std::smatch{};
+
+        // Extract version numbers from filename
+        if (std::regex_match(filenameStr, match, versionPattern)) {
+            try {
+                auto version = std::stoi(match[1].str());
+
+                // Read the JSON schema file
+                wxString fullPath = resourcesDir;
+#if defined(__APPLE__) && (__APPLE__)
+                fullPath.Append("/");
+#else
+                fullPath.Append(PATH_SEPARATOR);
+#endif
+                fullPath.Append(filename);
+
+                std::ifstream schemaFile(fullPath.ToStdString());
+                if (schemaFile.is_open()) {
+                    nlohmann::json schemaJson;
+                    schemaFile >> schemaJson;
+                    schemas[version] = std::move(schemaJson);
+                }
+            } catch (const std::exception&) {
+                // Skip files that can't be parsed or read
+            }
+        }
+
+        found = dir.GetNext(&filename);
+    }
+
+    return schemas;
+}
+} // namespace
 
 // Create a new show
 CalChartDoc::CalChartDoc()
@@ -70,7 +144,10 @@ bool CalChartDoc::OnOpenDocument(const wxString& filename)
     wxString recoveryFile = TranslateNameToAutosaveName(filename);
     if (wxFileExists(recoveryFile)) {
         // prompt the user to find out if they would like to use the recovery file
-        auto userchoice = wxMessageBox("CalChart has detected a recovery file (possibly from a previous crash).  Would you like to use the recovery file (Warning: choosing recover will destroy the original file)?", "Recovery File Detected", wxYES_NO | wxCANCEL);
+        auto userchoice
+            = wxMessageBox("CalChart has detected a recovery file (possibly from a previous crash).  Would you like to "
+                           "use the recovery file (Warning: choosing recover will destroy the original file)?",
+                "Recovery File Detected", wxYES_NO | wxCANCEL);
         if (userchoice == wxYES) {
             // move the recovery file to the filename, destroying the file and using
             // the recovery
@@ -128,7 +205,8 @@ bool CalChartDoc::OnSaveDocument(wxString const& filename)
     return true;
 }
 
-auto CalChartDoc::ImportPrintableContinuity(std::vector<std::string> const& lines) const -> std::optional<std::map<int, std::pair<std::string, std::string>>>
+auto CalChartDoc::ImportPrintableContinuity(std::vector<std::string> const& lines) const
+    -> std::optional<std::map<int, std::pair<std::string, std::string>>>
 {
     std::map<int, std::pair<std::string, std::string>> result;
     // should this first clear out all the continuity?
@@ -177,38 +255,30 @@ auto CalChartDoc::ImportPrintableContinuity(std::vector<std::string> const& line
     return result;
 }
 
-template <typename T>
-T& CalChartDoc::SaveObjectGeneric(T& stream)
+template <typename T> T& CalChartDoc::SaveObjectGeneric(T& stream)
 {
     // flush out the text before we save a file.
     FlushAllTextWindows();
     return SaveObjectInternal(stream);
 }
 
-wxSTD ostream& CalChartDoc::SaveObject(wxSTD ostream& stream)
-{
-    return SaveObjectGeneric<wxSTD ostream>(stream);
-}
+wxSTD ostream& CalChartDoc::SaveObject(wxSTD ostream& stream) { return SaveObjectGeneric<wxSTD ostream>(stream); }
 
-template <typename T>
-T& CalChartDoc::SaveObjectInternal(T& stream)
+template <typename T> T& CalChartDoc::SaveObjectInternal(T& stream)
 {
     auto data = mShow->SerializeShow();
     stream.write(reinterpret_cast<const char*>(&data[0]), data.size());
     return stream;
 }
 
-template <>
-wxFFileOutputStream& CalChartDoc::SaveObjectInternal<wxFFileOutputStream>(
-    wxFFileOutputStream& stream)
+template <> wxFFileOutputStream& CalChartDoc::SaveObjectInternal<wxFFileOutputStream>(wxFFileOutputStream& stream)
 {
     auto data = mShow->SerializeShow();
     stream.Write(&data[0], data.size());
     return stream;
 }
 
-template <typename T>
-T& CalChartDoc::LoadObjectGeneric(T& stream)
+template <typename T> T& CalChartDoc::LoadObjectGeneric(T& stream)
 {
     // here's where we would put up the correction box
     bool modified = false;
@@ -221,29 +291,29 @@ T& CalChartDoc::LoadObjectGeneric(T& stream)
                 wxMessageBox(message, "Error!");
                 // if we got here, then the user is forced to make a change to their show.  We set it as modified
                 modified = true;
-                return ContinuityEditorPopup::ProcessEditContinuity(GetDocumentWindow(), description, what, line, column);
+                return ContinuityEditorPopup::ProcessEditContinuity(
+                    GetDocumentWindow(), description, what, line, column);
             },
             [](int majorVersion, int minorVersion) {
-                std::string message = std::format(
-                    "Warning: Current version of CalChart is older than show file.\n"
-                    "Current Version {}.{}, show file: {}.{}.\n"
-                    "Please consider upgrade to a newer version of CalChart by checking https://sourceforge.net/projects/calchart.\n"
-                    "Continue trying to open this file?",
-                    CC_MAJOR_VERSION,
-                    CC_MINOR_VERSION,
-                    majorVersion,
-                    minorVersion);
+                std::string message = std::format("Warning: Current version of CalChart is older than show file.\n"
+                                                  "Current Version {}.{}, show file: {}.{}.\n"
+                                                  "Please consider upgrade to a newer version of CalChart by checking "
+                                                  "https://sourceforge.net/projects/calchart.\n"
+                                                  "Continue trying to open this file?",
+                    CC_MAJOR_VERSION, CC_MINOR_VERSION, majorVersion, minorVersion);
                 auto userchoice = wxMessageBox(message, "Warning!", wxYES_NO);
                 // if we got here, then the user is forced to make a change to their show.  We set it as modified
                 return userchoice == wxYES;
             },
         };
-        mShow = Show::Create(GetConfigShowMode(mConfig, CalChart::GetShowModeNames()[0]), stream, &handlers);
+        mShow = Show::Create(
+            GetConfigShowMode(mConfig, CalChart::GetShowModeNames()[0]), stream, FindShowSchemas(), &handlers);
     } catch (std::exception const& e) {
         auto message = std::string{ "Error encountered:\n" };
         message += e.what();
         wxMessageBox(message, "Error!");
-        // if we got here, then the user is did not do edits, and the show is in weird state.  Don't force a save on exit.
+        // if we got here, then the user is did not do edits, and the show is in weird state.  Don't force a save on
+        // exit.
         modified = false;
     }
     super::Modify(modified);
@@ -253,10 +323,7 @@ T& CalChartDoc::LoadObjectGeneric(T& stream)
     return stream;
 }
 
-wxSTD istream& CalChartDoc::LoadObject(wxSTD istream& stream)
-{
-    return LoadObjectGeneric<wxSTD istream>(stream);
-}
+wxSTD istream& CalChartDoc::LoadObject(wxSTD istream& stream) { return LoadObjectGeneric<wxSTD istream>(stream); }
 
 void CalChartDoc::exportViewerFile(std::filesystem::path const& filepath)
 {
@@ -272,10 +339,7 @@ void CalChartDoc::exportViewerBeatsFile(std::filesystem::path const& filepath)
     o << std::setw(4) << j << std::endl;
 }
 
-nlohmann::json CalChartDoc::toViewerJSON() const
-{
-    return mShow->toOnlineViewerJSON(Animation(*mShow));
-}
+nlohmann::json CalChartDoc::toViewerJSON() const { return mShow->toOnlineViewerJSON(Animation(*mShow)); }
 
 nlohmann::json CalChartDoc::toViewerFileJSON() const
 {
@@ -283,7 +347,16 @@ nlohmann::json CalChartDoc::toViewerFileJSON() const
 
     j["meta"] = {
         { "version", "1.0.0" },
-        { "index_name", "(MANUAL) Give a unique name for this show; this is effectively a filename, and won't be displayed to CalChart Online Viewer users (recommended format: show-name-year, e.g. taylor-swift-2016)" }, // TODO; for now, manually add index_name to viewer file after saving
+        { "index_name",
+            "(MANUAL) Give a unique name for this show; this is effectively a filename, and won't be displayed to "
+            "CalChart Online Viewer users (recommended format: show-name-year, e.g. taylor-swift-2016)" }, // TODO; for
+                                                                                                           // now,
+                                                                                                           // manually
+                                                                                                           // add
+                                                                                                           // index_name
+                                                                                                           // to viewer
+                                                                                                           // file after
+                                                                                                           // saving
         { "type", "viewer" },
     };
 
@@ -348,10 +421,7 @@ void CalChartDoc::Modify(bool b)
 
 void CalChartDoc::AutoSaveTimer::Notify() { mShow.Autosave(); }
 
-wxString CalChartDoc::TranslateNameToAutosaveName(const wxString& name)
-{
-    return name + wxT("~");
-}
+wxString CalChartDoc::TranslateNameToAutosaveName(const wxString& name) { return name + wxT("~"); }
 
 // When the timer goes off, and if the show has a name and is modified,
 // we will write the file to a version of the file that the same
@@ -360,8 +430,7 @@ wxString CalChartDoc::TranslateNameToAutosaveName(const wxString& name)
 void CalChartDoc::Autosave()
 {
     if (GetFilename() != wxT("") && IsModified()) {
-        wxFFileOutputStream outputStream(
-            TranslateNameToAutosaveName(GetFilename()));
+        wxFFileOutputStream outputStream(TranslateNameToAutosaveName(GetFilename()));
         if (outputStream.IsOk()) {
             SaveObjectInternal(outputStream);
         }
@@ -394,23 +463,15 @@ auto CalChartDoc::GetAnimationCollisions() const -> std::map<int, CalChart::Sele
     return mAnimation->GetCollisions();
 }
 
-auto CalChartDoc::GenerateAnimationDrawCommands(
-    CalChart::Beats whichBeat,
-    bool drawCollisionWarning,
-    std::optional<bool> onBeat,
-    CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>
+auto CalChartDoc::GenerateAnimationDrawCommands(CalChart::Beats whichBeat, bool drawCollisionWarning,
+    std::optional<bool> onBeat, CalChart::Animation::AngleStepToImageFunction imageFunction) const
+    -> std::vector<CalChart::Draw::DrawCommand>
 {
     if (!mAnimation) {
         return {};
     }
-    return mAnimation->GenerateDrawCommands(
-        whichBeat,
-        mShow->GetSelectionList(),
-        mShow->GetShowMode(),
-        GetConfiguration(),
-        drawCollisionWarning,
-        onBeat,
-        imageFunction);
+    return mAnimation->GenerateDrawCommands(whichBeat, mShow->GetSelectionList(), mShow->GetShowMode(),
+        GetConfiguration(), drawCollisionWarning, onBeat, imageFunction);
 }
 
 auto CalChartDoc::GetAnimationInfo(CalChart::Beats whichBeat) const -> std::vector<CalChart::Animate::Info>
@@ -424,7 +485,8 @@ auto CalChartDoc::GetAnimationInfo(CalChart::Beats whichBeat) const -> std::vect
     return mAnimation->GetAllAnimateInfo(whichBeat, mShow->GetSelectionList());
 }
 
-auto CalChartDoc::GetAnimationInfo(MarcherIndex whichMarcher, CalChart::Beats whichBeat) const -> std::optional<CalChart::Animate::Info>
+auto CalChartDoc::GetAnimationInfo(MarcherIndex whichMarcher, CalChart::Beats whichBeat) const
+    -> std::optional<CalChart::Animate::Info>
 {
     if (!mAnimation) {
         return std::nullopt;
@@ -442,7 +504,8 @@ auto CalChartDoc::GetTotalNumberAnimationBeats() const -> std::optional<CalChart
 
 // Return a bounding box of where the marchers are or the entire show.  If they are
 // outside the show, we don't see them.
-auto CalChartDoc::GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beats whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>
+auto CalChartDoc::GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beats whichBeat) const
+    -> std::pair<CalChart::Coord, CalChart::Coord>
 {
     auto modeSize = mShow->GetShowMode().Size();
     if (!zoomInOnMarchers || !mAnimation) {
@@ -452,7 +515,8 @@ auto CalChartDoc::GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beats
     return { bounding_box_low_right - bounding_box_upper_left, (modeSize / 2) + bounding_box_upper_left };
 }
 
-auto CalChartDoc::AnimationBeatToSheetOffsetAndBeat(CalChart::Beats whichBeat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>
+auto CalChartDoc::AnimationBeatToSheetOffsetAndBeat(CalChart::Beats whichBeat) const
+    -> std::optional<std::tuple<size_t, CalChart::Beats>>
 {
     if (!mAnimation) {
         return std::nullopt;
@@ -500,7 +564,9 @@ auto CalChartDoc::GetFermataForAnimationBeat(CalChart::Beats whichBeat) const ->
         return std::nullopt; // Default fermata if out of bounds
     }
     auto beatInfo = mShow->GetSheetBeatInfo(sheetIndex);
-    return std::get<1>(beatInfo).count(beatOffset) ? std::optional<CalChart::Seconds>{ std::get<1>(beatInfo).at(beatOffset) } : std::nullopt;
+    return std::get<1>(beatInfo).count(beatOffset)
+        ? std::optional<CalChart::Seconds>{ std::get<1>(beatInfo).at(beatOffset) }
+        : std::nullopt;
 }
 
 auto CalChartDoc::GetDownbeatTimes() const -> std::vector<CalChart::Seconds>
@@ -529,12 +595,12 @@ auto CalChartDoc::GetAnimationBeatForCurrentSheet() const -> CalChart::Beats
 
 namespace {
 // Returns a view adaptor that will transform a range of point indices to the Path DrawCommands.
-auto TransformIndexToDrawPathCommands(CalChart::Animation const& animation, unsigned whichSheet, CalChart::Coord::units endRadius)
+auto TransformIndexToDrawPathCommands(
+    CalChart::Animation const& animation, unsigned whichSheet, CalChart::Coord::units endRadius)
 {
     return std::views::transform([&animation, whichSheet, endRadius](int i) {
         return animation.GenPathToDraw(whichSheet, i, endRadius);
-    })
-        | std::views::join;
+    }) | std::views::join;
 }
 
 }
@@ -542,10 +608,7 @@ auto TransformIndexToDrawPathCommands(CalChart::Animation const& animation, unsi
 auto CalChartDoc::GenerateGhostPointsDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>
 {
     if (auto ghostSheet = GetGhostSheet()) {
-        return mShow->GenerateGhostPointsDrawCommands(
-            GetConfiguration(),
-            CalChart::SelectionList(),
-            *ghostSheet);
+        return mShow->GenerateGhostPointsDrawCommands(GetConfiguration(), CalChart::SelectionList(), *ghostSheet);
     }
     return {};
 }
@@ -555,7 +618,8 @@ auto CalChartDoc::GenerateCurrentSheetPointsDrawCommands() const -> std::vector<
     auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
     auto& config = GetConfiguration();
     auto origin = GetShowFieldOffset();
-    CalChart::append(drawCmds, CalChart::CreateModeDrawCommandsWithBorderOffset(config, GetShowMode(), CalChart::HowToDraw::FieldView));
+    CalChart::append(drawCmds,
+        CalChart::CreateModeDrawCommandsWithBorderOffset(config, GetShowMode(), CalChart::HowToDraw::FieldView));
     CalChart::append(drawCmds, GenerateGhostPointsDrawCommands());
     auto sheetNum = GetCurrentSheetNum();
     if (sheetNum >= GetNumSheets()) {
@@ -566,9 +630,10 @@ auto CalChartDoc::GenerateCurrentSheetPointsDrawCommands() const -> std::vector<
     return drawCmds + origin;
 }
 
-auto CalChartDoc::GeneratePhatomPointsDrawCommands(CalChart::MarcherToPosition const& positions) const -> std::vector<CalChart::Draw::DrawCommand>
+auto CalChartDoc::GeneratePhantomPointsDrawCommands(CalChart::MarcherToPosition const& positions) const
+    -> std::vector<CalChart::Draw::DrawCommand>
 {
-    return mShow->GeneratePhatomPointsDrawCommands(mConfig, positions);
+    return mShow->GeneratePhantomPointsDrawCommands(mConfig, positions);
 }
 
 auto CalChartDoc::GeneratePathsDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>
@@ -582,23 +647,22 @@ auto CalChartDoc::GeneratePathsDrawCommands() const -> std::vector<CalChart::Dra
     }
     auto endRadius = CalChart::Float2CoordUnits(config.Get_DotRatio()) / 2;
     auto currentSheet = GetCurrentSheetNum();
-    return {
-        CalChart::Draw::withBrushAndPen(
-            config.Get_CalChartBrushAndPen(CalChart::Colors::PATHS),
-            mShow->GetSelectionList()
-                | TransformIndexToDrawPathCommands(*mAnimation, currentSheet, endRadius))
-    };
+    return { CalChart::Draw::withBrushAndPen(config.Get_CalChartBrushAndPen(CalChart::Colors::PATHS),
+        mShow->GetSelectionList() | TransformIndexToDrawPathCommands(*mAnimation, currentSheet, endRadius)) };
 }
 
-void CalChartDoc::WizardSetupNewShow(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int columns, ShowMode const& newmode)
+void CalChartDoc::WizardSetupNewShow(
+    std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int columns, ShowMode const& newmode)
 {
     mShow = Show::Create(newmode, labelsAndInstruments, columns);
     UpdateAllViews();
 }
 
-auto CalChartDoc::GetRelabelMapping(std::vector<CalChart::Coord> const& source_marchers, std::vector<CalChart::Coord> const& target_marchers) const -> std::optional<std::vector<CalChart::MarcherIndex>>
+auto CalChartDoc::GetRelabelMapping(std::vector<CalChart::Coord> const& source_marchers,
+    std::vector<CalChart::Coord> const& target_marchers) const -> std::optional<std::vector<CalChart::MarcherIndex>>
 {
-    return mShow->GetRelabelMapping(source_marchers, target_marchers, CalChart::Float2CoordUnits(mConfig.Get_DotRatio()));
+    return mShow->GetRelabelMapping(
+        source_marchers, target_marchers, CalChart::Float2CoordUnits(mConfig.Get_DotRatio()));
 }
 
 void CalChartDoc::SetSelectionList(SelectionList const& sl)
@@ -691,7 +755,8 @@ void CalChartDoc::SetGhostSource(GhostSource source, int which)
     UpdateAllViews();
 }
 
-auto CalChartDoc::PrintToPS(bool overview, int min_yards, std::set<size_t> const& isPicked, CalChart::Configuration const& config_) const -> std::tuple<std::string, int>
+auto CalChartDoc::PrintToPS(bool overview, int min_yards, std::set<size_t> const& isPicked,
+    CalChart::Configuration const& config_) const -> std::tuple<std::string, int>
 {
     auto doLandscape = config_.Get_PrintPSLandscape();
     auto doCont = config_.Get_PrintPSDoCont();
@@ -752,14 +817,17 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_SetShowModeCommand(CalChart::Show
     return std::make_unique<CalChartDocCommand>(*this, "Set Mode", cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_SetupMarchersCommand(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int numColumns)
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetupMarchersCommand(
+    std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int numColumns)
 {
     auto tlabels = std::vector(labelsAndInstruments.begin(), labelsAndInstruments.end());
-    auto show_cmds = Inject_CalChartDocArg(mShow->Create_SetupMarchersCommand(tlabels, numColumns, GetShowMode().FieldOffset()));
+    auto show_cmds
+        = Inject_CalChartDocArg(mShow->Create_SetupMarchersCommand(tlabels, numColumns, GetShowMode().FieldOffset()));
     return std::make_unique<CalChartDocCommand>(*this, "Set show info", show_cmds);
 }
 
-auto CalChartDoc::Create_SetInstrumentsCommand(std::map<CalChart::MarcherIndex, std::string> const& dotToInstrument) -> std::unique_ptr<wxCommand>
+auto CalChartDoc::Create_SetInstrumentsCommand(std::map<CalChart::MarcherIndex, std::string> const& dotToInstrument)
+    -> std::unique_ptr<wxCommand>
 {
     auto show_cmds = Inject_CalChartDocArg(mShow->Create_SetInstrumentsCommand(dotToInstrument));
     return std::make_unique<CalChartDocCommand>(*this, "Set instruments", show_cmds);
@@ -786,7 +854,8 @@ auto CalChartDoc::Create_SetSheetTempoCommand(CalChart::Tempo tempo) -> std::uni
     return std::make_unique<CalChartDocCommand>(*this, "Set tempo", cmds);
 }
 
-auto CalChartDoc::Create_SetSheetsBeatInfoCommand(std::vector<CalChart::SheetBeatInfo> const& beatInfo) -> std::unique_ptr<wxCommand>
+auto CalChartDoc::Create_SetSheetsBeatInfoCommand(std::vector<CalChart::SheetBeatInfo> const& beatInfo)
+    -> std::unique_ptr<wxCommand>
 {
     auto cmds = Create_SetSheetPair();
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetSheetsBeatInfoCommand(beatInfo)));
@@ -800,7 +869,8 @@ auto CalChartDoc::Create_SetMediaCommand(CalChart::FileData const& media) -> std
     return std::make_unique<CalChartDocCommand>(*this, "Set media", cmds);
 }
 
-auto CalChartDoc::Create_AddSheetsCommand(Show::Sheet_container_t const& sheets, size_t where) -> std::unique_ptr<wxCommand>
+auto CalChartDoc::Create_AddSheetsCommand(Show::Sheet_container_t const& sheets, size_t where)
+    -> std::unique_ptr<wxCommand>
 {
     auto cmds = Create_SetSheetPair();
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_AddSheetsCommand(sheets, where)));
@@ -814,7 +884,8 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_RemoveSheetCommand(size_t where)
     return std::make_unique<CalChartDocCommand>(*this, "Removing Sheet", cmds);
 }
 
-auto CalChartDoc::Create_ApplyRelabelMapping(int sheet, std::vector<MarcherIndex> const& mapping) -> std::unique_ptr<wxCommand>
+auto CalChartDoc::Create_ApplyRelabelMapping(int sheet, std::vector<MarcherIndex> const& mapping)
+    -> std::unique_ptr<wxCommand>
 {
     auto cmds = Create_SetSheetPair();
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_ApplyRelabelMapping(sheet, mapping)));
@@ -844,28 +915,34 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_AppendShow(std::unique_ptr<CalCha
     return std::make_unique<CalChartDocCommand>(*this, "Append Show", cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string>> const& data)
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetPrintableContinuity(
+    std::map<int, std::pair<std::string, std::string>> const& data)
 {
     auto cmds = Create_SetSheetPair();
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetPrintableContinuity(data)));
     return std::make_unique<CalChartDocCommand>(*this, "Set Continuity", cmds);
 }
 
-auto CalChartDoc::Create_MovePointsCommand(CalChart::MarcherToPosition const& new_positions) -> std::unique_ptr<wxCommand>
+auto CalChartDoc::Create_MovePointsCommand(CalChart::MarcherToPosition const& new_positions)
+    -> std::unique_ptr<wxCommand>
 {
     auto cmds = Create_SetSheetAndSelectionPair();
-    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_MovePointsCommand(new_positions, mShow->GetCurrentReferencePoint())));
+    cmds.emplace_back(
+        Inject_CalChartDocArg(mShow->Create_MovePointsCommand(new_positions, mShow->GetCurrentReferencePoint())));
     return std::make_unique<CalChartDocCommand>(*this, "Move Points", cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_MovePointsCommand(unsigned whichSheet, CalChart::MarcherToPosition const& new_positions)
+std::unique_ptr<wxCommand> CalChartDoc::Create_MovePointsCommand(
+    unsigned whichSheet, CalChart::MarcherToPosition const& new_positions)
 {
     auto cmds = Create_SetSheetAndSelectionPair();
-    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_MovePointsCommand(whichSheet, new_positions, mShow->GetCurrentReferencePoint())));
+    cmds.emplace_back(Inject_CalChartDocArg(
+        mShow->Create_MovePointsCommand(whichSheet, new_positions, mShow->GetCurrentReferencePoint())));
     return std::make_unique<CalChartDocCommand>(*this, "Move Points", cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_AssignPointsToCurve(size_t whichCurve, std::vector<MarcherIndex> whichMarchers)
+std::unique_ptr<wxCommand> CalChartDoc::Create_AssignPointsToCurve(
+    size_t whichCurve, std::vector<MarcherIndex> whichMarchers)
 {
     auto cmds = Create_SetSheetAndSelectionPair();
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_AssignPointsToCurve(whichCurve, whichMarchers)));
@@ -882,14 +959,16 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_DeletePointsCommand()
 std::unique_ptr<wxCommand> CalChartDoc::Create_RotatePointPositionsCommand(int rotateAmount)
 {
     auto cmds = Create_SetSheetAndSelectionPair();
-    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_RotatePointPositionsCommand(rotateAmount, mShow->GetCurrentReferencePoint())));
+    cmds.emplace_back(Inject_CalChartDocArg(
+        mShow->Create_RotatePointPositionsCommand(rotateAmount, mShow->GetCurrentReferencePoint())));
     return std::make_unique<CalChartDocCommand>(*this, "Rotate Points", cmds);
 }
 
 std::unique_ptr<wxCommand> CalChartDoc::Create_ResetReferencePointToRef0()
 {
     auto cmds = Create_SetSheetAndSelectionPair();
-    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_ResetReferencePointToRef0(mShow->GetCurrentReferencePoint())));
+    cmds.emplace_back(
+        Inject_CalChartDocArg(mShow->Create_ResetReferencePointToRef0(mShow->GetCurrentReferencePoint())));
     return std::make_unique<CalChartDocCommand>(*this, "Reset Reference Point", cmds);
 }
 
@@ -949,14 +1028,17 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_RemoveBackgroundImageCommand(int 
     return std::make_unique<CalChartDocCommand>(*this, "Removing Background Image", cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height)
+std::unique_ptr<wxCommand> CalChartDoc::Create_MoveBackgroundImageCommand(
+    int which, int left, int top, int scaled_width, int scaled_height)
 {
     auto cmds = Create_SetSheetPair();
-    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_MoveBackgroundImageCommand(which, left, top, scaled_width, scaled_height)));
+    cmds.emplace_back(
+        Inject_CalChartDocArg(mShow->Create_MoveBackgroundImageCommand(which, left, top, scaled_width, scaled_height)));
     return std::make_unique<CalChartDocCommand>(*this, "Moving Background Image", cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_SetTransitionCommand(const std::vector<Coord>& finalPositions, const std::map<SYMBOL_TYPE, std::string>& continuities, const std::vector<SYMBOL_TYPE>& marcherDotTypes)
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetTransitionCommand(const std::vector<Coord>& finalPositions,
+    const std::map<SYMBOL_TYPE, std::string>& continuities, const std::vector<SYMBOL_TYPE>& marcherDotTypes)
 {
     CalChart::MarcherToPosition positionAssignments;
 
@@ -966,14 +1048,17 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_SetTransitionCommand(const std::v
 
     auto cmds = Create_SetSheetAndSelectionPair();
 
-    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_MovePointsCommand(GetCurrentSheetNum() + 1, positionAssignments, 0)));
+    cmds.emplace_back(
+        Inject_CalChartDocArg(mShow->Create_MovePointsCommand(GetCurrentSheetNum() + 1, positionAssignments, 0)));
 
     for (auto contIter = continuities.begin(); contIter != continuities.end(); contIter++) {
-        cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetContinuityCommand(contIter->first, CalChart::Continuity{ contIter->second })));
+        cmds.emplace_back(Inject_CalChartDocArg(
+            mShow->Create_SetContinuityCommand(contIter->first, CalChart::Continuity{ contIter->second })));
     }
 
     std::set<SYMBOL_TYPE> processedSymbols;
-    for (unsigned firstMarcherWithSymbol = 0; firstMarcherWithSymbol < marcherDotTypes.size(); firstMarcherWithSymbol++) {
+    for (unsigned firstMarcherWithSymbol = 0; firstMarcherWithSymbol < marcherDotTypes.size();
+        firstMarcherWithSymbol++) {
         SelectionList marchersWithSymbol;
         SYMBOL_TYPE symbolToProcess;
 
@@ -1004,7 +1089,8 @@ auto CalChartDoc::Create_AddSheetCurveCommand(CalChart::Curve const& curve) -> s
     return std::make_unique<CalChartDocCommand>(*this, "Adding Curve", cmds);
 }
 
-auto CalChartDoc::Create_ReplaceSheetCurveCommand(CalChart::Curve const& curve, int whichCurve) -> std::unique_ptr<wxCommand>
+auto CalChartDoc::Create_ReplaceSheetCurveCommand(CalChart::Curve const& curve, int whichCurve)
+    -> std::unique_ptr<wxCommand>
 {
     auto cmds = Create_SetSheetPair();
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_ReplaceSheetCurveCommand(curve, whichCurve)));

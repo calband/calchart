@@ -24,6 +24,7 @@
 #include "CalChartTypes.h"
 #include <cmath>
 #include <filesystem>
+#include <nlohmann/json.hpp>
 #include <optional>
 #include <ranges>
 #include <vector>
@@ -35,29 +36,25 @@ namespace CalChart {
  */
 
 // Should be constexpr in c++23
-template <typename T>
-inline auto IS_ZERO(T a)
+template <typename T> inline auto IS_ZERO(T a)
 {
     // the fudge factor for floating point math
     constexpr auto kEpsilon = 1e-5;
     return std::abs(a) < kEpsilon;
 }
 
-template <typename T, typename U>
-inline auto IS_EQUAL(T a, U b) { return IS_ZERO(b - a); }
+template <typename T, typename U> inline auto IS_EQUAL(T a, U b) { return IS_ZERO(b - a); }
 
 /**
  * Common utils
  */
-template <typename E>
-constexpr auto toUType(E enumerator)
+template <typename E> constexpr auto toUType(E enumerator)
 {
     return static_cast<std::underlying_type_t<E>>(enumerator);
 }
 
 // from https://stackoverflow.com/questions/261963/how-can-i-iterate-over-an-enum
-template <typename C, C beginVal, C endVal>
-class Iterator {
+template <typename C, C beginVal, C endVal> class Iterator {
 
 public:
     Iterator() = default;
@@ -90,60 +87,40 @@ public:
         }
 
         // Dereference operator
-        auto operator*() const -> C
-        {
-            return static_cast<C>(val_);
-        }
+        auto operator*() const -> C { return static_cast<C>(val_); }
 
         // Equality comparison operator
-        auto operator==(const iterator& other) const
-        {
-            return val_ == other.val_;
-        }
+        auto operator==(const iterator& other) const { return val_ == other.val_; }
 
-        auto operator!=(const iterator& other) const
-        {
-            return !(*this == other);
-        }
+        auto operator!=(const iterator& other) const { return !(*this == other); }
 
     private:
         val_t val_{};
     };
 
-    auto begin() const -> iterator
-    {
-        return iterator(toUType(beginVal));
-    }
+    auto begin() const -> iterator { return iterator(toUType(beginVal)); }
 
-    auto end() const -> iterator
-    {
-        return iterator(toUType(endVal) + 1);
-    }
+    auto end() const -> iterator { return iterator(toUType(endVal) + 1); }
 };
 
-template <class... Ts>
-struct overloaded : Ts... {
+template <class... Ts> struct overloaded : Ts... {
     using Ts::operator()...;
 };
-template <class... Ts>
-overloaded(Ts...) -> overloaded<Ts...>;
+template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-template <typename T>
-auto append(std::vector<T>& v, T const& other) -> std::vector<T>&
+template <typename T> auto append(std::vector<T>& v, T const& other) -> std::vector<T>&
 {
     v.insert(v.end(), other);
     return v;
 }
 
-template <typename T>
-auto append(std::vector<T>& v, std::vector<T> const& other) -> std::vector<T>&
+template <typename T> auto append(std::vector<T>& v, std::vector<T> const& other) -> std::vector<T>&
 {
     v.insert(v.end(), other.begin(), other.end());
     return v;
 }
 
-template <typename T>
-auto append(std::vector<T>&& v, std::vector<T> const& other) -> std::vector<T>&&
+template <typename T> auto append(std::vector<T>&& v, std::vector<T> const& other) -> std::vector<T>&&
 {
     v.insert(v.end(), other.begin(), other.end());
     return std::forward<std::vector<T>>(v);
@@ -162,7 +139,12 @@ class Reader;
 
 auto ToFileData(const std::filesystem::path& path) -> std::optional<FileData>;
 auto ToFileData(Reader path) -> FileData;
+auto ToFileData(nlohmann::json const& json) -> FileData;
 
 auto SerializeFileData(FileData const& fileData) -> std::vector<std::byte>;
+auto FileDataToJSON(FileData const& fileData) -> nlohmann::json;
+
+auto EncodeBase64(std::vector<std::byte> const& data) -> std::string;
+auto DecodeBase64(std::string const& encoded) -> std::vector<std::byte>;
 
 }

@@ -5,6 +5,10 @@ find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
 find_package(CURL REQUIRED)
 find_package(ZLIB REQUIRED)
+find_package(nlohmann_json_schema_validator REQUIRED)
+
+# cppcodec is header-only
+find_path(CPPCODEC_INCLUDE_DIRS "cppcodec/base64_rfc4648.hpp")
 
 # calchart_core
 BISON_TARGET(
@@ -77,6 +81,8 @@ add_library(
   CalChartSheet.h
   CalChartShow.cpp
   CalChartShow.h
+  CalChartShowJsonValidator.cpp
+  CalChartShowJsonValidator.h
   CalChartShowMode.cpp
   CalChartShowMode.h
   CalChartPrintShowToPS.cpp
@@ -133,10 +139,13 @@ target_include_directories(
 
 target_link_libraries(calchart_core PRIVATE
   nlohmann_json::nlohmann_json
+  nlohmann_json_schema_validator::validator
   munkres
   CURL::libcurl
   ZLIB::ZLIB
 )
+
+target_include_directories(calchart_core PRIVATE ${CPPCODEC_INCLUDE_DIRS})
 
 # When building on Windows with a static libcurl from vcpkg, define CURL_STATICLIB
 # so curl headers avoid __declspec(dllimport) and we link statically.
