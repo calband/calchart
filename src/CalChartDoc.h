@@ -27,6 +27,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <optional>
 #include <vector>
 #include <wx/cmdproc.h>
 #include <wx/docview.h> // For basic wx defines
@@ -151,14 +152,16 @@ public:
 
     [[nodiscard]] auto GetSheetsName() const { return mShow->GetSheetsName(); }
 
-    [[nodiscard]] auto GetNthSheet(int n) const { return static_cast<CalChart::Show const&>(*mShow).GetNthSheet(n); }
-    [[nodiscard]] auto CopyAllSheets() const { return mShow->CopyAllSheets(); }
+    [[nodiscard]] auto CopySheet(unsigned n) const { return mShow->CopySheet(n); }
+    [[nodiscard]] auto CopySheets() const { return mShow->CopySheets(); }
     [[nodiscard]] auto CopyCurrentSheet() const { return mShow->CopyCurrentSheet(); }
 
     [[nodiscard]] auto GetCurrentSheetNum() const { return mShow->GetCurrentSheetNum(); }
     [[nodiscard]] auto GetCurrentSheetName() const { return mShow->GetCurrentSheetName(); }
     [[nodiscard]] auto GetCurrentSheetBeats() const { return mShow->GetCurrentSheetBeats(); }
     [[nodiscard]] auto GetCurrentSheetTempo() const { return mShow->GetCurrentSheetTempo(); }
+    [[nodiscard]] auto GetSheetTempo(unsigned n) const { return mShow->GetSheetTempo(n); }
+    [[nodiscard]] auto GetSheetsTempo() const { return mShow->GetSheetsTempo(); }
     [[nodiscard]] auto GetCurrentSheetSymbols() const { return mShow->GetCurrentSheetSymbols(); }
     [[nodiscard]] auto GetCurrentSheetBackgroundImages() const { return mShow->GetCurrentSheetBackgroundImages(); }
     void SetCurrentSheet(int n);
@@ -318,7 +321,7 @@ private:
     [[nodiscard]] auto Create_SetSheetPair() const -> std::vector<CC_doc_command_pair>;
     [[nodiscard]] auto Create_SetSheetAndSelectionPair() const -> std::vector<CC_doc_command_pair>;
 
-    [[nodiscard]] auto GetGhostSheet() const -> CalChart::Sheet const*;
+    [[nodiscard]] auto GetGhostSheet() const -> std::optional<CalChart::Sheet>;
     [[nodiscard]] auto GeneratePathsDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>;
 
     // Autosaving:

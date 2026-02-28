@@ -467,9 +467,9 @@ auto Show::GetCurrentSheetBackgroundImages() const -> std::vector<ImageInfo>
     return mSheets.at(mSheetNum).GetBackgroundImages();
 }
 
-auto Show::CopyCurrentSheet() const -> Show::Sheet_container_t
+auto Show::CopySheet(unsigned n) const -> Sheet
 {
-    return Show::Sheet_container_t(1, mSheets.at(mSheetNum));
+    return mSheets.at(n);
 }
 
 auto Show::GetCurrentSheetSerialized() const -> std::vector<std::byte>
@@ -479,7 +479,7 @@ auto Show::GetCurrentSheetSerialized() const -> std::vector<std::byte>
 
 auto Show::RemoveNthSheet(int sheetidx) -> Sheet_container_t
 {
-    auto i = GetNthSheet(sheetidx);
+    auto i = mSheets.begin() + sheetidx;
     Sheet_container_t shts(1, *i);
     mSheets.erase(i);
 
@@ -513,9 +513,8 @@ void Show::InsertSheet(Sheet_container_t const& sheet,
 // warning, the labels might not match up
 void Show::SetNumPoints(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int columns, Coord const& new_march_position)
 {
-    for (auto sht = GetSheetBegin(); sht != GetSheetEnd(); ++sht) {
-        auto pts = sht->NewNumPointsPositions(static_cast<int>(labelsAndInstruments.size()), columns, new_march_position);
-        sht->SetMarchers(pts);
+    for (auto& sheet : mSheets) {
+        sheet.SetMarchers(sheet.NewNumPointsPositions(static_cast<int>(labelsAndInstruments.size()), columns, new_march_position));
     }
     SetPointLabelAndInstrument(labelsAndInstruments);
 }
@@ -1072,7 +1071,7 @@ auto Show::Create_AddSheetsCommand(const Show::Sheet_container_t& sheets, int wh
 
 auto Show::Create_RemoveSheetCommand(int where) const -> Show_command_pair
 {
-    Sheet_container_t old_shts(1, *GetNthSheet(where));
+    Sheet_container_t old_shts(1, mSheets.at(where));
     auto action = [where](Show& show) { show.RemoveNthSheet(where); };
     auto reaction = [old_shts, where](Show& show) { show.InsertSheet(old_shts, where); };
     return { action, reaction };
@@ -1081,24 +1080,18 @@ auto Show::Create_RemoveSheetCommand(int where) const -> Show_command_pair
 // remapping gets applied on this sheet till the last one
 auto Show::Create_ApplyRelabelMapping(int sheet_num_first, std::vector<MarcherIndex> const& mapping) const -> Show_command_pair
 {
-    std::vector<std::vector<Point>> current_pos;
-    for (auto s = GetNthSheet(sheet_num_first); s != GetSheetEnd(); ++s) {
-        current_pos.emplace_back(s->GetAllMarchers());
-    }
+    auto current_pos = CalChart::Ranges::ToVector<std::vector<Point>>(
+        mSheets | std::views::drop(sheet_num_first) | std::views::transform([](auto&& sheet) { return sheet.GetAllMarchers(); }));
     // first gather where all the points are;
     auto action = [sheet_num_first, mapping](Show& show) {
-        auto s = show.GetNthSheet(sheet_num_first);
-        while (s != show.GetSheetEnd()) {
-            s->SetMarchers(s->RemapPoints(mapping));
-            ++s;
+        for (auto index = static_cast<size_t>(sheet_num_first); index < show.mSheets.size(); ++index) {
+            auto& sheet = show.mSheets.at(index);
+            sheet.SetMarchers(sheet.RemapPoints(mapping));
         }
     };
     auto reaction = [sheet_num_first, current_pos](Show& show) {
-        auto i = 0;
-        auto s = show.GetNthSheet(sheet_num_first);
-        while (s != show.GetSheetEnd()) {
-            s->SetMarchers(current_pos.at(i++));
-            ++s;
+        for (auto index = 0U; index < current_pos.size(); ++index) {
+            show.mSheets.at(index + sheet_num_first).SetMarchers(current_pos.at(index));
         }
     };
     return { action, reaction };
@@ -1108,16 +1101,16 @@ auto Show::Create_SetPrintableContinuity(std::map<int, std::pair<std::string, st
 {
     std::map<unsigned, std::pair<std::string, std::string>> undo_data;
     for (auto&& i : data) {
-        undo_data[i.first] = { GetNthSheet(i.first)->GetPrintNumber(), GetNthSheet(i.first)->GetRawPrintContinuity() };
+        undo_data[i.first] = { mSheets.at(i.first).GetPrintNumber(), mSheets.at(i.first).GetRawPrintContinuity() };
     }
     auto action = [data](Show& show) {
         for (auto&& i : data) {
-            show.GetNthSheet(i.first)->SetPrintableContinuity(i.second.first, i.second.second);
+            show.mSheets.at(i.first).SetPrintableContinuity(i.second.first, i.second.second);
         }
     };
     auto reaction = [undo_data](Show& show) {
         for (auto&& i : undo_data) {
-            show.GetNthSheet(i.first)->SetPrintableContinuity(i.second.first, i.second.second);
+            show.mSheets.at(i.first).SetPrintableContinuity(i.second.first, i.second.second);
         }
     };
     return { action, reaction };
@@ -1130,25 +1123,25 @@ auto Show::Create_MovePointsCommand(MarcherToPosition const& new_positions, int 
 
 auto Show::Create_MovePointsCommand(int whichSheet, MarcherToPosition const& new_positions, int ref) const -> Show_command_pair
 {
-    auto sheet = GetNthSheet(whichSheet);
+    auto const& sheet = mSheets.at(whichSheet);
     MarcherToPosition original_positions;
     for (auto&& index : new_positions) {
-        original_positions[index.first] = sheet->GetMarcherPosition(index.first, ref);
+        original_positions[index.first] = sheet.GetMarcherPosition(index.first, ref);
     }
-    auto originalCurves = sheet->GetCurveAssignments();
+    auto originalCurves = sheet.GetCurveAssignments();
 
     auto action = [sheet_num = whichSheet, new_positions, ref](Show& show) {
-        auto sheet = show.GetNthSheet(sheet_num);
+        auto& sheet = show.mSheets.at(sheet_num);
         for (auto&& i : new_positions) {
-            sheet->SetPosition(i.second, i.first, ref);
+            sheet.SetPosition(i.second, i.first, ref);
         }
     };
     auto reaction = [sheet_num = whichSheet, original_positions, ref, originalCurves](Show& show) {
-        auto sheet = show.GetNthSheet(sheet_num);
+        auto& sheet = show.mSheets.at(sheet_num);
         for (auto&& i : original_positions) {
-            sheet->SetPosition(i.second, i.first, ref);
+            sheet.SetPosition(i.second, i.first, ref);
         }
-        sheet->SetCurveAssignment(originalCurves);
+        sheet.SetCurveAssignment(originalCurves);
     };
     return { action, reaction };
 }
@@ -1168,26 +1161,26 @@ namespace {
 Show_command_pair Show::Create_AssignPointsToCurve(size_t whichCurve, std::vector<MarcherIndex> whichMarchers)
 {
     auto whichSheet = GetCurrentSheetNum();
-    auto sheet = GetNthSheet(whichSheet);
+    auto const& sheet = mSheets.at(whichSheet);
     std::map<MarcherIndex, Coord> originalPositions;
-    auto originalCurves = sheet->GetCurveAssignments();
+    auto originalCurves = sheet.GetCurveAssignments();
 
     for (auto&& index : whichMarchers) {
         if (!found(index, originalCurves)) {
-            originalPositions[index] = sheet->GetMarcherPosition(index);
+            originalPositions[index] = sheet.GetMarcherPosition(index);
         }
     }
-    auto newAssignments = sheet->GetCurveAssignmentsWithNewAssignments(whichCurve, whichMarchers);
+    auto newAssignments = sheet.GetCurveAssignmentsWithNewAssignments(whichCurve, whichMarchers);
 
     auto action = [whichSheet, newAssignments](Show& show) {
-        show.GetNthSheet(whichSheet)->SetCurveAssignment(newAssignments);
+        show.mSheets.at(whichSheet).SetCurveAssignment(newAssignments);
     };
     auto reaction = [whichSheet, originalPositions, originalCurves](Show& show) {
-        auto sheet = show.GetNthSheet(whichSheet);
+        auto& sheet = show.mSheets.at(whichSheet);
         for (auto&& [whichMarcher, pos] : originalPositions) {
-            sheet->SetPosition(pos, whichMarcher);
+            sheet.SetPosition(pos, whichMarcher);
         }
-        sheet->SetCurveAssignment(originalCurves);
+        sheet.SetCurveAssignment(originalCurves);
     };
     return { action, reaction };
 }
@@ -1267,15 +1260,15 @@ auto Show::Create_SetSymbolCommand(SelectionList const& selectionList, SYMBOL_TY
         }
     }
     auto action = [sheet_num = mSheetNum, new_sym](Show& show) {
-        auto sheet = show.GetNthSheet(sheet_num);
+        auto& sheet = show.mSheets.at(sheet_num);
         for (auto&& i : new_sym) {
-            sheet->SetSymbol(i.first, i.second);
+            sheet.SetSymbol(i.first, i.second);
         }
     };
     auto reaction = [sheet_num = mSheetNum, original_sym](Show& show) {
-        auto sheet = show.GetNthSheet(sheet_num);
+        auto& sheet = show.mSheets.at(sheet_num);
         for (auto&& i : original_sym) {
-            sheet->SetSymbol(i.first, i.second);
+            sheet.SetSymbol(i.first, i.second);
         }
     };
     return { action, reaction };
@@ -1285,10 +1278,10 @@ auto Show::Create_SetContinuityCommand(SYMBOL_TYPE which_sym, CalChart::Continui
 {
     auto original_cont = mSheets.at(mSheetNum).GetContinuityBySymbol(which_sym);
     auto action = [sheet_num = mSheetNum, which_sym, new_cont](Show& show) {
-        show.GetNthSheet(sheet_num)->SetContinuity(which_sym, new_cont);
+        show.mSheets.at(sheet_num).SetContinuity(which_sym, new_cont);
     };
     auto reaction = [sheet_num = mSheetNum, which_sym, original_cont](Show& show) {
-        show.GetNthSheet(sheet_num)->SetContinuity(which_sym, original_cont);
+        show.mSheets.at(sheet_num).SetContinuity(which_sym, original_cont);
     };
     return { action, reaction };
 }
@@ -1301,15 +1294,15 @@ auto Show::Create_SetLabelFlipCommand(std::map<MarcherIndex, bool> const& new_fl
         original_flip[index.first] = sheet.GetMarcher(index.first).GetFlip();
     }
     auto action = [sheet_num = mSheetNum, new_flip](Show& show) {
-        auto sheet = show.GetNthSheet(sheet_num);
+        auto& sheet = show.mSheets.at(sheet_num);
         for (auto&& i : new_flip) {
-            sheet->SetMarcherFlip(i.first, i.second);
+            sheet.SetMarcherFlip(i.first, i.second);
         }
     };
     auto reaction = [sheet_num = mSheetNum, original_flip](Show& show) {
-        auto sheet = show.GetNthSheet(sheet_num);
+        auto& sheet = show.mSheets.at(sheet_num);
         for (auto&& i : original_flip) {
-            sheet->SetMarcherFlip(i.first, i.second);
+            sheet.SetMarcherFlip(i.first, i.second);
         }
     };
     return { action, reaction };
@@ -1342,15 +1335,15 @@ auto Show::Create_SetLabelVisiblityCommand(std::map<MarcherIndex, bool> const& n
         original_visibility[index.first] = sheet.GetMarcher(index.first).LabelIsVisible();
     }
     auto action = [sheet_num = mSheetNum, new_visibility](Show& show) {
-        auto sheet = show.GetNthSheet(sheet_num);
+        auto& sheet = show.mSheets.at(sheet_num);
         for (auto&& i : new_visibility) {
-            sheet->SetMarcherLabelVisibility(i.first, i.second);
+            sheet.SetMarcherLabelVisibility(i.first, i.second);
         }
     };
     auto reaction = [sheet_num = mSheetNum, original_visibility](Show& show) {
-        auto sheet = show.GetNthSheet(sheet_num);
+        auto& sheet = show.mSheets.at(sheet_num);
         for (auto&& i : original_visibility) {
-            sheet->SetMarcherLabelVisibility(i.first, i.second);
+            sheet.SetMarcherLabelVisibility(i.first, i.second);
         }
     };
     return { action, reaction };
@@ -1379,12 +1372,12 @@ auto Show::Create_AddNewBackgroundImageCommand(ImageInfo const& image) const -> 
 {
     auto& sheet = mSheets.at(mSheetNum);
     auto action = [sheet_num = mSheetNum, image, where = sheet.GetNumberBackgroundImages()](Show& show) {
-        auto sheet = show.GetNthSheet(sheet_num);
-        sheet->AddBackgroundImage(image, where);
+        auto& sheet = show.mSheets.at(sheet_num);
+        sheet.AddBackgroundImage(image, where);
     };
     auto reaction = [sheet_num = mSheetNum, where = sheet.GetNumberBackgroundImages()](Show& show) {
-        auto sheet = show.GetNthSheet(sheet_num);
-        sheet->RemoveBackgroundImage(where);
+        auto& sheet = show.mSheets.at(sheet_num);
+        sheet.RemoveBackgroundImage(where);
     };
     return { action, reaction };
 }
@@ -1396,12 +1389,12 @@ auto Show::Create_RemoveBackgroundImageCommand(int which) const -> Show_command_
         return { [](Show&) { }, [](Show&) { } };
     }
     auto action = [sheet_num = mSheetNum, which](Show& show) {
-        auto sheet = show.GetNthSheet(sheet_num);
-        sheet->RemoveBackgroundImage(which);
+        auto& sheet = show.mSheets.at(sheet_num);
+        sheet.RemoveBackgroundImage(which);
     };
     auto reaction = [sheet_num = mSheetNum, image = sheet.GetBackgroundImages().at(which), which](Show& show) {
-        auto sheet = show.GetNthSheet(sheet_num);
-        sheet->AddBackgroundImage(image, which);
+        auto& sheet = show.mSheets.at(sheet_num);
+        sheet.AddBackgroundImage(image, which);
     };
     return { action, reaction };
 }
@@ -1411,12 +1404,12 @@ auto Show::Create_MoveBackgroundImageCommand(int which, int left, int top, int s
     auto& sheet = mSheets.at(mSheetNum);
     auto [current_left, current_top, current_scaled_width, current_scaled_height] = sheet.GetBackgroundImageInfo(which);
     auto action = [sheet_num = mSheetNum, which, left, top, scaled_width, scaled_height](Show& show) {
-        auto sheet = show.GetNthSheet(sheet_num);
-        sheet->MoveBackgroundImage(which, left, top, scaled_width, scaled_height);
+        auto& sheet = show.mSheets.at(sheet_num);
+        sheet.MoveBackgroundImage(which, left, top, scaled_width, scaled_height);
     };
     auto reaction = [sheet_num = mSheetNum, which, current_left, current_top, current_scaled_width, current_scaled_height](Show& show) {
-        auto sheet = show.GetNthSheet(sheet_num);
-        sheet->MoveBackgroundImage(which, current_left, current_top, current_scaled_width, current_scaled_height);
+        auto& sheet = show.mSheets.at(sheet_num);
+        sheet.MoveBackgroundImage(which, current_left, current_top, current_scaled_width, current_scaled_height);
     };
     return { action, reaction };
 }
@@ -1425,10 +1418,10 @@ auto Show::Create_AddSheetCurveCommand(CalChart::Curve const& curve) const -> Sh
 {
     auto newIndex = mSheets.at(mSheetNum).GetNumberCurves();
     auto action = [sheet_num = mSheetNum, curve, newIndex](Show& show) {
-        show.GetNthSheet(sheet_num)->AddCurve(curve, newIndex);
+        show.mSheets.at(sheet_num).AddCurve(curve, newIndex);
     };
     auto reaction = [sheet_num = mSheetNum, newIndex](Show& show) {
-        show.GetNthSheet(sheet_num)->RemoveCurve(newIndex);
+        show.mSheets.at(sheet_num).RemoveCurve(newIndex);
     };
     return { action, reaction };
 }
@@ -1437,10 +1430,10 @@ auto Show::Create_ReplaceSheetCurveCommand(CalChart::Curve const& curve, int whi
 {
     auto oldCurve = mSheets.at(mSheetNum).GetCurve(whichCurve);
     auto action = [sheet_num = mSheetNum, curve, whichCurve](Show& show) {
-        show.GetNthSheet(sheet_num)->ReplaceCurve(curve, whichCurve);
+        show.mSheets.at(sheet_num).ReplaceCurve(curve, whichCurve);
     };
     auto reaction = [sheet_num = mSheetNum, oldCurve, whichCurve](Show& show) {
-        show.GetNthSheet(sheet_num)->ReplaceCurve(oldCurve, whichCurve);
+        show.mSheets.at(sheet_num).ReplaceCurve(oldCurve, whichCurve);
     };
     return { action, reaction };
 }
@@ -1450,11 +1443,11 @@ auto Show::Create_RemoveSheetCurveCommand(int whichCurve) const -> Show_command_
     auto oldCurve = mSheets.at(mSheetNum).GetCurve(whichCurve);
     auto oldAssignments = mSheets.at(mSheetNum).GetCurveAssignments();
     auto action = [sheet_num = mSheetNum, whichCurve](Show& show) {
-        show.GetNthSheet(sheet_num)->RemoveCurve(whichCurve);
+        show.mSheets.at(sheet_num).RemoveCurve(whichCurve);
     };
     auto reaction = [sheet_num = mSheetNum, oldCurve, whichCurve, oldAssignments](Show& show) {
-        show.GetNthSheet(sheet_num)->AddCurve(oldCurve, whichCurve);
-        show.GetNthSheet(sheet_num)->SetCurveAssignment(oldAssignments);
+        show.mSheets.at(sheet_num).AddCurve(oldCurve, whichCurve);
+        show.mSheets.at(sheet_num).SetCurveAssignment(oldAssignments);
     };
     return { action, reaction };
 }
