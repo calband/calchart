@@ -135,8 +135,8 @@ auto DiagnosticInfo::Create() -> DiagnosticInfo
 void DiagnosticInfo::AddShowInfo(Show const& show)
 {
     show_info.has_show = true;
-    show_info.num_sheets = static_cast<int>(show.GetNumSheets());
-    show_info.num_marchers = static_cast<int>(show.GetNumPoints());
+    show_info.num_sheets = show.GetNumSheets();
+    show_info.num_marchers = show.GetNumPoints();
 
     // ShowMode doesn't have a simple name, so we'll describe it with size
     auto const& mode = show.GetShowMode();

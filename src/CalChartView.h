@@ -84,7 +84,7 @@ public:
     [[nodiscard]] auto PointPosition(CalChart::MarcherIndex which) const { return mShow->GetMarcherPositionOnCurrentSheet(which, mShow->GetCurrentReferencePoint()); }
     [[nodiscard]] auto GetCurrentSheetNum() const { return (mShow != nullptr) ? mShow->GetCurrentSheetNum() : 0; }
     [[nodiscard]] auto GetNumSheets() const -> size_t { return (mShow != nullptr) ? mShow->GetNumSheets() : 0; }
-    [[nodiscard]] auto GetNumPoints() const { return (mShow != nullptr) ? mShow->GetNumPoints() : 0; }
+    [[nodiscard]] auto GetNumPoints() const -> size_t { return (mShow != nullptr) ? mShow->GetNumPoints() : 0; }
     [[nodiscard]] auto GetShowFieldOffset() const { return mShow->GetShowFieldOffset(); }
     [[nodiscard]] auto GetShowFullSize() const { return mShow->GetShowMode().Size(); }
     [[nodiscard]] auto GetShowFieldSize() const { return mShow->GetShowMode().FieldSize(); }

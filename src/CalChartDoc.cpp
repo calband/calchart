@@ -444,7 +444,7 @@ auto CalChartDoc::GetTempoForBeat(CalChart::Beats whichBeat) const -> CalChart::
         return 120; // Default tempo
     }
     auto [sheetIndex, beatOffset] = *sheetInfo;
-    if (sheetIndex >= static_cast<size_t>(mShow->GetNumSheets())) {
+    if (sheetIndex >= mShow->GetNumSheets()) {
         return 120; // Default tempo if out of bounds
     }
     return mShow->GetSheetTempo(static_cast<unsigned>(sheetIndex));
