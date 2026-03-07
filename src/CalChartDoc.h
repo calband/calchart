@@ -166,7 +166,7 @@ public:
     [[nodiscard]] auto GetCurrentSheetBackgroundImages() const { return mShow->GetCurrentSheetBackgroundImages(); }
     void SetCurrentSheet(size_t n);
 
-    [[nodiscard]] auto GetNumPoints() const { return mShow->GetNumPoints(); }
+    [[nodiscard]] auto GetNumPoints() const -> size_t { return mShow->GetNumPoints(); }
     [[nodiscard]] auto GetRelabelMapping(std::vector<CalChart::Coord> const& source_marchers, std::vector<CalChart::Coord> const& target_marchers) const -> std::optional<std::vector<CalChart::MarcherIndex>>;
 
     [[nodiscard]] auto GetPointLabel(CalChart::MarcherIndex i) const { return mShow->GetPointLabel(i); }

@@ -139,7 +139,7 @@ public:
     [[nodiscard]] auto GetCurrentSheetPrintNumber() const -> std::string;
     [[nodiscard]] auto GetCurrentSheetBackgroundImages() const -> std::vector<ImageInfo>;
     [[nodiscard]] auto GetCurrentSheetSerialized() const -> std::vector<std::byte>;
-    [[nodiscard]] auto GetNumPoints() const { return static_cast<int>(mDotLabelAndInstrument.size()); }
+    [[nodiscard]] auto GetNumPoints() const -> size_t { return mDotLabelAndInstrument.size(); }
     [[nodiscard]] auto GetPointLabel(MarcherIndex i) const -> std::string;
     [[nodiscard]] auto GetPointsLabel() const -> std::vector<std::string>;
     [[nodiscard]] auto GetPointsLabel(CalChart::SelectionList const& sl) const -> std::vector<std::string>;
@@ -259,6 +259,7 @@ private:
     void InsertSheet(Sheet const& nsheet, size_t sheetidx);
     void InsertSheet(Sheet_container_t const& nsheet, size_t sheetidx);
     void SetCurrentSheet(size_t n) { mSheetNum = n; }
+
     void SetSelectionList(SelectionList const& sl);
 
     void SetNumPoints(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int columns, Coord const& new_march_position);

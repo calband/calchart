@@ -118,7 +118,7 @@ Show::Show(Version_3_3_and_earlier, ShowMode const& mode, Reader reader, ParseEr
         std::vector<uint8_t> data = reader.GetVector<uint8_t>();
         std::vector<std::string> labels;
         auto str = (char const*)&data[0];
-        for (auto i = 0; i < GetNumPoints(); i++) {
+        for (auto i = 0UL; i < GetNumPoints(); i++) {
             labels.push_back(str);
             str += strlen(str) + 1;
         }
@@ -182,7 +182,7 @@ Show::Show(ShowMode const& mode, Reader reader, ParseErrorHandlers const* correc
             throw CC_FileException("Label the wrong size", INGL_LABL);
         }
         // restrict search to the size we're given
-        for (auto i = 0; i < show.GetNumPoints(); i++) {
+        for (auto i = 0UL; i < show.GetNumPoints(); i++) {
             auto str = reader.Get<std::string>();
             labels.push_back({ str, kDefault });
         }
@@ -197,7 +197,7 @@ Show::Show(ShowMode const& mode, Reader reader, ParseErrorHandlers const* correc
             throw CC_FileException("Label the wrong size", INGL_LABL);
         }
         // restrict search to the size we're given
-        for (auto i = 0; i < show.GetNumPoints(); i++) {
+        for (auto i = 0UL; i < show.GetNumPoints(); i++) {
             auto thisInst = reader.Get<std::string>();
             currentLabels.at(i).second = thisInst == "" ? kDefault : thisInst;
         }
@@ -474,11 +474,14 @@ auto Show::GetCurrentSheetSerialized() const -> std::vector<std::byte>
 
 auto Show::RemoveNthSheet(size_t sheetidx) -> Sheet_container_t
 {
+    if (sheetidx >= mSheets.size()) {
+        return {};
+    }
     auto i = mSheets.begin() + sheetidx;
     Sheet_container_t shts(1, *i);
     mSheets.erase(i);
 
-    if (sheetidx < GetCurrentSheetNum()) {
+    if (sheetidx > 0 && sheetidx < GetCurrentSheetNum()) {
         SetCurrentSheet(GetCurrentSheetNum() - 1);
     }
     if (GetCurrentSheetNum() >= GetNumSheets()) {
@@ -490,16 +493,24 @@ auto Show::RemoveNthSheet(size_t sheetidx) -> Sheet_container_t
 
 void Show::InsertSheet(Sheet const& sheet, size_t sheetidx)
 {
+    if (sheetidx > mSheets.size()) {
+        return;
+    }
     mSheets.insert(mSheets.begin() + sheetidx, sheet);
-    if (sheetidx <= GetCurrentSheetNum())
+    if (sheetidx <= GetCurrentSheetNum()) {
         SetCurrentSheet(GetCurrentSheetNum() + 1);
+    }
 }
 
 void Show::InsertSheet(Sheet_container_t const& sheet, size_t sheetidx)
 {
+    if (sheetidx > mSheets.size()) {
+        return;
+    }
     mSheets.insert(mSheets.begin() + sheetidx, sheet.begin(), sheet.end());
-    if (sheetidx <= GetCurrentSheetNum())
+    if (sheetidx <= GetCurrentSheetNum()) {
         SetCurrentSheet(GetCurrentSheetNum() + 1);
+    }
 }
 
 // warning, the labels might not match up
@@ -877,7 +888,7 @@ auto Show::MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon, int re
 
     SelectionList sl;
     auto& sheet = mSheets.at(mSheetNum);
-    for (int i = 0; i < GetNumPoints(); i++) {
+    for (auto i = 0UL; i < GetNumPoints(); i++) {
         if (CalChart::Inside(sheet.GetMarcherPosition(i, ref), polygon)) {
             sl.insert(i);
         }
