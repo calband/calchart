@@ -128,13 +128,19 @@ jobs:
       if: matrix.config.os == 'windows-latest'
       env:
         VCPKG_BINARY_SOURCES: 'clear;files,${{github.workspace}}/vcpkg-cache,readwrite'
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-static -DWEBVIEW2_LIB_PATH="${{env.WEBVIEW2_LIB_PATH}}"
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-static -DWEBVIEW2_LIB_PATH="${{env.WEBVIEW2_LIB_PATH}}" -DCORE_WARNINGS_AS_ERRORS=OFF
 
-    - name: Configure CMake (macOS/Linux)
-      if: matrix.config.os != 'windows-latest'
+    - name: Configure CMake (macOS)
+      if: matrix.config.os == 'macos-14'
       env:
         VCPKG_BINARY_SOURCES: 'clear;files,${{github.workspace}}/vcpkg-cache,readwrite'
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+
+    - name: Configure CMake (Linux)
+      if: matrix.config.os == 'ubuntu-24.04'
+      env:
+        VCPKG_BINARY_SOURCES: 'clear;files,${{github.workspace}}/vcpkg-cache,readwrite'
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCORE_WARNINGS_AS_ERRORS=OFF
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}

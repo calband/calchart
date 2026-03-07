@@ -23,6 +23,7 @@ macro(SetupCompilerForTarget arg)
   set_target_properties(${arg} PROPERTIES CXX_STANDARD 23)
 endmacro()
 
+option(CORE_WARNINGS_AS_ERRORS "Treat warnings as errors in calchart_core" ON)
 option(ENABLE_ASAN "Enable AddressSanitizer in Debug" ON)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND ENABLE_ASAN)
     set(SANITIZER_FLAGS "-fsanitize=address")

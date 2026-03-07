@@ -99,6 +99,23 @@ add_library(
 target_compile_definitions(calchart_core PUBLIC YY_NO_UNISTD_H)
 SetupCompilerForTarget(calchart_core)
 
+# Treat warnings as errors for core library (can be disabled with -DCORE_WARNINGS_AS_ERRORS=OFF)
+if(CORE_WARNINGS_AS_ERRORS)
+  if(NOT MSVC)
+    target_compile_options(calchart_core PRIVATE -Werror)
+  else()
+    target_compile_options(calchart_core PRIVATE /WX)
+  endif()
+  
+  # Exclude auto-generated Flex/Bison files from warnings-as-errors
+  set_source_files_properties(
+    ${BISON_calchart_core_parser_OUTPUTS}
+    ${FLEX_calchart_core_lexer_OUTPUTS}
+    PROPERTIES
+    COMPILE_FLAGS "-Wno-error"
+  )
+endif()
+
 # this is a hack to get contgram to build
 target_include_directories(
   calchart_core
