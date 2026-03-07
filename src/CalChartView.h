@@ -89,9 +89,9 @@ public:
     [[nodiscard]] auto GetShowFullSize() const { return mShow->GetShowMode().Size(); }
     [[nodiscard]] auto GetShowFieldSize() const { return mShow->GetShowMode().FieldSize(); }
     [[nodiscard]] auto GetSheetsName() const { return mShow->GetSheetsName(); }
-    [[nodiscard]] auto GetPrintNumber() const { return mShow->GetPrintNumber(); }
-    [[nodiscard]] auto GetRawPrintContinuity() const { return mShow->GetRawPrintContinuity(); }
-    [[nodiscard]] auto GetPrintContinuity() const { return mShow->GetPrintContinuity(); }
+    [[nodiscard]] auto GetSheetPrintNumberOnCurrentSheet() const { return mShow->GetSheetPrintNumberOnCurrentSheet(); }
+    [[nodiscard]] auto GetSheetRawPrintContinuityOnCurrentSheet() const { return mShow->GetSheetRawPrintContinuityOnCurrentSheet(); }
+    [[nodiscard]] auto GetSheetPrintContinuityOnCurrentSheet() const { return mShow->GetSheetPrintContinuityOnCurrentSheet(); }
     [[nodiscard]] auto GetAnimationInfo(CalChart::Beats whichBeat) const -> std::vector<CalChart::Animate::Info>;
     [[nodiscard]] auto GetAnimationInfo(CalChart::MarcherIndex which, CalChart::Beats whichBeat) const -> std::optional<CalChart::Animate::Info>;
     [[nodiscard]] auto GetAnimationErrors() const -> std::vector<CalChart::Animate::Errors>;

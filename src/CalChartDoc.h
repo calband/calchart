@@ -157,13 +157,13 @@ public:
     [[nodiscard]] auto CopyCurrentSheet() const { return mShow->CopyCurrentSheet(); }
 
     [[nodiscard]] auto GetCurrentSheetNum() const { return mShow->GetCurrentSheetNum(); }
-    [[nodiscard]] auto GetCurrentSheetName() const { return mShow->GetCurrentSheetName(); }
-    [[nodiscard]] auto GetCurrentSheetBeats() const { return mShow->GetCurrentSheetBeats(); }
-    [[nodiscard]] auto GetCurrentSheetTempo() const { return mShow->GetCurrentSheetTempo(); }
+    [[nodiscard]] auto GetSheetNameOnCurrentSheet() const { return mShow->GetSheetNameOnCurrentSheet(); }
+    [[nodiscard]] auto GetSheetBeatsOnCurrentSheet() const { return mShow->GetSheetBeatsOnCurrentSheet(); }
+    [[nodiscard]] auto GetSheetTempoOnCurrentSheet() const { return mShow->GetSheetTempoOnCurrentSheet(); }
     [[nodiscard]] auto GetSheetTempo(unsigned n) const { return mShow->GetSheetTempo(n); }
     [[nodiscard]] auto GetSheetsTempo() const { return mShow->GetSheetsTempo(); }
-    [[nodiscard]] auto GetCurrentSheetSymbols() const { return mShow->GetCurrentSheetSymbols(); }
-    [[nodiscard]] auto GetCurrentSheetBackgroundImages() const { return mShow->GetCurrentSheetBackgroundImages(); }
+    [[nodiscard]] auto GetSheetSymbolsOnCurrentSheet() const { return mShow->GetSheetSymbolsOnCurrentSheet(); }
+    [[nodiscard]] auto GetSheetBackgroundImagesOnCurrentSheet() const { return mShow->GetSheetBackgroundImagesOnCurrentSheet(); }
     void SetCurrentSheet(size_t n);
 
     [[nodiscard]] auto GetNumPoints() const -> size_t { return mShow->GetNumPoints(); }
@@ -176,10 +176,10 @@ public:
     [[nodiscard]] auto GetPointInstrument(std::string const& label) const { return mShow->GetPointInstrument(label); }
     [[nodiscard]] auto GetPointsInstrument() const { return mShow->GetPointsInstrument(); }
     [[nodiscard]] auto GetPointsInstrument(CalChart::SelectionList const& sl) const { return mShow->GetPointsInstrument(sl); }
-    [[nodiscard]] auto GetPointSymbol(CalChart::MarcherIndex i) const { return mShow->GetPointSymbol(i); }
-    [[nodiscard]] auto GetPointSymbol(std::string const& label) const { return mShow->GetPointSymbol(label); }
-    [[nodiscard]] auto GetPointsSymbol() const { return mShow->GetPointsSymbol(); }
-    [[nodiscard]] auto GetPointsSymbol(CalChart::SelectionList const& sl) const { return mShow->GetPointsSymbol(sl); }
+    [[nodiscard]] auto GetPointSymbolOnCurrentSheet(CalChart::MarcherIndex i) const { return mShow->GetPointSymbolOnCurrentSheet(i); }
+    [[nodiscard]] auto GetPointSymbolOnCurrentSheet(std::string const& label) const { return mShow->GetPointSymbolOnCurrentSheet(label); }
+    [[nodiscard]] auto GetPointsSymbolOnCurrentSheet() const { return mShow->GetPointsSymbolOnCurrentSheet(); }
+    [[nodiscard]] auto GetPointsSymbolOnCurrentSheet(CalChart::SelectionList const& sl) const { return mShow->GetPointsSymbolOnCurrentSheet(sl); }
     [[nodiscard]] auto GetPointFromLabel(std::string const& label) const { return mShow->GetPointFromLabel(label); }
     [[nodiscard]] auto GetPointsFromLabels(std::vector<std::string> const& labels) const { return mShow->GetPointsFromLabels(labels); }
     [[nodiscard]] auto GetMarcherPositionOnCurrentSheet(CalChart::MarcherIndex i, unsigned ref = 0) const { return mShow->GetMarcherPositionOnCurrentSheet(i, ref); }
@@ -192,7 +192,7 @@ public:
     [[nodiscard]] auto GetCurrentCurve(size_t index) const { return mShow->GetCurveOnCurrentSheet(index); }
     [[nodiscard]] auto GetCurrentNumberCurves() const { return mShow->GetNumberCurvesOnCurrentSheet(); }
     [[nodiscard]] auto GetMarchersAssignedToCurve(size_t whichCurve) const { return mShow->GetCurveAssignmentsOnCurrentSheet().at(whichCurve); }
-    [[nodiscard]] auto GetCurrentSheetSerialized() const { return mShow->GetCurrentSheetSerialized(); }
+    [[nodiscard]] auto GetSheetSerializedOnCurrentSheet() const { return mShow->GetSheetSerializedOnCurrentSheet(); }
 
     // Transition Solver
     [[nodiscard]] auto validateCurrentSheetForTransitionSolver() const { return mShow->validateCurrentSheetForTransitionSolver(); }
@@ -274,9 +274,9 @@ public:
     [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands() const { return mShow->GenerateFieldWithMarchersDrawCommands(mConfig); }
 
     [[nodiscard]] auto AlreadyHasPrintContinuity() const { return mShow->AlreadyHasPrintContinuity(); }
-    [[nodiscard]] auto GetPrintNumber() const { return mShow->GetCurrentSheetPrintNumber(); }
-    [[nodiscard]] auto GetRawPrintContinuity() const { return mShow->GetCurrentSheetRawPrintContinuity(); }
-    [[nodiscard]] auto GetPrintContinuity() const { return mShow->GetCurrentSheetPrintContinuity(); }
+    [[nodiscard]] auto GetSheetPrintNumberOnCurrentSheet() const { return mShow->GetSheetPrintNumberOnCurrentSheet(); }
+    [[nodiscard]] auto GetSheetRawPrintContinuityOnCurrentSheet() const { return mShow->GetSheetRawPrintContinuityOnCurrentSheet(); }
+    [[nodiscard]] auto GetSheetPrintContinuityOnCurrentSheet() const { return mShow->GetSheetPrintContinuityOnCurrentSheet(); }
 
     [[nodiscard]] auto WillMovePoints(CalChart::MarcherToPosition const& new_positions) const { return mShow->WillMovePoints(new_positions, mShow->GetCurrentReferencePoint()); }
     [[nodiscard]] auto PrintToPS(bool overview, int min_yards, std::set<size_t> const& isPicked, CalChart::Configuration const& config_) const -> std::tuple<std::string, int>;

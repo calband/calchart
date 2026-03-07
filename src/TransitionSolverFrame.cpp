@@ -308,7 +308,7 @@ void TransitionSolverFrame::SyncInstructionOptionsControlWithCurrentState()
     };
 
     mInstructionOptions.clear();
-    for (auto waitBeats = CalChart::Beats{}; waitBeats < mDoc->GetCurrentSheetBeats(); waitBeats += 2) {
+    for (auto waitBeats = CalChart::Beats{}; waitBeats < mDoc->GetSheetBeatsOnCurrentSheet(); waitBeats += 2) {
         for (auto pattern : marchInstructions) {
             mInstructionOptions.emplace_back(pattern.first, waitBeats);
         }

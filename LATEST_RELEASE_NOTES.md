@@ -12,4 +12,5 @@ Other changes:
 * [#794](../../issues/794) We should enable warnings as errors, at least for the CalChart core project
 * [#796](../../issues/796) We should have mSheetNum be size_t
 * [#801](../../issues/801) GetNumSheets(), GetNumPoints() should be size_t
+* [#803](../../issues/803) We should have consistent Get APIs for Show
 

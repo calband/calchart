@@ -143,12 +143,12 @@ void PrintContinuityEditor::UpdateText()
     }
 
     // if the user input has changed, then refresh it
-    auto printContinuity = mView->GetPrintContinuity();
+    auto printContinuity = mView->GetSheetPrintContinuityOnCurrentSheet();
 
     auto text = static_cast<wxTextCtrl*>(FindWindow(PrintContinuityEditor_PrintNumber));
     text->SetValue(printContinuity.GetPrintNumber());
 
-    if (mView->GetRawPrintContinuity() != mUserInput->GetValue()) {
+    if (mView->GetSheetRawPrintContinuityOnCurrentSheet() != mUserInput->GetValue()) {
         mUserInput->Clear();
         mUserInput->DiscardEdits();
         mUserInput->WriteText(printContinuity.GetOriginalLine());
@@ -169,7 +169,7 @@ void PrintContinuityEditor::FlushText()
     auto current_sheet_num = mView->GetCurrentSheetNum();
     wxTextCtrl* text = (wxTextCtrl*)FindWindow(PrintContinuityEditor_PrintNumber);
     try {
-        if ((mUserInput->GetValue() != mView->GetRawPrintContinuity()) || (text->GetValue() != mView->GetPrintNumber())) {
+        if ((mUserInput->GetValue() != mView->GetSheetRawPrintContinuityOnCurrentSheet()) || (text->GetValue() != mView->GetSheetPrintNumberOnCurrentSheet())) {
             mView->DoSetPrintContinuity(
                 current_sheet_num, text->GetValue().ToStdString(),
                 mUserInput->GetValue().ToStdString());
@@ -187,7 +187,7 @@ void PrintContinuityEditor::OnKeyPress(wxCommandEvent&)
     if (!mView) {
         return;
     }
-    if (mView->GetRawPrintContinuity() == mUserInput->GetValue()) {
+    if (mView->GetSheetRawPrintContinuityOnCurrentSheet() == mUserInput->GetValue()) {
         return;
     }
     // cache out the current text, and only after it's stopped changing do we flush it out.
@@ -209,7 +209,7 @@ void PrintContinuityEditor::OnSaveTimerExpired(wxTimerEvent&)
         return;
     }
     // one last check here, don't write anything out if nothing changed
-    if (mView->GetRawPrintContinuity() == mUserInput->GetValue()) {
+    if (mView->GetSheetRawPrintContinuityOnCurrentSheet() == mUserInput->GetValue()) {
         return;
     }
 

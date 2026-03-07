@@ -639,7 +639,7 @@ void CalChartFrame::OnCopySheet()
     if (wxTheClipboard->Open()) {
         std::unique_ptr<wxCustomDataObject> clipboardObject(
             new wxCustomDataObject(wxString{ kSheetDataClipboardFormat }));
-        auto serializedSheet = GetShow()->GetCurrentSheetSerialized();
+        auto serializedSheet = GetShow()->GetSheetSerializedOnCurrentSheet();
 
         auto numPoints = GetShow()->GetNumPoints();
 
@@ -715,8 +715,8 @@ void CalChartFrame::OnSetSheetTitle()
 {
     if (GetShow()) {
         if (auto s = wxGetTextFromUser("Enter the sheet title",
-                GetShow()->GetCurrentSheetName(),
-                GetShow()->GetCurrentSheetName(), this)
+                GetShow()->GetSheetNameOnCurrentSheet(),
+                GetShow()->GetSheetNameOnCurrentSheet(), this)
                 .ToStdString();
             !s.empty()) {
             GetFieldView()->DoSetSheetTitle(s);
@@ -727,9 +727,9 @@ void CalChartFrame::OnSetSheetTitle()
 void CalChartFrame::OnSetBeats()
 {
     if (GetShow()) {
-        std::string buf = std::format("{}", GetShow()->GetCurrentSheetBeats());
+        std::string buf = std::format("{}", GetShow()->GetSheetBeatsOnCurrentSheet());
         if (auto s = wxGetTextFromUser("Enter the number of beats",
-                GetShow()->GetCurrentSheetName(), buf, this);
+                GetShow()->GetSheetNameOnCurrentSheet(), buf, this);
             !s.empty()) {
             long val{};
             if (s.ToLong(&val)) {
@@ -742,9 +742,9 @@ void CalChartFrame::OnSetBeats()
 void CalChartFrame::OnSetTempo()
 {
     if (GetShow()) {
-        std::string buf = std::format("{}", GetShow()->GetCurrentSheetTempo());
+        std::string buf = std::format("{}", GetShow()->GetSheetTempoOnCurrentSheet());
         if (auto s = wxGetTextFromUser("Enter the tempo",
-                GetShow()->GetCurrentSheetName(), buf, this);
+                GetShow()->GetSheetNameOnCurrentSheet(), buf, this);
             !s.empty()) {
             long val{};
             if (s.ToLong(&val) && val > 0) {
@@ -1135,7 +1135,7 @@ void CalChartFrame::refreshInUse()
     auto instruments = GetShow()->GetPointsInstrument();
     auto currentInstruments = std::set(instruments.begin(), instruments.end());
     FieldControls::SetInstrumentsInUse(this, { currentInstruments.begin(), currentInstruments.end() });
-    auto symbols = GetShow()->GetPointsSymbol();
+    auto symbols = GetShow()->GetPointsSymbolOnCurrentSheet();
     auto currentsymbols = std::set(symbols.begin(), symbols.end());
     FieldControls::SetLabelsInUse(this, GetShow()->GetPointsLabel());
 }
@@ -1374,11 +1374,11 @@ float CalChartFrame::ToolBarSetZoom(float zoom_amount)
 
 std::string CalChartFrame::BeatStatusText() const
 {
-    auto name = GetShow()->GetCurrentSheetName();
-    auto beats = GetShow()->GetCurrentSheetBeats();
+    auto name = GetShow()->GetSheetNameOnCurrentSheet();
+    auto beats = GetShow()->GetSheetBeatsOnCurrentSheet();
     auto num = GetShow()->GetNumSheets();
     auto curr = GetFieldView()->GetCurrentSheetNum() + 1;
-    auto tempo = GetShow()->GetCurrentSheetTempo();
+    auto tempo = GetShow()->GetSheetTempoOnCurrentSheet();
 
     return std::format("{}{} of {} \"{:.32}\" {} beats at {} bpm", GetShow()->IsModified() ? "* " : "", curr, num, name, beats, tempo);
 }
