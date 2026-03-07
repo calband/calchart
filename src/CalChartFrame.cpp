@@ -747,8 +747,10 @@ void CalChartFrame::OnSetTempo()
                 GetShow()->GetCurrentSheetName(), buf, this);
             !s.empty()) {
             long val{};
-            if (s.ToLong(&val)) {
+            if (s.ToLong(&val) && val > 0) {
                 GetFieldView()->DoSetSheetTempo(static_cast<int>(val));
+            } else {
+                wxMessageBox("Tempo must be a number greater than 0.", "Invalid Tempo", wxOK | wxICON_ERROR, this);
             }
         }
     }
