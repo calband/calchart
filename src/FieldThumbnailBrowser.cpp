@@ -224,20 +224,20 @@ void FieldThumbnailBrowser::OnUpdate()
     } else {
         // if the upper part is above the view, move the view to contain it.
         if (mLayoutHorizontal) {
-            if (size_of_one.x * mView->GetCurrentSheetNum() < scrolled_top.x) {
-                Scroll(mView->GetCurrentSheetNum(), 0);
+            if (size_of_one.x * static_cast<int>(mView->GetCurrentSheetNum()) < scrolled_top.x) {
+                Scroll(static_cast<int>(mView->GetCurrentSheetNum()), 0);
             }
             // if the lower part is below the view, move the view to contain it.
-            if ((size_of_one.x * (mView->GetCurrentSheetNum() + 1)) > scrolled_bottom.x) {
-                Scroll(mView->GetCurrentSheetNum() - how_many_visible + 1, 0);
+            if ((size_of_one.x * static_cast<int>(mView->GetCurrentSheetNum() + 1)) > scrolled_bottom.x) {
+                Scroll(static_cast<int>(mView->GetCurrentSheetNum()) - how_many_visible + 1, 0);
             }
         } else {
-            if (size_of_one.y * mView->GetCurrentSheetNum() < scrolled_top.y) {
-                Scroll(0, mView->GetCurrentSheetNum());
+            if (size_of_one.y * static_cast<int>(mView->GetCurrentSheetNum()) < scrolled_top.y) {
+                Scroll(0, static_cast<int>(mView->GetCurrentSheetNum()));
             }
             // if the lower part is below the view, move the view to contain it.
-            if ((size_of_one.y * (mView->GetCurrentSheetNum() + 1)) > scrolled_bottom.y) {
-                Scroll(0, mView->GetCurrentSheetNum() - how_many_visible + 1);
+            if ((size_of_one.y * static_cast<int>(mView->GetCurrentSheetNum() + 1)) > scrolled_bottom.y) {
+                Scroll(0, static_cast<int>(mView->GetCurrentSheetNum()) - how_many_visible + 1);
             }
         }
     }
@@ -258,7 +258,10 @@ void FieldThumbnailBrowser::HandleKey(wxKeyEvent& event)
 void FieldThumbnailBrowser::HandleMouseDown(wxMouseEvent& event)
 {
     auto which = WhichCell(CalcUnscrolledPosition(event.GetPosition()));
-    mView->GoToSheet(std::min(which, mView->GetNumSheets() - 1));
+    auto numSheets = mView->GetNumSheets();
+    if (numSheets > 0) {
+        mView->GoToSheet(std::min(static_cast<size_t>(which), numSheets - 1));
+    }
 }
 
 void FieldThumbnailBrowser::HandleSizeEvent(wxSizeEvent& event)

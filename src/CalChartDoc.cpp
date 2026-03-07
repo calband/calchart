@@ -142,7 +142,7 @@ auto CalChartDoc::ImportPrintableContinuity(std::vector<std::string> const& line
         }
 
         // first, split the lines into groups for each page
-        auto sheet = 0;
+        auto sheet = 0UL;
         std::string number(lines.front(), 2);
         std::string current_print_cont;
         bool first_line = true;
@@ -332,7 +332,7 @@ void CalChartDoc::Autosave()
     }
 }
 
-void CalChartDoc::SetCurrentSheet(int n)
+void CalChartDoc::SetCurrentSheet(size_t n)
 {
     auto cmd = mShow->Create_SetCurrentSheetCommand(n);
     cmd.first(*mShow);
@@ -516,7 +516,7 @@ auto CalChartDoc::GeneratePathsDrawCommands() const -> std::vector<CalChart::Dra
     if (!GetDrawPaths()) {
         return {};
     }
-    if (!mAnimation || mAnimation->GetNumberSheets() == 0 || (static_cast<int>(mAnimation->GetNumberSheets()) <= GetCurrentSheetNum())) {
+    if (!mAnimation || mAnimation->GetNumberSheets() == 0 || (mAnimation->GetNumberSheets() <= GetCurrentSheetNum())) {
         return {};
     }
     auto endRadius = CalChart::Float2CoordUnits(config.Get_DotRatio()) / 2;
@@ -607,10 +607,18 @@ auto CalChartDoc::GetGhostSheet() const -> std::optional<CalChart::Sheet>
     if (!GetGhostModuleIsActive()) {
         return std::nullopt;
     }
-    auto targetSheet = (mGhostSource == GhostSource::next) ? currentSheet + 1 : (mGhostSource == GhostSource::previous) ? currentSheet - 1
-                                                                                                                        : mGhostSheet;
-    if (targetSheet >= 0 && targetSheet < GetNumSheets()) {
-        return mShow->CopySheet(static_cast<unsigned>(targetSheet));
+    std::optional<size_t> targetSheet;
+    if (mGhostSource == GhostSource::next) {
+        targetSheet = currentSheet + 1;
+    } else if (mGhostSource == GhostSource::previous) {
+        if (currentSheet > 0) {
+            targetSheet = currentSheet - 1;
+        }
+    } else {
+        targetSheet = mGhostSheet;
+    }
+    if (targetSheet && *targetSheet < GetNumSheets()) {
+        return mShow->CopySheet(*targetSheet);
     }
     return std::nullopt;
 }
@@ -660,7 +668,7 @@ std::vector<CalChartDocCommand::CC_doc_command_pair> CalChartDoc::Create_SetShee
 
 // This will create an array of actions where the first one is to set the sheet and the second is to set the selection
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_SetCurrentSheetCommand(int n)
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetCurrentSheetCommand(size_t n)
 {
     auto show_cmds = Inject_CalChartDocArg(mShow->Create_SetCurrentSheetCommand(n));
     return std::make_unique<CalChartDocCommand>(*this, "Set Current Sheet", show_cmds);
@@ -672,7 +680,7 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_SetSelectionListCommand(const Sel
     return std::make_unique<CalChartDocCommand>(*this, "Set Selection", show_cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_SetCurrentSheetAndSelectionCommand(int n, const SelectionList& sl)
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetCurrentSheetAndSelectionCommand(size_t n, const SelectionList& sl)
 {
     auto show_cmds = Inject_CalChartDocArg(mShow->Create_SetCurrentSheetAndSelectionCommand(n, sl));
     return std::make_unique<CalChartDocCommand>(*this, "Set Current Sheet and Selection", show_cmds);
@@ -719,14 +727,14 @@ auto CalChartDoc::Create_SetSheetTempoCommand(CalChart::Tempo tempo) -> std::uni
     return std::make_unique<CalChartDocCommand>(*this, "Set tempo", cmds);
 }
 
-auto CalChartDoc::Create_AddSheetsCommand(Show::Sheet_container_t const& sheets, int where) -> std::unique_ptr<wxCommand>
+auto CalChartDoc::Create_AddSheetsCommand(Show::Sheet_container_t const& sheets, size_t where) -> std::unique_ptr<wxCommand>
 {
     auto cmds = Create_SetSheetPair();
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_AddSheetsCommand(sheets, where)));
     return std::make_unique<CalChartDocCommand>(*this, "Adding Sheets", cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_RemoveSheetCommand(int where)
+std::unique_ptr<wxCommand> CalChartDoc::Create_RemoveSheetCommand(size_t where)
 {
     auto cmds = Create_SetSheetPair();
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_RemoveSheetCommand(where)));

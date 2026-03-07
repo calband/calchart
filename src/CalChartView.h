@@ -65,8 +65,8 @@ public:
     void DoSetPointsLabelVisibility(bool isVisible);
     void DoSetPointsLabelFlip();
     void DoTogglePointsLabelVisibility();
-    void DoInsertSheets(CalChart::Show::Sheet_container_t const& sht, int where);
-    void DoDeleteSheet(int where);
+    void DoInsertSheets(CalChart::Show::Sheet_container_t const& sht, size_t where);
+    void DoDeleteSheet(size_t where);
     void DoImportPrintableContinuity(std::string const& file);
     void DoSetPrintContinuity(int which_sheet, std::string const& number, std::string const& cont);
     void DoSetContinuityCommand(CalChart::SYMBOL_TYPE sym, CalChart::Continuity const& new_cont);
@@ -83,7 +83,7 @@ public:
     [[nodiscard]] auto FindCurve(CalChart::Coord pos) const { return mShow->FindCurve(pos); }
     [[nodiscard]] auto PointPosition(CalChart::MarcherIndex which) const { return mShow->GetMarcherPositionOnCurrentSheet(which, mShow->GetCurrentReferencePoint()); }
     [[nodiscard]] auto GetCurrentSheetNum() const { return (mShow != nullptr) ? mShow->GetCurrentSheetNum() : 0; }
-    [[nodiscard]] auto GetNumSheets() const { return (mShow != nullptr) ? mShow->GetNumSheets() : 0; }
+    [[nodiscard]] auto GetNumSheets() const -> size_t { return (mShow != nullptr) ? mShow->GetNumSheets() : 0; }
     [[nodiscard]] auto GetNumPoints() const { return (mShow != nullptr) ? mShow->GetNumPoints() : 0; }
     [[nodiscard]] auto GetShowFieldOffset() const { return mShow->GetShowFieldOffset(); }
     [[nodiscard]] auto GetShowFullSize() const { return mShow->GetShowMode().Size(); }
@@ -110,9 +110,19 @@ public:
     [[nodiscard]] auto ClipPositionToShowMode(CalChart::Coord const& pos) const { return mShow->GetShowMode().ClipPosition(pos); }
 
     ///// Change show attributes /////
-    void GoToSheet(int which);
-    void GoToNextSheet() { GoToSheet(mShow->GetCurrentSheetNum() + 1); }
-    void GoToPrevSheet() { GoToSheet(mShow->GetCurrentSheetNum() - 1); }
+    void GoToSheet(size_t which);
+    void GoToNextSheet()
+    {
+        if (mShow->GetCurrentSheetNum() + 1 < mShow->GetNumSheets()) {
+            GoToSheet(mShow->GetCurrentSheetNum() + 1);
+        }
+    }
+    void GoToPrevSheet()
+    {
+        if (mShow->GetCurrentSheetNum() > 0) {
+            GoToSheet(mShow->GetCurrentSheetNum() - 1);
+        }
+    }
     void SetActiveReferencePoint(int which);
 
     ///// Select /////
@@ -139,7 +149,7 @@ public:
     [[nodiscard]] auto GetGhostSource() const { return mShow->GetGhostSource(); };
     void SetGhostSource(GhostSource source, int which = 0) { mShow->SetGhostSource(source, which); }
 
-    void GoToSheetAndSetSelectionList(int which, const CalChart::SelectionList& sl);
+    void GoToSheetAndSetSelectionList(size_t which, const CalChart::SelectionList& sl);
     [[nodiscard]] auto IsSelected(CalChart::MarcherIndex i) const { return mShow->IsSelected(i); }
 
     ///// Drawing marcher's paths /////
