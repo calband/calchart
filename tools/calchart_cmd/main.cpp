@@ -80,7 +80,7 @@ void PrintToPS(std::string_view showPath, bool landscape, bool cont, bool contsh
         CalChart::kDefaultYardLines);
 
     auto picked = std::set<size_t>{};
-    for (auto i = 0; i < show->GetNumSheets(); ++i) {
+    for (auto i = 0UL; i < show->GetNumSheets(); ++i) {
         picked.insert(i);
     }
 

@@ -46,8 +46,8 @@ struct DiagnosticInfo {
     // Show information (if available)
     struct ShowInfo {
         bool has_show = false;
-        int num_sheets = 0;
-        int num_marchers = 0;
+        size_t num_sheets = 0;
+        size_t num_marchers = 0;
         std::string show_mode;
         std::string file_format_version;
     } show_info;

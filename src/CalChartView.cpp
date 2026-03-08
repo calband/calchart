@@ -371,6 +371,9 @@ auto CalChartView::DoAppendShow(std::unique_ptr<CalChartDoc> other_show) -> std:
     if (other_show->GetNumPoints() != mShow->GetNumPoints()) {
         return "The blocksize doesn't match";
     }
+    if (other_show->GetNumSheets() == 0 || GetNumSheets() == 0) {
+        return "One of the shows has no sheets";
+    }
     auto last_marchers = mShow->GetAllMarcherPositions(GetNumSheets() - 1);
     auto next_marchers = other_show->GetAllMarcherPositions(0);
     auto result = mShow->GetRelabelMapping(last_marchers, next_marchers);

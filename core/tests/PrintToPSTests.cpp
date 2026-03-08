@@ -653,7 +653,7 @@ void PrintToPS(CalChart::Show const& show, CalChart::ShowMode const& mode, bool 
         CalChart::kDefaultYardLines);
 
     std::set<size_t> picked;
-    for (auto i = 0; i < show.GetNumSheets(); ++i)
+    for (size_t i = 0; i < show.GetNumSheets(); ++i)
         picked.insert(i);
 
     output << std::get<0>(printShowToPS(picked, "show"));

@@ -147,8 +147,8 @@ namespace {
         // Add show information from document
         // CalChartDoc doesn't expose GetShow() directly, so we'll collect info directly
         info.show_info.has_show = true;
-        info.show_info.num_sheets = static_cast<int>(doc->GetNumSheets());
-        info.show_info.num_marchers = static_cast<int>(doc->GetNumPoints());
+        info.show_info.num_sheets = doc->GetNumSheets();
+        info.show_info.num_marchers = doc->GetNumPoints();
         info.show_info.show_mode = "Custom"; // We'd need GetShowMode() exposed to get this
         info.show_info.file_format_version = "Current";
 

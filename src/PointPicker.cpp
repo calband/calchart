@@ -132,9 +132,10 @@ auto PromptUserToPickMarchers(wxWindow* parent, CalChartDoc const& show, CalChar
 
 auto PromptUserToPickMarchers(wxWindow* parent, CalChartDoc const& show) -> std::optional<std::vector<std::string>>
 {
+    auto range = std::views::iota(CalChart::MarcherIndex{ 0 }, static_cast<CalChart::MarcherIndex>(show.GetNumPoints()));
     return PromptUserToPickMarchers(
         parent,
         show,
-        CalChart::SelectionList(std::views::iota(0, show.GetNumPoints()).begin(), std::views::iota(0, show.GetNumPoints()).end()),
+        CalChart::SelectionList(range.begin(), range.end()),
         show.GetSelectionList());
 }
