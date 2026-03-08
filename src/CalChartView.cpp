@@ -297,14 +297,13 @@ void CalChartView::DoTogglePointsLabelVisibility()
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-void CalChartView::DoInsertSheets(CalChart::Show::Sheet_container_t const& sht,
-    int where)
+void CalChartView::DoInsertSheets(CalChart::Show::Sheet_container_t const& sht, size_t where)
 {
     auto cmd = mShow->Create_AddSheetsCommand(sht, where);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-void CalChartView::DoDeleteSheet(int where)
+void CalChartView::DoDeleteSheet(size_t where)
 {
     auto cmd = mShow->Create_RemoveSheetCommand(where);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
@@ -371,6 +370,9 @@ auto CalChartView::DoAppendShow(std::unique_ptr<CalChartDoc> other_show) -> std:
 {
     if (other_show->GetNumPoints() != mShow->GetNumPoints()) {
         return "The blocksize doesn't match";
+    }
+    if (other_show->GetNumSheets() == 0 || GetNumSheets() == 0) {
+        return "One of the shows has no sheets";
     }
     auto last_marchers = mShow->GetAllMarcherPositions(GetNumSheets() - 1);
     auto next_marchers = other_show->GetAllMarcherPositions(0);
@@ -490,10 +492,10 @@ auto CalChartView::GetAnimationBeatForCurrentSheet() const -> CalChart::Beats
     return mShow->GetAnimationBeatForCurrentSheet();
 }
 
-void CalChartView::GoToSheet(int which)
+void CalChartView::GoToSheet(size_t which)
 {
     auto& config = mShow->GetConfiguration();
-    if (which >= 0 && which < mShow->GetNumSheets()) {
+    if (which < mShow->GetNumSheets()) {
         // This *could* be run through a command or run directly...
         if (config.Get_CommandUndoSetSheet()) {
             auto cmd = mShow->Create_SetCurrentSheetCommand(which);
@@ -546,10 +548,10 @@ void CalChartView::SetSelect(CalChart::Select select)
     mShow->SetSelect(select);
 }
 
-void CalChartView::GoToSheetAndSetSelectionList(int which, const CalChart::SelectionList& sl)
+void CalChartView::GoToSheetAndSetSelectionList(size_t which, const CalChart::SelectionList& sl)
 {
     auto& config = mShow->GetConfiguration();
-    if (which < 0 || which >= mShow->GetNumSheets()) {
+    if (which >= mShow->GetNumSheets()) {
         return;
     }
     auto current_sl = mShow->GetSelectionList();

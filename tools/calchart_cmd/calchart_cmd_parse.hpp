@@ -52,7 +52,7 @@ auto AnimateShow(CalChart::Show const& show, std::ostream& os)
 auto DumpContinuity(CalChart::Show const& show, std::ostream& os)
 {
     auto sheet_count = show.GetNumSheets();
-    for (auto sheet_num = 0; sheet_num < sheet_count; ++sheet_num) {
+    for (auto sheet_num = 0UL; sheet_num < sheet_count; ++sheet_num) {
         auto sheet = show.CopySheet(static_cast<unsigned>(sheet_num));
         for (auto symbol : {
                  CalChart::SYMBOL_PLAIN, CalChart::SYMBOL_SOL, CalChart::SYMBOL_BKSL, CalChart::SYMBOL_SL,

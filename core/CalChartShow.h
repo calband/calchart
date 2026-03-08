@@ -83,17 +83,17 @@ public:
     Show(ShowMode const& mode, Reader reader, ParseErrorHandlers const* correction = nullptr);
 
     // Create command, consists of an action and undo action
-    [[nodiscard]] auto Create_SetCurrentSheetCommand(int n) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetCurrentSheetCommand(size_t n) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetSelectionListCommand(SelectionList const& sl) const -> Show_command_pair;
-    [[nodiscard]] auto Create_SetCurrentSheetAndSelectionCommand(int n, SelectionList const& sl) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetCurrentSheetAndSelectionCommand(size_t n, SelectionList const& sl) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetShowModeCommand(CalChart::ShowMode const& newmode) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetupMarchersCommand(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int numColumns, Coord const& new_march_position) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetInstrumentsCommand(std::map<MarcherIndex, std::string> const& dotToInstrument) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetSheetTitleCommand(std::string const& newname) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetSheetBeatsCommand(Beats beats) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetSheetTempoCommand(Tempo tempo) const -> Show_command_pair;
-    [[nodiscard]] auto Create_AddSheetsCommand(Show::Sheet_container_t const& sheets, int where) const -> Show_command_pair;
-    [[nodiscard]] auto Create_RemoveSheetCommand(int where) const -> Show_command_pair;
+    [[nodiscard]] auto Create_AddSheetsCommand(Show::Sheet_container_t const& sheets, size_t where) const -> Show_command_pair;
+    [[nodiscard]] auto Create_RemoveSheetCommand(size_t where) const -> Show_command_pair;
     [[nodiscard]] auto Create_ApplyRelabelMapping(int sheet_num_first, std::vector<MarcherIndex> const& mapping) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string>> const& data) const -> Show_command_pair;
     [[nodiscard]] auto Create_MovePointsCommand(MarcherToPosition const& new_positions, int ref) const -> Show_command_pair;
@@ -122,8 +122,8 @@ public:
     [[nodiscard]] auto CopySheet(unsigned n) const -> Sheet;
     [[nodiscard]] auto CopyCurrentSheet() const { return CopySheet(mSheetNum); }
     [[nodiscard]] auto CopySheets() const { return mSheets; }
-    [[nodiscard]] auto GetNumSheets() const -> int;
-    [[nodiscard]] auto GetCurrentSheetNum() const { return mSheetNum; }
+    [[nodiscard]] auto GetNumSheets() const -> size_t { return mSheets.size(); }
+    [[nodiscard]] auto GetCurrentSheetNum() const -> size_t { return mSheetNum; }
     [[nodiscard]] auto GetCurrentSheetName() const -> std::string;
     [[nodiscard]] auto GetCurrentSheetBeats() const -> CalChart::Beats;
     [[nodiscard]] auto GetCurrentSheetTempo() const -> CalChart::Tempo;
@@ -139,7 +139,7 @@ public:
     [[nodiscard]] auto GetCurrentSheetPrintNumber() const -> std::string;
     [[nodiscard]] auto GetCurrentSheetBackgroundImages() const -> std::vector<ImageInfo>;
     [[nodiscard]] auto GetCurrentSheetSerialized() const -> std::vector<std::byte>;
-    [[nodiscard]] auto GetNumPoints() const { return static_cast<int>(mDotLabelAndInstrument.size()); }
+    [[nodiscard]] auto GetNumPoints() const -> size_t { return mDotLabelAndInstrument.size(); }
     [[nodiscard]] auto GetPointLabel(MarcherIndex i) const -> std::string;
     [[nodiscard]] auto GetPointsLabel() const -> std::vector<std::string>;
     [[nodiscard]] auto GetPointsLabel(CalChart::SelectionList const& sl) const -> std::vector<std::string>;
@@ -153,13 +153,13 @@ public:
     [[nodiscard]] auto GetPointsSymbol(CalChart::SelectionList const& sl) const -> std::vector<SYMBOL_TYPE>;
     [[nodiscard]] auto GetPointFromLabel(std::string const& label) const -> std::optional<CalChart::MarcherIndex>;
     [[nodiscard]] auto GetPointsFromLabels(std::vector<std::string> const& labels) const -> std::vector<CalChart::MarcherIndex>;
-    [[nodiscard]] auto GetMarcherPosition(int sheet, MarcherIndex i, unsigned ref = 0) const -> Coord;
+    [[nodiscard]] auto GetMarcherPosition(size_t sheet, MarcherIndex i, unsigned ref = 0) const -> Coord;
     [[nodiscard]] auto GetMarcherPositionOnCurrentSheet(MarcherIndex i, unsigned ref = 0) const -> Coord;
-    [[nodiscard]] auto GetAllMarcherPositions(int sheet, unsigned ref = 0) const -> std::vector<Coord>;
+    [[nodiscard]] auto GetAllMarcherPositions(size_t sheet, unsigned ref = 0) const -> std::vector<Coord>;
     [[nodiscard]] auto GetAllMarcherPositionsOnCurrentSheet(unsigned ref = 0) const -> std::vector<Coord>;
-    [[nodiscard]] auto GetContinuities(int sheet) const -> std::vector<Continuity>;
+    [[nodiscard]] auto GetContinuities(size_t sheet) const -> std::vector<Continuity>;
     [[nodiscard]] auto GetContinuitiesOnCurrentSheet() const -> std::vector<Continuity>;
-    [[nodiscard]] auto GetContinuitiesInUse(int sheet) const -> std::vector<bool>;
+    [[nodiscard]] auto GetContinuitiesInUse(size_t sheet) const -> std::vector<bool>;
     [[nodiscard]] auto GetContinuitiesInUseOnCurrentSheet() const -> std::vector<bool>;
 
     [[nodiscard]] auto GetCurrentSheetRawPrintContinuity() const -> std::string;
@@ -171,17 +171,17 @@ public:
     [[nodiscard]] auto const& GetShowMode() const { return mMode; }
     [[nodiscard]] auto GetSheetsName() const -> std::vector<std::string>;
     [[nodiscard]] auto GetCurrentReferencePoint() const -> int;
-    [[nodiscard]] auto FindMarcher(int sheet, Coord where, Coord::units searchBounds) const -> std::optional<MarcherIndex>;
+    [[nodiscard]] auto FindMarcher(size_t sheet, Coord where, Coord::units searchBounds) const -> std::optional<MarcherIndex>;
     [[nodiscard]] auto FindMarcherOnCurrentSheet(Coord where, Coord::units searchBounds) const -> std::optional<MarcherIndex>;
-    [[nodiscard]] auto GetCurve(int sheet, size_t index) const -> Curve;
+    [[nodiscard]] auto GetCurve(size_t sheet, size_t index) const -> Curve;
     [[nodiscard]] auto GetCurveOnCurrentSheet(size_t index) const -> Curve;
-    [[nodiscard]] auto GetNumberCurves(int sheet) const -> size_t;
+    [[nodiscard]] auto GetNumberCurves(size_t sheet) const -> size_t;
     [[nodiscard]] auto GetNumberCurvesOnCurrentSheet() const -> size_t;
-    [[nodiscard]] auto GetCurveAssignments(int sheet) const -> std::vector<std::vector<MarcherIndex>>;
+    [[nodiscard]] auto GetCurveAssignments(size_t sheet) const -> std::vector<std::vector<MarcherIndex>>;
     [[nodiscard]] auto GetCurveAssignmentsOnCurrentSheet() const -> std::vector<std::vector<MarcherIndex>>;
-    [[nodiscard]] auto FindCurveControlPoint(int sheet, CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t>>;
+    [[nodiscard]] auto FindCurveControlPoint(size_t sheet, CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t>>;
     [[nodiscard]] auto FindCurveControlPointOnCurrentSheet(CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t>>;
-    [[nodiscard]] auto FindCurve(int sheet, CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t, double>>;
+    [[nodiscard]] auto FindCurve(size_t sheet, CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t, double>>;
     [[nodiscard]] auto FindCurveOnCurrentSheet(CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t, double>>;
 
     // utility
@@ -255,10 +255,11 @@ public:
 
 private:
     // modification of show is private, and externally done through create and exeucte commands
-    auto RemoveNthSheet(int sheetidx) -> Sheet_container_t;
-    void InsertSheet(Sheet const& nsheet, int sheetidx);
-    void InsertSheet(Sheet_container_t const& nsheet, int sheetidx);
-    void SetCurrentSheet(int n);
+    auto RemoveNthSheet(size_t sheetidx) -> Sheet_container_t;
+    void InsertSheet(Sheet const& nsheet, size_t sheetidx);
+    void InsertSheet(Sheet_container_t const& nsheet, size_t sheetidx);
+    void SetCurrentSheet(size_t n) { mSheetNum = n; }
+
     void SetSelectionList(SelectionList const& sl);
 
     void SetNumPoints(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int columns, Coord const& new_march_position);
@@ -289,7 +290,7 @@ private:
 
     // the more "transient" settings, representing a current set of manipulations by the user, but preserved in the show
     SelectionList mSelectionList; // order of selections
-    int mSheetNum{};
+    size_t mSheetNum{};
 
     // reset every time we open
     int mCurrentReferencePoint{};

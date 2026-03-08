@@ -64,7 +64,7 @@ auto AnimateShow(const Show& show) -> Sheets
                   auto numBeats = curr_sheet->GetBeats();
                   auto isLastSheet = !nextAnimationSheet.has_value();
                   auto theCommands = CalChart::Ranges::ToVector<Animate::CompileResult>(
-                      std::ranges::iota_view(0, show.GetNumPoints()) | std::views::transform([&variablesStates, numBeats, isLastSheet, curr_sheet = curr_sheet, nextAnimationSheet = nextAnimationSheet](auto whichMarcher) {
+                      std::ranges::iota_view(0UL, show.GetNumPoints()) | std::views::transform([&variablesStates, numBeats, isLastSheet, curr_sheet = curr_sheet, nextAnimationSheet = nextAnimationSheet](auto whichMarcher) {
                           auto current_symbol = curr_sheet->GetSymbol(whichMarcher);
                           auto endPosition = [whichMarcher](auto&& nextAnimationSheet) -> std::optional<Coord> {
                               if (nextAnimationSheet) {

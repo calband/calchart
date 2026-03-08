@@ -164,9 +164,9 @@ public:
     [[nodiscard]] auto GetSheetsTempo() const { return mShow->GetSheetsTempo(); }
     [[nodiscard]] auto GetCurrentSheetSymbols() const { return mShow->GetCurrentSheetSymbols(); }
     [[nodiscard]] auto GetCurrentSheetBackgroundImages() const { return mShow->GetCurrentSheetBackgroundImages(); }
-    void SetCurrentSheet(int n);
+    void SetCurrentSheet(size_t n);
 
-    [[nodiscard]] auto GetNumPoints() const { return mShow->GetNumPoints(); }
+    [[nodiscard]] auto GetNumPoints() const -> size_t { return mShow->GetNumPoints(); }
     [[nodiscard]] auto GetRelabelMapping(std::vector<CalChart::Coord> const& source_marchers, std::vector<CalChart::Coord> const& target_marchers) const -> std::optional<std::vector<CalChart::MarcherIndex>>;
 
     [[nodiscard]] auto GetPointLabel(CalChart::MarcherIndex i) const { return mShow->GetPointLabel(i); }
@@ -183,7 +183,7 @@ public:
     [[nodiscard]] auto GetPointFromLabel(std::string const& label) const { return mShow->GetPointFromLabel(label); }
     [[nodiscard]] auto GetPointsFromLabels(std::vector<std::string> const& labels) const { return mShow->GetPointsFromLabels(labels); }
     [[nodiscard]] auto GetMarcherPositionOnCurrentSheet(CalChart::MarcherIndex i, unsigned ref = 0) const { return mShow->GetMarcherPositionOnCurrentSheet(i, ref); }
-    [[nodiscard]] auto GetAllMarcherPositions(int sheet, unsigned ref = 0) const { return mShow->GetAllMarcherPositions(sheet, ref); }
+    [[nodiscard]] auto GetAllMarcherPositions(size_t sheet, unsigned ref = 0) const { return mShow->GetAllMarcherPositions(sheet, ref); }
     [[nodiscard]] auto GetAllMarcherPositionsOnCurrentSheet(unsigned ref = 0) const { return mShow->GetAllMarcherPositionsOnCurrentSheet(ref); }
 
     [[nodiscard]] auto GetContinuities() const { return mShow->GetContinuitiesOnCurrentSheet(); }
@@ -282,17 +282,17 @@ public:
     [[nodiscard]] auto PrintToPS(bool overview, int min_yards, std::set<size_t> const& isPicked, CalChart::Configuration const& config_) const -> std::tuple<std::string, int>;
 
     // create a set of commands to apply to the document.  This is the best way to interact with the doc.
-    [[nodiscard]] auto Create_SetCurrentSheetCommand(int n) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_SetCurrentSheetCommand(size_t n) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_SetSelectionListCommand(const CalChart::SelectionList& sl) -> std::unique_ptr<wxCommand>;
-    [[nodiscard]] auto Create_SetCurrentSheetAndSelectionCommand(int n, const CalChart::SelectionList& sl) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_SetCurrentSheetAndSelectionCommand(size_t n, const CalChart::SelectionList& sl) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_SetShowModeCommand(CalChart::ShowMode const& newmode) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_SetupMarchersCommand(std::vector<std::pair<std::string, std::string>> const& labels, int numColumns) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_SetInstrumentsCommand(std::map<CalChart::MarcherIndex, std::string> const& dotToInstrument) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_SetSheetTitleCommand(wxString const& newname) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_SetSheetBeatsCommand(CalChart::Beats beats) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_SetSheetTempoCommand(CalChart::Tempo tempo) -> std::unique_ptr<wxCommand>;
-    [[nodiscard]] auto Create_AddSheetsCommand(CalChart::Show::Sheet_container_t const& sheets, int where) -> std::unique_ptr<wxCommand>;
-    [[nodiscard]] auto Create_RemoveSheetCommand(int where) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_AddSheetsCommand(CalChart::Show::Sheet_container_t const& sheets, size_t where) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_RemoveSheetCommand(size_t where) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_ApplyRelabelMapping(int sheet, std::vector<CalChart::MarcherIndex> const& mapping) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_AppendShow(std::unique_ptr<CalChartDoc> sheets) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string>> const& data) -> std::unique_ptr<wxCommand>;
