@@ -151,13 +151,13 @@ public:
     {
     }
     ~CalChartPrintout() override = default;
-    bool HasPage(int pageNum) override { return pageNum <= mShow.GetNumSheets(); }
+    bool HasPage(int pageNum) override { return static_cast<size_t>(pageNum) <= mShow.GetNumSheets(); }
     void GetPageInfo(int* minPage, int* maxPage, int* pageFrom, int* pageTo) override
     {
         *minPage = 1;
-        *maxPage = mShow.GetNumSheets();
+        *maxPage = static_cast<int>(mShow.GetNumSheets());
         *pageFrom = 1;
-        *pageTo = mShow.GetNumSheets();
+        *pageTo = static_cast<int>(mShow.GetNumSheets());
     }
     bool OnPrintPage(int pageNum) override
     {
@@ -606,17 +606,17 @@ void CalChartFrame::OnInsertFromOtherShow()
     auto begin = wxGetTextFromUser(
         std::format(prompt, "beginning", show.GetNumSheets()),
         "First Sheet Number", "1", this);
-    long beginValue;
-    if (!begin || !begin.ToLong(&beginValue) || beginValue < 1 || beginValue > show.GetNumSheets()) {
+    auto beginValue = 0UL;
+    if (!begin || !begin.ToULong(&beginValue) || beginValue < 1 || beginValue > show.GetNumSheets()) {
         (void)wxMessageBox("Not a valid sheet number", "Insert Failed");
         return;
     }
-    long endValue;
+    auto endValue = 0UL;
     if (beginValue != (&show)->GetNumSheets()) {
         auto end = wxGetTextFromUser(
             std::format(prompt, "ending", (&show)->GetNumSheets()),
             "Last Sheet Number", begin, this);
-        if (!end || !end.ToLong(&endValue) || endValue < beginValue || endValue > show.GetNumSheets()) {
+        if (!end || !end.ToULong(&endValue) || endValue < beginValue || endValue > show.GetNumSheets()) {
             (void)wxMessageBox("Not a valid sheet number", "Insert Failed");
             return;
         }
@@ -627,8 +627,8 @@ void CalChartFrame::OnInsertFromOtherShow()
     }
 
     auto sheets = (&show)->CopySheets()
-        | std::views::drop(static_cast<unsigned>(beginValue - 1))
-        | std::views::take(static_cast<unsigned>(endValue - beginValue + 1));
+        | std::views::drop(beginValue - 1)
+        | std::views::take(endValue - beginValue + 1);
     GetFieldView()->DoInsertSheets(
         CalChart::Show::Sheet_container_t(sheets.begin(), sheets.end()),
         GetFieldView()->GetCurrentSheetNum() + 1);

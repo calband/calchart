@@ -432,24 +432,19 @@ auto Show::GenerateFieldWithMarchersDrawCommands(CalChart::Configuration const& 
             }));
 }
 
-auto Show::GetNumSheets() const -> int
-{
-    return static_cast<int>(mSheets.size());
-}
-
 auto Show::GetCurrentSheetName() const -> std::string
 {
-    return static_cast<size_t>(mSheetNum) < mSheets.size() ? mSheets.at(mSheetNum).GetName() : "";
+    return mSheetNum < mSheets.size() ? mSheets.at(mSheetNum).GetName() : "";
 }
 
 auto Show::GetCurrentSheetBeats() const -> CalChart::Beats
 {
-    return static_cast<size_t>(mSheetNum) < mSheets.size() ? mSheets.at(mSheetNum).GetBeats() : 0;
+    return mSheetNum < mSheets.size() ? mSheets.at(mSheetNum).GetBeats() : 0;
 }
 
 auto Show::GetCurrentSheetTempo() const -> CalChart::Tempo
 {
-    return static_cast<size_t>(mSheetNum) < mSheets.size() ? mSheets.at(mSheetNum).GetTempo() : 0;
+    return mSheetNum < mSheets.size() ? mSheets.at(mSheetNum).GetTempo() : 0;
 }
 
 auto Show::GetCurrentSheetSymbols() const -> std::vector<SYMBOL_TYPE>
@@ -477,7 +472,7 @@ auto Show::GetCurrentSheetSerialized() const -> std::vector<std::byte>
     return mSheets.at(mSheetNum).SerializeSheet();
 }
 
-auto Show::RemoveNthSheet(int sheetidx) -> Sheet_container_t
+auto Show::RemoveNthSheet(size_t sheetidx) -> Sheet_container_t
 {
     auto i = mSheets.begin() + sheetidx;
     Sheet_container_t shts(1, *i);
@@ -493,17 +488,14 @@ auto Show::RemoveNthSheet(int sheetidx) -> Sheet_container_t
     return shts;
 }
 
-void Show::SetCurrentSheet(int n) { mSheetNum = n; }
-
-void Show::InsertSheet(Sheet const& sheet, int sheetidx)
+void Show::InsertSheet(Sheet const& sheet, size_t sheetidx)
 {
     mSheets.insert(mSheets.begin() + sheetidx, sheet);
     if (sheetidx <= GetCurrentSheetNum())
         SetCurrentSheet(GetCurrentSheetNum() + 1);
 }
 
-void Show::InsertSheet(Sheet_container_t const& sheet,
-    int sheetidx)
+void Show::InsertSheet(Sheet_container_t const& sheet, size_t sheetidx)
 {
     mSheets.insert(mSheets.begin() + sheetidx, sheet.begin(), sheet.end());
     if (sheetidx <= GetCurrentSheetNum())
@@ -658,7 +650,7 @@ auto Show::GetPointsFromLabels(std::vector<std::string> const& labels) const -> 
         | std::views::transform([](const std::optional<int>& opt) { return *opt; }));
 }
 
-auto Show::GetMarcherPosition(int sheet, MarcherIndex i, unsigned ref) const -> Coord
+auto Show::GetMarcherPosition(size_t sheet, MarcherIndex i, unsigned ref) const -> Coord
 {
     return mSheets.at(sheet).GetMarcherPosition(i, ref);
 }
@@ -668,7 +660,7 @@ auto Show::GetMarcherPositionOnCurrentSheet(MarcherIndex i, unsigned ref) const 
     return GetMarcherPosition(mSheetNum, i, ref);
 }
 
-auto Show::GetAllMarcherPositions(int sheet, unsigned ref) const -> std::vector<Coord>
+auto Show::GetAllMarcherPositions(size_t sheet, unsigned ref) const -> std::vector<Coord>
 {
     return mSheets.at(sheet).GetAllMarcherPositions(ref);
 }
@@ -678,7 +670,7 @@ auto Show::GetAllMarcherPositionsOnCurrentSheet(unsigned ref) const -> std::vect
     return GetAllMarcherPositions(mSheetNum, ref);
 }
 
-auto Show::GetContinuities(int sheet) const -> std::vector<Continuity>
+auto Show::GetContinuities(size_t sheet) const -> std::vector<Continuity>
 {
     return Ranges::ToVector<Continuity>(mSheets.at(sheet).GetContinuities());
 }
@@ -688,7 +680,7 @@ auto Show::GetContinuitiesOnCurrentSheet() const -> std::vector<Continuity>
     return GetContinuities(mSheetNum);
 }
 
-auto Show::GetContinuitiesInUse(int sheet) const -> std::vector<bool>
+auto Show::GetContinuitiesInUse(size_t sheet) const -> std::vector<bool>
 {
     return Ranges::ToVector<bool>(mSheets.at(sheet).ContinuitiesInUse());
 }
@@ -738,7 +730,7 @@ auto Show::GetCurrentReferencePoint() const -> int
     return mCurrentReferencePoint;
 }
 
-auto Show::FindMarcher(int sheet, Coord where, Coord::units searchBounds) const -> std::optional<MarcherIndex>
+auto Show::FindMarcher(size_t sheet, Coord where, Coord::units searchBounds) const -> std::optional<MarcherIndex>
 {
     return mSheets.at(sheet).FindMarcher(where, searchBounds);
 }
@@ -748,7 +740,7 @@ auto Show::FindMarcherOnCurrentSheet(Coord where, Coord::units searchBounds) con
     return FindMarcher(mSheetNum, where, searchBounds);
 }
 
-auto Show::GetCurve(int sheet, size_t index) const -> Curve
+auto Show::GetCurve(size_t sheet, size_t index) const -> Curve
 {
     return mSheets.at(sheet).GetCurve(index);
 }
@@ -758,7 +750,7 @@ auto Show::GetCurveOnCurrentSheet(size_t index) const -> Curve
     return GetCurve(mSheetNum, index);
 }
 
-auto Show::GetNumberCurves(int sheet) const -> size_t
+auto Show::GetNumberCurves(size_t sheet) const -> size_t
 {
     return mSheets.at(sheet).GetNumberCurves();
 }
@@ -768,7 +760,7 @@ auto Show::GetNumberCurvesOnCurrentSheet() const -> size_t
     return GetNumberCurves(mSheetNum);
 }
 
-auto Show::GetCurveAssignments(int sheet) const -> std::vector<std::vector<MarcherIndex>>
+auto Show::GetCurveAssignments(size_t sheet) const -> std::vector<std::vector<MarcherIndex>>
 {
     return mSheets.at(sheet).GetCurveAssignments();
 }
@@ -778,7 +770,7 @@ auto Show::GetCurveAssignmentsOnCurrentSheet() const -> std::vector<std::vector<
     return GetCurveAssignments(mSheetNum);
 }
 
-auto Show::FindCurveControlPoint(int sheet, CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t>>
+auto Show::FindCurveControlPoint(size_t sheet, CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t>>
 {
     return mSheets.at(sheet).FindCurveControlPoint(pos, searchBounds);
 }
@@ -788,7 +780,7 @@ auto Show::FindCurveControlPointOnCurrentSheet(CalChart::Coord pos, Coord::units
     return FindCurveControlPoint(mSheetNum, pos, searchBounds);
 }
 
-auto Show::FindCurve(int sheet, CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t, double>>
+auto Show::FindCurve(size_t sheet, CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t, double>>
 {
     return mSheets.at(sheet).FindCurve(pos, searchBounds);
 }
@@ -975,7 +967,7 @@ auto Show::toOnlineViewerJSON(Animation const& compiledShow) const -> nlohmann::
     return j;
 }
 
-auto Show::Create_SetCurrentSheetCommand(int n) const -> Show_command_pair
+auto Show::Create_SetCurrentSheetCommand(size_t n) const -> Show_command_pair
 {
     auto action = [n = n](Show& show) { show.SetCurrentSheet(n); };
     auto reaction = [n = mSheetNum](Show& show) { show.SetCurrentSheet(n); };
@@ -989,7 +981,7 @@ auto Show::Create_SetSelectionListCommand(SelectionList const& sl) const -> Show
     return { action, reaction };
 }
 
-auto Show::Create_SetCurrentSheetAndSelectionCommand(int n, SelectionList const& sl) const -> Show_command_pair
+auto Show::Create_SetCurrentSheetAndSelectionCommand(size_t n, SelectionList const& sl) const -> Show_command_pair
 {
     auto action = [n, sl](Show& show) { show.SetCurrentSheet(n); show.SetSelectionList(sl); };
     auto reaction = [n = mSheetNum, sl = mSelectionList](Show& show) { show.SetCurrentSheet(n); show.SetSelectionList(sl); };
@@ -1062,14 +1054,14 @@ auto Show::Create_SetSheetTempoCommand(Tempo tempo) const -> Show_command_pair
     return { action, reaction };
 }
 
-auto Show::Create_AddSheetsCommand(const Show::Sheet_container_t& sheets, int where) const -> Show_command_pair
+auto Show::Create_AddSheetsCommand(const Show::Sheet_container_t& sheets, size_t where) const -> Show_command_pair
 {
     auto action = [sheets, where](Show& show) { show.InsertSheet(sheets, where); };
     auto reaction = [sheets, where](Show& show) { auto num_times = sheets.size(); while (num_times--) show.RemoveNthSheet(where); };
     return { action, reaction };
 }
 
-auto Show::Create_RemoveSheetCommand(int where) const -> Show_command_pair
+auto Show::Create_RemoveSheetCommand(size_t where) const -> Show_command_pair
 {
     Sheet_container_t old_shts(1, mSheets.at(where));
     auto action = [where](Show& show) { show.RemoveNthSheet(where); };
