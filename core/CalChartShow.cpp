@@ -432,46 +432,6 @@ auto Show::GenerateFieldWithMarchersDrawCommands(CalChart::Configuration const& 
             }));
 }
 
-auto Show::GetCurrentSheetName() const -> std::string
-{
-    return mSheetNum < mSheets.size() ? mSheets.at(mSheetNum).GetName() : "";
-}
-
-auto Show::GetCurrentSheetBeats() const -> CalChart::Beats
-{
-    return mSheetNum < mSheets.size() ? mSheets.at(mSheetNum).GetBeats() : 0;
-}
-
-auto Show::GetCurrentSheetTempo() const -> CalChart::Tempo
-{
-    return mSheetNum < mSheets.size() ? mSheets.at(mSheetNum).GetTempo() : 0;
-}
-
-auto Show::GetCurrentSheetSymbols() const -> std::vector<SYMBOL_TYPE>
-{
-    return mSheets.at(mSheetNum).GetSymbols();
-}
-
-auto Show::GetCurrentSheetPrintNumber() const -> std::string
-{
-    return mSheets.at(mSheetNum).GetPrintNumber();
-}
-
-auto Show::GetCurrentSheetBackgroundImages() const -> std::vector<ImageInfo>
-{
-    return mSheets.at(mSheetNum).GetBackgroundImages();
-}
-
-auto Show::CopySheet(unsigned n) const -> Sheet
-{
-    return mSheets.at(n);
-}
-
-auto Show::GetCurrentSheetSerialized() const -> std::vector<std::byte>
-{
-    return mSheets.at(mSheetNum).SerializeSheet();
-}
-
 auto Show::RemoveNthSheet(size_t sheetidx) -> Sheet_container_t
 {
     if (sheetidx >= mSheets.size()) {
@@ -565,240 +525,6 @@ auto Show::GetRelabelMapping(std::vector<Coord> const& source_marchers, std::vec
     }
 
     return table;
-}
-
-auto Show::GetPointLabel(MarcherIndex i) const -> std::string
-{
-    if (i >= static_cast<MarcherIndex>(mDotLabelAndInstrument.size()))
-        return "";
-    return mDotLabelAndInstrument.at(i).first;
-}
-
-auto Show::GetPointsLabel() const -> std::vector<std::string>
-{
-    std::vector<std::string> labels;
-    std::transform(mDotLabelAndInstrument.begin(), mDotLabelAndInstrument.end(), std::back_inserter(labels), [](auto&& i) { return i.first; });
-    return labels;
-}
-
-auto Show::GetPointsLabel(const CalChart::SelectionList& sl) const -> std::vector<std::string>
-{
-    return CalChart::Ranges::ToVector<std::string>(sl | std::views::transform([this](auto&& i) { return GetPointLabel(i); }));
-}
-
-auto Show::GetPointInstrument(MarcherIndex i) const -> std::string
-{
-    if (i >= static_cast<MarcherIndex>(mDotLabelAndInstrument.size()))
-        return "";
-    return mDotLabelAndInstrument.at(i).second;
-}
-
-auto Show::GetPointInstrument(std::string const& label) const -> std::optional<std::string>
-{
-    auto selection = MakeSelectByLabel(label);
-    if (selection.size() == 0) {
-        return std::nullopt;
-    }
-    return GetPointInstrument(*selection.begin());
-}
-
-auto Show::GetPointsInstrument() const -> std::vector<std::string>
-{
-    std::vector<std::string> instruments;
-    std::transform(mDotLabelAndInstrument.begin(), mDotLabelAndInstrument.end(), std::back_inserter(instruments), [](auto&& i) { return i.second; });
-    return instruments;
-}
-
-auto Show::GetPointsInstrument(CalChart::SelectionList const& sl) const -> std::vector<std::string>
-{
-    return CalChart::Ranges::ToVector<std::string>(sl | std::views::transform([this](auto&& i) { return GetPointInstrument(i); }));
-}
-
-auto Show::GetPointSymbol(MarcherIndex i) const -> SYMBOL_TYPE
-{
-    if (i >= static_cast<MarcherIndex>(mDotLabelAndInstrument.size()))
-        return SYMBOL_PLAIN;
-    return mSheets.at(mSheetNum).GetSymbol(i);
-}
-
-auto Show::GetPointSymbol(std::string const& label) const -> std::optional<SYMBOL_TYPE>
-{
-    auto selection = MakeSelectByLabel(label);
-    if (selection.size() == 0) {
-        return std::nullopt;
-    }
-    return GetPointSymbol(*selection.begin());
-}
-
-auto Show::GetPointsSymbol() const -> std::vector<SYMBOL_TYPE>
-{
-    return mSheets.at(mSheetNum).GetSymbols();
-}
-
-auto Show::GetPointsSymbol(CalChart::SelectionList const& sl) const -> std::vector<SYMBOL_TYPE>
-{
-    return CalChart::Ranges::ToVector<SYMBOL_TYPE>(sl | std::views::transform([this](auto&& i) { return GetPointSymbol(i); }));
-}
-
-auto Show::GetPointFromLabel(std::string const& label) const -> std::optional<CalChart::MarcherIndex>
-{
-    if (auto it = std::find_if(
-            mDotLabelAndInstrument.begin(),
-            mDotLabelAndInstrument.end(),
-            [&label](const auto& pair) { return pair.first == label; });
-        it != mDotLabelAndInstrument.end()) {
-        return static_cast<CalChart::MarcherIndex>(std::distance(mDotLabelAndInstrument.begin(), it));
-    }
-    return std::nullopt;
-}
-
-auto Show::GetPointsFromLabels(std::vector<std::string> const& labels) const -> std::vector<CalChart::MarcherIndex>
-{
-    return CalChart::Ranges::ToVector<CalChart::MarcherIndex>(
-        labels
-        | std::views::transform([this](const std::string& label) { return GetPointFromLabel(label); })
-        | std::views::filter([](const std::optional<int>& opt) { return opt.has_value(); })
-        | std::views::transform([](const std::optional<int>& opt) { return *opt; }));
-}
-
-auto Show::GetMarcherPosition(size_t sheet, MarcherIndex i, unsigned ref) const -> Coord
-{
-    return mSheets.at(sheet).GetMarcherPosition(i, ref);
-}
-
-auto Show::GetMarcherPositionOnCurrentSheet(MarcherIndex i, unsigned ref) const -> Coord
-{
-    return GetMarcherPosition(mSheetNum, i, ref);
-}
-
-auto Show::GetAllMarcherPositions(size_t sheet, unsigned ref) const -> std::vector<Coord>
-{
-    return mSheets.at(sheet).GetAllMarcherPositions(ref);
-}
-
-auto Show::GetAllMarcherPositionsOnCurrentSheet(unsigned ref) const -> std::vector<Coord>
-{
-    return GetAllMarcherPositions(mSheetNum, ref);
-}
-
-auto Show::GetContinuities(size_t sheet) const -> std::vector<Continuity>
-{
-    return Ranges::ToVector<Continuity>(mSheets.at(sheet).GetContinuities());
-}
-
-auto Show::GetContinuitiesOnCurrentSheet() const -> std::vector<Continuity>
-{
-    return GetContinuities(mSheetNum);
-}
-
-auto Show::GetContinuitiesInUse(size_t sheet) const -> std::vector<bool>
-{
-    return Ranges::ToVector<bool>(mSheets.at(sheet).ContinuitiesInUse());
-}
-
-auto Show::GetContinuitiesInUseOnCurrentSheet() const -> std::vector<bool>
-{
-    return GetContinuitiesInUse(mSheetNum);
-}
-
-auto Show::GetCurrentSheetRawPrintContinuity() const -> std::string
-{
-    return mSheets.at(mSheetNum).GetRawPrintContinuity();
-}
-
-auto Show::GetCurrentSheetPrintContinuity() const -> PrintContinuity
-{
-    return mSheets.at(mSheetNum).GetPrintContinuity();
-}
-
-auto Show::AlreadyHasPrintContinuity() const -> bool
-{
-    for (auto& i : mSheets) {
-        if (i.GetPrintableContinuity().size() > 0) {
-            return true;
-        }
-    }
-    return false;
-}
-
-auto Show::GetAllRawPrintContinuity() const -> std::vector<std::string>
-{
-    return CalChart::Ranges::ToVector<std::string>(mSheets | std::views::transform([](auto&& sheet) { return sheet.GetRawPrintContinuity(); }));
-}
-
-auto Show::GetAllPrintContinuity() const -> std::vector<PrintContinuity>
-{
-    return CalChart::Ranges::ToVector<PrintContinuity>(mSheets | std::views::transform([](auto&& sheet) { return sheet.GetPrintContinuity(); }));
-}
-
-auto Show::GetSheetsName() const -> std::vector<std::string>
-{
-    return CalChart::Ranges::ToVector<std::string>(mSheets | std::views::transform([](auto&& sheet) { return sheet.GetName(); }));
-}
-
-auto Show::GetCurrentReferencePoint() const -> int
-{
-    return mCurrentReferencePoint;
-}
-
-auto Show::FindMarcher(size_t sheet, Coord where, Coord::units searchBounds) const -> std::optional<MarcherIndex>
-{
-    return mSheets.at(sheet).FindMarcher(where, searchBounds);
-}
-
-auto Show::FindMarcherOnCurrentSheet(Coord where, Coord::units searchBounds) const -> std::optional<MarcherIndex>
-{
-    return FindMarcher(mSheetNum, where, searchBounds);
-}
-
-auto Show::GetCurve(size_t sheet, size_t index) const -> Curve
-{
-    return mSheets.at(sheet).GetCurve(index);
-}
-
-auto Show::GetCurveOnCurrentSheet(size_t index) const -> Curve
-{
-    return GetCurve(mSheetNum, index);
-}
-
-auto Show::GetNumberCurves(size_t sheet) const -> size_t
-{
-    return mSheets.at(sheet).GetNumberCurves();
-}
-
-auto Show::GetNumberCurvesOnCurrentSheet() const -> size_t
-{
-    return GetNumberCurves(mSheetNum);
-}
-
-auto Show::GetCurveAssignments(size_t sheet) const -> std::vector<std::vector<MarcherIndex>>
-{
-    return mSheets.at(sheet).GetCurveAssignments();
-}
-
-auto Show::GetCurveAssignmentsOnCurrentSheet() const -> std::vector<std::vector<MarcherIndex>>
-{
-    return GetCurveAssignments(mSheetNum);
-}
-
-auto Show::FindCurveControlPoint(size_t sheet, CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t>>
-{
-    return mSheets.at(sheet).FindCurveControlPoint(pos, searchBounds);
-}
-
-auto Show::FindCurveControlPointOnCurrentSheet(CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t>>
-{
-    return FindCurveControlPoint(mSheetNum, pos, searchBounds);
-}
-
-auto Show::FindCurve(size_t sheet, CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t, double>>
-{
-    return mSheets.at(sheet).FindCurve(pos, searchBounds);
-}
-
-auto Show::FindCurveOnCurrentSheet(CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t, double>>
-{
-    return FindCurve(mSheetNum, pos, searchBounds);
 }
 
 auto Show::WillMovePoints(MarcherToPosition const& new_positions, int ref) const -> bool
@@ -933,6 +659,16 @@ auto Show::MakeSelectByLabels(std::vector<std::string> const& labels) const -> S
     return sl;
 }
 
+// Print continuity utility
+auto Show::AlreadyHasPrintContinuity() const -> bool
+{
+    for (auto& i : mSheets) {
+        if (i.GetPrintableContinuity().size() > 0) {
+            return true;
+        }
+    }
+    return false;
+}
 namespace {
     // In 'movements', make a series of commands to describe how a point should be animated over time in the Online Viewer
     // This is effectively a reduce, except the dotLabels make this challenging.
@@ -1454,5 +1190,284 @@ auto Show::Create_RemoveSheetCurveCommand(int whichCurve) const -> Show_command_
     };
     return { action, reaction };
 }
+
+// Accessors
+// General show info
+auto Show::GetNumSheets() const -> size_t { return mSheets.size(); }
+auto Show::GetCurrentSheetNum() const -> size_t { return mSheetNum; }
+auto Show::GetShowMode() const -> ShowMode const& { return mMode; }
+auto Show::GetNumPoints() const -> size_t { return mDotLabelAndInstrument.size(); }
+auto Show::GetCurrentReferencePoint() const -> int { return mCurrentReferencePoint; }
+
+// Sheet copying
+auto Show::CopySheet(size_t sheet) const -> Sheet { return mSheets.at(sheet); }
+auto Show::CopySheets() const -> Sheet_container_t { return mSheets; }
+auto Show::CopyCurrentSheet() const -> Sheet { return CopySheet(GetCurrentSheetNum()); }
+
+// Sheet name
+auto Show::GetSheetName(size_t sheet) const -> std::string
+{
+    return sheet < mSheets.size() ? mSheets.at(sheet).GetName() : "";
+}
+auto Show::GetSheetsName() const -> std::vector<std::string>
+{
+    return CalChart::Ranges::ToVector<std::string>(mSheets | std::views::transform([](auto&& sheet) { return sheet.GetName(); }));
+}
+auto Show::GetSheetNameOnCurrentSheet() const -> std::string { return GetSheetName(GetCurrentSheetNum()); }
+
+// Sheet beats
+auto Show::GetSheetBeats(size_t sheet) const -> CalChart::Beats
+{
+    return sheet < mSheets.size() ? mSheets.at(sheet).GetBeats() : 0;
+}
+auto Show::GetSheetsBeats() const -> std::vector<CalChart::Beats>
+{
+    return CalChart::Ranges::ToVector<CalChart::Beats>(mSheets | std::views::transform([](auto&& sheet) { return sheet.GetBeats(); }));
+}
+auto Show::GetSheetBeatsOnCurrentSheet() const -> CalChart::Beats { return GetSheetBeats(GetCurrentSheetNum()); }
+
+// Sheet tempo
+auto Show::GetSheetTempo(size_t sheet) const -> CalChart::Tempo
+{
+    return sheet < mSheets.size() ? mSheets.at(sheet).GetTempo() : 0;
+}
+auto Show::GetSheetsTempo() const -> std::vector<CalChart::Tempo>
+{
+    return CalChart::Ranges::ToVector<CalChart::Tempo>(mSheets | std::views::transform([](auto&& sheet) { return sheet.GetTempo(); }));
+}
+auto Show::GetSheetTempoOnCurrentSheet() const -> CalChart::Tempo { return GetSheetTempo(GetCurrentSheetNum()); }
+
+// Sheet symbols
+auto Show::GetSheetSymbols(size_t sheet) const -> std::vector<SYMBOL_TYPE>
+{
+    return sheet < mSheets.size() ? mSheets.at(sheet).GetSymbols() : std::vector<SYMBOL_TYPE>{};
+}
+auto Show::GetSheetsSymbols() const -> std::vector<std::vector<SYMBOL_TYPE>>
+{
+    return CalChart::Ranges::ToVector<std::vector<SYMBOL_TYPE>>(mSheets | std::views::transform([](auto&& sheet) { return sheet.GetSymbols(); }));
+}
+auto Show::GetSheetSymbolsOnCurrentSheet() const -> std::vector<SYMBOL_TYPE> { return GetSheetSymbols(GetCurrentSheetNum()); }
+
+// Sheet print number
+auto Show::GetSheetPrintNumber(size_t sheet) const -> std::string
+{
+    return sheet < mSheets.size() ? mSheets.at(sheet).GetPrintNumber() : "";
+}
+auto Show::GetSheetsPrintNumber() const -> std::vector<std::string>
+{
+    return CalChart::Ranges::ToVector<std::string>(mSheets | std::views::transform([](auto&& sheet) { return sheet.GetPrintNumber(); }));
+}
+auto Show::GetSheetPrintNumberOnCurrentSheet() const -> std::string { return GetSheetPrintNumber(GetCurrentSheetNum()); }
+
+// Sheet background images
+auto Show::GetSheetBackgroundImages(size_t sheet) const -> std::vector<ImageInfo>
+{
+    return sheet < mSheets.size() ? mSheets.at(sheet).GetBackgroundImages() : std::vector<ImageInfo>{};
+}
+auto Show::GetSheetsBackgroundImages() const -> std::vector<std::vector<ImageInfo>>
+{
+    return CalChart::Ranges::ToVector<std::vector<ImageInfo>>(mSheets | std::views::transform([](auto&& sheet) { return sheet.GetBackgroundImages(); }));
+}
+auto Show::GetSheetBackgroundImagesOnCurrentSheet() const -> std::vector<ImageInfo> { return GetSheetBackgroundImages(GetCurrentSheetNum()); }
+
+// Sheet serialized
+auto Show::GetSheetSerialized(size_t sheet) const -> std::vector<std::byte>
+{
+    return sheet < mSheets.size() ? mSheets.at(sheet).SerializeSheet() : std::vector<std::byte>{};
+}
+auto Show::GetSheetsSerialized() const -> std::vector<std::vector<std::byte>>
+{
+    return CalChart::Ranges::ToVector<std::vector<std::byte>>(mSheets | std::views::transform([](auto&& sheet) { return sheet.SerializeSheet(); }));
+}
+auto Show::GetSheetSerializedOnCurrentSheet() const -> std::vector<std::byte> { return GetSheetSerialized(GetCurrentSheetNum()); }
+
+// Continuities
+auto Show::GetContinuities(size_t sheet) const -> std::vector<Continuity>
+{
+    return Ranges::ToVector<Continuity>(mSheets.at(sheet).GetContinuities());
+}
+auto Show::GetAllContinuities() const -> std::vector<std::vector<Continuity>>
+{
+    return CalChart::Ranges::ToVector<std::vector<Continuity>>(std::views::iota(size_t{ 0 }, mSheets.size()) | std::views::transform([this](auto&& sheet) { return GetContinuities(sheet); }));
+}
+auto Show::GetContinuitiesOnCurrentSheet() const -> std::vector<Continuity> { return GetContinuities(GetCurrentSheetNum()); }
+
+// Continuities in use
+auto Show::GetContinuitiesInUse(size_t sheet) const -> std::vector<bool>
+{
+    return Ranges::ToVector<bool>(mSheets.at(sheet).ContinuitiesInUse());
+}
+auto Show::GetAllContinuitiesInUse() const -> std::vector<std::vector<bool>>
+{
+    return CalChart::Ranges::ToVector<std::vector<bool>>(std::views::iota(size_t{ 0 }, mSheets.size()) | std::views::transform([this](auto&& sheet) { return GetContinuitiesInUse(sheet); }));
+}
+auto Show::GetContinuitiesInUseOnCurrentSheet() const -> std::vector<bool> { return GetContinuitiesInUse(GetCurrentSheetNum()); }
+
+// Raw print continuity
+auto Show::GetSheetRawPrintContinuity(size_t sheet) const -> std::string
+{
+    return mSheets.at(sheet).GetRawPrintContinuity();
+}
+auto Show::GetAllRawPrintContinuity() const -> std::vector<std::string>
+{
+    return CalChart::Ranges::ToVector<std::string>(mSheets | std::views::transform([](auto&& sheet) { return sheet.GetRawPrintContinuity(); }));
+}
+auto Show::GetSheetRawPrintContinuityOnCurrentSheet() const -> std::string { return GetSheetRawPrintContinuity(GetCurrentSheetNum()); }
+
+// Print continuity
+auto Show::GetSheetPrintContinuity(size_t sheet) const -> PrintContinuity
+{
+    return mSheets.at(sheet).GetPrintContinuity();
+}
+auto Show::GetAllPrintContinuity() const -> std::vector<PrintContinuity>
+{
+    return CalChart::Ranges::ToVector<PrintContinuity>(mSheets | std::views::transform([](auto&& sheet) { return sheet.GetPrintContinuity(); }));
+}
+auto Show::GetSheetPrintContinuityOnCurrentSheet() const -> PrintContinuity { return GetSheetPrintContinuity(GetCurrentSheetNum()); }
+
+// Point label
+auto Show::GetPointLabel(MarcherIndex i) const -> std::string
+{
+    if (i >= static_cast<MarcherIndex>(mDotLabelAndInstrument.size()))
+        return "";
+    return mDotLabelAndInstrument.at(i).first;
+}
+auto Show::GetPointsLabel() const -> std::vector<std::string>
+{
+    return CalChart::Ranges::ToVector<std::string>(mDotLabelAndInstrument | std::views::transform([](auto&& i) { return i.first; }));
+}
+auto Show::GetPointsLabel(const CalChart::SelectionList& sl) const -> std::vector<std::string>
+{
+    return CalChart::Ranges::ToVector<std::string>(sl | std::views::transform([this](auto&& i) { return GetPointLabel(i); }));
+}
+
+// Point instrument
+auto Show::GetPointInstrument(MarcherIndex i) const -> std::string
+{
+    return static_cast<size_t>(i) < mDotLabelAndInstrument.size() ? mDotLabelAndInstrument.at(i).second : "";
+}
+auto Show::GetPointInstrument(std::string const& label) const -> std::optional<std::string>
+{
+    auto selection = MakeSelectByLabel(label);
+    if (selection.size() == 0) {
+        return std::nullopt;
+    }
+    return GetPointInstrument(*selection.begin());
+}
+auto Show::GetPointsInstrument() const -> std::vector<std::string>
+{
+    return CalChart::Ranges::ToVector<std::string>(mDotLabelAndInstrument | std::views::transform([](auto&& i) { return i.second; }));
+}
+auto Show::GetPointsInstrument(CalChart::SelectionList const& sl) const -> std::vector<std::string>
+{
+    return CalChart::Ranges::ToVector<std::string>(sl | std::views::transform([this](auto&& i) { return GetPointInstrument(i); }));
+}
+
+// Point symbol
+auto Show::GetPointSymbol(size_t sheet, MarcherIndex i) const -> SYMBOL_TYPE
+{
+    return static_cast<size_t>(i) < mDotLabelAndInstrument.size() && sheet < mSheets.size() ? mSheets.at(sheet).GetSymbol(i) : SYMBOL_PLAIN;
+}
+auto Show::GetPointSymbolOnCurrentSheet(MarcherIndex i) const -> SYMBOL_TYPE { return GetPointSymbol(GetCurrentSheetNum(), i); }
+auto Show::GetPointsSymbol(size_t sheet) const -> std::vector<SYMBOL_TYPE> { return mSheets.at(sheet).GetSymbols(); }
+auto Show::GetPointsSymbolOnCurrentSheet() const -> std::vector<SYMBOL_TYPE> { return GetPointsSymbol(GetCurrentSheetNum()); }
+auto Show::GetPointSymbol(size_t sheet, std::string const& label) const -> std::optional<SYMBOL_TYPE>
+{
+    auto selection = MakeSelectByLabel(label);
+    if (selection.size() == 0) {
+        return std::nullopt;
+    }
+    return GetPointSymbol(sheet, *selection.begin());
+}
+auto Show::GetPointSymbolOnCurrentSheet(std::string const& label) const -> std::optional<SYMBOL_TYPE> { return GetPointSymbol(GetCurrentSheetNum(), label); }
+auto Show::GetPointsSymbol(size_t sheet, CalChart::SelectionList const& sl) const -> std::vector<SYMBOL_TYPE>
+{
+    return CalChart::Ranges::ToVector<SYMBOL_TYPE>(sl | std::views::transform([this, sheet](auto&& i) { return GetPointSymbol(sheet, i); }));
+}
+auto Show::GetPointsSymbolOnCurrentSheet(CalChart::SelectionList const& sl) const -> std::vector<SYMBOL_TYPE> { return GetPointsSymbol(GetCurrentSheetNum(), sl); }
+
+// Point lookup
+auto Show::GetPointFromLabel(std::string const& label) const -> std::optional<CalChart::MarcherIndex>
+{
+    if (auto it = std::find_if(
+            mDotLabelAndInstrument.begin(),
+            mDotLabelAndInstrument.end(),
+            [&label](const auto& pair) { return pair.first == label; });
+        it != mDotLabelAndInstrument.end()) {
+        return static_cast<CalChart::MarcherIndex>(std::distance(mDotLabelAndInstrument.begin(), it));
+    }
+    return std::nullopt;
+}
+auto Show::GetPointsFromLabels(std::vector<std::string> const& labels) const -> std::vector<CalChart::MarcherIndex>
+{
+    return CalChart::Ranges::ToVector<CalChart::MarcherIndex>(
+        labels
+        | std::views::transform([this](const std::string& label) { return GetPointFromLabel(label); })
+        | std::views::filter([](const std::optional<int>& opt) { return opt.has_value(); })
+        | std::views::transform([](const std::optional<int>& opt) { return *opt; }));
+}
+
+// Marcher position
+auto Show::GetMarcherPosition(size_t sheet, MarcherIndex i, unsigned ref) const -> Coord
+{
+    return mSheets.at(sheet).GetMarcherPosition(i, ref);
+}
+auto Show::GetMarcherPositionOnCurrentSheet(MarcherIndex i, unsigned ref) const -> Coord { return GetMarcherPosition(GetCurrentSheetNum(), i, ref); }
+auto Show::GetAllMarcherPositions(size_t sheet, unsigned ref) const -> std::vector<Coord>
+{
+    return mSheets.at(sheet).GetAllMarcherPositions(ref);
+}
+auto Show::GetAllMarcherPositionsOnCurrentSheet(unsigned ref) const -> std::vector<Coord> { return GetAllMarcherPositions(GetCurrentSheetNum(), ref); }
+
+// Find marcher
+auto Show::FindMarcher(size_t sheet, Coord where, Coord::units searchBounds) const -> std::optional<MarcherIndex>
+{
+    return mSheets.at(sheet).FindMarcher(where, searchBounds);
+}
+auto Show::FindMarcherOnCurrentSheet(Coord where, Coord::units searchBounds) const -> std::optional<MarcherIndex> { return FindMarcher(GetCurrentSheetNum(), where, searchBounds); }
+
+// Curve
+auto Show::GetCurve(size_t sheet, size_t index) const -> Curve
+{
+    return mSheets.at(sheet).GetCurve(index);
+}
+auto Show::GetCurveOnCurrentSheet(size_t index) const -> Curve { return GetCurve(GetCurrentSheetNum(), index); }
+auto Show::GetAllCurves(int sheet) const -> std::vector<Curve>
+{
+    return CalChart::Ranges::ToVector<Curve>(std::views::iota(size_t{ 0 }, GetNumberCurves(sheet)) | std::views::transform([this, sheet](auto i) { return GetCurve(sheet, i); }));
+}
+auto Show::GetAllCurvesOnCurrentSheet() const -> std::vector<Curve>
+{
+    auto sheetNum = GetCurrentSheetNum();
+    return CalChart::Ranges::ToVector<Curve>(std::views::iota(size_t{ 0 }, GetNumberCurves(sheetNum)) | std::views::transform([this, sheetNum](auto i) { return GetCurve(sheetNum, i); }));
+}
+
+// Number of curves
+auto Show::GetNumberCurves(size_t sheet) const -> size_t
+{
+    return mSheets.at(sheet).GetNumberCurves();
+}
+auto Show::GetNumberCurvesOnCurrentSheet() const -> size_t { return GetNumberCurves(GetCurrentSheetNum()); }
+
+// Curve assignments
+auto Show::GetCurveAssignments(size_t sheet) const -> std::vector<std::vector<MarcherIndex>>
+{
+    return mSheets.at(sheet).GetCurveAssignments();
+}
+auto Show::GetCurveAssignmentsOnCurrentSheet() const -> std::vector<std::vector<MarcherIndex>> { return GetCurveAssignments(GetCurrentSheetNum()); }
+
+// Find curve control point
+auto Show::FindCurveControlPoint(size_t sheet, CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t>>
+{
+    return mSheets.at(sheet).FindCurveControlPoint(pos, searchBounds);
+}
+auto Show::FindCurveControlPointOnCurrentSheet(CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t>> { return FindCurveControlPoint(GetCurrentSheetNum(), pos, searchBounds); }
+
+// Find curve
+auto Show::FindCurve(size_t sheet, CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t, double>>
+{
+    return mSheets.at(sheet).FindCurve(pos, searchBounds);
+}
+auto Show::FindCurveOnCurrentSheet(CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t, double>> { return FindCurve(GetCurrentSheetNum(), pos, searchBounds); }
 
 }

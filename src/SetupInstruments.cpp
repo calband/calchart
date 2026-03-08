@@ -69,7 +69,7 @@ SetupInstruments::SetupInstruments(CalChartDoc const& shw, wxWindow* parent, wxW
     : mShow(shw)
 {
     auto selection = mShow.GetSelectionList();
-    auto dotSymbols = mShow.GetCurrentSheetSymbols();
+    auto dotSymbols = mShow.GetSheetSymbolsOnCurrentSheet();
     mDotIndices.assign(selection.begin(), selection.end());
     // if nothing is selected, then everything is selected.
     if (selection.size() == 0) {
