@@ -184,7 +184,7 @@ bool PrintPostScriptDialog::Create(const CalChartDoc* show,
         return false;
     }
     mShow = show;
-    for (auto i = 0; i < mShow->GetNumSheets(); ++i) {
+    for (size_t i = 0; i < mShow->GetNumSheets(); ++i) {
         mIsSheetPicked.insert(i);
     }
 
