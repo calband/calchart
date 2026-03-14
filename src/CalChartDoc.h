@@ -116,17 +116,15 @@ public:
      * @param filepath The filepath (relative or absolute) to which the
      * Viewer file will be saved. Note that the CalChart Online Viewer
      * expects a viewer file to end with the '.viewer' extension.
-     * @return True if the file was saved successfully; false otherwise.
      */
-    bool exportViewerFile(std::filesystem::path const& filepath);
+    void exportViewerFile(std::filesystem::path const& filepath);
 
     /*!
      * @brief Exports beats timing data to a JSON file for the CalChart Online Viewer.
      * @param filepath The filepath (relative or absolute) to which the
      * beats file will be saved. The beats file should end with '.beats.json'.
-     * @return True if the file was saved successfully; false otherwise.
      */
-    bool exportViewerBeatsFile(std::filesystem::path const& filepath);
+    void exportViewerBeatsFile(std::filesystem::path const& filepath);
 
     /*!
      * @brief Generates JSON representation of the show for the CalChart Online Viewer.

@@ -258,20 +258,18 @@ wxSTD istream& CalChartDoc::LoadObject(wxSTD istream& stream)
     return LoadObjectGeneric<wxSTD istream>(stream);
 }
 
-bool CalChartDoc::exportViewerFile(std::filesystem::path const& filepath)
+void CalChartDoc::exportViewerFile(std::filesystem::path const& filepath)
 {
     auto j = toViewerFileJSON();
     auto o = std::ofstream(filepath);
     o << std::setw(4) << j << std::endl;
-    return true;
 }
 
-bool CalChartDoc::exportViewerBeatsFile(std::filesystem::path const& filepath)
+void CalChartDoc::exportViewerBeatsFile(std::filesystem::path const& filepath)
 {
     auto j = toViewerBeatsJSON();
     auto o = std::ofstream(filepath);
     o << std::setw(4) << j << std::endl;
-    return true;
 }
 
 nlohmann::json CalChartDoc::toViewerJSON() const

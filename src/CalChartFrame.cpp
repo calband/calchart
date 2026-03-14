@@ -554,22 +554,21 @@ void CalChartFrame::OnLegacyPrint()
 
 void CalChartFrame::OnExportViewerFile()
 {
-    if (GetShow()) {
-        wxFileDialog saveFileDialog(this, _("Save viewer file"), "", "", "viewer files (*.viewer)|*.viewer", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-
-        if (saveFileDialog.ShowModal() == wxID_CANCEL)
-            return;
-
-        if (!GetShow()->exportViewerFile(std::filesystem::path{ saveFileDialog.GetPath().ToStdString() })) {
-            wxMessageBox("There was a problem exporting the viewer file.\n" + saveFileDialog.GetPath(), "Exporting Viewer File");
-            return;
-        }
+    if (GetShow() == nullptr) {
+        return;
     }
+    wxFileDialog saveFileDialog(this, _("Save viewer file"), "", "", "viewer files (*.viewer)|*.viewer", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+    if (saveFileDialog.ShowModal() == wxID_CANCEL) {
+        return;
+    }
+
+    GetShow()->exportViewerFile(std::filesystem::path{ saveFileDialog.GetPath().ToStdString() });
 }
 
 void CalChartFrame::OnExportViewerBeats()
 {
-    if (!GetShow()) {
+    if (GetShow() == nullptr) {
         return;
     }
 
@@ -578,22 +577,13 @@ void CalChartFrame::OnExportViewerBeats()
         showTitle = "untitled";
     }
 
-    wxFileDialog saveFileDialog(
-        this,
-        _("Save viewer beats file"),
-        "",
-        showTitle + ".beats.json",
-        "beats files (*.beats.json)|*.beats.json",
-        wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+    wxFileDialog saveFileDialog(this, _("Save viewer beats file"), "", showTitle + ".beats.json", "beats files (*.beats.json)|*.beats.json", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
     if (saveFileDialog.ShowModal() == wxID_CANCEL) {
         return;
     }
 
-    if (!GetShow()->exportViewerBeatsFile(std::filesystem::path{ saveFileDialog.GetPath().ToStdString() })) {
-        wxMessageBox("There was a problem exporting the beats file.\n" + saveFileDialog.GetPath(), "Exporting Beats File");
-        return;
-    }
+    GetShow()->exportViewerBeatsFile(std::filesystem::path{ saveFileDialog.GetPath().ToStdString() });
 }
 
 void CalChartFrame::OnCmdPreferences(wxCommandEvent&)
