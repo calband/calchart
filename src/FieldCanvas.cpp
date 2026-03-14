@@ -378,7 +378,7 @@ void FieldCanvas::OnMouseLeftDown_FoundCurveControl(size_t curveIndex, size_t cu
     // If we are already selecting the curve, then shift means add it, alt means toggle,
     if (!mCurve.has_value() || (mCurve->mExistingCurve.has_value() && mCurve->mExistingCurve->mCurveSelected != curveIndex)) {
         mCurve = CurveDrawInfo{
-            .mCurve = mView->GetCurrentCurve(curveIndex),
+            .mCurve = mView->GetCurveOnCurrentSheet(curveIndex),
             .mPointsSelected = std::set{ curveControl },
             .mExistingCurve = ExistingCurveInfo{
                 .mCurveSelected = curveIndex,
@@ -404,7 +404,7 @@ void FieldCanvas::OnMouseLeftDown_FoundCurveControl(size_t curveIndex, size_t cu
 void FieldCanvas::OnMouseLeftDown_FoundCurve(size_t curveIndex)
 {
     mCurve = CurveDrawInfo{
-        .mCurve = mView->GetCurrentCurve(curveIndex),
+        .mCurve = mView->GetCurveOnCurrentSheet(curveIndex),
         .mExistingCurve = ExistingCurveInfo{
             .mCurveSelected = curveIndex,
         },
@@ -493,7 +493,7 @@ void FieldCanvas::OnMouseLeftDoubleClick(wxMouseEvent& event)
 
 void FieldCanvas::OnMouseLeftDoubleClick_FoundCurve(CalChart::Coord pos, size_t whichCurve, size_t whereToInsert)
 {
-    auto points = mView->GetCurrentCurve(whichCurve).GetControlPoints();
+    auto points = mView->GetCurveOnCurrentSheet(whichCurve).GetControlPoints();
     points.insert(points.begin() + whereToInsert + 1, pos);
     mCurve = CurveDrawInfo{
         .mCurve = CalChart::Curve(points),
@@ -561,7 +561,7 @@ void FieldCanvas::OnMouseMove_DragCurveControlPoint(CalChart::Coord pos)
     }
     auto translate = pos - mDragStart;
     // collect all the control points, change the one control point.
-    auto points = mView->GetCurrentCurve(mCurve->mExistingCurve->mCurveSelected).GetControlPoints();
+    auto points = mView->GetCurveOnCurrentSheet(mCurve->mExistingCurve->mCurveSelected).GetControlPoints();
 
     for (auto index : mCurve->mPointsSelected) {
         points.at(index) += translate;
@@ -618,7 +618,7 @@ void FieldCanvas::MoveDrag(CalChart::Coord end)
     if (auto foundCurve = mView->FindCurve(end);
         GetCurrentMove() == CalChart::MoveMode::Normal && foundCurve.has_value()) {
         auto currentPointsOnCurve = MergeCurvePoints(mView->GetMarchersAssignedToCurve(std::get<0>(*foundCurve)), std::get<2>(*foundCurve), mView->GetSelectionList());
-        auto points = mView->GetCurrentCurve(std::get<0>(*foundCurve)).GetPointsOnLine(currentPointsOnCurve.size());
+        auto points = mView->GetCurveOnCurrentSheet(std::get<0>(*foundCurve)).GetPointsOnLine(currentPointsOnCurve.size());
         mUncommittedMovePoints.clear();
         for (auto&& thething : CalChart::Ranges::zip_view(currentPointsOnCurve, points)) {
             mUncommittedMovePoints[std::get<0>(thething)] = std::get<1>(thething);

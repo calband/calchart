@@ -116,7 +116,7 @@ public:
         }
         return mRunningBeatCount.at(whichSheet - 1);
     }
-    [[nodiscard]] auto BeatForSheet(size_t whichSheet) const -> Beats { return mSheets.at(whichSheet).GetNumBeats(); }
+    [[nodiscard]] auto BeatsForSheet(size_t whichSheet) const -> Beats { return mSheets.at(whichSheet).GetNumBeats(); }
     [[nodiscard]] auto MarcherInfoAtBeat(MarcherIndex whichMarcher, Beats beat) const -> MarcherInfo;
     [[nodiscard]] auto CollisionAtBeat(MarcherIndex whichMarcher, Beats beat) const -> Coord::CollisionType;
     [[nodiscard]] auto AnimateInfoAtBeat(MarcherIndex whichMarcher, Beats beat) const -> Info

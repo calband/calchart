@@ -462,24 +462,24 @@ auto CalChartView::GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beat
     return mShow->GetAnimationBoundingBox(zoomInOnMarchers, whichBeat);
 }
 
-auto CalChartView::BeatToSheetOffsetAndBeat(CalChart::Beats beat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>
+auto CalChartView::AnimationBeatToSheetOffsetAndBeat(CalChart::Beats beat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>
 {
-    return mShow->BeatToSheetOffsetAndBeat(beat);
+    return mShow->AnimationBeatToSheetOffsetAndBeat(beat);
 }
 
-auto CalChartView::BeatForSheet(int sheet) const -> CalChart::Beats
+auto CalChartView::AnimationBeatsForSheet(int sheet) const -> CalChart::Beats
 {
-    return mShow->BeatForSheet(sheet);
+    return mShow->AnimationBeatsForSheet(sheet);
 }
 
-auto CalChartView::GetTotalNumberBeatsUpTo(int whichSheet) const -> CalChart::Beats
+auto CalChartView::GetTotalNumberAnimationBeatsUpTo(int whichSheet) const -> CalChart::Beats
 {
-    return mShow->GetTotalNumberBeatsUpTo(whichSheet);
+    return mShow->GetTotalNumberAnimationBeatsUpTo(whichSheet);
 }
 
-auto CalChartView::GetTempoForBeat(CalChart::Beats whichBeat) const -> CalChart::Tempo
+auto CalChartView::GetTempoForAnimationBeat(CalChart::Beats whichBeat) const -> CalChart::Tempo
 {
-    return mShow->GetTempoForBeat(whichBeat);
+    return mShow->GetTempoForAnimationBeat(whichBeat);
 }
 
 auto CalChartView::BeatHasCollision(CalChart::Beats whichBeat) const -> bool

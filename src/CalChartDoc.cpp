@@ -37,6 +37,7 @@
 #include "SystemConfiguration.h"
 #include "platconf.h"
 
+#include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <wx/textfile.h>
@@ -257,12 +258,18 @@ wxSTD istream& CalChartDoc::LoadObject(wxSTD istream& stream)
     return LoadObjectGeneric<wxSTD istream>(stream);
 }
 
-bool CalChartDoc::exportViewerFile(std::filesystem::path const& filepath)
+void CalChartDoc::exportViewerFile(std::filesystem::path const& filepath)
 {
     auto j = toViewerFileJSON();
     auto o = std::ofstream(filepath);
     o << std::setw(4) << j << std::endl;
-    return true;
+}
+
+void CalChartDoc::exportViewerBeatsFile(std::filesystem::path const& filepath)
+{
+    auto j = toViewerBeatsJSON();
+    auto o = std::ofstream(filepath);
+    o << std::setw(4) << j << std::endl;
 }
 
 nlohmann::json CalChartDoc::toViewerJSON() const
@@ -281,6 +288,40 @@ nlohmann::json CalChartDoc::toViewerFileJSON() const
     };
 
     j["show"] = toViewerJSON();
+
+    return j;
+}
+
+nlohmann::json CalChartDoc::toViewerBeatsJSON() const
+{
+    nlohmann::json j;
+
+    auto indexName = GetTitle().ToStdString();
+    if (indexName.empty()) {
+        indexName = "untitled";
+    }
+
+    j["meta"] = {
+        { "version", "1.0.0" },
+        { "index_name", indexName },
+        { "type", "beats" },
+    };
+
+    nlohmann::json beats = nlohmann::json::array();
+    beats.push_back(0);
+
+    for (auto&& tempo_beat : CalChart::Ranges::zip_view(GetSheetsTempo(), GetSheetsBeats())) {
+        auto [tempo, beatCount] = tempo_beat;
+        if (tempo == 0) {
+            tempo = 120;
+        }
+        auto msPerBeat = static_cast<int>(std::lround(60000.0 / static_cast<double>(tempo)));
+        for (size_t beat = 0; beat < static_cast<size_t>(beatCount); ++beat) {
+            beats.push_back(msPerBeat);
+        }
+    }
+
+    j["beats"] = std::move(beats);
 
     return j;
 }
@@ -413,7 +454,7 @@ auto CalChartDoc::GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beats
     return { bounding_box_low_right - bounding_box_upper_left, (modeSize / 2) + bounding_box_upper_left };
 }
 
-auto CalChartDoc::BeatToSheetOffsetAndBeat(CalChart::Beats whichBeat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>
+auto CalChartDoc::AnimationBeatToSheetOffsetAndBeat(CalChart::Beats whichBeat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>
 {
     if (!mAnimation) {
         return std::nullopt;
@@ -421,15 +462,15 @@ auto CalChartDoc::BeatToSheetOffsetAndBeat(CalChart::Beats whichBeat) const -> s
     return mAnimation->BeatToSheetOffsetAndBeat(whichBeat);
 }
 
-auto CalChartDoc::BeatForSheet(int whichSheet) const -> CalChart::Beats
+auto CalChartDoc::AnimationBeatsForSheet(int whichSheet) const -> CalChart::Beats
 {
     if (!mAnimation) {
         return 0;
     }
-    return mAnimation->BeatForSheet(whichSheet);
+    return mAnimation->BeatsForSheet(whichSheet);
 }
 
-auto CalChartDoc::GetTotalNumberBeatsUpTo(int whichSheet) const -> CalChart::Beats
+auto CalChartDoc::GetTotalNumberAnimationBeatsUpTo(int whichSheet) const -> CalChart::Beats
 {
     if (!mAnimation) {
         return 0;
@@ -437,9 +478,9 @@ auto CalChartDoc::GetTotalNumberBeatsUpTo(int whichSheet) const -> CalChart::Bea
     return mAnimation->GetTotalNumberBeatsUpTo(whichSheet);
 }
 
-auto CalChartDoc::GetTempoForBeat(CalChart::Beats whichBeat) const -> CalChart::Tempo
+auto CalChartDoc::GetTempoForAnimationBeat(CalChart::Beats whichBeat) const -> CalChart::Tempo
 {
-    auto sheetInfo = BeatToSheetOffsetAndBeat(whichBeat);
+    auto sheetInfo = AnimationBeatToSheetOffsetAndBeat(whichBeat);
     if (!sheetInfo || !mShow) {
         return 120; // Default tempo
     }
@@ -629,8 +670,6 @@ void CalChartDoc::SetGhostSource(GhostSource source, int which)
     mGhostSheet = which;
     UpdateAllViews();
 }
-
-const ShowMode& CalChartDoc::GetShowMode() const { return mShow->GetShowMode(); }
 
 auto CalChartDoc::PrintToPS(bool overview, int min_yards, std::set<size_t> const& isPicked, CalChart::Configuration const& config_) const -> std::tuple<std::string, int>
 {

@@ -293,7 +293,7 @@ void AnimationPanel::UpdatePanel()
         return;
     }
     auto [currentSheet, sheetBeat] = *sheetBeatStuff; // gives us which shee we are on and beat
-    auto beatsForCurrentSheet = BeatForSheet(currentSheet) - 1; // gives us which shee we are on and beat
+    auto beatsForCurrentSheet = BeatsForSheet(currentSheet) - 1; // gives us which shee we are on and beat
 
     if (mSheetSlider.control()) {
         updateController(mBeatSlider, static_cast<int>(beatsForCurrentSheet), static_cast<int>(sheetBeat));
@@ -305,7 +305,7 @@ void AnimationPanel::UpdatePanel()
 
     // Update tempo display
     if (mView && mTempoValue.control()) {
-        auto currentTempo = mView->GetTempoForBeat(mCurrentBeat);
+        auto currentTempo = mView->GetTempoForAnimationBeat(mCurrentBeat);
         *mTempoValue = std::to_string(currentTempo);
         SetTempo(currentTempo);
     }
@@ -362,15 +362,15 @@ auto AnimationPanel::BeatToSheetOffsetAndBeat(CalChart::Beats beat) const -> std
     if (!mView) {
         return std::nullopt;
     }
-    return mView->BeatToSheetOffsetAndBeat(beat);
+    return mView->AnimationBeatToSheetOffsetAndBeat(beat);
 }
 
-auto AnimationPanel::BeatForSheet(int sheet) const -> CalChart::Beats
+auto AnimationPanel::BeatsForSheet(int sheet) const -> CalChart::Beats
 {
     if (!mView) {
         return 0;
     }
-    return mView->BeatForSheet(sheet);
+    return mView->AnimationBeatsForSheet(sheet);
 }
 
 auto AnimationPanel::GetAnimationBoundingBox(bool zoomInOnMarchers) const -> std::pair<CalChart::Coord, CalChart::Coord>
@@ -428,7 +428,7 @@ void AnimationPanel::GotoTotalBeat(CalChart::Beats whichBeat)
 
 void AnimationPanel::GotoSheetBeat(int whichSheet, CalChart::Beats whichBeat)
 {
-    mCurrentBeat = whichBeat + mView->GetTotalNumberBeatsUpTo(whichSheet);
+    mCurrentBeat = whichBeat + mView->GetTotalNumberAnimationBeatsUpTo(whichSheet);
     UpdateTempoIfChanged();
     UpdatePanel();
 }
@@ -472,7 +472,7 @@ void AnimationPanel::UpdateTempoIfChanged()
         return;
     }
 
-    auto newTempo = mView->GetTempoForBeat(mCurrentBeat);
+    auto newTempo = mView->GetTempoForAnimationBeat(mCurrentBeat);
     if (newTempo != GetTempo()) {
         SetTempo(newTempo);
         StopTimer();
