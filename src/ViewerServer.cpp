@@ -74,6 +74,43 @@ public:
             }
         });
 
+        // Route: GET /api/beats - returns beats timing data as JSON
+        mServer->Get("/api/beats", [this](const httplib::Request&, httplib::Response& res) {
+            wxLogDebug("ViewerServer: GET /api/beats requested");
+            std::lock_guard<std::mutex> beatsLock(mMutex);
+
+            if (mInjectedBeatsJson.has_value()) {
+                wxLogDebug("ViewerServer: Serving injected beats JSON (%zu bytes)", mInjectedBeatsJson->size());
+                res.set_content(*mInjectedBeatsJson, "application/json");
+                res.status = 200;
+                return;
+            }
+
+            if (!mCurrentDoc) {
+                wxLogDebug("ViewerServer: No current doc loaded for beats");
+                res.set_content(R"({"error": "No show loaded"})", "application/json");
+                res.status = 400;
+                return;
+            }
+
+            try {
+                wxLogDebug("ViewerServer: Generating beats JSON from CalChartDoc...");
+
+                // Get the beats JSON from the document
+                auto response = mCurrentDoc->toViewerBeatsJSON();
+
+                res.set_content(response.dump(4), "application/json");
+                res.status = 200;
+                wxLogDebug("ViewerServer: /api/beats response sent successfully");
+            } catch (const std::exception& e) {
+                wxLogError("ViewerServer: Exception in /api/beats: %s", e.what());
+                nlohmann::json error;
+                error["error"] = e.what();
+                res.set_content(error.dump(), "application/json");
+                res.status = 500;
+            }
+        });
+
         // Route: GET /api/status - health check
         mServer->Get("/api/status", [](const httplib::Request&, httplib::Response& res) {
             wxLogDebug("ViewerServer: GET /api/status requested");
@@ -214,6 +251,16 @@ public:
         mInjectedShowJson = std::move(json);
     }
 
+    void SetInjectedBeatsJson(std::string json)
+    {
+        std::lock_guard<std::mutex> lock(mMutex);
+        if (json.empty()) {
+            mInjectedBeatsJson.reset();
+            return;
+        }
+        mInjectedBeatsJson = std::move(json);
+    }
+
 private:
     mutable std::mutex mMutex;
     std::unique_ptr<httplib::Server> mServer;
@@ -222,6 +269,7 @@ private:
     bool mIsRunning;
     CalChartDoc* mCurrentDoc;
     std::optional<std::string> mInjectedShowJson;
+    std::optional<std::string> mInjectedBeatsJson;
 };
 
 ViewerServer::ViewerServer()
@@ -259,6 +307,11 @@ void ViewerServer::SetCurrentDoc(CalChartDoc* doc)
 void ViewerServer::SetInjectedShowJson(std::string json)
 {
     mImpl->SetInjectedShowJson(std::move(json));
+}
+
+void ViewerServer::SetInjectedBeatsJson(std::string json)
+{
+    mImpl->SetInjectedBeatsJson(std::move(json));
 }
 
 std::string ViewerServer::GetViewerUrl() const
