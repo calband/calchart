@@ -12,4 +12,5 @@ Other changes:
 * [#812](../../issues/812) Make it easier to read xbm files.
 * [#814](../../issues/814) Add the ability to dump when the beats occur with calchart_tool
 * [#815](../../issues/815) We can probably improve the way animation panel timer works by using one-shot
+* [#823](../../issues/823) Update wxUI to 0.4.0
 

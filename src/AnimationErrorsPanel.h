@@ -54,7 +54,7 @@ private:
     void UpdateErrors(std::vector<CalChart::Animate::Errors> const& errors, std::map<int, CalChart::SelectionList> const& collisions);
 
     CalChartView* mView{};
-    wxUI::Generic<wxTreeListCtrl>::Proxy mTreeCtrl{};
+    wxUI::Factory<wxTreeListCtrl>::Proxy mTreeCtrl{};
     std::vector<CalChart::Animate::Errors> mCurrentErrors{};
     std::map<wxTreeListItem, std::tuple<int, CalChart::SelectionList>> mErrorLookup{};
 };

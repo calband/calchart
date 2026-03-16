@@ -301,9 +301,9 @@ StackDrawPlayground::StackDrawPlayground(wxWindow* parent)
     VSizer{
         wxSizerFlags{}.Border(wxALL, 2).Left().Proportion(0),
         HSplitter{
-            mPreview = [](wxWindow* parent) {
+            wxUI::Factory{ [](wxWindow* parent) {
                 return new StackDrawPreview(parent);
-            },
+            } }.withProxy(mPreview),
             TextCtrl{}.bind([this] {
                           try {
                               mPreview->SetDrawCommand(ParseString(*mUserInput));
@@ -324,9 +324,9 @@ StackDrawPlayground::StackDrawPlayground(wxWindow* parent)
                                                           })
                                                     .withProxy(mUseOffset) },
         Generic{ CreateStdDialogButtonSizer(wxOK) },
-        mStatus = Generic<wxStatusBar>{ [](wxWindow* parent) {
+        Factory{ [](wxWindow* parent) {
             return new wxStatusBar(parent);
-        } },
+        } }.withProxy(mStatus),
     }
         .fitTo(this);
 

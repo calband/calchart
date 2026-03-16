@@ -38,6 +38,6 @@ public:
 private:
     wxUI::CheckBox::Proxy mUseOffset{};
     wxUI::TextCtrl::Proxy mUserInput{};
-    wxUI::Generic<StackDrawPreview>::Proxy mPreview{};
-    wxUI::Generic<wxStatusBar>::Proxy mStatus{};
+    wxUI::Factory<StackDrawPreview>::Proxy mPreview{};
+    wxUI::Factory<wxStatusBar>::Proxy mStatus{};
 };

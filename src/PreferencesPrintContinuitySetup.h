@@ -64,8 +64,8 @@ public:
     auto ClearValuesToDefault() -> bool override;
 
 private:
-    wxUI::Generic<FancyTextWin>::Proxy mUserInput{};
-    wxUI::Generic<PrintContinuityPreview>::Proxy mPrintContDisplay{};
+    wxUI::Factory<FancyTextWin>::Proxy mUserInput{};
+    wxUI::Factory<PrintContinuityPreview>::Proxy mPrintContDisplay{};
     wxUI::CheckBox::Proxy mLandscape{};
     wxUI::CheckBox::Proxy mUseNewDraw{};
     wxUI::TextCtrl::Proxy mDotRatio{};
