@@ -62,6 +62,9 @@ void ViewerPreviewDialog::RefreshFromDoc()
         return;
     }
 
-    auto json = mDoc->toViewerFileJSON();
-    mViewerPanel->InjectShowDataWhenReady(json.dump(4));
+    auto showJson = mDoc->toViewerFileJSON();
+    mViewerPanel->InjectShowDataWhenReady(showJson.dump(4));
+
+    auto beatsJson = mDoc->toViewerBeatsJSON();
+    mViewerPanel->InjectBeatsDataWhenReady(beatsJson.dump(4));
 }

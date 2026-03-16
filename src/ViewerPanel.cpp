@@ -148,6 +148,30 @@ void ViewerPanel::InjectShowData(const std::string& jsonData)
 #endif
 }
 
+void ViewerPanel::InjectBeatsData(const std::string& jsonData)
+{
+#if CALCHART_HAS_WEBVIEW
+    if (!mWebView) {
+        wxLogWarning("ViewerPanel: Cannot inject beats data - webview not initialized");
+        return;
+    }
+
+    if (!mPageLoaded) {
+        wxLogWarning("ViewerPanel: Page not loaded yet, beats injection may fail");
+    }
+
+    wxLogDebug("ViewerPanel: injecting beats data via server (%zu bytes)", jsonData.size());
+
+    auto& app = *wxGetApp().GetInstance();
+    CalChartApp* pApp = static_cast<CalChartApp*>(&app);
+    pApp->GetViewerServer().SetInjectedBeatsJson(jsonData);
+
+    // Trigger viewer to reload beats via JavaScript
+    mWebView->RunScriptAsync("if (typeof loadCalChartBeats === 'function') { loadCalChartBeats(); }");
+    wxLogDebug("ViewerPanel: injected beats data (server override)");
+#endif
+}
+
 void ViewerPanel::InjectShowDataWhenReady(const std::string& jsonData)
 {
 #if CALCHART_HAS_WEBVIEW
@@ -157,6 +181,24 @@ void ViewerPanel::InjectShowDataWhenReady(const std::string& jsonData)
     }
 
     mPendingInjectedShowJson = jsonData;
+    mPendingInjectAttempts = 0;
+    if (!mRefreshTimer.IsRunning()) {
+        mRefreshTimer.Start(200);
+    }
+#else
+    (void)jsonData;
+#endif
+}
+
+void ViewerPanel::InjectBeatsDataWhenReady(const std::string& jsonData)
+{
+#if CALCHART_HAS_WEBVIEW
+    if (mPageLoaded) {
+        InjectBeatsData(jsonData);
+        return;
+    }
+
+    mPendingInjectedBeatsJson = jsonData;
     mPendingInjectAttempts = 0;
     if (!mRefreshTimer.IsRunning()) {
         mRefreshTimer.Start(200);
@@ -191,7 +233,7 @@ void ViewerPanel::OnDocumentChanged(wxNotifyEvent& event)
 
 void ViewerPanel::OnRefreshTimer(wxTimerEvent&)
 {
-    if (!mPendingInjectedShowJson.has_value()) {
+    if (!mPendingInjectedShowJson.has_value() && !mPendingInjectedBeatsJson.has_value()) {
         mRefreshTimer.Stop();
         return;
     }
@@ -201,10 +243,20 @@ void ViewerPanel::OnRefreshTimer(wxTimerEvent&)
         auto currentUrl = mWebView->GetCurrentURL();
         if (IsViewerUrl(currentUrl)) {
             mPageLoaded = true;
-            auto pending = std::move(*mPendingInjectedShowJson);
-            mPendingInjectedShowJson.reset();
+
+            if (mPendingInjectedShowJson.has_value()) {
+                auto pendingShow = std::move(*mPendingInjectedShowJson);
+                mPendingInjectedShowJson.reset();
+                InjectShowData(pendingShow);
+            }
+
+            if (mPendingInjectedBeatsJson.has_value()) {
+                auto pendingBeats = std::move(*mPendingInjectedBeatsJson);
+                mPendingInjectedBeatsJson.reset();
+                InjectBeatsData(pendingBeats);
+            }
+
             mRefreshTimer.Stop();
-            InjectShowData(pending);
             return;
         }
     }
@@ -241,6 +293,13 @@ void ViewerPanel::OnPageLoaded(wxWebViewEvent& event)
         mPendingInjectedShowJson.reset();
         mRefreshTimer.Stop();
         InjectShowData(pending);
+    }
+
+    if (mPendingInjectedBeatsJson.has_value()) {
+        auto pendingBeats = std::move(*mPendingInjectedBeatsJson);
+        mPendingInjectedBeatsJson.reset();
+        mRefreshTimer.Stop();
+        InjectBeatsData(pendingBeats);
     }
 }
 #endif

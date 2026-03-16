@@ -48,10 +48,21 @@ public:
     void InjectShowData(const std::string& jsonData);
 
     /**
+     * Inject beats JSON data directly into the viewer.
+     * @param jsonData The JSON string representing the beats data
+     */
+    void InjectBeatsData(const std::string& jsonData);
+
+    /**
      * Inject JSON data when the page is ready. If the page isn't loaded yet,
      * the data is queued and injected after the load event.
      */
     void InjectShowDataWhenReady(const std::string& jsonData);
+
+    /**
+     * Inject beats JSON data when the page is ready.
+     */
+    void InjectBeatsDataWhenReady(const std::string& jsonData);
 
     /**
      * Navigate to the viewer homepage.
@@ -78,6 +89,7 @@ private:
     bool mPageLoaded = false;
     bool mPendingUpdate = false;
     std::optional<std::string> mPendingInjectedShowJson;
+    std::optional<std::string> mPendingInjectedBeatsJson;
     int mPendingInjectAttempts = 0;
     static constexpr int kMaxPendingInjectAttempts = 50; // ~10s at 200ms intervals
 

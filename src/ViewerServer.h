@@ -18,6 +18,7 @@ class Show;
  *
  * The server runs on localhost on a configurable port and serves:
  * - /api/show - JSON representation of the current show
+ * - /api/beats - JSON representation of beats timing data
  * - / - The viewer web interface (static files from calchart-viewer)
  */
 class ViewerServer {
@@ -59,6 +60,11 @@ public:
      * Override /api/show response with injected JSON. Pass empty to clear.
      */
     void SetInjectedShowJson(std::string json);
+
+    /**
+     * Override /api/beats response with injected JSON. Pass empty to clear.
+     */
+    void SetInjectedBeatsJson(std::string json);
 
     /**
      * Get the URL at which the viewer can be accessed.
