@@ -53,6 +53,25 @@ desired behavior.
 Please check out the [Getting Started](GETTING_STARTED.md) guide.
 
 # Release notes
+## Release notes for 3.8.7
+
+### New Features
+
+Bugs addressed in this release:
+
+* [#790](../../issues/790) Make sure we can't set tempo to 0 or negative numbers
+
+Other changes:
+
+* [#677](../../issues/677) We should have a print configuration
+* [#772](../../issues/772) CalChart should incorporate CalChart-Viewer
+* [#779](../../issues/779) Automatically generate beats file for the viewer
+* [#791](../../issues/791) do not expose CalChart::show internals
+* [#794](../../issues/794) We should enable warnings as errors, at least for the CalChart core project
+* [#796](../../issues/796) We should have mSheetNum be size_t
+* [#801](../../issues/801) GetNumSheets(), GetNumPoints() should be size_t
+* [#803](../../issues/803) We should have consistent Get APIs for Show
+
 ## Release notes for 3.8.6
 
 ### New Features
