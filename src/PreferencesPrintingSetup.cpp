@@ -78,9 +78,10 @@ void PrintingSetup::CreateControls()
                                                                                })
                                                .withProxy(mMaxFontSize)),
         },
-        mPrintingDisplay = wxUI::Generic<PrintingPreview>{
+        wxUI::Factory{
             wxSizerFlags{ 1 }.Expand(),
-            [this](wxWindow* parent) { return new PrintingPreview(parent, mConfig); } },
+            [this](wxWindow* parent) { return new PrintingPreview(parent, mConfig); } }
+            .withProxy(mPrintingDisplay),
     }
         .fitTo(this);
 

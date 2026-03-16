@@ -97,7 +97,7 @@ private:
 
     // Member variables
     HelpManager& mHelpManager;
-    wxUI::Generic<wxWebView>::Proxy mWebView{};
+    wxUI::Factory<wxWebView>::Proxy mWebView{};
     wxUI::TextCtrl::Proxy mSearchBox{};
     wxUI::Button::Proxy mBackButton{};
     wxUI::Button::Proxy mForwardButton{};

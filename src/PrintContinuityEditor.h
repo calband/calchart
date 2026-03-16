@@ -91,8 +91,8 @@ private:
     void OnSizeEvent(wxSizeEvent& event);
 
     CalChartView* mView{};
-    wxUI::Generic<FancyTextWin>::Proxy mUserInput{};
-    wxUI::Generic<PrintContinuityPreview>::Proxy mPrintContDisplay{};
+    wxUI::Factory<FancyTextWin>::Proxy mUserInput{};
+    wxUI::Factory<PrintContinuityPreview>::Proxy mPrintContDisplay{};
     wxTimer* mTimer{};
 
     wxString mPreviousText{};
