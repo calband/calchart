@@ -62,6 +62,7 @@ public:
     void DoSetSheetBeats(CalChart::Beats beats);
     void DoSetSheetTempo(CalChart::Tempo tempo);
     void DoSetSheetsBeatInfoCommand(std::vector<CalChart::SheetBeatInfo> const& beatInfo);
+    void DoSetMediaCommand(CalChart::FileData const& media);
     void DoSetPointsLabel(bool right);
     void DoSetPointsLabelVisibility(bool isVisible);
     void DoSetPointsLabelFlip();
@@ -111,6 +112,11 @@ public:
     [[nodiscard]] auto BeatHasCollision(CalChart::Beats whichBeat) const -> bool;
     [[nodiscard]] auto GetAnimationBeatForCurrentSheet() const -> CalChart::Beats;
     [[nodiscard]] auto ClipPositionToShowMode(CalChart::Coord const& pos) const { return mShow->GetShowMode().ClipPosition(pos); }
+
+    // Media
+    void OnSetMedia();
+    [[nodiscard]] auto GetMedia() const -> CalChart::FileData const& { return mShow->GetMedia(); }
+    [[nodiscard]] auto GetMediaVersion() const -> uint64_t { return mShow->GetMediaVersion(); }
 
     ///// Change show attributes /////
     void GoToSheet(size_t which);

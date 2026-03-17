@@ -236,6 +236,10 @@ Show::Show(ShowMode const& mode, Reader reader, ParseErrorHandlers const* correc
     auto parse_INGL_MODE = [](Show& show, Reader reader) {
         show.mMode = ShowMode::CreateShowMode(reader);
     };
+    auto parse_INGL_MEDIA = [](Show& show, Reader reader) {
+        show.mMedia = ToFileData(reader);
+        ++show.mMediaVersion;
+    };
     // [=] needed here to pull in the parse functions
     auto parse_INGL_SHOW = [=](Show& show, Reader reader) {
         std::map<uint32_t, std::function<void(Show & show, Reader)>> const parser = {
@@ -247,6 +251,7 @@ Show::Show(ShowMode const& mode, Reader reader, ParseErrorHandlers const* correc
             { INGL_SELE, parse_INGL_SELE },
             { INGL_CURR, parse_INGL_CURR },
             { INGL_MODE, parse_INGL_MODE },
+            { INGL_MEDIA, parse_INGL_MEDIA },
         };
         auto table = reader.ParseOutLabels();
         for (auto& i : table) {
@@ -330,6 +335,11 @@ auto Show::SerializeShowData() const -> std::vector<std::byte>
 
     // add the mode
     Append(result, Construct_block(INGL_MODE, mMode.Serialize()));
+
+    // add media
+    if (!std::get<0>(mMedia).empty()) {
+        Append(result, Construct_block(INGL_MEDIA, SerializeFileData(mMedia)));
+    }
 
     return result;
 }
@@ -813,6 +823,13 @@ auto Show::Create_SetSheetsBeatInfoCommand(std::vector<SheetBeatInfo> const& bea
             show.mSheets.at(whichSheet).SetSheetBeatInfo(beatInfo);
         }
     };
+    return { action, reaction };
+}
+
+auto Show::Create_SetMediaCommand(FileData const& media) const -> Show_command_pair
+{
+    auto action = [media](Show& show) { show.mMedia = media; ++show.mMediaVersion; };
+    auto reaction = [media = mMedia, version = mMediaVersion](Show& show) { show.mMedia = media; show.mMediaVersion = version; };
     return { action, reaction };
 }
 

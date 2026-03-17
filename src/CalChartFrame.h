@@ -75,6 +75,8 @@ public:
     void OnSetBeats();
     void OnSetTempo();
     void OnEditBeatMap();
+    void OnSetMedia();
+    void OnClearMedia();
     void OnSetupMarchers();
     void OnSetupInstruments();
     void OnMarcherPicker();

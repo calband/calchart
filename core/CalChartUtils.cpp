@@ -21,8 +21,10 @@
 */
 
 #include "CalChartUtils.h"
+#include "CalChartFileFormat.h"
 #include "CalChartTypes.h"
 #include <charconv>
+#include <fstream>
 #include <map>
 #include <optional>
 #include <string>
@@ -113,6 +115,59 @@ auto ToString(Fermatas const& input) -> std::string
     for (auto&& [beat, duration] : input) {
         result += std::format("{}={}, ", beat + 1, duration.count());
     }
+    return result;
+}
+
+auto ToFileData(const std::filesystem::path& path) -> std::optional<FileData>
+{
+    std::ifstream file(path, std::ios::binary | std::ios::ate);
+    if (!file) {
+        return std::nullopt;
+    }
+
+    const auto size = file.tellg();
+    if (size < 0) {
+        return std::nullopt;
+    }
+
+    std::vector<std::byte> buffer(static_cast<size_t>(size));
+    file.seekg(0);
+    file.read(reinterpret_cast<char*>(buffer.data()), size);
+
+    if (!file) {
+        return std::nullopt;
+    }
+
+    return FileData{ buffer, path.filename().string() };
+}
+
+auto ToFileData(CalChart::Reader reader) -> FileData
+{
+    auto table = reader.ParseOutLabels();
+    auto dataIter = std::find_if(table.begin(), table.end(), [](auto&& entry) { return std::get<0>(entry) == INGL_DATA; });
+    auto nameIter = std::find_if(table.begin(), table.end(), [](auto&& entry) { return std::get<0>(entry) == INGL_NAME; });
+    if (dataIter == table.end() || nameIter == table.end()) {
+        throw CC_FileException("missing required data or name chunk");
+    }
+    auto data = std::get<1>(*dataIter).GetVector<std::byte>();
+    auto name = std::get<1>(*nameIter).Get<std::string>();
+
+    return FileData{ data, name };
+}
+
+auto SerializeFileData(CalChart::FileData const& fileData) -> std::vector<std::byte>
+{
+    // Write Name
+    std::vector<std::byte> tdata;
+    Parser::Append(tdata, static_cast<uint32_t>(std::get<0>(fileData).size()));
+    Parser::Append(tdata, std::get<0>(fileData));
+    std::vector<std::byte> result = Parser::Construct_block(INGL_DATA, tdata);
+
+    // Write Name
+    std::vector<std::byte> tstring;
+    Parser::AppendAndNullTerminate(tstring, std::get<1>(fileData));
+    Parser::Append(result, Parser::Construct_block(INGL_NAME, tstring));
+
     return result;
 }
 

@@ -342,4 +342,5 @@ inline auto ConvertTowxBitmap(CalChart::Draw::Image const& image) -> wxBitmap
         },
         image.mImage);
 }
+
 }

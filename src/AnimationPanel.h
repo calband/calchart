@@ -34,6 +34,9 @@ class wxStaticText;
 class wxSpinCtrl;
 class wxButton;
 class CCOmniviewCanvas;
+#ifndef __WXGTK__
+class wxMediaCtrl;
+#endif
 
 namespace CalChart {
 class Configuration;
@@ -96,11 +99,18 @@ private:
     void OnSlider_anim_gotosheet(wxScrollEvent& event);
     void OnCmd_PlayButton();
     void OnCmd_ToggleAnimOmni();
+    void OnCmd_MusicButton();
 
     // Internals
     // timer stuff:
     void StartTimer();
     void StopTimer();
+
+    // Audio stuff:
+    void LoadMusicFileFromShow();
+    void LoadMusicFile();
+    void UpdateMedia();
+    auto CalculateAudioPositionMs() const -> long;
 
     CalChartView* mView{};
     AnimationCanvas* mCanvas{};
@@ -108,6 +118,7 @@ private:
     wxUI::Text::Proxy mTempoLabel{};
     wxUI::Text::Proxy mTempoValue{};
     wxUI::Slider::Proxy mBeatSlider{};
+    wxUI::BitmapToggleButton::Proxy mMusicButton{};
     wxUI::Slider::Proxy mSheetSlider{};
     wxUI::CheckBox::Proxy mSpritesCheckbox{};
     wxUI::CheckBox::Proxy mZoomCheckbox{};
@@ -122,6 +133,13 @@ private:
     bool mTimerOn{};
     std::optional<std::chrono::steady_clock::time_point> mAnchorTime = std::nullopt; // When playback started (for beat 0)
     const bool mInMiniMode{};
+#ifndef __WXGTK__
+    wxMediaCtrl* mMediaCtrl{};
+    bool mMusicMuted{ true }; // Start muted (no music loaded)
+    wxString mMusicFilePath{};
+    uint64_t mMediaVersion{};
+#endif
+
     bool mShowOmni{};
 
     CalChart::Beats mCurrentBeat{};

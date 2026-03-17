@@ -793,6 +793,13 @@ auto CalChartDoc::Create_SetSheetsBeatInfoCommand(std::vector<CalChart::SheetBea
     return std::make_unique<CalChartDocCommand>(*this, "Set beat info", cmds);
 }
 
+auto CalChartDoc::Create_SetMediaCommand(CalChart::FileData const& media) -> std::unique_ptr<wxCommand>
+{
+    auto cmds = Create_SetSheetPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetMediaCommand(media)));
+    return std::make_unique<CalChartDocCommand>(*this, "Set media", cmds);
+}
+
 auto CalChartDoc::Create_AddSheetsCommand(Show::Sheet_container_t const& sheets, size_t where) -> std::unique_ptr<wxCommand>
 {
     auto cmds = Create_SetSheetPair();
