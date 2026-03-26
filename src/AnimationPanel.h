@@ -100,9 +100,7 @@ private:
     // timer stuff:
     void StartTimer();
     void StopTimer();
-    void UpdateTempoIfChanged();
-    auto GetTempo() const { return mTempo; }
-    void SetTempo(unsigned tempo) { mTempo = tempo; }
+    void UpdateTimer(); // configures the timer based on the current beat's tempo and fermata
 
     CalChartView* mView{};
     AnimationCanvas* mCanvas{};
@@ -122,6 +120,7 @@ private:
     wxTimer* mTimer{};
     unsigned mTempo{};
     bool mTimerOn{};
+    std::optional<CalChart::Seconds> mCurrentFermata = std::nullopt;
     const bool mInMiniMode{};
     bool mShowOmni{};
 

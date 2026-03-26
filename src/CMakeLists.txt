@@ -58,6 +58,8 @@ add_executable(
   AnimationSprites.hpp
   BackgroundImages.cpp
   BackgroundImages.h
+  BeatMapDialog.cpp
+  BeatMapDialog.hpp
   BugReportDialog.cpp
   BugReportDialog.h
   GitHubIssueSubmitter.cpp

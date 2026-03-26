@@ -61,6 +61,7 @@ public:
     void DoSetSheetTitle(std::string const& descr);
     void DoSetSheetBeats(CalChart::Beats beats);
     void DoSetSheetTempo(CalChart::Tempo tempo);
+    void DoSetSheetsBeatInfoCommand(std::vector<CalChart::SheetBeatInfo> const& beatInfo);
     void DoSetPointsLabel(bool right);
     void DoSetPointsLabelVisibility(bool isVisible);
     void DoSetPointsLabelFlip();
@@ -102,6 +103,7 @@ public:
     [[nodiscard]] auto AnimationBeatsForSheet(int sheet) const -> CalChart::Beats;
     [[nodiscard]] auto GetTotalNumberAnimationBeatsUpTo(int whichSheet) const -> CalChart::Beats;
     [[nodiscard]] auto GetTempoForAnimationBeat(CalChart::Beats whichBeat) const -> CalChart::Tempo;
+    [[nodiscard]] auto GetFermataForAnimationBeat(CalChart::Beats whichBeat) const -> std::optional<CalChart::Seconds>;
 
     [[nodiscard]] auto GetContinuities() const { return mShow->GetContinuities(); }
     [[nodiscard]] auto ContinuitiesInUse() const { return mShow->ContinuitiesInUse(); }

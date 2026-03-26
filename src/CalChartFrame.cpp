@@ -28,6 +28,7 @@
 
 #include "AnimationErrorsPanel.h"
 #include "AnimationPanel.h"
+#include "BeatMapDialog.hpp"
 #include "BugReportDialog.h"
 #include "CalChartAnimationErrors.h"
 #include "CalChartApp.h"
@@ -274,6 +275,9 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
                        } },
             wxUI::Item{ "Set Tempo...", "Change the tempo for this stuntsheet", [this] {
                            OnSetTempo();
+                       } },
+            wxUI::Item{ "Edit Beat Map...", "Edit the beat map", [this] {
+                           OnEditBeatMap();
                        } },
             wxUI::Item{ "Reset reference point...", "Reset the current reference point", [this] {
                            OnResetReferencePoint();
@@ -774,6 +778,22 @@ void CalChartFrame::OnSetTempo()
             } else {
                 wxMessageBox("Tempo must be a number greater than 0.", "Invalid Tempo", wxOK | wxICON_ERROR, this);
             }
+        }
+    }
+}
+
+void CalChartFrame::OnEditBeatMap()
+{
+    if (GetShow()) {
+        auto sheetBeatInfo = GetShow()->GetSheetsBeatInfo();
+        auto tempos = GetShow()->GetSheetsTempo();
+        auto beatInfos = CalChart::Ranges::ToVector<BeatSheetInfo>(CalChart::Ranges::zip_view(sheetBeatInfo, tempos));
+        BeatMapDialog dialog(beatInfos, this);
+        if (dialog.ShowModal() == wxID_OK) {
+            GetFieldView()->DoSetSheetsBeatInfoCommand(
+                CalChart::Ranges::ToVector<CalChart::SheetBeatInfo>(dialog.GetBeatSheetInfo() | std::views::transform([](auto&& beatInfoAndTempo) {
+                    return std::get<0>(beatInfoAndTempo);
+                })));
         }
     }
 }

@@ -65,6 +65,7 @@ private:
     [[nodiscard]] auto SerializeAllPoints() const -> std::vector<std::byte>;
     [[nodiscard]] auto SerializeContinuityData() const -> std::vector<std::byte>;
     [[nodiscard]] auto SerializePrintContinuityData() const -> std::vector<std::byte>;
+    [[nodiscard]] auto SerializeFermata() const -> std::vector<std::byte>;
     [[nodiscard]] auto SerializeBackgroundImageInfo() const -> std::vector<std::byte>;
     [[nodiscard]] auto SerializeCurves() const -> std::vector<std::byte>;
     [[nodiscard]] auto SerializeCurveAssigments() const -> std::vector<std::byte>;
@@ -104,6 +105,10 @@ public:
     // tempo
     [[nodiscard]] auto GetTempo() const { return mTempo; }
     void SetTempo(Tempo t) { mTempo = t; }
+
+    // sheet beat info (tempo, beat, fermata info)
+    [[nodiscard]] auto GetSheetBeatInfo() const -> SheetBeatInfo;
+    void SetSheetBeatInfo(SheetBeatInfo const& value);
 
     // Marchers
     [[nodiscard]] auto GetMarcher(MarcherIndex i) const -> Point;
@@ -193,6 +198,7 @@ private:
     PrintContinuity mPrintableContinuity;
     Beats mBeats{};
     Tempo mTempo = 120;
+    Fermatas mFermata; // Map of beat to fermata hold time in Seconds
     std::vector<Point> mPoints;
     std::string mName;
     std::vector<ImageInfo> mBackgroundImages;

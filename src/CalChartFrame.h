@@ -74,6 +74,7 @@ public:
     void OnSetSheetTitle();
     void OnSetBeats();
     void OnSetTempo();
+    void OnEditBeatMap();
     void OnSetupMarchers();
     void OnSetupInstruments();
     void OnMarcherPicker();

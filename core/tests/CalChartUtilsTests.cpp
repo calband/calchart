@@ -1,5 +1,6 @@
 #include "CalChartAngles.h"
 #include "CalChartConstants.h"
+#include "CalChartTypes.h"
 #include "CalChartUtils.h"
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
@@ -156,6 +157,60 @@ TEST_CASE("CreateUnitVector", "CalChartUtils")
         auto unit = CalChart::CreateUnitVector(CalChart::Degree{ dir });
         CHECK(CalChart::IS_ZERO(std::get<0>(v) - std::get<0>(unit)));
         CHECK(CalChart::IS_ZERO(std::get<1>(v) - std::get<1>(unit)));
+    }
+}
+
+TEST_CASE("Fermatas", "CalChartSheetTests")
+{
+    {
+        auto test1 = "1=1.1, ";
+        auto fermatas = CalChart::ToFermatas(test1);
+        auto toString = CalChart::ToString(fermatas);
+        auto expected = std::map<CalChart::Beats, CalChart::Seconds>{ std::pair<CalChart::Beats, CalChart::Seconds>{ 0, 1.1 } };
+
+        CHECK(test1 == toString);
+        CHECK(fermatas == expected);
+
+        CHECK(test1 == CalChart::ToString(CalChart::ToFermatas("1=1.1")));
+        CHECK(test1 == CalChart::ToString(CalChart::ToFermatas("  1 = 1.1 , ")));
+        CHECK(test1 == CalChart::ToString(CalChart::ToFermatas("1 = 1.1  ,")));
+    }
+    {
+        auto fermatas = std::map<CalChart::Beats, CalChart::Seconds>{ std::pair<CalChart::Beats, CalChart::Seconds>{ 0, 1.1 } };
+        auto expected = "1=1.1, ";
+
+        CHECK(expected == CalChart::ToString(fermatas));
+    }
+    {
+        auto test1 = "1=1.1, 2=2.2, 3=3.3, ";
+        auto fermatas = CalChart::ToFermatas(test1);
+        auto toString = CalChart::ToString(fermatas);
+        auto expected = std::map<CalChart::Beats, CalChart::Seconds>{
+            std::pair<CalChart::Beats, CalChart::Seconds>{ 0, 1.1 },
+            std::pair<CalChart::Beats, CalChart::Seconds>{ 1, 2.2 },
+            std::pair<CalChart::Beats, CalChart::Seconds>{ 2, 3.3 }
+        };
+
+        CHECK(test1 == toString);
+        CHECK(fermatas == expected);
+
+        CHECK(test1 == CalChart::ToString(CalChart::ToFermatas("1=1.1,2=2.2,3=3.3")));
+        CHECK(test1 == CalChart::ToString(CalChart::ToFermatas("1=1.1 , 2=2.2,3=3.3 ")));
+        CHECK(test1 == CalChart::ToString(CalChart::ToFermatas(" 1=1.1 ,2=2.2 ,3=3.3")));
+    }
+    {
+        auto test1 = "";
+        auto fermatas = CalChart::ToFermatas(test1);
+        auto toString = CalChart::ToString(fermatas);
+        auto expected = std::map<CalChart::Beats, CalChart::Seconds>{};
+
+        CHECK(test1 == toString);
+        CHECK(fermatas == expected);
+
+        CHECK(test1 == CalChart::ToString(CalChart::ToFermatas("eee")));
+        CHECK(test1 == CalChart::ToString(CalChart::ToFermatas("   ")));
+        CHECK(test1 == CalChart::ToString(CalChart::ToFermatas("1=-1.1")));
+        CHECK(test1 == CalChart::ToString(CalChart::ToFermatas("0=1.1")));
     }
 }
 

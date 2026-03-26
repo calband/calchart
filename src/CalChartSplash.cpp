@@ -20,6 +20,7 @@
 */
 
 #include "CalChartSplash.h"
+#include "BeatMapDialog.hpp"
 #include "BugReportDialog.h"
 #include "CalChartApp.h"
 #include "CalChartConfiguration.h"
@@ -116,6 +117,16 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, std::strin
                            WebViewDemoDialog(this).ShowModal();
                        } },
 #endif
+            wxUI::Item{ "Beat Map Playground", [this] {
+                           if (auto dialog = BeatMapDialog(BeatMapPlaygroundData(), this);
+                               dialog.ShowModal() == wxID_OK) {
+#ifdef __clang__
+                               auto value = dialog.GetBeatSheetInfo();
+                               auto valueStr = std::format("{}", value);
+                               wxLogDebug("Beat Info: %s", valueStr.c_str());
+#endif
+                           }
+                       } },
         },
         wxUI::Menu{
             "&Help",

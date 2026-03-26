@@ -23,6 +23,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <chrono>
 #include <functional>
 #include <map>
 #include <ranges>
@@ -46,6 +47,18 @@ using SelectionList = std::set<MarcherIndex>;
 
 using Beats = unsigned;
 using Tempo = unsigned; // tempo is in BPM
+using Seconds = std::chrono::duration<float>; // duration in seconds with floating-point precision
+using Fermatas = std::map<CalChart::Beats, CalChart::Seconds>; // Fermatas are additional timing adjustments to a specific beat.
+
+// A sheet has a collection of info related to the timing of the beats:
+// Tempo
+// Fermatas (beat number to extra seconds)
+using SheetBeatInfo = std::tuple<CalChart::Tempo, CalChart::Fermatas>;
+
+// Fermatas in string form are of the form "beat=seconds,beat=seconds,..."
+// This is a helper function to make sure transiton is consistent.
+auto ToFermatas(std::string_view input) -> Fermatas;
+auto ToString(Fermatas const& input) -> std::string;
 
 enum class MoveMode {
     Normal,
