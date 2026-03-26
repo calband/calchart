@@ -571,7 +571,7 @@ void ContinuityComposerPanel::OnCmdTextEnterKeyPressed(wxCommandEvent const& eve
                 }
             } break;
             }
-        } catch (CalChart::Cont::ProcSet::ReplaceError_NotAVar const& e) {
+        } catch (CalChart::Cont::ProcSet::ReplaceError_NotAVar const&) {
             wxString msg("Not a valid variable\n");
             wxMessageBox(msg, wxT("Invalid variable name"), wxICON_INFORMATION | wxOK);
         }

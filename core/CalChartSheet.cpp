@@ -618,7 +618,7 @@ auto Sheet::FindCurveControlPoint(Coord where, Coord::units searchBound) const -
                 return ((where.x + searchBound) >= point.x) && ((where.x - searchBound) <= point.x) && ((where.y + searchBound) >= point.y) && ((where.y - searchBound) <= point.y);
             });
             iter != points.end()) {
-            return std::tuple<size_t, size_t>{ whichCurve, std::distance(points.begin(), iter) };
+            return std::tuple<size_t, size_t>{ whichCurve, static_cast<size_t>(std::distance(points.begin(), iter)) };
         }
     }
     return std::nullopt;

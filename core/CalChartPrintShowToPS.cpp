@@ -308,10 +308,10 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
 
     auto fullsize = mode.Size();
     auto fieldsize = mode.FieldSize();
-    auto fullwidth = CoordUnits2Float(fullsize.x);
-    auto fullheight = CoordUnits2Float(fullsize.y);
-    auto fieldwidth = CoordUnits2Float(fieldsize.x);
-    auto fieldheight = CoordUnits2Float(fieldsize.y);
+    auto fullwidth = static_cast<float>(CoordUnits2Float(fullsize.x));
+    auto fullheight = static_cast<float>(CoordUnits2Float(fullsize.y));
+    auto fieldwidth = static_cast<float>(CoordUnits2Float(fieldsize.x));
+    auto fieldheight = static_cast<float>(CoordUnits2Float(fieldsize.y));
 
     /* first, calculate dimensions */
     if (!overview) {
@@ -618,10 +618,10 @@ auto PrintShowToPS::GenerateStandard(Sheet const& sheet, bool split_sheet) const
         | std::views::filter([clip_s = clip_s, clip_n = clip_n](auto&& enumPoint) {
               return std::get<1>(enumPoint).GetPos().x >= clip_s && std::get<1>(enumPoint).GetPos().x <= clip_n;
           });
-    result = std::accumulate(std::begin(pointsOfInterest), std::end(pointsOfInterest), result, [this, step_offset = step_offset, fieldheight = CoordUnits2Float(fieldsize.y), fieldoffx = CoordUnits2Float(fieldoff.x), fieldoffy = CoordUnits2Float(fieldoff.y)](auto acc, auto enumPoint) {
+    result = std::accumulate(std::begin(pointsOfInterest), std::end(pointsOfInterest), result, [this, step_offset = step_offset, fieldheight = static_cast<float>(CoordUnits2Float(fieldsize.y)), fieldoffx = static_cast<float>(CoordUnits2Float(fieldoff.x)), fieldoffy = static_cast<float>(CoordUnits2Float(fieldoff.y))](auto acc, auto enumPoint) {
         auto [enumeration, point] = enumPoint;
-        auto dot_x = (CoordUnits2Float(point.GetPos().x) - fieldoffx - step_offset) / step_width * field_w;
-        auto dot_y = (1.0 - (CoordUnits2Float(point.GetPos().y) - fieldoffy) / fieldheight) * field_h;
+        auto dot_x = (static_cast<float>(CoordUnits2Float(point.GetPos().x)) - fieldoffx - step_offset) / step_width * field_w;
+        auto dot_y = (1.0 - (static_cast<float>(CoordUnits2Float(point.GetPos().y)) - fieldoffy) / fieldheight) * field_h;
         return acc + std::format("{:.2f} {:.2f} {}\n", dot_x, dot_y, dot_routines[point.GetSymbol()])
             + std::format("({}) {:.2f} {:.2f} {}\n", mShow.GetPointLabel(enumeration), dot_x, dot_y, (point.GetFlip() ? "donumber2" : "donumber"));
     });
@@ -636,7 +636,7 @@ auto PrintShowToPS::GenerateOverview(Sheet const& sheet) const -> std::string
 {
     auto fieldoff = mMode.FieldOffset();
     auto fieldsize = mMode.FieldSize();
-    auto fieldwidth = CoordUnits2Float(fieldsize.x);
+    auto fieldwidth = static_cast<float>(CoordUnits2Float(fieldsize.x));
     auto result = std::format("%%Page: {}\n", sheet.GetName())
         + GenerateStartPage(mPrintLandscape,
             field_x,
@@ -649,14 +649,14 @@ auto PrintShowToPS::GenerateOverview(Sheet const& sheet) const -> std::string
         + "drawfield\n"
         + std::format("/w {:.2f} def\n", width / fieldwidth * 2.0 / 3.0);
 
-    auto fieldheight = CoordUnits2Float(fieldsize.y);
+    auto fieldheight = static_cast<float>(CoordUnits2Float(fieldsize.y));
 
     auto allBoxes = sheet.GetAllMarchers()
         | std::views::transform([](auto&& point) { return point.GetPos(); })
         | std::views::transform([this, fieldoff, fieldwidth, fieldheight](auto&& position) {
               return std::format("{:.2f} {:.2f} dotbox\n",
-                  CoordUnits2Float(position.x - fieldoff.x) / fieldwidth * width,
-                  (1.0 - CoordUnits2Float(position.y - fieldoff.y) / fieldheight) * height);
+                  static_cast<float>(CoordUnits2Float(position.x - fieldoff.x)) / fieldwidth * width,
+                  (1.0 - static_cast<float>(CoordUnits2Float(position.y - fieldoff.y)) / fieldheight) * height);
           });
     return std::accumulate(allBoxes.begin(), allBoxes.end(), result, std::plus<>{});
 }

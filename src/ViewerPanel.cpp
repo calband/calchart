@@ -128,6 +128,7 @@ void ViewerPanel::UpdateShowData()
 void ViewerPanel::InjectShowData(const std::string& jsonData)
 {
 #if CALCHART_HAS_WEBVIEW
+    (void)jsonData; // Unused: data is fetched via server
     if (!mWebView) {
         wxLogWarning("ViewerPanel: Cannot inject show data - webview not initialized");
         return;
@@ -151,6 +152,7 @@ void ViewerPanel::InjectShowData(const std::string& jsonData)
 void ViewerPanel::InjectBeatsData(const std::string& jsonData)
 {
 #if CALCHART_HAS_WEBVIEW
+    (void)jsonData; // Unused: data is fetched via server
     if (!mWebView) {
         wxLogWarning("ViewerPanel: Cannot inject beats data - webview not initialized");
         return;

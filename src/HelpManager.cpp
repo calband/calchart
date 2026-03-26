@@ -67,7 +67,7 @@ auto HelpManager::LoadHelpHtmlDirectory(const std::string& htmlPath) -> bool
                     // Recurse into subdirectories
                     loadDir(fullPath);
                 } else if (fullPath.EndsWith(".html")) {
-                    LoadHtmlFile(fullPath, "");
+                    (void)LoadHtmlFile(fullPath, "");
                 }
             }
             found = subDir.GetNext(&fn);

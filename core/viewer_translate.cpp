@@ -22,7 +22,7 @@ float ToOnlineViewer::angle(CalChart::Degree angle)
 {
     angle = -(angle - CalChart::Degree::West());
     angle = BoundDirection(angle);
-    return angle.getValue();
+    return static_cast<float>(angle.getValue());
 }
 
 std::string ToOnlineViewer::symbolName(SYMBOL_TYPE symbol)

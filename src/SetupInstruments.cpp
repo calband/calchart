@@ -112,6 +112,7 @@ auto enumerate(R&& range)
     struct iterator {
         using difference_type = index_t;
         using value_type = std::pair<index_t, std::ranges::range_value_t<R>>;
+        using iterator_category = std::input_iterator_tag;
 
         iterator_t iter;
         index_t index;
@@ -145,7 +146,7 @@ auto enumerate(R&& range)
         }
     };
 
-    return std::ranges::subrange(iterator{ begin(range), 0 }, iterator{ end(range), 0 });
+    return std::ranges::subrange<iterator, iterator>(iterator{ begin(range), 0 }, iterator{ end(range), 0 });
 }
 
 bool SetupInstruments::Create(wxWindow* parent, wxWindowID id,

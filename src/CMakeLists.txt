@@ -210,6 +210,14 @@ set_target_properties(
 
 SetupCompilerForTarget(CalChart)
 
+if(CALCHART_WARNINGS_AS_ERRORS)
+  if(NOT MSVC)
+    target_compile_options(CalChart PRIVATE -Werror)
+  else()
+    target_compile_options(CalChart PRIVATE /WX)
+  endif()
+endif()
+
 target_include_directories(
   CalChart
   PRIVATE

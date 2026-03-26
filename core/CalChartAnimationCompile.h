@@ -85,6 +85,7 @@ struct Compile {
 
     [[nodiscard]] virtual auto GetVarValue(Cont::Variable varnum) const -> float = 0;
     virtual void SetVarValue(Cont::Variable varnum, float value) = 0;
+    virtual void SetVarValue(Cont::Variable varnum, double value) { SetVarValue(varnum, static_cast<float>(value)); }
 
     // helper functions to get information for building a command
     [[nodiscard]] virtual auto GetPointPosition() const -> Coord = 0;

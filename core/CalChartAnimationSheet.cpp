@@ -226,7 +226,7 @@ auto Sheets::BeatToSheetOffsetAndBeat(Beats beat) const -> std::tuple<size_t, Be
     if (where == mRunningBeatCount.end()) {
         return { mRunningBeatCount.size(), beat - TotalBeats() };
     }
-    auto index = std::distance(mRunningBeatCount.begin(), where);
+    auto index = static_cast<size_t>(std::distance(mRunningBeatCount.begin(), where));
     return { index, beat - (*where - mSheets.at(index).GetNumBeats()) };
 }
 

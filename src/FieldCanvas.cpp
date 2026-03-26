@@ -364,6 +364,8 @@ void FieldCanvas::OnMouseLeftDown_DrawingCurve(CalChart::Coord pos, bool shiftDo
     if (!mCurve.has_value()) {
         mCurve = CurveDrawInfo{
             .mCurve = CalChart::Curve(pos),
+            .mPointsSelected = {},
+            .mExistingCurve = std::nullopt,
         };
         return;
     }
@@ -405,6 +407,7 @@ void FieldCanvas::OnMouseLeftDown_FoundCurve(size_t curveIndex)
 {
     mCurve = CurveDrawInfo{
         .mCurve = mView->GetCurveOnCurrentSheet(curveIndex),
+        .mPointsSelected = {},
         .mExistingCurve = ExistingCurveInfo{
             .mCurveSelected = curveIndex,
         },
