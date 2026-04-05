@@ -127,8 +127,8 @@ bool CompileState::Append(Command cmd)
     mBeatsRem -= numBeats;
 
     mWhichPos = End(cmd); // Move current point to new position
-    SetVarValue(Cont::Variable::DOF, MotionDirectionAtBeat(cmd, numBeats).getValue());
-    SetVarValue(Cont::Variable::DOH, FacingDirectionAtBeat(cmd, numBeats).getValue());
+    SetVarValue(Cont::Variable::DOF, static_cast<float>(MotionDirectionAtBeat(cmd, numBeats).getValue()));
+    SetVarValue(Cont::Variable::DOH, static_cast<float>(FacingDirectionAtBeat(cmd, numBeats).getValue()));
     mCmds.push_back(cmd);
     return true;
 }

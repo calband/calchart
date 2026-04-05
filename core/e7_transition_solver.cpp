@@ -15,14 +15,14 @@
 #include "e7_transition_solver.h"
 #include "munkres.h"
 
-#if defined(__GNUC__) || defined(__clang__)
+#if (defined(__GNUC__) || defined(__clang__)) && !defined(_MSC_VER)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #endif
 
 namespace CalChart {
 
-#if defined(__GNUC__) || defined(__clang__)
+#ifdef __clang__
 #pragma mark - Shared
 #endif
 
@@ -1593,7 +1593,7 @@ bool DestinationConstraints::destinationIsAllowed(unsigned marcher, SolverCoord 
     return destinationIsAllowed(marcher, m_destinationPositionsToIndices.at(destination));
 }
 
-#if defined(__GNUC__) || defined(__clang__)
+#ifdef __clang__
 #pragma mark - Algorithm By: Chiu Zamora Malani
 #endif
 
@@ -1853,7 +1853,7 @@ namespace e7ChiuZamoraMalani {
     }
 }
 
-#if defined(__GNUC__) || defined(__clang__)
+#ifdef __clang__
 #pragma mark - Algorithm By: Namini Asl, Ramirez, Zhang
 #endif
 
@@ -1991,7 +1991,7 @@ namespace e7NaminiaslRamirezZhang {
     };
 }
 
-#if defined(__GNUC__) || defined(__clang__)
+#ifdef __clang__
 #pragma mark - Algorithm By: Sover, Eliceiri, Hershkovitz
 #endif
 
@@ -2132,7 +2132,7 @@ namespace e7SoverEliceiriHershkovitz {
     };
 }
 
-#if defined(__GNUC__) || defined(__clang__)
+#ifdef __clang__
 #pragma mark - Final Solver
 #endif
 
@@ -2355,6 +2355,6 @@ TransitionSolverResult runTransitionSolver(const CalChart::Sheet& sheet1, const 
 }
 }
 
-#if defined(__GNUC__) || defined(__clang__)
+#if (defined(__GNUC__) || defined(__clang__)) && !defined(_MSC_VER)
 #pragma GCC diagnostic pop
 #endif

@@ -60,8 +60,15 @@ auto AnimateShow(const Show& show) -> Sheets
                 return animationSheetsWithSentinel;
             }(show))
             | std::views::transform([&](auto&& curr_next) {
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
                   auto [curr_sheet, nextAnimationSheet] = curr_next;
                   auto numBeats = curr_sheet->GetBeats();
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
                   auto isLastSheet = !nextAnimationSheet.has_value();
                   auto theCommands = CalChart::Ranges::ToVector<Animate::CompileResult>(
                       std::ranges::iota_view(0UL, show.GetNumPoints()) | std::views::transform([&variablesStates, numBeats, isLastSheet, curr_sheet = curr_sheet, nextAnimationSheet = nextAnimationSheet](auto whichMarcher) {

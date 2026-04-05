@@ -937,7 +937,7 @@ namespace {
                         config.Get_CalChartBrushAndPen(std::get<0>(color)),
                         CalChart::Draw::withTextForeground(
                             config.Get_CalChartBrushAndPen(std::get<2>(color)),
-                            NegativeIntersection(selection_list, labels.size())
+                            NegativeIntersection(selection_list, static_cast<int>(labels.size()))
                                 | TransformIndexToDrawCommands(sheet, labels, ref, config))),
                     CalChart::Draw::withBrushAndPen(
                         config.Get_CalChartBrushAndPen(std::get<1>(color)),

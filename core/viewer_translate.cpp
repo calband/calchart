@@ -10,12 +10,12 @@ namespace CalChart {
 
 float ToOnlineViewer::xPosition(CalChart::Coord::units coord)
 {
-    return CoordUnits2Float(coord) + (80); // TODO; the Online Viewer is only prepared for normal-sized fields, so we'll assume those dimensions for now
+    return static_cast<float>(CoordUnits2Float(coord) + 80); // TODO; the Online Viewer is only prepared for normal-sized fields, so we'll assume those dimensions for now
 }
 
 float ToOnlineViewer::yPosition(CalChart::Coord::units coord)
 {
-    return CoordUnits2Float(coord) + 42; // TODO; the Online Viewer is only prepared for normal-sized fields, so we'll assume those dimensions for now
+    return static_cast<float>(CoordUnits2Float(coord) + 42); // TODO; the Online Viewer is only prepared for normal-sized fields, so we'll assume those dimensions for now
 }
 
 float ToOnlineViewer::angle(CalChart::Degree angle)

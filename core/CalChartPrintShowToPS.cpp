@@ -144,7 +144,14 @@ namespace {
         time_t t;
         time(&t);
         std::ostringstream os;
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4996) // ctime is not thread-safe but acceptable here
+#endif
         os << "%%CreationDate: " << ctime(&t);
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
         return os.str();
     };
 

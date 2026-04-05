@@ -894,7 +894,7 @@ auto Show::Create_MovePointsCommand(MarcherToPosition const& new_positions, int 
 
 auto Show::Create_MovePointsCommand(int whichSheet, MarcherToPosition const& new_positions, int ref) const -> Show_command_pair
 {
-    auto const& sheet = mSheets.at(whichSheet);
+    auto const& sheet = mSheets.at(static_cast<size_t>(whichSheet));
     MarcherToPosition original_positions;
     for (auto&& index : new_positions) {
         original_positions[index.first] = sheet.GetMarcherPosition(index.first, ref);
