@@ -21,6 +21,12 @@
 */
 
 #include "CalChartContinuityToken.h"
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnonnull"
+#endif
+
 #include "CalChartAngles.h"
 #include "CalChartAnimationCommand.h"
 #include "CalChartAnimationCompile.h"
@@ -2977,4 +2983,9 @@ Reader ProcStandAndPlay::Deserialize(Reader reader)
     std::tie(dir, reader) = DeserializeValue(reader);
     return reader;
 }
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
+
 }

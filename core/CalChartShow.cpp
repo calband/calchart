@@ -889,7 +889,7 @@ auto Show::Create_SetPrintableContinuity(std::map<int, std::pair<std::string, st
 
 auto Show::Create_MovePointsCommand(MarcherToPosition const& new_positions, int ref) const -> Show_command_pair
 {
-    return Create_MovePointsCommand(GetCurrentSheetNum(), new_positions, ref);
+    return Create_MovePointsCommand(static_cast<int>(GetCurrentSheetNum()), new_positions, ref);
 }
 
 auto Show::Create_MovePointsCommand(int whichSheet, MarcherToPosition const& new_positions, int ref) const -> Show_command_pair

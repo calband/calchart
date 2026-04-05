@@ -279,26 +279,26 @@ CalcValues(bool PrintLandscape, bool PrintDoCont, double PageWidth, double PageH
 {
     float width, height, real_width, real_height, field_y;
     if (PrintLandscape) {
-        width = PageHeight * DPI;
+        width = static_cast<float>(PageHeight * DPI);
         if (PrintDoCont) {
-            height = PageWidth * (1.0 - ContRatio) * DPI;
-            field_y = PageWidth * ContRatio * DPI;
+            height = static_cast<float>(PageWidth * (1.0 - ContRatio) * DPI);
+            field_y = static_cast<float>(PageWidth * ContRatio * DPI);
         } else {
-            height = PageWidth * DPI;
+            height = static_cast<float>(PageWidth * DPI);
             field_y = 0;
         }
     } else {
-        width = PageWidth * DPI;
+        width = static_cast<float>(PageWidth * DPI);
         if (PrintDoCont) {
-            height = PageHeight * (1.0 - ContRatio) * DPI;
-            field_y = PageHeight * ContRatio * DPI;
+            height = static_cast<float>(PageHeight * (1.0 - ContRatio) * DPI);
+            field_y = static_cast<float>(PageHeight * ContRatio * DPI);
         } else {
-            height = PageHeight * DPI;
+            height = static_cast<float>(PageHeight * DPI);
             field_y = 0;
         }
     }
-    real_width = PageWidth * DPI;
-    real_height = PageHeight * DPI;
+    real_width = static_cast<float>(PageWidth * DPI);
+    real_height = static_cast<float>(PageHeight * DPI);
     return std::tuple<float, float, float, float, float>(
         width, height, real_width, real_height, field_y);
 }

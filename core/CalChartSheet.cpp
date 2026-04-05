@@ -991,7 +991,7 @@ auto Sheet::GenerateSheetElements(CalChart::Configuration const& config, Selecti
     CalChart::append(drawCmds, GenerateSheetMarcherDrawCommands(config, selected, marcherLabels, *this, referencePoint, GetMarcherColors(false, false)));
 
     for (auto&& [which, curve] : CalChart::Ranges::enumerate_view(mCurves)) {
-        CalChart::append(drawCmds, GenerateCurve(config, curve.first, which));
+        CalChart::append(drawCmds, GenerateCurve(config, curve.first, static_cast<int>(which)));
     }
     return drawCmds;
 }

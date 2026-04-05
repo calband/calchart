@@ -1361,11 +1361,11 @@ std::pair<float, float> calcStepsInEachDir(SolverCoord startPos, SolverCoord end
         numSteps1 = a - (b * numSteps2);
     } else {
         if (vec1.y != 0) {
-            numSteps1 = moveVector.y / vec1.y;
+            numSteps1 = static_cast<float>(moveVector.y) / static_cast<float>(vec1.y);
             numSteps2 = 0;
         } else if (vec2.y != 0) {
             numSteps1 = 0;
-            numSteps2 = moveVector.y / vec2.y;
+            numSteps2 = static_cast<float>(moveVector.y) / static_cast<float>(vec2.y);
         } else {
             numSteps1 = 0;
             numSteps2 = 0;
