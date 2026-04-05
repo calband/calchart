@@ -768,12 +768,12 @@ float ValueDefined::Get(Animate::Compile const&) const
         { CC_SE, 225.0f },
         { CC_E, 270.0f },
         { CC_NE, 315.0f },
-        { CC_HS, 1.0 },
-        { CC_MM, 1.0 },
-        { CC_SH, 0.5 },
-        { CC_JS, 0.5 },
-        { CC_GV, 1.0 },
-        { CC_M, 4.0f / 3 },
+        { CC_HS, 1.0f },
+        { CC_MM, 1.0f },
+        { CC_SH, 0.5f },
+        { CC_JS, 0.5f },
+        { CC_GV, 1.0f },
+        { CC_M, 4.0f / 3.0f },
         { CC_DM, static_cast<float>(std::numbers::sqrt2) },
     };
     auto i = mapping.find(val);
