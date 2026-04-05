@@ -237,6 +237,7 @@ constexpr auto INGL_BACK = Make4CharWord('B', 'A', 'C', 'K');
 constexpr auto INGL_CURV = Make4CharWord('C', 'U', 'R', 'V');
 constexpr auto INGL_CASS = Make4CharWord('C', 'A', 'S', 'S');
 constexpr auto INGL_TMPO = Make4CharWord('T', 'M', 'P', 'O');
+constexpr auto INGL_FERM = Make4CharWord('F', 'E', 'R', 'M');
 constexpr auto INGL_PNTS = Make4CharWord('P', 'N', 'T', 'S');
 constexpr auto INGL_PONT = Make4CharWord('P', 'O', 'N', 'T');
 constexpr auto INGL_END = Make4CharWord('E', 'N', 'D', ' ');
@@ -387,6 +388,17 @@ namespace Parser {
     }
 
     static inline auto Construct_block(uint32_t type, uint32_t data) -> std::vector<std::byte>
+    {
+        std::vector<std::byte> result;
+        Append(result, type);
+        Append(result, uint32_t{ sizeof(data) });
+        Append(result, data);
+        Append(result, uint32_t{ INGL_END });
+        Append(result, type);
+        return result;
+    }
+
+    static inline auto Construct_block(uint32_t type, float data) -> std::vector<std::byte>
     {
         std::vector<std::byte> result;
         Append(result, type);

@@ -80,6 +80,7 @@ add_library(
   CalChartText.h
   CalChartTypes.h
   CalChartUtils.h
+  CalChartUtils.cpp
   e7_transition_solver.cpp
   e7_transition_solver.h
   linmath.h

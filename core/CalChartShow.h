@@ -92,6 +92,7 @@ public:
     [[nodiscard]] auto Create_SetSheetTitleCommand(std::string const& newname) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetSheetBeatsCommand(Beats beats) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetSheetTempoCommand(Tempo tempo) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetSheetsBeatInfoCommand(std::vector<SheetBeatInfo> const& beatInfo) const -> Show_command_pair;
     [[nodiscard]] auto Create_AddSheetsCommand(Show::Sheet_container_t const& sheets, size_t where) const -> Show_command_pair;
     [[nodiscard]] auto Create_RemoveSheetCommand(size_t where) const -> Show_command_pair;
     [[nodiscard]] auto Create_ApplyRelabelMapping(int sheet_num_first, std::vector<MarcherIndex> const& mapping) const -> Show_command_pair;
@@ -145,6 +146,11 @@ public:
     [[nodiscard]] auto GetSheetTempo(size_t sheet) const -> CalChart::Tempo;
     [[nodiscard]] auto GetSheetsTempo() const -> std::vector<CalChart::Tempo>;
     [[nodiscard]] auto GetSheetTempoOnCurrentSheet() const -> CalChart::Tempo;
+
+    // Sheet beat info
+    [[nodiscard]] auto GetSheetBeatInfo(size_t sheet) const -> CalChart::SheetBeatInfo;
+    [[nodiscard]] auto GetSheetsBeatInfo() const -> std::vector<CalChart::SheetBeatInfo>;
+    [[nodiscard]] auto GetSheetBeatInfoOnCurrentSheet() const -> CalChart::SheetBeatInfo;
 
     // Sheet symbols
     [[nodiscard]] auto GetSheetSymbols(size_t sheet) const -> std::vector<SYMBOL_TYPE>;

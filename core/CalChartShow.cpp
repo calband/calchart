@@ -801,6 +801,21 @@ auto Show::Create_SetSheetTempoCommand(Tempo tempo) const -> Show_command_pair
     return { action, reaction };
 }
 
+auto Show::Create_SetSheetsBeatInfoCommand(std::vector<SheetBeatInfo> const& beatInfos) const -> Show_command_pair
+{
+    auto action = [beatInfos](Show& show) {
+        for (auto&& [whichSheet, beatInfo] : CalChart::Ranges::enumerate_view(beatInfos)) {
+            show.mSheets.at(whichSheet).SetSheetBeatInfo(beatInfo);
+        }
+    };
+    auto reaction = [beatInfos = GetSheetsBeatInfo()](Show& show) {
+        for (auto&& [whichSheet, beatInfo] : CalChart::Ranges::enumerate_view(beatInfos)) {
+            show.mSheets.at(whichSheet).SetSheetBeatInfo(beatInfo);
+        }
+    };
+    return { action, reaction };
+}
+
 auto Show::Create_AddSheetsCommand(const Show::Sheet_container_t& sheets, size_t where) const -> Show_command_pair
 {
     auto action = [sheets, where](Show& show) { show.InsertSheet(sheets, where); };
@@ -1236,6 +1251,17 @@ auto Show::GetSheetsTempo() const -> std::vector<CalChart::Tempo>
     return CalChart::Ranges::ToVector<CalChart::Tempo>(mSheets | std::views::transform([](auto&& sheet) { return sheet.GetTempo(); }));
 }
 auto Show::GetSheetTempoOnCurrentSheet() const -> CalChart::Tempo { return GetSheetTempo(GetCurrentSheetNum()); }
+
+// Sheet beat info
+auto Show::GetSheetBeatInfo(size_t sheet) const -> CalChart::SheetBeatInfo
+{
+    return sheet < mSheets.size() ? mSheets.at(sheet).GetSheetBeatInfo() : CalChart::SheetBeatInfo{};
+}
+auto Show::GetSheetsBeatInfo() const -> std::vector<CalChart::SheetBeatInfo>
+{
+    return CalChart::Ranges::ToVector<CalChart::SheetBeatInfo>(mSheets | std::views::transform([](auto&& sheet) { return sheet.GetSheetBeatInfo(); }));
+}
+auto Show::GetSheetBeatInfoOnCurrentSheet() const -> CalChart::SheetBeatInfo { return GetSheetBeatInfo(GetCurrentSheetNum()); }
 
 // Sheet symbols
 auto Show::GetSheetSymbols(size_t sheet) const -> std::vector<SYMBOL_TYPE>

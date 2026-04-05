@@ -80,8 +80,6 @@ void AnimationPanel::Init()
 
 void AnimationPanel::CreateControls()
 {
-    auto tmp = GetTempo();
-
     wxUI::VSizer{
         BasicSizerFlags(),
         wxUI::HSizer{
@@ -109,7 +107,7 @@ void AnimationPanel::CreateControls()
                 .withProxy(mBeatSlider),
             wxUI::VSizer{
                 wxUI::Text{ "Tempo" }.withProxy(mTempoLabel),
-                wxUI::Text{ std::to_string(tmp) }.withProxy(mTempoValue),
+                wxUI::Text{ std::to_string(mTempo) }.withProxy(mTempoValue),
             },
             wxUI::VSizer{
                 wxUI::CheckBox{ "Sprites" }
@@ -155,7 +153,6 @@ void AnimationPanel::CreateControls()
 
     *mCollisionCheckbox = mDrawCollisionWarning;
 
-    SetTempo(tmp);
     mCanvas->Show();
     mOmniCanvas->Hide();
 
@@ -189,6 +186,12 @@ auto AnimationPanel::GenerateDrawCommands() -> std::vector<CalChart::Draw::DrawC
 
 void AnimationPanel::OnCmd_anim_next_beat_timer(wxTimerEvent&)
 {
+    // if we have reached here and there's a fermata, we must have been on a beat with a fermata, so we should clear the fermata and restart the timer
+    if (mCurrentFermata) {
+        mCurrentFermata = std::nullopt;
+        StartTimer();
+        return;
+    }
     // next_beat could come from the timer.  If so, stop the timer.
     NextBeat();
     if (AtEndOfShow()) {
@@ -247,12 +250,7 @@ void AnimationPanel::OnSlider_anim_gotosheet(wxScrollEvent& event)
 
 void AnimationPanel::ToggleTimer()
 {
-    if (mTimerOn) {
-        StopTimer();
-    } else {
-        StartTimer();
-    }
-    UpdatePanel();
+    SetPlayState(!mTimerOn);
 }
 
 namespace {
@@ -307,7 +305,7 @@ void AnimationPanel::UpdatePanel()
     if (mView && mTempoValue.control()) {
         auto currentTempo = mView->GetTempoForAnimationBeat(mCurrentBeat);
         *mTempoValue = std::to_string(currentTempo);
-        SetTempo(currentTempo);
+        mTempo = currentTempo;
     }
 
     if (mPlayCollisionWarning && mView->BeatHasCollision(mCurrentBeat) && mConfig.Get_BeepOnCollisions()) {
@@ -398,9 +396,7 @@ void AnimationPanel::PrevBeat()
     if (mCurrentBeat == 0) {
         return;
     }
-    mCurrentBeat -= 1;
-    UpdateTempoIfChanged();
-    UpdatePanel();
+    GotoTotalBeat(mCurrentBeat - 1);
 }
 
 void AnimationPanel::NextBeat()
@@ -409,28 +405,25 @@ void AnimationPanel::NextBeat()
         return;
     }
     auto totalBeats = mView->GetTotalNumberAnimationBeats();
-    if (totalBeats) {
-        if (mCurrentBeat >= (*totalBeats - 1)) {
-            return;
-        }
-        mCurrentBeat += 1;
-        UpdateTempoIfChanged();
-        UpdatePanel();
+    if (!totalBeats) {
+        return;
     }
+    if (mCurrentBeat >= (*totalBeats - 1)) {
+        return;
+    }
+    GotoTotalBeat(mCurrentBeat + 1);
 }
 
 void AnimationPanel::GotoTotalBeat(CalChart::Beats whichBeat)
 {
     mCurrentBeat = whichBeat;
-    UpdateTempoIfChanged();
+    UpdateTimer();
     UpdatePanel();
 }
 
 void AnimationPanel::GotoSheetBeat(int whichSheet, CalChart::Beats whichBeat)
 {
-    mCurrentBeat = whichBeat + mView->GetTotalNumberAnimationBeatsUpTo(whichSheet);
-    UpdateTempoIfChanged();
-    UpdatePanel();
+    GotoTotalBeat(whichBeat + mView->GetTotalNumberAnimationBeatsUpTo(whichSheet));
 }
 
 auto AnimationPanel::AtEndOfShow() const -> bool
@@ -449,44 +442,66 @@ void AnimationPanel::SetPlayState(bool playState)
     } else {
         StopTimer();
     }
+    UpdatePanel();
 }
 
+//  if StartTimer is called and there is a fermata, start a timer to expire at the duration.  Then when the timer expires we would remove the fermata and start the tempo.
+// Effectively mCurrentFermata gets consumed on the first beat, and then we switch to using the tempo for subsequent beats.
 void AnimationPanel::StartTimer()
 {
-    if (!mTimer->Start(60000 / GetTempo())) {
-        mTimerOn = false;
-    } else {
-        mTimerOn = true;
+    if (mCurrentFermata.has_value()) {
+        // if we have a fermata, use it for the first beat, then reset to the normal tempo
+        if (!mTimer->Start(static_cast<int>(mCurrentFermata->count() * 1000))) {
+            mTimerOn = false;
+        } else {
+            mTimerOn = true;
+        }
+        return;
     }
+    if (!mTimer->Start(60000 / mTempo)) {
+        mTimerOn = false;
+        return;
+    }
+    mTimerOn = true;
 }
 
 void AnimationPanel::StopTimer()
 {
     mTimer->Stop();
     mTimerOn = false;
+    mCurrentFermata = std::nullopt;
 }
 
-void AnimationPanel::UpdateTempoIfChanged()
+void AnimationPanel::UpdateTimer()
 {
-    if (!mView || !mTimerOn) {
+    if (!mView) {
         return;
     }
 
     auto newTempo = mView->GetTempoForAnimationBeat(mCurrentBeat);
-    if (newTempo != GetTempo()) {
-        SetTempo(newTempo);
+    auto newFermata = mView->GetFermataForAnimationBeat(mCurrentBeat);
+    auto tempoChanged = (newTempo != mTempo);
+    auto fermataChanged = (newFermata != mCurrentFermata);
+    if (!tempoChanged && !fermataChanged) {
+        return;
+    }
+    auto timerRunning = mTimerOn;
+    if (timerRunning) {
         StopTimer();
+    }
+    mCurrentFermata = newFermata;
+    mTempo = newTempo;
+    if (timerRunning) {
         StartTimer();
     }
 }
 
 void AnimationPanel::OnUpdate()
 {
-    if (mView) {
-        mCurrentBeat = mView->GetAnimationBeatForCurrentSheet();
+    if (!mView) {
+        return;
     }
-    UpdateTempoIfChanged();
-    UpdatePanel();
+    GotoTotalBeat(mView->GetAnimationBeatForCurrentSheet());
 }
 
 void AnimationPanel::SetView(CalChartView* view)

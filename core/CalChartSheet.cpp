@@ -322,6 +322,15 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
         }
         sheet->mTempo = reader.Get<uint32_t>();
     };
+    auto parse_INGL_FERM = [](Sheet* sheet, Reader reader) {
+        // Fermata is stored as: count (uint32_t), then pairs of (beat: uint32_t, Seconds: float)
+        auto count = reader.Get<uint32_t>();
+        for (auto i = 0u; i < count; ++i) {
+            auto beat = reader.Get<uint32_t>();
+            auto secondsValue = reader.Get<float>();
+            sheet->mFermata[beat] = Seconds{ secondsValue };
+        }
+    };
     auto parse_INGL_PNTS = [](Sheet* sheet, Reader reader) {
         for (auto i = 0u; i < sheet->mPoints.size(); ++i) {
             auto this_size = reader.Get<uint8_t>();
@@ -433,6 +442,7 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
               { INGL_NAME, parse_INGL_NAME },
               { INGL_DURA, parse_INGL_DURA },
               { INGL_TMPO, parse_INGL_TMPO },
+              { INGL_FERM, parse_INGL_FERM },
               { INGL_PNTS, parse_INGL_PNTS },
               { INGL_CONT, parse_INGL_CONT },
               { INGL_VCNT, parse_INGL_VCNT },
@@ -488,6 +498,20 @@ auto Sheet::SerializePrintContinuityData() const -> std::vector<std::byte>
     return result;
 }
 
+auto Sheet::SerializeFermata() const -> std::vector<std::byte>
+{
+    // Serialize as: count (uint32_t), then pairs of (beat: uint32_t, Seconds: float)
+    std::vector<std::byte> result;
+    Parser::Append(result, static_cast<uint32_t>(mFermata.size()));
+    for (auto const& [beat, secondsValue] : mFermata) {
+        if (secondsValue == CalChart::Seconds::zero())
+            continue;
+        Parser::Append(result, static_cast<uint32_t>(beat));
+        Parser::Append(result, secondsValue.count());
+    }
+    return result;
+}
+
 auto Sheet::SerializeBackgroundImageInfo() const -> std::vector<std::byte>
 {
     std::vector<std::byte> result;
@@ -535,6 +559,11 @@ auto Sheet::SerializeSheetData() const -> std::vector<std::byte>
     Parser::Append(result, Parser::Construct_block(INGL_DURA, uint32_t{ GetBeats() }));
     // Write TEMPO
     Parser::Append(result, Parser::Construct_block(INGL_TMPO, uint32_t{ GetTempo() }));
+
+    // Write FERMATA
+    if (!mFermata.empty()) {
+        Parser::Append(result, Parser::Construct_block(INGL_FERM, SerializeFermata()));
+    }
 
     // Write ALL_POINTS
     Parser::Append(result, Parser::Construct_block(INGL_PNTS, SerializeAllPoints()));
@@ -790,6 +819,17 @@ void Sheet::SetPrintableContinuity(std::string const& name, std::string const& l
 auto Sheet::GetPrintableContinuity() const -> Textline_list
 {
     return mPrintableContinuity.GetChunks();
+}
+
+// sheet beat info (tempo, fermata info)
+auto Sheet::GetSheetBeatInfo() const -> SheetBeatInfo
+{
+    return SheetBeatInfo{ mTempo, mFermata };
+}
+
+void Sheet::SetSheetBeatInfo(SheetBeatInfo const& value)
+{
+    std::tie(mTempo, mFermata) = value;
 }
 
 auto Sheet::GetMarcher(MarcherIndex i) const -> Point { return mPoints[i]; }

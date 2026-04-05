@@ -261,6 +261,12 @@ void CalChartView::DoSetSheetTempo(CalChart::Tempo tempo)
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
+void CalChartView::DoSetSheetsBeatInfoCommand(std::vector<CalChart::SheetBeatInfo> const& beatInfo)
+{
+    auto cmd = mShow->Create_SetSheetsBeatInfoCommand(beatInfo);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+}
+
 void CalChartView::DoSetPointsLabel(bool right)
 {
     if (mShow->GetSelectionList().size() == 0) {
@@ -480,6 +486,11 @@ auto CalChartView::GetTotalNumberAnimationBeatsUpTo(int whichSheet) const -> Cal
 auto CalChartView::GetTempoForAnimationBeat(CalChart::Beats whichBeat) const -> CalChart::Tempo
 {
     return mShow->GetTempoForAnimationBeat(whichBeat);
+}
+
+auto CalChartView::GetFermataForAnimationBeat(CalChart::Beats whichBeat) const -> std::optional<CalChart::Seconds>
+{
+    return mShow->GetFermataForAnimationBeat(whichBeat);
 }
 
 auto CalChartView::BeatHasCollision(CalChart::Beats whichBeat) const -> bool
