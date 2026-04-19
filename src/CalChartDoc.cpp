@@ -307,18 +307,16 @@ nlohmann::json CalChartDoc::toViewerBeatsJSON() const
         { "type", "beats" },
     };
 
+    // Get downbeat times (in seconds) and convert to durations (in milliseconds)
+    auto downbeatTimes = mShow->GetDownbeatTimes();
+
     nlohmann::json beats = nlohmann::json::array();
     beats.push_back(0);
 
-    for (auto&& tempo_beat : CalChart::Ranges::zip_view(GetSheetsTempo(), GetSheetsBeats())) {
-        auto [tempo, beatCount] = tempo_beat;
-        if (tempo == 0) {
-            tempo = 120;
-        }
-        auto msPerBeat = static_cast<int>(std::lround(60000.0 / static_cast<double>(tempo)));
-        for (size_t beat = 0; beat < static_cast<size_t>(beatCount); ++beat) {
-            beats.push_back(msPerBeat);
-        }
+    for (size_t i = 1; i < downbeatTimes.size(); ++i) {
+        // Calculate duration of this beat in milliseconds
+        auto duration = (downbeatTimes[i] - downbeatTimes[i - 1]).count() * 1000.0f;
+        beats.push_back(static_cast<int>(std::lround(duration)));
     }
 
     j["beats"] = std::move(beats);

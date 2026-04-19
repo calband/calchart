@@ -1263,6 +1263,39 @@ auto Show::GetSheetsBeatInfo() const -> std::vector<CalChart::SheetBeatInfo>
 }
 auto Show::GetSheetBeatInfoOnCurrentSheet() const -> CalChart::SheetBeatInfo { return GetSheetBeatInfo(GetCurrentSheetNum()); }
 
+// Calculate downbeat times for all beats in the show
+auto Show::GetDownbeatTimes() const -> std::vector<CalChart::Seconds>
+{
+    std::vector<CalChart::Seconds> downbeatTimes;
+    CalChart::Seconds currentTime{ 0.0f };
+
+    for (auto const& sheet : mSheets) {
+        auto [tempo, fermatas] = sheet.GetSheetBeatInfo();
+        auto numBeats = sheet.GetBeats();
+
+        // Calculate the base duration per beat from tempo (BPM)
+        auto baseBeatDuration = CalChart::Seconds{ 60.0f / tempo };
+
+        for (CalChart::Beats beat = 0; beat < numBeats; ++beat) {
+            // Record the start time of this beat
+            downbeatTimes.push_back(currentTime);
+
+            // Calculate the duration of this beat
+            auto beatDuration = baseBeatDuration;
+
+            // Add fermata if one exists for this beat
+            if (fermatas.count(beat)) {
+                beatDuration += fermatas.at(beat);
+            }
+
+            // Advance the current time
+            currentTime += beatDuration;
+        }
+    }
+
+    return downbeatTimes;
+}
+
 // Sheet symbols
 auto Show::GetSheetSymbols(size_t sheet) const -> std::vector<SYMBOL_TYPE>
 {

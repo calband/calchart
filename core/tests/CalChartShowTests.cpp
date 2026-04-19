@@ -326,3 +326,87 @@ TEST_CASE("Remapping", "CalChartShowTests")
     mapping = show1->GetRelabelMapping(show1->GetAllMarcherPositions(0), show2->GetAllMarcherPositions(0), 1);
     CHECK(mapping.has_value() == false);
 }
+
+TEST_CASE("GetDownbeatTimes", "CalChartShowTests")
+{
+    using namespace CalChart;
+
+    // Create a show with multiple sheets to test downbeat time calculation
+    auto show = Show::Create(ShowMode::GetDefaultShowMode());
+    show->Create_SetupMarchersCommand({ { "A", "A" } }, 1, 0).first(*show);
+
+    // Remove the default sheet (Show::Create creates one automatically)
+    show->Create_RemoveSheetCommand(0).first(*show);
+
+    // Sheet 1: Tempo 120 BPM (0.5 seconds per beat), 8 beats, with a 1.0 second fermata on beat 3
+    {
+        auto sheet = Sheet(1);
+        sheet.SetPosition({ 0, 0 }, 0);
+        sheet.SetBeats(8);
+        sheet.SetTempo(120);
+
+        // Add fermata on beat 3 (1.0 second)
+        CalChart::Fermatas fermatas;
+        fermatas[3] = CalChart::Seconds{ 1.0f };
+        sheet.SetSheetBeatInfo({ 120, fermatas });
+
+        show->Create_AddSheetsCommand({ sheet }, 0).first(*show);
+    }
+
+    // Sheet 2: Tempo 160 BPM (0.375 seconds per beat), 8 beats, no fermatas
+    {
+        auto sheet = Sheet(1);
+        sheet.SetPosition({ 0, 0 }, 0);
+        sheet.SetBeats(8);
+        sheet.SetTempo(160);
+        show->Create_AddSheetsCommand({ sheet }, 1).first(*show);
+    }
+
+    auto downbeatTimes = show->GetDownbeatTimes();
+
+    // Debug: Check what we actually got
+    INFO("Number of sheets: " << show->GetNumSheets());
+    INFO("Total downbeat times: " << downbeatTimes.size());
+
+    // Expected times:
+    // Sheet 1 (120 BPM = 0.5s per beat):
+    //   Beat 0: 0.0
+    //   Beat 1: 0.5
+    //   Beat 2: 1.0
+    //   Beat 3: 1.5
+    //   Beat 4: 3.0  (1.5 + 0.5 + 1.0 fermata)
+    //   Beat 5: 3.5
+    //   Beat 6: 4.0
+    //   Beat 7: 4.5
+    // Sheet 2 (160 BPM = 0.375s per beat):
+    //   Beat 0: 5.0
+    //   Beat 1: 5.375
+    //   Beat 2: 5.75
+    //   Beat 3: 6.125
+    //   Beat 4: 6.5
+    //   Beat 5: 6.875
+    //   Beat 6: 7.25
+    //   Beat 7: 7.625
+
+    REQUIRE(downbeatTimes.size() == 16);
+
+    // Check Sheet 1 times
+    CHECK(downbeatTimes[0].count() == 0.0f);
+    CHECK(downbeatTimes[1].count() == 0.5f);
+    CHECK(downbeatTimes[2].count() == 1.0f);
+    CHECK(downbeatTimes[3].count() == 1.5f);
+    CHECK(downbeatTimes[4].count() == 3.0f); // Fermata adds 1.0s after beat 3
+    CHECK(downbeatTimes[5].count() == 3.5f);
+    CHECK(downbeatTimes[6].count() == 4.0f);
+    CHECK(downbeatTimes[7].count() == 4.5f);
+
+    // Check Sheet 2 times
+    CHECK(downbeatTimes[8].count() == 5.0f);
+    CHECK(downbeatTimes[9].count() == 5.375f);
+    CHECK(downbeatTimes[10].count() == 5.75f);
+    CHECK(downbeatTimes[11].count() == 6.125f);
+    CHECK(downbeatTimes[12].count() == 6.5f);
+    CHECK(downbeatTimes[13].count() == 6.875f);
+    CHECK(downbeatTimes[14].count() == 7.25f);
+    CHECK(downbeatTimes[15].count() == 7.625f);
+}
