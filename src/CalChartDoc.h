@@ -327,6 +327,7 @@ public:
     [[nodiscard]] auto GetTotalNumberAnimationBeatsUpTo(int whichSheet) const -> CalChart::Beats;
     [[nodiscard]] auto GetTempoForAnimationBeat(CalChart::Beats whichBeat) const -> CalChart::Tempo;
     [[nodiscard]] auto GetFermataForAnimationBeat(CalChart::Beats whichBeat) const -> std::optional<CalChart::Seconds>;
+    [[nodiscard]] auto GetDownbeatTimes() const -> std::vector<CalChart::Seconds>;
     [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beats whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
     [[nodiscard]] auto BeatHasCollision(CalChart::Beats whichBeat) const -> bool;
     [[nodiscard]] auto GetAnimationBeatForCurrentSheet() const -> CalChart::Beats;

@@ -104,6 +104,7 @@ public:
     [[nodiscard]] auto GetTotalNumberAnimationBeatsUpTo(int whichSheet) const -> CalChart::Beats;
     [[nodiscard]] auto GetTempoForAnimationBeat(CalChart::Beats whichBeat) const -> CalChart::Tempo;
     [[nodiscard]] auto GetFermataForAnimationBeat(CalChart::Beats whichBeat) const -> std::optional<CalChart::Seconds>;
+    [[nodiscard]] auto GetDownbeatTimes() const -> std::vector<CalChart::Seconds>;
 
     [[nodiscard]] auto GetContinuities() const { return mShow->GetContinuities(); }
     [[nodiscard]] auto ContinuitiesInUse() const { return mShow->ContinuitiesInUse(); }

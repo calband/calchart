@@ -503,6 +503,14 @@ auto CalChartDoc::GetFermataForAnimationBeat(CalChart::Beats whichBeat) const ->
     return std::get<1>(beatInfo).count(beatOffset) ? std::optional<CalChart::Seconds>{ std::get<1>(beatInfo).at(beatOffset) } : std::nullopt;
 }
 
+auto CalChartDoc::GetDownbeatTimes() const -> std::vector<CalChart::Seconds>
+{
+    if (!mShow) {
+        return {};
+    }
+    return mShow->GetDownbeatTimes();
+}
+
 auto CalChartDoc::BeatHasCollision(CalChart::Beats whichBeat) const -> bool
 {
     if (!mAnimation) {
