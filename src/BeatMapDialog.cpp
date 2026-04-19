@@ -72,7 +72,7 @@ BeatMapDialog::BeatMapDialog(
                 std::get<2>(mBeatSheetProxyInfo.at(index)) = beats;
                 std::string fermataString = CalChart::ToString(fermatas);
                 return wxUI::HSizer{
-                    std::format("Sheet {}, beats {}", index, beats),
+                    std::format("Sheet {}, beats {}", index + 1, beats),
                     wxUI::HSizer{
                         wxUI::Text{ "Tempo" },
                         wxUI::SpinCtrl{ std::pair{ 1, 320 }, tempo }.withProxy(std::get<0>(mBeatSheetProxyInfo.at(index))),
@@ -137,9 +137,6 @@ void BeatMapDialog::runValidator() const
     auto valid = validate();
     if (wxButton* btn = wxDynamicCast(FindWindow(wxID_OK), wxButton); btn) {
         btn->Enable(valid);
-    }
-    if (wxButton* btn = wxDynamicCast(FindWindow(wxID_CANCEL), wxButton); btn) {
-        btn->Enable(!valid);
     }
 }
 

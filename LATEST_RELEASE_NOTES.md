@@ -4,6 +4,8 @@
 
 Bugs addressed in this release:
 
+* [#818](../../issues/818) Edit beat maps is show tempo instead of beats
+
 Other changes:
 
 * [#810](../../issues/810) We should have a way to set fermata for beats
