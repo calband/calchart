@@ -131,6 +131,14 @@ auto DumpPrintContinuity(CalChart::Show const& show, std::ostream& os)
     }
 }
 
+auto DumpBeats(CalChart::Show const& show, std::ostream& os)
+{
+    auto downbeatTimes = show.GetDownbeatTimes();
+    for (auto&& time : downbeatTimes) {
+        os << time.count() << "\n";
+    }
+}
+
 }
 
 namespace CalChartCmd {
@@ -158,6 +166,9 @@ constexpr auto Parse = [](auto args, auto& os) {
         }
         if (args["--dump_print_continuity"].asBool()) {
             DumpPrintContinuity(*show, os);
+        }
+        if (args["--dump_beats"].asBool()) {
+            DumpBeats(*show, os);
         }
     }
 };

@@ -10,4 +10,5 @@ Other changes:
 
 * [#810](../../issues/810) We should have a way to set fermata for beats
 * [#812](../../issues/812) Make it easier to read xbm files.
+* [#814](../../issues/814) Add the ability to dump when the beats occur with calchart_tool
 

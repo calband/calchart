@@ -152,6 +152,10 @@ public:
     [[nodiscard]] auto GetSheetsBeatInfo() const -> std::vector<CalChart::SheetBeatInfo>;
     [[nodiscard]] auto GetSheetBeatInfoOnCurrentSheet() const -> CalChart::SheetBeatInfo;
 
+    // Calculate downbeat times for all beats in the show
+    // Returns a vector where each element represents the start time of that beat
+    [[nodiscard]] auto GetDownbeatTimes() const -> std::vector<CalChart::Seconds>;
+
     // Sheet symbols
     [[nodiscard]] auto GetSheetSymbols(size_t sheet) const -> std::vector<SYMBOL_TYPE>;
     [[nodiscard]] auto GetSheetsSymbols() const -> std::vector<std::vector<SYMBOL_TYPE>>;
