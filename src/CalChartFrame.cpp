@@ -786,8 +786,8 @@ void CalChartFrame::OnEditBeatMap()
 {
     if (GetShow()) {
         auto sheetBeatInfo = GetShow()->GetSheetsBeatInfo();
-        auto tempos = GetShow()->GetSheetsTempo();
-        auto beatInfos = CalChart::Ranges::ToVector<BeatSheetInfo>(CalChart::Ranges::zip_view(sheetBeatInfo, tempos));
+        auto beats = GetShow()->GetSheetsBeats();
+        auto beatInfos = CalChart::Ranges::ToVector<BeatSheetInfo>(CalChart::Ranges::zip_view(sheetBeatInfo, beats));
         BeatMapDialog dialog(beatInfos, this);
         if (dialog.ShowModal() == wxID_OK) {
             GetFieldView()->DoSetSheetsBeatInfoCommand(
