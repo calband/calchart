@@ -23,6 +23,7 @@
 
 #include "AnimationSprites.hpp"
 #include "CalChartDrawCommand.h"
+#include <chrono>
 #include <wx/wx.h>
 #include <wxUI/wxUI.hpp>
 
@@ -100,7 +101,6 @@ private:
     // timer stuff:
     void StartTimer();
     void StopTimer();
-    void UpdateTimer(); // configures the timer based on the current beat's tempo and fermata
 
     CalChartView* mView{};
     AnimationCanvas* mCanvas{};
@@ -120,7 +120,7 @@ private:
     wxTimer* mTimer{};
     unsigned mTempo{};
     bool mTimerOn{};
-    std::optional<CalChart::Seconds> mCurrentFermata = std::nullopt;
+    std::optional<std::chrono::steady_clock::time_point> mAnchorTime = std::nullopt; // When playback started (for beat 0)
     const bool mInMiniMode{};
     bool mShowOmni{};
 

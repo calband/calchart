@@ -186,16 +186,13 @@ auto AnimationPanel::GenerateDrawCommands() -> std::vector<CalChart::Draw::DrawC
 
 void AnimationPanel::OnCmd_anim_next_beat_timer(wxTimerEvent&)
 {
-    // if we have reached here and there's a fermata, we must have been on a beat with a fermata, so we should clear the fermata and restart the timer
-    if (mCurrentFermata) {
-        mCurrentFermata = std::nullopt;
-        StartTimer();
-        return;
-    }
-    // next_beat could come from the timer.  If so, stop the timer.
+    // Timer fired - advance to next beat
     NextBeat();
     if (AtEndOfShow()) {
         StopTimer();
+    } else {
+        // Schedule the next beat
+        StartTimer();
     }
     Refresh();
 }
@@ -417,7 +414,28 @@ void AnimationPanel::NextBeat()
 void AnimationPanel::GotoTotalBeat(CalChart::Beats whichBeat)
 {
     mCurrentBeat = whichBeat;
-    UpdateTimer();
+
+    // If playing, adjust anchor time to maintain sync
+    if (!mTimerOn) {
+        UpdatePanel();
+        return;
+    }
+
+    if (!mView) {
+        UpdatePanel();
+        return;
+    }
+
+    auto downbeatTimes = mView->GetDownbeatTimes();
+    if (whichBeat >= downbeatTimes.size()) {
+        UpdatePanel();
+        return;
+    }
+
+    auto now = std::chrono::steady_clock::now();
+    auto currentBeatTime = std::chrono::duration<float>(downbeatTimes[whichBeat]);
+    mAnchorTime = now - std::chrono::duration_cast<std::chrono::steady_clock::duration>(currentBeatTime);
+
     UpdatePanel();
 }
 
@@ -445,20 +463,50 @@ void AnimationPanel::SetPlayState(bool playState)
     UpdatePanel();
 }
 
-//  if StartTimer is called and there is a fermata, start a timer to expire at the duration.  Then when the timer expires we would remove the fermata and start the tempo.
-// Effectively mCurrentFermata gets consumed on the first beat, and then we switch to using the tempo for subsequent beats.
 void AnimationPanel::StartTimer()
 {
-    if (mCurrentFermata.has_value()) {
-        // if we have a fermata, use it for the first beat, then reset to the normal tempo
-        if (!mTimer->Start(static_cast<int>(mCurrentFermata->count() * 1000))) {
-            mTimerOn = false;
-        } else {
-            mTimerOn = true;
-        }
+    if (!mView) {
+        mTimerOn = false;
         return;
     }
-    if (!mTimer->Start(60000 / mTempo)) {
+
+    auto now = std::chrono::steady_clock::now();
+    auto downbeatTimes = mView->GetDownbeatTimes();
+
+    // If no anchor time, set it based on current beat
+    if (!mAnchorTime.has_value()) {
+        // Calculate when beat 0 would have occurred
+        if (mCurrentBeat < downbeatTimes.size()) {
+            auto currentBeatTime = std::chrono::duration<float>(downbeatTimes[mCurrentBeat]);
+            mAnchorTime = now - std::chrono::duration_cast<std::chrono::steady_clock::duration>(currentBeatTime);
+        } else {
+            mAnchorTime = now;
+        }
+    }
+
+    // Calculate next beat index
+    auto nextBeat = mCurrentBeat + 1;
+
+    // Check if we have a next beat
+    if (nextBeat >= downbeatTimes.size()) {
+        mTimerOn = false;
+        return;
+    }
+
+    // Calculate when the next beat should occur
+    auto nextBeatTime = std::chrono::duration<float>(downbeatTimes[nextBeat]);
+    auto nextBeatTimePoint = *mAnchorTime + std::chrono::duration_cast<std::chrono::steady_clock::duration>(nextBeatTime);
+
+    // Calculate delay from now
+    auto delay = std::chrono::duration_cast<std::chrono::milliseconds>(nextBeatTimePoint - now);
+
+    // Ensure delay is at least 1ms (avoid negative or zero delays)
+    if (delay.count() < 1) {
+        delay = std::chrono::milliseconds(1);
+    }
+
+    // Start one-shot timer
+    if (!mTimer->Start(static_cast<int>(delay.count()), wxTIMER_ONE_SHOT)) {
         mTimerOn = false;
         return;
     }
@@ -469,31 +517,7 @@ void AnimationPanel::StopTimer()
 {
     mTimer->Stop();
     mTimerOn = false;
-    mCurrentFermata = std::nullopt;
-}
-
-void AnimationPanel::UpdateTimer()
-{
-    if (!mView) {
-        return;
-    }
-
-    auto newTempo = mView->GetTempoForAnimationBeat(mCurrentBeat);
-    auto newFermata = mView->GetFermataForAnimationBeat(mCurrentBeat);
-    auto tempoChanged = (newTempo != mTempo);
-    auto fermataChanged = (newFermata != mCurrentFermata);
-    if (!tempoChanged && !fermataChanged) {
-        return;
-    }
-    auto timerRunning = mTimerOn;
-    if (timerRunning) {
-        StopTimer();
-    }
-    mCurrentFermata = newFermata;
-    mTempo = newTempo;
-    if (timerRunning) {
-        StartTimer();
-    }
+    mAnchorTime = std::nullopt;
 }
 
 void AnimationPanel::OnUpdate()

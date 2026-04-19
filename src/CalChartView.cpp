@@ -493,6 +493,11 @@ auto CalChartView::GetFermataForAnimationBeat(CalChart::Beats whichBeat) const -
     return mShow->GetFermataForAnimationBeat(whichBeat);
 }
 
+auto CalChartView::GetDownbeatTimes() const -> std::vector<CalChart::Seconds>
+{
+    return mShow->GetDownbeatTimes();
+}
+
 auto CalChartView::BeatHasCollision(CalChart::Beats whichBeat) const -> bool
 {
     return mShow->BeatHasCollision(whichBeat);
