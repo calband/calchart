@@ -279,6 +279,12 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
             wxUI::Item{ "Edit Beat Map...", "Edit the beat map", [this] {
                            OnEditBeatMap();
                        } },
+            wxUI::Item{ "Set Media...", "Set the media for the show", [this] {
+                           OnSetMedia();
+                       } },
+            wxUI::Item{ "Clear Media...", "Clear the media for the show", [this] {
+                           OnClearMedia();
+                       } },
             wxUI::Item{ "Reset reference point...", "Reset the current reference point", [this] {
                            OnResetReferencePoint();
                        } },
@@ -796,6 +802,33 @@ void CalChartFrame::OnEditBeatMap()
                 })));
         }
     }
+}
+
+void CalChartFrame::OnSetMedia()
+{
+    wxFileDialog openFileDialog(
+        this,
+        "Open Music File",
+        "",
+        "",
+        "Audio files (*.mp3;*.m4a;*.wav;*.aac)|*.mp3;*.m4a;*.wav;*.aac|All files (*.*)|*.*",
+        wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+    if (openFileDialog.ShowModal() == wxID_CANCEL) {
+        return;
+    }
+
+    if (auto media = CalChart::ToFileData(openFileDialog.GetPath().utf8_string());
+        media) {
+        GetFieldView()->DoSetMediaCommand(std::move(*media));
+    } else {
+        wxMessageBox("Failed to read media file.", "Error", wxOK | wxICON_ERROR, this);
+    }
+}
+
+void CalChartFrame::OnClearMedia()
+{
+    GetFieldView()->DoSetMediaCommand({});
 }
 
 void CalChartFrame::OnSetupMarchers()

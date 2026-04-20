@@ -267,6 +267,12 @@ void CalChartView::DoSetSheetsBeatInfoCommand(std::vector<CalChart::SheetBeatInf
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
+void CalChartView::DoSetMediaCommand(CalChart::FileData const& media)
+{
+    auto cmd = mShow->Create_SetMediaCommand(media);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+}
+
 void CalChartView::DoSetPointsLabel(bool right)
 {
     if (mShow->GetSelectionList().size() == 0) {
@@ -506,6 +512,11 @@ auto CalChartView::BeatHasCollision(CalChart::Beats whichBeat) const -> bool
 auto CalChartView::GetAnimationBeatForCurrentSheet() const -> CalChart::Beats
 {
     return mShow->GetAnimationBeatForCurrentSheet();
+}
+
+void CalChartView::OnSetMedia()
+{
+    mFrame->OnSetMedia();
 }
 
 void CalChartView::GoToSheet(size_t which)

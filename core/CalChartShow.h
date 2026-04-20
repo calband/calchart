@@ -93,6 +93,7 @@ public:
     [[nodiscard]] auto Create_SetSheetBeatsCommand(Beats beats) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetSheetTempoCommand(Tempo tempo) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetSheetsBeatInfoCommand(std::vector<SheetBeatInfo> const& beatInfo) const -> Show_command_pair;
+    [[nodiscard]] auto Create_SetMediaCommand(FileData const& media) const -> Show_command_pair;
     [[nodiscard]] auto Create_AddSheetsCommand(Show::Sheet_container_t const& sheets, size_t where) const -> Show_command_pair;
     [[nodiscard]] auto Create_RemoveSheetCommand(size_t where) const -> Show_command_pair;
     [[nodiscard]] auto Create_ApplyRelabelMapping(int sheet_num_first, std::vector<MarcherIndex> const& mapping) const -> Show_command_pair;
@@ -255,6 +256,10 @@ public:
     [[nodiscard]] auto FindCurve(size_t sheet, CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t, double>>;
     [[nodiscard]] auto FindCurveOnCurrentSheet(CalChart::Coord pos, Coord::units searchBounds) const -> std::optional<std::tuple<size_t, size_t, double>>;
 
+    // Media
+    [[nodiscard]] auto GetMedia() const -> FileData const& { return mMedia; }
+    [[nodiscard]] auto GetMediaVersion() const -> uint64_t { return mMediaVersion; }
+
     // utility
     [[nodiscard]] static auto GetRelabelMapping(std::vector<Coord> const& source_marchers, std::vector<Coord> const& target_marchers, CalChart::Coord::units tolerance) -> std::optional<std::vector<MarcherIndex>>;
     [[nodiscard]] auto MakeSelectAll() const -> SelectionList;
@@ -359,6 +364,8 @@ private:
     std::vector<std::pair<std::string, std::string>> mDotLabelAndInstrument;
     Sheet_container_t mSheets;
     ShowMode mMode;
+    FileData mMedia;
+    uint64_t mMediaVersion = 0;
 
     // the more "transient" settings, representing a current set of manipulations by the user, but preserved in the show
     SelectionList mSelectionList; // order of selections

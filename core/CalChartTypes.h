@@ -60,6 +60,8 @@ using SheetBeatInfo = std::tuple<CalChart::Tempo, CalChart::Fermatas>;
 auto ToFermatas(std::string_view input) -> Fermatas;
 auto ToString(Fermatas const& input) -> std::string;
 
+using FileData = std::pair<std::vector<std::byte>, std::string>; // media bytes and filename
+
 enum class MoveMode {
     Normal,
     ShapeLine,

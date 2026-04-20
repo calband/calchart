@@ -271,6 +271,10 @@ public:
         return mShow->runTransitionSolver(params, delegate);
     }
 
+    // Media
+    [[nodiscard]] auto GetMedia() const -> CalChart::FileData const& { return mShow->GetMedia(); }
+    [[nodiscard]] auto GetMediaVersion() const -> uint64_t { return mShow->GetMediaVersion(); }
+
     void SetCurrentSheet(size_t n);
 
     // how to select points
@@ -354,6 +358,7 @@ public:
     [[nodiscard]] auto Create_SetSheetBeatsCommand(CalChart::Beats beats) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_SetSheetTempoCommand(CalChart::Tempo tempo) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_SetSheetsBeatInfoCommand(std::vector<CalChart::SheetBeatInfo> const& beatInfo) -> std::unique_ptr<wxCommand>;
+    [[nodiscard]] auto Create_SetMediaCommand(CalChart::FileData const& media) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_AddSheetsCommand(CalChart::Show::Sheet_container_t const& sheets, size_t where) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_RemoveSheetCommand(size_t where) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_ApplyRelabelMapping(int sheet, std::vector<CalChart::MarcherIndex> const& mapping) -> std::unique_ptr<wxCommand>;

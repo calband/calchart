@@ -21,7 +21,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartTypes.h"
 #include <cmath>
+#include <filesystem>
+#include <optional>
 #include <ranges>
 #include <vector>
 
@@ -154,5 +157,12 @@ auto append(std::vector<T>& v, R&& range) -> std::vector<T>&
     v.insert(v.end(), range.begin(), range.end());
     return v;
 }
+
+class Reader;
+
+auto ToFileData(const std::filesystem::path& path) -> std::optional<FileData>;
+auto ToFileData(Reader path) -> FileData;
+
+auto SerializeFileData(FileData const& fileData) -> std::vector<std::byte>;
 
 }

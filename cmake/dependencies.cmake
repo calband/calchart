@@ -90,11 +90,11 @@ try_find_or_fetch(Catch2 Catch2 https://github.com/catchorg/Catch2 6e79e68) # v3
 
 if(USE_SYSTEM_DEPENDENCIES)
   if(LINUX)
-    # Linux doesn't use webview support
+    # Linux doesn't use webview or media support
     find_package(wxWidgets REQUIRED COMPONENTS net core base gl aui html)
   else()
-    # macOS and Windows use webview support
-    find_package(wxWidgets REQUIRED COMPONENTS net core base gl aui html webview)
+    # macOS and Windows use webview and media support
+    find_package(wxWidgets REQUIRED COMPONENTS net core base gl aui html webview media)
   endif()
   include(${wxWidgets_USE_FILE})
 elseif(FORCE_VENDOR_DEPENDENCIES)
@@ -104,10 +104,12 @@ elseif(FORCE_VENDOR_DEPENDENCIES)
   set(wxUSE_STL ON)
   set(wxUSE_STC OFF)
   set(wxUSE_STD_CONTAINERS ON)
-  # Enable webview on macOS and Windows (not Linux)
+  # Enable media control on macOS and Windows (not Linux)
   if(LINUX)
+    set(wxUSE_MEDIACTRL OFF)
     set(wxUSE_WEBVIEW OFF)
   else()
+    set(wxUSE_MEDIACTRL ON)
     set(wxUSE_WEBVIEW ON)
   endif()
   FetchContent_Declare(

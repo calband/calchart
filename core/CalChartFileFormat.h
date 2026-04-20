@@ -240,6 +240,8 @@ constexpr auto INGL_TMPO = Make4CharWord('T', 'M', 'P', 'O');
 constexpr auto INGL_FERM = Make4CharWord('F', 'E', 'R', 'M');
 constexpr auto INGL_PNTS = Make4CharWord('P', 'N', 'T', 'S');
 constexpr auto INGL_PONT = Make4CharWord('P', 'O', 'N', 'T');
+constexpr auto INGL_DATA = Make4CharWord('D', 'A', 'T', 'A');
+constexpr auto INGL_MEDIA = Make4CharWord('M', 'D', 'I', 'A');
 constexpr auto INGL_END = Make4CharWord('E', 'N', 'D', ' ');
 
 namespace details {

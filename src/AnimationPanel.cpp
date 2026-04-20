@@ -28,16 +28,23 @@
 #include "CalChartView.h"
 #include "basic_ui.h"
 #include "platconf.h"
-#include "ui_enums.h"
-
+#include "tb_music.xbm"
+#include "tb_music_mute.xbm"
 #include "tb_play.xbm"
 #include "tb_stop.xbm"
+#include "ui_enums.h"
 
 #include <wx/artprov.h>
+#include <wx/filedlg.h>
+#ifndef __WXGTK__
+#include <wx/mediactrl.h>
+#endif
 #include <wx/spinctrl.h>
 #include <wx/splitter.h>
+#include <wx/stdpaths.h>
 #include <wx/tglbtn.h>
 #include <wx/timer.h>
+#include <wx/wfstream.h>
 #include <wxUI/wxUI.hpp>
 
 using namespace CalChart;
@@ -59,6 +66,9 @@ AnimationPanel::AnimationPanel(
     , mTempo(120)
     , mTimerOn(false)
     , mInMiniMode(miniMode)
+#ifndef __WXGTK__
+    , mMediaCtrl(new wxMediaCtrl(this, wxID_ANY))
+#endif
     , mPlayCollisionWarning{ !mInMiniMode }
     , mConfig(config)
 {
@@ -76,6 +86,10 @@ AnimationPanel::~AnimationPanel()
 
 void AnimationPanel::Init()
 {
+#ifndef __WXGTK__
+    // Hide the media control (we only use it for playback, not display)
+    mMediaCtrl->Hide();
+#endif
 }
 
 void AnimationPanel::CreateControls()
@@ -93,6 +107,13 @@ void AnimationPanel::CreateControls()
                     OnCmd_PlayButton();
                 })
                 .withProxy(mPlayPauseButton),
+#ifndef __WXGTK__
+            wxUI::BitmapToggleButton{ ScaleButtonBitmap(wxBitmap{ BITMAP_NAME(tb_music_mute) }), ScaleButtonBitmap(wxBitmap{ BITMAP_NAME(tb_music) }) }
+                .bind([this] {
+                    OnCmd_MusicButton();
+                })
+                .withProxy(mMusicButton),
+#endif
             wxUI::LayoutIf{
                 !mInMiniMode && mConfig.Get_AnimationFrameSheetSlider(),
                 wxUI::Text{ "Sheet" },
@@ -142,6 +163,10 @@ void AnimationPanel::CreateControls()
         wxUI::Generic{ ExpandSizerFlags(), mOmniCanvas },
     }
         .fitTo(this);
+
+#ifndef __WXGTK__
+    *mMusicButton = !mMusicMuted; // Starts in muted state (false)
+#endif
 
     mItemsToHide.push_back(mAnimateOmniToggle.control());
     mItemsToHide.push_back(mOmniHelpButton.control());
@@ -437,6 +462,12 @@ void AnimationPanel::GotoTotalBeat(CalChart::Beats whichBeat)
     mAnchorTime = now - std::chrono::duration_cast<std::chrono::steady_clock::duration>(currentBeatTime);
 
     UpdatePanel();
+#ifndef __WXGTK__
+    // Sync audio to new position
+    if (mTimerOn && !mMusicMuted && !mMusicFilePath.IsEmpty()) {
+        UpdateMedia();
+    }
+#endif
 }
 
 void AnimationPanel::GotoSheetBeat(int whichSheet, CalChart::Beats whichBeat)
@@ -508,9 +539,21 @@ void AnimationPanel::StartTimer()
     // Start one-shot timer
     if (!mTimer->Start(static_cast<int>(delay.count()), wxTIMER_ONE_SHOT)) {
         mTimerOn = false;
+#ifndef __WXGTK__
+        // Start audio if not muted and music is loaded
+        if (!mMusicMuted && !mMusicFilePath.IsEmpty()) {
+            UpdateMedia();
+        }
+#endif
         return;
     }
     mTimerOn = true;
+#ifndef __WXGTK__
+    // Start audio if not muted and music is loaded
+    if (!mMusicMuted && !mMusicFilePath.IsEmpty()) {
+        UpdateMedia();
+    }
+#endif
 }
 
 void AnimationPanel::StopTimer()
@@ -518,6 +561,10 @@ void AnimationPanel::StopTimer()
     mTimer->Stop();
     mTimerOn = false;
     mAnchorTime = std::nullopt;
+#ifndef __WXGTK__
+    // Stop audio as well
+    mMediaCtrl->Stop();
+#endif
 }
 
 void AnimationPanel::OnUpdate()
@@ -525,10 +572,141 @@ void AnimationPanel::OnUpdate()
     if (!mView) {
         return;
     }
+#ifndef __WXGTK__
+    LoadMusicFileFromShow();
+#endif
     GotoTotalBeat(mView->GetAnimationBeatForCurrentSheet());
 }
 
 void AnimationPanel::SetView(CalChartView* view)
 {
     mView = view;
+#ifndef __WXGTK__
+    LoadMusicFileFromShow();
+#endif
+}
+
+// Audio control methods
+
+void AnimationPanel::OnCmd_MusicButton()
+{
+#ifndef __WXGTK__
+    if (mMusicFilePath.IsEmpty()) {
+        // No music loaded - open file dialog
+        LoadMusicFile();
+    } else {
+        // Toggle mute state
+        mMusicMuted = !mMusicMuted;
+        if (mMusicMuted) {
+            mMediaCtrl->Stop();
+        } else {
+            // Sync and play if animation is playing
+            if (mTimerOn) {
+                UpdateMedia();
+            }
+        }
+    }
+#endif
+}
+
+void AnimationPanel::LoadMusicFileFromShow()
+{
+#ifndef __WXGTK__
+    // what we do is we tell the view to load the media, then we get the media vector of bytes.  Then we write that to a tmp file a the media file path.
+    if (!mView) {
+        return;
+    }
+    auto currentMediaVersion = mView->GetMediaVersion();
+    if (currentMediaVersion == mMediaVersion) {
+        // No change in media, no need to reload
+        return;
+    }
+    mMediaVersion = currentMediaVersion;
+
+    auto [mediaBytes, extension] = mView->GetMedia();
+    if (mediaBytes.empty()) {
+        return;
+    }
+
+    // Write to temp file
+    auto tempDir = wxStandardPaths::Get().GetTempDir();
+    auto tempFilePath = tempDir + "/calchart_temp_music_file" + extension;
+    wxLogDebug("Writing music bytes to temp file: %s", tempFilePath);
+    wxFileOutputStream output(tempFilePath);
+    if (!output.IsOk()) {
+        wxMessageBox("Failed to create temporary file for music", "Error", wxOK | wxICON_ERROR);
+        return;
+    }
+    output.Write(mediaBytes.data(), mediaBytes.size());
+    if (output.GetLastError() != wxSTREAM_NO_ERROR) {
+        wxMessageBox("Failed to write music data to temporary file", "Error", wxOK | wxICON_ERROR);
+        return;
+    }
+    mMusicFilePath = tempFilePath;
+
+    if (!mMediaCtrl->Load(mMusicFilePath)) {
+        wxMessageBox("Failed to load music file", "Error", wxOK | wxICON_ERROR);
+        mMusicFilePath = "";
+        return;
+    }
+#endif
+}
+
+void AnimationPanel::LoadMusicFile()
+{
+#ifndef __WXGTK__
+    if (!mView) {
+        return;
+    }
+    mView->OnSetMedia();
+    LoadMusicFileFromShow();
+    if (mMusicFilePath.IsEmpty()) {
+        return;
+    }
+
+    // Successfully loaded - unmute and sync
+    mMusicMuted = false;
+    if (mMusicButton.control()) {
+        mMusicButton.control()->SetValue(true); // Show as unmuted
+    }
+    if (mTimerOn) {
+        UpdateMedia();
+    }
+#endif
+}
+
+void AnimationPanel::UpdateMedia()
+{
+#ifndef __WXGTK__
+    if (mMusicFilePath.IsEmpty() || mMusicMuted) {
+        return;
+    }
+
+    auto positionMs = CalculateAudioPositionMs();
+    auto position = mMediaCtrl->Tell();
+    if (auto offset = abs(position - positionMs);
+        offset > 500) {
+        wxLogDebug("Audio offsync by %ld ms, seeking to %ld ms", offset, position);
+        mMediaCtrl->Seek(positionMs);
+    }
+    mMediaCtrl->Play();
+#endif
+}
+
+auto AnimationPanel::CalculateAudioPositionMs() const -> long
+{
+#ifndef __WXGTK__
+    if (!mView) {
+        return 0;
+    }
+
+    auto downbeatTimes = mView->GetDownbeatTimes();
+    if (mCurrentBeat >= downbeatTimes.size()) {
+        return 0;
+    }
+
+    return static_cast<long>(downbeatTimes[mCurrentBeat].count() * 1000.0f);
+#else
+    return 0;
+#endif
 }
