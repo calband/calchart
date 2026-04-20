@@ -57,7 +57,7 @@ HelpDialog::HelpDialog(wxWindow* parent, HelpManager& helpManager)
                 .bind(wxEVT_TEXT_ENTER, [this](auto const& event) { OnSearchEnter(const_cast<wxCommandEvent&>(event)); }),
         },
         // WebView for displaying help content
-        wxUI::Factory{
+        wxUI::Factory<wxWebView>{
             wxSizerFlags(1).Expand(),
             [this](wxWindow* parent) {
                 auto* webView = wxWebView::New(parent, wxID_ANY);
