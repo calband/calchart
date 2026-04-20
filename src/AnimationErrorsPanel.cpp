@@ -51,7 +51,7 @@ void AnimationErrorsPanel::CreateControls()
     // create a sizer and populate
     wxUI::VSizer{
         ExpandSizerFlags(),
-        wxUI::Factory{ [](wxWindow* window) {
+        wxUI::Factory<wxTreeListCtrl>{ [](wxWindow* window) {
             auto* treeList = new wxTreeListCtrl(window, wxID_ANY, wxDefaultPosition, wxDefaultSize);
             treeList->AppendColumn("Errors", wxCOL_WIDTH_AUTOSIZE, wxALIGN_LEFT, wxCOL_RESIZABLE | wxCOL_SORTABLE);
             wxSize iconSize = wxArtProvider::GetSizeHint(wxART_LIST);
