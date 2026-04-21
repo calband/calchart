@@ -109,7 +109,7 @@ auto Shape_rect::GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand>
 }
 
 namespace {
-    auto PointsOnLine(std::vector<Coord> const& pntlist, int numpnts) -> std::vector<Coord>
+    auto PointsOnLine(std::vector<Coord> const& pntlist, size_t numpnts) -> std::vector<Coord>
     {
         if (numpnts < 1 || pntlist.empty()) {
             return {};
@@ -132,7 +132,7 @@ namespace {
         auto running_dist = each_segment;
         while (iter != pntlist.end()) {
             // emergency rip chord on rounding cases
-            if (static_cast<int>(results.size()) == numpnts) {
+            if (results.size() == numpnts) {
                 break;
             }
             auto curr_dist = iter->Distance(curr_pnt);
@@ -155,14 +155,14 @@ namespace {
             running_dist = each_segment;
         }
         // emergency rip chord on rounding cases
-        while (static_cast<int>(results.size()) < numpnts) {
+        while (results.size() < numpnts) {
             results.push_back(pntlist.back());
         }
         return results;
     }
 }
 
-auto Lasso::GetPointsOnLine(int numpnts) const -> std::vector<Coord>
+auto Lasso::GetPointsOnLine(size_t numpnts) const -> std::vector<Coord>
 {
     return PointsOnLine(pntlist, numpnts);
 }
@@ -314,7 +314,7 @@ auto Curve::GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand>
     return GenerateCurve(mSegmentPoints);
 }
 
-auto Curve::GetPointsOnLine(int numpnts) const -> std::vector<Coord>
+auto Curve::GetPointsOnLine(size_t numpnts) const -> std::vector<Coord>
 {
     return PointsOnLine(mSegmentPoints, numpnts);
 }

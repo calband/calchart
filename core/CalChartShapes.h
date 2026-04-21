@@ -271,7 +271,7 @@ public:
     {
         return pntlist.empty() ? nullptr : &pntlist.front();
     }
-    [[nodiscard]] auto GetPointsOnLine(int numpnts) const -> std::vector<Coord>;
+    [[nodiscard]] auto GetPointsOnLine(size_t numpnts) const -> std::vector<Coord>;
     [[nodiscard]] auto GetPolygon() const -> RawPolygon_t override { return { pntlist }; }
 
 private:
@@ -357,7 +357,7 @@ public:
     void Append(Coord p);
     [[nodiscard]] auto GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand> override;
 
-    [[nodiscard]] auto GetPointsOnLine(int numpnts) const -> std::vector<Coord>;
+    [[nodiscard]] auto GetPointsOnLine(size_t numpnts) const -> std::vector<Coord>;
     [[nodiscard]] auto GetControlPoints() const -> std::vector<Coord> { return mControlPoints; }
     [[nodiscard]] auto LowerControlPointOnLine(Coord point, Coord::units searchBound) const -> std::optional<std::tuple<size_t, double>>;
 

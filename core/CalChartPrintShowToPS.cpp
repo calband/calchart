@@ -275,13 +275,13 @@ namespace {
 }
 
 static std::tuple<float, float, float, float, float>
-CalcValues(bool PrintLandscape, bool PrintDoCont, double PageWidth, double PageHeight, double ContRatio)
+CalcValues(bool PrintLandscape, bool PrintDoCont, float PageWidth, float PageHeight, float ContRatio)
 {
     float width, height, real_width, real_height, field_y;
     if (PrintLandscape) {
         width = static_cast<float>(PageHeight * DPI);
         if (PrintDoCont) {
-            height = static_cast<float>(PageWidth * (1.0 - ContRatio) * DPI);
+            height = static_cast<float>(PageWidth * (1.0f - ContRatio) * DPI);
             field_y = static_cast<float>(PageWidth * ContRatio * DPI);
         } else {
             height = static_cast<float>(PageWidth * DPI);
@@ -290,7 +290,7 @@ CalcValues(bool PrintLandscape, bool PrintDoCont, double PageWidth, double PageH
     } else {
         width = static_cast<float>(PageWidth * DPI);
         if (PrintDoCont) {
-            height = static_cast<float>(PageHeight * (1.0 - ContRatio) * DPI);
+            height = static_cast<float>(PageHeight * (1.0f - ContRatio) * DPI);
             field_y = static_cast<float>(PageHeight * ContRatio * DPI);
         } else {
             height = static_cast<float>(PageHeight * DPI);
@@ -305,7 +305,7 @@ CalcValues(bool PrintLandscape, bool PrintDoCont, double PageWidth, double PageH
 
 static auto
 CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
-    double PageWidth, double PageHeight, double ContRatio,
+    float PageWidth, float PageHeight, float ContRatio,
     int min_yards, ShowMode const& mode)
 {
     float width{}, height{}, real_width{}, real_height{};
@@ -332,8 +332,8 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
         if (step_width > min_yards) {
             /* We can get the minimum size */
             step_width = (step_width / 8) * 8;
-            field_w = step_width * (height / (fullheight + 8.0));
-            field_h = height * (fieldheight / (fullheight + 8.0));
+            field_w = step_width * (height / (fullheight + 8.f));
+            field_h = height * (fieldheight / (fullheight + 8.f));
             if ((field_w / step_width * (step_width + 4)) > width) {
                 /* Oops, we didn't made it big enough */
                 field_h *= width * step_width / (step_width + 4) / field_w;

@@ -641,7 +641,7 @@ auto MovePointsTool_ShapeDraw::TransformPoints(MarcherToPosition const& select_l
     assert(m_shape_list.size() == 1);
     auto* shape = (CalChart::Lasso const*)m_shape_list.back().get();
     MarcherToPosition result;
-    auto points = shape->GetPointsOnLine(static_cast<int>(select_list.size()));
+    auto points = shape->GetPointsOnLine(select_list.size());
     auto iter = points.begin();
     assert(points.size() == select_list.size());
     auto ordered = get_ordered_selection(select_list);
