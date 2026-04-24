@@ -24,6 +24,7 @@
 #include "CalChartAngles.h"
 #include "CalChartTypes.h"
 
+#include <algorithm>
 #include <compare>
 #include <cstdint>
 #include <format>
@@ -257,7 +258,9 @@ inline auto CoordBasic<T>::Direction() const -> CalChart::Radian
         return CalChart::Radian{};
     }
 
-    auto ang = acos(CoordUnits2Float(x) / Magnitude()); // normalize
+    // Clamp to [-1, 1] to prevent acos from returning NaN due to floating point rounding errors
+    auto cosValue = std::clamp(CoordUnits2Float(x) / Magnitude(), -1.0, 1.0);
+    auto ang = acos(cosValue); // normalize
     if (y > 0) {
         ang = (-ang); // check for > PI
     }
