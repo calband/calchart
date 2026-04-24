@@ -166,13 +166,15 @@ void FieldThumbnailBrowser::OnPaint([[maybe_unused]] wxPaintEvent& event)
     dc.Clear();
 
     // let's draw the boxes
-    auto mode_size = mView->GetShowFullSize();
+    // Convert mode_size to DIP coordinates to match GetSize() coordinate system
+    auto mode_size_logical = mView->GetShowFullSize();
+    auto mode_size = fDIP(wxSize{ mode_size_logical.x, mode_size_logical.y });
     auto current_size = GetSize() - wxSize(kXLeftPadding + kXRightPadding + mXScrollPadding, mYNameSize + kYNamePadding + kYUpperPadding + kYBottomPadding + mYScrollPadding);
     auto box_size = mLayoutHorizontal
         ? wxSize(mode_size.x * (current_size.y / static_cast<double>(mode_size.y)), current_size.y)
         : wxSize(current_size.x, mode_size.y * (current_size.x / static_cast<double>(mode_size.x)));
 
-    auto userScale = CalcUserScale(box_size, mode_size);
+    auto userScale = CalcUserScale(box_size, CalChart::Coord{ mode_size_logical.x, mode_size_logical.y });
 
     auto thumbnail_offset = mLayoutHorizontal
         ? CalChart::Coord(box_size.x + kXLeftPadding + kXRightPadding, 0)
