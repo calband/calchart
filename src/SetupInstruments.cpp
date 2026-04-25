@@ -182,16 +182,14 @@ void SetupInstruments::CreateControls()
             wxUI::Button{ "&None" }
                 .bind([this] { SelectNone(); }),
         },
-        wxUI::HSizer{
-            wxUI::ForEach{
-                enumerate(GetSymbolsBitmap()) | std::views::filter([this](auto bitmap) {
-                    return std::count(mSymbols.begin(), mSymbols.end(), static_cast<CalChart::SYMBOL_TYPE>(std::get<0>(bitmap)));
-                }),
-                [this](auto bitmap) {
-                    return wxUI::BitmapButton{ std::get<1>(bitmap) }
-                        .bind([this, which = static_cast<CalChart::SYMBOL_TYPE>(std::get<0>(bitmap))] { SelectSymbol(which); });
-                } },
-        },
+        wxUI::HForEach(
+            enumerate(GetSymbolsBitmap()) | std::views::filter([this](auto bitmap) {
+                return std::count(mSymbols.begin(), mSymbols.end(), static_cast<CalChart::SYMBOL_TYPE>(std::get<0>(bitmap)));
+            }),
+            [this](auto bitmap) {
+                return wxUI::BitmapButton{ std::get<1>(bitmap) }
+                    .bind([this, which = static_cast<CalChart::SYMBOL_TYPE>(std::get<0>(bitmap))] { SelectSymbol(which); });
+            }),
         wxUI::HSizer{
             wxUI::Text{ "Select Instrument" },
             wxUI::Choice{ std::set(mInstruments.begin(), mInstruments.end()) }

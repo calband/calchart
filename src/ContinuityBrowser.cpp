@@ -55,7 +55,7 @@ private:
 
     // Internals
     CalChartView* mView{};
-    wxUI::Generic<ContinuityBrowserPanel>::Proxy mCanvas{};
+    wxUI::Factory<ContinuityBrowserPanel>::Proxy mCanvas{};
     CalChart::SYMBOL_TYPE mSym{};
 };
 
@@ -81,11 +81,12 @@ void ContinuityBrowserPerCont::CreateControls(CalChart::Configuration const& con
                 })
                 .withFlags(BasicSizerFlags()) },
         // here's a canvas
-        mCanvas = wxUI::Generic<ContinuityBrowserPanel>{
+        wxUI::Factory{
             ExpandSizerFlags(),
             [this, &config](wxWindow* parent) {
                 return new ContinuityBrowserPanel(mSym, config, parent);
-            } },
+            } }
+            .withProxy(mCanvas),
     }
         .fitTo(this);
 }
@@ -124,17 +125,17 @@ void ContinuityBrowser::CreateControls(CalChart::Configuration const& config)
 {
     wxUI::VSizer{
         wxUI::Line{}.withStyle(wxLI_HORIZONTAL),
-        wxUI::ForEach{
+        wxUI::VForEach(
             wxSizerFlags{ 1 }.Border(wxALL, 2).Expand(),
             CalChart::k_symbols,
-            [this, &config](auto eachcont) { return wxUI::Generic{
+            [this, &config](auto eachcont) { return wxUI::Factory{
                                                  [this, eachcont, &config](wxWindow* parent) {
                                                      auto perCont = new ContinuityBrowserPerCont(parent, eachcont, config);
                                                      perCont->Show(false);
                                                      mPerCont.push_back(perCont);
                                                      return perCont;
                                                  }
-                                             }; } },
+                                             }; }),
 
         wxUI::HSizer{
             wxUI::Button{ wxID_HELP, "&Help" }

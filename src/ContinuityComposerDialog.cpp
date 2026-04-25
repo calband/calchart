@@ -86,7 +86,7 @@ private:
 
     std::unique_ptr<CalChart::Cont::Procedure> mCont;
     CalChart::Cont::Drawable mDrawableCont;
-    wxUI::Generic<ContinuityComposerCanvas>::Proxy mCanvas{};
+    wxUI::Factory<ContinuityComposerCanvas>::Proxy mCanvas{};
     wxUI::ComboBox::Proxy mComboSelection{};
     CalChart::Cont::Token const* mCurrentSelected = nullptr;
     CalChart::Cont::Token* mCurrentParent = nullptr;
@@ -146,12 +146,13 @@ void ContinuityComposerPanel::Init()
 void ContinuityComposerPanel::CreateControls()
 {
     wxUI::VSizer{
-        mCanvas = wxUI::Generic<ContinuityComposerCanvas>{
+        wxUI::Factory{
             wxSizerFlags(1).Expand(),
             [this](wxWindow* parent) {
                 return new ContinuityComposerCanvas(mConfig, parent);
             },
-        },
+        }
+            .withProxy(mCanvas),
         wxUI::ComboBox{}.withStyle(wxTE_PROCESS_ENTER).bind(wxEVT_TEXT_ENTER, [this](auto const& event) {
                                                           OnCmdTextEnterKeyPressed(event);
                                                       })
@@ -678,9 +679,10 @@ ContinuityComposerDialog::ContinuityComposerDialog(std::unique_ptr<CalChart::Con
     ContinuityComposerPanel* panel = new ContinuityComposerPanel(std::move(starting_continuity), config, this);
     wxUI::VSizer{
         sRightBasicSizerFlags,
-        mPanel = wxUI::Generic<ContinuityComposerPanel>{
+        wxUI::Generic{
             wxSizerFlags{ 0 }.Expand().Border(wxALL, 5),
-            panel },
+            panel }
+            .withProxy(mPanel),
         wxUI::VSizer{
             sRightBasicSizerFlags,
             wxUI::HSizer{

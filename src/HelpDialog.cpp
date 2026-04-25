@@ -57,7 +57,7 @@ HelpDialog::HelpDialog(wxWindow* parent, HelpManager& helpManager)
                 .bind(wxEVT_TEXT_ENTER, [this](auto const& event) { OnSearchEnter(const_cast<wxCommandEvent&>(event)); }),
         },
         // WebView for displaying help content
-        mWebView = wxUI::Generic<wxWebView>{
+        wxUI::Factory<wxWebView>{
             wxSizerFlags(1).Expand(),
             [this](wxWindow* parent) {
                 auto* webView = wxWebView::New(parent, wxID_ANY);
@@ -67,7 +67,8 @@ HelpDialog::HelpDialog(wxWindow* parent, HelpManager& helpManager)
                 webView->Bind(wxEVT_WEBVIEW_LOADED, &HelpDialog::OnWebViewLoaded, this);
                 return webView;
             },
-        },
+        }
+            .withProxy(mWebView),
     }
         .fitTo(this);
 
@@ -101,7 +102,7 @@ void HelpDialog::LoadTopic(const std::string& topicId)
 
     // Get the file path for the topic
     std::string filePath = mHelpManager.GetHelpTopicPath(topicId);
-    
+
     if (filePath.empty()) {
         wxLogWarning("Could not find file path for topic: %s", topicId);
         // Fallback to SetPage with error message
@@ -110,9 +111,9 @@ void HelpDialog::LoadTopic(const std::string& topicId)
         // Convert file path to file:// URL
         wxString fileUrl = "file:///" + wxString(filePath);
         fileUrl.Replace("\\", "/");
-        
+
         wxLogInfo("LoadTopic: topicId='%s', loading URL='%s'", topicId, fileUrl);
-        
+
         // Use LoadURL instead of SetPage - more reliable on Windows
         mWebView->LoadURL(fileUrl);
     }
@@ -133,9 +134,9 @@ void HelpDialog::OnBack(wxCommandEvent&)
     // Get and display the previous topic
     std::string topicId = mBackStack.top();
     mBackStack.pop();
-    
+
     mCurrentTopicId = topicId;
-    
+
     std::string filePath = mHelpManager.GetHelpTopicPath(topicId);
     if (!filePath.empty()) {
         wxString fileUrl = "file:///" + wxString(filePath);
@@ -159,9 +160,9 @@ void HelpDialog::OnForward(wxCommandEvent&)
     // Get and display the next topic
     std::string topicId = mForwardStack.top();
     mForwardStack.pop();
-    
+
     mCurrentTopicId = topicId;
-    
+
     std::string filePath = mHelpManager.GetHelpTopicPath(topicId);
     if (!filePath.empty()) {
         wxString fileUrl = "file:///" + wxString(filePath);
