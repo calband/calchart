@@ -618,7 +618,7 @@ auto Sheet::FindCurveControlPoint(Coord where, Coord::units searchBound) const -
                 return ((where.x + searchBound) >= point.x) && ((where.x - searchBound) <= point.x) && ((where.y + searchBound) >= point.y) && ((where.y - searchBound) <= point.y);
             });
             iter != points.end()) {
-            return std::tuple<size_t, size_t>{ whichCurve, std::distance(points.begin(), iter) };
+            return std::tuple<size_t, size_t>{ whichCurve, static_cast<size_t>(std::distance(points.begin(), iter)) };
         }
     }
     return std::nullopt;
@@ -937,7 +937,7 @@ namespace {
                         config.Get_CalChartBrushAndPen(std::get<0>(color)),
                         CalChart::Draw::withTextForeground(
                             config.Get_CalChartBrushAndPen(std::get<2>(color)),
-                            NegativeIntersection(selection_list, labels.size())
+                            NegativeIntersection(selection_list, static_cast<int>(labels.size()))
                                 | TransformIndexToDrawCommands(sheet, labels, ref, config))),
                     CalChart::Draw::withBrushAndPen(
                         config.Get_CalChartBrushAndPen(std::get<1>(color)),
@@ -991,7 +991,7 @@ auto Sheet::GenerateSheetElements(CalChart::Configuration const& config, Selecti
     CalChart::append(drawCmds, GenerateSheetMarcherDrawCommands(config, selected, marcherLabels, *this, referencePoint, GetMarcherColors(false, false)));
 
     for (auto&& [which, curve] : CalChart::Ranges::enumerate_view(mCurves)) {
-        CalChart::append(drawCmds, GenerateCurve(config, curve.first, which));
+        CalChart::append(drawCmds, GenerateCurve(config, curve.first, static_cast<int>(which)));
     }
     return drawCmds;
 }

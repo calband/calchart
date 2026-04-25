@@ -38,8 +38,6 @@ TEST_CASE("wxCalChart::CollectDiagnosticInfo", "DiagnosticInfo")
 
     // Verify system information is added to additional_info
     // These fields should be present from wxWidgets data collection
-    CHECK(info.additional_info.count("OS") >= 0); // May be 0 or 1 depending on platform
-    CHECK(info.additional_info.count("Architecture") >= 0);
     CHECK(info.additional_info.count("wxWidgets") > 0);
     CHECK(info.additional_info.count("Display") > 0);
     CHECK(info.additional_info.count("Memory") > 0);

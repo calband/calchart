@@ -23,12 +23,16 @@
 #include <wx/statline.h>
 #include <wxUI/wxUI.hpp>
 
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#endif
 
 using namespace std::string_literals;
 
+#ifdef __clang__
 #pragma mark -
+#endif
 
 enum {
     CALCHART__TRANSITION_SOLVER__CLOSE,
@@ -55,7 +59,9 @@ Algorithms were selected from three different student groups:
 (1) Chiu, Zamora, Malani (2) Namini Asl, Ramirez, Zhang (3) Sover, Eliceiri, Hershkovitz
 Additional thanks to professor Scott Moura for helping the Cal Band get support from the UC Berkeley
 Civil Engineering Department for developing these algorithms.)T";
+#ifdef __clang__
 #pragma mark - TransitionSolverFrame Implementation
+#endif
 
 TransitionSolverFrame::TransitionSolverFrame()
 {
@@ -412,7 +418,9 @@ void TransitionSolverFrame::SyncControlsWithCurrentState()
     mNumberOfSelectedPointsLabel->SetLabelText(std::to_string(numPointsInSelection));
 }
 
+#ifdef __clang__
 #pragma mark - UI ENDPOINTS
+#endif
 
 void TransitionSolverFrame::OnApply()
 {
@@ -504,7 +512,9 @@ void TransitionSolverFrame::OnNullEvent(wxCommandEvent&)
     SyncGroupControlsWithCurrentState();
 }
 
+#ifdef __clang__
 #pragma mark - UNDER-THE-UI
+#endif
 
 void TransitionSolverFrame::Apply()
 {
@@ -640,4 +650,6 @@ void TransitionSolverFrame::RemoveDestinations(CalChart::SelectionList marchers)
     }
 }
 
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
+#endif

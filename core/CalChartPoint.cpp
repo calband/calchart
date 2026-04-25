@@ -172,15 +172,15 @@ namespace {
             }
         }(symbol);
 
-        auto const circ_r = CalChart::Float2CoordUnits(dotRatio) / 2.0;
+        auto const circ_r = CalChart::Float2CoordUnits(dotRatio) / 2;
 
         return { Draw::Circle({ 0, 0 }, circ_r, filled) };
     }
 
     auto CreatePointCross(CalChart::SYMBOL_TYPE symbol, double dotRatio, double pLineRatio, double sLineRatio) -> std::vector<Draw::DrawCommand>
     {
-        auto const plineoff = static_cast<Coord::units>(CalChart::Float2CoordUnits(dotRatio * pLineRatio) / 2.0);
-        auto const slineoff = static_cast<Coord::units>(CalChart::Float2CoordUnits(dotRatio * sLineRatio) / 2.0);
+        auto const plineoff = static_cast<Coord::units>(CalChart::Float2CoordUnits(dotRatio * pLineRatio) / 2);
+        auto const slineoff = static_cast<Coord::units>(CalChart::Float2CoordUnits(dotRatio * sLineRatio) / 2);
 
         auto drawCmds = std::vector<Draw::DrawCommand>{};
         switch (symbol) {
@@ -215,7 +215,7 @@ namespace {
         if (!point.LabelIsVisible()) {
             return {};
         }
-        auto const circ_r = CalChart::Float2CoordUnits(dotRatio) / 2.0;
+        auto const circ_r = CalChart::Float2CoordUnits(dotRatio) / 2;
         auto anchor = Draw::Text::TextAnchor::Bottom;
         anchor = anchor | (point.GetFlip() ? Draw::Text::TextAnchor::Left : Draw::Text::TextAnchor::Right);
         return { Draw::Text(-CalChart::Coord(0, circ_r), label, anchor) };

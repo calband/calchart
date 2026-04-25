@@ -75,7 +75,7 @@ auto CreateCompileResult(
             defcont.Compile(ac);
         } else {
             // use EVEN REM NP
-            Cont::ProcEven defcont(std::make_unique<Cont::ValueFloat>(ac.GetBeatsRemaining()), std::make_unique<Cont::NextPoint>());
+            Cont::ProcEven defcont(std::make_unique<Cont::ValueFloat>(static_cast<float>(ac.GetBeatsRemaining())), std::make_unique<Cont::NextPoint>());
             defcont.Compile(ac);
         }
     } else {
@@ -127,8 +127,8 @@ bool CompileState::Append(Command cmd)
     mBeatsRem -= numBeats;
 
     mWhichPos = End(cmd); // Move current point to new position
-    SetVarValue(Cont::Variable::DOF, MotionDirectionAtBeat(cmd, numBeats).getValue());
-    SetVarValue(Cont::Variable::DOH, FacingDirectionAtBeat(cmd, numBeats).getValue());
+    SetVarValue(Cont::Variable::DOF, static_cast<float>(MotionDirectionAtBeat(cmd, numBeats).getValue()));
+    SetVarValue(Cont::Variable::DOH, static_cast<float>(FacingDirectionAtBeat(cmd, numBeats).getValue()));
     mCmds.push_back(cmd);
     return true;
 }

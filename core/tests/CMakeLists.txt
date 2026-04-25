@@ -29,6 +29,14 @@ add_executable(CalChartCoreTests
 
 SetupCompilerForTarget(CalChartCoreTests)
 
+if(CALCHART_CORE_WARNINGS_AS_ERRORS OR CALCHART_WARNINGS_AS_ERRORS)
+  if(NOT MSVC)
+    target_compile_options(CalChartCoreTests PRIVATE -Werror)
+  else()
+    target_compile_options(CalChartCoreTests PRIVATE /WX)
+  endif()
+endif()
+
 target_link_libraries(
   CalChartCoreTests
   PRIVATE

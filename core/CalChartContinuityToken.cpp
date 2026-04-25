@@ -21,6 +21,12 @@
 */
 
 #include "CalChartContinuityToken.h"
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnonnull"
+#endif
+
 #include "CalChartAngles.h"
 #include "CalChartAnimationCommand.h"
 #include "CalChartAnimationCompile.h"
@@ -761,19 +767,19 @@ ValueDefined::ValueDefined(DefinedValue v)
 float ValueDefined::Get(Animate::Compile const&) const
 {
     static const std::map<DefinedValue, float> mapping = {
-        { CC_NW, 45.0 },
-        { CC_W, 90.0 },
-        { CC_SW, 135.0 },
-        { CC_S, 180.0 },
-        { CC_SE, 225.0 },
-        { CC_E, 270.0 },
-        { CC_NE, 315.0 },
-        { CC_HS, 1.0 },
-        { CC_MM, 1.0 },
-        { CC_SH, 0.5 },
-        { CC_JS, 0.5 },
-        { CC_GV, 1.0 },
-        { CC_M, 4.0f / 3 },
+        { CC_NW, 45.0f },
+        { CC_W, 90.0f },
+        { CC_SW, 135.0f },
+        { CC_S, 180.0f },
+        { CC_SE, 225.0f },
+        { CC_E, 270.0f },
+        { CC_NE, 315.0f },
+        { CC_HS, 1.0f },
+        { CC_MM, 1.0f },
+        { CC_SH, 0.5f },
+        { CC_JS, 0.5f },
+        { CC_GV, 1.0f },
+        { CC_M, 4.0f / 3.0f },
         { CC_DM, static_cast<float>(std::numbers::sqrt2) },
     };
     auto i = mapping.find(val);
@@ -2977,4 +2983,9 @@ Reader ProcStandAndPlay::Deserialize(Reader reader)
     std::tie(dir, reader) = DeserializeValue(reader);
     return reader;
 }
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
+
 }

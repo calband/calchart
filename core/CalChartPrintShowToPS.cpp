@@ -144,7 +144,14 @@ namespace {
         time_t t;
         time(&t);
         std::ostringstream os;
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4996) // ctime is not thread-safe but acceptable here
+#endif
         os << "%%CreationDate: " << ctime(&t);
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
         return os.str();
     };
 
@@ -268,37 +275,37 @@ namespace {
 }
 
 static std::tuple<float, float, float, float, float>
-CalcValues(bool PrintLandscape, bool PrintDoCont, double PageWidth, double PageHeight, double ContRatio)
+CalcValues(bool PrintLandscape, bool PrintDoCont, float PageWidth, float PageHeight, float ContRatio)
 {
     float width, height, real_width, real_height, field_y;
     if (PrintLandscape) {
-        width = PageHeight * DPI;
+        width = static_cast<float>(PageHeight * DPI);
         if (PrintDoCont) {
-            height = PageWidth * (1.0 - ContRatio) * DPI;
-            field_y = PageWidth * ContRatio * DPI;
+            height = static_cast<float>(PageWidth * (1.0f - ContRatio) * DPI);
+            field_y = static_cast<float>(PageWidth * ContRatio * DPI);
         } else {
-            height = PageWidth * DPI;
+            height = static_cast<float>(PageWidth * DPI);
             field_y = 0;
         }
     } else {
-        width = PageWidth * DPI;
+        width = static_cast<float>(PageWidth * DPI);
         if (PrintDoCont) {
-            height = PageHeight * (1.0 - ContRatio) * DPI;
-            field_y = PageHeight * ContRatio * DPI;
+            height = static_cast<float>(PageHeight * (1.0f - ContRatio) * DPI);
+            field_y = static_cast<float>(PageHeight * ContRatio * DPI);
         } else {
-            height = PageHeight * DPI;
+            height = static_cast<float>(PageHeight * DPI);
             field_y = 0;
         }
     }
-    real_width = PageWidth * DPI;
-    real_height = PageHeight * DPI;
+    real_width = static_cast<float>(PageWidth * DPI);
+    real_height = static_cast<float>(PageHeight * DPI);
     return std::tuple<float, float, float, float, float>(
         width, height, real_width, real_height, field_y);
 }
 
 static auto
 CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
-    double PageWidth, double PageHeight, double ContRatio,
+    float PageWidth, float PageHeight, float ContRatio,
     int min_yards, ShowMode const& mode)
 {
     float width{}, height{}, real_width{}, real_height{};
@@ -308,10 +315,10 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
 
     auto fullsize = mode.Size();
     auto fieldsize = mode.FieldSize();
-    auto fullwidth = CoordUnits2Float(fullsize.x);
-    auto fullheight = CoordUnits2Float(fullsize.y);
-    auto fieldwidth = CoordUnits2Float(fieldsize.x);
-    auto fieldheight = CoordUnits2Float(fieldsize.y);
+    auto fullwidth = static_cast<float>(CoordUnits2Float(fullsize.x));
+    auto fullheight = static_cast<float>(CoordUnits2Float(fullsize.y));
+    auto fieldwidth = static_cast<float>(CoordUnits2Float(fieldsize.x));
+    auto fieldheight = static_cast<float>(CoordUnits2Float(fieldsize.y));
 
     /* first, calculate dimensions */
     if (!overview) {
@@ -325,8 +332,8 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
         if (step_width > min_yards) {
             /* We can get the minimum size */
             step_width = (step_width / 8) * 8;
-            field_w = step_width * (height / (fullheight + 8.0));
-            field_h = height * (fieldheight / (fullheight + 8.0));
+            field_w = step_width * (height / (fullheight + 8.f));
+            field_h = height * (fieldheight / (fullheight + 8.f));
             if ((field_w / step_width * (step_width + 4)) > width) {
                 /* Oops, we didn't made it big enough */
                 field_h *= width * step_width / (step_width + 4) / field_w;
@@ -618,10 +625,10 @@ auto PrintShowToPS::GenerateStandard(Sheet const& sheet, bool split_sheet) const
         | std::views::filter([clip_s = clip_s, clip_n = clip_n](auto&& enumPoint) {
               return std::get<1>(enumPoint).GetPos().x >= clip_s && std::get<1>(enumPoint).GetPos().x <= clip_n;
           });
-    result = std::accumulate(std::begin(pointsOfInterest), std::end(pointsOfInterest), result, [this, step_offset = step_offset, fieldheight = CoordUnits2Float(fieldsize.y), fieldoffx = CoordUnits2Float(fieldoff.x), fieldoffy = CoordUnits2Float(fieldoff.y)](auto acc, auto enumPoint) {
+    result = std::accumulate(std::begin(pointsOfInterest), std::end(pointsOfInterest), result, [this, step_offset = step_offset, fieldheight = static_cast<float>(CoordUnits2Float(fieldsize.y)), fieldoffx = static_cast<float>(CoordUnits2Float(fieldoff.x)), fieldoffy = static_cast<float>(CoordUnits2Float(fieldoff.y))](auto acc, auto enumPoint) {
         auto [enumeration, point] = enumPoint;
-        auto dot_x = (CoordUnits2Float(point.GetPos().x) - fieldoffx - step_offset) / step_width * field_w;
-        auto dot_y = (1.0 - (CoordUnits2Float(point.GetPos().y) - fieldoffy) / fieldheight) * field_h;
+        auto dot_x = (static_cast<float>(CoordUnits2Float(point.GetPos().x)) - fieldoffx - step_offset) / step_width * field_w;
+        auto dot_y = (1.0 - (static_cast<float>(CoordUnits2Float(point.GetPos().y)) - fieldoffy) / fieldheight) * field_h;
         return acc + std::format("{:.2f} {:.2f} {}\n", dot_x, dot_y, dot_routines[point.GetSymbol()])
             + std::format("({}) {:.2f} {:.2f} {}\n", mShow.GetPointLabel(enumeration), dot_x, dot_y, (point.GetFlip() ? "donumber2" : "donumber"));
     });
@@ -636,7 +643,7 @@ auto PrintShowToPS::GenerateOverview(Sheet const& sheet) const -> std::string
 {
     auto fieldoff = mMode.FieldOffset();
     auto fieldsize = mMode.FieldSize();
-    auto fieldwidth = CoordUnits2Float(fieldsize.x);
+    auto fieldwidth = static_cast<float>(CoordUnits2Float(fieldsize.x));
     auto result = std::format("%%Page: {}\n", sheet.GetName())
         + GenerateStartPage(mPrintLandscape,
             field_x,
@@ -649,14 +656,14 @@ auto PrintShowToPS::GenerateOverview(Sheet const& sheet) const -> std::string
         + "drawfield\n"
         + std::format("/w {:.2f} def\n", width / fieldwidth * 2.0 / 3.0);
 
-    auto fieldheight = CoordUnits2Float(fieldsize.y);
+    auto fieldheight = static_cast<float>(CoordUnits2Float(fieldsize.y));
 
     auto allBoxes = sheet.GetAllMarchers()
         | std::views::transform([](auto&& point) { return point.GetPos(); })
         | std::views::transform([this, fieldoff, fieldwidth, fieldheight](auto&& position) {
               return std::format("{:.2f} {:.2f} dotbox\n",
-                  CoordUnits2Float(position.x - fieldoff.x) / fieldwidth * width,
-                  (1.0 - CoordUnits2Float(position.y - fieldoff.y) / fieldheight) * height);
+                  static_cast<float>(CoordUnits2Float(position.x - fieldoff.x)) / fieldwidth * width,
+                  (1.0 - static_cast<float>(CoordUnits2Float(position.y - fieldoff.y)) / fieldheight) * height);
           });
     return std::accumulate(allBoxes.begin(), allBoxes.end(), result, std::plus<>{});
 }

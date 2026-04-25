@@ -100,8 +100,7 @@ add_library(
 target_compile_definitions(calchart_core PUBLIC YY_NO_UNISTD_H)
 SetupCompilerForTarget(calchart_core)
 
-# Treat warnings as errors for core library (can be disabled with -DCORE_WARNINGS_AS_ERRORS=OFF)
-if(CORE_WARNINGS_AS_ERRORS)
+if(CALCHART_CORE_WARNINGS_AS_ERRORS OR CALCHART_WARNINGS_AS_ERRORS)
   if(NOT MSVC)
     target_compile_options(calchart_core PRIVATE -Werror)
   else()

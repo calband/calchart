@@ -23,10 +23,14 @@
 
 #include <atomic>
 
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#endif
 
+#ifdef __clang__
 #pragma mark -
+#endif
 
 BEGIN_DECLARE_EVENT_TYPES()
 DECLARE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS_EVT, CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS)
@@ -47,7 +51,9 @@ EVT_COMMAND(wxID_ANY, CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND_EVT
 EVT_COMMAND(wxID_ANY, CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE_EVT, TransitionSolverProgressFrame::OnCalculationComplete)
 END_EVENT_TABLE()
 
+#ifdef __clang__
 #pragma mark - TransitionSolverProgressFrame Implementation
+#endif
 
 TransitionSolverProgressFrame::TransitionSolverProgressFrame()
 {
@@ -255,4 +261,6 @@ void* TransitionSolverProgressFrame::TransitionSolverThread::Entry()
     return nullptr;
 }
 
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
+#endif

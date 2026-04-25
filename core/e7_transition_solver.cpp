@@ -15,12 +15,16 @@
 #include "e7_transition_solver.h"
 #include "munkres.h"
 
+#if (defined(__GNUC__) || defined(__clang__)) && !defined(_MSC_VER)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#endif
 
 namespace CalChart {
 
+#ifdef __clang__
 #pragma mark - Shared
+#endif
 
 // ==================
 // ===-- SHARED --===
@@ -44,11 +48,11 @@ public:
     int32_t y;
 
     SolverCoord(CalChart::Coord showCoord, unsigned fieldWidthInSteps = kFieldWidthInSteps, unsigned fieldHeightInSteps = kFieldHeightInSteps)
-        : x(CoordUnits2Float(showCoord.x) + (fieldWidthInSteps / 2))
-        , y(CoordUnits2Float(showCoord.y) + (fieldHeightInSteps / 2)){};
+        : x(static_cast<int32_t>(CoordUnits2Float(showCoord.x) + (fieldWidthInSteps / 2)))
+        , y(static_cast<int32_t>(CoordUnits2Float(showCoord.y) + (fieldHeightInSteps / 2))) { };
     SolverCoord(int32_t x = 0, int32_t y = 0)
         : x(x)
-        , y(y){};
+        , y(y) { };
 
     auto toShowSpace(unsigned fieldWidthInSteps = kFieldWidthInSteps, unsigned fieldHeightInSteps = kFieldHeightInSteps)
     {
@@ -1357,11 +1361,11 @@ std::pair<float, float> calcStepsInEachDir(SolverCoord startPos, SolverCoord end
         numSteps1 = a - (b * numSteps2);
     } else {
         if (vec1.y != 0) {
-            numSteps1 = moveVector.y / vec1.y;
+            numSteps1 = static_cast<float>(moveVector.y) / static_cast<float>(vec1.y);
             numSteps2 = 0;
         } else if (vec2.y != 0) {
             numSteps1 = 0;
-            numSteps2 = moveVector.y / vec2.y;
+            numSteps2 = static_cast<float>(moveVector.y) / static_cast<float>(vec2.y);
         } else {
             numSteps1 = 0;
             numSteps2 = 0;
@@ -1390,7 +1394,7 @@ MovingMarcher calculateMovementFromSolution(const MarcherSolution& marcher)
     MovingMarcher marcherAnim;
     marcherAnim.waitBeats = marcher.instruction.waitBeats;
     marcherAnim.stepVectors = stepVectors;
-    marcherAnim.numSteps = numSteps;
+    marcherAnim.numSteps = { static_cast<unsigned>(numSteps.first), static_cast<unsigned>(numSteps.second) };
     marcherAnim.startPos = marcher.startPos;
 
     return marcherAnim;
@@ -1589,7 +1593,9 @@ bool DestinationConstraints::destinationIsAllowed(unsigned marcher, SolverCoord 
     return destinationIsAllowed(marcher, m_destinationPositionsToIndices.at(destination));
 }
 
+#ifdef __clang__
 #pragma mark - Algorithm By: Chiu Zamora Malani
+#endif
 
 // ==============================================
 // ===-- ALGORITHM BY: CHIU, ZAMORA, MALANI --===
@@ -1652,7 +1658,7 @@ namespace e7ChiuZamoraMalani {
     struct AdjustmentInstructionSorter {
 
         AdjustmentInstructionSorter(const std::vector<TransitionSolverParams::MarcherInstruction>& instructionOptions)
-            : instructionOptions(instructionOptions){};
+            : instructionOptions(instructionOptions) { };
 
         const std::vector<TransitionSolverParams::MarcherInstruction> instructionOptions;
 
@@ -1847,7 +1853,9 @@ namespace e7ChiuZamoraMalani {
     }
 }
 
+#ifdef __clang__
 #pragma mark - Algorithm By: Namini Asl, Ramirez, Zhang
+#endif
 
 // ===================================================
 // ===-- ALGORITHM BY: NAMINI ASL, RAMIREZ, ZHANG --===
@@ -1983,7 +1991,9 @@ namespace e7NaminiaslRamirezZhang {
     };
 }
 
+#ifdef __clang__
 #pragma mark - Algorithm By: Sover, Eliceiri, Hershkovitz
+#endif
 
 // ======================================================
 // ===-- ALGORITHM BY: SOVER, ELICEIRI, HERSHKOVITZ --===
@@ -2122,7 +2132,9 @@ namespace e7SoverEliceiriHershkovitz {
     };
 }
 
+#ifdef __clang__
 #pragma mark - Final Solver
+#endif
 
 // ========================
 // ===-- FINAL SOLVER --===
@@ -2343,4 +2355,6 @@ TransitionSolverResult runTransitionSolver(const CalChart::Sheet& sheet1, const 
 }
 }
 
+#if (defined(__GNUC__) || defined(__clang__)) && !defined(_MSC_VER)
 #pragma GCC diagnostic pop
+#endif

@@ -587,9 +587,9 @@ auto MovePointsTool_ShapeEllipse::TransformPoints(MarcherToPosition const& selec
     for (auto i : ordered) {
         // should this have a snap to grid?
         if ((angle > std::numbers::pi / 2.0) && (angle <= 3.0 * std::numbers::pi / 2.0)) {
-            result[i] = center + CalChart::Coord(-(a * b) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2))), -(a * b * tan(angle)) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2))));
+            result[i] = center + CalChart::Coord(static_cast<int>(-(a * b) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2)))), static_cast<int>(-(a * b * tan(angle)) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2)))));
         } else {
-            result[i] = center + CalChart::Coord((a * b) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2))), (a * b * tan(angle)) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2))));
+            result[i] = center + CalChart::Coord(static_cast<int>((a * b) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2)))), static_cast<int>((a * b * tan(angle)) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2)))));
         }
         angle += amount;
     }
@@ -617,13 +617,13 @@ auto MovePointsTool_ShapeRectangle::TransformPoints(MarcherToPosition const& sel
     auto ordered = get_ordered_selection(select_list);
     for (auto i : ordered) {
         if (total_distance < a) {
-            result[i] = start + CalChart::Coord(total_distance, 0);
+            result[i] = start + CalChart::Coord(static_cast<int>(total_distance), 0);
         } else if (total_distance < (a + b)) {
-            result[i] = start + CalChart::Coord(a, total_distance - a);
+            result[i] = start + CalChart::Coord(static_cast<int>(a), static_cast<int>(total_distance - a));
         } else if (total_distance < (2.0 * a + b)) {
-            result[i] = start + CalChart::Coord(a - (total_distance - (a + b)), b);
+            result[i] = start + CalChart::Coord(static_cast<int>(a - (total_distance - (a + b))), static_cast<int>(b));
         } else {
-            result[i] = start + CalChart::Coord(0, b - (total_distance - (2 * a + b)));
+            result[i] = start + CalChart::Coord(0, static_cast<int>(b - (total_distance - (2 * a + b))));
         }
         total_distance += each_segment;
     }
@@ -641,7 +641,7 @@ auto MovePointsTool_ShapeDraw::TransformPoints(MarcherToPosition const& select_l
     assert(m_shape_list.size() == 1);
     auto* shape = (CalChart::Lasso const*)m_shape_list.back().get();
     MarcherToPosition result;
-    auto points = shape->GetPointsOnLine(static_cast<int>(select_list.size()));
+    auto points = shape->GetPointsOnLine(select_list.size());
     auto iter = points.begin();
     assert(points.size() == select_list.size());
     auto ordered = get_ordered_selection(select_list);

@@ -56,7 +56,7 @@ Sheet::Sheet(std::string name, unsigned numBeats, std::vector<CompileResult> con
         auto enumerated = CalChart::Ranges::enumerate_view(cmds | std::views::transform([](auto&& item) { return item.second; }));
         return std::accumulate(std::begin(enumerated), std::end(enumerated), Errors{}, [](auto&& acc, auto&& item) {
             for (auto& error : std::get<1>(item)) {
-                acc[error].insert(std::get<0>(item));
+                acc[error].insert(static_cast<unsigned int>(std::get<0>(item)));
             }
             return acc;
         });
@@ -226,7 +226,7 @@ auto Sheets::BeatToSheetOffsetAndBeat(Beats beat) const -> std::tuple<size_t, Be
     if (where == mRunningBeatCount.end()) {
         return { mRunningBeatCount.size(), beat - TotalBeats() };
     }
-    auto index = std::distance(mRunningBeatCount.begin(), where);
+    auto index = static_cast<size_t>(std::distance(mRunningBeatCount.begin(), where));
     return { index, beat - (*where - mSheets.at(index).GetNumBeats()) };
 }
 
@@ -265,7 +265,7 @@ auto Sheets::DebugAnimateInfoAtBeat(Beats beat) const -> std::pair<std::string, 
 {
     auto [whichSheet, newBeat] = BeatToSheetOffsetAndBeat(beat);
     std::ostringstream output;
-    output << GetSheetName(whichSheet) << " (" << whichSheet << " of " << mSheets.size() << ")\n";
+    output << GetSheetName(static_cast<int>(whichSheet)) << " (" << static_cast<int>(whichSheet) << " of " << mSheets.size() << ")\n";
     output << "beat " << newBeat << " of " << BeatsForSheet(whichSheet) << "\n";
     auto each = mSheets.at(whichSheet).DebugAnimateInfoAtBeat(newBeat, beat == 0);
     return { output.str(), each };

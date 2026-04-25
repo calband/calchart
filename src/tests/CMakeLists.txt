@@ -10,6 +10,14 @@ add_executable(CalChartTests
 
 SetupCompilerForTarget(CalChartTests)
 
+if(CALCHART_WARNINGS_AS_ERRORS)
+  if(NOT MSVC)
+    target_compile_options(CalChartTests PRIVATE -Werror)
+  else()
+    target_compile_options(CalChartTests PRIVATE /WX)
+  endif()
+endif()
+
 target_include_directories(
   CalChartTests
   PRIVATE

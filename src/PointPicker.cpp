@@ -80,7 +80,7 @@ PointPicker::PointPicker(wxWindow* parent, CalChartDoc const& show, CalChart::Se
                         // given a symbol, we go through the labels, and see if it matches
                         mMarcherLabels = CalChart::Ranges::ToVector<std::string>(mList->GetStrings() | std::views::transform([](auto&& string) {
                             return string.ToStdString();
-                        }) | std::views::filter([which, &show](auto&& label) {
+                        }) | std::views::filter([&show, which](auto&& label) {
                             return show.GetPointSymbolOnCurrentSheet(label) == static_cast<CalChart::SYMBOL_TYPE>(which);
                         }));
                         EndModal(wxID_OK);
