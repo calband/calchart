@@ -41,7 +41,7 @@ Options:
     --version               Show version.
 )";
 
-constexpr auto version = "calchart_cmd " CC_VERSION;
+constexpr auto version = "calchart_cmd " CC_GIT_VERSION;
 
 void PrintToPS(std::string_view showPath, bool landscape, bool cont, bool contsheet, bool overview, std::string_view outfile)
 {

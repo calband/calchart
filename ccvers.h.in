@@ -18,9 +18,11 @@
 
 #include <cstdint>
 
+// clang-format off
 #define CC_MAJOR_VERSION @CalChart_VERSION_MAJOR@
 #define CC_MINOR_VERSION @CalChart_VERSION_MINOR@
 #define CC_PATCH_VERSION @CalChart_VERSION_PATCH@
+// clang-format on
 
 #define STRINGIZE_HELPER(name) #name
 #define STRINGIZE(x) STRINGIZE_HELPER(x)
@@ -29,6 +31,9 @@
     "v" STRINGIZE(major) "." STRINGIZE(minor) "." STRINGIZE(patch)
 #define CC_VERSION \
     MK_CC_VERSION(CC_MAJOR_VERSION, CC_MINOR_VERSION, CC_PATCH_VERSION)
+
+// Full git version including commit hash (e.g., "v3.6.2-48-g6538532")
+#define CC_GIT_VERSION "@CalChart_GIT_VERSION@"
 
 static constexpr uint32_t kVersion = (CC_MAJOR_VERSION << 8) | CC_MINOR_VERSION;
 

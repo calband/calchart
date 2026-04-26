@@ -105,8 +105,8 @@ auto DiagnosticInfo::Create() -> DiagnosticInfo
 {
     auto info = DiagnosticInfo{};
 
-    // CalChart version from ccvers.h
-    info.calchart_version = CC_VERSION;
+    // CalChart version from ccvers.h (includes git hash)
+    info.calchart_version = CC_GIT_VERSION;
 
     // Build type
 #ifdef NDEBUG
