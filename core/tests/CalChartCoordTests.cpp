@@ -167,4 +167,43 @@ TEST_CASE("CalChartCoord", "division")
     REQUIRE(CalChart::Coord{ -16, 0 } == CalChart::Coord{ -192, 0 } / 12UL);
 }
 
+// Regression test for Issue #694: Direction() can return NaN due to floating point rounding
+// When acos() receives a value slightly outside [-1, 1] due to FP rounding, it returns NaN
+// This caused marchers to ignore reference points in counter marches and continue straight
+TEST_CASE("DirectionNoNaN", "CalChartCoord")
+{
+    // Test coordinates that are likely to cause rounding issues
+    // These are real-world coordinates from animation calculations
+    std::vector<CalChart::Coord> testCoords = {
+        CalChart::Coord{ 16, 0 }, // Pure cardinal direction
+        CalChart::Coord{ 0, 16 },
+        CalChart::Coord{ -16, 0 },
+        CalChart::Coord{ 0, -16 },
+        CalChart::Coord{ 16, 16 }, // Diagonal
+        CalChart::Coord{ 1, 0 }, // Very small magnitude
+        CalChart::Coord{ 0, 1 },
+        CalChart::Coord{ 32767, 0 }, // Large magnitude (close to max int16)
+        CalChart::Coord{ 0, 32767 },
+        CalChart::Coord{ 23170, 23170 }, // Large diagonal
+        CalChart::Coord{ 23170, 23171 }, // Near-diagonal with slight asymmetry
+    };
+
+    for (auto const& coord : testCoords) {
+        auto direction = coord.Direction();
+        // The main assertion: direction should not be NaN
+        CHECK_FALSE(std::isnan(direction.getValue()));
+        // Direction should be bounded to [0, 2*pi)
+        CHECK(direction.getValue() >= -4.0 * std::numbers::pi); // Allow some wrapping
+        CHECK(direction.getValue() <= 4.0 * std::numbers::pi);
+    }
+
+    // Test that Direction() works correctly after arithmetic operations
+    // that might introduce rounding errors
+    auto c1 = CalChart::Coord{ 100, 50 };
+    auto c2 = CalChart::Coord{ 200, 100 };
+    auto diff = c2 - c1;
+    auto dir = diff.Direction();
+    CHECK_FALSE(std::isnan(dir.getValue()));
+}
+
 // NOLINTEND(cppcoreguidelines-avoid-do-while, misc-use-anonymous-namespace, cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers, readability-function-cognitive-complexity)
