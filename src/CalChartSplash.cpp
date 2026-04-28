@@ -154,7 +154,7 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, std::strin
     wxUI::VSizer{
         BasicSizerFlags(),
         wxUI::Bitmap{ BitmapWithBandIcon(GetLogoSize()) }.withFlags(ExpandSizerFlags()),
-        wxUI::Text{ "CalChart " CC_VERSION }
+        wxUI::Text{ "CalChart " CC_GIT_VERSION }
             .withFont(fontTitle),
         wxUI::Text{ std::string{ "Built with: " } + wxString{ wxVERSION_STRING }.ToStdString() }
             .withFont(fontSubTitle),
@@ -188,7 +188,7 @@ void CalChartSplash::About()
 {
     // clang-format off
     (void)wxMessageBox(
-        "CalChart " CC_VERSION "\n"
+        "CalChart " CC_GIT_VERSION "\n"
         "Built with: " wxVERSION_STRING "\n"
         "Authors: Gurk Meeker, Richard Michael Powell\n"
         "\n"

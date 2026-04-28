@@ -185,7 +185,7 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
 
     // Give it a status line
     CreateStatusBar(3);
-    SetStatusText("Welcome to Calchart " CC_VERSION);
+    SetStatusText("Welcome to Calchart " CC_GIT_VERSION);
 
     wxUI::MenuProxy editMenu;
     wxUI::MenuBar{
