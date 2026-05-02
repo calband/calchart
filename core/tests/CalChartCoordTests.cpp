@@ -170,6 +170,9 @@ TEST_CASE("CalChartCoord", "division")
 // Regression test for Issue #694: Direction() can return NaN due to floating point rounding
 // When acos() receives a value slightly outside [-1, 1] due to FP rounding, it returns NaN
 // This caused marchers to ignore reference points in counter marches and continue straight
+//
+// Additionally, Direction() was unreliable for near-zero magnitude vectors, causing incorrect
+// leg detection in DoCounterMarch when vectors were very small due to floating point precision
 TEST_CASE("DirectionNoNaN", "CalChartCoord")
 {
     // Test coordinates that are likely to cause rounding issues
@@ -204,6 +207,24 @@ TEST_CASE("DirectionNoNaN", "CalChartCoord")
     auto diff = c2 - c1;
     auto dir = diff.Direction();
     CHECK_FALSE(std::isnan(dir.getValue()));
+
+    // Test near-zero vectors return zero angle (Issue #694 follow-up)
+    // These vectors are too small to have a reliable direction
+    std::vector<CalChart::Coord> nearZeroCoords = {
+        CalChart::Coord{ 0, 0 }, // Exactly zero
+        CalChart::Coord{ 1, 0 } / 10000, // Extremely small
+        CalChart::Coord{ 0, 1 } / 10000,
+        CalChart::Coord{ 1, 1 } / 10000,
+    };
+
+    for (auto const& coord : nearZeroCoords) {
+        auto direction = coord.Direction();
+        CHECK_FALSE(std::isnan(direction.getValue()));
+        // Near-zero vectors should return zero angle
+        if (CalChart::IS_ZERO(coord.Magnitude())) {
+            CHECK(direction.getValue() == 0.0);
+        }
+    }
 }
 
 // NOLINTEND(cppcoreguidelines-avoid-do-while, misc-use-anonymous-namespace, cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers, readability-function-cognitive-complexity)

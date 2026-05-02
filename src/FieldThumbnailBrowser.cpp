@@ -43,11 +43,6 @@ constexpr auto kYNamePadding = 4;
 constexpr auto kYBottomPadding = 4;
 constexpr auto kHighlightWidth = 5;
 
-auto toAspectRatio(CalChart::Coord coord) -> double
-{
-    return coord.x / static_cast<double>(coord.y);
-}
-
 auto CalcUserScale(wxSize box_size, CalChart::Coord mode_size)
 {
     auto newX = static_cast<float>(box_size.x);
@@ -126,7 +121,9 @@ auto FieldThumbnailBrowser::SizeOfOneCell(bool horizontal) const -> wxSize
         return { 1, 1 };
     }
 
-    auto modeAspectRatio = toAspectRatio(mView->GetShowFullSize());
+    auto mode_size_logical = mView->GetShowFullSize();
+    auto mode_size = fDIP(wxSize{ mode_size_logical.x, mode_size_logical.y });
+    auto modeAspectRatio = mode_size.x / static_cast<double>(mode_size.y);
     if (horizontal) {
         auto current_size_y = GetSize().y - kYUpperPadding - mYNameSize - kYNamePadding - kYBottomPadding - mYScrollPadding;
         auto box_size_x = current_size_y * modeAspectRatio;
@@ -270,7 +267,8 @@ void FieldThumbnailBrowser::HandleMouseDown(wxMouseEvent& event)
 
 void FieldThumbnailBrowser::HandleSizeEvent(wxSizeEvent& event)
 {
-    auto mode_size = mView->GetShowFullSize();
+    auto mode_size_logical = mView->GetShowFullSize();
+    auto mode_size = fDIP(wxSize{ mode_size_logical.x, mode_size_logical.y });
     auto ratioMode = mode_size.y ? mode_size.x / static_cast<float>(mode_size.y) : 0;
     auto ratioSize = event.m_size.y ? event.m_size.x / static_cast<float>(event.m_size.y) : 0;
 

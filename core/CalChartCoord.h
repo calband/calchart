@@ -254,12 +254,14 @@ constexpr auto CreateCoordVector(CalChart::Degree dir, T mag) -> CalChart::Coord
 template <Arithmetic T>
 inline auto CoordBasic<T>::Direction() const -> CalChart::Radian
 {
-    if (*this == CoordBasic<T>{}) {
+    // Check for zero or near-zero magnitude to avoid unreliable angle calculations
+    auto mag = Magnitude();
+    if (IS_ZERO(mag)) {
         return CalChart::Radian{};
     }
 
     // Clamp to [-1, 1] to prevent acos from returning NaN due to floating point rounding errors
-    auto cosValue = std::clamp(CoordUnits2Float(x) / Magnitude(), -1.0, 1.0);
+    auto cosValue = std::clamp(CoordUnits2Float(x) / mag, -1.0, 1.0);
     auto ang = acos(cosValue); // normalize
     if (y > 0) {
         ang = (-ang); // check for > PI
