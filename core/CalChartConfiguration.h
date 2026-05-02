@@ -213,6 +213,8 @@ private:                                           \
     DECLARE_CONFIGURATION_FUNCTIONS(AnimationFrameSplitScreen, bool);
     DECLARE_CONFIGURATION_FUNCTIONS(AnimationFrameSplitVertical, bool);
     DECLARE_CONFIGURATION_FUNCTIONS(AnimationFrameSheetSlider, bool);
+    DECLARE_CONFIGURATION_FUNCTIONS(AnimationZoomOnMarchers, bool);
+    DECLARE_CONFIGURATION_FUNCTIONS(AnimationStepsOutForMarchersZoom, long);
 
     DECLARE_CONFIGURATION_FUNCTIONS(UseSprites, bool);
     DECLARE_CONFIGURATION_FUNCTIONS(SpriteBitmapScale, double);
