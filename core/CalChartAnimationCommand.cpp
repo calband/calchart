@@ -181,11 +181,78 @@ namespace {
         std::inclusive_scan(allBeats.begin(), allBeats.end(), running.begin());
         return running;
     }
+
+    auto LeadingBeatsAre0(std::vector<Command> const& commands) -> size_t
+    {
+        return std::distance(
+            commands.begin(),
+            std::ranges::find_if(commands.begin(), commands.end(), [](auto&& cmd) {
+                return NumBeats(cmd) != 0;
+            }));
+    }
+
+    auto BeatToCommandOffsetAndBeatImpl(
+        Beats beat,
+        std::vector<Command> const& commands,
+        std::vector<Beats> const& runningBeatCount)
+        -> std::pair<std::pair<size_t, Beats>, std::pair<size_t, Beats>>
+    {
+        // count the number of 0s
+        auto leadingBeats = static_cast<Beats>(LeadingBeatsAre0(commands));
+        if (leadingBeats > 0 && beat == 0) {
+            return { { 1, 0 }, { 0, 0 } };
+        }
+        beat -= leadingBeats;
+        auto where = std::ranges::find_if(runningBeatCount, [beat](auto thisBeat) { return beat < thisBeat; });
+        auto totalBeats = runningBeatCount.empty() ? Beats{ 0 } : runningBeatCount.back();
+        if (where == runningBeatCount.end()) {
+            return { { runningBeatCount.size(), beat - totalBeats }, { runningBeatCount.size(), beat - totalBeats } };
+        }
+        auto index = std::distance(runningBeatCount.begin(), where);
+        auto sheetIndex = std::distance(runningBeatCount.begin(), where);
+        auto thisBeat = beat - (*where - NumBeats(commands.at(index)));
+        // any sort of index makeup, we do here.
+        if (thisBeat == 0 && index > 0 && leadingBeats == 0) {
+            if (NumBeats(commands.at(index - 1)) == 0) {
+                sheetIndex -= 1;
+            }
+        }
+
+        return { { index, thisBeat }, { sheetIndex, thisBeat } };
+    }
+
+    auto ComputeCachedMarcherInfo(
+        std::vector<Command> const& commands,
+        std::vector<Beats> const& runningBeatCount)
+        -> std::vector<MarcherInfo>
+    {
+        auto totalBeats = runningBeatCount.empty() ? Beats{ 0 } : runningBeatCount.back();
+        auto result = std::vector<MarcherInfo>{};
+        result.reserve(totalBeats + 1); // +1 for beat 0
+
+        for (Beats beat = 0; beat <= totalBeats; ++beat) {
+            auto [position, facing] = BeatToCommandOffsetAndBeatImpl(beat, commands, runningBeatCount);
+            auto [which, newBeat] = position;
+            auto [whichFacing, newBeatFacing] = facing;
+
+            if (which >= commands.size()) {
+                result.emplace_back();
+            } else {
+                result.emplace_back(
+                    PositionAtBeat(commands.at(which), newBeat),
+                    CalChart::Radian{ FacingDirectionAtBeat(commands.at(whichFacing), newBeatFacing) },
+                    StepStyle(commands.at(which)));
+            }
+        }
+
+        return result;
+    }
 }
 
 Commands::Commands(std::vector<Command> const& commands)
     : mCommands(commands)
     , mRunningBeatCount{ GetRunningBeats(commands) }
+    , mCachedMarcherInfo{ ComputeCachedMarcherInfo(commands, mRunningBeatCount) }
 {
 }
 
@@ -197,78 +264,17 @@ auto Commands::TotalBeats() const -> Beats
     return mRunningBeatCount.back();
 }
 
-namespace {
-    auto LeadingBeatsAre0(std::vector<Command> const& commands) -> size_t
-    {
-        return std::distance(
-            commands.begin(),
-            std::ranges::find_if(commands.begin(), commands.end(), [](auto&& cmd) {
-                return NumBeats(cmd) != 0;
-            }));
-    }
-
-}
-
 auto Commands::BeatToCommandOffsetAndBeat(Beats beat) const -> std::pair<std::pair<size_t, Beats>, std::pair<size_t, Beats>>
 {
-    // count the number of 0s
-    auto leadingBeats = static_cast<Beats>(LeadingBeatsAre0(mCommands));
-    if (leadingBeats > 0 && beat == 0) {
-        return { { 1, 0 }, { 0, 0 } };
-    }
-    beat -= leadingBeats;
-    auto where = std::ranges::find_if(mRunningBeatCount, [beat](auto thisBeat) { return beat < thisBeat; });
-    if (where == mRunningBeatCount.end()) {
-        return { { mRunningBeatCount.size(), beat - TotalBeats() }, { mRunningBeatCount.size(), beat - TotalBeats() } };
-    }
-    auto index = std::distance(mRunningBeatCount.begin(), where);
-    auto sheetIndex = std::distance(mRunningBeatCount.begin(), where);
-    auto thisBeat = beat - (*where - NumBeats(mCommands.at(index)));
-    // any sort of index makeup, we do here.
-    if (thisBeat == 0 && index > 0 && leadingBeats == 0) {
-        if (NumBeats(mCommands.at(index - 1)) == 0) {
-            sheetIndex -= 1;
-        }
-    }
-
-    return { { index, thisBeat }, { sheetIndex, thisBeat } };
-}
-
-namespace {
-    // We treat position and facing because of very odd 0 beat continuities
-    // These are artifacts of micro-position inconsistencies, where what can
-    // happen is that to make up where the marcher is there can be 0 beat
-    // continuities.  CalChart treats this like you've pivoted that direction --
-    // that the direction you are facing is of the next beat but the position
-    // is of the previous beat.
-    auto MarcherInfoAtBeat(
-        Command const& cmd,
-        Beats beat,
-        Command const& facingCmd,
-        Beats facingBeat)
-        -> MarcherInfo
-    {
-        return {
-            PositionAtBeat(cmd, beat),
-            CalChart::Radian{ FacingDirectionAtBeat(facingCmd, facingBeat) },
-            StepStyle(cmd)
-        };
-    }
+    return BeatToCommandOffsetAndBeatImpl(beat, mCommands, mRunningBeatCount);
 }
 
 auto Commands::MarcherInfoAtBeat(Beats beat) const -> MarcherInfo
 {
-    auto [position, facing] = BeatToCommandOffsetAndBeat(beat);
-    auto [which, newBeat] = position;
-    auto [whichFacing, newBeatFacing] = facing;
-    if (which >= mCommands.size()) {
+    if (beat >= mCachedMarcherInfo.size()) {
         return {};
     }
-    return Animate::MarcherInfoAtBeat(
-        mCommands.at(which),
-        newBeat,
-        mCommands.at(whichFacing),
-        newBeatFacing);
+    return mCachedMarcherInfo[beat];
 }
 
 auto Commands::GeneratePathToDraw(Coord::units endRadius) const -> std::vector<Draw::DrawCommand>
