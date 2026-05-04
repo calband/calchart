@@ -38,6 +38,7 @@ PrintContinuityPreview::PrintContinuityPreview(wxWindow* parent, CalChart::Confi
     : wxScrolled<wxWindow>(parent, wxID_ANY)
     , m_landscape(false)
     , mConfig(config)
+    , mPerfRegistry(CalChart::PerformanceRegistry::GetGlobalPerformanceRegistry(), this, "PrintContinuityPreview::OnPaint")
 {
     static const double kSizeX = 576, kSizeY = 734 - 606;
     SetVirtualSize(wxSize(kSizeX, kSizeY));
@@ -48,6 +49,7 @@ PrintContinuityPreview::PrintContinuityPreview(wxWindow* parent, CalChart::Confi
 
 void PrintContinuityPreview::OnPaint(wxPaintEvent&)
 {
+    auto measure = mPerfRegistry.doMeasure();
     wxPaintDC dc(this);
     PrepareDC(dc);
     auto virtSize = GetVirtualSize();

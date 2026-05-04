@@ -31,7 +31,7 @@
 #include <optional>
 #include <ranges>
 
-auto gAnimateMeasure = CalChart::MeasureDuration{ "AnimateShow" };
+auto gAnimateMeasure = CalChart::MeasureDuration<1024>{ "AnimateShow" };
 
 namespace CalChart::Animate {
 

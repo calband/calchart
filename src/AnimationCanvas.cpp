@@ -46,6 +46,7 @@ AnimationCanvas::AnimationCanvas(
     : super(&parent, wxID_ANY, wxDefaultPosition, size)
     , mPanel{ parent }
     , mConfig(config)
+    , mPerfRegistry(CalChart::PerformanceRegistry::GetGlobalPerformanceRegistry(), this, "AnimationCanvas::OnPaint")
 {
     SetBackgroundStyle(wxBG_STYLE_PAINT);
     Init();
@@ -125,6 +126,7 @@ void AnimationCanvas::OnUpdate()
 
 void AnimationCanvas::OnPaint(wxPaintEvent&)
 {
+    auto measure = mPerfRegistry.doMeasure();
     // update the scale and origin
     UpdateScaleAndOrigin();
 

@@ -15,6 +15,8 @@ add_executable(CalChartCoreTests
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartDrawPrimativesTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartFileFormatTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartGitHubIssueSubmitterTests.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/CalChartMeasureTests.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/CalChartPerformanceRegistryTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartPointTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartSheetTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/CalChartShapesTests.cpp

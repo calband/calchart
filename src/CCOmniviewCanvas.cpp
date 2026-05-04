@@ -598,6 +598,7 @@ CCOmniviewCanvas::CCOmniviewCanvas(AnimationPanel& parent, CalChart::Configurati
     , mPanel{ parent }
     , m_glContext(new CCOmniView_GLContext(this))
     , mConfig(config)
+    , mPerfRegistry(CalChart::PerformanceRegistry::GetGlobalPerformanceRegistry(), this, "CCOmniviewCanvas::OnPaint")
     , mViewPoint(kStartingViewPoint)
     , mViewAngle(kStartingViewAngle)
     , mViewAngleZ(kStartingViewAngleZ)
@@ -693,6 +694,7 @@ static void mygluLookAt(GLdouble eyeX, GLdouble eyeY, GLdouble eyeZ, GLdouble ce
 
 void CCOmniviewCanvas::OnPaint(wxPaintEvent&)
 {
+    auto measure = mPerfRegistry.doMeasure();
     // This is required even though dc is not used otherwise.
     wxPaintDC dc(this);
     SetCurrent(*m_glContext);

@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartPerformanceRegistry.h"
 #include "CalChartText.h"
 #include <wx/wx.h>
 
@@ -48,6 +49,7 @@ private:
     CalChart::PrintContinuity mPrintContinuity{};
     bool m_landscape{};
     CalChart::Configuration const& mConfig;
+    CalChart::ScopedPerformanceRegistry mPerfRegistry;
 
     void OnPaint(wxPaintEvent& event);
     void OnSizeEvent(wxSizeEvent& event);

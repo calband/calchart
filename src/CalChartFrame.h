@@ -22,6 +22,7 @@
 
 #include "CalChartCoord.h"
 #include "CalChartDoc.h"
+#include "CalChartPerformanceRegistry.h"
 #include "CalChartSelectTool.h"
 #include "CalChartTypes.h"
 
@@ -85,6 +86,7 @@ public:
     void OnCmdAbout(wxCommandEvent& event);
     void OnCmdHelp(wxCommandEvent& event);
     void OnReportBug(wxCommandEvent& event);
+    void OnShowDrawPerformance();
 
     void OnCmd_prev_ss(wxCommandEvent& event);
     void OnCmd_next_ss(wxCommandEvent& event);
@@ -217,6 +219,9 @@ private:
     wxUI::MenuItemProxy mViewSwapFieldAndAnimate;
     wxUI::MenuItemProxy mDrawPaths;
     std::vector<wxUI::MenuItemProxy> mAdjustPaneIndex;
+
+    // Modeless dialogs
+    class PerformanceDialog* mPerformanceDialog{};
 
     DECLARE_EVENT_TABLE()
 };

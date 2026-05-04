@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartPerformanceRegistry.h"
 #include "CalChartShowMode.h"
 #include "basic_ui.h"
 #include <wx/bmpcbox.h>
@@ -47,5 +48,6 @@ public:
 
 private:
     CalChart::Configuration const& mConfig;
+    CalChart::ScopedPerformanceRegistry mPerfRegistry;
     CalChart::ShowMode mMode;
 };

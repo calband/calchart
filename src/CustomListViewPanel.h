@@ -21,6 +21,7 @@
 */
 
 #include "CalChartDrawCommand.h"
+#include "CalChartPerformanceRegistry.h"
 #include <memory>
 #include <set>
 #include <vector>
@@ -79,4 +80,5 @@ private:
     wxPoint m_lastLocation;
     std::optional<size_t> m_selected;
     bool m_dragging;
+    CalChart::ScopedPerformanceRegistry mPerfRegistry;
 };

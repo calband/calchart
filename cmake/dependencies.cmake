@@ -75,7 +75,7 @@ FetchContent_MakeAvailable(docopt)
 FetchContent_Declare(
   wxUI
   GIT_REPOSITORY https://github.com/rmpowell77/wxUI.git
-  GIT_TAG        1b2cf2ca7db7c22474b43c3eca01563ffd91e832 # v0.4.0
+  GIT_TAG        412242668365986cf66f7d9141d2b0b2653ea076 # v0.4.1
 )
 FetchContent_MakeAvailable(wxUI)
 

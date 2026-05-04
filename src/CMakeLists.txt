@@ -131,6 +131,8 @@ add_executable(
   HostAppInterface.h
   ModeSetupDialog.cpp
   ModeSetupDialog.h
+  PerformanceDialog.cpp
+  PerformanceDialog.hpp
   PointPicker.cpp
   PointPicker.h
   PreferencesContCellSetup.cpp

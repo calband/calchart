@@ -44,6 +44,7 @@ END_EVENT_TABLE()
 ColorPalettePanel::ColorPalettePanel(CalChart::Configuration& config, wxWindow* parent, wxWindowID winid)
     : super(parent, winid)
     , mConfig(config)
+    , mPerfRegistry(CalChart::PerformanceRegistry::GetGlobalPerformanceRegistry(), this, "ColorPalettePanel::OnPaint")
 {
     Init();
 }
@@ -55,6 +56,7 @@ void ColorPalettePanel::Init()
 
 void ColorPalettePanel::OnPaint(wxPaintEvent&)
 {
+    auto measure = mPerfRegistry.doMeasure();
     auto dc = wxBufferedPaintDC{ this };
 
     dc.Clear();

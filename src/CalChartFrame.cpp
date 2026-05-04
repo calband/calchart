@@ -50,6 +50,7 @@
 #include "FieldControlsToolBar.h"
 #include "FieldThumbnailBrowser.h"
 #include "ModeSetupDialog.h"
+#include "PerformanceDialog.hpp"
 #include "PointPicker.h"
 #include "PrintContinuityEditor.h"
 #include "PrintPostScriptDialog.h"
@@ -360,6 +361,12 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
                 .withProxy(mAdjustBackgroundImageMode),
         },
         wxUI::Menu{
+            "&Debug",
+            wxUI::Item{ "Show Draw Performance...", "Display draw performance metrics", [this] {
+                           OnShowDrawPerformance();
+                       } },
+        },
+        wxUI::Menu{
             "&Help",
             wxUI::Item{ wxID_ABOUT, "&About CalChart...", "Information about the program" },
             wxUI::Item{ wxID_HELP, "&Help on CalChart...\tCTRL-H", "Help on using CalChart" },
@@ -478,6 +485,12 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
 
 CalChartFrame::~CalChartFrame()
 {
+    // Clean up modeless dialogs
+    if (mPerformanceDialog) {
+        mPerformanceDialog->Destroy();
+        mPerformanceDialog = nullptr;
+    }
+
     mAUIManager->UnInit();
 }
 
@@ -902,6 +915,18 @@ void CalChartFrame::OnReportBug(wxCommandEvent&)
     auto* doc = dynamic_cast<CalChartDoc*>(GetDocument());
     BugReportDialog dialog(doc->GetConfiguration(), doc, this);
     dialog.ShowModal();
+}
+
+void CalChartFrame::OnShowDrawPerformance()
+{
+    // Create the dialog if it doesn't exist
+    if (!mPerformanceDialog) {
+        mPerformanceDialog = new PerformanceDialog(this, CalChart::PerformanceRegistry::GetGlobalPerformanceRegistry());
+    }
+
+    // Show and raise the dialog
+    mPerformanceDialog->Show();
+    mPerformanceDialog->Raise();
 }
 
 void CalChartFrame::OnCmd_prev_ss(wxCommandEvent&)

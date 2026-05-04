@@ -78,6 +78,7 @@ ColorSetupCanvas::ColorSetupCanvas(CalChart::Configuration& config, wxWindow* pa
           Coord(Int2CoordUnits(4), Int2CoordUnits(4)), Int2CoordUnits(32), Int2CoordUnits(52),
           kDefaultYardLines))
     , mConfig(config)
+    , mPerfRegistry(CalChart::PerformanceRegistry::GetGlobalPerformanceRegistry(), this, "ColorSetupCanvas::OnPaint")
 {
     auto field_offset = mMode.FieldOffset();
     SetCanvasSize(wxSize{ mMode.Size().x, mMode.Size().y });
@@ -122,6 +123,10 @@ ColorSetupCanvas::ColorSetupCanvas(CalChart::Configuration& config, wxWindow* pa
     list.insert(3);
 
     mShow->Create_SetSelectionListCommand(list).first(*mShow);
+}
+
+ColorSetupCanvas::~ColorSetupCanvas()
+{
 }
 
 // Because we're not a real show, we have to make the path manually.
@@ -183,6 +188,8 @@ auto GenerateCurves(CalChart::ShowMode const& mode, CalChart::Configuration cons
 // Define the repainting behaviour
 void ColorSetupCanvas::OnPaint(wxPaintEvent&)
 {
+    auto measure = mPerfRegistry.doMeasure();
+
     wxBufferedPaintDC dc(this);
     PrepareDC(dc);
 

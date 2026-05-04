@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartPerformanceRegistry.h"
 #include <wx/wx.h>
 
 class AnimationPanel;
@@ -72,4 +73,5 @@ private:
     wxPoint mMouseStart{};
     wxPoint mMouseEnd{};
     CalChart::Configuration& mConfig;
+    CalChart::ScopedPerformanceRegistry mPerfRegistry;
 };

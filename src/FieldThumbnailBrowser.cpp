@@ -112,6 +112,7 @@ FieldThumbnailBrowser::FieldThumbnailBrowser(
     , mYScrollPadding(wxSystemSettings::GetMetric(wxSYS_HSCROLL_Y))
     , mLayoutHorizontal{ true }
     , mConfig(config)
+    , mPerfRegistry(CalChart::PerformanceRegistry::GetGlobalPerformanceRegistry(), this, "FieldThumbnailBrowser::OnPaint")
 {
     SetBackgroundStyle(wxBG_STYLE_PAINT);
     // now update the current screen
@@ -153,6 +154,7 @@ auto FieldThumbnailBrowser::WhichCell(wxPoint const& p) const -> int
 // auto gFieldThumbnailMeasure = CalChart::MeasureDuration{ "FieldThumbnail" };
 void FieldThumbnailBrowser::OnPaint([[maybe_unused]] wxPaintEvent& event)
 {
+    auto measure = mPerfRegistry.doMeasure();
     // for profiling purposes
     // std::cout << gFieldThumbnailMeasure << "\n";
     // auto snapshot = gFieldThumbnailMeasure.doMeasurement();

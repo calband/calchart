@@ -186,6 +186,7 @@ END_EVENT_TABLE()
 CustomListViewPanel::CustomListViewPanel(wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
     : super(parent, winid, pos, size, style, name)
     , m_dragging(false)
+    , mPerfRegistry(CalChart::PerformanceRegistry::GetGlobalPerformanceRegistry(), this, "CustomListViewPanel::OnPaint")
 {
 }
 
@@ -224,6 +225,7 @@ void CustomListViewPanel::SetHighlight(void const* highlight)
 // Define the repainting behaviour
 void CustomListViewPanel::OnPaint(wxPaintEvent&)
 {
+    auto measure = mPerfRegistry.doMeasure();
     wxBufferedPaintDC dc(this);
     PrepareDC(dc);
     PrepareToDraw(dc);

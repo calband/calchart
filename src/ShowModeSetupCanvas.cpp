@@ -45,6 +45,7 @@ IMPLEMENT_CLASS(ShowModeSetupCanvas, ClickDragCtrlScrollCanvas)
 ShowModeSetupCanvas::ShowModeSetupCanvas(CalChart::Configuration const& config, wxWindow* parent, wxWindowID id)
     : super(config, parent, id, wxDefaultPosition, wxSize(640, 240))
     , mConfig(config)
+    , mPerfRegistry(CalChart::PerformanceRegistry::GetGlobalPerformanceRegistry(), this, "ShowModeSetupCanvas::OnPaint")
     , mMode(CalChart::ShowMode::GetDefaultShowMode())
 {
 }
@@ -52,6 +53,7 @@ ShowModeSetupCanvas::ShowModeSetupCanvas(CalChart::Configuration const& config, 
 // Define the repainting behaviour
 void ShowModeSetupCanvas::OnPaint(wxPaintEvent&)
 {
+    auto measure = mPerfRegistry.doMeasure();
     wxBufferedPaintDC dc(this);
     PrepareDC(dc);
 

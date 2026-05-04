@@ -123,6 +123,7 @@ FieldCanvas::FieldCanvas(wxWindow* parent, CalChartView* view, float def_zoom, C
     : super(config, parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER)
     , mView(view)
     , mConfig(config)
+    , mPerfRegistry(CalChart::PerformanceRegistry::GetGlobalPerformanceRegistry(), this, "FieldCanvas::OnPaint")
 {
     Init();
     super::SetZoom(def_zoom);
@@ -142,6 +143,7 @@ void FieldCanvas::SetView(CalChartView* view)
 // across several different widgets
 void FieldCanvas::OnFieldPaint(wxPaintEvent& event)
 {
+    auto measure = mPerfRegistry.doMeasure();
     OnPaint(event, mConfig);
 }
 
