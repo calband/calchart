@@ -40,7 +40,7 @@ EVT_PAINT(AnimationCanvas::OnPaint)
 END_EVENT_TABLE()
 
 AnimationCanvas::AnimationCanvas(
-    CalChart::Configuration const& config,
+    CalChart::Configuration& config,
     AnimationPanel& parent,
     wxSize const& size)
     : super(&parent, wxID_ANY, wxDefaultPosition, size)
@@ -63,15 +63,27 @@ void AnimationCanvas::CreateControls()
     wxUI::VSizer{}.fitTo(this);
 }
 
+auto AnimationCanvas::GetZoomOnMarchers() const -> bool
+{
+    return mConfig.Get_AnimationZoomOnMarchers();
+}
+
 void AnimationCanvas::SetZoomOnMarchers(bool zoomOnMarchers)
 {
-    mZoomOnMarchers = zoomOnMarchers;
+    mConfig.Set_AnimationZoomOnMarchers(zoomOnMarchers);
+    mConfig.FlushWriteQueue();
     Refresh();
+}
+
+auto AnimationCanvas::GetStepsOutForMarchersZoom() const -> int
+{
+    return mConfig.Get_AnimationStepsOutForMarchersZoom();
 }
 
 void AnimationCanvas::SetStepsOutForMarchersZoom(int steps)
 {
-    mStepsOutForMarcherZoom = steps;
+    mConfig.Set_AnimationStepsOutForMarchersZoom(steps);
+    mConfig.FlushWriteQueue();
     Refresh();
 }
 
@@ -211,9 +223,10 @@ auto towxBox(std::pair<CalChart::Coord, CalChart::Coord> input) -> std::pair<wxS
 void AnimationCanvas::UpdateScaleAndOrigin()
 {
     auto window_size = GetSize();
-    auto boundingBox = towxBox(mPanel.GetAnimationBoundingBox(mZoomOnMarchers));
-    if (mZoomOnMarchers) {
-        auto amount = CalChart::Int2CoordUnits(mStepsOutForMarcherZoom);
+    auto zoomOnMarchers = mConfig.Get_AnimationZoomOnMarchers();
+    auto boundingBox = towxBox(mPanel.GetAnimationBoundingBox(zoomOnMarchers));
+    if (zoomOnMarchers) {
+        auto amount = CalChart::Int2CoordUnits(mConfig.Get_AnimationStepsOutForMarchersZoom());
         boundingBox.first += wxSize(amount, amount) * 2;
         boundingBox.second -= wxPoint(amount, amount);
     }

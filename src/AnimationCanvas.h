@@ -35,16 +35,16 @@ class AnimationCanvas : public wxPanel {
 
 public:
     AnimationCanvas(
-        CalChart::Configuration const& config,
+        CalChart::Configuration& config,
         AnimationPanel& parent,
         wxSize const& size);
     ~AnimationCanvas() override = default;
 
     void OnUpdate(); // Refresh from the View
 
-    [[nodiscard]] auto GetZoomOnMarchers() const { return mZoomOnMarchers; }
+    [[nodiscard]] auto GetZoomOnMarchers() const -> bool;
     void SetZoomOnMarchers(bool zoomOnMarchers);
-    [[nodiscard]] auto GetStepsOutForMarchersZoom() const { return mStepsOutForMarcherZoom; }
+    [[nodiscard]] auto GetStepsOutForMarchersZoom() const -> int;
     void SetStepsOutForMarchersZoom(int steps);
 
 private:
@@ -66,12 +66,10 @@ private:
 
     float mUserScale = 1.0F;
     std::pair<wxCoord, wxCoord> mUserOrigin = { 0, 0 };
-    bool mZoomOnMarchers = true;
-    int mStepsOutForMarcherZoom = 8;
 
     // for mouse and drawing
     bool mMouseDown{};
     wxPoint mMouseStart{};
     wxPoint mMouseEnd{};
-    CalChart::Configuration const& mConfig;
+    CalChart::Configuration& mConfig;
 };

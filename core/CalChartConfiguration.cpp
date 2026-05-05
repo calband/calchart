@@ -292,6 +292,8 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS(AnimationFrameOmniAnimation, bool, false);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(AnimationFrameSplitScreen, bool, true);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(AnimationFrameSplitVertical, bool, false);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(AnimationFrameSheetSlider, bool, true);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(AnimationZoomOnMarchers, bool, true);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(AnimationStepsOutForMarchersZoom, long, 8);
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS(UseSprites, bool, false);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(SpriteBitmapScale, double, 0.5);
