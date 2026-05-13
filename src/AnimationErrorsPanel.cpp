@@ -51,7 +51,7 @@ void AnimationErrorsPanel::CreateControls()
     // create a sizer and populate
     wxUI::VSizer{
         ExpandSizerFlags(),
-        mTreeCtrl = wxUI::Generic<wxTreeListCtrl>{ [](wxWindow* window) {
+        wxUI::Factory<wxTreeListCtrl>{ [](wxWindow* window) {
             auto* treeList = new wxTreeListCtrl(window, wxID_ANY, wxDefaultPosition, wxDefaultSize);
             treeList->AppendColumn("Errors", wxCOL_WIDTH_AUTOSIZE, wxALIGN_LEFT, wxCOL_RESIZABLE | wxCOL_SORTABLE);
             wxSize iconSize = wxArtProvider::GetSizeHint(wxART_LIST);
@@ -62,8 +62,9 @@ void AnimationErrorsPanel::CreateControls()
             imageList->Add(wxArtProvider::GetIcon(wxART_ERROR, wxART_LIST, iconSize));
             treeList->SetImageList(imageList);
             return treeList;
-        } }
-    }.fitTo(this);
+        } }.withProxy(mTreeCtrl),
+    }
+        .fitTo(this);
 }
 
 void AnimationErrorsPanel::OnUpdate()

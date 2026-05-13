@@ -251,9 +251,9 @@ ModeSetupDialog::ModeSetupDialog(wxWindow* parent, CalChart::ShowMode const& cur
 {
     wxUI::VSizer{
         BasicSizerFlags(),
-        m_setup = [current_mode, &config](wxWindow* parent) {
+        wxUI::Factory{ [current_mode, &config](wxWindow* parent) {
             return ShowModeDialogSetup::CreateDialog(parent, current_mode, config);
-        },
+        } }.withProxy(m_setup),
         wxUI::HSizer{
             wxUI::Button{ wxID_CANCEL },
             wxUI::Button{ wxID_OK },

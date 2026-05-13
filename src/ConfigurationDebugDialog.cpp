@@ -211,7 +211,7 @@ ConfigurationDebug::ConfigurationDebug(wxWindow* parent, wxConfigBase* config)
     std::cout << mConfig << "\n";
     wxUI::VSizer{
         BasicSizerFlags(),
-        mTreeCtrl = wxUI::Generic{
+        wxUI::Generic{
             ExpandSizerFlags(),
             [this] {
                 auto* tree = new wxTreeListCtrl(this, wxID_ANY, wxDefaultPosition, { 400, 400 });
@@ -226,7 +226,8 @@ ConfigurationDebug::ConfigurationDebug(wxWindow* parent, wxConfigBase* config)
                     wxCOL_RESIZABLE | wxCOL_SORTABLE);
                 ConstructConfig(mConfig, *tree);
                 return tree;
-            }() },
+            }() }
+            .withProxy(mTreeCtrl),
         wxUI::HSizer{
             wxUI::Button{ wxID_OK },
         }

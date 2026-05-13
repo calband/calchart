@@ -8,5 +8,6 @@ Bugs addressed in this release:
 
 Other changes:
 
+* [#823](../../issues/823) Update wxUI to 0.4.0
 * [#835](../../issues/835) update Xcode to the latest version in CI
 

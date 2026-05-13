@@ -101,8 +101,8 @@ void PrintContinuitySetup::CreateControls()
                                                .withProxy(mMaxFontSize)),
         },
         wxUI::HSplitter{
-            mPrintContDisplay = [this](wxWindow* parent) { return new PrintContinuityPreview(parent, mConfig); },
-            mUserInput = [](wxWindow* parent) { return new FancyTextWin(parent, PrintContinuitySetup_KeyPress); } }
+            wxUI::Factory{ [this](wxWindow* parent) { return new PrintContinuityPreview(parent, mConfig); } }.withProxy(mPrintContDisplay),
+            wxUI::Factory{ [](wxWindow* parent) { return new FancyTextWin(parent, PrintContinuitySetup_KeyPress); } }.withProxy(mUserInput) }
             .withStashGravity(0.5)
             .withFlags(wxSizerFlags{ 1 }.Expand()),
     }

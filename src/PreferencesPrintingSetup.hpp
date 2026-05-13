@@ -65,7 +65,7 @@ public:
 
 private:
     wxUI::Generic<FancyTextWin>::Proxy mUserInput{};
-    wxUI::Generic<PrintingPreview>::Proxy mPrintingDisplay{};
+    wxUI::Factory<PrintingPreview>::Proxy mPrintingDisplay{};
     wxUI::CheckBox::Proxy mLandscape{};
     wxUI::TextCtrl::Proxy mDotRatio{};
     wxUI::TextCtrl::Proxy mPLineRatio{};

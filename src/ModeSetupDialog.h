@@ -42,5 +42,5 @@ public:
     CalChart::ShowMode GetShowMode() const;
 
 private:
-    wxUI::Generic<ShowModeDialogSetup>::Proxy m_setup;
+    wxUI::Factory<ShowModeDialogSetup>::Proxy m_setup;
 };
