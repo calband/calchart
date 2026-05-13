@@ -8,3 +8,5 @@ Bugs addressed in this release:
 
 Other changes:
 
+* [#835](../../issues/835) update Xcode to the latest version in CI
+
