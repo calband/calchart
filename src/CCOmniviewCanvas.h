@@ -22,6 +22,7 @@
 */
 
 #include "CalChartAngles.h"
+#include "CalChartPerformanceRegistry.h"
 #include "CalChartTypes.h"
 #include "DCSaveRestore.h"
 #include <map>
@@ -66,6 +67,7 @@ private:
     AnimationPanel& mPanel;
     std::shared_ptr<CCOmniView_GLContext> m_glContext;
     CalChart::Configuration& mConfig;
+    CalChart::ScopedPerformanceRegistry mPerfRegistry;
 
     ViewPoint mViewPoint{};
 

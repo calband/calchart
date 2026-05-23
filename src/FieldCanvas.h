@@ -22,6 +22,7 @@
 */
 
 #include "CalChartMovePointsTool.h"
+#include "CalChartPerformanceRegistry.h"
 #include "CalChartPoint.h"
 #include "CalChartSelectTool.h"
 #include "CalChartShapes.h"
@@ -145,4 +146,5 @@ private:
         std::optional<ExistingCurveInfo> mExistingCurve;
     };
     std::optional<CurveDrawInfo> mCurve;
+    CalChart::ScopedPerformanceRegistry mPerfRegistry;
 };

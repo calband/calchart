@@ -16,7 +16,7 @@
 #include <fstream>
 #include <iostream>
 
-extern CalChart::MeasureDuration gAnimateMeasure;
+extern CalChart::MeasureDuration<1024> gAnimateMeasure;
 
 constexpr auto USAGE =
     R"(calchart_cmd

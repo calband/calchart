@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartPerformanceRegistry.h"
 #include <wx/wx.h>
 
 class CalChartView;
@@ -54,4 +55,5 @@ private:
 
     CalChartView* mView{};
     CalChart::Configuration& mConfig;
+    CalChart::ScopedPerformanceRegistry mPerfRegistry;
 };

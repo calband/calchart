@@ -52,6 +52,7 @@ PrintingPreview::PrintingPreview(wxWindow* parent, CalChart::Configuration const
     , mShow(CalChart::Show::Create(CalChart::ShowMode::GetDefaultShowMode()))
     , mLandscape(false)
     , mConfig(config)
+    , mPerfRegistry(CalChart::PerformanceRegistry::GetGlobalPerformanceRegistry(), this, "PrintingPreview::OnPaint")
 {
     using namespace CalChart;
     mShow->Create_SetupMarchersCommand({ { "A", "A" }, { "B", "B" }, { "C", "C" }, { "D", "D" } }, 1, 0).first(*mShow);
@@ -63,6 +64,7 @@ PrintingPreview::PrintingPreview(wxWindow* parent, CalChart::Configuration const
 
 void PrintingPreview::OnPaint(wxPaintEvent&)
 {
+    auto measure = mPerfRegistry.doMeasure();
     wxPaintDC dc(this);
     PrepareDC(dc);
     auto virtSize = GetVirtualSize();

@@ -20,6 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartPerformanceRegistry.h"
 #include <wx/docview.h>
 
 class CalChartView;
@@ -66,4 +67,5 @@ private:
 
     bool mLayoutHorizontal{ false };
     CalChart::Configuration const& mConfig;
+    CalChart::ScopedPerformanceRegistry mPerfRegistry;
 };

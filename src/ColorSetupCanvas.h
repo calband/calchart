@@ -22,6 +22,7 @@
 */
 
 #include "CalChartDrawCommand.h"
+#include "CalChartPerformanceRegistry.h"
 #include "CalChartShowMode.h"
 #include "basic_ui.h"
 #include <memory>
@@ -41,6 +42,7 @@ class ColorSetupCanvas : public ClickDragCtrlScrollCanvas {
 
 public:
     ColorSetupCanvas(CalChart::Configuration& config, wxWindow* parent);
+    ~ColorSetupCanvas() override;
 
     void OnPaint(wxPaintEvent& event);
 
@@ -51,4 +53,5 @@ private:
     std::unique_ptr<CalChart::Show> mShow;
     CalChart::ShowMode mMode;
     CalChart::Configuration& mConfig;
+    CalChart::ScopedPerformanceRegistry mPerfRegistry;
 };

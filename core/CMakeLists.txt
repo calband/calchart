@@ -58,6 +58,8 @@ add_library(
   CalChartMeasure.h
   CalChartMovePointsTool.cpp
   CalChartMovePointsTool.h
+  CalChartPerformanceRegistry.cpp
+  CalChartPerformanceRegistry.h
   CalChartPoint.cpp
   CalChartPoint.h
   CalChartPostScript.h
