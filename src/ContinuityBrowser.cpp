@@ -74,7 +74,7 @@ void ContinuityBrowserPerCont::CreateControls(CalChart::Configuration const& con
     wxUI::VSizer{
         BasicSizerFlags(),
         wxUI::HSizer{
-            wxUI::Text{ CalChart::GetLongNameForSymbol(mSym) }.withFlags(ExpandSizerFlags()),
+            wxUI::Text{ CalChart::GetLongNameForSymbol(mSym) },
             wxUI::BitmapButton{ ScaleButtonBitmap(wxArtProvider::GetBitmap(wxART_PLUS)) }
                 .bind([this]() {
                     mCanvas->AddNewEntry();
@@ -87,6 +87,7 @@ void ContinuityBrowserPerCont::CreateControls(CalChart::Configuration const& con
                 return new ContinuityBrowserPanel(mSym, config, parent);
             } }
             .withProxy(mCanvas),
+        wxUI::VLine(),
     }
         .fitTo(this);
 }
@@ -124,19 +125,20 @@ void ContinuityBrowser::Init()
 void ContinuityBrowser::CreateControls(CalChart::Configuration const& config)
 {
     wxUI::VSizer{
-        wxUI::Line{}.withStyle(wxLI_HORIZONTAL),
+        wxSizerFlags{}.Border(wxALL, 2).Expand(),
+        wxUI::VLine(),
         wxUI::VForEach(
-            wxSizerFlags{ 1 }.Border(wxALL, 2).Expand(),
             CalChart::k_symbols,
-            [this, &config](auto eachcont) { return wxUI::Factory{
-                                                 [this, eachcont, &config](wxWindow* parent) {
-                                                     auto perCont = new ContinuityBrowserPerCont(parent, eachcont, config);
-                                                     perCont->Show(false);
-                                                     mPerCont.push_back(perCont);
-                                                     return perCont;
-                                                 }
-                                             }; }),
-
+            [this, &config](auto eachcont) {
+                return wxUI::Factory{
+                    [this, eachcont, &config](wxWindow* parent) {
+                        auto perCont = new ContinuityBrowserPerCont(parent, eachcont, config);
+                        perCont->Show(false);
+                        mPerCont.push_back(perCont);
+                        return perCont;
+                    }
+                };
+            }),
         wxUI::HSizer{
             wxUI::Button{ wxID_HELP, "&Help" }
                 .bind([] {
