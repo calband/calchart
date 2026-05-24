@@ -4,6 +4,7 @@
 
 Bugs addressed in this release:
 
+* [#692](../../issues/692) CalChart Windows Field Thumbnails Appear Incorrectly (again)
 * [#827](../../issues/827) make sure zoom is persistent
 
 Other changes:
