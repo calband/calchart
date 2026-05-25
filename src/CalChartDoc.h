@@ -347,6 +347,10 @@ public:
     [[nodiscard]] auto WillMovePoints(CalChart::MarcherToPosition const& new_positions) const { return mShow->WillMovePoints(new_positions, mShow->GetCurrentReferencePoint()); }
     [[nodiscard]] auto PrintToPS(bool overview, int min_yards, std::set<size_t> const& isPicked, CalChart::Configuration const& config_) const -> std::tuple<std::string, int>;
 
+    // Access to the underlying Show and Animation objects for advanced operations
+    [[nodiscard]] auto GetCalChartShow() const -> CalChart::Show const& { return *mShow; }
+    [[nodiscard]] auto GetAnimation() const -> std::optional<CalChart::Animation> const& { return mAnimation; }
+
     // create a set of commands to apply to the document.  This is the best way to interact with the doc.
     [[nodiscard]] auto Create_SetCurrentSheetCommand(size_t n) -> std::unique_ptr<wxCommand>;
     [[nodiscard]] auto Create_SetSelectionListCommand(const CalChart::SelectionList& sl) -> std::unique_ptr<wxCommand>;
