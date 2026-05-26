@@ -4,6 +4,7 @@
 find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
 find_package(CURL REQUIRED)
+find_package(ZLIB REQUIRED)
 
 # calchart_core
 BISON_TARGET(
@@ -42,6 +43,8 @@ add_library(
   CalChartContinuityToken.cpp
   CalChartContinuityToken.h
   CalChartCoord.h
+  CalChartDebugExport.cpp
+  CalChartDebugExport.hpp
   CalChartDiagnosticInfo.cpp
   CalChartDiagnosticInfo.hpp
   CalChartCoroutine.h
@@ -132,6 +135,7 @@ target_link_libraries(calchart_core PRIVATE
   nlohmann_json::nlohmann_json
   munkres
   CURL::libcurl
+  ZLIB::ZLIB
 )
 
 # When building on Windows with a static libcurl from vcpkg, define CURL_STATICLIB

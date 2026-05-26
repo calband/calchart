@@ -30,10 +30,12 @@
 #include "AnimationPanel.h"
 #include "BeatMapDialog.hpp"
 #include "BugReportDialog.h"
+#include "CalChartAnimation.h"
 #include "CalChartAnimationErrors.h"
 #include "CalChartApp.h"
 #include "CalChartConfiguration.h"
 #include "CalChartCoord.h"
+#include "CalChartDebugExport.hpp"
 #include "CalChartDrawing.h"
 #include "CalChartPoint.h"
 #include "CalChartPreferences.h"
@@ -72,6 +74,8 @@
 #include <wx/aui/auibar.h>
 #include <wx/clipbrd.h>
 #include <wx/cmdproc.h>
+#include <wx/display.h>
+#include <wx/filedlg.h>
 #include <wx/tglbtn.h>
 
 static constexpr auto kSheetDataClipboardFormat = "CC_sheet_clipboard_v1";
@@ -364,6 +368,9 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
             "&Debug",
             wxUI::Item{ "Show Draw Performance...", "Display draw performance metrics", [this] {
                            OnShowDrawPerformance();
+                       } },
+            wxUI::Item{ "Export Debug Dump...", "Export debug information for troubleshooting", [this] {
+                           OnExportDebugDump();
                        } },
         },
         wxUI::Menu{
@@ -927,6 +934,96 @@ void CalChartFrame::OnShowDrawPerformance()
     // Show and raise the dialog
     mPerformanceDialog->Show();
     mPerformanceDialog->Raise();
+}
+
+void CalChartFrame::OnExportDebugDump()
+{
+    // Get the show and create an animation
+    auto* doc = GetShow();
+    if (!doc) {
+        wxMessageBox("No show is currently open.", "Export Debug Dump", wxOK | wxICON_INFORMATION, this);
+        return;
+    }
+
+    auto& show = doc->GetCalChartShow();
+
+    // Create animation from show (or use existing if available)
+    CalChart::Animation animation(show);
+
+    // Gather display information
+    CalChart::DisplayInfo displayInfo;
+
+    // Get DPI scaling
+#if defined(__WXMSW__)
+    displayInfo.dpi_scale = GetContentScaleFactor();
+#elif defined(__WXMAC__)
+    displayInfo.dpi_scale = GetContentScaleFactor();
+#else
+    displayInfo.dpi_scale = 1.0;
+#endif
+
+    // Get screen dimensions
+    wxDisplay display(wxDisplay::GetFromWindow(this));
+    wxRect screenRect = display.GetGeometry();
+    displayInfo.screen_width = screenRect.GetWidth();
+    displayInfo.screen_height = screenRect.GetHeight();
+
+    // Get OS info
+    displayInfo.os_name = wxPlatformInfo::Get().GetOperatingSystemFamilyName().ToStdString();
+    displayInfo.os_version = wxPlatformInfo::Get().GetOperatingSystemDescription().ToStdString();
+
+    // Create debug export data
+    auto debugData = CalChart::DebugExportData::Create(show, animation, displayInfo);
+
+    // Show file save dialog for compressed file
+    wxFileDialog saveFileDialog(
+        this,
+        "Export Debug Dump",
+        "",
+        "calchart-debug-dump.json.gz",
+        "Compressed JSON files (*.json.gz)|*.json.gz|All files (*.*)|*.*",
+        wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+    if (saveFileDialog.ShowModal() == wxID_CANCEL) {
+        return;
+    }
+
+    // Compress the data
+    auto compressedData = debugData.toCompressedBytes();
+    if (compressedData.empty()) {
+        wxMessageBox("Failed to compress debug data.", "Export Debug Dump", wxOK | wxICON_ERROR, this);
+        return;
+    }
+
+    // Save compressed data to file
+    std::string filePath = saveFileDialog.GetPath().ToStdString();
+    std::ofstream outFile(filePath, std::ios::binary);
+    if (!outFile) {
+        wxMessageBox("Failed to open file for writing: " + filePath, "Export Debug Dump", wxOK | wxICON_ERROR, this);
+        return;
+    }
+
+    outFile.write(reinterpret_cast<const char*>(compressedData.data()), compressedData.size());
+    outFile.close();
+
+    // Calculate and display compression ratio
+    auto originalSize = debugData.toString().size();
+    auto compressedSize = compressedData.size();
+    double ratio = (1.0 - (static_cast<double>(compressedSize) / originalSize)) * 100.0;
+
+    wxMessageBox(
+        wxString::Format(
+            "Debug dump successfully exported to:\n%s\n\n"
+            "Original size: %.2f MB\n"
+            "Compressed size: %.2f MB\n"
+            "Compression: %.1f%%",
+            filePath,
+            originalSize / 1024.0 / 1024.0,
+            compressedSize / 1024.0 / 1024.0,
+            ratio),
+        "Export Debug Dump",
+        wxOK | wxICON_INFORMATION,
+        this);
 }
 
 void CalChartFrame::OnCmd_prev_ss(wxCommandEvent&)

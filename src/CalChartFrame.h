@@ -87,6 +87,7 @@ public:
     void OnCmdHelp(wxCommandEvent& event);
     void OnReportBug(wxCommandEvent& event);
     void OnShowDrawPerformance();
+    void OnExportDebugDump();
 
     void OnCmd_prev_ss(wxCommandEvent& event);
     void OnCmd_next_ss(wxCommandEvent& event);
