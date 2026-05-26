@@ -299,6 +299,7 @@ public:
 private:
     std::vector<Command> mCommands;
     std::vector<Beats> mRunningBeatCount;
+    std::vector<MarcherInfo> const mCachedMarcherInfo;
 };
 
 }
