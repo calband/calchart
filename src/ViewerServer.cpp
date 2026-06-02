@@ -1,5 +1,5 @@
 #include "ViewerServer.h"
-
+#include "CalChartDoc.h"
 #include "CalChartViewerHtml.h"
 #include <fstream>
 #include <httplib.h>
@@ -8,7 +8,32 @@
 #include <mutex>
 #include <thread>
 
-#include "CalChartDoc.h"
+#include <wx/filename.h>
+#include <wx/stdpaths.h>
+
+namespace {
+// Get the path to viewer assets in the application bundle
+std::string GetViewerAssetsPath()
+{
+#ifdef CMAKE_VIEWER_SOURCE_DIR
+    // Debug build: use source directory
+    return std::string(CMAKE_VIEWER_SOURCE_DIR);
+#else
+    // Release build: assets bundled in Resources
+#ifdef __APPLE__
+    // macOS: Assets in CalChart.app/Contents/Resources/viewer/
+    wxString resourcesDir = wxStandardPaths::Get().GetResourcesDir();
+    wxString viewerPath = resourcesDir + wxFILE_SEP_PATH + "viewer";
+    return viewerPath.ToStdString();
+#else
+    // Linux/Windows: Assets relative to executable
+    wxFileName exePath(wxStandardPaths::Get().GetExecutablePath());
+    wxString viewerPath = exePath.GetPath() + wxFILE_SEP_PATH + "viewer";
+    return viewerPath.ToStdString();
+#endif
+#endif
+}
+} // namespace
 
 class ViewerServer::Impl {
 public:
@@ -140,12 +165,14 @@ public:
             res.status = 200;
         });
 
-#ifdef CMAKE_VIEWER_SOURCE_DIR
-        // In debug mode, serve static files from viewer directory
-        // We explicitly serve files instead of using set_mount_point to avoid
-        // ASAN crashes in httplib's conditional request handling
+        // Serve static files (CSS, JS, images) from viewer assets directory
+        // Works in both debug (from source) and release (from bundled Resources)
         mServer->Get(R"(.+\.(css|js|png|jpg|jpeg|gif|svg|ico|json|woff|woff2|ttf|eot))", [](const httplib::Request& req, httplib::Response& res) {
-            auto path = std::string(CMAKE_VIEWER_SOURCE_DIR) + req.path;
+            auto viewerAssetsPath = GetViewerAssetsPath();
+            auto path = viewerAssetsPath + req.path;
+
+            wxLogDebug("ViewerServer: Static asset requested: %s", path.c_str());
+
             std::ifstream file(path, std::ios::binary);
             if (file) {
                 std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -169,16 +196,22 @@ public:
                     contentType = "image/svg+xml";
                 else if (ext == "ico")
                     contentType = "image/x-icon";
+                else if (ext == "woff" || ext == "woff2")
+                    contentType = "font/woff";
+                else if (ext == "ttf")
+                    contentType = "font/ttf";
+                else if (ext == "eot")
+                    contentType = "application/vnd.ms-fontobject";
 
                 res.set_content(content, contentType.c_str());
                 res.status = 200;
             } else {
+                wxLogWarning("ViewerServer: Static asset not found: %s", path.c_str());
                 res.status = 404;
                 res.set_content("File not found", "text/plain");
             }
         });
-        wxLogDebug("ViewerServer: Configured to serve static files from %s", CMAKE_VIEWER_SOURCE_DIR);
-#endif
+        wxLogDebug("ViewerServer: Configured to serve static files from %s", GetViewerAssetsPath().c_str());
 
         // Start the server in a background thread
         mThread = std::thread([this]() {
