@@ -309,6 +309,31 @@ add_custom_command(
   "${PROJECT_SOURCE_DIR}/docs" "$<TARGET_FILE_DIR:CalChart>/../Resources/docs"
 )
 
+# Copy viewer assets to the bundle's Resources
+# Only copy if the viewer was built (viewer/build directory exists)
+if(EXISTS "${PROJECT_SOURCE_DIR}/viewer/build")
+  add_custom_command(
+    TARGET CalChart POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${PROJECT_SOURCE_DIR}/viewer/build" "$<TARGET_FILE_DIR:CalChart>/../Resources/viewer/build"
+    COMMENT "Copying viewer assets to app bundle"
+  )
+endif()
+
+# Copy viewer HTML and static assets (js/vendor, css/vendor, etc.)
+add_custom_command(
+  TARGET CalChart POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:CalChart>/../Resources/viewer"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${PROJECT_SOURCE_DIR}/viewer/index.html" "$<TARGET_FILE_DIR:CalChart>/../Resources/viewer/index.html"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${PROJECT_SOURCE_DIR}/viewer/js" "$<TARGET_FILE_DIR:CalChart>/../Resources/viewer/js"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${PROJECT_SOURCE_DIR}/viewer/css" "$<TARGET_FILE_DIR:CalChart>/../Resources/viewer/css"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${PROJECT_SOURCE_DIR}/viewer/img" "$<TARGET_FILE_DIR:CalChart>/../Resources/viewer/img"
+  COMMENT "Copying viewer files to app bundle"
+)
 
 endif()
 
@@ -337,6 +362,29 @@ add_custom_command(
   DEPENDS build_help_html
 )
 
+# Copy viewer assets (Windows)
+if(EXISTS "${PROJECT_SOURCE_DIR}/viewer/build")
+  add_custom_command(
+    TARGET CalChart POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${PROJECT_SOURCE_DIR}/viewer/build" "$<TARGET_FILE_DIR:CalChart>/viewer/build"
+    COMMENT "Copying viewer assets (Windows)"
+  )
+endif()
+add_custom_command(
+  TARGET CalChart POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:CalChart>/viewer"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${PROJECT_SOURCE_DIR}/viewer/index.html" "$<TARGET_FILE_DIR:CalChart>/viewer/index.html"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${PROJECT_SOURCE_DIR}/viewer/js" "$<TARGET_FILE_DIR:CalChart>/viewer/js"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${PROJECT_SOURCE_DIR}/viewer/css" "$<TARGET_FILE_DIR:CalChart>/viewer/css"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${PROJECT_SOURCE_DIR}/viewer/img" "$<TARGET_FILE_DIR:CalChart>/viewer/img"
+  COMMENT "Copying viewer files (Windows)"
+)
+
 target_sources(CalChart PRIVATE ${PROJECT_SOURCE_DIR}/resources/windows/WindowsHiDPI.manifest)
 
 endif ()
@@ -355,6 +403,29 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${CMAKE_BINARY_DIR}/docs/html" "$<TARGET_FILE_DIR:CalChart>/docs/html"
   DEPENDS build_help_html
+)
+
+# Copy viewer assets (Linux)
+if(EXISTS "${PROJECT_SOURCE_DIR}/viewer/build")
+  add_custom_command(
+    TARGET CalChart POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${PROJECT_SOURCE_DIR}/viewer/build" "$<TARGET_FILE_DIR:CalChart>/viewer/build"
+    COMMENT "Copying viewer assets (Linux)"
+  )
+endif()
+add_custom_command(
+  TARGET CalChart POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:CalChart>/viewer"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${PROJECT_SOURCE_DIR}/viewer/index.html" "$<TARGET_FILE_DIR:CalChart>/viewer/index.html"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${PROJECT_SOURCE_DIR}/viewer/js" "$<TARGET_FILE_DIR:CalChart>/viewer/js"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${PROJECT_SOURCE_DIR}/viewer/css" "$<TARGET_FILE_DIR:CalChart>/viewer/css"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${PROJECT_SOURCE_DIR}/viewer/img" "$<TARGET_FILE_DIR:CalChart>/viewer/img"
+  COMMENT "Copying viewer files (Linux)"
 )
 endif()
 
