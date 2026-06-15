@@ -46,15 +46,9 @@ public:
 
     void DoSetContinuity(CalChart::Continuity const& new_cont);
 
-    void OnUpdate();
-    void SetView(CalChartView* view);
-    auto GetView() const { return mView; }
+    void SetHandlers(ContinuityBrowserPanel::Handlers handlers);
 
 private:
-    void CreateControls(CalChart::Configuration const& config);
-
-    // Internals
-    CalChartView* mView{};
     wxUI::Factory<ContinuityBrowserPanel>::Proxy mCanvas{};
     CalChart::SYMBOL_TYPE mSym{};
 };
@@ -63,16 +57,8 @@ ContinuityBrowserPerCont::ContinuityBrowserPerCont(wxWindow* parent, CalChart::S
     : super(parent)
     , mSym(sym)
 {
-    CreateControls(config);
-    GetSizer()->Fit(this);
-    GetSizer()->SetSizeHints(this);
-    OnUpdate();
-}
-
-void ContinuityBrowserPerCont::CreateControls(CalChart::Configuration const& config)
-{
     wxUI::VSizer{
-        BasicSizerFlags(),
+        wxSizerFlags{}.Border(wxALL, 2).Proportion(0).Expand(),
         wxUI::HSizer{
             wxUI::Text{ CalChart::GetLongNameForSymbol(mSym) },
             wxUI::BitmapButton{ ScaleButtonBitmap(wxArtProvider::GetBitmap(wxART_PLUS)) }
@@ -82,95 +68,99 @@ void ContinuityBrowserPerCont::CreateControls(CalChart::Configuration const& con
                 .withFlags(BasicSizerFlags()) },
         // here's a canvas
         wxUI::Factory{
-            ExpandSizerFlags(),
             [this, &config](wxWindow* parent) {
                 return new ContinuityBrowserPanel(mSym, config, parent);
             } }
             .withProxy(mCanvas),
-        wxUI::VLine(),
+        wxUI::Line{},
     }
         .fitTo(this);
-}
-
-void ContinuityBrowserPerCont::OnUpdate()
-{
 }
 
 void ContinuityBrowserPerCont::DoSetContinuity(CalChart::Continuity const& new_cont)
 {
     mCanvas->DoSetContinuity(new_cont);
+    if (auto* sizer = GetSizer()) {
+        sizer->SetSizeHints(this); // Apply minimum size constraints from DoGetBestClientSize()
+    }
+    // Invalidate cached size so sizer recalculates from DoGetBestClientSize()
+    InvalidateBestSize();
 }
 
-void ContinuityBrowserPerCont::SetView(CalChartView* view)
+void ContinuityBrowserPerCont::SetHandlers(ContinuityBrowserPanel::Handlers handlers)
 {
-    mView = view;
-    mCanvas->SetView(view);
+    mCanvas->SetHandlers(handlers);
 }
 
 ContinuityBrowser::ContinuityBrowser(wxWindow* parent, wxSize const& size, CalChart::Configuration const& config)
     : super(parent, wxID_ANY, wxDefaultPosition, size, wxScrolledWindowStyle)
 {
-    CreateControls(config);
-    GetSizer()->Fit(this);
-    GetSizer()->SetSizeHints(this);
-    OnUpdate();
-}
-
-ContinuityBrowser::~ContinuityBrowser() = default;
-
-void ContinuityBrowser::Init()
-{
-}
-
-void ContinuityBrowser::CreateControls(CalChart::Configuration const& config)
-{
     wxUI::VSizer{
-        wxSizerFlags{}.Border(wxALL, 2).Expand(),
-        wxUI::VLine(),
-        wxUI::VForEach(
-            CalChart::k_symbols,
-            [this, &config](auto eachcont) {
-                return wxUI::Factory{
-                    [this, eachcont, &config](wxWindow* parent) {
-                        auto perCont = new ContinuityBrowserPerCont(parent, eachcont, config);
-                        perCont->Show(false);
-                        mPerCont.push_back(perCont);
-                        return perCont;
-                    }
-                };
-            }),
-        wxUI::HSizer{
-            wxUI::Button{ wxID_HELP, "&Help" }
-                .bind([] {
-                    CalChartSplash::Help();
-                }),
-        },
+        wxSizerFlags{}.Proportion(1).Expand(),
+        wxUI::Factory{
+            [this, &config](wxWindow* parent) {
+                // create a scrollable window to contain all of the frame's content
+                auto scrolledWindow = new wxScrolledWindow(parent, wxID_ANY);
+                wxUI::VSizer{
+                    wxSizerFlags{}.Border(wxALL, 2).Proportion(0).Expand(),
+                    wxUI::Line{},
+                    wxUI::VForEach(
+                        CalChart::k_symbols,
+                        [this, &config](auto eachcont) {
+                            return wxUI::Factory{
+                                [this, eachcont, &config](wxWindow* parent) {
+                                    auto perCont = new ContinuityBrowserPerCont(parent, eachcont, config);
+                                    perCont->Show(false);
+                                    mPerCont.push_back(perCont);
+                                    return perCont;
+                                }
+                            };
+                        }),
+                    wxUI::HSizer{
+                        wxUI::Button{ wxID_HELP, "&Help" }
+                            .bind([] {
+                                CalChartSplash::Help();
+                            }),
+                    },
+                }
+                    .fitTo(scrolledWindow);
+
+                // configure the minimum size of the window, and then add scroll bars
+                scrolledWindow->SetMinSize(scrolledWindow->GetSizer()->ComputeFittingWindowSize(scrolledWindow));
+                scrolledWindow->SetScrollRate(1, 1);
+
+                return scrolledWindow;
+            } }
     }
         .fitTo(this);
-
-    SetScrollRate(1, 1);
     // now update the current screen
+    OnUpdate();
 }
 
 void ContinuityBrowser::OnUpdate()
 {
-    if (!mView) {
+    if (!mHandleGetContinuities) {
         return;
     }
-    for (auto [i, inUse] : CalChart::Ranges::enumerate_view(mView->ContinuitiesInUse())) {
-        mPerCont.at(i)->Show(inUse);
+    for (auto [i, optContBrowser] : CalChart::Ranges::enumerate_view(CalChart::Ranges::zip_view(mHandleGetContinuities(), mPerCont))) {
+        auto&& [optCont, contBrowser] = optContBrowser;
+        contBrowser->Show(optCont.has_value());
+        if (optCont.has_value()) {
+            contBrowser->DoSetContinuity(*optCont);
+        }
     }
-    std::ranges::for_each(CalChart::Ranges::zip_view(mView->GetContinuities(), mPerCont),
-        [](auto&& contAndBrowser) {
-            std::get<1>(contAndBrowser)->DoSetContinuity(std::get<0>(contAndBrowser));
-        });
-    GetSizer()->FitInside(this);
+    // Relayout with new panel sizes, then update virtual size for scrolling
+    if (auto* sizer = GetSizer()) {
+        sizer->Layout(); // Use new best sizes from invalidated panels
+        FitInside(); // Update virtual size - scrollbars appear if needed
+    }
 }
 
-void ContinuityBrowser::SetView(CalChartView* view)
+void ContinuityBrowser::SetHandlers(Handlers handlers)
 {
-    mView = view;
+    mHandleGetContinuities = std::get<0>(handlers);
     for (auto&& cont : mPerCont) {
-        cont->SetView(view);
+        cont->SetHandlers(std::get<1>(handlers));
     }
+    OnUpdate();
 }

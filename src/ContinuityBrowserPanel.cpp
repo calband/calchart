@@ -33,39 +33,20 @@ EVT_KILL_FOCUS(ContinuityBrowserPanel::DoKillFocus)
 END_EVENT_TABLE()
 
 // Define a constructor for field canvas
-ContinuityBrowserPanel::ContinuityBrowserPanel(SYMBOL_TYPE sym, CalChart::Configuration const& config, wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
-    : super(parent, winid, pos, size, style, name)
+ContinuityBrowserPanel::ContinuityBrowserPanel(SYMBOL_TYPE sym, CalChart::Configuration const& config, wxWindow* parent)
+    : super(parent)
     , mSym(sym)
     , mConfig(config)
 {
-    Init();
-}
-
-void ContinuityBrowserPanel::Init()
-{
-    // make room for about 3.5
-    auto current_size = GetMinSize();
-    current_size.y = ContinuityBoxDrawer::GetHeight(mConfig);
-    current_size.y *= 3.5;
-    SetMinSize(current_size);
 }
 
 void ContinuityBrowserPanel::DoSetContinuity(CalChart::Continuity const& new_cont)
 {
     mCont = new_cont;
-
-    auto contCells = CalChart::Ranges::ToVector<std::unique_ptr<DrawableCell>>(
+    SetCells(CalChart::Ranges::ToVector<std::unique_ptr<DrawableCell>>(
         mCont.GetParsedContinuity() | std::views::transform([this](auto&& proceedure) {
             return std::make_unique<ContinuityBoxDrawer>(proceedure->GetDrawable(), mConfig);
-        }));
-
-    // resize based on the new number of continuities.
-    auto current_size = GetMinSize();
-    current_size.y = ContinuityBoxDrawer::GetHeight(mConfig);
-    current_size.y *= (static_cast<double>(contCells.size()) + 0.5);
-    SetMinSize(current_size);
-
-    SetCells(std::move(contCells));
+        })));
 }
 
 template <typename T>
@@ -85,10 +66,6 @@ void ContinuityBrowserPanel::AddNewEntry()
 
 void ContinuityBrowserPanel::OnNewEntry(int cell)
 {
-    if (!mView) {
-        return;
-    }
-
     ContinuityComposerDialog dialog(nullptr, mConfig, this);
 
     if (dialog.ShowModal() != wxID_OK) {
@@ -125,10 +102,6 @@ void ContinuityBrowserPanel::OnEditEntry(int cell)
 
 void ContinuityBrowserPanel::OnDeleteEntry(int cell)
 {
-    if (!mView) {
-        return;
-    }
-
     // make a copy, then delete it, then set as new continuity:
     if (cell < static_cast<int>(mCont.GetParsedContinuity().size())) {
         auto copied_cont = do_cloning(mCont);
@@ -152,20 +125,20 @@ void ContinuityBrowserPanel::OnMoveEntry(int start_cell, int end_cell)
 
 void ContinuityBrowserPanel::UpdateCont(Continuity const& new_cont)
 {
-    if (!mView) {
+    if (!std::get<HandleSetContinuity>(mHandlers)) {
         return;
     }
 
-    mView->DoSetContinuityCommand(mSym, new_cont);
+    std::get<HandleSetContinuity>(mHandlers)(mSym, new_cont);
 }
 
 void ContinuityBrowserPanel::DoSetFocus(wxFocusEvent&)
 {
-    if (!mView || !IsShownOnScreen()) {
+    if (!std::get<HandleSetSelectionList>(mHandlers) || !IsShownOnScreen()) {
         return;
     }
 
-    mView->SetSelectionList(mView->MakeSelectBySymbol(mSym));
+    std::get<HandleSetSelectionList>(mHandlers)(mSym);
 }
 
 void ContinuityBrowserPanel::DoKillFocus(wxFocusEvent&)

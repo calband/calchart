@@ -202,17 +202,7 @@ void CustomListViewPanel::SetCells(std::vector<std::unique_ptr<DrawableCell>> ce
         }
     }
 
-    auto total_y = std::accumulate(mCells.begin(), mCells.end(), 0, [](auto&& a, auto&& b) {
-        return a + b->Height();
-    });
-    auto max_x_elem = std::max_element(mCells.begin(), mCells.end(), [](auto&& a, auto&& b) {
-        return a->Width() < b->Width();
-    });
-    // give a slight little padding on max_x
-    auto max_x = max_x_elem != mCells.end() ? ((*max_x_elem)->Width() * 1.1) : 0;
-
-    SetVirtualSize(wxSize{ int(max_x), total_y });
-    SetScrollRate(1, 1);
+    InvalidateBestSize(); // Clear cached size so sizer will re-query DoGetBestClientSize()
 }
 
 void CustomListViewPanel::SetHighlight(void const* highlight)
@@ -222,15 +212,33 @@ void CustomListViewPanel::SetHighlight(void const* highlight)
     }
 }
 
+wxSize CustomListViewPanel::DoGetBestClientSize() const
+{
+    // Tell sizers how big our client area should be based on our content
+    return GetContentSize();
+}
+
+auto CustomListViewPanel::GetContentSize() const -> wxSize
+{
+    auto total_y = std::accumulate(mCells.begin(), mCells.end(), 0, [](auto&& a, auto&& b) {
+        return a + b->Height();
+    });
+    auto max_x_elem = std::max_element(mCells.begin(), mCells.end(), [](auto&& a, auto&& b) {
+        return a->Width() < b->Width();
+    });
+    // give a slight little padding on max_x
+    auto max_x = max_x_elem != mCells.end() ? ((*max_x_elem)->Width() * 1.1) : 0;
+
+    return wxSize{ int(max_x), total_y };
+}
+
 // Define the repainting behaviour
 void CustomListViewPanel::OnPaint(wxPaintEvent&)
 {
     auto measure = mPerfRegistry.doMeasure();
     wxBufferedPaintDC dc(this);
-    PrepareDC(dc);
     PrepareToDraw(dc);
-    auto offset = GetViewStart();
-    wxCalChart::Draw::DrawCommandList(dc, CreateListViewDrawCommands(dc, mCells, m_firstPress, m_lastLocation, m_selected, m_dragging, offset));
+    wxCalChart::Draw::DrawCommandList(dc, CreateListViewDrawCommands(dc, mCells, m_firstPress, m_lastLocation, m_selected, m_dragging, wxPoint(0, 0)));
 }
 
 auto CustomListViewPanel::WhichCell(wxPoint const& point) const -> std::optional<size_t>
@@ -259,7 +267,7 @@ int CustomListViewPanel::HeightToCell(int which) const
 
 void CustomListViewPanel::OnLeftDownMouseEvent(wxMouseEvent& event)
 {
-    m_firstPress = m_lastLocation = CalcUnscrolledPosition(event.GetPosition());
+    m_firstPress = m_lastLocation = event.GetPosition();
     wxClientDC dc{ this };
 
     // which cell would this be?
@@ -277,7 +285,7 @@ void CustomListViewPanel::OnLeftDownMouseEvent(wxMouseEvent& event)
 void CustomListViewPanel::OnLeftDoubleClick(wxMouseEvent& event)
 {
     // which cell would this be?
-    auto which_cell = WhichCell(CalcUnscrolledPosition(event.GetPosition()));
+    auto which_cell = WhichCell(event.GetPosition());
     if (which_cell) {
         OnEditEntry(*which_cell);
     }
@@ -289,7 +297,7 @@ void CustomListViewPanel::OnLeftUpMouseEvent(wxMouseEvent& event)
     auto starting_cell = WhichCell(m_firstPress);
     m_lastLocation = m_firstPress;
     // which cell would this be?
-    auto which_cell = WhichCell(CalcUnscrolledPosition(event.GetPosition()));
+    auto which_cell = WhichCell(event.GetPosition());
     if (which_cell && starting_cell && *starting_cell != *which_cell) {
         // reorder.
         OnMoveEntry(*starting_cell, *which_cell);
@@ -303,7 +311,7 @@ void CustomListViewPanel::OnLeftUpMouseEvent(wxMouseEvent& event)
 void CustomListViewPanel::OnMouseMove(wxMouseEvent& event)
 {
     if (event.LeftIsDown() && event.GetPosition().y >= 0) {
-        m_lastLocation = CalcUnscrolledPosition(event.GetPosition());
+        m_lastLocation = event.GetPosition();
     }
     Refresh();
 }

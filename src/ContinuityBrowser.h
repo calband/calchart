@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "ContinuityBrowserPanel.h"
 #include <wx/wx.h>
 #include <wxUI/wxUI.hpp>
 
@@ -38,17 +39,16 @@ class ContinuityBrowser : public wxScrolledWindow {
 
 public:
     ContinuityBrowser(wxWindow* parent, wxSize const& size, CalChart::Configuration const& config);
-    ~ContinuityBrowser() override;
+    ~ContinuityBrowser() override = default;
 
     void OnUpdate(); // Refresh from the View
-    void SetView(CalChartView* view);
-    auto GetView() const { return mView; }
+
+    using HandleGetContinuities = std::function<std::vector<std::optional<CalChart::Continuity>>()>;
+    using Handlers = std::tuple<HandleGetContinuities, ContinuityBrowserPanel::Handlers>;
+
+    void SetHandlers(Handlers handlers);
 
 private:
-    void Init();
-    void CreateControls(CalChart::Configuration const& config);
-
-    // Internals
-    CalChartView* mView{};
+    HandleGetContinuities mHandleGetContinuities{};
     std::vector<ContinuityBrowserPerCont*> mPerCont;
 };
