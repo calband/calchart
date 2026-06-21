@@ -61,31 +61,35 @@ auto AnimateShow(const Show& show) -> Sheets
             }(show))
             | std::views::transform([&](auto&& curr_next) {
                   auto [curr_sheet, nextAnimationSheet] = curr_next;
+                  // Create local copies to avoid capturing structured bindings directly (C++ limitation)
+                  // This prevents MSVC from silently failing in Release builds
+                  auto curr_sheet_copy = curr_sheet;
+                  auto nextAnimationSheet_copy = nextAnimationSheet;
                   auto numBeats = curr_sheet->GetBeats();
                   auto isLastSheet = !nextAnimationSheet.has_value();
                   auto theCommands = CalChart::Ranges::ToVector<Animate::CompileResult>(
-                      std::ranges::iota_view(0UL, show.GetNumPoints()) | std::views::transform([&variablesStates, numBeats, isLastSheet, curr_sheet = curr_sheet, nextAnimationSheet = nextAnimationSheet](auto whichMarcher) {
-                          auto current_symbol = curr_sheet->GetSymbol(whichMarcher);
+                      std::ranges::iota_view(0UL, show.GetNumPoints()) | std::views::transform([&variablesStates, numBeats, isLastSheet, curr_sheet_copy, nextAnimationSheet_copy](auto whichMarcher) {
+                          auto current_symbol = curr_sheet_copy->GetSymbol(whichMarcher);
                           auto endPosition = [whichMarcher](auto&& nextAnimationSheet) -> std::optional<Coord> {
                               if (nextAnimationSheet) {
                                   return nextAnimationSheet->GetMarcherPosition(whichMarcher);
                               }
                               return std::nullopt;
-                          }(nextAnimationSheet);
-                          auto cont = curr_sheet->GetContinuityBySymbol(current_symbol);
+                          }(nextAnimationSheet_copy);
+                          auto cont = curr_sheet_copy->GetContinuityBySymbol(current_symbol);
                           return CalChart::Animate::CreateCompileResult(
                               AnimationData{
                                   static_cast<unsigned>(whichMarcher),
-                                  curr_sheet->GetMarcher(whichMarcher),
+                                  curr_sheet_copy->GetMarcher(whichMarcher),
                                   endPosition,
                                   numBeats,
                                   isLastSheet },
-                              curr_sheet->ContinuityInUse(current_symbol) ? &cont : nullptr,
+                              curr_sheet_copy->ContinuityInUse(current_symbol) ? &cont : nullptr,
                               variablesStates);
                       }));
 
                   return Animate::Sheet{
-                      curr_sheet->GetName(), numBeats, theCommands
+                      curr_sheet_copy->GetName(), numBeats, theCommands
                   };
               })),
         runningIndex
