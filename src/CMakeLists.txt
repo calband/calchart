@@ -118,6 +118,8 @@ add_executable(
   ContinuityEditorPopup.h
   CustomListViewPanel.cpp
   CustomListViewPanel.h
+  DebugContinuityBrowser.cpp
+  DebugContinuityBrowser.hpp
   EditCurveAssignments.cpp
   EditCurveAssignments.hpp
   DCSaveRestore.h

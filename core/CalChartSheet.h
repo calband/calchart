@@ -194,7 +194,7 @@ public:
     [[nodiscard]] auto GenerateSheetElements(CalChart::Configuration const& config, SelectionList const& selected, std::vector<std::string> const& marcherLabels, int referencePoint) const -> std::vector<CalChart::Draw::DrawCommand>;
 
 private:
-    std::vector<Continuity> mAnimationContinuity;
+    std::array<Continuity, MAX_NUM_SYMBOLS> mAnimationContinuity;
     PrintContinuity mPrintableContinuity;
     Beats mBeats{};
     Tempo mTempo = 120;

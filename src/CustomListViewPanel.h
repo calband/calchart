@@ -43,13 +43,13 @@ public:
 // can be manipulated.
 // the idea is that we will have a collection of smaller cells, that can be moved around.
 // View for linking CalChartDoc with ContinuityBrowser
-class CustomListViewPanel : public wxScrolledWindow {
-    using super = wxScrolledWindow;
+class CustomListViewPanel : public wxPanel {
+    using super = wxPanel;
     DECLARE_EVENT_TABLE()
 
 public:
     // Basic functions
-    CustomListViewPanel(wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxScrolledWindowStyle, wxString const& name = wxPanelNameStr);
+    CustomListViewPanel(wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = 0, wxString const& name = wxPanelNameStr);
     ~CustomListViewPanel() override = default;
 
     void SetSelection(std::optional<size_t> which) { m_selected = which; }
@@ -66,6 +66,10 @@ private:
     void OnLeftUpMouseEvent(wxMouseEvent& event);
     void OnMouseMove(wxMouseEvent& event);
     void OnEraseBackground(wxEraseEvent& event);
+
+    // Override to tell sizers how big our client area should be based on content
+    wxSize DoGetBestClientSize() const override;
+    auto GetContentSize() const -> wxSize;
 
     // internals
     virtual void OnNewEntry(int cell);

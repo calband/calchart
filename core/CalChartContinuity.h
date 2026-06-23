@@ -51,9 +51,9 @@ struct ParseErrorHandlers;
 class Continuity {
 public:
     // this could throw runtime_error on bad parses.
-    Continuity(std::string const& s = "", ParseErrorHandlers const* correction = nullptr);
-    Continuity(std::vector<std::unique_ptr<Cont::Procedure>>);
-    Continuity(Reader);
+    explicit Continuity(std::string const& s = "", ParseErrorHandlers const* correction = nullptr);
+    explicit Continuity(std::vector<std::unique_ptr<Cont::Procedure>>);
+    explicit Continuity(Reader);
     ~Continuity();
 
     Continuity(Continuity const&);

@@ -38,23 +38,19 @@ class ContinuityBrowserPanel : public CustomListViewPanel {
 
 public:
     // Basic functions
-    ContinuityBrowserPanel(CalChart::SYMBOL_TYPE sym, CalChart::Configuration const& config, wxWindow* parent,
-        wxWindowID winid = wxID_ANY,
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxScrolledWindowStyle,
-        const wxString& name = wxPanelNameStr);
-    virtual ~ContinuityBrowserPanel() = default;
+    ContinuityBrowserPanel(CalChart::SYMBOL_TYPE sym, CalChart::Configuration const& config, wxWindow* parent);
+    ~ContinuityBrowserPanel() override = default;
 
-    void SetView(CalChartView* view) { mView = view; }
-    auto GetView() const { return mView; }
+    using HandleSetContinuity = std::function<void(CalChart::SYMBOL_TYPE, CalChart::Continuity const& new_cont)>;
+    using HandleSetSelectionList = std::function<void(CalChart::SYMBOL_TYPE)>;
+    using Handlers = std::tuple<HandleSetContinuity, HandleSetSelectionList>;
+
+    void SetHandlers(Handlers handlers) { mHandlers = std::move(handlers); }
 
     void DoSetContinuity(CalChart::Continuity const& new_cont);
     void AddNewEntry();
 
 private:
-    void Init();
-
     // Event Handlers
     void OnNewEntry(int cell) override;
     void OnEditEntry(int cell) override;
@@ -67,7 +63,7 @@ private:
 
     void UpdateCont(CalChart::Continuity const& new_cont);
 
-    CalChartView* mView{};
+    Handlers mHandlers{};
     CalChart::Continuity mCont{};
     CalChart::SYMBOL_TYPE mSym{};
     CalChart::Configuration const& mConfig;

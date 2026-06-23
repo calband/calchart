@@ -1643,10 +1643,40 @@ CalChartDoc* CalChartFrame::GetShow()
     return static_cast<CalChartDoc*>(GetDocument());
 }
 
+namespace {
+auto CreateContinuityBrowserHandlers(CalChartView* view) -> ContinuityBrowser::Handlers
+{
+    if (!view) {
+        return ContinuityBrowser::Handlers{};
+    }
+    return ContinuityBrowser::Handlers{
+        [view]() { return CalChart::Ranges::ToVector<std::optional<CalChart::Continuity>>(
+                       CalChart::Ranges::zip_view(view->ContinuitiesInUse(), view->GetContinuities())
+                       | std::views::transform([](auto&& inUseAndCont) -> std::optional<CalChart::Continuity> {
+                             auto&& [inUse, cont] = inUseAndCont;
+                             if (inUse) {
+                                 return cont;
+                             } else {
+                                 return std::nullopt;
+                             }
+                         })); },
+        {
+            [view](CalChart::SYMBOL_TYPE sym, CalChart::Continuity const& new_cont) {
+                view->DoSetContinuityCommand(sym, new_cont);
+            },
+            [view](CalChart::SYMBOL_TYPE symbol) {
+                view->SetSelectionList(view->MakeSelectBySymbol(symbol));
+            },
+        }
+    };
+}
+
+}
+
 void CalChartFrame::SetViewsOnComponents(CalChartView* view)
 {
     mCanvas->SetView(view);
-    mContinuityBrowser->SetView(view);
+    mContinuityBrowser->SetHandlers(CreateContinuityBrowserHandlers(view));
     mFieldThumbnailBrowser->SetView(view);
     mAnimationErrorsPanel->SetView(view);
     mAnimationPanel->SetView(view);

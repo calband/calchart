@@ -47,15 +47,13 @@ std::array<std::string, MAX_NUM_SYMBOLS> const long_contnames = {
 };
 
 Sheet::Sheet(size_t numPoints)
-    : mAnimationContinuity(MAX_NUM_SYMBOLS)
-    , mBeats(1)
+    : mBeats(1)
     , mPoints(numPoints)
 {
 }
 
 Sheet::Sheet(size_t numPoints, std::string name)
-    : mAnimationContinuity(MAX_NUM_SYMBOLS)
-    , mBeats(1)
+    : mBeats(1)
     , mPoints(numPoints)
     , mName(std::move(name))
 {
@@ -153,8 +151,7 @@ namespace {
 // Constructor for shows 3.3 and ealier.
 // intentionally a reference to Reader.
 Sheet::Sheet(Version_3_3_and_earlier, size_t numPoints, Reader& reader, ParseErrorHandlers const* correction)
-    : mAnimationContinuity(MAX_NUM_SYMBOLS)
-    , mPoints(numPoints)
+    : mPoints(numPoints)
 {
     // Read in sheet name
     // <INGL_NAME><size><string + 1>
@@ -299,8 +296,7 @@ Sheet::Sheet(Version_3_3_and_earlier, size_t numPoints, Reader& reader, ParseErr
 // -=-=-=-=-=- LEGACY CODE</end> -=-=-=-=-=-
 
 Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correction)
-    : mAnimationContinuity(MAX_NUM_SYMBOLS)
-    , mPoints(numPoints)
+    : mPoints(numPoints)
 {
     // construct the parser handlers
     auto parse_INGL_NAME = [](Sheet* sheet, Reader reader) {

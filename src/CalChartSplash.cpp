@@ -26,6 +26,7 @@
 #include "CalChartConfiguration.h"
 #include "CalChartPreferences.h"
 #include "ConfigurationDebugDialog.h"
+#include "DebugContinuityBrowser.hpp"
 #include "HelpDialog.hpp"
 #include "StackDrawPlayground.h"
 #include "SystemConfiguration.h"
@@ -126,6 +127,9 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, std::strin
                                wxLogDebug("Beat Info: %s", valueStr.c_str());
 #endif
                            }
+                       } },
+            wxUI::Item{ "Continuity Browser Playground", [this] {
+                           DebugContinuityBrowser(this, mConfig);
                        } },
         },
         wxUI::Menu{
