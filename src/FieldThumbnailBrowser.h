@@ -20,6 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartCoord.h"
+#include "CalChartDrawCommand.h"
 #include "CalChartPerformanceRegistry.h"
 #include <wx/docview.h>
 
@@ -42,8 +44,15 @@ public:
     ~FieldThumbnailBrowser() override = default;
 
     void OnUpdate(); // Refresh from the View
-    void SetView(CalChartView* view) { mView = view; }
-    auto GetView() const { return mView; }
+
+    using HandleGetShowFullSize = std::function<CalChart::Coord()>;
+    using HandleGetNumSheets = std::function<size_t()>;
+    using HandleGetCurrentSheetNum = std::function<size_t()>;
+    using HandleGetSheetsName = std::function<std::vector<std::string>()>;
+    using HandleGenerateFieldWithMarchersDrawCommands = std::function<std::vector<std::vector<CalChart::Draw::DrawCommand>>()>;
+    using HandleGoToSheet = std::function<void(size_t)>;
+    using Handlers = std::tuple<HandleGetShowFullSize, HandleGetNumSheets, HandleGetCurrentSheetNum, HandleGetSheetsName, HandleGenerateFieldWithMarchersDrawCommands, HandleGoToSheet>;
+    void SetHandlers(Handlers handlers);
 
 private:
     void OnPaint(wxPaintEvent& event);
@@ -55,6 +64,7 @@ private:
     auto WhichCell(wxPoint const& p) const -> int;
 
     CalChartView* mView{};
+    Handlers mHandle;
 
     // const int mXLeftPadding{ 4 };
     // const int mXRightPadding{ 4 };

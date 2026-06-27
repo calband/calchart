@@ -61,15 +61,23 @@ auto CalcUserScale(wxSize box_size, CalChart::Coord mode_size)
     }
 }
 
-auto LayoutSheetThumbnails(CalChartView const& view, CalChart::Configuration const& config, int YNameSize, CalChart::Coord thumbnail_offset, CalChart::Coord box_size, CalChart::Coord box_offset)
+template <typename Range>
+auto LayoutSheetThumbnails(
+    size_t current_sheet_num,
+    Range&& sheet_names,
+    CalChart::Configuration const& config,
+    int YNameSize,
+    CalChart::Coord thumbnail_offset,
+    CalChart::Coord box_size,
+    CalChart::Coord box_offset)
 {
-    auto highlight_offset = box_offset + view.GetCurrentSheetNum() * thumbnail_offset;
+    auto highlight_offset = box_offset + current_sheet_num * thumbnail_offset;
     return std::vector<CalChart::Draw::DrawCommand>{
         CalChart::Draw::withFont(
             CalChart::Font{ YNameSize },
             CalChart::Draw::withBrushAndPen(
                 config.Get_CalChartBrushAndPen(CalChart::Colors::FIELD),
-                CalChart::Ranges::enumerate_view(view.GetSheetsName())
+                CalChart::Ranges::enumerate_view(std::forward<Range>(sheet_names))
                     | std::views::transform([thumbnail_offset, box_size, box_offset](auto&& whichAndSheet) {
                           auto [which, name] = whichAndSheet;
                           return std::vector<CalChart::Draw::DrawCommand>{
@@ -85,6 +93,36 @@ auto LayoutSheetThumbnails(CalChartView const& view, CalChart::Configuration con
                 CalChart::Draw::Rectangle(highlight_offset, box_size))),
     }
     + CalChart::Coord(kXLeftPadding, kYUpperPadding);
+}
+
+auto GetShowFullSize(FieldThumbnailBrowser::Handlers const& handle)
+{
+    return std::get<0>(handle)();
+}
+
+auto GetNumSheets(FieldThumbnailBrowser::Handlers const& handle)
+{
+    return std::get<1>(handle)();
+}
+
+auto GetCurrentSheetNum(FieldThumbnailBrowser::Handlers const& handle)
+{
+    return std::get<2>(handle)();
+}
+
+auto GetSheetsName(FieldThumbnailBrowser::Handlers const& handle)
+{
+    return std::get<3>(handle)();
+}
+
+auto GenerateFieldWithMarchersDrawCommands(FieldThumbnailBrowser::Handlers const& handle)
+{
+    return std::get<4>(handle)();
+}
+
+auto GoToSheet(FieldThumbnailBrowser::Handlers const& handle, size_t sheet_num)
+{
+    std::get<5>(handle)(sheet_num);
 }
 }
 
@@ -117,11 +155,11 @@ FieldThumbnailBrowser::FieldThumbnailBrowser(
 // calculate the size of the panel depending on orientation
 auto FieldThumbnailBrowser::SizeOfOneCell(bool horizontal) const -> wxSize
 {
-    if (!mView) {
+    if (!std::get<0>(mHandle)) {
         return { 1, 1 };
     }
 
-    auto mode_size_logical = mView->GetShowFullSize();
+    auto mode_size_logical = GetShowFullSize(mHandle);
     auto mode_size = fDIP(wxSize{ mode_size_logical.x, mode_size_logical.y });
     auto modeAspectRatio = mode_size.x / static_cast<double>(mode_size.y);
     if (horizontal) {
@@ -155,7 +193,7 @@ void FieldThumbnailBrowser::OnPaint([[maybe_unused]] wxPaintEvent& event)
     // for profiling purposes
     // std::cout << gFieldThumbnailMeasure << "\n";
     // auto snapshot = gFieldThumbnailMeasure.doMeasurement();
-    if (!mView) {
+    if (!std::get<0>(mHandle)) {
         return;
     }
 
@@ -166,7 +204,7 @@ void FieldThumbnailBrowser::OnPaint([[maybe_unused]] wxPaintEvent& event)
 
     // let's draw the boxes
     // Convert mode_size to DIP coordinates to match GetSize() coordinate system
-    auto mode_size_logical = mView->GetShowFullSize();
+    auto mode_size_logical = GetShowFullSize(mHandle);
     auto mode_size = fDIP(wxSize{ mode_size_logical.x, mode_size_logical.y });
     auto current_size = GetSize() - wxSize(kXLeftPadding + kXRightPadding + mXScrollPadding, mYNameSize + kYNamePadding + kYUpperPadding + kYBottomPadding + mYScrollPadding);
     auto box_size = mLayoutHorizontal
@@ -194,10 +232,10 @@ void FieldThumbnailBrowser::OnPaint([[maybe_unused]] wxPaintEvent& event)
     wxLogInfo("  origin: (%d, %d)", origin.x, origin.y);
     wxLogInfo("  mLayoutHorizontal: %s", mLayoutHorizontal ? "true" : "false");
 
-    wxCalChart::Draw::DrawCommandList(dc, LayoutSheetThumbnails(*mView, mConfig, mYNameSize, thumbnail_offset, CalChart::Coord(box_size.x, box_size.y), field_offset));
+    wxCalChart::Draw::DrawCommandList(dc, LayoutSheetThumbnails(GetCurrentSheetNum(mHandle), GetSheetsName(mHandle), mConfig, mYNameSize, thumbnail_offset, CalChart::Coord(box_size.x, box_size.y), field_offset));
 
     dc.SetUserScale(userScale, userScale);
-    for (auto [which, sheet] : CalChart::Ranges::enumerate_view(mView->GenerateFieldWithMarchersDrawCommands())) {
+    for (auto [which, sheet] : CalChart::Ranges::enumerate_view(GenerateFieldWithMarchersDrawCommands(mHandle))) {
         auto newOrigin = which * thumbnail_offset;
         dc.SetDeviceOrigin(origin.x + newOrigin.x + kXLeftPadding, origin.y + newOrigin.y + kYUpperPadding + mYNameSize + kYNamePadding);
         wxCalChart::Draw::DrawCommandList(dc, sheet);
@@ -206,39 +244,41 @@ void FieldThumbnailBrowser::OnPaint([[maybe_unused]] wxPaintEvent& event)
 
 void FieldThumbnailBrowser::OnUpdate()
 {
-    if (!mView) {
+    if (!std::get<0>(mHandle)) {
         return;
     }
 
     auto size_of_one = SizeOfOneCell(mLayoutHorizontal);
-    SetVirtualSize(size_of_one.x * (mLayoutHorizontal ? mView->GetNumSheets() : 1.0), size_of_one.y * (mLayoutHorizontal ? 1.0 : mView->GetNumSheets()));
+    auto numSheets = GetNumSheets(mHandle);
+    SetVirtualSize(size_of_one.x * (mLayoutHorizontal ? numSheets : 1.0), size_of_one.y * (mLayoutHorizontal ? 1.0 : numSheets));
 
     SetScrollRate(mLayoutHorizontal ? size_of_one.x : 0, mLayoutHorizontal ? 0 : size_of_one.y);
 
     auto get_size = GetSize();
+    auto currentSheetNum = GetCurrentSheetNum(mHandle);
     auto scrolled_top = CalcUnscrolledPosition({ 0, 0 });
     auto scrolled_bottom = CalcUnscrolledPosition({ get_size.x, get_size.y });
     // so how many are visible:
     auto how_many_visible = mLayoutHorizontal ? get_size.x / size_of_one.x : get_size.y / size_of_one.y;
     if (how_many_visible == 0) {
-        Scroll(mLayoutHorizontal ? mView->GetCurrentSheetNum() : 0, mLayoutHorizontal ? 0 : mView->GetCurrentSheetNum());
+        Scroll(mLayoutHorizontal ? currentSheetNum : 0, mLayoutHorizontal ? 0 : currentSheetNum);
     } else {
         // if the upper part is above the view, move the view to contain it.
         if (mLayoutHorizontal) {
-            if (size_of_one.x * static_cast<int>(mView->GetCurrentSheetNum()) < scrolled_top.x) {
-                Scroll(static_cast<int>(mView->GetCurrentSheetNum()), 0);
+            if (size_of_one.x * static_cast<int>(currentSheetNum) < scrolled_top.x) {
+                Scroll(static_cast<int>(currentSheetNum), 0);
             }
             // if the lower part is below the view, move the view to contain it.
-            if ((size_of_one.x * static_cast<int>(mView->GetCurrentSheetNum() + 1)) > scrolled_bottom.x) {
-                Scroll(static_cast<int>(mView->GetCurrentSheetNum()) - how_many_visible + 1, 0);
+            if ((size_of_one.x * static_cast<int>(currentSheetNum + 1)) > scrolled_bottom.x) {
+                Scroll(static_cast<int>(currentSheetNum) - how_many_visible + 1, 0);
             }
         } else {
-            if (size_of_one.y * static_cast<int>(mView->GetCurrentSheetNum()) < scrolled_top.y) {
-                Scroll(0, static_cast<int>(mView->GetCurrentSheetNum()));
+            if (size_of_one.y * static_cast<int>(currentSheetNum) < scrolled_top.y) {
+                Scroll(0, static_cast<int>(currentSheetNum));
             }
             // if the lower part is below the view, move the view to contain it.
-            if ((size_of_one.y * static_cast<int>(mView->GetCurrentSheetNum() + 1)) > scrolled_bottom.y) {
-                Scroll(0, static_cast<int>(mView->GetCurrentSheetNum()) - how_many_visible + 1);
+            if ((size_of_one.y * static_cast<int>(currentSheetNum + 1)) > scrolled_bottom.y) {
+                Scroll(0, static_cast<int>(currentSheetNum) - how_many_visible + 1);
             }
         }
     }
@@ -246,28 +286,34 @@ void FieldThumbnailBrowser::OnUpdate()
     Refresh();
 }
 
+void FieldThumbnailBrowser::SetHandlers(Handlers handlers)
+{
+    mHandle = handlers;
+}
+
 void FieldThumbnailBrowser::HandleKey(wxKeyEvent& event)
 {
-    if (((event.GetKeyCode() == WXK_LEFT) || (event.GetKeyCode() == WXK_UP)) && mView->GetCurrentSheetNum() > 0) {
-        mView->GoToSheet(mView->GetCurrentSheetNum() - 1);
+    auto currentSheetNum = GetCurrentSheetNum(mHandle);
+    if (((event.GetKeyCode() == WXK_LEFT) || (event.GetKeyCode() == WXK_UP)) && currentSheetNum > 0) {
+        GoToSheet(mHandle, currentSheetNum - 1);
     }
-    if (((event.GetKeyCode() == WXK_RIGHT) || (event.GetKeyCode() == WXK_DOWN)) && mView->GetCurrentSheetNum() < (mView->GetNumSheets() - 1)) {
-        mView->GoToSheet(mView->GetCurrentSheetNum() + 1);
+    if (((event.GetKeyCode() == WXK_RIGHT) || (event.GetKeyCode() == WXK_DOWN)) && currentSheetNum < (GetNumSheets(mHandle) - 1)) {
+        GoToSheet(mHandle, currentSheetNum + 1);
     }
 }
 
 void FieldThumbnailBrowser::HandleMouseDown(wxMouseEvent& event)
 {
     auto which = WhichCell(CalcUnscrolledPosition(event.GetPosition()));
-    auto numSheets = mView->GetNumSheets();
+    auto numSheets = GetNumSheets(mHandle);
     if (numSheets > 0) {
-        mView->GoToSheet(std::min(static_cast<size_t>(which), numSheets - 1));
+        GoToSheet(mHandle, std::min(static_cast<size_t>(which), numSheets - 1));
     }
 }
 
 void FieldThumbnailBrowser::HandleSizeEvent(wxSizeEvent& event)
 {
-    auto mode_size_logical = mView->GetShowFullSize();
+    auto mode_size_logical = GetShowFullSize(mHandle);
     auto mode_size = fDIP(wxSize{ mode_size_logical.x, mode_size_logical.y });
     auto ratioMode = mode_size.y ? mode_size.x / static_cast<float>(mode_size.y) : 0;
     auto ratioSize = event.m_size.y ? event.m_size.x / static_cast<float>(event.m_size.y) : 0;
