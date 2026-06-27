@@ -162,16 +162,24 @@ auto DebugExportData::Create(Show const& show, Animation const& animation, Displ
     nlohmann::json animData;
     animData["sheets"] = nlohmann::json::array();
 
-    for (size_t sheetIdx = 0; sheetIdx < show.GetNumSheets(); ++sheetIdx) {
+    for (size_t sheetIdx = 0; sheetIdx < animation.TotalAnimatedSheets(); ++sheetIdx) {
         nlohmann::json sheetData;
-        sheetData["sheet_index"] = sheetIdx;
-        sheetData["sheet_name"] = show.GetSheetName(sheetIdx);
+        auto showSheetIdx = animation.AnimSheetToShowSheetTranslate(sheetIdx);
+        sheetData["sheet_index"] = showSheetIdx;
+        sheetData["sheet_name"] = animation.GetSheetName(sheetIdx);
 
-        auto numBeats = show.GetSheetBeats(sheetIdx);
-        auto beatOffset = animation.GetBeatForShowSheet(sheetIdx);
+        auto numBeats = animation.GetSheetBeats(sheetIdx);
+        auto beatOffset = animation.GetTotalBeatsUpTo(sheetIdx);
 
         sheetData["beats"] = numBeats;
         sheetData["beat_offset"] = beatOffset;
+
+        // Add animation errors for this sheet
+        auto sheetErrors = animation.GetAnimationErrors();
+        if (sheetIdx < sheetErrors.size()) {
+            sheetData["errors"] = CalChart::Animate::ErrorsToJSON(sheetErrors[sheetIdx]);
+        }
+
         sheetData["marchers"] = nlohmann::json::array();
 
         // For each marcher

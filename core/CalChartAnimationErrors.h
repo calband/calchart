@@ -27,6 +27,7 @@
 #include "CalChartUtils.h"
 #include <cstdint>
 #include <map>
+#include <nlohmann/json.hpp>
 #include <ostream>
 
 /**
@@ -84,5 +85,22 @@ static inline auto operator<<(std::ostream& os, Error e) -> std::ostream&
 using ErrorsEncountered = std::set<Error>;
 using Errors = std::map<Error, SelectionList>;
 inline auto AnyErrors(Errors const& errors) { return !errors.empty(); }
+
+// Convert Errors to JSON for debugging
+static inline auto ErrorsToJSON(Errors const& errors) -> nlohmann::json
+{
+    auto j = nlohmann::json::array();
+    for (auto&& [error, marchers] : errors) {
+        nlohmann::json errorEntry;
+        errorEntry["error_type"] = ErrorToString(error);
+        errorEntry["error_code"] = static_cast<int>(error);
+        errorEntry["marchers"] = nlohmann::json::array();
+        for (auto marcher : marchers) {
+            errorEntry["marchers"].push_back(marcher);
+        }
+        j.push_back(errorEntry);
+    }
+    return j;
+}
 
 }
