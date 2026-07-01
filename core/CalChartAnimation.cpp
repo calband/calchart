@@ -65,8 +65,8 @@ auto AnimateShow(const Show& show) -> Sheets
                   // This prevents MSVC from silently failing in Release builds
                   auto curr_sheet_copy = curr_sheet;
                   auto nextAnimationSheet_copy = nextAnimationSheet;
-                  auto numBeats = curr_sheet->GetBeats();
-                  auto isLastSheet = !nextAnimationSheet.has_value();
+                  auto numBeats = curr_sheet_copy->GetBeats();
+                  auto isLastSheet = !nextAnimationSheet_copy.has_value();
                   auto theCommands = CalChart::Ranges::ToVector<Animate::CompileResult>(
                       std::ranges::iota_view(0UL, show.GetNumPoints()) | std::views::transform([&variablesStates, numBeats, isLastSheet, curr_sheet_copy, nextAnimationSheet_copy](auto whichMarcher) {
                           auto current_symbol = curr_sheet_copy->GetSymbol(whichMarcher);

@@ -94,6 +94,15 @@ public:
         return mErrors;
     }
 
+    // For debugging: expose the raw commands for a marcher
+    [[nodiscard]] auto GetCommandsJSON(MarcherIndex whichMarcher) const -> std::vector<nlohmann::json>
+    {
+        if (whichMarcher >= mCommands.size()) {
+            return {};
+        }
+        return mCommands.at(whichMarcher).toOnlineViewerJSON();
+    }
+
 private:
     [[nodiscard]] auto FindAllCollisions() const -> std::map<std::tuple<MarcherIndex, Beats>, Coord::CollisionType>;
     std::string mName;
