@@ -54,7 +54,7 @@ namespace Cont {
 }
 
 namespace CalChart::Animate {
-using Variables = std::array<std::map<unsigned, double>, Cont::kNumVariables>;
+using Variables = std::array<std::map<MarcherIndex, double>, Cont::kNumVariables>;
 using CompileResult = std::pair<std::vector<Command>, ErrorsEncountered>;
 using Proceedures = std::vector<std::unique_ptr<Cont::Procedure>>;
 
@@ -66,7 +66,7 @@ using Proceedures = std::vector<std::unique_ptr<Cont::Procedure>>;
 // next position is the position of the marcher on the next sheet, regardless of number of beats.
 // is optional because if there is no next sheet (this is the last sheet), then it's null.
 struct AnimationData {
-    unsigned whichMarcher;
+    MarcherIndex whichMarcher;
     Point marcherPosition;
     std::optional<Coord> endPosition;
     Beats numBeats;

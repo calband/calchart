@@ -141,7 +141,7 @@ public:
     [[nodiscard]] auto DebugAnimateInfoAtBeat(Beats beat) const -> std::pair<std::string, std::vector<std::string>>;
 
     [[nodiscard]] auto BeatHasCollision(Beats whichBeat) const -> bool;
-    [[nodiscard]] auto GetSheetName(int whichSheet) const { return mSheets.at(whichSheet).GetName(); }
+    [[nodiscard]] auto GetSheetName(size_t whichSheet) const { return mSheets.at(whichSheet).GetName(); }
     // Sheet -> selection of marchers who collided
     [[nodiscard]] auto SheetsToMarchersWhoCollided() const -> std::map<int, CalChart::SelectionList>
     {
