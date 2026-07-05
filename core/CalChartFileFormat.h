@@ -349,6 +349,10 @@ namespace Parser {
         std::memcpy(rawd, fptr, sizeof(float));
         d.insert(d.end(), std::begin(rawd), std::end(rawd));
     }
+    inline void Append(std::vector<std::byte>& d, double v)
+    {
+        Append(d, static_cast<float>(v));
+    }
 
     template <typename T>
     void Append(std::vector<std::byte>& d, std::vector<T> const& s)
@@ -643,6 +647,12 @@ inline auto Reader::Peek<float>() const -> float
     void* fptr = &result;
     std::memcpy(fptr, rawd, sizeof(float));
     return result;
+}
+
+template <>
+inline auto Reader::Peek<double>() const -> double
+{
+    return static_cast<double>(Peek<float>());
 }
 
 template <>

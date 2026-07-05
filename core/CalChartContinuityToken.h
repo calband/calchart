@@ -34,7 +34,7 @@
  *  each other node).  We then have these inuity specialization "types"
  *
  *      procedure : A inuityToken that represents a inuity that a marcher will follow.
- *      value : A inuityToken that represents a specific Value, like a float
+ *      value : A inuityToken that represents a specific Value, like a double
  *      function : A Value that has composes one or more Values for a new Value.
  *      direction : A Value that is specifically a Direction.
  *      steptype : A Value that is specifically a step type.
@@ -352,7 +352,7 @@ class ValueFloat : public Value {
 
 public:
     ValueFloat() = default;
-    ValueFloat(float v);
+    ValueFloat(double v);
     [[nodiscard]] auto clone() const -> std::unique_ptr<Value> override { return std::make_unique<ValueFloat>(val); }
 
     [[nodiscard]] auto Get(Animate::Compile const& anim) const -> double override;
@@ -369,7 +369,7 @@ protected:
     }
 
 private:
-    float val{};
+    double val{};
     static constexpr auto NumParts = 0;
 };
 

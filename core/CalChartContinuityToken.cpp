@@ -712,7 +712,7 @@ Reader ValueUnset::Deserialize(Reader reader)
 }
 
 // ValueFloat
-ValueFloat::ValueFloat(float v)
+ValueFloat::ValueFloat(double v)
     : val(v)
 {
 }
@@ -748,7 +748,7 @@ Reader ValueFloat::Deserialize(Reader reader)
 {
     reader = CheckForToken(reader, 5, SerializationToken::ValueFloat);
     reader = super::Deserialize(reader);
-    val = reader.Get<float>();
+    val = reader.Get<double>();
     return reader;
 }
 
@@ -760,7 +760,7 @@ ValueDefined::ValueDefined(DefinedValue v)
 
 auto ValueDefined::Get(Animate::Compile const&) const -> double
 {
-    static const std::map<DefinedValue, float> mapping = {
+    static const std::map<DefinedValue, double> mapping = {
         { DefinedValue::CC_NW, 45.0 },
         { DefinedValue::CC_W, 90.0 },
         { DefinedValue::CC_SW, 135.0 },
@@ -773,8 +773,8 @@ auto ValueDefined::Get(Animate::Compile const&) const -> double
         { DefinedValue::CC_SH, 0.5 },
         { DefinedValue::CC_JS, 0.5 },
         { DefinedValue::CC_GV, 1.0 },
-        { DefinedValue::CC_M, 4.0f / 3 },
-        { DefinedValue::CC_DM, static_cast<float>(std::numbers::sqrt2) },
+        { DefinedValue::CC_M, 4.0 / 3 },
+        { DefinedValue::CC_DM, std::numbers::sqrt2 },
     };
     auto i = mapping.find(val);
     if (i != mapping.end()) {
