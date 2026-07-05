@@ -112,6 +112,12 @@ if(USE_SYSTEM_DEPENDENCIES)
     find_package(wxWidgets REQUIRED COMPONENTS net core base gl aui html webview media)
   endif()
   include(${wxWidgets_USE_FILE})
+  # Workaround for vcpkg wxWidgets on Windows: vcpkg's library wasn't built with
+  # string_view support, but headers check __cpp_lib_string_view and expose it anyway.
+  # Force it undefined to prevent wxHAS_STD_STRING_VIEW from being defined.
+  if(WIN32)
+    add_compile_options(/U__cpp_lib_string_view)
+  endif()
 elseif(FORCE_VENDOR_DEPENDENCIES)
   message(STATUS "Fetching wxWidgets sources for vendor build (this can be slow).")
   # Have wxWidgets build as static libraries
