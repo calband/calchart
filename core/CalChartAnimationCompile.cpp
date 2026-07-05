@@ -37,8 +37,8 @@ struct CompileState : public Compile {
     [[nodiscard]] auto Append(Command cmd) -> bool override;
     void RegisterError(Error err) const override { mErrors.insert(err); }
 
-    [[nodiscard]] auto GetVarValue(Cont::Variable varnum) const -> float override;
-    void SetVarValue(Cont::Variable varnum, float value) override { mVars.at(toUType(varnum))[mWhichMarcher] = value; }
+    [[nodiscard]] auto GetVarValue(Cont::Variable varnum) const -> double override;
+    void SetVarValue(Cont::Variable varnum, double value) override { mVars.at(toUType(varnum))[mWhichMarcher] = value; }
 
     [[nodiscard]] auto GetPointPosition() const -> Coord override { return mWhichPos; }
     [[nodiscard]] auto GetStartingPosition() const -> Coord override { return mPoint.GetPos(0); }
@@ -71,7 +71,7 @@ auto CreateCompileResult(
     if (proceedures == nullptr || !proceedures->HasParsedContinuity()) {
         if (animationData.isLastAnimationSheet) {
             // use MTRM E
-            Cont::ProcMTRM defcont(std::make_unique<Cont::ValueDefined>(Cont::CC_E));
+            Cont::ProcMTRM defcont(std::make_unique<Cont::ValueDefined>(Cont::DefinedValue::CC_E));
             defcont.Compile(ac);
         } else {
             // use EVEN REM NP
@@ -133,7 +133,7 @@ bool CompileState::Append(Command cmd)
     return true;
 }
 
-float CompileState::GetVarValue(Cont::Variable varnum) const
+auto CompileState::GetVarValue(Cont::Variable varnum) const -> double
 {
     auto i = mVars[toUType(varnum)].find(mWhichMarcher);
     if (i != mVars[toUType(varnum)].end()) {

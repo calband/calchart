@@ -54,7 +54,7 @@ namespace Cont {
 }
 
 namespace CalChart::Animate {
-using Variables = std::array<std::map<unsigned, float>, Cont::kNumVariables>;
+using Variables = std::array<std::map<unsigned, double>, Cont::kNumVariables>;
 using CompileResult = std::pair<std::vector<Command>, ErrorsEncountered>;
 using Proceedures = std::vector<std::unique_ptr<Cont::Procedure>>;
 
@@ -83,8 +83,8 @@ struct Compile {
     virtual auto Append(Command cmd) -> bool = 0;
     virtual void RegisterError(Error err) const = 0;
 
-    [[nodiscard]] virtual auto GetVarValue(Cont::Variable varnum) const -> float = 0;
-    virtual void SetVarValue(Cont::Variable varnum, float value) = 0;
+    [[nodiscard]] virtual auto GetVarValue(Cont::Variable varnum) const -> double = 0;
+    virtual void SetVarValue(Cont::Variable varnum, double value) = 0;
 
     // helper functions to get information for building a command
     [[nodiscard]] virtual auto GetPointPosition() const -> Coord = 0;

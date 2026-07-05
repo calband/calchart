@@ -230,7 +230,7 @@ auto CheckForTokenImpl(Reader reader, size_t minSize, T serialToken, U tokenName
     return reader;
 }
 
-std::tuple<std::unique_ptr<Procedure>, Reader> DeserializeProcedure(Reader reader)
+auto DeserializeProcedure(Reader reader) -> std::tuple<std::unique_ptr<Procedure>, Reader>
 {
     if (reader.size() < 1) {
         throw std::runtime_error("Error, size of Point is not correct");
@@ -311,7 +311,7 @@ std::tuple<std::unique_ptr<Procedure>, Reader> DeserializeProcedure(Reader reade
     return { std::move(v), b };
 }
 
-static std::tuple<std::unique_ptr<Point>, Reader> DeserializePoint(Reader reader)
+static auto DeserializePoint(Reader reader) -> std::tuple<std::unique_ptr<Point>, Reader>
 {
     if (reader.size() < 1) {
         throw std::runtime_error("Error, size of Point is not correct");
@@ -341,7 +341,7 @@ static std::tuple<std::unique_ptr<Point>, Reader> DeserializePoint(Reader reader
     return { std::move(v), new_reader };
 }
 
-static std::tuple<std::unique_ptr<Value>, Reader> DeserializeValue(Reader reader)
+static auto DeserializeValue(Reader reader) -> std::tuple<std::unique_ptr<Value>, Reader>
 {
     if (reader.size() < 1) {
         throw std::runtime_error("Error, size of Point is not correct");
@@ -717,9 +717,9 @@ ValueFloat::ValueFloat(float v)
 {
 }
 
-float ValueFloat::Get(Animate::Compile const&) const { return val; }
+auto ValueFloat::Get(Animate::Compile const&) const -> double { return val; }
 
-std::ostream& ValueFloat::Print(std::ostream& os) const
+auto ValueFloat::Print(std::ostream& os) const -> std::ostream&
 {
     super::Print(os);
     os << "[CVF]";
@@ -758,23 +758,23 @@ ValueDefined::ValueDefined(DefinedValue v)
 {
 }
 
-float ValueDefined::Get(Animate::Compile const&) const
+auto ValueDefined::Get(Animate::Compile const&) const -> double
 {
     static const std::map<DefinedValue, float> mapping = {
-        { CC_NW, 45.0 },
-        { CC_W, 90.0 },
-        { CC_SW, 135.0 },
-        { CC_S, 180.0 },
-        { CC_SE, 225.0 },
-        { CC_E, 270.0 },
-        { CC_NE, 315.0 },
-        { CC_HS, 1.0 },
-        { CC_MM, 1.0 },
-        { CC_SH, 0.5 },
-        { CC_JS, 0.5 },
-        { CC_GV, 1.0 },
-        { CC_M, 4.0f / 3 },
-        { CC_DM, static_cast<float>(std::numbers::sqrt2) },
+        { DefinedValue::CC_NW, 45.0 },
+        { DefinedValue::CC_W, 90.0 },
+        { DefinedValue::CC_SW, 135.0 },
+        { DefinedValue::CC_S, 180.0 },
+        { DefinedValue::CC_SE, 225.0 },
+        { DefinedValue::CC_E, 270.0 },
+        { DefinedValue::CC_NE, 315.0 },
+        { DefinedValue::CC_HS, 1.0 },
+        { DefinedValue::CC_MM, 1.0 },
+        { DefinedValue::CC_SH, 0.5 },
+        { DefinedValue::CC_JS, 0.5 },
+        { DefinedValue::CC_GV, 1.0 },
+        { DefinedValue::CC_M, 4.0f / 3 },
+        { DefinedValue::CC_DM, static_cast<float>(std::numbers::sqrt2) },
     };
     auto i = mapping.find(val);
     if (i != mapping.end()) {
@@ -787,7 +787,7 @@ std::ostream& ValueDefined::Print(std::ostream& os) const
 {
     super::Print(os);
     os << "[CVC]";
-    return os << "Defined:" << DefinedValue_strings[val];
+    return os << "Defined:" << DefinedValue_strings[toUType(val)];
 }
 
 Drawable ValueDefined::GetDrawable() const
@@ -795,20 +795,20 @@ Drawable ValueDefined::GetDrawable() const
     // to_string gives a lot of decimal points.  256 on the stack should be ok...?
     auto type = Type::value;
     switch (val) {
-    case CC_NW:
-    case CC_W:
-    case CC_SW:
-    case CC_S:
-    case CC_SE:
-    case CC_E:
-    case CC_NE:
-    case CC_N:
+    case DefinedValue::CC_NW:
+    case DefinedValue::CC_W:
+    case DefinedValue::CC_SW:
+    case DefinedValue::CC_S:
+    case DefinedValue::CC_SE:
+    case DefinedValue::CC_E:
+    case DefinedValue::CC_NE:
+    case DefinedValue::CC_N:
         type = Type::direction;
         break;
     default:
         type = Type::steptype;
     }
-    return { this, parent_ptr, type, std::string{ DefinedValue_strings[val] }, std::string{ DefinedValue_strings[val] }, {} };
+    return { this, parent_ptr, type, std::string{ DefinedValue_strings[toUType(val)] }, std::string{ DefinedValue_strings[toUType(val)] }, {} };
 }
 
 auto ValueDefined::Serialize() const -> std::vector<std::byte>
@@ -829,7 +829,7 @@ Reader ValueDefined::Deserialize(Reader reader)
 }
 
 // ValueAdd
-float ValueAdd::Get(Animate::Compile const& anim) const
+auto ValueAdd::Get(Animate::Compile const& anim) const -> double
 {
     return (val1->Get(anim) + val2->Get(anim));
 }
@@ -877,7 +877,7 @@ Reader ValueAdd::Deserialize(Reader reader)
 }
 
 // ValueSub
-float ValueSub::Get(Animate::Compile const& anim) const
+auto ValueSub::Get(Animate::Compile const& anim) const -> double
 {
     return (val1->Get(anim) - val2->Get(anim));
 }
@@ -925,7 +925,7 @@ Reader ValueSub::Deserialize(Reader reader)
 }
 
 // ValueMult
-float ValueMult::Get(Animate::Compile const& anim) const
+auto ValueMult::Get(Animate::Compile const& anim) const -> double
 {
     return (val1->Get(anim) * val2->Get(anim));
 }
@@ -973,7 +973,7 @@ Reader ValueMult::Deserialize(Reader reader)
 }
 
 // ValueDiv
-float ValueDiv::Get(Animate::Compile const& anim) const
+auto ValueDiv::Get(Animate::Compile const& anim) const -> double
 {
     auto f = val2->Get(anim);
     if (IS_ZERO(f)) {
@@ -1027,7 +1027,7 @@ Reader ValueDiv::Deserialize(Reader reader)
 }
 
 // ValueNeg
-float ValueNeg::Get(Animate::Compile const& anim) const { return -val->Get(anim); }
+auto ValueNeg::Get(Animate::Compile const& anim) const -> double { return -val->Get(anim); }
 
 std::ostream& ValueNeg::Print(std::ostream& os) const
 {
@@ -1070,9 +1070,9 @@ Reader ValueNeg::Deserialize(Reader reader)
 }
 
 // ValueREM
-auto ValueREM::Get(Animate::Compile const& anim) const -> float
+auto ValueREM::Get(Animate::Compile const& anim) const -> double
 {
-    return static_cast<float>(anim.GetBeatsRemaining());
+    return static_cast<double>(anim.GetBeatsRemaining());
 }
 
 std::ostream& ValueREM::Print(std::ostream& os) const
@@ -1113,7 +1113,7 @@ ValueVar::ValueVar(Cont::Variable num)
 {
 }
 
-float ValueVar::Get(Animate::Compile const& anim) const
+double ValueVar::Get(Animate::Compile const& anim) const
 {
     return anim.GetVarValue(varnum);
 }
@@ -1136,7 +1136,7 @@ Drawable ValueVar::GetDrawable() const
     };
 }
 
-void ValueVar::Set(Animate::Compile& anim, float v)
+void ValueVar::Set(Animate::Compile& anim, double v)
 {
     anim.SetVarValue(varnum, v);
 }
@@ -1192,13 +1192,13 @@ Reader ValueVarUnset::Deserialize(Reader reader)
 }
 
 // FuncDir
-auto FuncDir::Get(Animate::Compile const& anim) const -> float
+auto FuncDir::Get(Animate::Compile const& anim) const -> double
 {
     auto c = pnt->Get(anim);
     if (c == anim.GetPointPosition()) {
         anim.RegisterError(Animate::Error::UNDEFINED);
     }
-    return static_cast<float>(CalChart::Degree{ anim.GetPointPosition().Direction(c) }.getValue());
+    return CalChart::Degree{ anim.GetPointPosition().Direction(c) }.getValue();
 }
 
 std::ostream& FuncDir::Print(std::ostream& os) const
@@ -1242,14 +1242,14 @@ Reader FuncDir::Deserialize(Reader reader)
 }
 
 // FuncDirFrom
-auto FuncDirFrom::Get(Animate::Compile const& anim) const -> float
+auto FuncDirFrom::Get(Animate::Compile const& anim) const -> double
 {
     auto start = pnt_start->Get(anim);
     auto end = pnt_end->Get(anim);
     if (start == end) {
         anim.RegisterError(Animate::Error::UNDEFINED);
     }
-    return static_cast<float>(CalChart::Degree{ start.Direction(end) }.getValue());
+    return CalChart::Degree{ start.Direction(end) }.getValue();
 }
 
 std::ostream& FuncDirFrom::Print(std::ostream& os) const
@@ -1295,7 +1295,7 @@ Reader FuncDirFrom::Deserialize(Reader reader)
 }
 
 // FuncDist
-float FuncDist::Get(Animate::Compile const& anim) const
+auto FuncDist::Get(Animate::Compile const& anim) const -> double
 {
     auto vector = pnt->Get(anim) - anim.GetPointPosition();
     return vector.DM_Magnitude();
@@ -1342,7 +1342,7 @@ Reader FuncDist::Deserialize(Reader reader)
 }
 
 // FuncDistFrom
-float FuncDistFrom::Get(Animate::Compile const& anim) const
+auto FuncDistFrom::Get(Animate::Compile const& anim) const -> double
 {
     auto vector = pnt_end->Get(anim) - pnt_start->Get(anim);
     return vector.Magnitude();
@@ -1391,7 +1391,7 @@ Reader FuncDistFrom::Deserialize(Reader reader)
 }
 
 // FuncEither
-float FuncEither::Get(Animate::Compile const& anim) const
+auto FuncEither::Get(Animate::Compile const& anim) const -> double
 {
     auto c = pnt->Get(anim);
     if (anim.GetPointPosition() == c) {
@@ -1450,7 +1450,7 @@ Reader FuncEither::Deserialize(Reader reader)
 }
 
 // FuncOpp
-float FuncOpp::Get(Animate::Compile const& anim) const
+auto FuncOpp::Get(Animate::Compile const& anim) const -> double
 {
     return (dir->Get(anim) + 180.0f);
 }
@@ -1497,7 +1497,7 @@ Reader FuncOpp::Deserialize(Reader reader)
 
 // FuncStep
 
-float FuncStep::Get(Animate::Compile const& anim) const
+auto FuncStep::Get(Animate::Compile const& anim) const -> double
 {
     auto c = pnt->Get(anim) - anim.GetPointPosition();
     return (c.DM_Magnitude() * numbeats->Get(anim) / blksize->Get(anim));
@@ -1832,29 +1832,29 @@ void ProcDMCM::Compile(Animate::Compile& anim)
     auto c = r2.x - r1.x;
     if (c == (r2.y - r1.y + Int2CoordUnits(2))) {
         if (c >= 0) {
-            ValueDefined dir1(CC_SW);
-            ValueDefined dir2(CC_W);
+            ValueDefined dir1{ DefinedValue::CC_SW };
+            ValueDefined dir2{ DefinedValue::CC_W };
             DoCounterMarch(anim, *pnt1, *pnt2, steps, dir1, dir2, *numbeats);
             return;
         }
     } else if (c == (r1.y - r2.y - Int2CoordUnits(2))) {
         if (c >= 0) {
-            ValueDefined dir1(CC_SE);
-            ValueDefined dir2(CC_W);
+            ValueDefined dir1{ DefinedValue::CC_SE };
+            ValueDefined dir2{ DefinedValue::CC_W };
             DoCounterMarch(anim, *pnt1, *pnt2, steps, dir1, dir2, *numbeats);
             return;
         }
     } else if (c == (r1.y - r2.y + Int2CoordUnits(2))) {
         if (c <= 0) {
-            ValueDefined dir1(CC_NW);
-            ValueDefined dir2(CC_E);
+            ValueDefined dir1{ DefinedValue::CC_NW };
+            ValueDefined dir2{ DefinedValue::CC_E };
             DoCounterMarch(anim, *pnt1, *pnt2, steps, dir1, dir2, *numbeats);
             return;
         }
     } else if (c == (r2.y - r1.y - Int2CoordUnits(2))) {
         if (c <= 0) {
-            ValueDefined dir1(CC_NE);
-            ValueDefined dir2(CC_E);
+            ValueDefined dir1{ DefinedValue::CC_NE };
+            ValueDefined dir2{ DefinedValue::CC_E };
             DoCounterMarch(anim, *pnt1, *pnt2, steps, dir1, dir2, *numbeats);
             return;
         }
@@ -2431,15 +2431,15 @@ void ProcHSCM::Compile(Animate::Compile& anim)
     auto r2 = pnt2->Get(anim);
     if ((r1.y - r2.y) == Int2CoordUnits(2)) {
         if (r2.x >= r1.x) {
-            ValueDefined dirs(CC_S);
-            ValueDefined dirw(CC_W);
+            ValueDefined dirs{ DefinedValue::CC_S };
+            ValueDefined dirw{ DefinedValue::CC_W };
             DoCounterMarch(anim, *pnt1, *pnt2, steps, dirs, dirw, *numbeats);
             return;
         }
     } else if ((r1.y - r2.y) == -Int2CoordUnits(2)) {
         if (r1.x >= r2.x) {
-            ValueDefined dirn(CC_N);
-            ValueDefined dire(CC_E);
+            ValueDefined dirn{ DefinedValue::CC_N };
+            ValueDefined dire{ DefinedValue::CC_E };
             DoCounterMarch(anim, *pnt1, *pnt2, steps, dirn, dire, *numbeats);
             return;
         }

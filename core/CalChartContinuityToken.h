@@ -101,7 +101,7 @@ struct Compile;
 
 namespace CalChart::Cont {
 
-enum DefinedValue {
+enum class DefinedValue {
     CC_N,
     CC_NW,
     CC_W,
@@ -183,18 +183,18 @@ class Token {
 public:
     Token();
     virtual ~Token() = default;
-    virtual std::ostream& Print(std::ostream&) const;
+    virtual auto Print(std::ostream&) const -> std::ostream&;
     void SetParentPtr(Token* p) { parent_ptr = p; }
     virtual void replace(Token const* which, std::unique_ptr<Token> v);
 
     [[nodiscard]] virtual auto Serialize() const -> std::vector<std::byte>;
-    virtual Reader Deserialize(Reader);
+    virtual auto Deserialize(Reader) -> Reader;
 
 protected:
     Token* parent_ptr = nullptr;
 
     friend bool operator==(Token const& lhs, Token const& rhs);
-    virtual bool is_equal(Token const& other) const
+    virtual auto is_equal(Token const& other) const -> bool
     {
         return line == other.line && col == other.col;
     }
@@ -204,12 +204,12 @@ private:
     static constexpr auto NumParts = 0;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const Token& c)
+inline auto operator<<(std::ostream& os, const Token& c) -> std::ostream&
 {
     return c.Print(os);
 }
 
-inline bool operator==(Token const& lhs, Token const& rhs)
+inline auto operator==(Token const& lhs, Token const& rhs) -> bool
 {
     return (typeid(lhs) == typeid(rhs)) && lhs.is_equal(rhs);
 }
@@ -219,14 +219,14 @@ class Point : public Token {
 
 public:
     Point() = default;
-    virtual std::unique_ptr<Point> clone() const { return std::make_unique<Point>(); }
+    [[nodiscard]] virtual auto clone() const -> std::unique_ptr<Point> { return std::make_unique<Point>(); }
 
-    virtual Coord Get(Animate::Compile const& anim) const;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const;
+    [[nodiscard]] virtual auto Get(Animate::Compile const& anim) const -> Coord;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] virtual auto GetDrawable() const -> Drawable;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    virtual auto Deserialize(Reader) -> Reader override;
 
 private:
     static constexpr auto NumParts = 0;
@@ -236,13 +236,13 @@ class PointUnset : public Point {
     using super = Point;
 
 public:
-    virtual std::unique_ptr<Point> clone() const override { return std::make_unique<PointUnset>(); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Point> override { return std::make_unique<PointUnset>(); }
 
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 private:
     static constexpr auto NumParts = 0;
@@ -253,14 +253,14 @@ class StartPoint : public Point {
 
 public:
     StartPoint() = default;
-    virtual std::unique_ptr<Point> clone() const override { return std::make_unique<StartPoint>(); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Point> override { return std::make_unique<StartPoint>(); }
 
-    virtual Coord Get(Animate::Compile const& anim) const override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
+    [[nodiscard]] auto Get(Animate::Compile const& anim) const -> Coord override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 private:
     static constexpr auto NumParts = 0;
@@ -271,14 +271,14 @@ class NextPoint : public Point {
 
 public:
     NextPoint() = default;
-    virtual std::unique_ptr<Point> clone() const override { return std::make_unique<NextPoint>(); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Point> override { return std::make_unique<NextPoint>(); }
 
-    virtual Coord Get(Animate::Compile const& anim) const override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
+    [[nodiscard]] auto Get(Animate::Compile const& anim) const -> Coord override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 private:
     static constexpr auto NumParts = 0;
@@ -290,14 +290,14 @@ class RefPoint : public Point {
 public:
     RefPoint() = default;
     RefPoint(unsigned n);
-    virtual std::unique_ptr<Point> clone() const override { return std::make_unique<RefPoint>(refnum); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Point> override { return std::make_unique<RefPoint>(refnum); }
 
-    virtual Coord Get(Animate::Compile const& anim) const override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
+    [[nodiscard]] auto Get(Animate::Compile const& anim) const -> Coord override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -317,14 +317,14 @@ class Value : public Token {
 
 public:
     Value() = default;
-    virtual std::unique_ptr<Value> clone() const = 0;
+    [[nodiscard]] virtual auto clone() const -> std::unique_ptr<Value> = 0;
 
-    virtual float Get(Animate::Compile const& anim) const = 0;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const = 0;
+    [[nodiscard]] virtual auto Get(Animate::Compile const& anim) const -> double = 0;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] virtual auto GetDrawable() const -> Drawable = 0;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 private:
     static constexpr auto NumParts = 0;
@@ -334,14 +334,14 @@ class ValueUnset : public Value {
     using super = Value;
 
 public:
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueUnset>(); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Value> override { return std::make_unique<ValueUnset>(); }
 
-    virtual float Get(Animate::Compile const&) const override { return 0; }
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
+    [[nodiscard]] auto Get(Animate::Compile const&) const -> double override { return 0; }
+    auto Print(std::ostream&) const -> std::ostream& override;
+    auto GetDrawable() const -> Drawable override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 private:
     static constexpr auto NumParts = 0;
@@ -353,17 +353,17 @@ class ValueFloat : public Value {
 public:
     ValueFloat() = default;
     ValueFloat(float v);
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueFloat>(val); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Value> override { return std::make_unique<ValueFloat>(val); }
 
-    virtual float Get(Animate::Compile const& anim) const override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
+    [[nodiscard]] auto Get(Animate::Compile const& anim) const -> double override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         return super::is_equal(other) && val == dynamic_cast<ValueFloat const&>(other).val;
     }
@@ -379,23 +379,23 @@ class ValueDefined : public Value {
 public:
     ValueDefined() = default;
     ValueDefined(DefinedValue v);
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueDefined>(val); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Value> override { return std::make_unique<ValueDefined>(val); }
 
-    virtual float Get(Animate::Compile const& anim) const override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
+    [[nodiscard]] auto Get(Animate::Compile const& anim) const -> double override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         return super::is_equal(other) && val == dynamic_cast<ValueDefined const&>(other).val;
     }
 
 private:
-    DefinedValue val{ CC_N };
+    DefinedValue val{ DefinedValue::CC_N };
     static constexpr auto NumParts = 0;
 };
 
@@ -414,18 +414,18 @@ public:
     {
         SetParentPtr_helper(this, val1, val2);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueAdd>(val1->clone(), val2->clone()); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Value> override { return std::make_unique<ValueAdd>(val1->clone(), val2->clone()); }
 
-    virtual float Get(Animate::Compile const& anim) const override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    [[nodiscard]] auto Get(Animate::Compile const& anim) const -> double override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         auto&& der_other = dynamic_cast<ValueAdd const&>(other);
         return super::is_equal(other) && (*val1 == *der_other.val1) && (*val2 == *der_other.val2);
@@ -451,18 +451,18 @@ public:
     {
         SetParentPtr_helper(this, val1, val2);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueSub>(val1->clone(), val2->clone()); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Value> override { return std::make_unique<ValueSub>(val1->clone(), val2->clone()); }
 
-    virtual float Get(Animate::Compile const& anim) const override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    [[nodiscard]] auto Get(Animate::Compile const& anim) const -> double override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         auto&& der_other = dynamic_cast<ValueSub const&>(other);
         return super::is_equal(other) && (*val1 == *der_other.val1) && (*val2 == *der_other.val2);
@@ -488,18 +488,18 @@ public:
     {
         SetParentPtr_helper(this, val1, val2);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueMult>(val1->clone(), val2->clone()); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Value> override { return std::make_unique<ValueMult>(val1->clone(), val2->clone()); }
 
-    virtual float Get(Animate::Compile const& anim) const override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    [[nodiscard]] auto Get(Animate::Compile const& anim) const -> double override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         auto&& der_other = dynamic_cast<ValueMult const&>(other);
         return super::is_equal(other) && (*val1 == *der_other.val1) && (*val2 == *der_other.val2);
@@ -525,18 +525,18 @@ public:
     {
         SetParentPtr_helper(this, val1, val2);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueDiv>(val1->clone(), val2->clone()); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Value> override { return std::make_unique<ValueDiv>(val1->clone(), val2->clone()); }
 
-    virtual float Get(Animate::Compile const& anim) const override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    [[nodiscard]] auto Get(Animate::Compile const& anim) const -> double override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         auto&& der_other = dynamic_cast<ValueDiv const&>(other);
         return super::is_equal(other) && (*val1 == *der_other.val1) && (*val2 == *der_other.val2);
@@ -561,18 +561,18 @@ public:
     {
         SetParentPtr_helper(this, val);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueNeg>(val->clone()); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Value> override { return std::make_unique<ValueNeg>(val->clone()); }
 
-    virtual float Get(Animate::Compile const& anim) const override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    [[nodiscard]] auto Get(Animate::Compile const& anim) const -> double override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         return super::is_equal(other) && (*val == *dynamic_cast<ValueNeg const&>(other).val);
     }
@@ -586,14 +586,14 @@ class ValueREM : public Value {
     using super = Value;
 
 public:
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueREM>(); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Value> override { return std::make_unique<ValueREM>(); }
 
-    virtual float Get(Animate::Compile const& anim) const override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
+    [[nodiscard]] auto Get(Animate::Compile const& anim) const -> double override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 private:
     static constexpr auto NumParts = 0;
@@ -605,18 +605,18 @@ class ValueVar : public Value {
 public:
     ValueVar() = default;
     ValueVar(Variable num);
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueVar>(varnum); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Value> override { return std::make_unique<ValueVar>(varnum); }
 
-    virtual float Get(Animate::Compile const& anim) const override;
-    void Set(Animate::Compile& anim, float v);
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
+    [[nodiscard]] auto Get(Animate::Compile const& anim) const -> double override;
+    void Set(Animate::Compile& anim, double v);
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         return super::is_equal(other) && (varnum == dynamic_cast<ValueVar const&>(other).varnum);
     }
@@ -630,14 +630,14 @@ class ValueVarUnset : public ValueVar {
     using super = ValueVar;
 
 public:
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueVarUnset>(); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Value> override { return std::make_unique<ValueVarUnset>(); }
 
-    virtual float Get(Animate::Compile const&) const override { return 0; }
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
+    [[nodiscard]] auto Get(Animate::Compile const&) const -> double override { return 0; }
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 private:
     static constexpr auto NumParts = 0;
@@ -657,18 +657,18 @@ public:
     {
         SetParentPtr_helper(this, pnt);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncDir>(pnt->clone()); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Value> override { return std::make_unique<FuncDir>(pnt->clone()); }
 
-    virtual float Get(Animate::Compile const& anim) const override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    [[nodiscard]] auto Get(Animate::Compile const& anim) const -> double override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         return super::is_equal(other) && (*pnt == *dynamic_cast<FuncDir const&>(other).pnt);
     }
@@ -693,18 +693,18 @@ public:
     {
         SetParentPtr_helper(this, pnt_start, pnt_end);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncDirFrom>(pnt_start->clone(), pnt_end->clone()); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Value> override { return std::make_unique<FuncDirFrom>(pnt_start->clone(), pnt_end->clone()); }
 
-    virtual float Get(Animate::Compile const& anim) const override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    [[nodiscard]] auto Get(Animate::Compile const& anim) const -> double override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         auto&& der_other = dynamic_cast<FuncDirFrom const&>(other);
         return super::is_equal(other) && (*pnt_start == *der_other.pnt_start) && (*pnt_end == *der_other.pnt_end);
@@ -729,18 +729,18 @@ public:
     {
         SetParentPtr_helper(this, pnt);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncDist>(pnt->clone()); }
+    auto clone() const -> std::unique_ptr<Value> override { return std::make_unique<FuncDist>(pnt->clone()); }
 
-    virtual float Get(Animate::Compile const& anim) const override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    [[nodiscard]] auto Get(Animate::Compile const& anim) const -> double override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         return super::is_equal(other) && (*pnt == *dynamic_cast<FuncDist const&>(other).pnt);
     }
@@ -765,18 +765,18 @@ public:
     {
         SetParentPtr_helper(this, pnt_start, pnt_end);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncDistFrom>(pnt_start->clone(), pnt_end->clone()); }
+    auto clone() const -> std::unique_ptr<Value> override { return std::make_unique<FuncDistFrom>(pnt_start->clone(), pnt_end->clone()); }
 
-    virtual float Get(Animate::Compile const& anim) const override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    [[nodiscard]] auto Get(Animate::Compile const& anim) const -> double override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         auto&& der_other = dynamic_cast<FuncDistFrom const&>(other);
         return super::is_equal(other) && (*pnt_start == *der_other.pnt_start) && (*pnt_end == *der_other.pnt_end);
@@ -803,18 +803,18 @@ public:
     {
         SetParentPtr_helper(this, dir1, dir2, pnt);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncEither>(dir1->clone(), dir2->clone(), pnt->clone()); }
+    auto clone() const -> std::unique_ptr<Value> override { return std::make_unique<FuncEither>(dir1->clone(), dir2->clone(), pnt->clone()); }
 
-    virtual float Get(Animate::Compile const& anim) const override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    [[nodiscard]] auto Get(Animate::Compile const& anim) const -> double override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         auto&& der_other = dynamic_cast<FuncEither const&>(other);
         return super::is_equal(other) && (*dir1 == *der_other.dir1) && (*dir2 == *der_other.dir2) && (*pnt == *der_other.pnt);
@@ -840,18 +840,18 @@ public:
     {
         SetParentPtr_helper(this, dir);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncOpp>(dir->clone()); }
+    auto clone() const -> std::unique_ptr<Value> override { return std::make_unique<FuncOpp>(dir->clone()); }
 
-    virtual float Get(Animate::Compile const& anim) const override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    [[nodiscard]] auto Get(Animate::Compile const& anim) const -> double override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         return super::is_equal(other) && (*dir == *dynamic_cast<FuncOpp const&>(other).dir);
     }
@@ -877,18 +877,18 @@ public:
     {
         SetParentPtr_helper(this, numbeats, blksize, pnt);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncStep>(numbeats->clone(), blksize->clone(), pnt->clone()); }
+    auto clone() const -> std::unique_ptr<Value> override { return std::make_unique<FuncStep>(numbeats->clone(), blksize->clone(), pnt->clone()); }
 
-    virtual float Get(Animate::Compile const& anim) const override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    [[nodiscard]] auto Get(Animate::Compile const& anim) const -> double override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    [[nodiscard]] auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         auto&& der_other = dynamic_cast<FuncStep const&>(other);
         return super::is_equal(other) && (*numbeats == *der_other.numbeats) && (*blksize == *der_other.blksize) && (*pnt == *der_other.pnt);
@@ -908,12 +908,12 @@ public:
     virtual std::unique_ptr<Procedure> clone() const = 0;
 
     virtual void Compile(Animate::Compile& anim) = 0;
-    virtual std::ostream& Print(std::ostream&) const override;
+    auto Print(std::ostream&) const -> std::ostream& override;
     virtual Drawable GetDrawable() const = 0;
     virtual bool IsValid() const { return true; }
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 };
 
 class ProcUnset : public Procedure {
@@ -922,12 +922,12 @@ class ProcUnset : public Procedure {
 public:
     virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcUnset>(); }
     virtual void Compile(Animate::Compile&) override { }
-    virtual std::ostream& Print(std::ostream&) const override;
+    auto Print(std::ostream&) const -> std::ostream& override;
     virtual Drawable GetDrawable() const override;
     virtual bool IsValid() const override { return false; }
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 private:
     static constexpr auto NumParts = 0;
@@ -948,21 +948,21 @@ public:
     {
         SetParentPtr_helper(this, var, val);
     }
-    virtual std::unique_ptr<Procedure> clone() const override;
+    auto clone() const -> std::unique_ptr<Procedure> override;
 
-    virtual void Compile(Animate::Compile& anim) override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    void Compile(Animate::Compile& anim) override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
     struct ReplaceError_NotAVar : std::exception {
     };
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         auto&& der_other = dynamic_cast<ProcSet const&>(other);
         return super::is_equal(other) && (*var == *der_other.var) && (*val == *der_other.val);
@@ -978,18 +978,18 @@ class ProcBlam : public Procedure {
     using super = Procedure;
 
 public:
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcBlam>(); }
+    auto clone() const -> std::unique_ptr<Procedure> override { return std::make_unique<ProcBlam>(); }
 
-    virtual void Compile(Animate::Compile& anim) override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
+    void Compile(Animate::Compile& anim) override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    auto GetDrawable() const -> Drawable override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
     // we use the assumption that we've already checked that the types match before calling.
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         return super::is_equal(other) && true;
     }
@@ -1012,18 +1012,18 @@ public:
     {
         SetParentPtr_helper(this, dir);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcClose>(dir->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override { return std::make_unique<ProcClose>(dir->clone()); }
 
-    virtual void Compile(Animate::Compile& anim) override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    void Compile(Animate::Compile& anim) override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         auto&& der_other = dynamic_cast<ProcClose const&>(other);
         return super::is_equal(other) && (*dir == *der_other.dir);
@@ -1054,18 +1054,18 @@ public:
     {
         SetParentPtr_helper(this, pnt1, pnt2, stps, dir1, dir2, numbeats);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcCM>(pnt1->clone(), pnt2->clone(), stps->clone(), dir1->clone(), dir2->clone(), numbeats->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override { return std::make_unique<ProcCM>(pnt1->clone(), pnt2->clone(), stps->clone(), dir1->clone(), dir2->clone(), numbeats->clone()); }
 
-    virtual void Compile(Animate::Compile& anim) override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    void Compile(Animate::Compile& anim) override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         auto&& der_other = dynamic_cast<ProcCM const&>(other);
         return super::is_equal(other) && (*pnt1 == *der_other.pnt1) && (*pnt2 == *der_other.pnt2) && (*stps == *der_other.stps) && (*dir1 == *der_other.dir1) && (*dir2 == *der_other.dir2) && (*numbeats == *der_other.numbeats);
@@ -1093,18 +1093,18 @@ public:
     {
         SetParentPtr_helper(this, pnt1, pnt2, numbeats);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcDMCM>(pnt1->clone(), pnt2->clone(), numbeats->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override { return std::make_unique<ProcDMCM>(pnt1->clone(), pnt2->clone(), numbeats->clone()); }
 
-    virtual void Compile(Animate::Compile& anim) override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    void Compile(Animate::Compile& anim) override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         auto&& der_other = dynamic_cast<ProcDMCM const&>(other);
         return super::is_equal(other) && (*pnt1 == *der_other.pnt1) && (*pnt2 == *der_other.pnt2) && (*numbeats == *der_other.numbeats);
@@ -1130,18 +1130,18 @@ public:
     {
         SetParentPtr_helper(this, pnt);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcDMHS>(pnt->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override { return std::make_unique<ProcDMHS>(pnt->clone()); }
 
-    virtual void Compile(Animate::Compile& anim) override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    void Compile(Animate::Compile& anim) override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         auto&& der_other = dynamic_cast<ProcDMHS const&>(other);
         return super::is_equal(other) && (*pnt == *der_other.pnt);
@@ -1167,18 +1167,18 @@ public:
     {
         SetParentPtr_helper(this, stps, pnt);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcEven>(stps->clone(), pnt->clone()); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Procedure> override { return std::make_unique<ProcEven>(stps->clone(), pnt->clone()); }
 
-    virtual void Compile(Animate::Compile& anim) override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    void Compile(Animate::Compile& anim) override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         auto&& der_other = dynamic_cast<ProcEven const&>(other);
         return super::is_equal(other) && (*stps == *der_other.stps) && (*pnt == *der_other.pnt);
@@ -1204,18 +1204,18 @@ public:
     {
         SetParentPtr_helper(this, pnt);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcEWNS>(pnt->clone()); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Procedure> override { return std::make_unique<ProcEWNS>(pnt->clone()); }
 
-    virtual void Compile(Animate::Compile& anim) override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    void Compile(Animate::Compile& anim) override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         auto&& der_other = dynamic_cast<ProcEWNS const&>(other);
         return super::is_equal(other) && (*pnt == *der_other.pnt);
@@ -1244,18 +1244,18 @@ public:
     {
         SetParentPtr_helper(this, dir1, dir2, stepsize1, stepsize2, pnt);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcFountain>(dir1->clone(), dir2->clone(), stepsize1 ? stepsize1->clone() : nullptr, stepsize2 ? stepsize2->clone() : nullptr, pnt->clone()); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Procedure> override { return std::make_unique<ProcFountain>(dir1->clone(), dir2->clone(), stepsize1 ? stepsize1->clone() : nullptr, stepsize2 ? stepsize2->clone() : nullptr, pnt->clone()); }
 
-    virtual void Compile(Animate::Compile& anim) override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    void Compile(Animate::Compile& anim) override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         if (!super::is_equal(other)) {
             return false;
@@ -1297,18 +1297,18 @@ public:
     {
         SetParentPtr_helper(this, stps, dir);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcFM>(stps->clone(), dir->clone()); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Procedure> override { return std::make_unique<ProcFM>(stps->clone(), dir->clone()); }
 
-    virtual void Compile(Animate::Compile& anim) override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    void Compile(Animate::Compile& anim) override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
-    virtual Reader Deserialize(Reader) override;
+    auto Deserialize(Reader) -> Reader override;
 
 protected:
-    virtual bool is_equal(Token const& other) const override
+    auto is_equal(Token const& other) const -> bool override
     {
         auto&& der_other = dynamic_cast<ProcFM const&>(other);
         return super::is_equal(other) && (*stps == *der_other.stps) && (*dir == *der_other.dir);
@@ -1333,12 +1333,12 @@ public:
     {
         SetParentPtr_helper(this, pnt);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcFMTO>(pnt->clone()); }
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Procedure> override { return std::make_unique<ProcFMTO>(pnt->clone()); }
 
-    virtual void Compile(Animate::Compile& anim) override;
-    virtual std::ostream& Print(std::ostream&) const override;
-    virtual Drawable GetDrawable() const override;
-    virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
+    void Compile(Animate::Compile& anim) override;
+    auto Print(std::ostream&) const -> std::ostream& override;
+    auto GetDrawable() const -> Drawable override;
+    void replace(Token const* which, std::unique_ptr<Token> v) override;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte> override;
     virtual Reader Deserialize(Reader) override;
