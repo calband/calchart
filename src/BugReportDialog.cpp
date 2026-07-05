@@ -73,10 +73,9 @@ void OpenBugReportInBrowser(CalChart::BugReport const& report)
     }
 
     // Build the GitHub issue URL
-    wxString url = wxString::FromUTF8(
-        "https://github.com/calband/calchart/issues/new"
-        "?title="
-        + report.title + "&body=" + encoded_body);
+    std::string url_str = "https://github.com/calband/calchart/issues/new?title="
+        + report.title + "&body=" + encoded_body;
+    wxString url = wxString::FromUTF8(url_str);
 
     // Open the URL in the default browser
     wxLaunchDefaultBrowser(url);
