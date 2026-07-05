@@ -48,7 +48,7 @@ namespace {
     }
 }
 
-Sheet::Sheet(std::string name, unsigned numBeats, std::vector<CompileResult> const& commands)
+Sheet::Sheet(std::string name, Beats numBeats, std::vector<CompileResult> const& commands)
     : mName{ std::move(name) }
     , mNumBeats{ numBeats }
     , mCommands{ CalChart::Ranges::ToVector<Commands>(commands | std::views::transform([](auto&& item) { return Commands(item.first); })) }
@@ -56,7 +56,7 @@ Sheet::Sheet(std::string name, unsigned numBeats, std::vector<CompileResult> con
         auto enumerated = CalChart::Ranges::enumerate_view(cmds | std::views::transform([](auto&& item) { return item.second; }));
         return std::accumulate(std::begin(enumerated), std::end(enumerated), Errors{}, [](auto&& acc, auto&& item) {
             for (auto& error : std::get<1>(item)) {
-                acc[error].insert(std::get<0>(item));
+                acc[error].insert(static_cast<MarcherIndex>(std::get<0>(item)));
             }
             return acc;
         });
