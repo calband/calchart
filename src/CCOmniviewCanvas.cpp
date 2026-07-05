@@ -848,7 +848,7 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
     case '-':
         OnCmd_FollowMarcher(std::nullopt);
         mViewPoint.z -= stepIncr;
-        mViewPoint.z = std::max(mViewPoint.z, 0.3f);
+        mViewPoint.z = std::max(mViewPoint.z, 0.3);
         break;
     case '+':
         OnCmd_FollowMarcher(std::nullopt);
@@ -904,14 +904,14 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
         mViewPoint.x += -stepIncr * cos(mViewAngle);
         mViewPoint.y += -stepIncr * sin(mViewAngle);
         mViewPoint.z += -stepIncr * sin(mViewAngleZ);
-        mViewPoint.z = std::max(mViewPoint.z, 0.3f);
+        mViewPoint.z = std::max(mViewPoint.z, 0.3);
         break;
     case 'w':
         OnCmd_FollowMarcher(std::nullopt);
         mViewPoint.x += stepIncr * cos(mViewAngle);
         mViewPoint.y += stepIncr * sin(mViewAngle);
         mViewPoint.z += stepIncr * sin(mViewAngleZ);
-        mViewPoint.z = std::max(mViewPoint.z, 0.3f);
+        mViewPoint.z = std::max(mViewPoint.z, 0.3);
         break;
 
     case WXK_LEFT:

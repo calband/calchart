@@ -266,23 +266,23 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS(PrintPSOverview, bool, false);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(PrintPSDoCont, bool, false);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(PrintPSDoContSheet, bool, false);
 
-IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewPoint_X_4, float, CalChart::kViewPoint_x_1);
-IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewPoint_Y_4, float, CalChart::kViewPoint_y_1);
-IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewPoint_Z_4, float, CalChart::kViewPoint_z_1);
-IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewAngle_4, float, CalChart::kViewAngle_1.getValue());
-IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewAngle_Z_4, float, CalChart::kViewAngle_z_1.getValue());
+IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewPoint_X_4, double, CalChart::kViewPoint_x_1);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewPoint_Y_4, double, CalChart::kViewPoint_y_1);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewPoint_Z_4, double, CalChart::kViewPoint_z_1);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewAngle_4, double, CalChart::kViewAngle_1.getValue());
+IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewAngle_Z_4, double, CalChart::kViewAngle_z_1.getValue());
 
-IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewPoint_X_5, float, CalChart::kViewPoint_x_2);
-IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewPoint_Y_5, float, CalChart::kViewPoint_y_2);
-IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewPoint_Z_5, float, CalChart::kViewPoint_z_2);
-IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewAngle_5, float, CalChart::kViewAngle_2.getValue());
-IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewAngle_Z_5, float, CalChart::kViewAngle_z_2.getValue());
+IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewPoint_X_5, double, CalChart::kViewPoint_x_2);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewPoint_Y_5, double, CalChart::kViewPoint_y_2);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewPoint_Z_5, double, CalChart::kViewPoint_z_2);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewAngle_5, double, CalChart::kViewAngle_2.getValue());
+IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewAngle_Z_5, double, CalChart::kViewAngle_z_2.getValue());
 
-IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewPoint_X_6, float, CalChart::kViewPoint_x_3);
-IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewPoint_Y_6, float, CalChart::kViewPoint_y_3);
-IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewPoint_Z_6, float, CalChart::kViewPoint_z_3);
-IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewAngle_6, float, CalChart::kViewAngle_3.getValue());
-IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewAngle_Z_6, float, CalChart::kViewAngle_z_3.getValue());
+IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewPoint_X_6, double, CalChart::kViewPoint_x_3);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewPoint_Y_6, double, CalChart::kViewPoint_y_3);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewPoint_Z_6, double, CalChart::kViewPoint_z_3);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewAngle_6, double, CalChart::kViewAngle_3.getValue());
+IMPLEMENT_CONFIGURATION_FUNCTIONS(OmniViewAngle_Z_6, double, CalChart::kViewAngle_z_3.getValue());
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS(AnimationFrameWidth, long, 600);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(AnimationFrameHeight, long, 450);
@@ -323,10 +323,10 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS(GitHubToken, std::string, "");
 
 // OBSOLETE Settings
 // "MainFrameZoom" now obsolete with version post 3.2, use "MainFrameZoom2"
-// IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameZoom, float, 0.5);
+// IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameZoom, double, 0.5);
 // "MainFrameZoom", "MainFrameWidth", "MainFrameHeight" now obsolete with
 // version post 3.3.1, use Field versions
-// IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameZoom2, float, 0.5);
+// IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameZoom2, double, 0.5);
 // IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameWidth, long, 600);
 // IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameHeight, long, 450);
 

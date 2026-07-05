@@ -42,7 +42,7 @@ class CCOmniviewCanvas : public wxGLCanvas {
 
 public:
     struct ViewPoint {
-        float x, y, z;
+        double x, y, z;
     };
 
     CCOmniviewCanvas(AnimationPanel& parent, CalChart::Configuration& config);

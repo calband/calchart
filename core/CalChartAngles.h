@@ -58,11 +58,11 @@ constexpr auto DegreesNorthWest = 315.0;
 struct Radian {
     template <typename T>
     explicit constexpr Radian(T v)
-        : value(v)
+        : value{ static_cast<double>(v) }
     {
     }
     explicit constexpr Radian()
-        : Radian(0.0)
+        : Radian{ 0.0 }
     {
     }
     explicit constexpr Radian(Degree v);
@@ -112,11 +112,11 @@ static inline constexpr auto pi = Radian{ std::numbers::pi };
 struct Degree {
     template <typename T>
     explicit constexpr Degree(T v)
-        : value(v)
+        : value{ static_cast<double>(v) }
     {
     }
     explicit constexpr Degree()
-        : Degree(0.0)
+        : Degree{ 0.0 }
     {
     }
     explicit constexpr Degree(Radian v);
@@ -221,12 +221,12 @@ inline auto operator<<(std::ostream& os, Radian v) -> std::ostream& { return os 
 inline auto operator<<(std::ostream& os, Degree v) -> std::ostream& { return os << v.getValue(); }
 
 constexpr Radian::Radian(Degree v)
-    : Radian(details::Deg2Rad(v.getValue()))
+    : Radian{ details::Deg2Rad(v.getValue()) }
 {
 }
 
 constexpr Degree::Degree(Radian v)
-    : Degree(details::Rad2Deg(v.getValue()))
+    : Degree{ details::Rad2Deg(v.getValue()) }
 {
 }
 
