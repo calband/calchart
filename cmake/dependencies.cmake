@@ -4,7 +4,7 @@
 # We use the convention of specifying the git tag completely, as that can
 # avoid issues when a tag changes.
 
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.15)
 
 include(FetchContent)
 
@@ -58,6 +58,21 @@ macro(try_find_or_fetch VAR_PREFIX PACKAGE_NAME GIT_REPO GIT_TAG)
 endmacro()
 
 # ---- Per-dependency fetch content ----
+
+# On Windows (MSVC), ensure FetchContent dependencies use the same runtime library
+# as the parent project to avoid linker errors (CMAKE_MSVC_RUNTIME_LIBRARY).
+# This requires CMake policy CMP0091 to be NEW (introduced in CMake 3.15).
+if(MSVC)
+  # Set policy default for dependencies that don't specify it
+  set(CMAKE_POLICY_DEFAULT_CMP0091 NEW)
+  
+  # Use dynamic runtime library (/MD for Release, /MDd for Debug)
+  # This matches typical Windows builds and vcpkg defaults
+  if(NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+  endif()
+endif()
+
 FetchContent_Declare(
   munkres-cpp
   GIT_REPOSITORY https://github.com/rmpowell77/munkres-cpp
