@@ -2,8 +2,8 @@
     "version": 8,
     "configurePresets": [
         {
-            "name": "windows",
-            "displayName": "Windows - Visual Studio 2022",
+            "name": "windows-x64-2022",
+            "displayName": "Windows(x64) - Visual Studio 2022",
             "description": "Visual Studio generator for Windows",
             "generator": "Visual Studio 17 2022",
             "binaryDir": "${sourceDir}/build/${presetName}",
@@ -13,6 +13,23 @@
             },
             "cacheVariables": {
                 "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+            }
+        },
+        {
+            "name": "windows-arm64-2026",
+            "displayName": "Windows(ARM64) - Visual Studio 2026",
+            "description": "Visual Studio generator for Windows",
+            "generator": "Visual Studio 18 2026",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "architecture": {
+                "value": "ARM64",
+                "strategy": "set"
+            },
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg-triplets",
+                "VCPKG_TARGET_TRIPLET": "arm64-windows",
+                "VCPKG_HOST_TRIPLET": "arm64-windows"
             }
         },
         {
@@ -44,12 +61,22 @@
     "buildPresets": [
         {
             "name": "windows-release",
-            "configurePreset": "windows",
+            "configurePreset": "windows-x64-2022",
             "configuration": "Release"
         },
         {
             "name": "windows-debug",
-            "configurePreset": "windows",
+            "configurePreset": "windows-x64-2022",
+            "configuration": "Debug"
+        },
+        {
+            "name": "windows-arm64-release",
+            "configurePreset": "windows-arm64-2026",
+            "configuration": "Release"
+        },
+        {
+            "name": "windows-arm64-debug",
+            "configurePreset": "windows-arm64-2026",
             "configuration": "Debug"
         },
         {

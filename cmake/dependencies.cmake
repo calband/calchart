@@ -4,7 +4,7 @@
 # We use the convention of specifying the git tag completely, as that can
 # avoid issues when a tag changes.
 
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.15)
 
 include(FetchContent)
 

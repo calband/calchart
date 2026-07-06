@@ -48,6 +48,8 @@ static constexpr auto kCustom = "custom...";
 // Set icon to band's insignia
 void SetBandIcon(wxFrame* frame);
 
+auto ResolveResourcePath(wxString const& filename) -> wxString;
+
 // Set icon to band's insignia
 wxStaticBitmap* BitmapWithBandIcon(wxWindow* parent, wxSize const& size = wxDefaultSize);
 wxStaticText* TextStringWithSize(wxWindow* parent, std::string const& label, int pointSize);
