@@ -167,16 +167,16 @@ auto CommandRotate::toOnlineViewerJSON() const -> nlohmann::json
 namespace {
     template <std::ranges::input_range Range>
         requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Command>)
-    auto GetBeatsPerCont(Range range)
+    auto GetBeatsPerCont(Range&& range)
     {
-        return range | std::views::transform([](auto cmd) { return NumBeats(cmd); });
+        return std::views::all(std::forward<Range>(range) | std::views::transform([](auto cmd) { return NumBeats(cmd); }));
     }
 
     template <std::ranges::input_range Range>
         requires(std::is_convertible_v<std::ranges::range_value_t<Range>, CalChart::Animate::Command>)
-    auto GetRunningBeats(Range range)
+    auto GetRunningBeats(Range&& range)
     {
-        auto allBeats = CalChart::Ranges::ToVector<Beats>(GetBeatsPerCont(range));
+        auto allBeats = CalChart::Ranges::ToVector<Beats>(GetBeatsPerCont(std::forward<Range>(range)));
         auto running = std::vector<Beats>(allBeats.size());
         std::inclusive_scan(allBeats.begin(), allBeats.end(), running.begin());
         return running;
