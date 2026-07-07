@@ -15,8 +15,10 @@
 #include "e7_transition_solver.h"
 #include "munkres.h"
 
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#endif
 
 namespace CalChart {
 
@@ -45,10 +47,10 @@ public:
 
     SolverCoord(CalChart::Coord showCoord, unsigned fieldWidthInSteps = kFieldWidthInSteps, unsigned fieldHeightInSteps = kFieldHeightInSteps)
         : x(CoordUnits2Float(showCoord.x) + (fieldWidthInSteps / 2))
-        , y(CoordUnits2Float(showCoord.y) + (fieldHeightInSteps / 2)){};
+        , y(CoordUnits2Float(showCoord.y) + (fieldHeightInSteps / 2)) { };
     SolverCoord(int32_t x = 0, int32_t y = 0)
         : x(x)
-        , y(y){};
+        , y(y) { };
 
     auto toShowSpace(unsigned fieldWidthInSteps = kFieldWidthInSteps, unsigned fieldHeightInSteps = kFieldHeightInSteps)
     {
@@ -1652,7 +1654,7 @@ namespace e7ChiuZamoraMalani {
     struct AdjustmentInstructionSorter {
 
         AdjustmentInstructionSorter(const std::vector<TransitionSolverParams::MarcherInstruction>& instructionOptions)
-            : instructionOptions(instructionOptions){};
+            : instructionOptions(instructionOptions) { };
 
         const std::vector<TransitionSolverParams::MarcherInstruction> instructionOptions;
 
@@ -2343,4 +2345,6 @@ TransitionSolverResult runTransitionSolver(const CalChart::Sheet& sheet1, const 
 }
 }
 
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
+#endif

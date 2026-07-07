@@ -23,8 +23,10 @@
 #include <wx/statline.h>
 #include <wxUI/wxUI.hpp>
 
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#endif
 
 using namespace std::string_literals;
 
@@ -640,4 +642,6 @@ void TransitionSolverFrame::RemoveDestinations(CalChart::SelectionList marchers)
     }
 }
 
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
+#endif
