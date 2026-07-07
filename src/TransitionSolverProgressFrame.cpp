@@ -23,8 +23,10 @@
 
 #include <atomic>
 
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#endif
 
 #pragma mark -
 
@@ -255,4 +257,6 @@ void* TransitionSolverProgressFrame::TransitionSolverThread::Entry()
     return nullptr;
 }
 
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
+#endif

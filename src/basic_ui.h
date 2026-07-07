@@ -31,8 +31,10 @@
 #include <wx/wx.h>
 #include <wxUI/wxUI.hpp>
 
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#endif
 
 class CalChartView;
 namespace CalChart {
@@ -221,4 +223,6 @@ auto VLabelWidget(std::string caption, W&& widget)
     };
 }
 
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
+#endif
