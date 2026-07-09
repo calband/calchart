@@ -131,15 +131,15 @@ void ShowModeSetup::CreateControls()
             },
 
         },
-        wxUI::Generic{
-            ExpandSizerFlags(), [this] {
-                auto modeSetupCanvas = new ShowModeSetupCanvas(mConfig, this, CANVAS);
+        wxUI::Factory{
+            ExpandSizerFlags(), [this](wxWindow* parent) {
+                auto modeSetupCanvas = new ShowModeSetupCanvas(mConfig, parent, CANVAS);
                 modeSetupCanvas->SetScrollRate(1, 1);
 
                 modeSetupCanvas->SetMode(CalChart::ShowMode::CreateShowMode(mConfig.Get_ShowModeData(static_cast<CalChart::ShowModes>(mWhichMode)), mYardText));
                 modeSetupCanvas->SetZoom(zoom_amounts[defaultZoom] / 100.0);
                 return modeSetupCanvas;
-            }() },
+            } },
     }
         .fitTo(this);
 
@@ -162,7 +162,7 @@ bool ShowModeSetup::TransferDataToWindow()
 {
     // standard show
     for (auto i = mShowModeValues[mWhichMode].begin();
-         i != mShowModeValues[mWhichMode].end(); ++i) {
+        i != mShowModeValues[mWhichMode].end(); ++i) {
         wxString buf;
         wxTextCtrl* text = (wxTextCtrl*)FindWindow(
             WESTHASH + std::distance(mShowModeValues[mWhichMode].begin(), i));
@@ -180,7 +180,7 @@ bool ShowModeSetup::TransferDataFromWindow()
     // read out the values from the window
     // standard show
     for (auto i = mShowModeValues[mWhichMode].begin();
-         i != mShowModeValues[mWhichMode].end(); ++i) {
+        i != mShowModeValues[mWhichMode].end(); ++i) {
         long val;
         wxTextCtrl* text = (wxTextCtrl*)FindWindow(
             WESTHASH + std::distance(mShowModeValues[mWhichMode].begin(), i));
@@ -222,7 +222,7 @@ void ShowModeSetup::OnCmdChoice()
 {
     // save off all the old values:
     for (auto i = mShowModeValues[mWhichMode].begin();
-         i != mShowModeValues[mWhichMode].end(); ++i) {
+        i != mShowModeValues[mWhichMode].end(); ++i) {
         long val;
         wxTextCtrl* text = (wxTextCtrl*)FindWindow(
             WESTHASH + std::distance(mShowModeValues[mWhichMode].begin(), i));

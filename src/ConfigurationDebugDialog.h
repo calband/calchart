@@ -35,5 +35,5 @@ public:
 
 private:
     wxConfigBase* mConfig;
-    wxUI::Generic<wxTreeListCtrl>::Proxy mTreeCtrl{};
+    wxUI::Factory<wxTreeListCtrl>::Proxy mTreeCtrl{};
 };

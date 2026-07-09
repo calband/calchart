@@ -159,8 +159,8 @@ void AnimationPanel::CreateControls()
                 })
                 .withProxy(mOmniHelpButton),
         },
-        wxUI::Generic{ ExpandSizerFlags(), mCanvas },
-        wxUI::Generic{ ExpandSizerFlags(), mOmniCanvas },
+        wxUI::Factory{ ExpandSizerFlags(), [this]([[maybe_unused]] wxWindow* parent) { return mCanvas; } },
+        wxUI::Factory{ ExpandSizerFlags(), [this]([[maybe_unused]] wxWindow* parent) { return mOmniCanvas; } },
     }
         .fitTo(this);
 
