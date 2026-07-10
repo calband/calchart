@@ -62,9 +62,9 @@ CalChartPreferences::CalChartPreferences(wxWindow* parent, CalChart::Configurati
 {
     wxUI::VSizer{
         BasicSizerFlags(),
-        wxUI::Generic{
-            [this] {
-                mNotebook = new wxNotebook(this, wxID_ANY);
+        wxUI::Factory{
+            [this](wxWindow* parent) {
+                mNotebook = new wxNotebook(parent, wxID_ANY);
 
                 mNotebook->AddPage(GeneralSetup::CreatePreference(mConfig, mNotebook), wxT("General"));
                 mNotebook->AddPage(ContCellSetup::CreatePreference(mConfig, mNotebook), wxT("Continuity"));
@@ -74,8 +74,7 @@ CalChartPreferences::CalChartPreferences(wxWindow* parent, CalChart::Configurati
                 mNotebook->AddPage(PrintContinuitySetup::CreatePreference(mConfig, mNotebook), wxT("Print Continuity Setup"));
                 mNotebook->AddPage(PSPrintingSetUp::CreatePreference(mConfig, mNotebook), wxT("PS Printing"));
                 return mNotebook;
-            }(),
-        },
+            } },
         wxUI::HSizer{
             wxUI::Button{ wxID_APPLY },
             wxUI::Button{ wxID_RESET, "&Reset All" },

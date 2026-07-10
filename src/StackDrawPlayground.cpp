@@ -323,7 +323,7 @@ StackDrawPlayground::StackDrawPlayground(wxWindow* parent)
                                                               Refresh();
                                                           })
                                                     .withProxy(mUseOffset) },
-        Generic{ CreateStdDialogButtonSizer(wxOK) },
+        StdDialogButtons(this, wxOK),
         Factory{ [](wxWindow* parent) {
             return new wxStatusBar(parent);
         } }.withProxy(mStatus),

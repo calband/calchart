@@ -122,7 +122,7 @@ void ColorSetupDialog::CreateControls()
                 wxUI::Button(BUTTON_IMPORT, "&Import..."),
             },
         },
-        wxUI::Generic{ ExpandSizerFlags(), new ColorSetupCanvas(mConfig, this) },
+        wxUI::Factory{ ExpandSizerFlags(), [this](wxWindow* parent) { return new ColorSetupCanvas(mConfig, parent); } },
         wxUI::HSizer{
             BasicSizerFlags(),
             wxUI::Button{ wxID_RESET, "&Reset" },
