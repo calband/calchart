@@ -38,6 +38,10 @@
 #include "platconf.h"
 
 #include "CircularLogBuffer.hpp"
+#if defined(_WIN32) && !defined(NDEBUG)
+#include <windows.h>
+#endif
+#include <cstdio>
 #include <wx/config.h>
 #include <wx/fs_zip.h>
 #include <wx/help.h>
@@ -45,6 +49,24 @@
 #include <wx/msgdlg.h>
 #include <wx/stdpaths.h>
 #include <wxUI/wxUI.hpp>
+
+#if defined(_WIN32) && !defined(NDEBUG)
+namespace {
+void AttachDebugConsoleForPrintf()
+{
+    if (GetConsoleWindow() != nullptr) {
+        return;
+    }
+    if (!AllocConsole()) {
+        return;
+    }
+
+    (void)std::freopen("CONIN$", "r", stdin);
+    (void)std::freopen("CONOUT$", "w", stdout);
+    (void)std::freopen("CONOUT$", "w", stderr);
+}
+} // namespace
+#endif
 
 // This statement initializes the whole application and calls OnInit
 IMPLEMENT_APP(CalChartApp)
@@ -164,6 +186,10 @@ CalChart::CircularLogBuffer CalChartApp::GetLogBuffer() const
 
 void CalChartApp::InitAppAsServer()
 {
+#if defined(_WIN32) && !defined(NDEBUG)
+    AttachDebugConsoleForPrintf();
+#endif
+
     wxLogDebug("CalChartApp: Initializing as Server");
     // Create log target (wxLog will take ownership and delete it)
     mLogTarget = new CalChartLogTarget(CalChart::CircularLogBuffer{ 100 });
