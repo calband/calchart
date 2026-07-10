@@ -24,39 +24,7 @@
 #include "CalChartContinuity.h"
 #include "CalChartRanges.h"
 #include "ContinuityBrowser.h"
-
-namespace {
-auto GetHanders(
-    CalChart::Continuity const& plainCont,
-    CalChart::Continuity const& solCont,
-    std::function<void(CalChart::SYMBOL_TYPE, CalChart::Continuity const&)> onUpdate,
-    std::function<void(CalChart::SYMBOL_TYPE)> onSetSelection) -> ContinuityBrowser::Handlers
-{
-    return {
-        [&]() {
-            return CalChart::Ranges::ToVector<std::optional<CalChart::Continuity>>(
-                CalChart::k_symbols | std::views::transform([&](auto eachcont) -> std::optional<CalChart::Continuity> {
-                    if (eachcont == CalChart::SYMBOL_PLAIN) {
-                        return plainCont;
-                    }
-                    if (eachcont == CalChart::SYMBOL_SOL) {
-                        return solCont;
-                    }
-                    return std::nullopt;
-                }));
-        },
-        {
-            [onUpdate](CalChart::SYMBOL_TYPE sym, CalChart::Continuity const& new_cont) {
-                onUpdate(sym, new_cont);
-            },
-            [onSetSelection](CalChart::SYMBOL_TYPE symbol) {
-                onSetSelection(symbol);
-            },
-        }
-    };
-}
-
-}
+#include "ViewHandlers.hpp"
 
 void DebugContinuityBrowser(wxWindow* parent, CalChart::Configuration& config)
 {
@@ -68,7 +36,7 @@ void DebugContinuityBrowser(wxWindow* parent, CalChart::Configuration& config)
     auto plainCont = CalChart::Continuity{ "mt E REM\nnsew np" };
     auto solCont = CalChart::Continuity{ "nsew np" };
 
-    browser->SetHandlers(GetHanders(
+    browser->SetHandlers(GetDebugContinuityHandlers(
         plainCont, solCont,
         [&]([[maybe_unused]] CalChart::SYMBOL_TYPE sym, [[maybe_unused]] CalChart::Continuity const& new_cont) {
             wxLogDebug("Continuity changed for symbol %c", sym);

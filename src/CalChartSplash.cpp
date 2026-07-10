@@ -27,6 +27,7 @@
 #include "CalChartPreferences.h"
 #include "ConfigurationDebugDialog.h"
 #include "DebugContinuityBrowser.hpp"
+#include "DebugFieldThumbnailBrowser.hpp"
 #include "HelpDialog.hpp"
 #include "StackDrawPlayground.h"
 #include "SystemConfiguration.h"
@@ -130,6 +131,9 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, std::strin
                        } },
             wxUI::Item{ "Continuity Browser Playground", [this] {
                            DebugContinuityBrowser(this, mConfig);
+                       } },
+            wxUI::Item{ "Field Thumbnail Playground", [this] {
+                           DebugFieldThumbnailBrowser(this, mConfig);
                        } },
         },
         wxUI::Menu{

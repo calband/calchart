@@ -120,6 +120,8 @@ add_executable(
   CustomListViewPanel.h
   DebugContinuityBrowser.cpp
   DebugContinuityBrowser.hpp
+  DebugFieldThumbnailBrowser.cpp
+  DebugFieldThumbnailBrowser.hpp
   EditCurveAssignments.cpp
   EditCurveAssignments.hpp
   DCSaveRestore.h
@@ -181,6 +183,8 @@ add_executable(
   TransitionSolverView.h
   WebViewDemoDialog.cpp
   WebViewDemoDialog.h
+  ViewHandlers.cpp
+  ViewHandlers.hpp
   ViewerPanel.cpp
   ViewerPanel.h
   ViewerPreviewDialog.cpp
