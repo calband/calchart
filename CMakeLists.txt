@@ -11,7 +11,7 @@
 # That means that when you want to add a new file, you'll have to modify the
 # cmake file in that directory.
 
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.15)
 
 project(CalChart)
 

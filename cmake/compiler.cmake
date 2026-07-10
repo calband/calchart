@@ -31,3 +31,16 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND ENABLE_ASAN)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZER_FLAGS}")
     set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} ${SANITIZER_FLAGS}")
 endif()
+
+# On Windows (MSVC), ensure FetchContent dependencies use the same runtime library
+# as the parent project to avoid linker errors (CMAKE_MSVC_RUNTIME_LIBRARY).
+# This requires CMake policy CMP0091 to be NEW (introduced in CMake 3.15).
+if(MSVC)
+  # Set policy default for dependencies that don't specify it
+  set(CMAKE_POLICY_DEFAULT_CMP0091 NEW)
+  # Use dynamic runtime library (/MD for Release, /MDd for Debug)
+  # This matches typical Windows builds and vcpkg defaults
+  if(NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+  endif()
+endif()
