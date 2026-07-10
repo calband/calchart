@@ -4,7 +4,7 @@
 # We use the convention of specifying the git tag completely, as that can
 # avoid issues when a tag changes.
 
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.15)
 
 include(FetchContent)
 
@@ -75,7 +75,7 @@ FetchContent_MakeAvailable(docopt)
 FetchContent_Declare(
   wxUI
   GIT_REPOSITORY https://github.com/rmpowell77/wxUI.git
-  GIT_TAG        412242668365986cf66f7d9141d2b0b2653ea076 # v0.4.1
+  GIT_TAG        697dc1213015a343002d3733c299cb673e5097a9 # v0.4.3
 )
 FetchContent_MakeAvailable(wxUI)
 

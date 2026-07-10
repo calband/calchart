@@ -211,10 +211,10 @@ ConfigurationDebug::ConfigurationDebug(wxWindow* parent, wxConfigBase* config)
     std::cout << mConfig << "\n";
     wxUI::VSizer{
         BasicSizerFlags(),
-        wxUI::Generic{
+        wxUI::Factory{
             ExpandSizerFlags(),
-            [this] {
-                auto* tree = new wxTreeListCtrl(this, wxID_ANY, wxDefaultPosition, { 400, 400 });
+            [this](wxWindow* parent) {
+                auto* tree = new wxTreeListCtrl(parent, wxID_ANY, wxDefaultPosition, { 400, 400 });
 
                 tree->AppendColumn("Key",
                     wxCOL_WIDTH_AUTOSIZE,
@@ -226,7 +226,7 @@ ConfigurationDebug::ConfigurationDebug(wxWindow* parent, wxConfigBase* config)
                     wxCOL_RESIZABLE | wxCOL_SORTABLE);
                 ConstructConfig(mConfig, *tree);
                 return tree;
-            }() }
+            } }
             .withProxy(mTreeCtrl),
         wxUI::HSizer{
             wxUI::Button{ wxID_OK },

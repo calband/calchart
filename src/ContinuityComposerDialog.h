@@ -41,5 +41,5 @@ public:
     bool Validate() override;
 
 private:
-    wxUI::Generic<ContinuityComposerPanel>::Proxy mPanel{};
+    wxUI::Factory<ContinuityComposerPanel>::Proxy mPanel{};
 };

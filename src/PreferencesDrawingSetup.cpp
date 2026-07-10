@@ -149,7 +149,7 @@ void DrawingSetup::CreateControls()
             VLabelWidget("Sprite Height:", wxUI::TextCtrl{ SPRITEHEIGHT }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER).withProxy(mSpriteHeight)),
             VLabelWidget("Curve Box:", wxUI::TextCtrl{ CURVECONTROL }.withSize({ 80, -1 }).withStyle(wxTE_PROCESS_ENTER).withProxy(mCurveControl)),
         },
-        wxUI::Generic{ ExpandSizerFlags(), new ColorSetupCanvas(mConfig, this) },
+        wxUI::Factory{ ExpandSizerFlags(), [this](wxWindow* parent) { return new ColorSetupCanvas(mConfig, parent); } },
     }
         .fitTo(this);
 

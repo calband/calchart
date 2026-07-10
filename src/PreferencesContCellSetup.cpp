@@ -123,17 +123,15 @@ void ContCellSetup::CreateControls()
                     .withStyle(wxSP_ARROW_KEYS) },
         },
 
-        wxUI::Generic<ContinuityBrowserPanel>{
-            ExpandSizerFlags(),
-            [this] {
-                auto canvas = new ContinuityBrowserPanel(CalChart::SYMBOL_PLAIN, mConfig, this);
+        wxUI::Factory{
+            ExpandSizerFlags(), [this](wxWindow* parent) {
+                auto canvas = new ContinuityBrowserPanel(CalChart::SYMBOL_PLAIN, mConfig, parent);
                 auto basic_cont = CalChart::Continuity{ "ewns np\nX = distfrom(sp r2)\nmt (24-X)w\nmarch gv dist(np) dir(np) w\nmtrm e" };
                 auto clonedOut = do_cloning(basic_cont);
                 clonedOut.emplace_back(std::make_unique<CalChart::Cont::ProcMT>(std::make_unique<CalChart::Cont::ValueUnset>(), std::make_unique<CalChart::Cont::ValueUnset>()));
                 canvas->DoSetContinuity(CalChart::Continuity{ std::move(clonedOut) });
                 return canvas;
-            }(),
-        },
+            } },
     }
         .fitTo(this);
 

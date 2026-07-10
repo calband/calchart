@@ -176,14 +176,14 @@ void ShowModeDialogSetup::CreateControls()
                     }),
             },
         },
-        wxUI::Generic{
-            ExpandSizerFlags(), [this] {
-                auto modeSetupCanvas = new ShowModeSetupCanvas(mConfig, this, CANVAS);
+        wxUI::Factory{
+            ExpandSizerFlags(), [this](wxWindow* parent) {
+                auto modeSetupCanvas = new ShowModeSetupCanvas(mConfig, parent, CANVAS);
                 modeSetupCanvas->SetScrollRate(1, 1);
                 modeSetupCanvas->SetMode(CalChart::ShowMode::CreateShowMode(mShowModeValues, mYardText));
                 modeSetupCanvas->SetZoom(zoom_amounts[defaultZoom] / 100.0);
                 return modeSetupCanvas;
-            }() },
+            } },
     }
         .fitTo(this);
 }

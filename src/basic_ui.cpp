@@ -40,6 +40,21 @@ void SetBandIcon(wxFrame* frame)
     frame->SetIcon(icon);
 }
 
+auto ResolveResourcePath(wxString const& filename) -> wxString
+{
+#if defined(__APPLE__) && (__APPLE__)
+    return wxStandardPaths::Get().GetResourcesDir().Append("/" + filename);
+#else
+    auto const exeDir = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath();
+    auto const preferred = exeDir + PATH_SEPARATOR "resources" PATH_SEPARATOR "common" PATH_SEPARATOR + filename;
+    if (wxFileExists(preferred)) {
+        return preferred;
+    }
+    // Backward-compatible fallback for layouts where files are directly in resources/.
+    return exeDir + PATH_SEPARATOR "resources" PATH_SEPARATOR + filename;
+#endif
+}
+
 wxStaticBitmap* BitmapWithBandIcon(wxWindow* parent, wxSize const& size)
 {
     wxBitmap bitmap(BITMAP_NAME(calchart));

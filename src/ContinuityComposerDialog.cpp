@@ -679,16 +679,16 @@ ContinuityComposerDialog::ContinuityComposerDialog(std::unique_ptr<CalChart::Con
     ContinuityComposerPanel* panel = new ContinuityComposerPanel(std::move(starting_continuity), config, this);
     wxUI::VSizer{
         sRightBasicSizerFlags,
-        wxUI::Generic{
+        wxUI::Factory{
             wxSizerFlags{ 0 }.Expand().Border(wxALL, 5),
-            panel }
+            [panel]([[maybe_unused]] wxWindow* parent) { return panel; } }
             .withProxy(mPanel),
         wxUI::VSizer{
             sRightBasicSizerFlags,
             wxUI::HSizer{
                 wxSizerFlags{ 0 },
                 wxUI::Button{ wxID_CANCEL, "&Cancel" },
-                wxUI::Button{ wxID_OK, "&Done" }.setDefault().setEnabled(panel->Validate()),
+                wxUI::Button{ wxID_OK, "&Done" }.setDefault().setEnabled(mPanel->Validate()),
             },
         },
     }
