@@ -18,11 +18,17 @@
 #include "AnimationSprites.hpp"
 #include "CalChartConfiguration.h"
 #include "CalChartDrawPrimativesHelper.h"
+#include "basic_ui.h"
 #include "platconf.h"
 #include <wx/filename.h>
 #include <wx/stdpaths.h>
 
 namespace {
+
+auto ResolveSpritePath()
+{
+    return ResolveResourcePath("default_sprite_strip.png");
+}
 
 // split the source image into a number of horizontal images
 auto GenerateSpriteImages(wxImage const& image, int numberImages, int imageX, int imageY, double scale)
@@ -42,11 +48,7 @@ void AnimationSprites::RegenerateImages(CalChart::Configuration const& config)
         return;
     }
     mScaleSize = spriteScale;
-#if defined(__APPLE__) && (__APPLE__)
-    const static auto kImageDir = wxStandardPaths::Get().GetResourcesDir().Append("/default_sprite_strip.png");
-#else
-    const static auto kImageDir = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR "resources" PATH_SEPARATOR "default_sprite_strip.png");
-#endif
+    const static auto kImageDir = ResolveSpritePath();
     auto image = []() {
         wxImage image;
         if (!image.LoadFile(kImageDir)) {

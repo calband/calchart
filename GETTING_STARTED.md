@@ -60,7 +60,7 @@ First, go to https://chocolatey.org/install and follow the installation instruct
 Once Chocolatey is installed, install the required dependencies (in an admin PowerShell):
 
 ```
-choco install cmake git winflexbison ninja clang-format python3 pandoc
+choco install cmake git winflexbison ninja python3 pandoc
 ```
 
 **Note**: `ninja` is required for building with CMake presets. Pandoc is required for converting help documentation from Markdown to HTML. If you encounter issues with Ninja not being found, close and reopen your terminal after installation.

@@ -10,4 +10,5 @@ Other changes:
 
 * [#848](../../issues/848) We should have a way to iterate on ContinuityBrowser without a show
 * [#851](../../issues/851) Let's fix up the pragma warnings on windows
+* [#854](../../issues/854) Get Windows to build
 
