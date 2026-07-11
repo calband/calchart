@@ -31,6 +31,13 @@ static auto fDIP(T const& t) { return wxWindow::FromDIP(t, nullptr); }
 template <typename T>
 static auto tDIP(T const& t) { return wxWindow::ToDIP(t, nullptr); }
 
+template <typename T>
+static auto toCoordDIP(T t)
+{
+    t = tDIP(t);
+    return CalChart::Coord(t.x, t.y);
+}
+
 static inline auto fDIP(CalChart::Coord const& t) { return wxWindow::FromDIP(wxSize{ t.x, t.y }, nullptr); }
 
 // Generic sizes
