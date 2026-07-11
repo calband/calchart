@@ -15,6 +15,11 @@ cmake_minimum_required(VERSION 3.15)
 
 project(CalChart)
 
+# Set macOS deployment target for backwards compatibility
+if(APPLE)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "14.0" CACHE STRING "Minimum macOS deployment version")
+endif()
+
 # Find Python for build scripts
 find_package(Python3 COMPONENTS Interpreter)
 if(NOT Python3_FOUND)
