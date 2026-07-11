@@ -5,7 +5,7 @@ name: CI action for CalChart
 
 on:
   push:
-    branches: [main, calchart-3.6]
+    branches: [main, calchart-3.6, 'test-ci-*']
     tags: ['*']
   pull_request:
     branches: [main, calchart-3.6]
@@ -90,12 +90,24 @@ jobs:
       shell: bash
 
     - name: Cache vcpkg binary cache
+      id: cache-vcpkg-archives
       uses: actions/cache@v4
       with:
         path: ${{github.workspace}}/vcpkg-cache
-        key: vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-${{ hashFiles('vcpkg.json') }}-${{ steps.vcpkg-baseline.outputs.hash }}
+        key: vcpkg-archives-v2-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-${{ hashFiles('vcpkg.json', 'vcpkg-triplets/**') }}-${{ steps.vcpkg-baseline.outputs.hash }}
         restore-keys: |
-          vcpkg-archives-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-
+          vcpkg-archives-v2-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-
+
+    - name: Vcpkg cache status
+      run: |
+        echo "::notice::vcpkg binary cache restored: ${{ steps.cache-vcpkg-archives.outputs.cache-hit && 'HIT (exact)' || 'MISS (partial or none)' }}"
+        if [ -d "${{github.workspace}}/vcpkg-cache" ]; then
+          PACKAGE_COUNT=$(find "${{github.workspace}}/vcpkg-cache" -type f -name "*.zip" 2>/dev/null | wc -l || echo 0)
+          echo "::notice::vcpkg-cache contains $PACKAGE_COUNT package(s)"
+        else
+          echo "::notice::vcpkg-cache directory does not exist"
+        fi
+      shell: bash
 
     - name: Install Xcode (macOS)
       if: matrix.config.os == 'macos-latest'
