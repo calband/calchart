@@ -4,8 +4,7 @@
 
 Bugs addressed in this release:
 
-* [#](../../issues/) 
+* [#867](../../issues/867) v3.8.12 not does not scroll through thumbnails
 
 Other changes:
-
 
