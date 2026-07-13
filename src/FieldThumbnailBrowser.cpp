@@ -217,10 +217,11 @@ void FieldThumbnailBrowser::OnPaint([[maybe_unused]] wxPaintEvent& event)
     auto userScale = CalcUserScale(tDIP(box_size), CalChart::Coord{ mode_size.x, mode_size.y });
     dc.SetUserScale(userScale, userScale);
 
+    auto origin = dc.GetDeviceOrigin();
     // we manipulate the scale and origin to create repeating copies of the field
     for (auto [which, sheet] : CalChart::Ranges::enumerate_view(GenerateFieldWithMarchersDrawCommands(mHandle))) {
         auto newOrigin = wxSize(which * thumbnail_offset.x, which * thumbnail_offset.y);
-        auto newOriginful = (wxSize{ newOrigin.x + kXLeftPadding, newOrigin.y + kYUpperPadding + mYNameSize + kYNamePadding });
+        auto newOriginful = (wxSize{ origin.x + newOrigin.x + kXLeftPadding, origin.y + newOrigin.y + kYUpperPadding + mYNameSize + kYNamePadding });
         dc.SetDeviceOrigin(newOriginful.x, newOriginful.y);
         wxCalChart::Draw::DrawCommandList(dc, sheet);
     }
@@ -288,8 +289,6 @@ void FieldThumbnailBrowser::HandleKey(wxKeyEvent& event)
 
 void FieldThumbnailBrowser::HandleMouseDown(wxMouseEvent& event)
 {
-    printf("Mouse down at position: (%d, %d)\n", event.GetPosition().x, event.GetPosition().y);
-    printf("Size is (%d, %d), scroll (%d, %d)\n", GetSize().x, GetSize().y, GetSize().x - mXScrollPadding, GetSize().y - mYScrollPadding);
     auto which = WhichCell(CalcUnscrolledPosition(event.GetPosition()));
     auto numSheets = GetNumSheets(mHandle);
     if (numSheets > 0) {
