@@ -61,6 +61,7 @@ Bugs addressed in this release:
 
 * [#692](../../issues/692) CalChart Windows Field Thumbnails Appear Incorrectly
 * [#845](../../issues/845) Marchers stick to middle of field when animating on windows.
+* [#863](../../issues/863) Cannot launch calchart on MacOS 15
 
 Other changes:
 
