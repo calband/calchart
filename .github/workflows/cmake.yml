@@ -94,9 +94,9 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{github.workspace}}/vcpkg-cache
-        key: vcpkg-archives-v2-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-${{ hashFiles('vcpkg.json', 'vcpkg-triplets/**') }}-${{ steps.vcpkg-baseline.outputs.hash }}
+        key: vcpkg-archives-v3-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-${{ hashFiles('vcpkg.json', 'vcpkg-triplets/**') }}-${{ steps.vcpkg-baseline.outputs.hash }}
         restore-keys: |
-          vcpkg-archives-v2-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-
+          vcpkg-archives-v3-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-
 
     - name: Vcpkg cache status
       run: |
