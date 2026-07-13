@@ -4,7 +4,7 @@
 
 Bugs addressed in this release:
 
-* [#](../../issues/) 
+* [#868](../../issues/868) v3.8.12 crashes on creating continuity
 
 Other changes:
 

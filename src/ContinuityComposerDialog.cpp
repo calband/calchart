@@ -688,7 +688,7 @@ ContinuityComposerDialog::ContinuityComposerDialog(std::unique_ptr<CalChart::Con
             wxUI::HSizer{
                 wxSizerFlags{ 0 },
                 wxUI::Button{ wxID_CANCEL, "&Cancel" },
-                wxUI::Button{ wxID_OK, "&Done" }.setDefault().setEnabled(mPanel->Validate()),
+                wxUI::Button{ wxID_OK, "&Done" }.setDefault().setEnabled(panel->Validate()),
             },
         },
     }
