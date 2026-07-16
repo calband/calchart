@@ -88,6 +88,9 @@ void OpenBugReportInBrowser(CalChart::BugReport const& report)
         wxOK | wxICON_INFORMATION);
 }
 
+constexpr auto minLargeWidth = 400;
+constexpr auto minMediumHeight = 80;
+constexpr auto minLargeHeight = 380;
 } // namespace
 
 // Custom dialog for entering GitHub token with clickable hyperlinks
@@ -153,20 +156,12 @@ BugReportDialog::BugReportDialog(
     const CalChartDoc* doc,
     wxFrame* parent,
     std::string const& title)
-    : super{ parent, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU }
+    : super{ parent, wxID_ANY, title, wxDefaultPosition, { minLargeWidth * 2, minLargeHeight * 2 }, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU }
     , mConfig{ config }
     , mDoc(doc)
     , mDiagnosticInfo{ wxCalChart::CollectDiagnosticInfo(mDoc, wxGetApp().GetLogBuffer()) }
     , mShowHasLoaded{ doc != nullptr }
 {
-    constexpr auto minLargeWidth = 400;
-    constexpr auto minLargeHeight = 80;
-    constexpr auto scrollableHeight = 500;
-
-    // Create a scrolled window for the entire dialog content
-    auto* scrolled = new wxScrolledWindow(this, wxID_ANY);
-    scrolled->SetScrollRate(0, 5); // Scroll 5 pixels per wheel event vertically
-
     // Create the UI structure inside the scrolled window
     wxUI::VSizer{
         wxSizerFlags{}.Border(wxALL, 2).Expand(),
@@ -188,7 +183,7 @@ BugReportDialog::BugReportDialog(
         // Description
         wxUI::Text{ "Description*:" },
         wxUI::TextCtrl{}
-            .withHeight(minLargeHeight)
+            .withHeight(minMediumHeight)
             .withWidth(minLargeWidth)
             .withFlags(wxSizerFlags{}.Expand())
             .setStyle(wxTE_MULTILINE)
@@ -196,7 +191,7 @@ BugReportDialog::BugReportDialog(
         // Steps to reproduce
         wxUI::Text{ "Steps to Reproduce:" },
         wxUI::TextCtrl{}
-            .withHeight(minLargeHeight)
+            .withHeight(minMediumHeight)
             .withWidth(minLargeWidth)
             .withFlags(wxSizerFlags{}.Expand())
             .setStyle(wxTE_MULTILINE)
@@ -228,28 +223,16 @@ BugReportDialog::BugReportDialog(
         wxUI::Line{},
         // Buttons
         wxUI::HSizer{
-            wxSizerFlags{}.Border(wxALL, 5).Left(),
-            wxUI::Button{ wxID_OK, "Submit" },
+            wxUI::StretchSpacer{},
             wxUI::Button{ wxID_CANCEL, "Cancel" }
                 .setDefault(),
+            wxUI::Spacer{ 5 },
+            wxUI::Button{ wxID_OK, "Submit" },
+            wxUI::Spacer{ 5 },
         },
     }
-        .fitTo(scrolled);
-
-    // Create the main dialog layout with scrolled window and buttons at bottom
-    auto* dialogSizer = new wxBoxSizer(wxVERTICAL);
-    dialogSizer->Add(scrolled, 1, wxEXPAND | wxALL, 0);
-
-    SetSizer(dialogSizer);
-
-    // Set a reasonable default size for the dialog
-    SetClientSize(minLargeWidth + 40, scrollableHeight);
-
-    if (GetSizer()) {
-        GetSizer()->SetSizeHints(this);
-    }
-
-    Centre();
+        .withScrollBars(5)
+        .fitTo(this);
 }
 
 auto BugReportDialog::TransferDataToWindow() -> bool
@@ -293,13 +276,13 @@ auto BugReportDialog::Validate() -> bool
 {
     // Check that title is not empty
     if (text_title->GetValue().IsEmpty()) {
-        wxLogError("Please enter a title for your bug report.");
+        wxMessageDialog(this, "Please enter a title for your bug report.", "CalChart Error", wxOK | wxICON_ERROR).ShowModal();
         return false;
     }
 
     // Check that description is not empty
     if (text_description->GetValue().IsEmpty()) {
-        wxLogError("Please enter a description of the bug.");
+        wxMessageDialog(this, "Please enter a description of the bug.", "CalChart Error", wxOK | wxICON_ERROR).ShowModal();
         return false;
     }
 
@@ -308,7 +291,7 @@ auto BugReportDialog::Validate() -> bool
         auto email = text_email->GetValue();
         // Simple email validation - check for @ and at least one dot
         if (email.Find('@') == wxNOT_FOUND || email.Find('.') == wxNOT_FOUND) {
-            wxLogError("Please enter a valid email address or leave it blank.");
+            wxMessageDialog(this, "Please enter a valid email address or leave it blank.", "CalChart Error", wxOK | wxICON_ERROR).ShowModal();
             return false;
         }
     }

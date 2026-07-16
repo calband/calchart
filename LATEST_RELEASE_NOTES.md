@@ -4,6 +4,8 @@
 
 Bugs addressed in this release:
 
+* [#826](../../issues/826) Filing a bug did not work
+
 Other changes:
 
 * [#866](../../issues/866) switch Beatmap browser to use wxUI 0.4.3 withScrollBars
