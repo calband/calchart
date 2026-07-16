@@ -617,6 +617,10 @@ void ContinuityComposerPanel::OnUpdate()
     // filter out the selected
     auto filteredStrings = findStringsThatMatchString(*mComboSelection, std::vector(list_of_strings.begin(), list_of_strings.end()));
     auto stringsCont = std::vector<wxString>(filteredStrings.begin(), filteredStrings.end());
+
+    // Save the current insertion point to restore it after updating the list
+    long insertionPoint = mComboSelection.control()->GetInsertionPoint();
+
     // if we *not* in the middle of browsing the list, or there's currently no strings, put in the culled list.
     if (wxNOT_FOUND == mComboSelection.selection().get() || mComboSelection.control()->GetCount() == 0) {
         while (mComboSelection.control()->GetCount()) {
@@ -632,6 +636,9 @@ void ContinuityComposerPanel::OnUpdate()
     // do highlighting
     mCanvas->SetHighlight(mCurrentSelected);
     mComboSelection->SetFocus();
+
+    // Restore the insertion point and clear any text selection (fixes Windows auto-select issue)
+    mComboSelection.control()->SetInsertionPoint(insertionPoint);
 
     if (mOnUpdateIsValid) {
         mOnUpdateIsValid(Validate());
