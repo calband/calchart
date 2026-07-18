@@ -25,7 +25,7 @@
 #include "CalChartConfiguration.h"
 #include "CalChartRanges.h"
 
-bool IsValidIntFloatMap(std::string_view input, CalChart::Beats beats)
+auto IsValidIntFloatMap(std::string_view input, CalChart::Beats beats) -> bool
 {
     // Reject empty or whitespace-only strings explicitly
     if (input.empty()) {
@@ -52,18 +52,14 @@ BeatMapDialog::BeatMapDialog(
         wxID_ANY,
         "Beat Map Dialog",
         wxDefaultPosition,
-        { 100, 100 },
+        { 350, 700 },
         wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER
     }
     , mBeatSheetProxyInfo(beatSheetInfo.size())
 {
-    // Create a scrolled window for the entire dialog content
-    auto* scrolled = new wxScrolledWindow(this, wxID_ANY);
-    scrolled->SetScrollRate(0, 5); // Scroll 5 pixels per wheel event vertically
-
     wxUI::VSizer{
+        wxSizerFlags{}.Border(wxALL, 2).Expand(),
         wxUI::VForEach(
-            wxSizerFlags{}.Border(wxALL, 2),
             CalChart::Ranges::enumerate_view(beatSheetInfo),
             [this](auto const& pair) {
                 auto const& [index, info] = pair;
@@ -90,27 +86,22 @@ BeatMapDialog::BeatMapDialog(
                 };
             }),
         wxUI::HSizer{
+            wxSizerFlags{}.Border(wxALL, 2).Expand(),
+            wxUI::StretchSpacer{},
+            wxUI::Button{ wxID_CANCEL }.bind([this]() {
+                EndModal(wxID_CANCEL);
+            }),
+            wxUI::StretchSpacer{},
             wxUI::Button{ wxID_OK }.setDefault().bind([this]() {
                 if (validate()) {
                     EndModal(wxID_OK);
                 }
             }),
-            wxUI::Button{ wxID_CANCEL }.bind([this]() {
-                EndModal(wxID_CANCEL);
-            }),
+            wxUI::StretchSpacer{},
         }
     }
-        .fitTo(scrolled);
-    auto* dialogSizer = new wxBoxSizer(wxVERTICAL);
-    dialogSizer->Add(scrolled, 1, wxEXPAND | wxALL, 0);
-
-    SetSizer(dialogSizer);
-
-    if (GetSizer()) {
-        GetSizer()->SetSizeHints(this);
-    }
-
-    // Centre();
+        .withScrollBars(5)
+        .fitTo(this);
 }
 
 auto BeatMapDialog::validate() const -> bool
@@ -177,11 +168,16 @@ auto BeatMapDialog::GetBeatSheetRawInfo() const -> std::vector<BeatSheetRawInfo>
 
 auto BeatMapPlaygroundData() -> std::vector<BeatSheetInfo>
 {
-    return std::vector<BeatSheetInfo>{
+    auto source = std::vector<BeatSheetInfo>{
         BeatSheetInfo{ CalChart::SheetBeatInfo{ 120, std::map<CalChart::Beats, CalChart::Seconds>{} }, 16 },
         BeatSheetInfo{ CalChart::SheetBeatInfo{ 130, std::map<CalChart::Beats, CalChart::Seconds>{ std::pair<CalChart::Beats, CalChart::Seconds>{ 0, 1.5 } } }, 16 },
         BeatSheetInfo{ CalChart::SheetBeatInfo{ 115, std::map<CalChart::Beats, CalChart::Seconds>{} }, 16 },
         BeatSheetInfo{ CalChart::SheetBeatInfo{ 120, std::map<CalChart::Beats, CalChart::Seconds>{} }, 16 },
         BeatSheetInfo{ CalChart::SheetBeatInfo{ 120, std::map<CalChart::Beats, CalChart::Seconds>{} }, 16 },
     };
+    auto full = source;
+    full.insert(full.end(), source.begin(), source.end());
+    full.insert(full.end(), source.begin(), source.end());
+    full.insert(full.end(), source.begin(), source.end());
+    return full;
 }
