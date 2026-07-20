@@ -77,7 +77,7 @@ auto DumpContinuity(CalChart::Show const& show, std::ostream& os)
             os << "<--End errors-->\n";
             os << "<--StartParsed-->\n";
             for (auto&& proc : continuity) {
-                os << *proc << "\n";
+                os << proc->ToString() << "\n";
             }
             os << "<--EndParsed-->\n";
         }
