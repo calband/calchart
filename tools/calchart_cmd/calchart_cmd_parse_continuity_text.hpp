@@ -18,7 +18,7 @@ auto ParseContinuityText(std::string const& text, std::ostream& os)
     try {
         auto&& continuity = CalChart::Continuity(text);
         for (auto& proc : continuity.GetParsedContinuity()) {
-            os << proc->ToString() << "\n";
+            os << *proc << "\n";
         }
     } catch (std::runtime_error const& error) {
         os << "Errors during compile: " << error.what() << "\n";

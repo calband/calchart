@@ -19,6 +19,15 @@ auto serializeDeserialize(T const& cont)
     return uut2;
 }
 
+// this will pull out the string:
+template <typename T>
+auto print(T const& cont)
+{
+    std::stringstream os;
+    cont.Print(os);
+    return os.str();
+}
+
 template <typename Sheets, typename Conts>
 auto GetCompiledResults(Sheets const& sheets, Conts const& proc)
 {
@@ -69,7 +78,7 @@ TEST_CASE("Fountain", "CalChartContinuityToken")
 
     CHECK(*uut == serializeDeserialize(*uut));
     CHECK(*uut == *uut);
-    CHECK(uut->ToString() == "[CT][CPr]Procedure: [CPrF]Fountain step, first going [CT][CV]Value:[CVC]Defined:NE then [CT][CV]Value:[CVC]Defined:E, first at [CT][CV]Value:[CVF]2, then at [CT][CV]Value:[CVF]1ending at [CT][CP]Point:[CNP]Next Point");
+    CHECK(print(*uut) == "[CT][CPr]Procedure: [CPrF]Fountain step, first going [CT][CV]Value:[CVC]Defined:NE then [CT][CV]Value:[CVC]Defined:E, first at [CT][CV]Value:[CVF]2, then at [CT][CV]Value:[CVF]1ending at [CT][CP]Point:[CNP]Next Point");
 
     // now move things into a vector so we can work with it
     auto procs = std::vector<std::unique_ptr<Cont::Procedure>>{};
@@ -91,7 +100,7 @@ TEST_CASE("Fountain with nulls", "CalChartContinuityToken")
 
     CHECK(*uut == serializeDeserialize(*uut));
     CHECK(*uut == *uut);
-    CHECK(uut->ToString() == "[CT][CPr]Procedure: [CPrF]Fountain step, first going [CT][CV]Value:[CVC]Defined:NE then [CT][CV]Value:[CVC]Defined:Eending at [CT][CP]Point:[CNP]Next Point");
+    CHECK(print(*uut) == "[CT][CPr]Procedure: [CPrF]Fountain step, first going [CT][CV]Value:[CVC]Defined:NE then [CT][CV]Value:[CVC]Defined:Eending at [CT][CP]Point:[CNP]Next Point");
 
     // now move things into a vector so we can work with it
     auto procs = std::vector<std::unique_ptr<Cont::Procedure>>{};
@@ -114,7 +123,7 @@ TEST_CASE("HSCM", "CalChartContinuityToken")
 
     CHECK(*uut == serializeDeserialize(*uut));
     CHECK(*uut == *uut);
-    CHECK(uut->ToString() == "[CT][CPr]Procedure: [CPrHCM]High Step CounterMarch starting at [CT][CP]Point:[CRP]Ref Point 1 passing through [CT][CP]Point:[CRP]Ref Point 2 for number beats[CT][CV]Value:[CVF]40");
+    CHECK(print(*uut) == "[CT][CPr]Procedure: [CPrHCM]High Step CounterMarch starting at [CT][CP]Point:[CRP]Ref Point 1 passing through [CT][CP]Point:[CRP]Ref Point 2 for number beats[CT][CV]Value:[CVF]40");
 
     // now move things into a vector so we can work with it
     auto procs = std::vector<std::unique_ptr<Cont::Procedure>>{};
@@ -139,7 +148,7 @@ TEST_CASE("DMCM", "CalChartContinuityToken")
 
     CHECK(*uut == serializeDeserialize(*uut));
     CHECK(*uut == *uut);
-    CHECK(uut->ToString() == "[CT][CPr]Procedure: [CPrDC]Diagonal march CounterMarch starting at [CT][CP]Point:[CRP]Ref Point 1 passing through [CT][CP]Point:[CRP]Ref Point 2 for number beats[CT][CV]Value:[CVF]40");
+    CHECK(print(*uut) == "[CT][CPr]Procedure: [CPrDC]Diagonal march CounterMarch starting at [CT][CP]Point:[CRP]Ref Point 1 passing through [CT][CP]Point:[CRP]Ref Point 2 for number beats[CT][CV]Value:[CVF]40");
 
     // now move things into a vector so we can work with it
     auto procs = std::vector<std::unique_ptr<Cont::Procedure>>{};
