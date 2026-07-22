@@ -30,6 +30,7 @@
 #include "parse.h"
 
 #include <cmath>
+#include <format>
 
 // for serialization we need to pre-register all of the different types that can exist in the inuity AST.
 namespace {
@@ -435,10 +436,9 @@ Token::Token()
 {
 }
 
-std::ostream& Token::Print(std::ostream& os) const
+auto Token::ToString() const -> std::string
 {
-    os << "[CT]";
-    return os;
+    return "[CT]";
 }
 
 void Token::replace(Token const* /*which*/, std::unique_ptr<Token> /*v*/)
@@ -469,11 +469,9 @@ Coord Point::Get(Animate::Compile const& anim) const
     return anim.GetPointPosition();
 }
 
-std::ostream& Point::Print(std::ostream& os) const
+auto Point::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CP]";
-    return os << "Point:";
+    return std::format("{}[CP]Point:", super::ToString());
 }
 
 Drawable Point::GetDrawable() const
@@ -502,11 +500,9 @@ Reader Point::Deserialize(Reader reader)
 }
 
 // PointUnset
-std::ostream& PointUnset::Print(std::ostream& os) const
+auto PointUnset::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPU]";
-    return os << "Unset";
+    return std::format("{}[CPU]Unset", super::ToString());
 }
 
 Drawable PointUnset::GetDrawable() const
@@ -540,11 +536,9 @@ Coord StartPoint::Get(Animate::Compile const& anim) const
     return anim.GetStartingPosition();
 }
 
-std::ostream& StartPoint::Print(std::ostream& os) const
+auto StartPoint::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CSP]";
-    return os << "Start Point";
+    return std::format("{}[CSP]Start Point", super::ToString());
 }
 
 Drawable StartPoint::GetDrawable() const
@@ -578,11 +572,9 @@ Coord NextPoint::Get(Animate::Compile const& anim) const
     return anim.GetEndingPosition();
 }
 
-std::ostream& NextPoint::Print(std::ostream& os) const
+auto NextPoint::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CNP]";
-    return os << "Next Point";
+    return std::format("{}[CNP]Next Point", super::ToString());
 }
 
 Drawable NextPoint::GetDrawable() const
@@ -621,11 +613,9 @@ Coord RefPoint::Get(Animate::Compile const& anim) const
     return anim.GetReferencePointPosition(refnum);
 }
 
-std::ostream& RefPoint::Print(std::ostream& os) const
+auto RefPoint::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CRP]";
-    return os << "Ref Point " << refnum;
+    return std::format("{}[CRP]Ref Point {}", super::ToString(), refnum);
 }
 
 Drawable RefPoint::GetDrawable() const
@@ -657,11 +647,9 @@ Reader RefPoint::Deserialize(Reader reader)
 }
 
 // Value
-std::ostream& Value::Print(std::ostream& os) const
+auto Value::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CV]";
-    return os << "Value:";
+    return std::format("{}[CV]Value:", super::ToString());
 }
 
 auto Value::Serialize() const -> std::vector<std::byte>
@@ -679,11 +667,9 @@ Reader Value::Deserialize(Reader reader)
 }
 
 // ValueUnset
-std::ostream& ValueUnset::Print(std::ostream& os) const
+auto ValueUnset::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CVU]";
-    return os << "Unset";
+    return std::format("{}[CVU]Unset", super::ToString());
 }
 
 Drawable ValueUnset::GetDrawable() const
@@ -719,11 +705,9 @@ ValueFloat::ValueFloat(float v)
 
 float ValueFloat::Get(Animate::Compile const&) const { return val; }
 
-std::ostream& ValueFloat::Print(std::ostream& os) const
+auto ValueFloat::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CVF]";
-    return os << val;
+    return std::format("{}[CVF]{}", super::ToString(), val);
 }
 
 Drawable ValueFloat::GetDrawable() const
@@ -783,11 +767,9 @@ float ValueDefined::Get(Animate::Compile const&) const
     return 0.0;
 }
 
-std::ostream& ValueDefined::Print(std::ostream& os) const
+auto ValueDefined::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CVC]";
-    return os << "Defined:" << DefinedValue_strings[val];
+    return std::format("{}[CVC]Defined:{}", super::ToString(), DefinedValue_strings[val]);
 }
 
 Drawable ValueDefined::GetDrawable() const
@@ -834,11 +816,9 @@ float ValueAdd::Get(Animate::Compile const& anim) const
     return (val1->Get(anim) + val2->Get(anim));
 }
 
-std::ostream& ValueAdd::Print(std::ostream& os) const
+auto ValueAdd::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CVA]";
-    return os << *val1 << " + " << *val2;
+    return std::format("{}[CVA]{} + {}", super::ToString(), *val1, *val2);
 }
 
 Drawable ValueAdd::GetDrawable() const
@@ -882,11 +862,9 @@ float ValueSub::Get(Animate::Compile const& anim) const
     return (val1->Get(anim) - val2->Get(anim));
 }
 
-std::ostream& ValueSub::Print(std::ostream& os) const
+auto ValueSub::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CVS]";
-    return os << *val1 << " - " << *val2;
+    return std::format("{}[CVS]{} - {}", super::ToString(), *val1, *val2);
 }
 
 Drawable ValueSub::GetDrawable() const
@@ -930,11 +908,9 @@ float ValueMult::Get(Animate::Compile const& anim) const
     return (val1->Get(anim) * val2->Get(anim));
 }
 
-std::ostream& ValueMult::Print(std::ostream& os) const
+auto ValueMult::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CVM]";
-    return os << *val1 << " * " << *val2;
+    return std::format("{}[CVM]{} * {}", super::ToString(), *val1, *val2);
 }
 
 Drawable ValueMult::GetDrawable() const
@@ -984,11 +960,9 @@ float ValueDiv::Get(Animate::Compile const& anim) const
     }
 }
 
-std::ostream& ValueDiv::Print(std::ostream& os) const
+auto ValueDiv::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CVD]";
-    return os << *val1 << " / " << *val2;
+    return std::format("{}[CVD]{} / {}", super::ToString(), *val1, *val2);
 }
 
 Drawable ValueDiv::GetDrawable() const
@@ -1029,11 +1003,9 @@ Reader ValueDiv::Deserialize(Reader reader)
 // ValueNeg
 float ValueNeg::Get(Animate::Compile const& anim) const { return -val->Get(anim); }
 
-std::ostream& ValueNeg::Print(std::ostream& os) const
+auto ValueNeg::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CVN]";
-    return os << "- " << *val;
+    return std::format("{}[CVN]- {}", super::ToString(), *val);
 }
 
 Drawable ValueNeg::GetDrawable() const
@@ -1075,11 +1047,9 @@ auto ValueREM::Get(Animate::Compile const& anim) const -> float
     return static_cast<float>(anim.GetBeatsRemaining());
 }
 
-std::ostream& ValueREM::Print(std::ostream& os) const
+auto ValueREM::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CVR]";
-    return os << "REM";
+    return std::format("{}[CVR]REM", super::ToString());
 }
 
 Drawable ValueREM::GetDrawable() const
@@ -1118,11 +1088,9 @@ float ValueVar::Get(Animate::Compile const& anim) const
     return anim.GetVarValue(varnum);
 }
 
-std::ostream& ValueVar::Print(std::ostream& os) const
+auto ValueVar::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CVV]";
-    return os << "Var " << toUType(varnum);
+    return std::format("{}[CVV]Var {}", super::ToString(), toUType(varnum));
 }
 
 Drawable ValueVar::GetDrawable() const
@@ -1159,11 +1127,9 @@ Reader ValueVar::Deserialize(Reader reader)
 }
 
 // ValueVarUnset
-std::ostream& ValueVarUnset::Print(std::ostream& os) const
+auto ValueVarUnset::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CVVU]";
-    return os << "Unset";
+    return std::format("{}[CVVU]Unset", super::ToString());
 }
 
 Drawable ValueVarUnset::GetDrawable() const
@@ -1201,11 +1167,9 @@ auto FuncDir::Get(Animate::Compile const& anim) const -> float
     return static_cast<float>(CalChart::Degree{ anim.GetPointPosition().Direction(c) }.getValue());
 }
 
-std::ostream& FuncDir::Print(std::ostream& os) const
+auto FuncDir::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CFD]";
-    return os << "Direction to " << *pnt;
+    return std::format("{}[CFD]Direction to {}", super::ToString(), *pnt);
 }
 
 Drawable FuncDir::GetDrawable() const
@@ -1252,11 +1216,9 @@ auto FuncDirFrom::Get(Animate::Compile const& anim) const -> float
     return static_cast<float>(CalChart::Degree{ start.Direction(end) }.getValue());
 }
 
-std::ostream& FuncDirFrom::Print(std::ostream& os) const
+auto FuncDirFrom::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CFDF]";
-    return os << "Direction from " << *pnt_start << " to " << *pnt_end;
+    return std::format("{}[CFDF]Direction from {} to {}", super::ToString(), *pnt_start, *pnt_end);
 }
 
 Drawable FuncDirFrom::GetDrawable() const
@@ -1301,11 +1263,9 @@ float FuncDist::Get(Animate::Compile const& anim) const
     return vector.DM_Magnitude();
 }
 
-std::ostream& FuncDist::Print(std::ostream& os) const
+auto FuncDist::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CFd]";
-    return os << "Distance to " << *pnt;
+    return std::format("{}[CFd]Distance to {}", super::ToString(), *pnt);
 }
 
 Drawable FuncDist::GetDrawable() const
@@ -1348,11 +1308,9 @@ float FuncDistFrom::Get(Animate::Compile const& anim) const
     return vector.Magnitude();
 }
 
-std::ostream& FuncDistFrom::Print(std::ostream& os) const
+auto FuncDistFrom::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CFdF]";
-    return os << "Distance from " << *pnt_start << " to " << *pnt_end;
+    return std::format("{}[CFdF]Distance from {} to {}", super::ToString(), *pnt_start, *pnt_end);
 }
 
 Drawable FuncDistFrom::GetDrawable() const
@@ -1404,12 +1362,10 @@ float FuncEither::Get(Animate::Compile const& anim) const
     return (std::abs(d1.getValue()) > std::abs(d2.getValue())) ? dir2->Get(anim) : dir1->Get(anim);
 }
 
-std::ostream& FuncEither::Print(std::ostream& os) const
+auto FuncEither::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CFE]";
-    return os << "Either direction to " << *dir1 << " or " << *dir2
-              << ", depending on whichever is a shorter angle to " << *pnt;
+    return std::format("{}[CFE]Either direction to {} or {}, depending on whichever is a shorter angle to {}",
+        super::ToString(), *dir1, *dir2, *pnt);
 }
 
 Drawable FuncEither::GetDrawable() const
@@ -1455,11 +1411,9 @@ float FuncOpp::Get(Animate::Compile const& anim) const
     return (dir->Get(anim) + 180.0f);
 }
 
-std::ostream& FuncOpp::Print(std::ostream& os) const
+auto FuncOpp::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CFO]";
-    return os << "opposite direction of " << *dir;
+    return std::format("{}[CFO]opposite direction of {}", super::ToString(), *dir);
 }
 
 Drawable FuncOpp::GetDrawable() const
@@ -1503,12 +1457,10 @@ float FuncStep::Get(Animate::Compile const& anim) const
     return (c.DM_Magnitude() * numbeats->Get(anim) / blksize->Get(anim));
 }
 
-std::ostream& FuncStep::Print(std::ostream& os) const
+auto FuncStep::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CFS]";
-    return os << "Step drill at " << *numbeats << " beats for a block size of "
-              << *blksize << " from point " << *pnt;
+    return std::format("{}[CFS]Step drill at {} beats for a block size of {} from point {}",
+        super::ToString(), *numbeats, *blksize, *pnt);
 }
 
 Drawable FuncStep::GetDrawable() const
@@ -1549,11 +1501,9 @@ Reader FuncStep::Deserialize(Reader reader)
 }
 
 // Procedure
-std::ostream& Procedure::Print(std::ostream& os) const
+auto Procedure::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPr]";
-    return os << "Procedure: ";
+    return std::format("{}[CPr]Procedure: ", super::ToString());
 }
 
 auto Procedure::Serialize() const -> std::vector<std::byte>
@@ -1571,11 +1521,9 @@ Reader Procedure::Deserialize(Reader reader)
 }
 
 // ProcUnset
-std::ostream& ProcUnset::Print(std::ostream& os) const
+auto ProcUnset::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrU]";
-    return os << "Unset";
+    return std::format("{}[CPrU]Unset", super::ToString());
 }
 
 Drawable ProcUnset::GetDrawable() const
@@ -1609,11 +1557,9 @@ void ProcSet::Compile(Animate::Compile& anim)
     var->Set(anim, val->Get(anim));
 }
 
-std::ostream& ProcSet::Print(std::ostream& os) const
+auto ProcSet::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrS]";
-    return os << "Setting variable " << *var << " to " << *val;
+    return std::format("{}[CPrS]Setting variable {} to {}", super::ToString(), *var, *val);
 }
 
 Drawable ProcSet::GetDrawable() const
@@ -1686,11 +1632,9 @@ void ProcBlam::Compile(Animate::Compile& anim)
     anim.Append(Animate::CommandMove{ anim.GetPointPosition(), anim.GetBeatsRemaining(), c });
 }
 
-std::ostream& ProcBlam::Print(std::ostream& os) const
+auto ProcBlam::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrB]";
-    return os << "BLAM";
+    return std::format("{}[CPrB]BLAM", super::ToString());
 }
 
 Drawable ProcBlam::GetDrawable() const
@@ -1724,11 +1668,9 @@ void ProcClose::Compile(Animate::Compile& anim)
     anim.Append(Animate::CommandStill{ anim.GetPointPosition(), anim.GetBeatsRemaining(), Animate::CommandStill::Style::Close, CalChart::Degree{ dir->Get(anim) } });
 }
 
-std::ostream& ProcClose::Print(std::ostream& os) const
+auto ProcClose::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrClose]";
-    return os << "Close facing " << *dir;
+    return std::format("{}[CPrClose]Close facing {}", super::ToString(), *dir);
 }
 
 Drawable ProcClose::GetDrawable() const
@@ -1770,13 +1712,10 @@ void ProcCM::Compile(Animate::Compile& anim)
     DoCounterMarch(anim, *pnt1, *pnt2, *stps, *dir1, *dir2, *numbeats);
 }
 
-std::ostream& ProcCM::Print(std::ostream& os) const
+auto ProcCM::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrCM]";
-    return os << "CounterMarch starting at " << *pnt1 << " passing through "
-              << *pnt2 << " stepping " << *stps << " off points, first moving "
-              << *dir1 << " then " << *dir2 << " for number beats " << *numbeats;
+    return std::format("{}[CPrCM]CounterMarch starting at {} passing through {} stepping {} off points, first moving {} then {} for number beats {}",
+        super::ToString(), *pnt1, *pnt2, *stps, *dir1, *dir2, *numbeats);
 }
 
 Drawable ProcCM::GetDrawable() const
@@ -1862,12 +1801,10 @@ void ProcDMCM::Compile(Animate::Compile& anim)
     anim.RegisterError(Animate::Error::INVALID_CM);
 }
 
-std::ostream& ProcDMCM::Print(std::ostream& os) const
+auto ProcDMCM::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrDC]";
-    return os << "Diagonal march CounterMarch starting at " << *pnt1
-              << " passing through " << *pnt2 << " for number beats" << *numbeats;
+    return std::format("{}[CPrDC]Diagonal march CounterMarch starting at {} passing through {} for number beats{}",
+        super::ToString(), *pnt1, *pnt2, *numbeats);
 }
 
 Drawable ProcDMCM::GetDrawable() const
@@ -1942,11 +1879,9 @@ void ProcDMHS::Compile(Animate::Compile& anim)
     }
 }
 
-std::ostream& ProcDMHS::Print(std::ostream& os) const
+auto ProcDMHS::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrDH]";
-    return os << "Diagonal march then HighStep to " << *pnt;
+    return std::format("{}[CPrDH]Diagonal march then HighStep to {}", super::ToString(), *pnt);
 }
 
 Drawable ProcDMHS::GetDrawable() const
@@ -1994,11 +1929,9 @@ void ProcEven::Compile(Animate::Compile& anim)
     }
 }
 
-std::ostream& ProcEven::Print(std::ostream& os) const
+auto ProcEven::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrE]";
-    return os << "Even march of step size " << *stps << " to " << *pnt;
+    return std::format("{}[CPrE]Even march of step size {} to {}", super::ToString(), *stps, *pnt);
 }
 
 Drawable ProcEven::GetDrawable() const
@@ -2056,11 +1989,9 @@ void ProcEWNS::Compile(Animate::Compile& anim)
     }
 }
 
-std::ostream& ProcEWNS::Print(std::ostream& os) const
+auto ProcEWNS::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrEWNS]";
-    return os << "March EastWest/NorthSouth to " << *pnt;
+    return std::format("{}[CPrEWNS]March EastWest/NorthSouth to {}", super::ToString(), *pnt);
 }
 
 Drawable ProcEWNS::GetDrawable() const
@@ -2154,16 +2085,16 @@ void ProcFountain::Compile(Animate::Compile& anim)
     }
 }
 
-std::ostream& ProcFountain::Print(std::ostream& os) const
+auto ProcFountain::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrF]";
-    os << "Fountain step, first going " << *dir1 << " then " << *dir2;
+    std::string result = std::format("{}[CPrF]Fountain step, first going {} then {}",
+        super::ToString(), *dir1, *dir2);
     if (stepsize1)
-        os << ", first at " << *stepsize1;
+        result += std::format(", first at {}", *stepsize1);
     if (stepsize2)
-        os << ", then at " << *stepsize2;
-    return os << "ending at " << *pnt;
+        result += std::format(", then at {}", *stepsize2);
+    result += std::format("ending at {}", *pnt);
+    return result;
 }
 
 Drawable ProcFountain::GetDrawable() const
@@ -2262,11 +2193,9 @@ void ProcFM::Compile(Animate::Compile& anim)
     }
 }
 
-std::ostream& ProcFM::Print(std::ostream& os) const
+auto ProcFM::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrFM]";
-    return os << "Forward march for steps " << *stps << " in direction " << *dir;
+    return std::format("{}[CPrFM]Forward march for steps {} in direction {}", super::ToString(), *stps, *dir);
 }
 
 Drawable ProcFM::GetDrawable() const
@@ -2313,11 +2242,9 @@ void ProcFMTO::Compile(Animate::Compile& anim)
     }
 }
 
-std::ostream& ProcFMTO::Print(std::ostream& os) const
+auto ProcFMTO::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrFMT]";
-    return os << "Forward march to " << *pnt;
+    return std::format("{}[CPrFMT]Forward march to {}", super::ToString(), *pnt);
 }
 
 Drawable ProcFMTO::GetDrawable() const
@@ -2382,11 +2309,9 @@ void ProcGrid::Compile(Animate::Compile& anim)
     }
 }
 
-std::ostream& ProcGrid::Print(std::ostream& os) const
+auto ProcGrid::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrG]";
-    return os << "Move on Grid of " << *grid << " spacing";
+    return std::format("{}[CPrG]Move on Grid of {} spacing", super::ToString(), *grid);
 }
 
 Drawable ProcGrid::GetDrawable() const
@@ -2447,12 +2372,10 @@ void ProcHSCM::Compile(Animate::Compile& anim)
     anim.RegisterError(Animate::Error::INVALID_CM);
 }
 
-std::ostream& ProcHSCM::Print(std::ostream& os) const
+auto ProcHSCM::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrHCM]";
-    return os << "High Step CounterMarch starting at " << *pnt1
-              << " passing through " << *pnt2 << " for number beats" << *numbeats;
+    return std::format("{}[CPrHCM]High Step CounterMarch starting at {} passing through {} for number beats{}",
+        super::ToString(), *pnt1, *pnt2, *numbeats);
 }
 
 Drawable ProcHSCM::GetDrawable() const
@@ -2527,11 +2450,9 @@ void ProcHSDM::Compile(Animate::Compile& anim)
     }
 }
 
-std::ostream& ProcHSDM::Print(std::ostream& os) const
+auto ProcHSDM::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrHD]";
-    return os << "HighStep then Diagonal march to " << *pnt;
+    return std::format("{}[CPrHD]HighStep then Diagonal march to {}", super::ToString(), *pnt);
 }
 
 Drawable ProcHSDM::GetDrawable() const
@@ -2574,11 +2495,9 @@ void ProcMagic::Compile(Animate::Compile& anim)
     anim.Append(Animate::CommandMove(anim.GetPointPosition(), 0, c));
 }
 
-std::ostream& ProcMagic::Print(std::ostream& os) const
+auto ProcMagic::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrM]";
-    return os << "Magic step to " << *pnt;
+    return std::format("{}[CPrM]Magic step to {}", super::ToString(), *pnt);
 }
 
 Drawable ProcMagic::GetDrawable() const
@@ -2634,15 +2553,9 @@ void ProcMarch::Compile(Animate::Compile& anim)
     }
 }
 
-std::ostream& ProcMarch::Print(std::ostream& os) const
+auto ProcMarch::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrm]";
-    os << "March step size" << *stpsize << " for steps " << *stps
-       << " in direction " << *dir;
-    if (facedir)
-        os << " facing " << *facedir;
-    return os;
+    return std::format("{}[CPrm]March step size {} for steps {} in direction {}{}", super::ToString(), *stpsize, *stps, *dir, facedir ? std::format(" facing {}", *facedir) : "");
 }
 
 Drawable ProcMarch::GetDrawable() const
@@ -2708,11 +2621,9 @@ void ProcMT::Compile(Animate::Compile& anim)
     }
 }
 
-std::ostream& ProcMT::Print(std::ostream& os) const
+auto ProcMT::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrMT]";
-    return os << "MarkTime for " << *numbeats << " facing " << *dir;
+    return std::format("{}[CPrMT]MarkTime for {} facing {}", super::ToString(), *numbeats, *dir);
 }
 
 Drawable ProcMT::GetDrawable() const
@@ -2756,13 +2667,10 @@ void ProcMTRM::Compile(Animate::Compile& anim)
     anim.Append(Animate::CommandStill(anim.GetPointPosition(), anim.GetBeatsRemaining(), Animate::CommandStill::Style::MarkTime, CalChart::Degree{ dir->Get(anim) }));
 }
 
-std::ostream& ProcMTRM::Print(std::ostream& os) const
+auto ProcMTRM::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrMTR]";
-    return os << "MarkTime for Remaining Beats facing " << *dir;
+    return std::format("{}[CPrMTR]MarkTime for Remaining Beats facing {}", super::ToString(), *dir);
 }
-
 Drawable ProcMTRM::GetDrawable() const
 {
     return {
@@ -2816,11 +2724,9 @@ void ProcNSEW::Compile(Animate::Compile& anim)
     }
 }
 
-std::ostream& ProcNSEW::Print(std::ostream& os) const
+auto ProcNSEW::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrNSEW]";
-    return os << "March NorthSouth/EastWest to " << *pnt;
+    return std::format("{}[CPrNSEW]March NorthSouth/EastWest to {}", super::ToString(), *pnt);
 }
 
 Drawable ProcNSEW::GetDrawable() const
@@ -2882,12 +2788,9 @@ void ProcRotate::Compile(Animate::Compile& anim)
         start_ang, start_ang + angle, backwards));
 }
 
-std::ostream& ProcRotate::Print(std::ostream& os) const
+auto ProcRotate::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrR]";
-    return os << "Rotate at angle " << *ang << " for " << *stps
-              << " around pivot point " << *pnt;
+    return std::format("{}[CPrR]Rotate at angle {} for {} around pivot point {}", super::ToString(), *ang, *stps, *pnt);
 }
 
 Drawable ProcRotate::GetDrawable() const
@@ -2936,11 +2839,9 @@ void ProcStandAndPlay::Compile(Animate::Compile& anim)
     }
 }
 
-std::ostream& ProcStandAndPlay::Print(std::ostream& os) const
+auto ProcStandAndPlay::ToString() const -> std::string
 {
-    super::Print(os);
-    os << "[CPrStandAndPlay]";
-    return os << "Stand & Play for " << *numbeats << " facing " << *dir;
+    return std::format("{}[CPrStandAndPlay]Stand & Play for {} facing {}", super::ToString(), *numbeats, *dir);
 }
 
 Drawable ProcStandAndPlay::GetDrawable() const
