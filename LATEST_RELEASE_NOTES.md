@@ -10,4 +10,5 @@ Other changes:
 
 * [#866](../../issues/866) switch Beatmap browser to use wxUI 0.4.3 withScrollBars
 * [#878](../../issues/878) use std::format in ContToken
+* [#884](../../issues/884) Create a show schema with version 1
 

@@ -34,8 +34,10 @@ namespace CalChart {
 auto Shape_crosshairs::GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand>
 {
     return {
-        Draw::Line(GetOrigin().x - crosshairs_width, GetOrigin().y - crosshairs_width, GetOrigin().x + crosshairs_width, GetOrigin().y + crosshairs_width),
-        Draw::Line(GetOrigin().x + crosshairs_width, GetOrigin().y - crosshairs_width, GetOrigin().x - crosshairs_width, GetOrigin().y + crosshairs_width),
+        Draw::Line(GetOrigin().x - crosshairs_width, GetOrigin().y - crosshairs_width, GetOrigin().x + crosshairs_width,
+            GetOrigin().y + crosshairs_width),
+        Draw::Line(GetOrigin().x + crosshairs_width, GetOrigin().y - crosshairs_width, GetOrigin().x - crosshairs_width,
+            GetOrigin().y + crosshairs_width),
     };
 }
 
@@ -51,9 +53,7 @@ auto Shape_2point::GetPolygon() const -> RawPolygon_t
 
 auto Shape_line::GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand>
 {
-    return {
-        Draw::Line(GetOrigin(), GetPoint())
-    };
+    return { Draw::Line(GetOrigin(), GetPoint()) };
 }
 
 auto Shape_x::GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand>
@@ -67,35 +67,27 @@ auto Shape_x::GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand>
 auto Shape_cross::GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand>
 {
     return {
-        Draw::Line(GetOrigin().x + (GetPoint().x - GetOrigin().x) / 2, GetOrigin().y, GetOrigin().x + (GetPoint().x - GetOrigin().x) / 2, GetPoint().y),
-        Draw::Line(GetOrigin().x, GetOrigin().y + (GetPoint().y - GetOrigin().y) / 2, GetPoint().x, GetOrigin().y + (GetPoint().y - GetOrigin().y) / 2),
+        Draw::Line(GetOrigin().x + (GetPoint().x - GetOrigin().x) / 2, GetOrigin().y,
+            GetOrigin().x + (GetPoint().x - GetOrigin().x) / 2, GetPoint().y),
+        Draw::Line(GetOrigin().x, GetOrigin().y + (GetPoint().y - GetOrigin().y) / 2, GetPoint().x,
+            GetOrigin().y + (GetPoint().y - GetOrigin().y) / 2),
     };
 }
 
 auto Shape_ellipse::GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand>
 {
-    return {
-        Draw::Ellipse(GetOrigin(), GetPoint())
-    };
+    return { Draw::Ellipse(GetOrigin(), GetPoint()) };
 }
 
 auto Shape_arc::GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand>
 {
     auto boundingAngle = angle0 < CalChart::Radian{} ? angle - angle0 : angle0 - angle;
     if (boundingAngle < CalChart::Radian{} || boundingAngle > CalChart::pi) {
-        return {
-            Draw::Arc(
-                GetOrigin() + CalChart::CreateCoordVector(angle0 < CalChart::Radian{} ? angle : angle0, d),
-                GetOrigin() + CalChart::CreateCoordVector(angle0 < CalChart::Radian{} ? angle0 : angle, d),
-                GetOrigin())
-        };
+        return { Draw::Arc(GetOrigin() + CalChart::CreateCoordVector(angle0 < CalChart::Radian{} ? angle : angle0, d),
+            GetOrigin() + CalChart::CreateCoordVector(angle0 < CalChart::Radian{} ? angle0 : angle, d), GetOrigin()) };
     }
-    return {
-        Draw::Arc(
-            GetOrigin() + CalChart::CreateCoordVector(angle0 < CalChart::Radian{} ? angle0 : angle, d),
-            GetOrigin() + CalChart::CreateCoordVector(angle0 < CalChart::Radian{} ? angle : angle0, d),
-            GetOrigin())
-    };
+    return { Draw::Arc(GetOrigin() + CalChart::CreateCoordVector(angle0 < CalChart::Radian{} ? angle0 : angle, d),
+        GetOrigin() + CalChart::CreateCoordVector(angle0 < CalChart::Radian{} ? angle : angle0, d), GetOrigin()) };
 }
 
 auto Shape_rect::GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand>
@@ -162,10 +154,7 @@ namespace {
     }
 }
 
-auto Lasso::GetPointsOnLine(int numpnts) const -> std::vector<Coord>
-{
-    return PointsOnLine(pntlist, numpnts);
-}
+auto Lasso::GetPointsOnLine(int numpnts) const -> std::vector<Coord> { return PointsOnLine(pntlist, numpnts); }
 
 auto Lasso::GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand>
 {
@@ -194,7 +183,8 @@ Poly::Poly(Coord p)
 
 namespace {
     // Compute a point on a Catmull-Rom spline segment
-    auto catmullRom(CalChart::Coord p0, CalChart::Coord p1, CalChart::Coord p2, CalChart::Coord p3, double t) -> CalChart::Coord
+    auto catmullRom(CalChart::Coord p0, CalChart::Coord p1, CalChart::Coord p2, CalChart::Coord p3, double t)
+        -> CalChart::Coord
     {
         // Catmull-Rom basis functions
         auto t2 = t * t;
@@ -209,7 +199,8 @@ namespace {
     }
 
     // Generate the linear points of a Catmull-Rom spline
-    auto generateCatmullRomPoints(std::vector<CalChart::Coord> const& controlPoints, int segments) -> std::vector<CalChart::Coord>
+    auto generateCatmullRomPoints(std::vector<CalChart::Coord> const& controlPoints, int segments)
+        -> std::vector<CalChart::Coord>
     {
         auto points = std::vector<CalChart::Coord>{};
 
@@ -241,13 +232,13 @@ namespace {
     }
 
     // Generate line segments from a Catmull-Rom spline
-    auto generateDrawSegments(std::vector<CalChart::Coord> const& segmentPoints) -> std::vector<CalChart::Draw::DrawCommand>
+    auto generateDrawSegments(std::vector<CalChart::Coord> const& segmentPoints)
+        -> std::vector<CalChart::Draw::DrawCommand>
     {
         auto pairs = CalChart::Ranges::adjacent_view<2>(segmentPoints);
-        return CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(
-            pairs | std::views::transform([](auto points) {
-                return CalChart::Draw::Line{ std::get<0>(points), std::get<1>(points) };
-            }));
+        return CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(pairs | std::views::transform([](auto points) {
+            return CalChart::Draw::Line{ std::get<0>(points), std::get<1>(points) };
+        }));
     }
 
     auto GenerateCurve(std::vector<CalChart::Coord> const& segmentPoints) -> std::vector<CalChart::Draw::DrawCommand>
@@ -256,9 +247,7 @@ namespace {
     }
 
     // Helper function to compute distance from a point to a line segment
-    auto pointToSegmentDistance(CalChart::Coord point,
-        CalChart::Coord segStart,
-        CalChart::Coord segEnd) -> double
+    auto pointToSegmentDistance(CalChart::Coord point, CalChart::Coord segStart, CalChart::Coord segEnd) -> double
     {
         auto segment = segEnd - segStart;
         auto pointVec = point - segStart;
@@ -279,11 +268,10 @@ namespace {
         return (point - projection).Length();
     }
 
-    // Function to check if a point is close to any of these segments, and returns which and how much distance was traveled
-    auto isPointOnCurve(
-        std::vector<CalChart::Coord> const& segmentPoints,
-        CalChart::Coord point,
-        double tolerance) -> std::optional<std::tuple<size_t, double>>
+    // Function to check if a point is close to any of these segments, and returns which and how much distance was
+    // traveled
+    auto isPointOnCurve(std::vector<CalChart::Coord> const& segmentPoints, CalChart::Coord point, double tolerance)
+        -> std::optional<std::tuple<size_t, double>>
     {
         auto distance = 0.0;
         auto lineSegments = CalChart::Ranges::adjacent_view<2>(segmentPoints);
@@ -309,22 +297,16 @@ void Curve::Append(Coord p)
     Regenerate();
 }
 
-auto Curve::GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand>
-{
-    return GenerateCurve(mSegmentPoints);
-}
+auto Curve::GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand> { return GenerateCurve(mSegmentPoints); }
 
-auto Curve::GetPointsOnLine(int numpnts) const -> std::vector<Coord>
-{
-    return PointsOnLine(mSegmentPoints, numpnts);
-}
+auto Curve::GetPointsOnLine(int numpnts) const -> std::vector<Coord> { return PointsOnLine(mSegmentPoints, numpnts); }
 
-auto Curve::LowerControlPointOnLine(Coord point, Coord::units searchBound) const -> std::optional<std::tuple<size_t, double>>
+auto Curve::LowerControlPointOnLine(Coord point, Coord::units searchBound) const
+    -> std::optional<std::tuple<size_t, double>>
 {
     auto totalDistance = GetDistance(mSegmentPoints);
 
-    if (auto found = isPointOnCurve(mSegmentPoints, point, searchBound);
-        found.has_value()) {
+    if (auto found = isPointOnCurve(mSegmentPoints, point, searchBound); found.has_value()) {
         auto [whichSegment, distance] = *found;
         return std::tuple<size_t, double>{ whichSegment / kNumberSegments, distance / totalDistance };
     }
@@ -340,6 +322,55 @@ auto Curve::Serialize() const -> std::vector<std::byte>
         Parser::Append(result, static_cast<int32_t>(point.y));
     }
     return result;
+}
+
+auto CreateCurve(nlohmann::json const& json) -> Curve
+{
+    try {
+        if (!json.is_object()) {
+            throw CC_FileException("bad Curve JSON: root must be an object");
+        }
+
+        if (!json.contains("control_points")) {
+            throw CC_FileException("bad Curve JSON: missing control_points");
+        }
+
+        auto const& controlPointsJson = json.at("control_points");
+        if (!controlPointsJson.is_array()) {
+            throw CC_FileException("bad Curve JSON: control_points must be an array");
+        }
+
+        if (controlPointsJson.empty()) {
+            throw CC_FileException("bad Curve JSON: control_points must have at least one point");
+        }
+
+        auto controlPoints = std::vector<Coord>{};
+        for (auto const& pointJson : controlPointsJson) {
+            if (!pointJson.is_array() || pointJson.size() != 2) {
+                throw CC_FileException("bad Curve JSON: each control point must be [x, y]");
+            }
+            if (!pointJson.at(0).is_number() || !pointJson.at(1).is_number()) {
+                throw CC_FileException("bad Curve JSON: control point coordinates must be numeric");
+            }
+            auto x = static_cast<Coord::units>(pointJson.at(0).get<double>());
+            auto y = static_cast<Coord::units>(pointJson.at(1).get<double>());
+            controlPoints.emplace_back(x, y);
+        }
+
+        return Curve{ controlPoints };
+    } catch (nlohmann::json::exception const& e) {
+        throw CC_FileException(std::string("bad Curve JSON: ") + e.what());
+    }
+}
+
+auto Curve::toJSON() const -> nlohmann::json
+{
+    auto controlPointsJson = nlohmann::json::array();
+    for (auto const& point : mControlPoints) {
+        controlPointsJson.push_back(nlohmann::json::array({ point.x, point.y }));
+    }
+
+    return nlohmann::json{ { "control_points", controlPointsJson } };
 }
 
 void Curve::Regenerate()

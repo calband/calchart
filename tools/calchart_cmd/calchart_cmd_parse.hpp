@@ -112,11 +112,15 @@ auto PrintShow(CalChart::Show const& show, std::ostream& os)
     }
 }
 
-auto DumpJSON(CalChart::Show const& show, std::ostream& os)
+auto DumpJSON(CalChart::Show const& show)
 {
     auto animation = CalChart::Animation{ show };
-    auto json = show.toOnlineViewerJSON(animation);
-    os << std::setw(4) << json << "\n";
+    return show.toOnlineViewerJSON(animation);
+}
+
+auto DumpShowJSON(CalChart::Show const& show)
+{
+    return show.toJSON();
 }
 
 auto DumpPrintContinuity(CalChart::Show const& show, std::ostream& os)
@@ -162,7 +166,12 @@ constexpr auto Parse = [](auto args, auto& os) {
             DumpFileCheck(os);
         }
         if (args["--json"].asBool()) {
-            DumpJSON(*show, os);
+            auto jsonwidth = args["--jsonwidth"].asLong();
+            os << std::setw(jsonwidth) << DumpJSON(*show) << "\n";
+        }
+        if (args["--showjson"].asBool()) {
+            auto jsonwidth = args["--jsonwidth"].asLong();
+            os << std::setw(jsonwidth) << DumpShowJSON(*show) << "\n";
         }
         if (args["--dump_print_continuity"].asBool()) {
             DumpPrintContinuity(*show, os);

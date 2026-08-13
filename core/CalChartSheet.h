@@ -24,7 +24,8 @@
 /**
  * CalChart Sheet
  *
- *  The CalChart sheet object is a collection of CC_point locations, the number of beats and the different marcher's continuity.
+ *  The CalChart sheet object is a collection of CC_point locations, the number of beats and the different marcher's
+ * continuity.
  *
  */
 
@@ -60,6 +61,7 @@ public:
     // intentionally a reference to Reader.
     Sheet(Version_3_3_and_earlier, size_t numPoints, Reader&, ParseErrorHandlers const* correction = nullptr);
     Sheet(size_t numPoints, Reader, ParseErrorHandlers const* correction = nullptr);
+    Sheet(nlohmann::json const& json);
 
 private:
     [[nodiscard]] auto SerializeAllPoints() const -> std::vector<std::byte>;
@@ -73,12 +75,10 @@ private:
 
 public:
     [[nodiscard]] auto SerializeSheet() const -> std::vector<std::byte>;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json;
 
     // continuity Functions
-    [[nodiscard]] auto GetContinuityBySymbol(SYMBOL_TYPE i) const
-    {
-        return mAnimationContinuity.at(i);
-    }
+    [[nodiscard]] auto GetContinuityBySymbol(SYMBOL_TYPE i) const { return mAnimationContinuity.at(i); }
     [[nodiscard]] auto GetContinuities() const
     {
         return k_symbols | std::views::transform([this](auto symbol) { return GetContinuityBySymbol(symbol); });
@@ -118,7 +118,8 @@ public:
     [[nodiscard]] auto GetNumberPoints() const { return mPoints.size(); }
     [[nodiscard]] auto GetSymbols() const -> std::vector<SYMBOL_TYPE>;
     void SetPoints(std::vector<Point> const& points);
-    [[nodiscard]] auto FindMarcher(Coord where, Coord::units searchBound, unsigned ref = 0) const -> std::optional<MarcherIndex>;
+    [[nodiscard]] auto FindMarcher(Coord where, Coord::units searchBound, unsigned ref = 0) const
+        -> std::optional<MarcherIndex>;
     [[nodiscard]] auto RemapPoints(std::vector<MarcherIndex> const& table) const -> std::vector<Point>;
     [[nodiscard]] auto GetMarcherPosition(MarcherIndex i, unsigned ref = 0) const -> Coord;
     [[nodiscard]] auto GetAllMarcherPositions(unsigned ref = 0) const -> std::vector<Coord>;
@@ -128,7 +129,8 @@ public:
     void SetMarcherFlip(MarcherIndex i, bool val);
     void SetMarcherLabelVisibility(MarcherIndex i, bool isVisible);
     [[nodiscard]] auto MakeSelectPointsBySymbol(SYMBOL_TYPE i) const -> SelectionList;
-    [[nodiscard]] auto NewNumPointsPositions(int num, int columns, Coord new_march_position) const -> std::vector<Point>;
+    [[nodiscard]] auto NewNumPointsPositions(int num, int columns, Coord new_march_position) const
+        -> std::vector<Point>;
     void DeletePoints(SelectionList const& sl);
 
     // Curves
@@ -137,8 +139,10 @@ public:
     void ReplaceCurve(Curve const& curve, size_t index);
     [[nodiscard]] auto GetCurve(size_t index) const -> Curve;
     [[nodiscard]] auto GetNumberCurves() const -> size_t;
-    [[nodiscard]] auto FindCurveControlPoint(Coord where, Coord::units searchBound) const -> std::optional<std::tuple<size_t, size_t>>;
-    [[nodiscard]] auto FindCurve(Coord where, Coord::units searchBound) const -> std::optional<std::tuple<size_t, size_t, double>>;
+    [[nodiscard]] auto FindCurveControlPoint(Coord where, Coord::units searchBound) const
+        -> std::optional<std::tuple<size_t, size_t>>;
+    [[nodiscard]] auto FindCurve(Coord where, Coord::units searchBound) const
+        -> std::optional<std::tuple<size_t, size_t, double>>;
     // Curve assignemnts: the idea is some marchers are assigned to curves.  The sheet will automatically determine
     // where they should be.  You can get and set all the curve assignements.
     // But if you want to assign a group of marchers to a curve, you ask first what would be the new assignments
@@ -146,28 +150,25 @@ public:
     // and then you would set the sheet with that result.
     [[nodiscard]] auto GetCurveAssignments() const -> std::vector<std::vector<MarcherIndex>>;
     void SetCurveAssignment(std::vector<std::vector<MarcherIndex>> curveAssignments);
-    [[nodiscard]] auto GetCurveAssignmentsWithNewAssignments(size_t whichCurve, std::vector<MarcherIndex> whichMarchers) const -> std::vector<std::vector<MarcherIndex>>;
+    [[nodiscard]] auto GetCurveAssignmentsWithNewAssignments(
+        size_t whichCurve, std::vector<MarcherIndex> whichMarchers) const -> std::vector<std::vector<MarcherIndex>>;
 
     // titles
     [[nodiscard]] auto GetName() const -> std::string;
     void SetName(std::string const& newname);
 
     // image
-    [[nodiscard]] auto GetBackgroundImages() const -> std::vector<ImageInfo>
-    {
-        return mBackgroundImages;
-    }
-    [[nodiscard]] auto GetBackgroundImage(size_t which) const -> ImageInfo
-    {
-        return mBackgroundImages.at(which);
-    }
+    [[nodiscard]] auto GetBackgroundImages() const -> std::vector<ImageInfo> { return mBackgroundImages; }
+    [[nodiscard]] auto GetBackgroundImage(size_t which) const -> ImageInfo { return mBackgroundImages.at(which); }
     [[nodiscard]] auto GetNumberBackgroundImages() const { return mBackgroundImages.size(); }
     [[nodiscard]] auto GetBackgroundImageInfo(size_t which) const -> std::array<int, 4>
     {
-        return { mBackgroundImages.at(which).left,
+        return {
+            mBackgroundImages.at(which).left,
             mBackgroundImages.at(which).top,
             mBackgroundImages.at(which).scaledWidth,
-            mBackgroundImages.at(which).scaledHeight };
+            mBackgroundImages.at(which).scaledHeight,
+        };
     }
     void AddBackgroundImage(ImageInfo const& image, size_t where);
     void RemoveBackgroundImage(size_t which);
@@ -186,21 +187,25 @@ public:
      * @return A JSON which could represent this sheet in
      * a '.viewer' file.
      */
-    [[nodiscard]] auto toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, std::map<std::string, std::vector<nlohmann::json>> const& movements) const -> nlohmann::json;
+    [[nodiscard]] auto toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels,
+        std::map<std::string, std::vector<nlohmann::json>> const& movements) const -> nlohmann::json;
 
     // Draw Commands
     // the sheet can generate all the elements related to sheet specific draw aspects
-    [[nodiscard]] auto GenerateGhostElements(CalChart::Configuration const& config, SelectionList const& selected, std::vector<std::string> const& marcherLabels) const -> std::vector<CalChart::Draw::DrawCommand>;
-    [[nodiscard]] auto GenerateSheetElements(CalChart::Configuration const& config, SelectionList const& selected, std::vector<std::string> const& marcherLabels, int referencePoint) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateGhostElements(CalChart::Configuration const& config, SelectionList const& selected,
+        std::vector<std::string> const& marcherLabels) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateSheetElements(CalChart::Configuration const& config, SelectionList const& selected,
+        std::vector<std::string> const& marcherLabels, int referencePoint) const
+        -> std::vector<CalChart::Draw::DrawCommand>;
 
 private:
-    std::array<Continuity, MAX_NUM_SYMBOLS> mAnimationContinuity;
-    PrintContinuity mPrintableContinuity;
+    std::string mName;
     Beats mBeats{};
     Tempo mTempo = 120;
-    Fermatas mFermata; // Map of beat to fermata hold time in Seconds
     std::vector<Point> mPoints;
-    std::string mName;
+    std::array<Continuity, MAX_NUM_SYMBOLS> mAnimationContinuity;
+    PrintContinuity mPrintableContinuity;
+    Fermatas mFermatas; // Map of beat to fermata hold time in Seconds
     std::vector<ImageInfo> mBackgroundImages;
     std::vector<std::pair<Curve, std::vector<MarcherIndex>>> mCurves; // curves and the points assigned to them.
 

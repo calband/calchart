@@ -21,6 +21,7 @@
 */
 
 #include "CalChartText.h"
+#include "CalChartFileFormat.h"
 
 #include <sstream>
 
@@ -158,6 +159,35 @@ PrintContinuity::PrintContinuity(std::string const& number, std::string const& d
     std::string line;
     while (std::getline(reader, line, '\n')) {
         mPrintChunks.push_back(ParseTextLine(line));
+    }
+}
+
+auto PrintContinuity::toJSON() const -> nlohmann::json
+{
+    return nlohmann::json{
+        { "number", mNumber },
+        { "data", mOriginalLine }
+    };
+}
+
+auto PrintContinuityFromJSON(nlohmann::json const& json) -> PrintContinuity
+{
+    try {
+        if (!json.is_object()) {
+            throw CC_FileException("bad PrintContinuity JSON: root must be an object");
+        }
+
+        if (!json.contains("number") || !json.at("number").is_string()) {
+            throw CC_FileException("bad PrintContinuity JSON: missing or invalid 'number' field");
+        }
+
+        if (!json.contains("data") || !json.at("data").is_string()) {
+            throw CC_FileException("bad PrintContinuity JSON: missing or invalid 'data' field");
+        }
+
+        return PrintContinuity(json.at("number").get<std::string>(), json.at("data").get<std::string>());
+    } catch (nlohmann::json::exception const& e) {
+        throw CC_FileException(std::string("bad PrintContinuity JSON: ") + e.what());
     }
 }
 }

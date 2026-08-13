@@ -35,6 +35,8 @@ Options:
     --dump_print_continuity  Parse option to dump the print continuity.
     --animate_show          Parse option to print the animation.
     --json                  Parse option to dump the JSON for the viewer.
+    --showjson              Parse option to dump the Show file format JSON.
+    --jsonwidth=<width>     Indention for JSON dumps [default: 4].
     --dump_beats            Parse option to dump downbeat times.
     --profile               Print profiling data.
     -h, --help              Show this screen.

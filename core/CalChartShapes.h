@@ -31,6 +31,7 @@
 
 #include "CalChartCoord.h"
 #include "CalChartDrawCommand.h"
+#include <nlohmann/json.hpp>
 #include <numeric>
 #include <optional>
 #include <vector>
@@ -57,8 +58,7 @@ public:
     // Different shapes have different "snap" policies.  The derived classes determine
     // if they will call snap by overloading the useSnap() function and then will
     // call the provided snapper function.
-    template <typename Function>
-    void OnMove(Coord p, Function snapper) { OnMoveImpl(useSnap() ? snapper(p) : p); }
+    template <typename Function> void OnMove(Coord p, Function snapper) { OnMoveImpl(useSnap() ? snapper(p) : p); }
 
     [[nodiscard]] virtual auto GetCC_DrawCommand() const -> std::vector<Draw::DrawCommand> = 0;
     [[nodiscard]] virtual auto GetPolygon() const -> RawPolygon_t { return {}; }
@@ -267,10 +267,7 @@ protected:
     void Drag(Coord p);
 
 public:
-    [[nodiscard]] auto FirstPoint() const -> Coord const*
-    {
-        return pntlist.empty() ? nullptr : &pntlist.front();
-    }
+    [[nodiscard]] auto FirstPoint() const -> Coord const* { return pntlist.empty() ? nullptr : &pntlist.front(); }
     [[nodiscard]] auto GetPointsOnLine(int numpnts) const -> std::vector<Coord>;
     [[nodiscard]] auto GetPolygon() const -> RawPolygon_t override { return { pntlist }; }
 
@@ -311,15 +308,8 @@ inline auto Inside(Coord p, RawPolygon_t const& polygon) -> bool
     }
     // use inner product to do adjacent comparisons.
     return std::inner_product(
-        polygon.begin(), polygon.end() - 1,
-        polygon.begin() + 1,
-        CrossesLine(polygon.back(), polygon.front(), p),
-        [](auto acc, auto next) {
-            return next ^ acc;
-        },
-        [p](auto a, auto b) {
-            return CrossesLine(a, b, p);
-        });
+        polygon.begin(), polygon.end() - 1, polygon.begin() + 1, CrossesLine(polygon.back(), polygon.front(), p),
+        [](auto acc, auto next) { return next ^ acc; }, [p](auto a, auto b) { return CrossesLine(a, b, p); });
 }
 
 inline auto GetDistance(RawPolygon_t const& polygon) -> double
@@ -327,9 +317,8 @@ inline auto GetDistance(RawPolygon_t const& polygon) -> double
     if (polygon.empty()) {
         return {};
     }
-    return std::inner_product(polygon.begin(), polygon.end() - 1, polygon.begin() + 1, 0.0, std::plus(), [](auto a, auto b) {
-        return b.Distance(a);
-    });
+    return std::inner_product(polygon.begin(), polygon.end() - 1, polygon.begin() + 1, 0.0, std::plus(),
+        [](auto a, auto b) { return b.Distance(a); });
 }
 
 // A curve is described by Control Points, which are appended.
@@ -359,16 +348,17 @@ public:
 
     [[nodiscard]] auto GetPointsOnLine(int numpnts) const -> std::vector<Coord>;
     [[nodiscard]] auto GetControlPoints() const -> std::vector<Coord> { return mControlPoints; }
-    [[nodiscard]] auto LowerControlPointOnLine(Coord point, Coord::units searchBound) const -> std::optional<std::tuple<size_t, double>>;
+    [[nodiscard]] auto LowerControlPointOnLine(Coord point, Coord::units searchBound) const
+        -> std::optional<std::tuple<size_t, double>>;
 
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte>;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json;
 
     void Regenerate();
 
     [[nodiscard]] auto operator==(Curve const& other) const -> bool
     {
-        return mControlPoints == other.mControlPoints
-            && mMovingPoint == other.mMovingPoint;
+        return mControlPoints == other.mControlPoints && mMovingPoint == other.mMovingPoint;
     }
 
 private:
@@ -385,5 +375,6 @@ private:
 };
 
 auto CreateCurve(Reader) -> std::pair<Curve, Reader>;
+auto CreateCurve(nlohmann::json const& json) -> Curve;
 
 }

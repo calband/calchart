@@ -339,7 +339,7 @@ public:
     [[nodiscard]] auto GenerateGhostPointsDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>;
     [[nodiscard]] auto GenerateCurrentSheetPointsDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>;
 
-    [[nodiscard]] auto GeneratePhatomPointsDrawCommands(CalChart::MarcherToPosition const& positions) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GeneratePhantomPointsDrawCommands(CalChart::MarcherToPosition const& positions) const -> std::vector<CalChart::Draw::DrawCommand>;
     [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands() const { return mShow->GenerateFieldWithMarchersDrawCommands(mConfig); }
 
     [[nodiscard]] auto AlreadyHasPrintContinuity() const { return mShow->AlreadyHasPrintContinuity(); }

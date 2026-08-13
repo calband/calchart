@@ -118,9 +118,9 @@ void CalChartView::OnDraw(wxDC* dc)
     wxCalChart::Draw::DrawCommandList(*dc, mShow->GenerateCurrentSheetPointsDrawCommands());
 }
 
-auto CalChartView::GeneratePhatomPointsDrawCommands(CalChart::MarcherToPosition const& positions) const -> std::vector<CalChart::Draw::DrawCommand>
+auto CalChartView::GeneratePhantomPointsDrawCommands(CalChart::MarcherToPosition const& positions) const -> std::vector<CalChart::Draw::DrawCommand>
 {
-    return mShow->GeneratePhatomPointsDrawCommands(positions);
+    return mShow->GeneratePhantomPointsDrawCommands(positions);
 }
 
 void CalChartView::OnDrawBackground(wxDC& dc)

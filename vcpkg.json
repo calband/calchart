@@ -21,6 +21,7 @@
             "platform": "windows"
         },
         "nlohmann-json",
+        "json-schema-validator",
         "cpp-httplib",
         {
             "name": "catch2",
@@ -28,6 +29,7 @@
         },
         "curl",
         "libwebp",
+        "cppcodec",
         "zlib"
     ],
     "builtin-baseline": "6d7bf7ef2193e2d1c5798a5ff8811d533104c861"

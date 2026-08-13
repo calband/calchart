@@ -25,8 +25,11 @@
 #include "CalChartSheet.h"
 #include "CalChartConfiguration.h"
 #include "CalChartFileFormat.h"
+#include "CalChartImage.h"
 #include "CalChartRanges.h"
+#include "CalChartShapes.h"
 #include "CalChartShow.h"
+#include "CalChartText.h"
 #include "viewer_translate.h"
 
 #include <algorithm>
@@ -36,56 +39,301 @@
 #include <map>
 #include <sstream>
 
-namespace CalChart {
+namespace {
+
+using namespace CalChart;
 
 std::array<std::string, MAX_NUM_SYMBOLS> const contnames = {
-    "Plain", "Sol", "Bksl", "Sl", "X", "Solbksl", "Solsl", "Solx"
+    "Plain",
+    "Sol",
+    "Bksl",
+    "Sl",
+    "X",
+    "Solbksl",
+    "Solsl",
+    "Solx",
 };
 
 std::array<std::string, MAX_NUM_SYMBOLS> const long_contnames = {
-    "Plain", "Solid", "Backslash", "Slash", "Crossed", "Solid Backslash", "Solid Slash", "Solid Crossed"
+    "Plain",
+    "Solid",
+    "Backslash",
+    "Slash",
+    "Crossed",
+    "Solid Backslash",
+    "Solid Slash",
+    "Solid Crossed",
 };
 
-Sheet::Sheet(size_t numPoints)
-    : mBeats(1)
-    , mPoints(numPoints)
+auto are_equal_helper(std::string const& a, std::string const& b) -> bool
 {
+    auto p = std::mismatch(
+        a.begin(), a.end(), b.begin(), [](char c1, char c2) { return std::tolower(c1) == std::tolower(c2); });
+    return (p.first == a.end() && p.second == b.end());
 }
 
-Sheet::Sheet(size_t numPoints, std::string name)
-    : mBeats(1)
-    , mPoints(numPoints)
-    , mName(std::move(name))
+auto are_equal(std::string const& a, std::string const& b) -> bool
 {
+    return a.size() <= b.size() ? are_equal_helper(a, b) : are_equal_helper(b, a);
 }
 
-namespace {
-    auto are_equal_helper(std::string const& a, std::string const& b) -> bool
-    {
-        auto p = std::mismatch(a.begin(), a.end(), b.begin(), [](char c1, char c2) {
-            return std::tolower(c1) == std::tolower(c2);
-        });
-        return (p.first == a.end() && p.second == b.end());
+auto ToJSON(std::vector<Point> const& points) -> nlohmann::json
+{
+    auto pointsJson = nlohmann::json::array();
+    for (auto const& point : points) {
+        pointsJson.push_back(point.toJSON());
     }
-
-    auto are_equal(std::string const& a, std::string const& b) -> bool
-    {
-        return a.size() <= b.size() ? are_equal_helper(a, b) : are_equal_helper(b, a);
-    }
-
+    return pointsJson;
 }
 
-auto GetSymbolForName(std::string const& name) -> SYMBOL_TYPE
+auto ToJSON(std::array<Continuity, MAX_NUM_SYMBOLS> const& continuities,
+    std::function<bool(SYMBOL_TYPE)> const& isInUse) -> nlohmann::json
 {
-    for (auto [index, symbolName] : CalChart::Ranges::enumerate_view(contnames)) {
-        if (are_equal(name, symbolName)) {
-            return static_cast<SYMBOL_TYPE>(index);
+    auto continuitiesJson = nlohmann::json::object();
+    for (auto const& symbol : k_symbols) {
+        if (isInUse(symbol)) {
+            auto symbolName = GetNameForSymbol(symbol);
+            continuitiesJson[symbolName] = continuities.at(symbol).toJSON();
         }
     }
-    // what do we do here?  give larger one for now...
-    // This should probably throw
-    return MAX_NUM_SYMBOLS;
+    return continuitiesJson;
 }
+
+auto ToJSON(Fermatas const& fermatas) -> nlohmann::json
+{
+    auto fermatasJson = nlohmann::json::array();
+    for (auto const& [beat, seconds] : fermatas) {
+        auto fermataJson = nlohmann::json{
+            { "beat", beat },
+            { "seconds", seconds.count() },
+        };
+        fermatasJson.push_back(fermataJson);
+    }
+    return fermatasJson;
+}
+
+auto ToJSON(std::vector<ImageInfo> const& images) -> nlohmann::json
+{
+    auto imagesJson = nlohmann::json::array();
+    for (auto const& image : images) {
+        imagesJson.push_back(ImageInfoToJSON(image));
+    }
+    return imagesJson;
+}
+
+auto ToJSON(std::vector<std::pair<Curve, std::vector<MarcherIndex>>> const& curves) -> nlohmann::json
+{
+    auto curvesJson = nlohmann::json::array();
+    for (auto const& [curve, marchers] : curves) {
+        auto curveJson = nlohmann::json{
+            { "curve", curve.toJSON() },
+            { "marchers", marchers },
+        };
+        curvesJson.push_back(curveJson);
+    }
+    return curvesJson;
+}
+
+auto PointsFromJSON(nlohmann::json const& json) -> std::vector<Point>
+{
+    if (!json.contains("points") || !json.at("points").is_array()) {
+        throw CC_FileException("bad Sheet JSON: missing or invalid 'points' field");
+    }
+    auto points_array = json.at("points");
+    if (!points_array.is_array()) {
+        throw CC_FileException("bad Sheet JSON: points must be an array");
+    }
+    auto points = std::vector<Point>{};
+    for (auto const& pointJson : points_array) {
+        points.push_back(Point{ pointJson });
+    }
+    return points;
+}
+
+auto ContinuitiesFromJSON(nlohmann::json const& json) -> std::vector<std::pair<SYMBOL_TYPE, Continuity>>
+{
+    if (!json.is_object()) {
+        throw CalChart::CC_FileException("bad Sheet JSON: continuities must be an object");
+    }
+    auto continuities = std::vector<std::pair<CalChart::SYMBOL_TYPE, CalChart::Continuity>>{};
+    for (auto const& [symbolName, continuityJson] : json.items()) {
+        auto symbol = GetSymbolForName(symbolName);
+        if (symbol >= CalChart::MAX_NUM_SYMBOLS) {
+            throw CalChart::CC_FileException("bad Sheet JSON: invalid symbol name '" + symbolName + "'");
+        }
+        continuities.emplace_back(symbol, CalChart::Continuity{ continuityJson });
+    }
+    return continuities;
+}
+
+auto BackgroundImagesFromJSON(nlohmann::json const& json) -> std::vector<CalChart::ImageInfo>
+{
+    if (!json.is_array()) {
+        throw CalChart::CC_FileException("bad Sheet JSON: background_images must be an array");
+    }
+    auto images = std::vector<CalChart::ImageInfo>{};
+    for (auto const& imageJson : json) {
+        images.push_back(CalChart::ImageInfoFromJSON(imageJson));
+    }
+    return images;
+}
+
+auto FermatasFromJSON(nlohmann::json const& json) -> Fermatas
+{
+    if (!json.is_array()) {
+        throw CalChart::CC_FileException("bad Sheet JSON: fermatas must be an array");
+    }
+    auto fermatas = std::vector<std::pair<CalChart::Beats, CalChart::Seconds>>{};
+    for (auto const& fermataJson : json) {
+        if (!fermataJson.contains("beat") || !fermataJson.contains("seconds")) {
+            throw CalChart::CC_FileException("bad Sheet JSON: fermata entry must have 'beat' and 'seconds' fields");
+        }
+        auto beat = fermataJson.at("beat").get<CalChart::Beats>();
+        auto seconds = CalChart::Seconds{ fermataJson.at("seconds").get<float>() };
+        fermatas.emplace_back(beat, seconds);
+    }
+    auto result = Fermatas{};
+    for (auto const& [beat, seconds] : fermatas) {
+        result[beat] = seconds;
+    }
+    return result;
+}
+
+auto CurvesWithAssignmentsFromJSON(nlohmann::json const& json)
+    -> std::vector<std::pair<CalChart::Curve, std::vector<CalChart::MarcherIndex>>>
+{
+    if (!json.is_array()) {
+        throw CalChart::CC_FileException("bad Sheet JSON: curves must be an array");
+    }
+    auto curvesWithAssignments = std::vector<std::pair<CalChart::Curve, std::vector<CalChart::MarcherIndex>>>{};
+    for (auto const& curveJson : json) {
+        if (!curveJson.contains("curve") || !curveJson.contains("marchers")) {
+            throw CalChart::CC_FileException("bad Sheet JSON: curve entry must have 'curve' and 'marchers' fields");
+        }
+        auto curve = CalChart::CreateCurve(curveJson.at("curve"));
+        if (!curveJson.at("marchers").is_array()) {
+            throw CalChart::CC_FileException("bad Sheet JSON: 'marchers' must be an array");
+        }
+        auto marchers = curveJson.at("marchers").get<std::vector<CalChart::MarcherIndex>>();
+        curvesWithAssignments.emplace_back(curve, marchers);
+    }
+    return curvesWithAssignments;
+}
+
+auto BeatsFromJSON(nlohmann::json const& json) -> Beats
+{
+    if (!json.contains("beats")) {
+        throw CalChart::CC_FileException("bad Sheet JSON: 'beats' must be an object");
+    }
+    if (!json.at("beats").is_number_unsigned()) {
+        throw CalChart::CC_FileException("bad Sheet JSON: 'beats' must be an unsigned number");
+    }
+    return json.at("beats").get<Beats>();
+}
+
+auto TempoFromJSON(nlohmann::json const& json) -> Tempo
+{
+    if (!json.contains("tempo")) {
+        throw CalChart::CC_FileException("bad Sheet JSON: 'tempo' must be an object");
+    }
+    if (!json.at("tempo").is_number_unsigned()) {
+        throw CalChart::CC_FileException("bad Sheet JSON: 'tempo' must be an unsigned number");
+    }
+    return json.at("tempo").get<Tempo>();
+}
+
+auto OptionalContinuitiesFromJSON(nlohmann::json const& json)
+    -> std::optional<std::vector<std::pair<SYMBOL_TYPE, CalChart::Continuity>>>
+{
+    if (!json.contains("continuities")) {
+        return std::nullopt;
+    }
+    if (!json.at("continuities").is_object()) {
+        throw CalChart::CC_FileException("bad Sheet JSON: 'continuities' must be an object");
+    }
+    return ContinuitiesFromJSON(json.at("continuities"));
+}
+
+auto OptionalPrintContinuityFromJSON(nlohmann::json const& json) -> std::optional<CalChart::PrintContinuity>
+{
+    if (!json.contains("print_continuity")) {
+        return std::nullopt;
+    }
+    return PrintContinuityFromJSON(json.at("print_continuity"));
+}
+
+auto OptionalFermatasFromJSON(nlohmann::json const& json) -> std::optional<Fermatas>
+{
+    if (!json.contains("fermatas")) {
+        return std::nullopt;
+    }
+    if (!json.at("fermatas").is_array()) {
+        throw CalChart::CC_FileException("bad Sheet JSON: 'fermatas' must be an array");
+    }
+    return FermatasFromJSON(json.at("fermatas"));
+}
+
+auto OptionalBackgroundImagesFromJSON(nlohmann::json const& json) -> std::optional<std::vector<ImageInfo>>
+{
+    if (!json.contains("background_images")) {
+        return std::nullopt;
+    }
+    if (!json.at("background_images").is_array()) {
+        throw CC_FileException("bad Sheet JSON: 'background_images' must be an array");
+    }
+    return BackgroundImagesFromJSON(json.at("background_images"));
+}
+
+auto OptionalCurvesWithAssignmentsFromJSON(nlohmann::json const& json)
+    -> std::optional<std::vector<std::pair<Curve, std::vector<MarcherIndex>>>>
+{
+    if (!json.contains("curves_with_assignments")) {
+        return std::nullopt;
+    }
+    if (!json.at("curves_with_assignments").is_array()) {
+        throw CC_FileException("bad Sheet JSON: 'curves_with_assignments' must be an array");
+    }
+    return CurvesWithAssignmentsFromJSON(json.at("curves_with_assignments"));
+}
+
+// -=-=-=-=-=- LEGACY CODE -=-=-=-=-=-
+// Recommend that you don't touch this unless you know what you are doing.
+void CheckInconsistancy(SYMBOL_TYPE symbol, uint8_t cont_index, std::map<SYMBOL_TYPE, uint8_t>& continity_for_symbol,
+    std::map<uint8_t, SYMBOL_TYPE>& symbol_for_continuity, std::string const& sheet_name, uint32_t pointNum)
+{
+    // need to check for symbol inconsistency here.
+    if (continity_for_symbol.count(symbol) == 0) {
+        // we haven't seen this symbol->cont_index yet
+        continity_for_symbol[symbol] = cont_index;
+    } else {
+        if (continity_for_symbol[symbol] != cont_index) {
+            std::stringstream buf;
+            buf << "Error, symbol inconsistency on sheet \"" << sheet_name << "\".\n";
+            buf << "Symbol " << GetNameForSymbol(symbol) << " previously used continuity "
+                << (uint32_t)continity_for_symbol[symbol] << " but point " << pointNum << " on uses continuity "
+                << (uint32_t)cont_index << ", which is used by symbol "
+                << GetNameForSymbol(symbol_for_continuity[cont_index]) << ".\n";
+            buf << "Try opening this file on CalChart v3.3.5 or earlier.\n";
+            throw CC_FileException(buf.str());
+        }
+    }
+    if (symbol_for_continuity.count(cont_index) == 0) {
+        symbol_for_continuity[cont_index] = symbol;
+    } else {
+        if (symbol_for_continuity[cont_index] != symbol) {
+            std::stringstream buf;
+            buf << "Error, symbol inconsistency on sheet \"" << sheet_name << "\".\n";
+            buf << "Continuity index " << (uint32_t)cont_index << " previously used symbol "
+                << GetNameForSymbol(symbol_for_continuity[cont_index]) << "  but point " << pointNum
+                << " on uses symbol " << GetNameForSymbol(symbol) << ".\n";
+            buf << "Try opening this file on CalChart v3.3.5 or earlier.\n";
+            throw CC_FileException(buf.str());
+        }
+    }
+}
+} // namespace
+
+namespace CalChart {
 
 auto GetNameForSymbol(SYMBOL_TYPE which) -> std::string
 {
@@ -103,52 +351,32 @@ auto GetLongNameForSymbol(SYMBOL_TYPE which) -> std::string
     return long_contnames[which];
 }
 
-// -=-=-=-=-=- LEGACY CODE -=-=-=-=-=-
-// Recommend that you don't touch this unless you know what you are doing.
-namespace {
-    void
-    CheckInconsistancy(SYMBOL_TYPE symbol, uint8_t cont_index,
-        std::map<SYMBOL_TYPE, uint8_t>& continity_for_symbol,
-        std::map<uint8_t, SYMBOL_TYPE>& symbol_for_continuity,
-        std::string const& sheet_name, uint32_t pointNum)
-    {
-        // need to check for symbol inconsistency here.
-        if (continity_for_symbol.count(symbol) == 0) {
-            // we haven't seen this symbol->cont_index yet
-            continity_for_symbol[symbol] = cont_index;
-        } else {
-            if (continity_for_symbol[symbol] != cont_index) {
-                std::stringstream buf;
-                buf << "Error, symbol inconsistency on sheet \"" << sheet_name << "\".\n";
-                buf << "Symbol " << GetNameForSymbol(symbol)
-                    << " previously used continuity "
-                    << (uint32_t)continity_for_symbol[symbol] << " but point " << pointNum
-                    << " on uses continuity " << (uint32_t)cont_index
-                    << ", which is used by symbol "
-                    << GetNameForSymbol(symbol_for_continuity[cont_index]) << ".\n";
-                buf << "Try opening this file on CalChart v3.3.5 or earlier.\n";
-                throw CC_FileException(buf.str());
-            }
-        }
-        if (symbol_for_continuity.count(cont_index) == 0) {
-            symbol_for_continuity[cont_index] = symbol;
-        } else {
-            if (symbol_for_continuity[cont_index] != symbol) {
-                std::stringstream buf;
-                buf << "Error, symbol inconsistency on sheet \"" << sheet_name << "\".\n";
-                buf << "Continuity index " << (uint32_t)cont_index
-                    << " previously used symbol "
-                    << GetNameForSymbol(symbol_for_continuity[cont_index])
-                    << "  but point " << pointNum << " on uses symbol "
-                    << GetNameForSymbol(symbol) << ".\n";
-                buf << "Try opening this file on CalChart v3.3.5 or earlier.\n";
-                throw CC_FileException(buf.str());
-            }
+auto GetSymbolForName(std::string const& name) -> SYMBOL_TYPE
+{
+    for (auto [index, symbolName] : Ranges::enumerate_view(contnames)) {
+        if (are_equal(name, symbolName)) {
+            return static_cast<SYMBOL_TYPE>(index);
         }
     }
+    // what do we do here?  give larger one for now...
+    // This should probably throw
+    return MAX_NUM_SYMBOLS;
 }
 
-// Constructor for shows 3.3 and ealier.
+Sheet::Sheet(size_t numPoints)
+    : mBeats(1)
+    , mPoints(numPoints)
+{
+}
+
+Sheet::Sheet(size_t numPoints, std::string name)
+    : mName(std::move(name))
+    , mBeats(1)
+    , mPoints(numPoints)
+{
+}
+
+// Constructor for shows 3.3 and earlier.
 // intentionally a reference to Reader.
 Sheet::Sheet(Version_3_3_and_earlier, size_t numPoints, Reader& reader, ParseErrorHandlers const* correction)
     : mPoints(numPoints)
@@ -170,7 +398,7 @@ Sheet::Sheet(Version_3_3_and_earlier, size_t numPoints, Reader& reader, ParseErr
         throw CC_FileException("bad POS chunk");
     }
     {
-        auto reader = CalChart::Reader({ data.data(), data.size() });
+        auto reader = Reader({ data.data(), data.size() });
         for (unsigned i = 0; i < mPoints.size(); ++i) {
             auto x = reader.Get<int16_t>();
             auto y = reader.Get<int16_t>();
@@ -221,8 +449,7 @@ Sheet::Sheet(Version_3_3_and_earlier, size_t numPoints, Reader& reader, ParseErr
         }
         uint8_t* d = &data[0];
         for (unsigned i = 0; i < mPoints.size(); i++) {
-            CheckInconsistancy(GetSymbol(i), *(d++), continity_for_symbol,
-                symbol_for_continuity, mName, i);
+            CheckInconsistancy(GetSymbol(i), *(d++), continity_for_symbol, symbol_for_continuity, mName, i);
         }
         name = reader.Get<uint32_t>();
     }
@@ -231,8 +458,7 @@ Sheet::Sheet(Version_3_3_and_earlier, size_t numPoints, Reader& reader, ParseErr
     if (!has_type) {
         // when a point doesn't have a cont_index, it is assumed to be 0
         for (unsigned i = 0; i < mPoints.size(); i++) {
-            CheckInconsistancy(GetSymbol(i), 0, continity_for_symbol,
-                symbol_for_continuity, mName, i);
+            CheckInconsistancy(GetSymbol(i), 0, continity_for_symbol, symbol_for_continuity, mName, i);
         }
     }
     // Point labels (left or right)
@@ -280,8 +506,7 @@ Sheet::Sheet(Version_3_3_and_earlier, size_t numPoints, Reader& reader, ParseErr
             if (continity_for_symbol[symbol_index] != (*d)) {
                 std::stringstream buf;
                 buf << "Error, continuity inconsistency on sheet " << mName << "\n";
-                buf << "Continuity index " << (uint32_t)(*d) << " is symbol "
-                    << GetNameForSymbol(symbol_index)
+                buf << "Continuity index " << (uint32_t)(*d) << " is symbol " << GetNameForSymbol(symbol_index)
                     << " but points using that symbol refer to continuity index "
                     << (uint32_t)continity_for_symbol[symbol_index] << "\n";
                 throw CC_FileException(buf.str());
@@ -324,7 +549,7 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
         for (auto i = 0u; i < count; ++i) {
             auto beat = reader.Get<uint32_t>();
             auto secondsValue = reader.Get<float>();
-            sheet->mFermata[beat] = Seconds{ secondsValue };
+            sheet->mFermatas[beat] = Seconds{ secondsValue };
         }
     };
     auto parse_INGL_PNTS = [](Sheet* sheet, Reader reader) {
@@ -353,10 +578,9 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
         sheet->mAnimationContinuity.at(symbol_index) = Continuity{ text, correction };
     };
     auto parse_INGL_CONT = [parse_INGL_ECNT](Sheet* sheet, Reader reader) {
-        const std::map<uint32_t, std::function<void(Sheet*, Reader)>>
-            parser = {
-                { INGL_ECNT, parse_INGL_ECNT },
-            };
+        const std::map<uint32_t, std::function<void(Sheet*, Reader)>> parser = {
+            { INGL_ECNT, parse_INGL_ECNT },
+        };
 
         auto table = reader.ParseOutLabels();
         for (auto& i : table) {
@@ -378,11 +602,9 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
         sheet->mAnimationContinuity.at(symbol_index) = Continuity{ reader };
     };
     auto parse_INGL_VCNT = [parse_INGL_EVCT](Sheet* sheet, Reader reader) {
-        std::map<uint32_t, std::function<void(Sheet*, Reader)>> const
-            parser
-            = {
-                  { INGL_EVCT, parse_INGL_EVCT },
-              };
+        std::map<uint32_t, std::function<void(Sheet*, Reader)>> const parser = {
+            { INGL_EVCT, parse_INGL_EVCT },
+        };
 
         auto table = reader.ParseOutLabels();
         for (auto& i : table) {
@@ -432,21 +654,19 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
         }
     };
 
-    std::map<uint32_t, std::function<void(Sheet*, Reader)>> const
-        parser
-        = {
-              { INGL_NAME, parse_INGL_NAME },
-              { INGL_DURA, parse_INGL_DURA },
-              { INGL_TMPO, parse_INGL_TMPO },
-              { INGL_FERM, parse_INGL_FERM },
-              { INGL_PNTS, parse_INGL_PNTS },
-              { INGL_CONT, parse_INGL_CONT },
-              { INGL_VCNT, parse_INGL_VCNT },
-              { INGL_PCNT, parse_INGL_PCNT },
-              { INGL_BACK, parse_INGL_BACK },
-              { INGL_CURV, parse_INGL_CURV },
-              { INGL_CASS, parse_INGL_CASS },
-          };
+    std::map<uint32_t, std::function<void(Sheet*, Reader)>> const parser = {
+        { INGL_NAME, parse_INGL_NAME },
+        { INGL_DURA, parse_INGL_DURA },
+        { INGL_TMPO, parse_INGL_TMPO },
+        { INGL_FERM, parse_INGL_FERM },
+        { INGL_PNTS, parse_INGL_PNTS },
+        { INGL_CONT, parse_INGL_CONT },
+        { INGL_VCNT, parse_INGL_VCNT },
+        { INGL_PCNT, parse_INGL_PCNT },
+        { INGL_BACK, parse_INGL_BACK },
+        { INGL_CURV, parse_INGL_CURV },
+        { INGL_CASS, parse_INGL_CASS },
+    };
 
     auto table = reader.ParseOutLabels();
     for (auto& i : table) {
@@ -456,6 +676,39 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
         }
     }
     RepositionCurveMarchers();
+}
+
+Sheet::Sheet(nlohmann::json const& json)
+    : mName{ json.at("name").get<std::string>() }
+    , mBeats{ BeatsFromJSON(json) }
+    , mTempo{ TempoFromJSON(json) }
+    , mPoints{ PointsFromJSON(json) }
+{
+    try {
+        if (auto continuities = OptionalContinuitiesFromJSON(json); continuities) {
+            for (auto const& [symbol, continuity] : *continuities) {
+                mAnimationContinuity.at(symbol) = continuity;
+            }
+        }
+
+        if (auto printCont = OptionalPrintContinuityFromJSON(json); printCont) {
+            mPrintableContinuity = *printCont;
+        }
+
+        if (auto fermatas = OptionalFermatasFromJSON(json); fermatas) {
+            mFermatas = *fermatas;
+        }
+
+        if (auto backgroundImages = OptionalBackgroundImagesFromJSON(json); backgroundImages) {
+            mBackgroundImages = *backgroundImages;
+        }
+
+        if (auto curvesWithAssignments = OptionalCurvesWithAssignmentsFromJSON(json); curvesWithAssignments) {
+            mCurves = *curvesWithAssignments;
+        }
+    } catch (nlohmann::json::exception const& e) {
+        throw CC_FileException(std::string("bad Sheet JSON: ") + e.what());
+    }
 }
 
 auto Sheet::SerializeAllPoints() const -> std::vector<std::byte>
@@ -487,10 +740,8 @@ auto Sheet::SerializeContinuityData() const -> std::vector<std::byte>
 auto Sheet::SerializePrintContinuityData() const -> std::vector<std::byte>
 {
     std::vector<std::byte> result;
-    Parser::AppendAndNullTerminate(
-        result, mPrintableContinuity.GetPrintNumber());
-    Parser::AppendAndNullTerminate(
-        result, mPrintableContinuity.GetOriginalLine());
+    Parser::AppendAndNullTerminate(result, mPrintableContinuity.GetPrintNumber());
+    Parser::AppendAndNullTerminate(result, mPrintableContinuity.GetOriginalLine());
     return result;
 }
 
@@ -498,9 +749,9 @@ auto Sheet::SerializeFermata() const -> std::vector<std::byte>
 {
     // Serialize as: count (uint32_t), then pairs of (beat: uint32_t, Seconds: float)
     std::vector<std::byte> result;
-    Parser::Append(result, static_cast<uint32_t>(mFermata.size()));
-    for (auto const& [beat, secondsValue] : mFermata) {
-        if (secondsValue == CalChart::Seconds::zero())
+    Parser::Append(result, static_cast<uint32_t>(mFermatas.size()));
+    for (auto const& [beat, secondsValue] : mFermatas) {
+        if (secondsValue == Seconds::zero())
             continue;
         Parser::Append(result, static_cast<uint32_t>(beat));
         Parser::Append(result, secondsValue.count());
@@ -548,8 +799,7 @@ auto Sheet::SerializeSheetData() const -> std::vector<std::byte>
     // Write NAME
     std::vector<std::byte> tstring;
     Parser::AppendAndNullTerminate(tstring, GetName());
-    Parser::Append(
-        result, Parser::Construct_block(INGL_NAME, tstring));
+    Parser::Append(result, Parser::Construct_block(INGL_NAME, tstring));
 
     // Write DURATION
     Parser::Append(result, Parser::Construct_block(INGL_DURA, uint32_t{ GetBeats() }));
@@ -557,7 +807,7 @@ auto Sheet::SerializeSheetData() const -> std::vector<std::byte>
     Parser::Append(result, Parser::Construct_block(INGL_TMPO, uint32_t{ GetTempo() }));
 
     // Write FERMATA
-    if (!mFermata.empty()) {
+    if (!mFermatas.empty()) {
         Parser::Append(result, Parser::Construct_block(INGL_FERM, SerializeFermata()));
     }
 
@@ -568,9 +818,7 @@ auto Sheet::SerializeSheetData() const -> std::vector<std::byte>
     Parser::Append(result, Parser::Construct_block(INGL_VCNT, SerializeContinuityData()));
 
     // Write Continuity
-    Parser::Append(result,
-        Parser::Construct_block(
-            INGL_PCNT, SerializePrintContinuityData()));
+    Parser::Append(result, Parser::Construct_block(INGL_PCNT, SerializePrintContinuityData()));
 
     // Write Background
     Parser::Append(result, Parser::Construct_block(INGL_BACK, SerializeBackgroundImageInfo()));
@@ -594,25 +842,56 @@ auto Sheet::SerializeSheet() const -> std::vector<std::byte>
     return result;
 }
 
+auto Sheet::toJSON() const -> nlohmann::json
+{
+    auto json = nlohmann::json{
+        { "name", mName },
+        { "beats", mBeats },
+        { "tempo", mTempo },
+        { "points", ToJSON(mPoints) },
+    };
+    auto continuities = ToJSON(mAnimationContinuity, [this](SYMBOL_TYPE sym) { return ContinuityInUse(sym); });
+    if (!continuities.empty()) {
+        json["continuities"] = continuities;
+    }
+    if (!mPrintableContinuity.GetPrintNumber().empty() && !mPrintableContinuity.GetOriginalLine().empty()) {
+        json["print_continuity"] = mPrintableContinuity.toJSON();
+    }
+    if (!mFermatas.empty()) {
+        json["fermatas"] = ToJSON(mFermatas);
+    }
+    if (!mBackgroundImages.empty()) {
+        json["background_images"] = ToJSON(mBackgroundImages);
+    }
+    if (!mCurves.empty()) {
+        json["curves_with_assignments"] = ToJSON(mCurves);
+    }
+    return json;
+}
+
 // Find point at certain coords
 auto Sheet::FindMarcher(Coord where, Coord::units searchBound, unsigned ref) const -> std::optional<MarcherIndex>
 {
     for (auto i : std::views::iota(0ul, mPoints.size())) {
         Coord c = GetMarcherPosition(i, ref);
-        if (((where.x + searchBound) >= c.x) && ((where.x - searchBound) <= c.x) && ((where.y + searchBound) >= c.y) && ((where.y - searchBound) <= c.y)) {
+        if (((where.x + searchBound) >= c.x) && ((where.x - searchBound) <= c.x) && ((where.y + searchBound) >= c.y)
+            && ((where.y - searchBound) <= c.y)) {
             return i;
         }
     }
     return std::nullopt;
 }
 
-auto Sheet::FindCurveControlPoint(Coord where, Coord::units searchBound) const -> std::optional<std::tuple<size_t, size_t>>
+auto Sheet::FindCurveControlPoint(Coord where, Coord::units searchBound) const
+    -> std::optional<std::tuple<size_t, size_t>>
 {
-    for (auto&& [whichCurve, curve] : CalChart::Ranges::enumerate_view(mCurves)) {
+    for (auto&& [whichCurve, curve] : Ranges::enumerate_view(mCurves)) {
         auto&& points = curve.first.GetControlPoints();
-        if (auto iter = std::find_if(points.begin(), points.end(), [where, searchBound](auto point) {
-                return ((where.x + searchBound) >= point.x) && ((where.x - searchBound) <= point.x) && ((where.y + searchBound) >= point.y) && ((where.y - searchBound) <= point.y);
-            });
+        if (auto iter = std::find_if(points.begin(), points.end(),
+                [where, searchBound](auto point) {
+                    return ((where.x + searchBound) >= point.x) && ((where.x - searchBound) <= point.x)
+                        && ((where.y + searchBound) >= point.y) && ((where.y - searchBound) <= point.y);
+                });
             iter != points.end()) {
             return std::tuple<size_t, size_t>{ whichCurve, std::distance(points.begin(), iter) };
         }
@@ -622,7 +901,7 @@ auto Sheet::FindCurveControlPoint(Coord where, Coord::units searchBound) const -
 
 auto Sheet::FindCurve(Coord where, Coord::units searchBound) const -> std::optional<std::tuple<size_t, size_t, double>>
 {
-    for (auto&& [whichCurve, curve] : CalChart::Ranges::enumerate_view(mCurves)) {
+    for (auto&& [whichCurve, curve] : Ranges::enumerate_view(mCurves)) {
         auto result = curve.first.LowerControlPointOnLine(where, searchBound);
         if (result.has_value()) {
             return std::tuple<size_t, size_t, double>{ whichCurve, std::get<0>(*result), std::get<1>(*result) };
@@ -633,18 +912,20 @@ auto Sheet::FindCurve(Coord where, Coord::units searchBound) const -> std::optio
 
 auto Sheet::GetCurveAssignments() const -> std::vector<std::vector<MarcherIndex>>
 {
-    return CalChart::Ranges::ToVector<std::vector<MarcherIndex>>(mCurves | std::views::transform([](auto&& curve) { return curve.second; }));
+    return Ranges::ToVector<std::vector<MarcherIndex>>(
+        mCurves | std::views::transform([](auto&& curve) { return curve.second; }));
 }
 
 void Sheet::SetCurveAssignment(std::vector<std::vector<MarcherIndex>> curveAssignments)
 {
-    for (auto&& [which, marchers] : CalChart::Ranges::enumerate_view(curveAssignments)) {
+    for (auto&& [which, marchers] : Ranges::enumerate_view(curveAssignments)) {
         mCurves.at(which).second = marchers;
     }
     RepositionCurveMarchers();
 }
 
-auto Sheet::GetCurveAssignmentsWithNewAssignments(size_t whichCurve, std::vector<MarcherIndex> whichMarchers) const -> std::vector<std::vector<MarcherIndex>>
+auto Sheet::GetCurveAssignmentsWithNewAssignments(size_t whichCurve, std::vector<MarcherIndex> whichMarchers) const
+    -> std::vector<std::vector<MarcherIndex>>
 {
     // first get all the marchers assigned to curves
     auto curveAssignments = GetCurveAssignments();
@@ -674,8 +955,7 @@ auto Sheet::MakeSelectPointsBySymbol(SYMBOL_TYPE i) const -> SelectionList
 {
     SelectionList select;
     std::ranges::for_each(
-        std::views::iota(0ul, mPoints.size())
-            | std::views::filter([&](MarcherIndex j) { return GetSymbol(j) == i; }),
+        std::views::iota(0ul, mPoints.size()) | std::views::filter([&](MarcherIndex j) { return GetSymbol(j) == i; }),
         [&](MarcherIndex j) { select.insert(j); });
     return select;
 }
@@ -714,10 +994,7 @@ void Sheet::AddCurve(Curve const& curve, size_t index)
     mCurves.insert(mCurves.begin() + index, std::pair<Curve, std::vector<MarcherIndex>>{ curve, {} });
 }
 
-void Sheet::RemoveCurve(size_t index)
-{
-    mCurves.erase(mCurves.cbegin() + index);
-}
+void Sheet::RemoveCurve(size_t index) { mCurves.erase(mCurves.cbegin() + index); }
 
 void Sheet::ReplaceCurve(Curve const& curve, size_t index)
 {
@@ -740,10 +1017,7 @@ auto Sheet::RemapPoints(std::vector<MarcherIndex> const& table) const -> std::ve
     return newpts;
 }
 
-void Sheet::SetContinuity(SYMBOL_TYPE which, Continuity const& new_cont)
-{
-    mAnimationContinuity.at(which) = new_cont;
-}
+void Sheet::SetContinuity(SYMBOL_TYPE which, Continuity const& new_cont) { mAnimationContinuity.at(which) = new_cont; }
 
 auto Sheet::ContinuityInUse(SYMBOL_TYPE idx) const -> bool
 {
@@ -762,25 +1036,17 @@ auto Sheet::GetName() const -> std::string { return mName; }
 
 void Sheet::SetName(std::string const& newname) { mName = newname; }
 
-auto Sheet::GetPrintNumber() const -> std::string
-{
-    return mPrintableContinuity.GetPrintNumber();
-}
+auto Sheet::GetPrintNumber() const -> std::string { return mPrintableContinuity.GetPrintNumber(); }
 
-std::string Sheet::GetRawPrintContinuity() const
-{
-    return mPrintableContinuity.GetOriginalLine();
-}
+std::string Sheet::GetRawPrintContinuity() const { return mPrintableContinuity.GetOriginalLine(); }
 
 // Get position of point
-auto Sheet::GetMarcherPosition(MarcherIndex i, unsigned ref) const -> Coord
-{
-    return mPoints[i].GetPos(ref);
-}
+auto Sheet::GetMarcherPosition(MarcherIndex i, unsigned ref) const -> Coord { return mPoints[i].GetPos(ref); }
 
 auto Sheet::GetAllMarcherPositions(unsigned ref) const -> std::vector<Coord>
 {
-    return CalChart::Ranges::ToVector<Coord>(mPoints | std::views::transform([ref](auto&& point) { return point.GetPos(ref); }));
+    return CalChart::Ranges::ToVector<Coord>(
+        mPoints | std::views::transform([ref](auto&& point) { return point.GetPos(ref); }));
 }
 
 // Set position of point
@@ -812,38 +1078,20 @@ void Sheet::SetPrintableContinuity(std::string const& name, std::string const& l
     mPrintableContinuity = PrintContinuity(name, lines);
 }
 
-auto Sheet::GetPrintableContinuity() const -> Textline_list
-{
-    return mPrintableContinuity.GetChunks();
-}
+auto Sheet::GetPrintableContinuity() const -> Textline_list { return mPrintableContinuity.GetChunks(); }
 
 // sheet beat info (tempo, fermata info)
-auto Sheet::GetSheetBeatInfo() const -> SheetBeatInfo
-{
-    return SheetBeatInfo{ mTempo, mFermata };
-}
+auto Sheet::GetSheetBeatInfo() const -> SheetBeatInfo { return SheetBeatInfo{ mTempo, mFermatas }; }
 
-void Sheet::SetSheetBeatInfo(SheetBeatInfo const& value)
-{
-    std::tie(mTempo, mFermata) = value;
-}
+void Sheet::SetSheetBeatInfo(SheetBeatInfo const& value) { std::tie(mTempo, mFermatas) = value; }
 
 auto Sheet::GetMarcher(MarcherIndex i) const -> Point { return mPoints[i]; }
 
-void Sheet::SetSymbol(MarcherIndex i, SYMBOL_TYPE sym)
-{
-    mPoints[i].SetSymbol(sym);
-}
+void Sheet::SetSymbol(MarcherIndex i, SYMBOL_TYPE sym) { mPoints[i].SetSymbol(sym); }
 
-void Sheet::SetMarcherFlip(MarcherIndex i, bool val)
-{
-    mPoints.at(i).Flip(val);
-}
+void Sheet::SetMarcherFlip(MarcherIndex i, bool val) { mPoints.at(i).Flip(val); }
 
-void Sheet::SetMarcherLabelVisibility(MarcherIndex i, bool isVisible)
-{
-    mPoints.at(i).SetLabelVisibility(isVisible);
-}
+void Sheet::SetMarcherLabelVisibility(MarcherIndex i, bool isVisible) { mPoints.at(i).SetLabelVisibility(isVisible); }
 
 auto Sheet::GetSymbols() const -> std::vector<SYMBOL_TYPE>
 {
@@ -852,7 +1100,8 @@ auto Sheet::GetSymbols() const -> std::vector<SYMBOL_TYPE>
     return result;
 }
 
-auto Sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, std::map<std::string, std::vector<nlohmann::json>> const& movements) const -> nlohmann::json
+auto Sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels,
+    std::map<std::string, std::vector<nlohmann::json>> const& movements) const -> nlohmann::json
 {
     nlohmann::json j;
     // TODO; add printed continuities to viewer file manually for now
@@ -886,28 +1135,26 @@ auto Sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLa
 
 namespace {
     // Returns a view adaptor that will transform a range of point indices to Draw point commands.
-    auto TransformIndexToDrawCommands(CalChart::Sheet const& sheet, std::vector<std::string> const& labels, int ref, CalChart::Configuration const& config)
+    auto TransformIndexToDrawCommands(CalChart::Sheet const& sheet, std::vector<std::string> const& labels, int ref,
+        CalChart::Configuration const& config)
     {
         return std::views::transform([&sheet, ref, labels, &config](int i) {
             return sheet.GetMarcher(i).GetDrawCommands(ref, labels.at(i), config);
-        })
-            | std::ranges::views::join;
+        }) | std::ranges::views::join;
     }
 
     // Given a set and a size, return a range that has the numbers not in the set
     auto NegativeIntersection(CalChart::SelectionList const& set, int count)
     {
-        return std::views::iota(0, count)
-            | std::views::filter([set](int i) {
-                  return !set.contains(i);
-              });
+        return std::views::iota(0, count) | std::views::filter([set](int i) { return !set.contains(i); });
     }
 
     // convention is that we have unselected
     auto GetMarcherColors(bool isGhost, bool isRef) -> std::array<Colors, 4>
     {
         if (isGhost) {
-            return { Colors::GHOST_POINT, Colors::GHOST_POINT_HLIT, Colors::GHOST_POINT_TEXT, Colors::GHOST_POINT_HLIT_TEXT };
+            return { Colors::GHOST_POINT, Colors::GHOST_POINT_HLIT, Colors::GHOST_POINT_TEXT,
+                Colors::GHOST_POINT_HLIT_TEXT };
         }
         if (isRef) {
             return { Colors::REF_POINT, Colors::REF_POINT_HILIT, Colors::REF_POINT_TEXT, Colors::REF_POINT_HILIT_TEXT };
@@ -915,53 +1162,42 @@ namespace {
         return { Colors::POINT, Colors::POINT_HILIT, Colors::POINT_TEXT, Colors::POINT_HILIT_TEXT };
     }
 
-    auto GenerateSheetMarcherDrawCommands(
-        CalChart::Configuration const& config,
-        CalChart::SelectionList const& selection_list,
-        std::vector<std::string> const& labels,
-        CalChart::Sheet const& sheet,
-        int ref,
-        std::array<Colors, 4> color) -> std::vector<CalChart::Draw::DrawCommand>
+    auto GenerateSheetMarcherDrawCommands(CalChart::Configuration const& config,
+        CalChart::SelectionList const& selection_list, std::vector<std::string> const& labels,
+        CalChart::Sheet const& sheet, int ref, std::array<Colors, 4> color) -> std::vector<CalChart::Draw::DrawCommand>
     {
 
         auto pointLabelFont = CalChart::Font{ Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio()) };
-        return {
-            CalChart::Draw::withFont(
-                pointLabelFont,
-                std::vector{
-                    CalChart::Draw::withBrushAndPen(
-                        config.Get_CalChartBrushAndPen(std::get<0>(color)),
-                        CalChart::Draw::withTextForeground(
-                            config.Get_CalChartBrushAndPen(std::get<2>(color)),
-                            NegativeIntersection(selection_list, labels.size())
-                                | TransformIndexToDrawCommands(sheet, labels, ref, config))),
-                    CalChart::Draw::withBrushAndPen(
-                        config.Get_CalChartBrushAndPen(std::get<1>(color)),
-                        CalChart::Draw::withTextForeground(
-                            config.Get_CalChartBrushAndPen(std::get<3>(color)),
-                            selection_list
-                                | TransformIndexToDrawCommands(sheet, labels, ref, config))),
-                })
-        };
+        return { CalChart::Draw::withFont(pointLabelFont,
+            std::vector{
+                CalChart::Draw::withBrushAndPen(config.Get_CalChartBrushAndPen(std::get<0>(color)),
+                    CalChart::Draw::withTextForeground(config.Get_CalChartBrushAndPen(std::get<2>(color)),
+                        NegativeIntersection(selection_list, labels.size())
+                            | TransformIndexToDrawCommands(sheet, labels, ref, config))),
+                CalChart::Draw::withBrushAndPen(config.Get_CalChartBrushAndPen(std::get<1>(color)),
+                    CalChart::Draw::withTextForeground(config.Get_CalChartBrushAndPen(std::get<3>(color)),
+                        selection_list | TransformIndexToDrawCommands(sheet, labels, ref, config))),
+            }) };
     }
 
-    auto GenerateCurvePoints(std::vector<CalChart::Coord> const& points, Coord::units boxSize) -> std::vector<CalChart::Draw::DrawCommand>
+    auto GenerateCurvePoints(std::vector<CalChart::Coord> const& points, Coord::units boxSize)
+        -> std::vector<CalChart::Draw::DrawCommand>
     {
-        return CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(points | std::views::transform([boxSize](auto&& point) {
-            return CalChart::Draw::Rectangle(point - Coord(boxSize, boxSize) / 2, Coord(boxSize, boxSize));
-        }));
+        return CalChart::Ranges::ToVector<CalChart::Draw::DrawCommand>(
+            points | std::views::transform([boxSize](auto&& point) {
+                return CalChart::Draw::Rectangle(point - Coord(boxSize, boxSize) / 2, Coord(boxSize, boxSize));
+            }));
     }
 
-    auto GenerateCurve(CalChart::Configuration const& config, CalChart::Curve const& curve, int which) -> std::vector<Draw::DrawCommand>
+    auto GenerateCurve(CalChart::Configuration const& config, CalChart::Curve const& curve, int which)
+        -> std::vector<Draw::DrawCommand>
     {
         auto boxSize = CalChart::Float2CoordUnits(config.Get_ControlPointRatio());
         auto points = curve.GetControlPoints();
         auto drawCmds = std::vector<Draw::DrawCommand>{
             CalChart::Draw::withBrushAndPen(
-                config.Get_CalChartBrushAndPen(CalChart::Colors::SHEET_CURVE),
-                curve.GetCC_DrawCommand()),
-            CalChart::Draw::withBrushAndPen(
-                config.Get_CalChartBrushAndPen(CalChart::Colors::SHEET_CURVE_CONTROL_POINT),
+                config.Get_CalChartBrushAndPen(CalChart::Colors::SHEET_CURVE), curve.GetCC_DrawCommand()),
+            CalChart::Draw::withBrushAndPen(config.Get_CalChartBrushAndPen(CalChart::Colors::SHEET_CURVE_CONTROL_POINT),
                 GenerateCurvePoints(points, boxSize)),
         };
         if (points.size()) {
@@ -972,19 +1208,24 @@ namespace {
 
 }
 
-auto Sheet::GenerateGhostElements(CalChart::Configuration const& config, SelectionList const& selected, std::vector<std::string> const& marcherLabels) const -> std::vector<CalChart::Draw::DrawCommand>
+auto Sheet::GenerateGhostElements(CalChart::Configuration const& config, SelectionList const& selected,
+    std::vector<std::string> const& marcherLabels) const -> std::vector<CalChart::Draw::DrawCommand>
 {
     return GenerateSheetMarcherDrawCommands(config, selected, marcherLabels, *this, 0, GetMarcherColors(true, false));
 }
 
-auto Sheet::GenerateSheetElements(CalChart::Configuration const& config, SelectionList const& selected, std::vector<std::string> const& marcherLabels, int referencePoint) const -> std::vector<CalChart::Draw::DrawCommand>
+auto Sheet::GenerateSheetElements(CalChart::Configuration const& config, SelectionList const& selected,
+    std::vector<std::string> const& marcherLabels, int referencePoint) const -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
     if (referencePoint > 0) {
         // if we are editing a ref point other than 0, draw the 0 one in a different color.
-        CalChart::append(drawCmds, GenerateSheetMarcherDrawCommands(config, selected, marcherLabels, *this, 0, GetMarcherColors(false, true)));
+        CalChart::append(drawCmds,
+            GenerateSheetMarcherDrawCommands(config, selected, marcherLabels, *this, 0, GetMarcherColors(false, true)));
     }
-    CalChart::append(drawCmds, GenerateSheetMarcherDrawCommands(config, selected, marcherLabels, *this, referencePoint, GetMarcherColors(false, false)));
+    CalChart::append(drawCmds,
+        GenerateSheetMarcherDrawCommands(
+            config, selected, marcherLabels, *this, referencePoint, GetMarcherColors(false, false)));
 
     for (auto&& [which, curve] : CalChart::Ranges::enumerate_view(mCurves)) {
         CalChart::append(drawCmds, GenerateCurve(config, curve.first, which));
@@ -1028,8 +1269,10 @@ namespace {
 
         for (auto& i : pts) {
             auto position = i.GetPos();
-            bounding_box_upper_left = CalChart::Coord(std::min(bounding_box_upper_left.x, position.x), std::min(bounding_box_upper_left.y, position.y));
-            bounding_box_low_right = CalChart::Coord(std::max(bounding_box_low_right.x, position.x), std::max(bounding_box_low_right.y, position.y));
+            bounding_box_upper_left = CalChart::Coord(
+                std::min(bounding_box_upper_left.x, position.x), std::min(bounding_box_upper_left.y, position.y));
+            bounding_box_low_right = CalChart::Coord(
+                std::max(bounding_box_low_right.x, position.x), std::max(bounding_box_low_right.y, position.y));
         }
 
         return { bounding_box_upper_left, bounding_box_low_right };
@@ -1040,7 +1283,8 @@ namespace {
 auto Sheet::ShouldPrintLandscape() const -> bool
 {
     auto boundingBox = GetMarcherBoundingBox(GetAllMarchers());
-    return (boundingBox.second.x - boundingBox.first.x) > CalChart::Int2CoordUnits(CalChart::kFieldStepSizeNorthSouth[0]);
+    return (boundingBox.second.x - boundingBox.first.x)
+        > CalChart::Int2CoordUnits(CalChart::kFieldStepSizeNorthSouth[0]);
 }
 
 void Sheet::RepositionCurveMarchers()
@@ -1051,5 +1295,4 @@ void Sheet::RepositionCurveMarchers()
         }
     }
 }
-
 }

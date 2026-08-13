@@ -163,7 +163,7 @@ public:
 
     ///// Drawing marcher's paths /////
     // Generate Draw Commands
-    [[nodiscard]] auto GeneratePhatomPointsDrawCommands(CalChart::MarcherToPosition const& positions) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GeneratePhantomPointsDrawCommands(CalChart::MarcherToPosition const& positions) const -> std::vector<CalChart::Draw::DrawCommand>;
     [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands() const { return mShow->GenerateFieldWithMarchersDrawCommands(); }
     [[nodiscard]] auto GenerateAnimationDrawCommands(
         CalChart::Beats whichBeat,

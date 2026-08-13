@@ -293,4 +293,31 @@ TEST_CASE("CalChartPrintContinuityLayout")
     }
 }
 
+TEST_CASE("PrintContinuity_JSONSerializeDeserialize", "CalChartText")
+{
+    using namespace CalChart;
+
+    SECTION("Empty print continuity")
+    {
+        auto uut = PrintContinuity();
+        auto json = uut.toJSON();
+        auto reconstructed = PrintContinuityFromJSON(json);
+
+        CHECK(reconstructed.GetPrintNumber() == uut.GetPrintNumber());
+        CHECK(reconstructed.GetOriginalLine() == uut.GetOriginalLine());
+    }
+
+    SECTION("Print continuity with data")
+    {
+        auto uut = PrintContinuity("M1", "This is the continuity\\nSecond line");
+        auto json = uut.toJSON();
+        auto reconstructed = PrintContinuityFromJSON(json);
+
+        CHECK(reconstructed.GetPrintNumber() == uut.GetPrintNumber());
+        CHECK(reconstructed.GetOriginalLine() == uut.GetOriginalLine());
+        CHECK(reconstructed.GetPrintNumber() == "M1");
+        CHECK(reconstructed.GetOriginalLine() == "This is the continuity\\nSecond line");
+    }
+}
+
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers, cppcoreguidelines-avoid-do-while, readability-magic-numbers, readability-function-cognitive-complexity, misc-use-anonymous-namespace)

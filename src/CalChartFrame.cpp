@@ -180,7 +180,8 @@ public:
 };
 
 // Main frame constructor
-CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configuration& config, wxDocParentFrame* frame, wxPoint const& pos, wxSize const& size)
+CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configuration& config, wxDocParentFrame* frame,
+    wxPoint const& pos, wxSize const& size)
     : wxDocChildFrame(doc, view, frame, -1, "CalChart", pos, size)
     , mConfig(config)
     , mAUIManager(new wxAuiManager(this))
@@ -199,27 +200,17 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
             "&File",
             wxUI::Item{ wxID_NEW, "&New Show\tCTRL-N", "Create a new show" },
             wxUI::Item{ wxID_OPEN, "&Open...\tCTRL-O", "Load a saved show" },
-            wxUI::Item{ "&Import Continuity...\tCTRL-SHIFT-I", "Import continuity text", [this] {
-                           ImportContFile();
-                       } },
+            wxUI::Item{ "&Import Continuity...\tCTRL-SHIFT-I", "Import continuity text", [this] { ImportContFile(); } },
             wxUI::Item{ wxID_SAVE, "&Save\tCTRL-S", "Save show" },
             wxUI::Item{ wxID_SAVEAS, "Save &As...\tCTRL-SHIFT-S", "Save show as a new name" },
-            wxUI::Item{ "&Print...\tCTRL-P", "Print this show", [this] {
-                           OnPrint();
-                       } },
-            wxUI::Item{ "Preview...\tCTRL-SHIFT-P", "Preview this show", [this] {
-                           OnPrintPreview();
-                       } },
+            wxUI::Item{ "&Print...\tCTRL-P", "Print this show", [this] { OnPrint(); } },
+            wxUI::Item{ "Preview...\tCTRL-SHIFT-P", "Preview this show", [this] { OnPrintPreview(); } },
             wxUI::Item{ wxID_PAGE_SETUP, "Page Setup...\tCTRL-SHIFT-ALT-P", "Setup Pages" },
-            wxUI::Item{ "Print to PS...", "Print show to PostScript", [this] {
-                           OnLegacyPrint();
-                       } },
-            wxUI::Item{ "Export for Online Viewer...", "Export show to be viewed using the CalChart Online Viewer", [this] {
-                           OnExportViewerFile();
-                       } },
-            wxUI::Item{ "Export Viewer Beats...", "Export beats timing for the CalChart Online Viewer", [this] {
-                           OnExportViewerBeats();
-                       } },
+            wxUI::Item{ "Print to PS...", "Print show to PostScript", [this] { OnLegacyPrint(); } },
+            wxUI::Item{ "Export for Online Viewer...", "Export show to be viewed using the CalChart Online Viewer",
+                [this] { OnExportViewerFile(); } },
+            wxUI::Item{ "Export Viewer Beats...", "Export beats timing for the CalChart Online Viewer",
+                [this] { OnExportViewerBeats(); } },
             wxUI::Item{ wxID_PREFERENCES, "&Preferences\tCTRL-," },
             wxUI::Item{ wxID_CLOSE, "Close Window\tCTRL-W", "Close this window" },
             wxUI::Item{ wxID_EXIT, "&Quit\tCTRL-Q", "Quit CalChart" },
@@ -229,158 +220,101 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
             wxUI::Item{ wxID_UNDO, "&Undo\tCTRL-Z" },
             wxUI::Item{ wxID_REDO, "&Redo\tCTRL-SHIFT-Z" },
             wxUI::Separator{},
-            wxUI::Item{ "&Insert Sheet Before\tCTRL-[", "Insert a new stuntsheet before this one", [this] {
-                           OnInsertBefore();
-                       } },
-            wxUI::Item{ "Insert Sheet &After\tCTRL-]", "Insert a new stuntsheet after this one", [this] {
-                           OnInsertAfter();
-                       } },
+            wxUI::Item{ "&Insert Sheet Before\tCTRL-[", "Insert a new stuntsheet before this one",
+                [this] { OnInsertBefore(); } },
+            wxUI::Item{
+                "Insert Sheet &After\tCTRL-]", "Insert a new stuntsheet after this one", [this] { OnInsertAfter(); } },
             wxUI::Item{ wxID_DELETE, "&Delete Sheet\tCTRL-DEL", "Delete this stuntsheet" },
-            wxUI::Item{ "&Copy Sheet\tCTRL-C", "Copy the current stuntsheet", [this] {
-                           OnCopySheet();
-                       } },
-            wxUI::Item{ "&Paste Sheet\tCTRL-V", "Paste the current stuntsheet", [this] {
-                           OnPasteSheet();
-                       } },
-            wxUI::Item{ "Insert Sheets From Other Show...", "Insert a saved stuntsheet after this one", [this] {
-                           OnInsertFromOtherShow();
-                       } },
-            wxUI::Item{ "&Relabel Sheets\tCTRL-R", "Relabel all stuntsheets after this one", [this] {
-                           OnRelabel();
-                       } },
-            wxUI::Item{ "Append Show...", "Append a show to the end", [this] {
-                           AppendShow();
-                       } },
+            wxUI::Item{ "&Copy Sheet\tCTRL-C", "Copy the current stuntsheet", [this] { OnCopySheet(); } },
+            wxUI::Item{ "&Paste Sheet\tCTRL-V", "Paste the current stuntsheet", [this] { OnPasteSheet(); } },
+            wxUI::Item{ "Insert Sheets From Other Show...", "Insert a saved stuntsheet after this one",
+                [this] { OnInsertFromOtherShow(); } },
+            wxUI::Item{ "&Relabel Sheets\tCTRL-R", "Relabel all stuntsheets after this one", [this] { OnRelabel(); } },
+            wxUI::Item{ "Append Show...", "Append a show to the end", [this] { AppendShow(); } },
             wxUI::Separator{},
-            wxUI::Item{ "Set &Up Marchers...\tCTRL-U", "Setup number of marchers", [this] {
-                           OnSetupMarchers();
-                       } },
-            wxUI::Item{ "Set &Instruments...\tCTRL-I", "Set instruments", [this] {
-                           OnSetupInstruments();
-                       } },
-            wxUI::Item{ "Set Show &Mode...", "Set the show mode", [this] {
-                           SetMode();
-                       } },
+            wxUI::Item{ "Set &Up Marchers...\tCTRL-U", "Setup number of marchers", [this] { OnSetupMarchers(); } },
+            wxUI::Item{ "Set &Instruments...\tCTRL-I", "Set instruments", [this] { OnSetupInstruments(); } },
+            wxUI::Item{ "Set Show &Mode...", "Set the show mode", [this] { SetMode(); } },
             wxUI::Separator{},
-            wxUI::Item{ "Marcher Picker...\tCTRL-SHIFT-A", "Marcher Picker", [this] {
-                           OnMarcherPicker();
-                       } },
-            wxUI::Item{ "Select &All...\tCTRL-A", "Select All Points", [this] {
-                           OnSelectAll();
-                       } },
+            wxUI::Item{ "Marcher Picker...\tCTRL-SHIFT-A", "Marcher Picker", [this] { OnMarcherPicker(); } },
+            wxUI::Item{ "Select &All...\tCTRL-A", "Select All Points", [this] { OnSelectAll(); } },
             wxUI::Separator{},
-            wxUI::Item{ "Edit Curve Assignments...", "Edit Curve Assignments", [this] {
-                           OnEditCurveAssignments();
-                       } },
+            wxUI::Item{ "Edit Curve Assignments...", "Edit Curve Assignments", [this] { OnEditCurveAssignments(); } },
             wxUI::Separator{},
-            wxUI::Item{ "Set Sheet &Title...\tCTRL-T", "Change the title of this stuntsheet", [this] {
-                           OnSetSheetTitle();
-                       } },
-            wxUI::Item{ "Set &Beats...\tCTRL-B", "Change the number of beats for this stuntsheet", [this] {
-                           OnSetBeats();
-                       } },
-            wxUI::Item{ "Set Tempo...", "Change the tempo for this stuntsheet", [this] {
-                           OnSetTempo();
-                       } },
-            wxUI::Item{ "Edit Beat Map...", "Edit the beat map", [this] {
-                           OnEditBeatMap();
-                       } },
-            wxUI::Item{ "Set Media...", "Set the media for the show", [this] {
-                           OnSetMedia();
-                       } },
-            wxUI::Item{ "Clear Media...", "Clear the media for the show", [this] {
-                           OnClearMedia();
-                       } },
-            wxUI::Item{ "Reset reference point...", "Reset the current reference point", [this] {
-                           OnResetReferencePoint();
-                       } },
+            wxUI::Item{
+                "Set Sheet &Title...\tCTRL-T", "Change the title of this stuntsheet", [this] { OnSetSheetTitle(); } },
+            wxUI::Item{
+                "Set &Beats...\tCTRL-B", "Change the number of beats for this stuntsheet", [this] { OnSetBeats(); } },
+            wxUI::Item{ "Set Tempo...", "Change the tempo for this stuntsheet", [this] { OnSetTempo(); } },
+            wxUI::Item{ "Edit Beat Map...", "Edit the beat map", [this] { OnEditBeatMap(); } },
+            wxUI::Item{ "Set Media...", "Set the media for the show", [this] { OnSetMedia(); } },
+            wxUI::Item{ "Clear Media...", "Clear the media for the show", [this] { OnClearMedia(); } },
+            wxUI::Item{
+                "Reset reference point...", "Reset the current reference point", [this] { OnResetReferencePoint(); } },
             wxUI::Separator{},
-            wxUI::Item{ "Solve transition", "Solve the transition to the next sheet automatically", [this] {
-                           OnSolveTransition();
-                       } },
-            wxUI::Item{ "Edit Print Continuity...", "Edit Print continuity for this stuntsheet", [this] {
-                           OnEditPrintContinuity();
-                       } },
+            wxUI::Item{ "Solve transition", "Solve the transition to the next sheet automatically",
+                [this] { OnSolveTransition(); } },
+            wxUI::Item{ "Edit Print Continuity...", "Edit Print continuity for this stuntsheet",
+                [this] { OnEditPrintContinuity(); } },
         }
             .withProxy(editMenu),
         wxUI::Menu{
             "&View",
-            wxUI::Item{ "View Animation\tCTRL-RETURN", "View Animation or Field", [this] {
-                           OnSwapAnimation();
-                       } }
+            wxUI::Item{ "View Animation\tCTRL-RETURN", "View Animation or Field", [this] { OnSwapAnimation(); } }
                 .withProxy(mViewSwapFieldAndAnimate),
             wxUI::Separator{},
-            wxUI::Item{ "Preview in Viewer (experimental)...", "Open the built-in CalChart Viewer preview", [this] {
-                           OnLaunchViewerPreview();
-                       } },
+            wxUI::Item{ "Preview in Viewer (experimental)...", "Open the built-in CalChart Viewer preview",
+                [this] { OnLaunchViewerPreview(); } },
             wxUI::Separator{},
-            wxUI::MenuForEach{ CalChart::Ranges::enumerate_view(kAUINames), [this](auto&& whichAndName) {
-                                  auto&& [which, name] = whichAndName;
-                                  return wxUI::Item{ std::string("Show ") + name, std::string("Controls Displaying ") + name, [this, which] {
-                                                        OnAdjustViews(which);
-                                                    } }
-                                      .withProxy(mAdjustPaneIndex.at(which));
-                              } },
+            wxUI::MenuForEach{ CalChart::Ranges::enumerate_view(kAUINames),
+                [this](auto&& whichAndName) {
+                    auto&& [which, name] = whichAndName;
+                    return wxUI::Item{
+                        std::string("Show ") + name, std::string("Controls Displaying ") + name,
+                        [this, which] { OnAdjustViews(which); }
+                    }.withProxy(mAdjustPaneIndex.at(which));
+                } },
             wxUI::Separator{},
-            wxUI::CheckItem{ "Draw Paths", "Draw Paths", [this](wxCommandEvent& event) {
-                                GetFieldView()->OnEnableDrawPaths(event.IsChecked());
-                            } }
+            wxUI::CheckItem{ "Draw Paths", "Draw Paths",
+                [this](wxCommandEvent& event) { GetFieldView()->OnEnableDrawPaths(event.IsChecked()); } }
                 .withProxy(mDrawPaths),
             wxUI::Separator{},
-            wxUI::Item{ "Disable Ghost View", "Turn off ghost view", [this] {
-                           OnGhostOption(GhostSource::disabled);
-                       } }
+            wxUI::Item{ "Disable Ghost View", "Turn off ghost view", [this] { OnGhostOption(GhostSource::disabled); } }
                 .withProxy(mGhostOff),
-            wxUI::Item{ "Ghost Next Sheet", "Draw a ghost of the next stuntsheet", [this] {
-                           OnGhostOption(GhostSource::next);
-                       } },
-            wxUI::Item{ "Ghost Previous Sheet", "Draw a ghost of the previous stuntsheet", [this] {
-                           OnGhostOption(GhostSource::previous);
-                       } },
-            wxUI::Item{ "Ghost Particular Sheet...", "Draw a ghost of a particular stuntsheet", [this] {
-                           OnGhostOption(GhostSource::specific);
-                       } },
+            wxUI::Item{ "Ghost Next Sheet", "Draw a ghost of the next stuntsheet",
+                [this] { OnGhostOption(GhostSource::next); } },
+            wxUI::Item{ "Ghost Previous Sheet", "Draw a ghost of the previous stuntsheet",
+                [this] { OnGhostOption(GhostSource::previous); } },
+            wxUI::Item{ "Ghost Particular Sheet...", "Draw a ghost of a particular stuntsheet",
+                [this] { OnGhostOption(GhostSource::specific); } },
             wxUI::Separator{},
-            wxUI::Item{ "Zoom to Fit\tCTRL-0", "Zoom to fit", [this] {
-                           OnZoomFit();
-                       } },
-            wxUI::Item{ "Zoom In\tCTRL-+", "Zoom In", [this] {
-                           OnZoomIn();
-                       } },
-            wxUI::Item{ "Zoom In\tCTRL--", "Zoom Out", [this] {
-                           OnZoomOut();
-                       } },
+            wxUI::Item{ "Zoom to Fit\tCTRL-0", "Zoom to fit", [this] { OnZoomFit(); } },
+            wxUI::Item{ "Zoom In\tCTRL-+", "Zoom In", [this] { OnZoomIn(); } },
+            wxUI::Item{ "Zoom In\tCTRL--", "Zoom Out", [this] { OnZoomOut(); } },
         },
         wxUI::Menu{
             "&Field Image",
-            wxUI::CheckItem{ "Show Background Images", "Toggle showing background images", [this] {
-                                OnShowBackgroundImages();
-                            } }
+            wxUI::CheckItem{
+                "Show Background Images", "Toggle showing background images", [this] { OnShowBackgroundImages(); } }
                 .withProxy(mShowBackgroundImages),
-            wxUI::Item{ "Add Background Image...", "Add a background image", [this] {
-                           OnAddBackgroundImage();
-                       } },
-            wxUI::CheckItem{ "Image Adjust Mode...", "Mode to adjust background images", [this] {
-                                OnAdjustBackgroundImageMode();
-                            } }
+            wxUI::Item{ "Add Background Image...", "Add a background image", [this] { OnAddBackgroundImage(); } },
+            wxUI::CheckItem{
+                "Image Adjust Mode...", "Mode to adjust background images", [this] { OnAdjustBackgroundImageMode(); } }
                 .withProxy(mAdjustBackgroundImageMode),
         },
         wxUI::Menu{
             "&Debug",
-            wxUI::Item{ "Show Draw Performance...", "Display draw performance metrics", [this] {
-                           OnShowDrawPerformance();
-                       } },
-            wxUI::Item{ "Export Debug Dump...", "Export debug information for troubleshooting", [this] {
-                           OnExportDebugDump();
-                       } },
+            wxUI::Item{
+                "Show Draw Performance...", "Display draw performance metrics", [this] { OnShowDrawPerformance(); } },
+            wxUI::Item{ "Export Debug Dump...", "Export debug information for troubleshooting",
+                [this] { OnExportDebugDump(); } },
         },
         wxUI::Menu{
             "&Help",
             wxUI::Item{ wxID_ABOUT, "&About CalChart...", "Information about the program" },
             wxUI::Item{ wxID_HELP, "&Help on CalChart...\tCTRL-H", "Help on using CalChart" },
-            wxUI::Item{ "Report a &Bug...\tCTRL-SHIFT-B", "Report a bug to GitHub", [this](wxCommandEvent& e) {
-                           OnReportBug(e);
-                       } },
+            wxUI::Item{ "Report a &Bug...\tCTRL-SHIFT-B", "Report a bug to GitHub",
+                [this](wxCommandEvent& e) { OnReportBug(e); } },
         }
     }.fitTo(this);
     // A nice touch: a history of files visited. Use this menu.
@@ -406,11 +340,13 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
     mCanvas->SetScrollRate(1, 1);
 
     // Create all the other things attached to the frame:
-    mControls = FieldControls::CreateToolBar(this, wxID_ANY, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW | wxAUI_TB_TEXT, mConfig);
+    mControls = FieldControls::CreateToolBar(
+        this, wxID_ANY, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW | wxAUI_TB_TEXT, mConfig);
     FieldControls::SetZoomAmount(this, mConfig.Get_FieldFrameZoom_3_6_0());
 
     mContinuityBrowser = new ContinuityBrowser(this, GetContinuityBrowserConstructSize(), mConfig);
-    mFieldThumbnailBrowser = new FieldThumbnailBrowser(mConfig, this, wxID_ANY, wxDefaultPosition, GetFieldThumbnailBrowserConstructSize());
+    mFieldThumbnailBrowser = new FieldThumbnailBrowser(
+        mConfig, this, wxID_ANY, wxDefaultPosition, GetFieldThumbnailBrowserConstructSize());
     mAnimationErrorsPanel = new AnimationErrorsPanel(this);
     mAnimationPanel = new AnimationPanel(mConfig, this, true);
     mPrintContinuityEditor = new PrintContinuityEditor(this, mConfig);
@@ -442,13 +378,19 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
     mAUIManager->AddPane(mShadowAnimationPanel, wxAuiPaneInfo().Name("ShadowAnimation").CenterPane().Hide());
 
     // And layout the default way things should look
-    mAUIManager->AddPane(mFieldThumbnailBrowser, wxAuiPaneInfo().Name(kAUINames[0]).Caption(kAUINames[0]).Left().BestSize(GetFieldThumbnailBrowserSize()));
-    mAUIManager->AddPane(mAnimationPanel, wxAuiPaneInfo().Name(kAUINames[4]).Caption(kAUINames[4]).Left().BestSize(GetAnimationSize()));
-    mAUIManager->AddPane(mContinuityBrowser, wxAuiPaneInfo().Name(kAUINames[2]).Caption(kAUINames[2]).Right().BestSize(GetContinuityBrowserSize()));
-    mAUIManager->AddPane(mAnimationErrorsPanel, wxAuiPaneInfo().Name(kAUINames[3]).Caption(kAUINames[3]).Right().BestSize(GetAnimationErrorsSize()));
-    mAUIManager->AddPane(mPrintContinuityEditor, wxAuiPaneInfo().Name(kAUINames[5]).Caption(kAUINames[5]).Right().BestSize(GetPrintContinuitySize()));
+    mAUIManager->AddPane(mFieldThumbnailBrowser,
+        wxAuiPaneInfo().Name(kAUINames[0]).Caption(kAUINames[0]).Left().BestSize(GetFieldThumbnailBrowserSize()));
+    mAUIManager->AddPane(
+        mAnimationPanel, wxAuiPaneInfo().Name(kAUINames[4]).Caption(kAUINames[4]).Left().BestSize(GetAnimationSize()));
+    mAUIManager->AddPane(mContinuityBrowser,
+        wxAuiPaneInfo().Name(kAUINames[2]).Caption(kAUINames[2]).Right().BestSize(GetContinuityBrowserSize()));
+    mAUIManager->AddPane(mAnimationErrorsPanel,
+        wxAuiPaneInfo().Name(kAUINames[3]).Caption(kAUINames[3]).Right().BestSize(GetAnimationErrorsSize()));
+    mAUIManager->AddPane(mPrintContinuityEditor,
+        wxAuiPaneInfo().Name(kAUINames[5]).Caption(kAUINames[5]).Right().BestSize(GetPrintContinuitySize()));
     mAUIManager->AddPane(mControls, wxAuiPaneInfo().Name(kAUINames[1]).Caption(kAUINames[1]).ToolbarPane().Top());
-    mAUIManager->AddPane(mSelectAndMoveToolBar, wxAuiPaneInfo().Name(kAUINames[6]).Caption(kAUINames[6]).ToolbarPane().Left());
+    mAUIManager->AddPane(
+        mSelectAndMoveToolBar, wxAuiPaneInfo().Name(kAUINames[6]).Caption(kAUINames[6]).ToolbarPane().Left());
     mAUIManager->AddPane(mMarcherToolBar, wxAuiPaneInfo().Name(kAUINames[7]).Caption(kAUINames[7]).ToolbarPane().Top());
 
     mAUIManager->Update();
@@ -544,13 +486,12 @@ void CalChartFrame::OnPrint()
 void CalChartFrame::OnPrintPreview()
 {
     // grab our current page setup.
-    auto preview = new wxPrintPreview(
-        new CalChartPrintout("My Printout", *GetShow(), mConfig),
-        new CalChartPrintout("My Printout", *GetShow(), mConfig),
-        &wxGetApp().GetGlobalPrintDialog());
+    auto preview = new wxPrintPreview(new CalChartPrintout("My Printout", *GetShow(), mConfig),
+        new CalChartPrintout("My Printout", *GetShow(), mConfig), &wxGetApp().GetGlobalPrintDialog());
     if (!preview->Ok()) {
         delete preview;
-        wxMessageBox("There was a problem previewing.\nPerhaps your current printer is not set correctly?", "Previewing", wxOK);
+        wxMessageBox(
+            "There was a problem previewing.\nPerhaps your current printer is not set correctly?", "Previewing", wxOK);
         return;
     }
     auto frame = new wxPreviewFrame(preview, this, "Show Print Preview");
@@ -588,7 +529,8 @@ void CalChartFrame::OnExportViewerFile()
     if (GetShow() == nullptr) {
         return;
     }
-    wxFileDialog saveFileDialog(this, _("Save viewer file"), "", "", "viewer files (*.viewer)|*.viewer", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+    wxFileDialog saveFileDialog(
+        this, _("Save viewer file"), "", "", "viewer files (*.viewer)|*.viewer", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
     if (saveFileDialog.ShowModal() == wxID_CANCEL) {
         return;
@@ -608,7 +550,8 @@ void CalChartFrame::OnExportViewerBeats()
         showTitle = "untitled";
     }
 
-    wxFileDialog saveFileDialog(this, _("Save viewer beats file"), "", showTitle + ".beats.json", "beats files (*.beats.json)|*.beats.json", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+    wxFileDialog saveFileDialog(this, _("Save viewer beats file"), "", showTitle + ".beats.json",
+        "beats files (*.beats.json)|*.beats.json", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
     if (saveFileDialog.ShowModal() == wxID_CANCEL) {
         return;
@@ -656,9 +599,8 @@ void CalChartFrame::OnInsertFromOtherShow()
         return;
     }
     constexpr auto prompt = "Enter the {} sheet number (highest possible: {})";
-    auto begin = wxGetTextFromUser(
-        std::format(prompt, "beginning", show.GetNumSheets()),
-        "First Sheet Number", "1", this);
+    auto begin
+        = wxGetTextFromUser(std::format(prompt, "beginning", show.GetNumSheets()), "First Sheet Number", "1", this);
     auto beginValue = 0UL;
     if (!begin || !begin.ToULong(&beginValue) || beginValue < 1 || beginValue > show.GetNumSheets()) {
         (void)wxMessageBox("Not a valid sheet number", "Insert Failed");
@@ -667,8 +609,7 @@ void CalChartFrame::OnInsertFromOtherShow()
     auto endValue = 0UL;
     if (beginValue != (&show)->GetNumSheets()) {
         auto end = wxGetTextFromUser(
-            std::format(prompt, "ending", (&show)->GetNumSheets()),
-            "Last Sheet Number", begin, this);
+            std::format(prompt, "ending", (&show)->GetNumSheets()), "Last Sheet Number", begin, this);
         if (!end || !end.ToULong(&endValue) || endValue < beginValue || endValue > show.GetNumSheets()) {
             (void)wxMessageBox("Not a valid sheet number", "Insert Failed");
             return;
@@ -679,12 +620,10 @@ void CalChartFrame::OnInsertFromOtherShow()
         endValue = beginValue;
     }
 
-    auto sheets = (&show)->CopySheets()
-        | std::views::drop(beginValue - 1)
-        | std::views::take(endValue - beginValue + 1);
+    auto sheets
+        = (&show)->CopySheets() | std::views::drop(beginValue - 1) | std::views::take(endValue - beginValue + 1);
     GetFieldView()->DoInsertSheets(
-        CalChart::Show::Sheet_container_t(sheets.begin(), sheets.end()),
-        GetFieldView()->GetCurrentSheetNum() + 1);
+        CalChart::Show::Sheet_container_t(sheets.begin(), sheets.end()), GetFieldView()->GetCurrentSheetNum() + 1);
 }
 
 void CalChartFrame::OnCopySheet()
@@ -701,8 +640,7 @@ void CalChartFrame::OnCopySheet()
         auto totalBytes = bytesForNumPoints + bytesForSheetData;
         std::vector<char> clipboardData(totalBytes);
         memcpy(clipboardData.data(), &numPoints, bytesForNumPoints);
-        memcpy(clipboardData.data() + bytesForNumPoints, serializedSheet.data(),
-            bytesForSheetData);
+        memcpy(clipboardData.data() + bytesForNumPoints, serializedSheet.data(), bytesForSheetData);
 
         clipboardObject->SetData(totalBytes, clipboardData.data());
 
@@ -721,13 +659,15 @@ void CalChartFrame::OnPasteSheet()
             auto numPoints = GetShow()->GetNumPoints();
             memcpy(&numPoints, clipboardObject.GetData(), sizeof(numPoints));
             if (numPoints != GetShow()->GetNumPoints()) {
-                wxMessageBox(std::format("Cannot paste - number of points in pasted sheet ({}) does not match number of points in current show ({})",
+                wxMessageBox(std::format("Cannot paste - number of points in pasted sheet ({}) does not match number "
+                                         "of points in current show ({})",
                     numPoints, GetShow()->GetNumPoints()));
                 wxTheClipboard->Close();
                 return;
             }
-            auto reader = CalChart::Reader({ static_cast<std::byte const*>(clipboardObject.GetData()) + sizeof(numPoints),
-                clipboardObject.GetDataSize() - sizeof(numPoints) });
+            auto reader
+                = CalChart::Reader({ static_cast<std::byte const*>(clipboardObject.GetData()) + sizeof(numPoints),
+                    clipboardObject.GetDataSize() - sizeof(numPoints) });
             reader.Get<uint32_t>();
             reader.Get<uint32_t>();
 
@@ -767,8 +707,7 @@ void CalChartFrame::OnEditPrintContinuity()
 void CalChartFrame::OnSetSheetTitle()
 {
     if (GetShow()) {
-        if (auto s = wxGetTextFromUser("Enter the sheet title",
-                GetShow()->GetSheetNameOnCurrentSheet(),
+        if (auto s = wxGetTextFromUser("Enter the sheet title", GetShow()->GetSheetNameOnCurrentSheet(),
                 GetShow()->GetSheetNameOnCurrentSheet(), this)
                 .ToStdString();
             !s.empty()) {
@@ -781,8 +720,7 @@ void CalChartFrame::OnSetBeats()
 {
     if (GetShow()) {
         std::string buf = std::format("{}", GetShow()->GetSheetBeatsOnCurrentSheet());
-        if (auto s = wxGetTextFromUser("Enter the number of beats",
-                GetShow()->GetSheetNameOnCurrentSheet(), buf, this);
+        if (auto s = wxGetTextFromUser("Enter the number of beats", GetShow()->GetSheetNameOnCurrentSheet(), buf, this);
             !s.empty()) {
             long val{};
             if (s.ToLong(&val)) {
@@ -796,8 +734,7 @@ void CalChartFrame::OnSetTempo()
 {
     if (GetShow()) {
         std::string buf = std::format("{}", GetShow()->GetSheetTempoOnCurrentSheet());
-        if (auto s = wxGetTextFromUser("Enter the tempo",
-                GetShow()->GetSheetNameOnCurrentSheet(), buf, this);
+        if (auto s = wxGetTextFromUser("Enter the tempo", GetShow()->GetSheetNameOnCurrentSheet(), buf, this);
             !s.empty()) {
             long val{};
             if (s.ToLong(&val) && val > 0) {
@@ -818,20 +755,15 @@ void CalChartFrame::OnEditBeatMap()
         BeatMapDialog dialog(beatInfos, this);
         if (dialog.ShowModal() == wxID_OK) {
             GetFieldView()->DoSetSheetsBeatInfoCommand(
-                CalChart::Ranges::ToVector<CalChart::SheetBeatInfo>(dialog.GetBeatSheetInfo() | std::views::transform([](auto&& beatInfoAndTempo) {
-                    return std::get<0>(beatInfoAndTempo);
-                })));
+                CalChart::Ranges::ToVector<CalChart::SheetBeatInfo>(dialog.GetBeatSheetInfo()
+                    | std::views::transform([](auto&& beatInfoAndTempo) { return std::get<0>(beatInfoAndTempo); })));
         }
     }
 }
 
 void CalChartFrame::OnSetMedia()
 {
-    wxFileDialog openFileDialog(
-        this,
-        "Open Music File",
-        "",
-        "",
+    wxFileDialog openFileDialog(this, "Open Music File", "", "",
         "Audio files (*.mp3;*.m4a;*.wav;*.aac)|*.mp3;*.m4a;*.wav;*.aac|All files (*.*)|*.*",
         wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 
@@ -839,18 +771,14 @@ void CalChartFrame::OnSetMedia()
         return;
     }
 
-    if (auto media = CalChart::ToFileData(openFileDialog.GetPath().utf8_string());
-        media) {
+    if (auto media = CalChart::ToFileData(std::filesystem::path{ openFileDialog.GetPath().utf8_string() }); media) {
         GetFieldView()->DoSetMediaCommand(std::move(*media));
     } else {
         wxMessageBox("Failed to read media file.", "Error", wxOK | wxICON_ERROR, this);
     }
 }
 
-void CalChartFrame::OnClearMedia()
-{
-    GetFieldView()->DoSetMediaCommand({});
-}
+void CalChartFrame::OnClearMedia() { GetFieldView()->DoSetMediaCommand({}); }
 
 void CalChartFrame::OnSetupMarchers()
 {
@@ -877,8 +805,7 @@ void CalChartFrame::OnMarcherPicker()
     if (!GetShow()) {
         return;
     }
-    if (auto selections = PromptUserToPickMarchers(this, *GetShow());
-        selections.has_value()) {
+    if (auto selections = PromptUserToPickMarchers(this, *GetShow()); selections.has_value()) {
         GetShow()->SetSelectionList(GetShow()->MakeSelectByLabels(*selections));
     }
 }
@@ -896,9 +823,9 @@ void CalChartFrame::OnEditCurveAssignments()
     if (!show) {
         return;
     }
-    if (auto curveAssignment = PromptUserForCurveAssignment(this, *show);
-        curveAssignment) {
-        GetFieldView()->DoAssignPointsToCurve(curveAssignment->first, GetShow()->GetPointsFromLabels(curveAssignment->second));
+    if (auto curveAssignment = PromptUserForCurveAssignment(this, *show); curveAssignment) {
+        GetFieldView()->DoAssignPointsToCurve(
+            curveAssignment->first, GetShow()->GetPointsFromLabels(curveAssignment->second));
     }
 }
 
@@ -977,13 +904,8 @@ void CalChartFrame::OnExportDebugDump()
     auto debugData = CalChart::DebugExportData::Create(show, animation, displayInfo);
 
     // Show file save dialog for compressed file
-    wxFileDialog saveFileDialog(
-        this,
-        "Export Debug Dump",
-        "",
-        "calchart-debug-dump.json.gz",
-        "Compressed JSON files (*.json.gz)|*.json.gz|All files (*.*)|*.*",
-        wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+    wxFileDialog saveFileDialog(this, "Export Debug Dump", "", "calchart-debug-dump.json.gz",
+        "Compressed JSON files (*.json.gz)|*.json.gz|All files (*.*)|*.*", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
     if (saveFileDialog.ShowModal() == wxID_CANCEL) {
         return;
@@ -1012,190 +934,84 @@ void CalChartFrame::OnExportDebugDump()
     auto compressedSize = compressedData.size();
     double ratio = (1.0 - (static_cast<double>(compressedSize) / originalSize)) * 100.0;
 
-    wxMessageBox(
-        wxString::Format(
-            "Debug dump successfully exported to:\n%s\n\n"
-            "Original size: %.2f MB\n"
-            "Compressed size: %.2f MB\n"
-            "Compression: %.1f%%",
-            filePath,
-            originalSize / 1024.0 / 1024.0,
-            compressedSize / 1024.0 / 1024.0,
-            ratio),
-        "Export Debug Dump",
-        wxOK | wxICON_INFORMATION,
-        this);
+    wxMessageBox(wxString::Format("Debug dump successfully exported to:\n%s\n\n"
+                                  "Original size: %.2f MB\n"
+                                  "Compressed size: %.2f MB\n"
+                                  "Compression: %.1f%%",
+                     filePath, originalSize / 1024.0 / 1024.0, compressedSize / 1024.0 / 1024.0, ratio),
+        "Export Debug Dump", wxOK | wxICON_INFORMATION, this);
 }
 
-void CalChartFrame::OnCmd_prev_ss(wxCommandEvent&)
-{
-    GetFieldView()->GoToPrevSheet();
-}
+void CalChartFrame::OnCmd_prev_ss(wxCommandEvent&) { GetFieldView()->GoToPrevSheet(); }
 
-void CalChartFrame::OnCmd_next_ss(wxCommandEvent&)
-{
-    GetFieldView()->GoToNextSheet();
-}
+void CalChartFrame::OnCmd_next_ss(wxCommandEvent&) { GetFieldView()->GoToNextSheet(); }
 
-void CalChartFrame::OnCmd_box(wxCommandEvent&)
-{
-    SetCurrentSelect(CalChart::Select::Box);
-}
+void CalChartFrame::OnCmd_box(wxCommandEvent&) { SetCurrentSelect(CalChart::Select::Box); }
 
-void CalChartFrame::OnCmd_poly(wxCommandEvent&)
-{
-    SetCurrentSelect(CalChart::Select::Poly);
-}
+void CalChartFrame::OnCmd_poly(wxCommandEvent&) { SetCurrentSelect(CalChart::Select::Poly); }
 
-void CalChartFrame::OnCmd_lasso(wxCommandEvent&)
-{
-    SetCurrentSelect(CalChart::Select::Lasso);
-}
+void CalChartFrame::OnCmd_lasso(wxCommandEvent&) { SetCurrentSelect(CalChart::Select::Lasso); }
 
-void CalChartFrame::OnCmd_swap(wxCommandEvent&)
-{
-    SetCurrentSelect(CalChart::Select::Swap);
-}
+void CalChartFrame::OnCmd_swap(wxCommandEvent&) { SetCurrentSelect(CalChart::Select::Swap); }
 
 void CalChartFrame::OnCmd_curve(wxCommandEvent&)
 {
     mCanvas->SetDrawingCurve(mSelectAndMoveToolBar->GetToolToggled(CALCHART__curve));
 }
 
-void CalChartFrame::OnCmd_move(wxCommandEvent&)
-{
-    SetCurrentMove(CalChart::MoveMode::Normal);
-}
+void CalChartFrame::OnCmd_move(wxCommandEvent&) { SetCurrentMove(CalChart::MoveMode::Normal); }
 
-void CalChartFrame::OnCmd_shape_line(wxCommandEvent&)
-{
-    SetCurrentMove(CalChart::MoveMode::ShapeLine);
-}
+void CalChartFrame::OnCmd_shape_line(wxCommandEvent&) { SetCurrentMove(CalChart::MoveMode::ShapeLine); }
 
-void CalChartFrame::OnCmd_shape_x(wxCommandEvent&)
-{
-    SetCurrentMove(CalChart::MoveMode::ShapeX);
-}
+void CalChartFrame::OnCmd_shape_x(wxCommandEvent&) { SetCurrentMove(CalChart::MoveMode::ShapeX); }
 
-void CalChartFrame::OnCmd_shape_cross(wxCommandEvent&)
-{
-    SetCurrentMove(CalChart::MoveMode::ShapeCross);
-}
+void CalChartFrame::OnCmd_shape_cross(wxCommandEvent&) { SetCurrentMove(CalChart::MoveMode::ShapeCross); }
 
-void CalChartFrame::OnCmd_shape_box(wxCommandEvent&)
-{
-    SetCurrentMove(CalChart::MoveMode::ShapeRectange);
-}
+void CalChartFrame::OnCmd_shape_box(wxCommandEvent&) { SetCurrentMove(CalChart::MoveMode::ShapeRectange); }
 
-void CalChartFrame::OnCmd_shape_ellipse(wxCommandEvent&)
-{
-    SetCurrentMove(CalChart::MoveMode::ShapeEllipse);
-}
+void CalChartFrame::OnCmd_shape_ellipse(wxCommandEvent&) { SetCurrentMove(CalChart::MoveMode::ShapeEllipse); }
 
-void CalChartFrame::OnCmd_shape_draw(wxCommandEvent&)
-{
-    SetCurrentMove(CalChart::MoveMode::ShapeDraw);
-}
+void CalChartFrame::OnCmd_shape_draw(wxCommandEvent&) { SetCurrentMove(CalChart::MoveMode::ShapeDraw); }
 
-void CalChartFrame::OnCmd_line(wxCommandEvent&)
-{
-    SetCurrentMove(CalChart::MoveMode::MoveLine);
-}
+void CalChartFrame::OnCmd_line(wxCommandEvent&) { SetCurrentMove(CalChart::MoveMode::MoveLine); }
 
-void CalChartFrame::OnCmd_rot(wxCommandEvent&)
-{
-    SetCurrentMove(CalChart::MoveMode::MoveRotate);
-}
+void CalChartFrame::OnCmd_rot(wxCommandEvent&) { SetCurrentMove(CalChart::MoveMode::MoveRotate); }
 
-void CalChartFrame::OnCmd_shear(wxCommandEvent&)
-{
-    SetCurrentMove(CalChart::MoveMode::MoveShear);
-}
+void CalChartFrame::OnCmd_shear(wxCommandEvent&) { SetCurrentMove(CalChart::MoveMode::MoveShear); }
 
-void CalChartFrame::OnCmd_reflect(wxCommandEvent&)
-{
-    SetCurrentMove(CalChart::MoveMode::MoveReflect);
-}
+void CalChartFrame::OnCmd_reflect(wxCommandEvent&) { SetCurrentMove(CalChart::MoveMode::MoveReflect); }
 
-void CalChartFrame::OnCmd_size(wxCommandEvent&)
-{
-    SetCurrentMove(CalChart::MoveMode::MoveSize);
-}
+void CalChartFrame::OnCmd_size(wxCommandEvent&) { SetCurrentMove(CalChart::MoveMode::MoveSize); }
 
-void CalChartFrame::OnCmd_genius(wxCommandEvent&)
-{
-    SetCurrentMove(CalChart::MoveMode::MoveGenius);
-}
+void CalChartFrame::OnCmd_genius(wxCommandEvent&) { SetCurrentMove(CalChart::MoveMode::MoveGenius); }
 
-void CalChartFrame::OnCmd_label_left(wxCommandEvent&)
-{
-    GetFieldView()->DoSetPointsLabel(false);
-}
+void CalChartFrame::OnCmd_label_left(wxCommandEvent&) { GetFieldView()->DoSetPointsLabel(false); }
 
-void CalChartFrame::OnCmd_label_right(wxCommandEvent&)
-{
-    GetFieldView()->DoSetPointsLabel(true);
-}
+void CalChartFrame::OnCmd_label_right(wxCommandEvent&) { GetFieldView()->DoSetPointsLabel(true); }
 
-void CalChartFrame::OnCmd_label_flip(wxCommandEvent&)
-{
-    GetFieldView()->DoSetPointsLabelFlip();
-}
+void CalChartFrame::OnCmd_label_flip(wxCommandEvent&) { GetFieldView()->DoSetPointsLabelFlip(); }
 
-void CalChartFrame::OnCmd_label_hide(wxCommandEvent&)
-{
-    GetFieldView()->DoSetPointsLabelVisibility(false);
-}
+void CalChartFrame::OnCmd_label_hide(wxCommandEvent&) { GetFieldView()->DoSetPointsLabelVisibility(false); }
 
-void CalChartFrame::OnCmd_label_show(wxCommandEvent&)
-{
-    GetFieldView()->DoSetPointsLabelVisibility(true);
-}
+void CalChartFrame::OnCmd_label_show(wxCommandEvent&) { GetFieldView()->DoSetPointsLabelVisibility(true); }
 
-void CalChartFrame::OnCmd_label_visibility_toggle(wxCommandEvent&)
-{
-    GetFieldView()->DoTogglePointsLabelVisibility();
-}
+void CalChartFrame::OnCmd_label_visibility_toggle(wxCommandEvent&) { GetFieldView()->DoTogglePointsLabelVisibility(); }
 
-void CalChartFrame::OnCmd_setsym0(wxCommandEvent&)
-{
-    GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_PLAIN);
-}
+void CalChartFrame::OnCmd_setsym0(wxCommandEvent&) { GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_PLAIN); }
 
-void CalChartFrame::OnCmd_setsym1(wxCommandEvent&)
-{
-    GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_SOL);
-}
+void CalChartFrame::OnCmd_setsym1(wxCommandEvent&) { GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_SOL); }
 
-void CalChartFrame::OnCmd_setsym2(wxCommandEvent&)
-{
-    GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_BKSL);
-}
+void CalChartFrame::OnCmd_setsym2(wxCommandEvent&) { GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_BKSL); }
 
-void CalChartFrame::OnCmd_setsym3(wxCommandEvent&)
-{
-    GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_SL);
-}
+void CalChartFrame::OnCmd_setsym3(wxCommandEvent&) { GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_SL); }
 
-void CalChartFrame::OnCmd_setsym4(wxCommandEvent&)
-{
-    GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_X);
-}
+void CalChartFrame::OnCmd_setsym4(wxCommandEvent&) { GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_X); }
 
-void CalChartFrame::OnCmd_setsym5(wxCommandEvent&)
-{
-    GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_SOLBKSL);
-}
+void CalChartFrame::OnCmd_setsym5(wxCommandEvent&) { GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_SOLBKSL); }
 
-void CalChartFrame::OnCmd_setsym6(wxCommandEvent&)
-{
-    GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_SOLSL);
-}
+void CalChartFrame::OnCmd_setsym6(wxCommandEvent&) { GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_SOLSL); }
 
-void CalChartFrame::OnCmd_setsym7(wxCommandEvent&)
-{
-    GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_SOLX);
-}
+void CalChartFrame::OnCmd_setsym7(wxCommandEvent&) { GetFieldView()->DoSetPointsSymbol(CalChart::SYMBOL_SOLX); }
 
 void CalChartFrame::OnChar(wxKeyEvent& event) { mCanvas->OnChar(event); }
 
@@ -1263,7 +1079,8 @@ void CalChartFrame::OnShowBackgroundImages()
 
 void CalChartFrame::OnCmd_GhostOption(wxCommandEvent&)
 {
-    auto selection = static_cast<GhostSource>(static_cast<wxChoice*>(FindWindow(CALCHART__GhostControls))->GetSelection());
+    auto selection
+        = static_cast<GhostSource>(static_cast<wxChoice*>(FindWindow(CALCHART__GhostControls))->GetSelection());
     return OnGhostOption(selection);
 }
 
@@ -1343,10 +1160,7 @@ void CalChartFrame::OnAdjustViews(size_t which)
     ChangePaneVisibility(!mAUIManager->GetPane(mLookupSubWindows.at(which)).IsShown(), which);
 }
 
-void CalChartFrame::OnSwapAnimation()
-{
-    ChangeMainFieldVisibility(!mMainFieldVisible);
-}
+void CalChartFrame::OnSwapAnimation() { ChangeMainFieldVisibility(!mMainFieldVisible); }
 
 void CalChartFrame::OnLaunchViewerPreview()
 {
@@ -1391,20 +1205,15 @@ void CalChartFrame::ChangeMainFieldVisibility(bool show)
     ShowFieldAndHideAnimation(mMainFieldVisible);
 }
 
-void CalChartFrame::OnResetReferencePoint()
-{
-    GetFieldView()->DoResetReferencePoint();
-}
+void CalChartFrame::OnResetReferencePoint() { GetFieldView()->DoResetReferencePoint(); }
 
-void CalChartFrame::OnCmd_ChangedColorPalette(wxCommandEvent&)
-{
-    GetFieldView()->OnUpdate(nullptr);
-}
+void CalChartFrame::OnCmd_ChangedColorPalette(wxCommandEvent&) { GetFieldView()->OnUpdate(nullptr); }
 
 void CalChartFrame::OnSolveTransition()
 {
     if (GetShow()) {
-        TransitionSolverFrame* transitionSolver = new TransitionSolverFrame(static_cast<CalChartDoc*>(GetDocument()), this, wxID_ANY, "Transition Solver");
+        TransitionSolverFrame* transitionSolver
+            = new TransitionSolverFrame(static_cast<CalChartDoc*>(GetDocument()), this, wxID_ANY, "Transition Solver");
         transitionSolver->Show();
     }
 }
@@ -1431,7 +1240,8 @@ void CalChartFrame::AppendShow()
 // Append a show with file selector
 void CalChartFrame::ImportContFile()
 {
-    if (auto s = wxFileSelector("Import Continuity", wxEmptyString, wxEmptyString, wxEmptyString, "*.txt").ToStdString();
+    if (auto s
+        = wxFileSelector("Import Continuity", wxEmptyString, wxEmptyString, wxEmptyString, "*.txt").ToStdString();
         !s.empty()) {
         GetFieldView()->DoImportPrintableContinuity(s);
     }
@@ -1502,15 +1312,9 @@ void CalChartFrame::zoom_callback(wxCommandEvent&)
     do_zoom(zoom_amount);
 }
 
-void CalChartFrame::OnZoomFit()
-{
-    do_zoom(mCanvas->ZoomToFitFactor());
-}
+void CalChartFrame::OnZoomFit() { do_zoom(mCanvas->ZoomToFitFactor()); }
 
-void CalChartFrame::OnCmd_ZoomIn(wxCommandEvent&)
-{
-    OnZoomIn();
-}
+void CalChartFrame::OnCmd_ZoomIn(wxCommandEvent&) { OnZoomIn(); }
 
 void CalChartFrame::OnZoomIn()
 {
@@ -1525,10 +1329,7 @@ void CalChartFrame::OnZoomIn()
     }
 }
 
-void CalChartFrame::OnCmd_ZoomOut(wxCommandEvent&)
-{
-    OnZoomOut();
-}
+void CalChartFrame::OnCmd_ZoomOut(wxCommandEvent&) { OnZoomOut(); }
 
 void CalChartFrame::OnZoomOut()
 {
@@ -1578,7 +1379,8 @@ std::string CalChartFrame::BeatStatusText() const
     auto curr = GetFieldView()->GetCurrentSheetNum() + 1;
     auto tempo = GetShow()->GetSheetTempoOnCurrentSheet();
 
-    return std::format("{}{} of {} \"{:.32}\" {} beats at {} bpm", GetShow()->IsModified() ? "* " : "", curr, num, name, beats, tempo);
+    return std::format(
+        "{}{} of {} \"{:.32}\" {} beats at {} bpm", GetShow()->IsModified() ? "* " : "", curr, num, name, beats, tempo);
 }
 
 std::string CalChartFrame::PointStatusText() const
@@ -1587,9 +1389,8 @@ std::string CalChartFrame::PointStatusText() const
     auto sl = show->GetSelectionList();
     std::string result = std::format("{} of {}", show->GetSelectionList().size(), show->GetNumPoints());
     std::set<std::string> instruments;
-    std::transform(sl.begin(), sl.end(), std::inserter(instruments, instruments.begin()), [&show](auto&& i) {
-        return show->GetPointInstrument(i);
-    });
+    std::transform(sl.begin(), sl.end(), std::inserter(instruments, instruments.begin()),
+        [&show](auto&& i) { return show->GetPointInstrument(i); });
     if (instruments.size()) {
         result += " [ ";
         auto firstTime = true;
@@ -1624,25 +1425,13 @@ void CalChartFrame::OnUpdate()
     refreshInUse();
 }
 
-const CalChartView* CalChartFrame::GetFieldView() const
-{
-    return static_cast<const CalChartView*>(GetView());
-}
+const CalChartView* CalChartFrame::GetFieldView() const { return static_cast<const CalChartView*>(GetView()); }
 
-CalChartView* CalChartFrame::GetFieldView()
-{
-    return static_cast<CalChartView*>(GetView());
-}
+CalChartView* CalChartFrame::GetFieldView() { return static_cast<CalChartView*>(GetView()); }
 
-const CalChartDoc* CalChartFrame::GetShow() const
-{
-    return static_cast<const CalChartDoc*>(GetDocument());
-}
+const CalChartDoc* CalChartFrame::GetShow() const { return static_cast<const CalChartDoc*>(GetDocument()); }
 
-CalChartDoc* CalChartFrame::GetShow()
-{
-    return static_cast<CalChartDoc*>(GetDocument());
-}
+CalChartDoc* CalChartFrame::GetShow() { return static_cast<CalChartDoc*>(GetDocument()); }
 
 void CalChartFrame::SetViewsOnComponents(CalChartView* view)
 {

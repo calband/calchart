@@ -223,7 +223,7 @@ void FieldCanvas::OnPaint(wxPaintEvent&, CalChart::Configuration const& config)
 
     // draw the move points dots
     auto origin = mView->GetShowFieldOffset();
-    auto drawCmds = mView->GeneratePhatomPointsDrawCommands(mUncommittedMovePoints);
+    auto drawCmds = mView->GeneratePhantomPointsDrawCommands(mUncommittedMovePoints);
     CalChart::append(drawCmds,
         GenerateShapeBasedCommands(mSelectTool, mMovePointsTool.get(), config));
 

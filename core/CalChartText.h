@@ -25,7 +25,9 @@
 #include "CalChartDrawCommand.h"
 #include "CalChartPrintContinuityLayout.h"
 
+#include <nlohmann/json.hpp>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace CalChart {
@@ -75,10 +77,13 @@ public:
     [[nodiscard]] auto GetOriginalLine() const { return mOriginalLine; }
     [[nodiscard]] auto GetPrintNumber() const { return mNumber; }
     [[nodiscard]] auto GetDrawCommands() const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto toJSON() const -> nlohmann::json;
 
 private:
     Textline_list mPrintChunks;
     std::string mOriginalLine;
     std::string mNumber;
 };
+
+[[nodiscard]] auto PrintContinuityFromJSON(nlohmann::json const&) -> PrintContinuity;
 }

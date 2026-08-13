@@ -22,6 +22,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <nlohmann/json.hpp>
 #include <vector>
 
 namespace CalChart::Draw {
@@ -53,5 +54,9 @@ struct ImageInfo {
 
 auto CreateImageInfo(Reader) -> std::pair<ImageInfo, Reader>;
 auto Serialize(ImageInfo const&) -> std::vector<std::byte>;
+
+// JSON serialization
+[[nodiscard]] auto ImageInfoToJSON(ImageInfo const&) -> nlohmann::json;
+[[nodiscard]] auto ImageInfoFromJSON(nlohmann::json const&) -> ImageInfo;
 
 }
