@@ -397,6 +397,8 @@ nlohmann::json CalChartDoc::toViewerBeatsJSON() const
     return j;
 }
 
+nlohmann::json CalChartDoc::toJSON() const { return mShow->toJSON(); }
+
 void CalChartDoc::FlushAllTextWindows()
 {
     CalChartDoc_FlushAllViews flushMod;

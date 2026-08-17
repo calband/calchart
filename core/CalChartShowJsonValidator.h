@@ -31,11 +31,14 @@ struct ValidationResult {
 
 /// Validate a JSON document against a CalChart show schema
 /// @param json The JSON document to validate
-/// @param schemaPath Path to the JSON schema file (typically schemas/show/v3.8/schema.json)
+/// @param schemas JSON schema (typically loaded from resources/common/show_schema_v1.json)
 /// @return ValidationResult containing errors and warnings
-/// @throws std::runtime_error if schema file cannot be loaded or is invalid
-[[nodiscard]] auto ValidateShowJson(
-    nlohmann::json const& json,
-    ShowSchemas const& schemas) -> ValidationResult;
+[[nodiscard]] auto ValidateShowJson(nlohmann::json const& json, nlohmann::json const& schemas) -> ValidationResult;
+
+/// Validate a JSON document against a CalChart show schema
+/// @param json The JSON document to validate
+/// @param schemas Map of formatVersion to JSON schema, will pick the "right one"
+/// @return ValidationResult containing errors and warnings
+[[nodiscard]] auto ValidateShowJson(nlohmann::json const& json, ShowSchemas const& schemas) -> ValidationResult;
 
 } // namespace CalChart

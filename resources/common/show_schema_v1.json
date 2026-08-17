@@ -1025,24 +1025,10 @@
               "$ref": "#/$defs/valueNode"
             },
             "stepsize1": {
-              "anyOf": [
-                {
-                  "$ref": "#/$defs/valueNode"
-                },
-                {
-                  "type": "null"
-                }
-              ]
+              "$ref": "#/$defs/valueNode"
             },
             "stepsize2": {
-              "anyOf": [
-                {
-                  "$ref": "#/$defs/valueNode"
-                },
-                {
-                  "type": "null"
-                }
-              ]
+              "$ref": "#/$defs/valueNode"
             },
             "pnt": {
               "$ref": "#/$defs/astPointNode"
@@ -1236,14 +1222,7 @@
               "$ref": "#/$defs/valueNode"
             },
             "facedir": {
-              "anyOf": [
-                {
-                  "$ref": "#/$defs/valueNode"
-                },
-                {
-                  "type": "null"
-                }
-              ]
+              "$ref": "#/$defs/valueNode"
             }
           },
           "required": [
@@ -1577,11 +1556,8 @@
             "$ref": "#/$defs/continuity"
           }
         },
-        "print_continuities": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/printContinuity"
-          }
+        "print_continuity": {
+          "$ref": "#/$defs/printContinuity"
         },
         "fermata": {
           "type": "array",

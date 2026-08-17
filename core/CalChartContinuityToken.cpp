@@ -2007,14 +2007,16 @@ auto ProcSet::fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcSet>
         std::make_unique<ProcSet>(std::move(varAsValueVar), ValueFromJSON(RequireField(json, "val", "ProcSet"))), json);
 }
 
-std::unique_ptr<Procedure> ProcSet::clone() const
+auto ProcSet::clone() const -> std::unique_ptr<Procedure>
 {
     // we need to make a copy of the var, then dynamically cast to std::unique_ptr<ValueVar>
     auto var_clone = var->clone();
     if (ValueVar* cast = dynamic_cast<ValueVar*>(var_clone.get())) {
         std::unique_ptr<ValueVar> t(cast);
         var_clone.release();
-        return std::make_unique<ProcSet>(std::move(t), val->clone());
+        auto result = std::make_unique<ProcSet>(std::move(t), val->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
     }
     throw std::runtime_error("ProcSet var was not of type ValueVar");
 }
@@ -3166,7 +3168,9 @@ auto ProcMarch::toJSON() const -> nlohmann::json
         { "stps", stps->toJSON() },
         { "dir", dir->toJSON() },
     };
-    json["facedir"] = facedir ? facedir->toJSON() : nlohmann::json(nullptr);
+    if (facedir) {
+        json["facedir"] = facedir->toJSON();
+    }
     return AddTokenLocation(std::move(json), *this);
 }
 

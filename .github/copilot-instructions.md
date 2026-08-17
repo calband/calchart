@@ -6,7 +6,9 @@ Focus: be practical and code-aware. The repository is a native C++ project using
 Quick facts
 - Build: CMake (top-level `CMakeLists.txt`). Core library in `src/core` (target `calchart_core`). GUI target `CalChart` in `src/`. CLI tool `calchart_cmd` lives in `calchart_cmd/` and is built on non-MSVC platforms.
 - Languages: C++ (C++20), Bison/Flex are used to generate parser code from `src/core/contgram.y` / `src/core/contscan.l`.
-- Tests: CTest-based tests in `tests/` and a `tests/sanity_tester.py` harness that invokes `calchart_cmd`.
+- Tests: CTest-based tests in `tests/` and test harnesses in `resources/tests/`:
+  - `sanity_tester.py` - Validates output consistency across parsing/animation/continuity/PostScript generation
+  - `json_roundtrip_tester.py` - Validates JSON export/import roundtrip fidelity (distinguishes unopenable files from JSON export bugs)
 - CI: GitHub Actions workflow at `.github/workflows/cmake.yml` runs cmake/configure/build/test and packages with CPack.
 
 What to change and why
@@ -18,7 +20,8 @@ Dev workflows (concrete commands)
   - `cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug`
   - `cmake --build build --config Debug`
 - Run tests: `ctest --test-dir build --output-on-failure` or from project root: `cmake --build build --target test`.
-- Run sanity harness: `python3 tests/sanity_tester.py -c ./build/calchart_cmd/calchart_cmd -d shows -g tests/gold.zip` (the script will default to `./build/calchart_cmd/calchart_cmd` if `-c` omitted).
+- Run sanity harness: `python3 resources/tests/sanity_tester.py -c ./build/calchart_cmd/calchart_cmd -d shows -g resources/tests/gold.zip` (the script will default to `./build/calchart_cmd/calchart_cmd` if `-c` omitted).
+- Run JSON roundtrip test: `python3 resources/tests/json_roundtrip_tester.py -d shows -c ./build/calchart_cmd/calchart_cmd -s resources/common/show_schema_v1.json` (validates that openable files export to valid JSON and roundtrip correctly).
 - macOS notes: useful setup script `scripts/osx-setup.sh` automates installing wxWidgets used historically. CI uses FetchContent to obtain dependencies; local dev may prefer system-installed wxWidgets.
 
 Debugging notes
@@ -87,7 +90,8 @@ Submitting changes / Pull requests
 - Before creating a PR run the basic validation locally:
   - Configure & build: `cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug && cmake --build build --config Debug`
   - Run unit tests: `ctest --test-dir build --output-on-failure`
-  - Run sanity harness (optional for changes touching parsing or output): `python3 tests/sanity_tester.py -c ./build/calchart_cmd/calchart_cmd -d shows -g tests/gold.zip`
+  - Run sanity harness (optional for changes touching parsing or output): `python3 resources/tests/sanity_tester.py -c ./build/calchart_cmd/calchart_cmd -d shows -g resources/tests/gold.zip`
+  - Run JSON roundtrip test (optional for changes touching JSON export/import): `python3 resources/tests/json_roundtrip_tester.py -d shows -c ./build/calchart_cmd/calchart_cmd -s resources/common/show_schema_v1.json`
 - In PRs, point reviewers to representative files changed (e.g., `src/core/contgram.y`, `src/CMakeLists.txt`, or `calchart_cmd/main.cpp`) and any commands to reproduce the change.
 
 If anything above is ambiguous or you need command examples for a platform, ask and I will expand with exact commands and small reproduction steps.

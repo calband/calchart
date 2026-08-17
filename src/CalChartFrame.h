@@ -54,7 +54,8 @@ class CalChartFrame : public wxDocChildFrame {
 
 public:
     // CalChartFrame will own the show that is passed in
-    CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configuration& config_, wxDocParentFrame* frame, const wxPoint& pos, const wxSize& size);
+    CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configuration& config_, wxDocParentFrame* frame,
+        const wxPoint& pos, const wxSize& size);
     ~CalChartFrame() override;
 
     void OnPrint();
@@ -63,6 +64,7 @@ public:
     void OnCmdPageSetup(wxCommandEvent& event);
     void OnExportViewerFile();
     void OnExportViewerBeats();
+    void OnExportShw2File();
     void OnCmdPreferences(wxCommandEvent& event);
     void OnInsertBefore();
     void OnInsertAfter();

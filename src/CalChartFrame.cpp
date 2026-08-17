@@ -211,6 +211,7 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChart::Configurat
                 [this] { OnExportViewerFile(); } },
             wxUI::Item{ "Export Viewer Beats...", "Export beats timing for the CalChart Online Viewer",
                 [this] { OnExportViewerBeats(); } },
+            wxUI::Item{ "Export to shw2...", "Export show to shw2 format", [this] { OnExportShw2File(); } },
             wxUI::Item{ wxID_PREFERENCES, "&Preferences\tCTRL-," },
             wxUI::Item{ wxID_CLOSE, "Close Window\tCTRL-W", "Close this window" },
             wxUI::Item{ wxID_EXIT, "&Quit\tCTRL-Q", "Quit CalChart" },
@@ -558,6 +559,29 @@ void CalChartFrame::OnExportViewerBeats()
     }
 
     GetShow()->exportViewerBeatsFile(std::filesystem::path{ saveFileDialog.GetPath().utf8_string() });
+}
+
+void CalChartFrame::OnExportShw2File()
+{
+    if (GetShow() == nullptr) {
+        return;
+    }
+
+    auto showTitle = GetShow()->GetTitle().ToStdString();
+    if (showTitle.empty()) {
+        showTitle = "untitled";
+    }
+
+    wxFileDialog saveFileDialog(this, _("Save shw2 file"), "", showTitle + ".shw2", "shw2 files (*.shw2)|*.shw2",
+        wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+    if (saveFileDialog.ShowModal() == wxID_CANCEL) {
+        return;
+    }
+
+    auto o = std::ofstream(std::filesystem::path{ saveFileDialog.GetPath().ToStdString() });
+
+    o << std::setw(0) << GetShow()->toJSON() << std::endl;
 }
 
 void CalChartFrame::OnCmdPreferences(wxCommandEvent&)
