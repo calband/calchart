@@ -64,7 +64,7 @@ add_subdirectory(src)
 # Top-level tests
 if(NOT MSVC)
   add_test(NAME CalChartVersion COMMAND $<TARGET_FILE:calchart_cmd> --version)
-  add_test(NAME SanityTest COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/resources/tests/sanity_tester.py -d ${CMAKE_CURRENT_SOURCE_DIR}/shows -g ${CMAKE_CURRENT_SOURCE_DIR}/resources/tests/gold.zip -c $<TARGET_FILE:calchart_cmd>)
+  add_test(NAME SanityTest COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/resources/tests/sanity_tester.py -d ${CMAKE_CURRENT_SOURCE_DIR}/resources/show_archive/known_good -g ${CMAKE_CURRENT_SOURCE_DIR}/resources/tests/gold.zip -c $<TARGET_FILE:calchart_cmd>)
 endif()
 
 # CPack section

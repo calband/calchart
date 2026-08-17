@@ -867,9 +867,9 @@ auto Show::toOnlineViewerJSON(Animation const& compiledShow) const -> nlohmann::
 
     std::vector<nlohmann::json> sheetData;
     auto allMovements = compiledShow.toOnlineViewerJSON();
-    for (auto index : std::views::iota(0UL, mSheets.size())) {
+    for (auto&& [index, sheet] : CalChart::Ranges::enumerate_view(SheetsInAnimation())) {
         auto thisMovement = GetMovement(ptLabels, allMovements.at(index));
-        sheetData.push_back(mSheets.at(index).toOnlineViewerJSON(index + 1, ptLabels, thisMovement));
+        sheetData.push_back(sheet.toOnlineViewerJSON(index + 1, ptLabels, thisMovement));
     }
 
     j["sheets"] = sheetData;
