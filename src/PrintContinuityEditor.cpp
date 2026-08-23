@@ -69,13 +69,8 @@ EVT_TIMER(PrintContinuityEditor_TimerExpiration, PrintContinuityEditor::OnSaveTi
 EVT_SIZE(PrintContinuityEditor::OnSizeEvent)
 END_EVENT_TABLE()
 
-PrintContinuityEditor::PrintContinuityEditor(wxWindow* parent,
-    CalChart::Configuration const& config,
-    wxWindowID id,
-    const wxPoint& pos,
-    const wxSize& size,
-    long style,
-    const wxString& name)
+PrintContinuityEditor::PrintContinuityEditor(wxWindow* parent, CalChart::Configuration const& config, wxWindowID id,
+    const wxPoint& pos, const wxSize& size, long style, const wxString& name)
     : super(parent, id, pos, size, style, name)
     , mTimer(new wxTimer(this, PrintContinuityEditor_TimerExpiration))
     , mConfig(config)
@@ -93,10 +88,7 @@ PrintContinuityEditor::PrintContinuityEditor(wxWindow* parent,
     Update();
 }
 
-PrintContinuityEditor::~PrintContinuityEditor()
-{
-    mTimer->Stop();
-}
+PrintContinuityEditor::~PrintContinuityEditor() { mTimer->Stop(); }
 
 void PrintContinuityEditor::CreateControls()
 {
@@ -109,19 +101,19 @@ void PrintContinuityEditor::CreateControls()
             wxUI::TextCtrl{ PrintContinuityEditor_PrintNumber }.withStyle(wxTE_PROCESS_ENTER),
             wxUI::Button{ wxID_HELP, "&Help" },
         },
-        wxUI::HSplitter{
-            wxUI::Factory{ [this](wxWindow* parent) { return new PrintContinuityPreview(parent, mConfig); } }.withProxy(mPrintContDisplay),
-            wxUI::Factory{ [](wxWindow* parent) { return new FancyTextWin(parent, PrintContinuityEditor_KeyPress); } }.withProxy(mUserInput) }
+        wxUI::HSplitter{ wxUI::Factory{ [this](wxWindow* parent) {
+                            return new PrintContinuityPreview(parent, mConfig);
+                        } }.withProxy(mPrintContDisplay),
+            wxUI::Factory{ [](wxWindow* parent) {
+                return new FancyTextWin(parent, PrintContinuityEditor_KeyPress);
+            } }.withProxy(mUserInput) }
             .withStashGravity(0.5)
             .withFlags(wxSizerFlags{ 1 }.Expand()),
     }
         .fitTo(this);
 }
 
-void PrintContinuityEditor::OnCmdHelp(wxCommandEvent&)
-{
-    CalChartSplash::Help();
-}
+void PrintContinuityEditor::OnCmdHelp(wxCommandEvent&) { CalChartSplash::Help(); }
 
 void PrintContinuityEditor::Update()
 {
@@ -131,8 +123,7 @@ void PrintContinuityEditor::Update()
 
 void PrintContinuityEditor::SetInsertionPoint(int x, int y)
 {
-    mUserInput->SetInsertionPoint(
-        mUserInput->XYToPosition((long)x - 1, (long)y - 1));
+    mUserInput->SetInsertionPoint(mUserInput->XYToPosition((long)x - 1, (long)y - 1));
     mUserInput->SetFocus();
 }
 
@@ -169,10 +160,10 @@ void PrintContinuityEditor::FlushText()
     auto current_sheet_num = mView->GetCurrentSheetNum();
     wxTextCtrl* text = (wxTextCtrl*)FindWindow(PrintContinuityEditor_PrintNumber);
     try {
-        if ((mUserInput->GetValue() != mView->GetSheetRawPrintContinuityOnCurrentSheet()) || (text->GetValue() != mView->GetSheetPrintNumberOnCurrentSheet())) {
+        if ((mUserInput->GetValue() != mView->GetSheetRawPrintContinuityOnCurrentSheet())
+            || (text->GetValue() != mView->GetSheetPrintNumberOnCurrentSheet())) {
             mView->DoSetPrintContinuity(
-                current_sheet_num, text->GetValue().ToStdString(),
-                mUserInput->GetValue().ToStdString());
+                current_sheet_num, text->GetValue().utf8_string(), mUserInput->GetValue().utf8_string());
         }
     } catch (const std::runtime_error& e) {
         wxString message = wxT("Error encountered:\n");

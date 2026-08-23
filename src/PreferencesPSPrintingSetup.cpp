@@ -129,19 +129,19 @@ bool PSPrintingSetUp::TransferDataFromWindow()
 {
     // read out the values from the window
     wxTextCtrl* text = (wxTextCtrl*)FindWindow(HEADFONT);
-    mFontNames[0] = text->GetValue().ToStdString();
+    mFontNames[0] = text->GetValue().utf8_string();
     text = (wxTextCtrl*)FindWindow(MAINFONT);
-    mFontNames[1] = text->GetValue().ToStdString();
+    mFontNames[1] = text->GetValue().utf8_string();
     text = (wxTextCtrl*)FindWindow(NUMBERFONT);
-    mFontNames[2] = text->GetValue().ToStdString();
+    mFontNames[2] = text->GetValue().utf8_string();
     text = (wxTextCtrl*)FindWindow(CONTFONT);
-    mFontNames[3] = text->GetValue().ToStdString();
+    mFontNames[3] = text->GetValue().utf8_string();
     text = (wxTextCtrl*)FindWindow(BOLDFONT);
-    mFontNames[4] = text->GetValue().ToStdString();
+    mFontNames[4] = text->GetValue().utf8_string();
     text = (wxTextCtrl*)FindWindow(ITALFONT);
-    mFontNames[5] = text->GetValue().ToStdString();
+    mFontNames[5] = text->GetValue().utf8_string();
     text = (wxTextCtrl*)FindWindow(BOLDITALFONT);
-    mFontNames[6] = text->GetValue().ToStdString();
+    mFontNames[6] = text->GetValue().utf8_string();
     text = (wxTextCtrl*)FindWindow(HEADERSIZE);
     text->GetValue().ToDouble(&mPrintValues[0]);
     text = (wxTextCtrl*)FindWindow(YARDSSIZE);

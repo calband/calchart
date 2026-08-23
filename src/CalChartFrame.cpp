@@ -456,7 +456,7 @@ void CalChartFrame::OnClose()
 
     // just to make sure we never end up hiding the Field
     ShowFieldAndHideAnimation(true);
-    mConfig.Set_CalChartFrameAUILayout_3_6_1(mAUIManager->SavePerspective().ToStdString());
+    mConfig.Set_CalChartFrameAUILayout_3_6_1(mAUIManager->SavePerspective().utf8_string());
     SetViewsOnComponents(nullptr);
 }
 
@@ -536,7 +536,7 @@ void CalChartFrame::OnExportViewerFile()
         return;
     }
 
-    GetShow()->exportViewerFile(std::filesystem::path{ saveFileDialog.GetPath().ToStdString() });
+    GetShow()->exportViewerFile(std::filesystem::path{ saveFileDialog.GetPath().utf8_string() });
 }
 
 void CalChartFrame::OnExportViewerBeats()
@@ -545,7 +545,7 @@ void CalChartFrame::OnExportViewerBeats()
         return;
     }
 
-    auto showTitle = GetShow()->GetTitle().ToStdString();
+    auto showTitle = GetShow()->GetTitle().utf8_string();
     if (showTitle.empty()) {
         showTitle = "untitled";
     }
@@ -557,7 +557,7 @@ void CalChartFrame::OnExportViewerBeats()
         return;
     }
 
-    GetShow()->exportViewerBeatsFile(std::filesystem::path{ saveFileDialog.GetPath().ToStdString() });
+    GetShow()->exportViewerBeatsFile(std::filesystem::path{ saveFileDialog.GetPath().utf8_string() });
 }
 
 void CalChartFrame::OnCmdPreferences(wxCommandEvent&)
@@ -709,7 +709,7 @@ void CalChartFrame::OnSetSheetTitle()
     if (GetShow()) {
         if (auto s = wxGetTextFromUser("Enter the sheet title", GetShow()->GetSheetNameOnCurrentSheet(),
                 GetShow()->GetSheetNameOnCurrentSheet(), this)
-                .ToStdString();
+                .utf8_string();
             !s.empty()) {
             GetFieldView()->DoSetSheetTitle(s);
         }
@@ -897,8 +897,8 @@ void CalChartFrame::OnExportDebugDump()
     displayInfo.screen_height = screenRect.GetHeight();
 
     // Get OS info
-    displayInfo.os_name = wxPlatformInfo::Get().GetOperatingSystemFamilyName().ToStdString();
-    displayInfo.os_version = wxPlatformInfo::Get().GetOperatingSystemDescription().ToStdString();
+    displayInfo.os_name = wxPlatformInfo::Get().GetOperatingSystemFamilyName().utf8_string();
+    displayInfo.os_version = wxPlatformInfo::Get().GetOperatingSystemDescription().utf8_string();
 
     // Create debug export data
     auto debugData = CalChart::DebugExportData::Create(show, animation, displayInfo);
@@ -919,7 +919,7 @@ void CalChartFrame::OnExportDebugDump()
     }
 
     // Save compressed data to file
-    std::string filePath = saveFileDialog.GetPath().ToStdString();
+    std::string filePath = saveFileDialog.GetPath().utf8_string();
     std::ofstream outFile(filePath, std::ios::binary);
     if (!outFile) {
         wxMessageBox("Failed to open file for writing: " + filePath, "Export Debug Dump", wxOK | wxICON_ERROR, this);
@@ -1113,7 +1113,7 @@ void CalChartFrame::OnGhostOption(GhostSource option)
 void CalChartFrame::OnCmd_InstrumentSelection(wxCommandEvent&)
 {
     auto choice = static_cast<wxChoice*>(FindWindow(CALCHART__InstrumentChoice));
-    auto selection = choice->GetString(choice->GetSelection()).ToStdString();
+    auto selection = choice->GetString(choice->GetSelection()).utf8_string();
     if (selection != "" && GetShow()) {
         GetShow()->SetSelectionList(GetShow()->MakeSelectByInstrument(selection));
     }
@@ -1122,7 +1122,7 @@ void CalChartFrame::OnCmd_InstrumentSelection(wxCommandEvent&)
 void CalChartFrame::OnCmd_SymbolSelection(wxCommandEvent&)
 {
     auto choice = static_cast<wxChoice*>(FindWindow(CALCHART__SymbolChoice));
-    auto selection = choice->GetString(choice->GetSelection()).ToStdString();
+    auto selection = choice->GetString(choice->GetSelection()).utf8_string();
     if (selection != "" && GetShow()) {
         GetShow()->SetSelectionList(GetShow()->MakeSelectByInstrument(selection));
     }
@@ -1131,7 +1131,7 @@ void CalChartFrame::OnCmd_SymbolSelection(wxCommandEvent&)
 void CalChartFrame::OnCmd_MarcherSelection(wxCommandEvent&)
 {
     auto choice = static_cast<wxChoice*>(FindWindow(CALCHART__MarcherChoice));
-    auto selection = choice->GetString(choice->GetSelection()).ToStdString();
+    auto selection = choice->GetString(choice->GetSelection()).utf8_string();
     if (selection != "" && GetShow()) {
         GetShow()->SetSelectionList(GetShow()->MakeSelectByLabel(selection));
     }
@@ -1241,7 +1241,7 @@ void CalChartFrame::AppendShow()
 void CalChartFrame::ImportContFile()
 {
     if (auto s
-        = wxFileSelector("Import Continuity", wxEmptyString, wxEmptyString, wxEmptyString, "*.txt").ToStdString();
+        = wxFileSelector("Import Continuity", wxEmptyString, wxEmptyString, wxEmptyString, "*.txt").utf8_string();
         !s.empty()) {
         GetFieldView()->DoImportPrintableContinuity(s);
     }

@@ -70,9 +70,8 @@ namespace {
         info.architecture = platform.GetBitnessName();
 
         // wxWidgets version
-        info.wxwidgets_version = wxString::Format("%d.%d.%d",
-            wxMAJOR_VERSION, wxMINOR_VERSION, wxRELEASE_NUMBER)
-                                     .ToStdString();
+        info.wxwidgets_version
+            = wxString::Format("%d.%d.%d", wxMAJOR_VERSION, wxMINOR_VERSION, wxRELEASE_NUMBER).utf8_string();
 
         // Display information
         auto display_count = wxDisplay::GetCount();
@@ -94,10 +93,9 @@ namespace {
             auto test_pixel = wxWindow::FromDIP(test_dip, nullptr);
 
             auto ss = std::stringstream{};
-            ss << display_count << " display(s), Primary: "
-               << geometry.width << "x" << geometry.height
-               << " @ " << dpi.x << " DPI, Scale: " << contentScaleFactor
-               << ", DIP(100px): " << test_dip << "DIP, FromDIP: " << test_pixel << "px";
+            ss << display_count << " display(s), Primary: " << geometry.width << "x" << geometry.height << " @ "
+               << dpi.x << " DPI, Scale: " << contentScaleFactor << ", DIP(100px): " << test_dip
+               << "DIP, FromDIP: " << test_pixel << "px";
             info.display_info = ss.str();
         } else {
             info.display_info = "No displays detected";
@@ -154,7 +152,7 @@ namespace {
 
         // Add additional document state
         info.additional_info["Document Modified"] = doc->IsModified() ? "Yes" : "No";
-        info.additional_info["Document Path"] = doc->GetFilename().ToStdString();
+        info.additional_info["Document Path"] = doc->GetFilename().utf8_string();
     }
 
 } // anonymous namespace

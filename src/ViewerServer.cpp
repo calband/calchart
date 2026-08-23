@@ -24,12 +24,12 @@ std::string GetViewerAssetsPath()
     // macOS: Assets in CalChart.app/Contents/Resources/viewer/
     wxString resourcesDir = wxStandardPaths::Get().GetResourcesDir();
     wxString viewerPath = resourcesDir + wxFILE_SEP_PATH + "viewer";
-    return viewerPath.ToStdString();
+    return viewerPath.utf8_string();
 #else
     // Linux/Windows: Assets relative to executable
     wxFileName exePath(wxStandardPaths::Get().GetExecutablePath());
     wxString viewerPath = exePath.GetPath() + wxFILE_SEP_PATH + "viewer";
-    return viewerPath.ToStdString();
+    return viewerPath.utf8_string();
 #endif
 #endif
 }
@@ -44,10 +44,7 @@ public:
     {
     }
 
-    ~Impl()
-    {
-        Stop();
-    }
+    ~Impl() { Stop(); }
 
     void Start(int port)
     {
@@ -167,50 +164,51 @@ public:
 
         // Serve static files (CSS, JS, images) from viewer assets directory
         // Works in both debug (from source) and release (from bundled Resources)
-        mServer->Get(R"(.+\.(css|js|png|jpg|jpeg|gif|svg|ico|json|woff|woff2|ttf|eot))", [](const httplib::Request& req, httplib::Response& res) {
-            auto viewerAssetsPath = GetViewerAssetsPath();
-            auto path = viewerAssetsPath + req.path;
+        mServer->Get(R"(.+\.(css|js|png|jpg|jpeg|gif|svg|ico|json|woff|woff2|ttf|eot))",
+            [](const httplib::Request& req, httplib::Response& res) {
+                auto viewerAssetsPath = GetViewerAssetsPath();
+                auto path = viewerAssetsPath + req.path;
 
-            wxLogDebug("ViewerServer: Static asset requested: %s", path.c_str());
+                wxLogDebug("ViewerServer: Static asset requested: %s", path.c_str());
 
-            std::ifstream file(path, std::ios::binary);
-            if (file) {
-                std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+                std::ifstream file(path, std::ios::binary);
+                if (file) {
+                    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
-                // Set content type based on extension
-                auto ext = req.path.substr(req.path.find_last_of('.') + 1);
-                std::string contentType = "application/octet-stream";
-                if (ext == "css")
-                    contentType = "text/css";
-                else if (ext == "js")
-                    contentType = "application/javascript";
-                else if (ext == "json")
-                    contentType = "application/json";
-                else if (ext == "png")
-                    contentType = "image/png";
-                else if (ext == "jpg" || ext == "jpeg")
-                    contentType = "image/jpeg";
-                else if (ext == "gif")
-                    contentType = "image/gif";
-                else if (ext == "svg")
-                    contentType = "image/svg+xml";
-                else if (ext == "ico")
-                    contentType = "image/x-icon";
-                else if (ext == "woff" || ext == "woff2")
-                    contentType = "font/woff";
-                else if (ext == "ttf")
-                    contentType = "font/ttf";
-                else if (ext == "eot")
-                    contentType = "application/vnd.ms-fontobject";
+                    // Set content type based on extension
+                    auto ext = req.path.substr(req.path.find_last_of('.') + 1);
+                    std::string contentType = "application/octet-stream";
+                    if (ext == "css")
+                        contentType = "text/css";
+                    else if (ext == "js")
+                        contentType = "application/javascript";
+                    else if (ext == "json")
+                        contentType = "application/json";
+                    else if (ext == "png")
+                        contentType = "image/png";
+                    else if (ext == "jpg" || ext == "jpeg")
+                        contentType = "image/jpeg";
+                    else if (ext == "gif")
+                        contentType = "image/gif";
+                    else if (ext == "svg")
+                        contentType = "image/svg+xml";
+                    else if (ext == "ico")
+                        contentType = "image/x-icon";
+                    else if (ext == "woff" || ext == "woff2")
+                        contentType = "font/woff";
+                    else if (ext == "ttf")
+                        contentType = "font/ttf";
+                    else if (ext == "eot")
+                        contentType = "application/vnd.ms-fontobject";
 
-                res.set_content(content, contentType.c_str());
-                res.status = 200;
-            } else {
-                wxLogWarning("ViewerServer: Static asset not found: %s", path.c_str());
-                res.status = 404;
-                res.set_content("File not found", "text/plain");
-            }
-        });
+                    res.set_content(content, contentType.c_str());
+                    res.status = 200;
+                } else {
+                    wxLogWarning("ViewerServer: Static asset not found: %s", path.c_str());
+                    res.status = 404;
+                    res.set_content("File not found", "text/plain");
+                }
+            });
         wxLogDebug("ViewerServer: Configured to serve static files from %s", GetViewerAssetsPath().c_str());
 
         // Start the server in a background thread
@@ -312,42 +310,18 @@ ViewerServer::ViewerServer()
 
 ViewerServer::~ViewerServer() = default;
 
-void ViewerServer::Start(int port)
-{
-    mImpl->Start(port);
-}
+void ViewerServer::Start(int port) { mImpl->Start(port); }
 
-void ViewerServer::Stop()
-{
-    mImpl->Stop();
-}
+void ViewerServer::Stop() { mImpl->Stop(); }
 
-bool ViewerServer::IsRunning() const
-{
-    return mImpl->IsRunning();
-}
+bool ViewerServer::IsRunning() const { return mImpl->IsRunning(); }
 
-int ViewerServer::GetPort() const
-{
-    return mImpl->GetPort();
-}
+int ViewerServer::GetPort() const { return mImpl->GetPort(); }
 
-void ViewerServer::SetCurrentDoc(CalChartDoc* doc)
-{
-    mImpl->SetCurrentDoc(doc);
-}
+void ViewerServer::SetCurrentDoc(CalChartDoc* doc) { mImpl->SetCurrentDoc(doc); }
 
-void ViewerServer::SetInjectedShowJson(std::string json)
-{
-    mImpl->SetInjectedShowJson(std::move(json));
-}
+void ViewerServer::SetInjectedShowJson(std::string json) { mImpl->SetInjectedShowJson(std::move(json)); }
 
-void ViewerServer::SetInjectedBeatsJson(std::string json)
-{
-    mImpl->SetInjectedBeatsJson(std::move(json));
-}
+void ViewerServer::SetInjectedBeatsJson(std::string json) { mImpl->SetInjectedBeatsJson(std::move(json)); }
 
-std::string ViewerServer::GetViewerUrl() const
-{
-    return "http://localhost:" + std::to_string(GetPort()) + "/";
-}
+std::string ViewerServer::GetViewerUrl() const { return "http://localhost:" + std::to_string(GetPort()) + "/"; }

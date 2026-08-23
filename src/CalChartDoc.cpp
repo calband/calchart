@@ -91,7 +91,7 @@ auto FindShowSchemas() -> CalChart::ShowSchemas
     CalChart::ShowSchemas schemas;
 
     while (found) {
-        auto filenameStr = filename.ToStdString();
+        auto filenameStr = filename.utf8_string();
         auto match = std::smatch{};
 
         // Extract version numbers from filename
@@ -108,7 +108,7 @@ auto FindShowSchemas() -> CalChart::ShowSchemas
 #endif
                 fullPath.Append(filename);
 
-                std::ifstream schemaFile(fullPath.ToStdString());
+                std::ifstream schemaFile(fullPath.utf8_string());
                 if (schemaFile.is_open()) {
                     nlohmann::json schemaJson;
                     schemaFile >> schemaJson;
@@ -369,7 +369,7 @@ nlohmann::json CalChartDoc::toViewerBeatsJSON() const
 {
     nlohmann::json j;
 
-    auto indexName = GetTitle().ToStdString();
+    auto indexName = GetTitle().utf8_string();
     if (indexName.empty()) {
         indexName = "untitled";
     }
@@ -763,7 +763,7 @@ auto CalChartDoc::PrintToPS(bool overview, int min_yards, std::set<size_t> const
     auto doContSheet = config_.Get_PrintPSDoContSheet();
 
     PrintShowToPS printShowToPS(*mShow, doLandscape, doCont, doContSheet, overview, min_yards, GetShowMode(), config_);
-    return printShowToPS(isPicked, GetTitle().ToStdString());
+    return printShowToPS(isPicked, GetTitle().utf8_string());
 }
 
 // CalChartDocCommand consist of the action to perform, and the reverse action to undo.

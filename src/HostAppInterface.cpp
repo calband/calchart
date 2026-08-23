@@ -22,7 +22,7 @@ struct CCAppServerConnection;
 struct CCAppServer : public wxServer {
     static auto GetServerName()
     {
-        auto name = (wxGetUserId() + wxStandardPaths::Get().GetExecutablePath()).ToStdString();
+        auto name = (wxGetUserId() + wxStandardPaths::Get().GetExecutablePath()).utf8_string();
         return std::to_string(static_cast<int16_t>(std::hash<std::string>{}(name)));
     }
 
@@ -43,10 +43,7 @@ struct CCAppServer : public wxServer {
     virtual ~CCAppServer() override;
     virtual wxConnectionBase* OnAcceptConnection(wxString const& topic) override;
 
-    void OpenFile(wxString const& filename)
-    {
-        mApp->OpenFile(filename);
-    }
+    void OpenFile(wxString const& filename) { mApp->OpenFile(filename); }
 
     // should only be called by the connection
     void DestroyConnection(CCAppServerConnection* connection)
@@ -101,7 +98,8 @@ struct CCAppServerConnection : public wxConnection {
     }
 
     // ServerConnection: OnPoke, ask the server to open a file.
-    virtual bool OnPoke(wxString const& topic, wxString const& item, void const* data, size_t size, wxIPCFormat format) override
+    virtual bool OnPoke(
+        wxString const& topic, wxString const& item, void const* data, size_t size, wxIPCFormat format) override
     {
         if (item == OPEN_FILE) {
             mServer->OpenFile(std::string(static_cast<char const*>(data), size - 1));
@@ -183,19 +181,16 @@ bool CCAppClient::Connect(wxString const& host, wxString const& service, wxStrin
     return IsConnected();
 }
 
-wxConnectionBase* CCAppClient::OnMakeConnection()
-{
-    return new CCAppClientConnection(this);
-}
+wxConnectionBase* CCAppClient::OnMakeConnection() { return new CCAppClientConnection(this); }
 
 // Server, Client, and Independent are all derived from HostAppInterface.
 // Mostly it's all boilerplate, with "smarts" done in the Make functions
 struct ServerSideHostAppInterface : public HostAppInterface {
-    static std::unique_ptr<HostAppInterface> Make(CalChartApp* app, StartStopFunc_t serverStartStop, StartStopFunc_t clientStartStop);
+    static std::unique_ptr<HostAppInterface> Make(
+        CalChartApp* app, StartStopFunc_t serverStartStop, StartStopFunc_t clientStartStop);
 
-    ServerSideHostAppInterface(std::unique_ptr<CCAppServer> server,
-        StartStopFunc_t serverStartStop,
-        StartStopFunc_t clientStartStop)
+    ServerSideHostAppInterface(
+        std::unique_ptr<CCAppServer> server, StartStopFunc_t serverStartStop, StartStopFunc_t clientStartStop)
         : HostAppInterface(serverStartStop, clientStartStop)
         , mServer(std::move(server))
     {
@@ -208,10 +203,7 @@ struct ServerSideHostAppInterface : public HostAppInterface {
         return true;
     }
 
-    virtual void OpenFile(const wxString& filename) override
-    {
-        mServer->OpenFile(filename);
-    }
+    virtual void OpenFile(const wxString& filename) override { mServer->OpenFile(filename); }
 
 private:
     std::unique_ptr<CCAppServer> mServer;
@@ -220,9 +212,8 @@ private:
 struct ClientSideHostAppInterface : public HostAppInterface {
     static std::unique_ptr<HostAppInterface> Make(StartStopFunc_t serverStartStop, StartStopFunc_t clientStartStop);
 
-    ClientSideHostAppInterface(std::unique_ptr<CCAppClient> client,
-        StartStopFunc_t serverStartStop,
-        StartStopFunc_t clientStartStop)
+    ClientSideHostAppInterface(
+        std::unique_ptr<CCAppClient> client, StartStopFunc_t serverStartStop, StartStopFunc_t clientStartStop)
         : HostAppInterface(serverStartStop, clientStartStop)
         , mClient(std::move(client))
     {
@@ -235,20 +226,17 @@ struct ClientSideHostAppInterface : public HostAppInterface {
         return false;
     }
 
-    virtual void OpenFile(const wxString& filename) override
-    {
-        mClient->OpenFile(filename);
-    }
+    virtual void OpenFile(const wxString& filename) override { mClient->OpenFile(filename); }
 
 private:
     std::unique_ptr<CCAppClient> mClient;
 };
 
 struct IndependentHostAppInterface : public HostAppInterface {
-    static std::unique_ptr<HostAppInterface> Make(CalChartApp* app, StartStopFunc_t serverStartStop, StartStopFunc_t clientStartStop);
+    static std::unique_ptr<HostAppInterface> Make(
+        CalChartApp* app, StartStopFunc_t serverStartStop, StartStopFunc_t clientStartStop);
 
-    IndependentHostAppInterface(CalChartApp* app, StartStopFunc_t serverStartStop,
-        StartStopFunc_t clientStartStop)
+    IndependentHostAppInterface(CalChartApp* app, StartStopFunc_t serverStartStop, StartStopFunc_t clientStartStop)
         : HostAppInterface(serverStartStop, clientStartStop)
         , mApp(app)
     {
@@ -268,8 +256,8 @@ private:
 };
 
 // Linch-pin function that ties everything together
-std::unique_ptr<HostAppInterface>
-HostAppInterface::Make(CalChartApp* app, StartStopFunc_t serverStartStop, StartStopFunc_t clientStartStop)
+std::unique_ptr<HostAppInterface> HostAppInterface::Make(
+    CalChartApp* app, StartStopFunc_t serverStartStop, StartStopFunc_t clientStartStop)
 {
 #ifdef __APPLE__
     return IndependentHostAppInterface::Make(app, serverStartStop, clientStartStop);
@@ -290,8 +278,8 @@ HostAppInterface::HostAppInterface(StartStopFunc_t serverStartStop, StartStopFun
 
 HostAppInterface::~HostAppInterface() { }
 
-std::unique_ptr<HostAppInterface>
-ServerSideHostAppInterface::Make(CalChartApp* app, StartStopFunc_t serverStartStop, StartStopFunc_t clientStartStop)
+std::unique_ptr<HostAppInterface> ServerSideHostAppInterface::Make(
+    CalChartApp* app, StartStopFunc_t serverStartStop, StartStopFunc_t clientStartStop)
 {
     auto server = CCAppServer::MakeServer(app);
     if (server != nullptr) {
@@ -300,9 +288,8 @@ ServerSideHostAppInterface::Make(CalChartApp* app, StartStopFunc_t serverStartSt
     return nullptr;
 }
 
-std::unique_ptr<HostAppInterface>
-ClientSideHostAppInterface::Make(StartStopFunc_t serverStartStop,
-    StartStopFunc_t clientStartStop)
+std::unique_ptr<HostAppInterface> ClientSideHostAppInterface::Make(
+    StartStopFunc_t serverStartStop, StartStopFunc_t clientStartStop)
 {
     auto client = CCAppClient::MakeClient();
     if (client != nullptr) {
@@ -311,8 +298,8 @@ ClientSideHostAppInterface::Make(StartStopFunc_t serverStartStop,
     return nullptr;
 }
 
-std::unique_ptr<HostAppInterface>
-IndependentHostAppInterface::Make(CalChartApp* app, StartStopFunc_t serverStartStop, StartStopFunc_t clientStartStop)
+std::unique_ptr<HostAppInterface> IndependentHostAppInterface::Make(
+    CalChartApp* app, StartStopFunc_t serverStartStop, StartStopFunc_t clientStartStop)
 {
     return std::make_unique<IndependentHostAppInterface>(app, serverStartStop, clientStartStop);
 }

@@ -50,7 +50,8 @@ END_EVENT_TABLE()
 IMPLEMENT_CLASS(SetupMarchers, wxDialog)
 
 SetupMarchers::SetupMarchers(CalChartDoc& shw, wxWindow* parent)
-    : super(parent, wxID_ANY, "Setup Marchers", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
+    : super(parent, wxID_ANY, "Setup Marchers", wxDefaultPosition, wxDefaultSize,
+          wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
     , mNumberColumns(8)
     , mShow(shw)
 {
@@ -101,8 +102,8 @@ static void LayoutShowInfo(wxWindow* parent, bool putLastRowButtons)
                 },
                 wxUI::HSizer{
                     wxUI::Text{ "&Columns:" },
-                    wxUI::SpinCtrl{ SetupMarchers_ID_COLUMNS_SPIN, std::pair{ 1, kMaxPoints }, 10 }
-                        .withStyle(wxSP_ARROW_KEYS),
+                    wxUI::SpinCtrl{ SetupMarchers_ID_COLUMNS_SPIN, std::pair{ 1, kMaxPoints }, 10 }.withStyle(
+                        wxSP_ARROW_KEYS),
                 },
                 wxUI::Choice{ SetupMarchers_ID_LABEL_TYPE, std::vector<wxString>{ wxT("Numbers"), wxT("Letters") } }
                     .bind([parent](auto& e) {
@@ -111,8 +112,8 @@ static void LayoutShowInfo(wxWindow* parent, bool putLastRowButtons)
                     }),
                 wxUI::HSizer{
                     wxUI::Text{ "P&oints per letter:" },
-                    wxUI::SpinCtrl{ SetupMarchers_ID_POINTS_PER_LETTER, std::pair{ 1, 99 }, 10 }
-                        .withStyle(wxSP_ARROW_KEYS),
+                    wxUI::SpinCtrl{ SetupMarchers_ID_POINTS_PER_LETTER, std::pair{ 1, 99 }, 10 }.withStyle(
+                        wxSP_ARROW_KEYS),
                 },
 
             },
@@ -135,8 +136,7 @@ static void LayoutShowInfo(wxWindow* parent, bool putLastRowButtons)
                 wxUI::Button{ wxID_CANCEL },
             },
         }
-    }
-        .fitTo(parent);
+    }.fitTo(parent);
 }
 
 static auto GenNumberLabels(int num)
@@ -169,7 +169,8 @@ static auto GenLetterLabels(int numPerLetter, int num, wxListBox const* label_le
             if (label_letters->IsSelected(letr)) {
                 auto n = std::min(num, numPerLetter);
                 for (auto i = 0; i < n; ++i) {
-                    results.push_back({ label_letters->GetString(letr).ToStdString() + std::to_string(i), kDefaultInstrument });
+                    results.push_back(
+                        { label_letters->GetString(letr).utf8_string() + std::to_string(i), kDefaultInstrument });
                 }
                 num -= n;
             }
@@ -186,7 +187,7 @@ static auto GenLetterLabels(int numPerLetter, int num, wxListBox const* label_le
                 } else {
                     buffer.Printf(wxT("%c%u"), 'A' + letr, i);
                 }
-                results.push_back({ buffer.ToStdString(), "" });
+                results.push_back({ buffer.utf8_string(), "" });
             }
             num -= n;
             ++letr;
@@ -213,10 +214,7 @@ static auto ValidateInfo(wxWindow* parent)
     return canDo;
 }
 
-void SetupMarchers::CreateControls()
-{
-    LayoutShowInfo(this, true);
-}
+void SetupMarchers::CreateControls() { LayoutShowInfo(this, true); }
 
 bool SetupMarchers::TransferDataToWindow()
 {

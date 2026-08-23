@@ -32,15 +32,11 @@
 ShowModeWizard::ShowModeWizard(wxWizard* parent)
     : wxWizardPageSimple(parent)
 {
-    wxUI::VSizer{
-        BasicSizerFlags(),
-        wxUI::Text{ "Choose a field to set your show:" },
-        wxUI::Choice{ CalChart::kShowModeDefaultValues | std::views::transform([](auto item) { return std::get<0>(item); }) }.withProxy(mChoice)
-    }
+    wxUI::VSizer{ BasicSizerFlags(), wxUI::Text{ "Choose a field to set your show:" },
+        wxUI::Choice{ CalChart::kShowModeDefaultValues | std::views::transform([](auto item) {
+            return std::get<0>(item);
+        }) }.withProxy(mChoice) }
         .fitTo(this);
 }
 
-std::string ShowModeWizard::GetValue()
-{
-    return mChoice->GetString(*mChoice).ToStdString();
-}
+std::string ShowModeWizard::GetValue() { return mChoice->GetString(*mChoice).utf8_string(); }

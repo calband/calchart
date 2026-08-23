@@ -33,7 +33,7 @@ auto GetEntry(wxConfigBase& config, std::string const& entry) -> std::string
     case wxConfigBase::Type_String: {
         auto def = wxString{};
         if (config.Read(entry, &def)) {
-            return def.ToStdString();
+            return def.utf8_string();
         }
     } break;
     case wxConfigBase::Type_Boolean: {
@@ -140,7 +140,7 @@ auto PrintConfigHelper(std::ostream& os, wxConfigBase& config, int depth) -> std
     result = config.GetFirstEntry(str, entry);
     while (result) {
         os << std::string(depth * 4 - 2, ' ') << str << " : ";
-        PrintEntry(os, config, str.ToStdString());
+        PrintEntry(os, config, str.utf8_string());
         os << "\n";
 
         result = config.GetNextEntry(str, entry);
@@ -169,7 +169,7 @@ void AddEntries(wxConfigBase& config, wxTreeListCtrl& ctrl, wxTreeListItem& root
     auto result = config.GetFirstEntry(str, entry);
     while (result) {
         auto item = ctrl.AppendItem(root, str);
-        ctrl.SetItemText(item, 1, GetEntry(config, str.ToStdString()));
+        ctrl.SetItemText(item, 1, GetEntry(config, str.utf8_string()));
         result = config.GetNextEntry(str, entry);
     }
 }
@@ -205,25 +205,20 @@ void ConstructConfig(wxConfigBase* config, wxTreeListCtrl& ctrl)
 }
 
 ConfigurationDebug::ConfigurationDebug(wxWindow* parent, wxConfigBase* config)
-    : ConfigurationDebug::super(parent, wxID_ANY, "Configuration Debug", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
+    : ConfigurationDebug::super(parent, wxID_ANY, "Configuration Debug", wxDefaultPosition, wxDefaultSize,
+          wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
     , mConfig(config)
 {
     std::cout << mConfig << "\n";
     wxUI::VSizer{
         BasicSizerFlags(),
-        wxUI::Factory{
-            ExpandSizerFlags(),
+        wxUI::Factory{ ExpandSizerFlags(),
             [this](wxWindow* parent) {
                 auto* tree = new wxTreeListCtrl(parent, wxID_ANY, wxDefaultPosition, { 400, 400 });
 
-                tree->AppendColumn("Key",
-                    wxCOL_WIDTH_AUTOSIZE,
-                    wxALIGN_LEFT,
-                    wxCOL_RESIZABLE | wxCOL_SORTABLE);
-                tree->AppendColumn("Value",
-                    tree->WidthFor(std::string(40, ' ')),
-                    wxALIGN_RIGHT,
-                    wxCOL_RESIZABLE | wxCOL_SORTABLE);
+                tree->AppendColumn("Key", wxCOL_WIDTH_AUTOSIZE, wxALIGN_LEFT, wxCOL_RESIZABLE | wxCOL_SORTABLE);
+                tree->AppendColumn(
+                    "Value", tree->WidthFor(std::string(40, ' ')), wxALIGN_RIGHT, wxCOL_RESIZABLE | wxCOL_SORTABLE);
                 ConstructConfig(mConfig, *tree);
                 return tree;
             } }

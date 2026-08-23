@@ -78,7 +78,9 @@ auto BitmapWithBandIcon(wxSize const& size)
 #if defined(__APPLE__) && (__APPLE__)
     const static auto kImageDir = wxStandardPaths::Get().GetResourcesDir().Append("/calchart.png");
 #else
-    const static auto kImageDir = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR wxT("resources") PATH_SEPARATOR wxT("calchart.png"));
+    const static auto kImageDir = wxFileName(wxStandardPaths::Get().GetExecutablePath())
+                                      .GetPath()
+                                      .Append(PATH_SEPARATOR wxT("resources") PATH_SEPARATOR wxT("calchart.png"));
 #endif
     if (image.LoadFile(kImageDir)) {
         if (size != wxDefaultSize) {
@@ -89,7 +91,8 @@ auto BitmapWithBandIcon(wxSize const& size)
     return wxBitmap(BITMAP_NAME(calchart));
 }
 
-CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, std::string const& title, CalChart::Configuration& config)
+CalChartSplash::CalChartSplash(
+    wxDocManager* manager, wxFrame* frame, std::string const& title, CalChart::Configuration& config)
     : super(manager, frame, wxID_ANY, title)
     , mConfig(config)
 {
@@ -108,45 +111,29 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, std::strin
             .withProxy(fileMenu),
         wxUI::Menu{
             "&Debug",
-            wxUI::Item{ "Stack Draw Playground", [this] {
-                           StackDrawPlayground(this).ShowModal();
-                       } },
-            wxUI::Item{ "Debug Configuration", [this] {
-                           ConfigurationDebug(this, wxConfigBase::Get()).ShowModal();
-                       } },
+            wxUI::Item{ "Stack Draw Playground", [this] { StackDrawPlayground(this).ShowModal(); } },
+            wxUI::Item{ "Debug Configuration", [this] { ConfigurationDebug(this, wxConfigBase::Get()).ShowModal(); } },
 #if wxUSE_WEBVIEW
-            wxUI::Item{ "wxWebView Demo", [this] {
-                           WebViewDemoDialog(this).ShowModal();
-                       } },
+            wxUI::Item{ "wxWebView Demo", [this] { WebViewDemoDialog(this).ShowModal(); } },
 #endif
-            wxUI::Item{ "Beat Map Playground", [this] {
-                           if (auto dialog = BeatMapDialog(BeatMapPlaygroundData(), this);
-                               dialog.ShowModal() == wxID_OK) {
+            wxUI::Item{ "Beat Map Playground",
+                [this] {
+                    if (auto dialog = BeatMapDialog(BeatMapPlaygroundData(), this); dialog.ShowModal() == wxID_OK) {
 #ifdef __clang__
-                               auto value = dialog.GetBeatSheetInfo();
-                               auto valueStr = std::format("{}", value);
-                               wxLogDebug("Beat Info: %s", valueStr.c_str());
+                        auto value = dialog.GetBeatSheetInfo();
+                        auto valueStr = std::format("{}", value);
+                        wxLogDebug("Beat Info: %s", valueStr.c_str());
 #endif
-                           }
-                       } },
-            wxUI::Item{ "Continuity Browser Playground", [this] {
-                           DebugContinuityBrowser(this, mConfig);
-                       } },
-            wxUI::Item{ "Field Thumbnail Playground", [this] {
-                           DebugFieldThumbnailBrowser(this, mConfig);
-                       } },
+                    }
+                } },
+            wxUI::Item{ "Continuity Browser Playground", [this] { DebugContinuityBrowser(this, mConfig); } },
+            wxUI::Item{ "Field Thumbnail Playground", [this] { DebugFieldThumbnailBrowser(this, mConfig); } },
         },
         wxUI::Menu{
             "&Help",
-            wxUI::Item{ wxID_ABOUT, "&About CalChart...", "Information about the program", [] {
-                           About();
-                       } },
-            wxUI::Item{ wxID_HELP, "&Help on CalChart...\tCTRL-H", "Help on using CalChart ", [] {
-                           Help();
-                       } },
-            wxUI::Item{ "Report a &Bug...\tCTRL-SHIFT-B", "Report a bug to GitHub", [] {
-                           ReportBug();
-                       } },
+            wxUI::Item{ wxID_ABOUT, "&About CalChart...", "Information about the program", [] { About(); } },
+            wxUI::Item{ wxID_HELP, "&Help on CalChart...\tCTRL-H", "Help on using CalChart ", [] { Help(); } },
+            wxUI::Item{ "Report a &Bug...\tCTRL-SHIFT-B", "Report a bug to GitHub", [] { ReportBug(); } },
         }
     }.fitTo(this);
 
@@ -162,29 +149,20 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, std::strin
     wxUI::VSizer{
         BasicSizerFlags(),
         wxUI::Bitmap{ BitmapWithBandIcon(GetLogoSize()) }.withFlags(ExpandSizerFlags()),
-        wxUI::Text{ "CalChart " CC_GIT_VERSION }
-            .withFont(fontTitle),
-        wxUI::Text{ std::string{ "Built with: " } + wxString{ wxVERSION_STRING }.ToStdString() }
-            .withFont(fontSubTitle),
-        wxUI::Line{}
-            .withSize({ GetLogoLineSize(), -1 }),
+        wxUI::Text{ "CalChart " CC_GIT_VERSION }.withFont(fontTitle),
+        wxUI::Text{ std::string{ "Built with: " } + wxString{ wxVERSION_STRING }.utf8_string() }.withFont(fontSubTitle),
+        wxUI::Line{}.withSize({ GetLogoLineSize(), -1 }),
         wxUI::HSizer{
             wxUI::Hyperlink{ "Check for latest.", "https://sourceforge.net/projects/calchart/" }
                 .withFont(fontSubTitle)
                 .withStyle(wxHL_DEFAULT_STYLE),
-            wxUI::Text{ "        " }
-                .withFont(fontSubTitle),
-            wxUI::Button{ "Report a Bug." }
-                .withFont(fontSubTitle)
-                .withStyle(wxHL_DEFAULT_STYLE)
-                .bind([]() {
-                    ReportBug();
-                }),
+            wxUI::Text{ "        " }.withFont(fontSubTitle),
+            wxUI::Button{ "Report a Bug." }.withFont(fontSubTitle).withStyle(wxHL_DEFAULT_STYLE).bind([]() {
+                ReportBug();
+            }),
         },
-        wxUI::Line{}
-            .withSize({ GetLogoLineSize(), -1 }),
-        wxUI::Text{ "Authors: Gurk Meeker, Richard Michael Powell" }
-            .withFont(fontSubTitle),
+        wxUI::Line{}.withSize({ GetLogoLineSize(), -1 }),
+        wxUI::Text{ "Authors: Gurk Meeker, Richard Michael Powell" }.withFont(fontSubTitle),
         wxUI::Text{ "Contributors: Brandon Chinn, Kevin Durand,\nNoah Gilmore, David Strachan-Olson, Allan Yu" }
             .withFont(fontSubSubTitle),
     }
@@ -230,21 +208,18 @@ void CalChartSplash::Help()
     helpDialog->Show();
     // Dialog is modeless and will delete itself on close
 #else
-    wxMessageBox(
-        "Help system is not available.\n\n"
-        "This build was compiled without wxWebView support.\n"
-        "Please refer to the online documentation at:\n"
-        "https://github.com/calband/calchart",
-        "Help Not Available",
-        wxOK | wxICON_INFORMATION);
+    wxMessageBox("Help system is not available.\n\n"
+                 "This build was compiled without wxWebView support.\n"
+                 "Please refer to the online documentation at:\n"
+                 "https://github.com/calband/calchart",
+        "Help Not Available", wxOK | wxICON_INFORMATION);
 #endif
 }
 
 void CalChartSplash::ReportBug()
 {
     // Create and show the bug report dialog
-    BugReportDialog dialog(wxCalChart::GetGlobalConfig(),
-        nullptr, dynamic_cast<wxFrame*>(wxGetApp().GetTopWindow()));
+    BugReportDialog dialog(wxCalChart::GetGlobalConfig(), nullptr, dynamic_cast<wxFrame*>(wxGetApp().GetTopWindow()));
     dialog.ShowModal();
 }
 

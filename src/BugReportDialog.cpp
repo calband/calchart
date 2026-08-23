@@ -42,8 +42,7 @@ int PromptForTokenOrBrowser(wxWindow* parent)
         "  We'll open GitHub in your browser with a pre-filled issue form.\n"
         "  You can review and submit it there.\n\n"
         "Which would you prefer?",
-        "Submit Bug Report",
-        wxYES_NO | wxCANCEL | wxICON_INFORMATION);
+        "Submit Bug Report", wxYES_NO | wxCANCEL | wxICON_INFORMATION);
 
     dlg.SetYesNoLabels("Enter token", "Open in browser");
     return dlg.ShowModal();
@@ -73,19 +72,16 @@ void OpenBugReportInBrowser(CalChart::BugReport const& report)
     }
 
     // Build the GitHub issue URL
-    wxString url = wxString::FromUTF8(
-        "https://github.com/calband/calchart/issues/new"
-        "?title="
+    wxString url = wxString::FromUTF8("https://github.com/calband/calchart/issues/new"
+                                      "?title="
         + report.title + "&body=" + encoded_body);
 
     // Open the URL in the default browser
     wxLaunchDefaultBrowser(url);
 
-    wxMessageBox(
-        "Your browser is opening a new GitHub issue form with your bug report pre-filled.\n\n"
-        "You can review the content and click 'Submit new issue' to file the report.",
-        "Opening GitHub",
-        wxOK | wxICON_INFORMATION);
+    wxMessageBox("Your browser is opening a new GitHub issue form with your bug report pre-filled.\n\n"
+                 "You can review the content and click 'Submit new issue' to file the report.",
+        "Opening GitHub", wxOK | wxICON_INFORMATION);
 }
 
 constexpr auto minLargeWidth = 400;
@@ -111,13 +107,11 @@ GitHubTokenDialog::GitHubTokenDialog(wxFrame* parent)
 
     wxUI::VSizer{
         wxSizerFlags{}.Border(wxALL, 5).Expand(),
-        wxUI::Text{ "Create a GitHub Personal Access Token" }
-            .withFont(wxFontInfo(12).Bold()),
+        wxUI::Text{ "Create a GitHub Personal Access Token" }.withFont(wxFontInfo(12).Bold()),
         wxUI::Text{ "To submit bug reports directly, create a classic token:" },
         wxUI::VSizer{
             wxSizerFlags{}.Border(wxALL, 5).Align(wxLEFT | wxRIGHT | wxTOP),
-            wxUI::Hyperlink{
-                "1. Go to GitHub Token Settings",
+            wxUI::Hyperlink{ "1. Go to GitHub Token Settings",
                 "https://github.com/settings/tokens/new?scopes=public_repo&description=CalChart%20FileABug%20Token" },
             wxUI::Text{ "2. Click 'Generate new token (classic)'" },
             wxUI::Text{ "3. Select only the 'public_repo' scope" },
@@ -126,10 +120,7 @@ GitHubTokenDialog::GitHubTokenDialog(wxFrame* parent)
         },
         wxUI::Text{ "" }, // spacer
         wxUI::Text{ "Paste your token here:" },
-        wxUI::TextCtrl{}
-            .withProxy(mTokenCtrl)
-            .withWidth(500)
-            .withFlags(wxSizerFlags{}.Expand()),
+        wxUI::TextCtrl{}.withProxy(mTokenCtrl).withWidth(500).withFlags(wxSizerFlags{}.Expand()),
         wxUI::Line{},
         wxUI::HSizer{
             wxSizerFlags{}.Border(wxALL, 5).Left(),
@@ -140,10 +131,7 @@ GitHubTokenDialog::GitHubTokenDialog(wxFrame* parent)
         .fitTo(this);
 }
 
-auto GitHubTokenDialog::GetToken() const -> std::string
-{
-    return mTokenCtrl->GetValue().ToStdString();
-}
+auto GitHubTokenDialog::GetToken() const -> std::string { return *mTokenCtrl; }
 
 BEGIN_EVENT_TABLE(BugReportDialog, wxDialog)
 EVT_BUTTON(wxID_OK, BugReportDialog::OnSubmit)
@@ -152,11 +140,9 @@ END_EVENT_TABLE()
 IMPLEMENT_CLASS(BugReportDialog, wxDialog)
 
 BugReportDialog::BugReportDialog(
-    CalChart::Configuration& config,
-    const CalChartDoc* doc,
-    wxFrame* parent,
-    std::string const& title)
-    : super{ parent, wxID_ANY, title, wxDefaultPosition, { minLargeWidth * 2, minLargeHeight * 2 }, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU }
+    CalChart::Configuration& config, const CalChartDoc* doc, wxFrame* parent, std::string const& title)
+    : super{ parent, wxID_ANY, title, wxDefaultPosition, { minLargeWidth * 2, minLargeHeight * 2 },
+        wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU }
     , mConfig{ config }
     , mDoc(doc)
     , mDiagnosticInfo{ wxCalChart::CollectDiagnosticInfo(mDoc, wxGetApp().GetLogBuffer()) }
@@ -176,10 +162,7 @@ BugReportDialog::BugReportDialog(
         wxUI::Text{ "" }, // spacer
         // Title
         wxUI::Text{ "Title*:" },
-        wxUI::TextCtrl{}
-            .withWidth(minLargeWidth)
-            .withFlags(wxSizerFlags{}.Expand())
-            .withProxy(text_title),
+        wxUI::TextCtrl{}.withWidth(minLargeWidth).withFlags(wxSizerFlags{}.Expand()).withProxy(text_title),
         // Description
         wxUI::Text{ "Description*:" },
         wxUI::TextCtrl{}
@@ -198,21 +181,16 @@ BugReportDialog::BugReportDialog(
             .withProxy(text_steps),
         // Email (optional)
         wxUI::Text{ "Email (optional, for follow-up):" },
-        wxUI::TextCtrl{}
-            .withWidth(minLargeWidth)
-            .withFlags(wxSizerFlags{}.Expand())
-            .withProxy(text_email),
+        wxUI::TextCtrl{}.withWidth(minLargeWidth).withFlags(wxSizerFlags{}.Expand()).withProxy(text_email),
         wxUI::Line{},
         // System Information
         wxUI::Text{ "Diagnostic Information (checked = included in report):" },
         wxUI::CheckBox{ "Include system information (OS, version, CalChart version, etc.)" }
             .withProxy(check_system_info)
-            .bind(
-                [this]() { UpdateDiagnosticInfoDisplay(); }),
+            .bind([this]() { UpdateDiagnosticInfoDisplay(); }),
         wxUI::CheckBox{ "Include current show information (sheets, marchers, modes, etc.)" }
             .withProxy(check_show_info)
-            .bind(
-                [this]() { UpdateDiagnosticInfoDisplay(); }),
+            .bind([this]() { UpdateDiagnosticInfoDisplay(); }),
         wxUI::Text{ "Preview of information to be sent:" },
         wxUI::TextCtrl{}
             .withHeight(minLargeHeight)
@@ -224,8 +202,7 @@ BugReportDialog::BugReportDialog(
         // Buttons
         wxUI::HSizer{
             wxUI::StretchSpacer{},
-            wxUI::Button{ wxID_CANCEL, "Cancel" }
-                .setDefault(),
+            wxUI::Button{ wxID_CANCEL, "Cancel" }.setDefault(),
             wxUI::Spacer{ 5 },
             wxUI::Button{ wxID_OK, "Submit" },
             wxUI::Spacer{ 5 },
@@ -262,12 +239,12 @@ auto BugReportDialog::TransferDataFromWindow() -> bool
     }
 
     // Get values from controls
-    mBugReportData.title = text_title->GetValue().ToStdString();
-    mBugReportData.description = text_description->GetValue().ToStdString();
-    mBugReportData.steps_to_reproduce = text_steps->GetValue().ToStdString();
-    mBugReportData.email = text_email->GetValue().ToStdString();
-    mBugReportData.include_system_info = check_system_info->GetValue();
-    mBugReportData.include_show = check_show_info->GetValue();
+    mBugReportData.title = *text_title;
+    mBugReportData.description = *text_description;
+    mBugReportData.steps_to_reproduce = *text_steps;
+    mBugReportData.email = *text_email;
+    mBugReportData.include_system_info = *check_system_info;
+    mBugReportData.include_show = *check_show_info;
 
     return true;
 }
@@ -276,13 +253,15 @@ auto BugReportDialog::Validate() -> bool
 {
     // Check that title is not empty
     if (text_title->GetValue().IsEmpty()) {
-        wxMessageDialog(this, "Please enter a title for your bug report.", "CalChart Error", wxOK | wxICON_ERROR).ShowModal();
+        wxMessageDialog(this, "Please enter a title for your bug report.", "CalChart Error", wxOK | wxICON_ERROR)
+            .ShowModal();
         return false;
     }
 
     // Check that description is not empty
     if (text_description->GetValue().IsEmpty()) {
-        wxMessageDialog(this, "Please enter a description of the bug.", "CalChart Error", wxOK | wxICON_ERROR).ShowModal();
+        wxMessageDialog(this, "Please enter a description of the bug.", "CalChart Error", wxOK | wxICON_ERROR)
+            .ShowModal();
         return false;
     }
 
@@ -291,7 +270,9 @@ auto BugReportDialog::Validate() -> bool
         auto email = text_email->GetValue();
         // Simple email validation - check for @ and at least one dot
         if (email.Find('@') == wxNOT_FOUND || email.Find('.') == wxNOT_FOUND) {
-            wxMessageDialog(this, "Please enter a valid email address or leave it blank.", "CalChart Error", wxOK | wxICON_ERROR).ShowModal();
+            wxMessageDialog(
+                this, "Please enter a valid email address or leave it blank.", "CalChart Error", wxOK | wxICON_ERROR)
+                .ShowModal();
             return false;
         }
     }
@@ -357,8 +338,7 @@ void BugReportDialog::OnSubmit(wxCommandEvent&)
     std::string token;
 
     // 1. Try environment variable first
-    if (auto* token_env = std::getenv("CALCHART_GITHUB_TOKEN");
-        token_env && std::string(token_env).length() > 0) {
+    if (auto* token_env = std::getenv("CALCHART_GITHUB_TOKEN"); token_env && std::string(token_env).length() > 0) {
         token = token_env;
     }
 
@@ -417,30 +397,28 @@ void BugReportDialog::OnSubmit(wxCommandEvent&)
             switch (status) {
             case CalChart::IssueSubmissionStatus::Success:
                 if (!issue_url.empty()) {
-                    wxMessageBox(
-                        wxString::Format("Bug report submitted successfully!\n\nIssue: %s", issue_url),
-                        "Success",
-                        wxOK | wxICON_INFORMATION);
+                    wxMessageBox(wxString::Format("Bug report submitted successfully!\n\nIssue: %s", issue_url),
+                        "Success", wxOK | wxICON_INFORMATION);
                     EndModal(wxID_OK);
                 } else {
-                    wxMessageBox(
-                        error_message,
-                        "Fallback: Copied to Clipboard",
-                        wxOK | wxICON_INFORMATION);
+                    wxMessageBox(error_message, "Fallback: Copied to Clipboard", wxOK | wxICON_INFORMATION);
                     EndModal(wxID_OK);
                 }
                 break;
 
             case CalChart::IssueSubmissionStatus::NetworkError:
                 wxMessageBox(
-                    wxString::Format("Network error: %s\n\nTip: Make sure you have internet access and the GitHub API is reachable.", error_message),
-                    "Network Error",
-                    wxOK | wxICON_ERROR);
+                    wxString::Format(
+                        "Network error: %s\n\nTip: Make sure you have internet access and the GitHub API is reachable.",
+                        error_message),
+                    "Network Error", wxOK | wxICON_ERROR);
                 break;
 
             case CalChart::IssueSubmissionStatus::ApiError: {
                 // Check if this is an expired token error
-                auto is_expired = error_message.find("token") != std::string::npos && (error_message.find("expir") != std::string::npos || error_message.find("expired") != std::string::npos);
+                auto is_expired = error_message.find("token") != std::string::npos
+                    && (error_message.find("expir") != std::string::npos
+                        || error_message.find("expired") != std::string::npos);
                 auto is_auth_error = error_message.find("Authentication failed") != std::string::npos;
 
                 if (is_expired || is_auth_error) {
@@ -451,26 +429,21 @@ void BugReportDialog::OnSubmit(wxCommandEvent&)
                     wxCommandEvent evt;
                     OnSubmit(evt);
                 } else {
-                    wxMessageBox(
-                        wxString::Format("GitHub API error: %s\n\nTip: Try using 'Open in browser' instead to file the issue manually.", error_message),
-                        "API Error",
-                        wxOK | wxICON_ERROR);
+                    wxMessageBox(wxString::Format("GitHub API error: %s\n\nTip: Try using 'Open in browser' instead to "
+                                                  "file the issue manually.",
+                                     error_message),
+                        "API Error", wxOK | wxICON_ERROR);
                 }
                 break;
             }
 
             case CalChart::IssueSubmissionStatus::InvalidInput:
                 wxMessageBox(
-                    wxString::Format("Invalid input: %s", error_message),
-                    "Invalid Input",
-                    wxOK | wxICON_ERROR);
+                    wxString::Format("Invalid input: %s", error_message), "Invalid Input", wxOK | wxICON_ERROR);
                 break;
 
             case CalChart::IssueSubmissionStatus::UnknownError:
-                wxMessageBox(
-                    wxString::Format("Unknown error: %s", error_message),
-                    "Error",
-                    wxOK | wxICON_ERROR);
+                wxMessageBox(wxString::Format("Unknown error: %s", error_message), "Error", wxOK | wxICON_ERROR);
                 break;
             }
         },

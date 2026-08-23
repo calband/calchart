@@ -31,14 +31,13 @@
 #include <stdexcept>
 #include <vector>
 
+#include "CalChartUtils.h"
 #include "ccvers.h"
 
 namespace CalChart {
 
-struct Version_3_3_and_earlier {
-};
-struct Current_version_and_later {
-};
+struct Version_3_3_and_earlier { };
+struct Current_version_and_later { };
 
 // clang-format off
 // Description of the CalChart file format layout, in modified Extended
@@ -266,7 +265,8 @@ class CC_FileException : public std::runtime_error {
         auto rawd = std::array<std::byte, 4>{};
         details::put_big_long(rawd.data(), nameID);
         auto buf = std::stringstream{};
-        buf << "Wrong ID read:  Read " << std::to_integer<uint8_t>(rawd[0]) << std::to_integer<uint8_t>(rawd[1]) << std::to_integer<uint8_t>(rawd[2]) << std::to_integer<uint8_t>(rawd[3]);
+        buf << "Wrong ID read:  Read " << std::to_integer<uint8_t>(rawd[0]) << std::to_integer<uint8_t>(rawd[1])
+            << std::to_integer<uint8_t>(rawd[2]) << std::to_integer<uint8_t>(rawd[3]);
         buf << "\n";
         buf << "Check to make sure you are on the latest version of CalChart\n";
         return buf.str();
@@ -294,17 +294,14 @@ namespace Parser {
         return os << char(p.d >> 24) << char(p.d >> 16) << char(p.d >> 8) << char(p.d >> 0);
     }
 
-    template <typename Iter>
-    void DoRecursiveParsing(std::ostream& os, const std::string& prefix, Iter begin, Iter end)
+    template <typename Iter> void DoRecursiveParsing(std::ostream& os, const std::string& prefix, Iter begin, Iter end)
     {
         auto table = ParseOutLabels(begin, end);
         auto counter = std::map<uint32_t, int>{};
         for (auto& i : table) {
             os << prefix << "found " << PrintHeader{ std::get<0>(i) } << "\n";
-            os << prefix << counter[std::get<0>(i)]++ << "\tsize " << std::get<2>(i)
-               << "\n";
-            DoRecursiveParsing(os, prefix + "  ", std::get<1>(i),
-                std::get<1>(i) + std::get<2>(i));
+            os << prefix << counter[std::get<0>(i)]++ << "\tsize " << std::get<2>(i) << "\n";
+            DoRecursiveParsing(os, prefix + "  ", std::get<1>(i), std::get<1>(i) + std::get<2>(i));
         }
     }
 
@@ -350,8 +347,7 @@ namespace Parser {
         d.insert(d.end(), std::begin(rawd), std::end(rawd));
     }
 
-    template <typename T>
-    void Append(std::vector<std::byte>& d, std::vector<T> const& s)
+    template <typename T> void Append(std::vector<std::byte>& d, std::vector<T> const& s)
     {
         for (auto&& i : s) {
             Append(d, i);
@@ -370,15 +366,13 @@ namespace Parser {
         d.insert(d.end(), s.begin(), s.end());
     }
 
-    template <typename T, typename U>
-    void AppendAndNullTerminate(T& d, const U& s)
+    template <typename T, typename U> void AppendAndNullTerminate(T& d, const U& s)
     {
         Append(d, s);
         Append(d, uint8_t{ 0 });
     }
 
-    template <typename T>
-    auto Construct_block(uint32_t type, const T& data) -> std::vector<std::byte>
+    template <typename T> auto Construct_block(uint32_t type, const T& data) -> std::vector<std::byte>
     {
         std::vector<std::byte> result;
         Append(result, type);
@@ -426,7 +420,7 @@ public:
     [[nodiscard]] auto first(std::size_t n) const -> Reader
     {
         if (size() < n) {
-            throw std::runtime_error(std::string("not enough data for first.  Need ") + std::to_string(n) + ", currently have " + std::to_string(size()));
+            throw std::runtime_error(std::format("not enough data for first.  Need {}, currently have {}", n, size()));
         }
         return Reader(data.first(n), version);
     }
@@ -438,19 +432,16 @@ public:
         return copy;
     }
 
-    template <typename T>
-    auto Peek() const -> T;
+    template <typename T> auto Peek() const -> T;
 
-    template <typename T>
-    auto Get() -> T
+    template <typename T> auto Get() -> T
     {
         auto result = Peek<T>();
         increment(sizeof(T));
         return result;
     }
 
-    template <typename T>
-    auto GetVector() -> std::vector<T>;
+    template <typename T> auto GetVector() -> std::vector<T>;
 
     auto ParseOutLabels() -> std::vector<std::tuple<uint32_t, Reader>>
     {
@@ -520,17 +511,15 @@ public:
         throw CC_FileException(inname);
     }
 
-    static auto parseVersion(int version) -> std::tuple<int, int>
-    {
-        return { version >> 8, version & 0xFF };
-    }
+    static auto parseVersion(int version) -> std::tuple<int, int> { return { version >> 8, version & 0xFF }; }
 
 private:
     // privateSubspan
     void increment(std::size_t n)
     {
         if (data.size() < n) {
-            throw std::runtime_error(std::string("not enough data for subspan.  Need ") + std::to_string(n) + ", currently have " + std::to_string(size()));
+            throw std::runtime_error(
+                std::format("not enough data for subspan.  Need {}, currently have {}", n, size()));
         }
         data = data.subspan(n);
     }
@@ -539,21 +528,21 @@ private:
     uint32_t version;
 };
 
-template <>
-inline auto Reader::Peek<std::byte>() const -> std::byte
+template <> inline auto Reader::Peek<std::byte>() const -> std::byte
 {
     if (size() < sizeof(std::byte)) {
-        throw std::runtime_error(std::string("not enough data for type.  Need ") + std::to_string(sizeof(std::byte)) + ", currently have " + std::to_string(size()));
+        throw std::runtime_error(
+            std::format("not enough data for type.  Need {}, currently have {}", sizeof(std::byte), size()));
     }
     return data[0];
 }
 
-template <>
-inline auto Reader::Peek<char>() const -> char
+template <> inline auto Reader::Peek<char>() const -> char
 {
     using T = int8_t;
     if (size() < sizeof(T)) {
-        throw std::runtime_error(std::string("not enough data for type.  Need ") + std::to_string(sizeof(T)) + ", currently have " + std::to_string(size()));
+        throw std::runtime_error(
+            std::format("not enough data for type.  Need {}, currently have {}", sizeof(T), size()));
     }
     auto result = T{};
     for (std::size_t i = 0; i < sizeof(result); ++i) {
@@ -562,12 +551,12 @@ inline auto Reader::Peek<char>() const -> char
     return result;
 }
 
-template <>
-inline auto Reader::Peek<uint8_t>() const -> uint8_t
+template <> inline auto Reader::Peek<uint8_t>() const -> uint8_t
 {
     using T = uint8_t;
     if (size() < sizeof(T)) {
-        throw std::runtime_error(std::string("not enough data for type.  Need ") + std::to_string(sizeof(T)) + ", currently have " + std::to_string(size()));
+        throw std::runtime_error(
+            std::format("not enough data for type.  Need {}, currently have {}", sizeof(T), size()));
     }
     auto result = T{};
     for (std::size_t i = 0; i < sizeof(result); ++i) {
@@ -576,12 +565,12 @@ inline auto Reader::Peek<uint8_t>() const -> uint8_t
     return result;
 }
 
-template <>
-inline auto Reader::Peek<int16_t>() const -> int16_t
+template <> inline auto Reader::Peek<int16_t>() const -> int16_t
 {
     using T = int16_t;
     if (size() < sizeof(T)) {
-        throw std::runtime_error(std::string("not enough data for type.  Need ") + std::to_string(sizeof(T)) + ", currently have " + std::to_string(size()));
+        throw std::runtime_error(
+            std::format("not enough data for type.  Need {}, currently have {}", sizeof(T), size()));
     }
     auto result = T{};
     for (std::size_t i = 0; i < sizeof(result); ++i) {
@@ -589,12 +578,12 @@ inline auto Reader::Peek<int16_t>() const -> int16_t
     }
     return result;
 }
-template <>
-inline auto Reader::Peek<uint16_t>() const -> uint16_t
+template <> inline auto Reader::Peek<uint16_t>() const -> uint16_t
 {
     using T = uint16_t;
     if (size() < sizeof(T)) {
-        throw std::runtime_error(std::string("not enough data for type.  Need ") + std::to_string(sizeof(T)) + ", currently have " + std::to_string(size()));
+        throw std::runtime_error(
+            std::format("not enough data for type.  Need {}, currently have {}", sizeof(T), size()));
     }
     auto result = T{};
     for (std::size_t i = 0; i < sizeof(result); ++i) {
@@ -603,12 +592,12 @@ inline auto Reader::Peek<uint16_t>() const -> uint16_t
     return result;
 }
 
-template <>
-inline auto Reader::Peek<uint32_t>() const -> uint32_t
+template <> inline auto Reader::Peek<uint32_t>() const -> uint32_t
 {
     using T = uint32_t;
     if (size() < sizeof(T)) {
-        throw std::runtime_error(std::string("not enough data for type.  Need ") + std::to_string(sizeof(T)) + ", currently have " + std::to_string(size()));
+        throw std::runtime_error(
+            std::format("not enough data for type.  Need {}, currently have {}", sizeof(T), size()));
     }
     auto result = T{};
     for (std::size_t i = 0; i < sizeof(result); ++i) {
@@ -617,12 +606,12 @@ inline auto Reader::Peek<uint32_t>() const -> uint32_t
     return result;
 }
 
-template <>
-inline auto Reader::Peek<int32_t>() const -> int32_t
+template <> inline auto Reader::Peek<int32_t>() const -> int32_t
 {
     using T = int32_t;
     if (size() < sizeof(T)) {
-        throw std::runtime_error(std::string("not enough data for type.  Need ") + std::to_string(sizeof(T)) + ", currently have " + std::to_string(size()));
+        throw std::runtime_error(
+            std::format("not enough data for type.  Need {}, currently have {}", sizeof(T), size()));
     }
     auto result = T{};
     for (std::size_t i = 0; i < sizeof(result); ++i) {
@@ -631,11 +620,11 @@ inline auto Reader::Peek<int32_t>() const -> int32_t
     return result;
 }
 
-template <>
-inline auto Reader::Peek<float>() const -> float
+template <> inline auto Reader::Peek<float>() const -> float
 {
     if (size() < sizeof(float)) {
-        throw std::runtime_error(std::string("not enough data for float.  Need " + std::to_string(sizeof(float)) + ", currently have ") + std::to_string(size()));
+        throw std::runtime_error(
+            std::format("not enough data for float.  Need {}, currently have {}", sizeof(float), size()));
     }
     std::byte rawd[sizeof(float)];
     std::copy(data.begin(), data.begin() + sizeof(float), rawd);
@@ -645,22 +634,21 @@ inline auto Reader::Peek<float>() const -> float
     return result;
 }
 
-template <>
-inline auto Reader::Get<std::string>() -> std::string
+template <> inline auto Reader::Get<std::string>() -> std::string
 {
     auto result = std::string(reinterpret_cast<char const*>(data.data()));
     if (size() < (result.size() + 1)) {
-        throw std::runtime_error(std::string("not enough data for string.  Need " + std::to_string(result.size() + 1) + ", currently have ") + std::to_string(size()));
+        throw std::runtime_error(
+            std::format("not enough data for string.  Need {}, currently have {}", result.size() + 1, size()));
     }
     increment(result.size() + 1); // +1 for the null terminator
-    return result;
+    return SanitizeToUTF8(result);
 }
 
-template <typename T>
-inline auto Reader::GetVector() -> std::vector<T>
+template <typename T> inline auto Reader::GetVector() -> std::vector<T>
 {
     if (size() < 4) {
-        throw std::runtime_error(std::string("not enough data for vector size.  Need 4, currently have ") + std::to_string(size()));
+        throw std::runtime_error(std::format("not enough data for vector size.  Need 4, currently have {}", size()));
     }
     auto size = Get<uint32_t>();
     auto result = std::vector<T>{};

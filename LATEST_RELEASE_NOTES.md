@@ -5,6 +5,7 @@
 Bugs addressed in this release:
 
 * [#826](../../issues/826) Filing a bug did not work
+* [#892](../../issues/892) Some files don't display continuity right, I think due to utf8 issues
 
 Other changes:
 

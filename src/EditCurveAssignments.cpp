@@ -51,7 +51,8 @@ private:
 };
 
 EditCurveAssignments::EditCurveAssignments(wxWindow* parent, CalChartDoc const& show, int whichCurve)
-    : super(parent, wxID_ANY, "Edit Curve Assignments", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
+    : super(parent, wxID_ANY, "Edit Curve Assignments", wxDefaultPosition, wxDefaultSize,
+          wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
 {
     wxUI::ListBox::Proxy listProxy{};
     auto marchers = show.GetMarchersAssignedToCurve(whichCurve);
@@ -61,20 +62,17 @@ EditCurveAssignments::EditCurveAssignments(wxWindow* parent, CalChartDoc const& 
     }
     auto selections = marchers.empty() ? std::vector<int>{} : std::vector<int>{ 0 };
     auto useMarcherPicker = [this, &show, listProxy](int whereToInsert) {
-        auto marchersToUse = removeFromSet(show.MakeSelectAll(), show.MakeSelectByLabels(CalChart::Ranges::ToVector<std::string>(listProxy->GetStrings() | std::views::transform([](auto&& string) {
-            return string.ToStdString();
-        }))));
-        if (auto labels = PromptUserToPickMarchers(this, show, marchersToUse, {});
-            labels.has_value()) {
+        auto marchersToUse = removeFromSet(show.MakeSelectAll(),
+            show.MakeSelectByLabels(CalChart::Ranges::ToVector<std::string>(
+                listProxy->GetStrings() | std::views::transform([](auto&& string) { return string.utf8_string(); }))));
+        if (auto labels = PromptUserToPickMarchers(this, show, marchersToUse, {}); labels.has_value()) {
             wxArrayString items;
             for (auto&& label : *labels) {
                 items.Add(label);
             }
             *listProxy = listProxy->Insert(items, whereToInsert);
             mCurveAssignment = CalChart::Ranges::ToVector<std::string>(
-                listProxy->GetStrings() | std::views::transform([](auto&& string) {
-                    return string.ToStdString();
-                }));
+                listProxy->GetStrings() | std::views::transform([](auto&& string) { return string.utf8_string(); }));
         }
     };
     wxUI::VSizer{
@@ -100,7 +98,11 @@ EditCurveAssignments::EditCurveAssignments(wxWindow* parent, CalChartDoc const& 
             }),
         },
         wxUI::HSizer{
-            wxUI::ListBox{ items }.withStyle(wxLB_SINGLE).withSize(wxSize(50, 250)).withSelections(selections).withProxy(listProxy),
+            wxUI::ListBox{ items }
+                .withStyle(wxLB_SINGLE)
+                .withSize(wxSize(50, 250))
+                .withSelections(selections)
+                .withProxy(listProxy),
             wxUI::VSizer{
                 wxUI::Button{ "Move Up" }.bind([this, listProxy] {
                     auto selected = listProxy.selection().get();
@@ -111,9 +113,8 @@ EditCurveAssignments::EditCurveAssignments(wxWindow* parent, CalChartDoc const& 
                     auto value = listProxy->GetString(selected);
                     listProxy->Delete(selected);
                     *listProxy = listProxy->Insert(value, next);
-                    mCurveAssignment = CalChart::Ranges::ToVector<std::string>(listProxy->GetStrings() | std::views::transform([](auto&& string) {
-                        return string.ToStdString();
-                    }));
+                    mCurveAssignment = CalChart::Ranges::ToVector<std::string>(listProxy->GetStrings()
+                        | std::views::transform([](auto&& string) { return string.utf8_string(); }));
                 }),
                 wxUI::Button{ "Move Down" }.bind([this, listProxy] {
                     auto selected = listProxy.selection().get();
@@ -124,9 +125,8 @@ EditCurveAssignments::EditCurveAssignments(wxWindow* parent, CalChartDoc const& 
                     auto value = listProxy->GetString(selected);
                     listProxy->Delete(selected);
                     *listProxy = listProxy->Insert(value, next);
-                    mCurveAssignment = CalChart::Ranges::ToVector<std::string>(listProxy->GetStrings() | std::views::transform([](auto&& string) {
-                        return string.ToStdString();
-                    }));
+                    mCurveAssignment = CalChart::Ranges::ToVector<std::string>(listProxy->GetStrings()
+                        | std::views::transform([](auto&& string) { return string.utf8_string(); }));
                 }),
                 wxUI::Button{ "Remove" }.bind([this, listProxy] {
                     auto selected = listProxy.selection().get();
@@ -134,9 +134,8 @@ EditCurveAssignments::EditCurveAssignments(wxWindow* parent, CalChartDoc const& 
                         return;
                     }
                     listProxy->Delete(selected);
-                    mCurveAssignment = CalChart::Ranges::ToVector<std::string>(listProxy->GetStrings() | std::views::transform([](auto&& string) {
-                        return string.ToStdString();
-                    }));
+                    mCurveAssignment = CalChart::Ranges::ToVector<std::string>(listProxy->GetStrings()
+                        | std::views::transform([](auto&& string) { return string.utf8_string(); }));
                     if (listProxy->IsEmpty()) {
                         return;
                     }
@@ -157,7 +156,8 @@ EditCurveAssignments::EditCurveAssignments(wxWindow* parent, CalChartDoc const& 
     Center();
 }
 
-auto PromptUserForCurveAssignment(wxWindow* parent, CalChartDoc const& show) -> std::optional<std::pair<size_t, std::vector<std::string>>>
+auto PromptUserForCurveAssignment(wxWindow* parent, CalChartDoc const& show)
+    -> std::optional<std::pair<size_t, std::vector<std::string>>>
 {
     auto numberCurves = show.GetNumberCurvesOnCurrentSheet();
     if (numberCurves == 0) {
@@ -166,13 +166,11 @@ auto PromptUserForCurveAssignment(wxWindow* parent, CalChartDoc const& show) -> 
     }
     auto whichCurve = 0;
     if (numberCurves > 1) {
-        auto curves = CalChart::Ranges::ToVector<wxString>(std::views::iota(0ul, numberCurves) | std::views::transform([](int i) -> wxString { return std::string("Curve ") + std::to_string(i); }));
+        auto curves = CalChart::Ranges::ToVector<wxString>(std::views::iota(0ul, numberCurves)
+            | std::views::transform([](int i) -> wxString { return std::string("Curve ") + std::to_string(i); }));
 
-        whichCurve = wxGetSingleChoiceIndex(
-            "Which curve would you like to edit?",
-            "Edit Curve Assignments",
-            static_cast<int>(numberCurves),
-            curves.data());
+        whichCurve = wxGetSingleChoiceIndex("Which curve would you like to edit?", "Edit Curve Assignments",
+            static_cast<int>(numberCurves), curves.data());
         if (whichCurve == wxNOT_FOUND) {
             return std::nullopt;
         }
