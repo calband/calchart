@@ -50,21 +50,20 @@ EVT_TEXT_ENTER(PrintContinuitySetup_PLINERATIO, PrintContinuitySetup::OnCmdTextC
 EVT_TEXT_ENTER(PrintContinuitySetup_SLINERATIO, PrintContinuitySetup::OnCmdTextChanged)
 END_EVENT_TABLE()
 
-static constexpr auto DefaultText
-    = "~This is a centered line of text\n"
-      "Normal \\bsBold \\isBold+Italics \\beItalics \\ieNormal\n"
-      "Next line is all tabs with numbers\n"
-      "1\t2\t3\t4\t5\t6\t7\n"
-      "All the symbols with two tabs\n"
-      "\t\t\\po:\tplainman\n"
-      "\t\t\\pb:\tbackslashman\n"
-      "\t\t\\ps:\tslashman\n"
-      "\t\t\\px:\txman\n"
-      "\t\t\\so:\tsolidman\n"
-      "\t\t\\sb:\tsolidbackslashman\n"
-      "\t\t\\ss:\tsolidslashman\n"
-      "\t\t\\sx:\tsolidxman\n"
-      "";
+static constexpr auto DefaultText = "~This is a centered line of text\n"
+                                    "Normal \\bsBold \\isBold+Italics \\beItalics \\ieNormal\n"
+                                    "Next line is all tabs with numbers\n"
+                                    "1\t2\t3\t4\t5\t6\t7\n"
+                                    "All the symbols with two tabs\n"
+                                    "\t\t\\po:\tplainman\n"
+                                    "\t\t\\pb:\tbackslashman\n"
+                                    "\t\t\\ps:\tslashman\n"
+                                    "\t\t\\px:\txman\n"
+                                    "\t\t\\so:\tsolidman\n"
+                                    "\t\t\\sb:\tsolidbackslashman\n"
+                                    "\t\t\\ss:\tsolidslashman\n"
+                                    "\t\t\\sx:\tsolidxman\n"
+                                    "";
 
 void PrintContinuitySetup::CreateControls()
 {
@@ -86,23 +85,42 @@ void PrintContinuitySetup::CreateControls()
                     Refresh();
                 })
                 .withProxy(mUseNewDraw),
-            VLabelWidget("Symbol Ratio:", wxUI::TextCtrl{ PrintContinuitySetup_DOTRATIO }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER).withProxy(mDotRatio)),
-            VLabelWidget("P-Line Ratio:", wxUI::TextCtrl{ PrintContinuitySetup_PLINERATIO }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER).withProxy(mPLineRatio)),
-            VLabelWidget("S-Line Ratio:", wxUI::TextCtrl{ PrintContinuitySetup_SLINERATIO }.withSize({ 100, -1 }).withStyle(wxTE_PROCESS_ENTER).withProxy(mSLineRatio)),
-            VLabelWidget("Line Pad:", wxUI::SpinCtrl{ std::pair{ 0, 10 } }.bind([this] {
-                                                                              mConfig.Set_PrintContLinePad(static_cast<int>(*mLinePad));
-                                                                              Refresh();
-                                                                          })
-                                          .withProxy(mLinePad)),
-            VLabelWidget("Max Font Size:", wxUI::SpinCtrl{ std::pair{ 6, 30 } }.bind([this] {
-                                                                                   mConfig.Set_PrintContMaxFontSize(static_cast<int>(*mMaxFontSize));
-                                                                                   Refresh();
-                                                                               })
-                                               .withProxy(mMaxFontSize)),
+            VLabelWidget("Symbol Ratio:",
+                wxUI::TextCtrl{ PrintContinuitySetup_DOTRATIO }
+                    .withSize({ 100, -1 })
+                    .withStyle(wxTE_PROCESS_ENTER)
+                    .withProxy(mDotRatio)),
+            VLabelWidget("P-Line Ratio:",
+                wxUI::TextCtrl{ PrintContinuitySetup_PLINERATIO }
+                    .withSize({ 100, -1 })
+                    .withStyle(wxTE_PROCESS_ENTER)
+                    .withProxy(mPLineRatio)),
+            VLabelWidget("S-Line Ratio:",
+                wxUI::TextCtrl{ PrintContinuitySetup_SLINERATIO }
+                    .withSize({ 100, -1 })
+                    .withStyle(wxTE_PROCESS_ENTER)
+                    .withProxy(mSLineRatio)),
+            VLabelWidget("Line Pad:",
+                wxUI::SpinCtrl{ std::pair{ 0, 10 } }
+                    .bind([this] {
+                        mConfig.Set_PrintContLinePad(static_cast<int>(*mLinePad));
+                        Refresh();
+                    })
+                    .withProxy(mLinePad)),
+            VLabelWidget("Max Font Size:",
+                wxUI::SpinCtrl{ std::pair{ 6, 30 } }
+                    .bind([this] {
+                        mConfig.Set_PrintContMaxFontSize(static_cast<int>(*mMaxFontSize));
+                        Refresh();
+                    })
+                    .withProxy(mMaxFontSize)),
         },
-        wxUI::HSplitter{
-            wxUI::Factory{ [this](wxWindow* parent) { return new PrintContinuityPreview(parent, mConfig); } }.withProxy(mPrintContDisplay),
-            wxUI::Factory{ [](wxWindow* parent) { return new FancyTextWin(parent, PrintContinuitySetup_KeyPress); } }.withProxy(mUserInput) }
+        wxUI::HSplitter{ wxUI::Factory{ [this](wxWindow* parent) {
+                            return new PrintContinuityPreview(parent, mConfig);
+                        } }.withProxy(mPrintContDisplay),
+            wxUI::Factory{ [](wxWindow* parent) {
+                return new FancyTextWin(parent, PrintContinuitySetup_KeyPress);
+            } }.withProxy(mUserInput) }
             .withStashGravity(0.5)
             .withFlags(wxSizerFlags{ 1 }.Expand()),
     }
@@ -110,7 +128,7 @@ void PrintContinuitySetup::CreateControls()
 
     mUserInput->SetValue(DefaultText);
 
-    mPrintContDisplay->SetPrintContinuity(CalChart::PrintContinuity("", mUserInput->GetValue().ToStdString()));
+    mPrintContDisplay->SetPrintContinuity(CalChart::PrintContinuity("", mUserInput->GetValue().utf8_string()));
     TransferDataToWindow();
 }
 
@@ -135,9 +153,7 @@ void PrintContinuitySetup::OnCmdTextChanged(wxCommandEvent& e)
     Refresh();
 }
 
-void PrintContinuitySetup::InitFromConfig()
-{
-}
+void PrintContinuitySetup::InitFromConfig() { }
 
 bool PrintContinuitySetup::TransferDataToWindow()
 {
@@ -189,6 +205,6 @@ bool PrintContinuitySetup::ClearValuesToDefault()
 
 void PrintContinuitySetup::OnKeyPress(wxCommandEvent&)
 {
-    mPrintContDisplay->SetPrintContinuity(CalChart::PrintContinuity("", mUserInput->GetValue().ToStdString()));
+    mPrintContDisplay->SetPrintContinuity(CalChart::PrintContinuity("", mUserInput->GetValue().utf8_string()));
     Refresh();
 }

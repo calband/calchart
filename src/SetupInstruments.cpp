@@ -63,9 +63,8 @@ IMPLEMENT_CLASS(SetupInstruments, wxDialog)
 // When multiple points are selected with multiple instruments, we
 // add the selection kMultiple
 
-SetupInstruments::SetupInstruments(CalChartDoc const& shw, wxWindow* parent, wxWindowID id,
-    const wxString& caption, const wxPoint& pos,
-    const wxSize& size, long style)
+SetupInstruments::SetupInstruments(CalChartDoc const& shw, wxWindow* parent, wxWindowID id, const wxString& caption,
+    const wxPoint& pos, const wxSize& size, long style)
     : mShow(shw)
 {
     auto selection = mShow.GetSelectionList();
@@ -77,16 +76,13 @@ SetupInstruments::SetupInstruments(CalChartDoc const& shw, wxWindow* parent, wxW
         std::iota(mDotIndices.begin(), mDotIndices.end(), 0);
     }
 
-    std::transform(mDotIndices.begin(), mDotIndices.end(), std::back_inserter(mLabels), [&shw](auto&& i) {
-        return shw.GetPointLabel(i);
-    });
+    std::transform(mDotIndices.begin(), mDotIndices.end(), std::back_inserter(mLabels),
+        [&shw](auto&& i) { return shw.GetPointLabel(i); });
 
-    std::transform(mDotIndices.begin(), mDotIndices.end(), std::back_inserter(mInstruments), [&shw](auto&& i) {
-        return shw.GetPointInstrument(i);
-    });
-    std::transform(mDotIndices.begin(), mDotIndices.end(), std::back_inserter(mSymbols), [dotSymbols](auto&& i) {
-        return dotSymbols.at(i);
-    });
+    std::transform(mDotIndices.begin(), mDotIndices.end(), std::back_inserter(mInstruments),
+        [&shw](auto&& i) { return shw.GetPointInstrument(i); });
+    std::transform(mDotIndices.begin(), mDotIndices.end(), std::back_inserter(mSymbols),
+        [dotSymbols](auto&& i) { return dotSymbols.at(i); });
 
     // we construct a new list of instrument choices.
     std::set<std::string> currentInstruments(mInstruments.begin(), mInstruments.end());
@@ -102,8 +98,7 @@ SetupInstruments::SetupInstruments(CalChartDoc const& shw, wxWindow* parent, wxW
     SelectAllPoints();
 }
 
-template <std::ranges::input_range R>
-auto enumerate(R&& range)
+template <std::ranges::input_range R> auto enumerate(R&& range)
 {
     using std::begin, std::end;
     using iterator_t = decltype(begin(range));
@@ -116,10 +111,7 @@ auto enumerate(R&& range)
         iterator_t iter;
         index_t index;
 
-        decltype(auto) operator*() const
-        {
-            return std::pair{ index, *iter };
-        }
+        decltype(auto) operator*() const { return std::pair{ index, *iter }; }
 
         iterator& operator++()
         {
@@ -135,22 +127,15 @@ auto enumerate(R&& range)
             ++index;
             return old;
         }
-        bool operator==(const iterator& other) const
-        {
-            return iter == other.iter;
-        }
-        bool operator!=(const iterator& other) const
-        {
-            return iter != other.iter;
-        }
+        bool operator==(const iterator& other) const { return iter == other.iter; }
+        bool operator!=(const iterator& other) const { return iter != other.iter; }
     };
 
     return std::ranges::subrange(iterator{ begin(range), 0 }, iterator{ end(range), 0 });
 }
 
-bool SetupInstruments::Create(wxWindow* parent, wxWindowID id,
-    const wxString& caption, const wxPoint& pos,
-    const wxSize& size, long style)
+bool SetupInstruments::Create(
+    wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
 {
     if (!wxDialog::Create(parent, id, caption, pos, size, style))
         return false;
@@ -177,18 +162,16 @@ void SetupInstruments::CreateControls()
     wxUI::VSizer{
         BasicSizerFlags(),
         wxUI::HSizer{
-            wxUI::Button{ "&All" }
-                .bind([this] { SelectAllPoints(); }),
-            wxUI::Button{ "&None" }
-                .bind([this] { SelectNone(); }),
+            wxUI::Button{ "&All" }.bind([this] { SelectAllPoints(); }),
+            wxUI::Button{ "&None" }.bind([this] { SelectNone(); }),
         },
-        wxUI::HForEach(
-            enumerate(GetSymbolsBitmap()) | std::views::filter([this](auto bitmap) {
-                return std::count(mSymbols.begin(), mSymbols.end(), static_cast<CalChart::SYMBOL_TYPE>(std::get<0>(bitmap)));
-            }),
+        wxUI::HForEach(enumerate(GetSymbolsBitmap()) | std::views::filter([this](auto bitmap) {
+            return std::count(
+                mSymbols.begin(), mSymbols.end(), static_cast<CalChart::SYMBOL_TYPE>(std::get<0>(bitmap)));
+        }),
             [this](auto bitmap) {
-                return wxUI::BitmapButton{ std::get<1>(bitmap) }
-                    .bind([this, which = static_cast<CalChart::SYMBOL_TYPE>(std::get<0>(bitmap))] { SelectSymbol(which); });
+                return wxUI::BitmapButton{ std::get<1>(bitmap) }.bind(
+                    [this, which = static_cast<CalChart::SYMBOL_TYPE>(std::get<0>(bitmap))] { SelectSymbol(which); });
             }),
         wxUI::HSizer{
             wxUI::Text{ "Select Instrument" },
@@ -207,9 +190,7 @@ void SetupInstruments::CreateControls()
                 .withProxy(mSetupInstrumentList),
             wxUI::VSizer{
                 wxUI::Text{ "Set Instrument" },
-                wxUI::Choice{ mInstrumentChoices }
-                    .bind([this] { OnCmdChoice(); })
-                    .withProxy(mInstrumentChoice),
+                wxUI::Choice{ mInstrumentChoices }.bind([this] { OnCmdChoice(); }).withProxy(mInstrumentChoice),
             },
         },
         wxUI::HSizer{
@@ -223,7 +204,8 @@ void SetupInstruments::CreateControls()
 auto SetupInstruments::GetInstruments() const -> std::map<CalChart::MarcherIndex, std::string>
 {
     auto result = std::vector<std::pair<CalChart::MarcherIndex, std::string>>{};
-    std::transform(mDotIndices.begin(), mDotIndices.end(), mInstruments.begin(), std::back_inserter(result), [](auto&& a, auto&& b) -> std::pair<CalChart::MarcherIndex, std::string> { return { a, b }; });
+    std::transform(mDotIndices.begin(), mDotIndices.end(), mInstruments.begin(), std::back_inserter(result),
+        [](auto&& a, auto&& b) -> std::pair<CalChart::MarcherIndex, std::string> { return { a, b }; });
     return { result.begin(), result.end() };
 }
 
@@ -245,7 +227,8 @@ void SetupInstruments::SelectionListChanged()
     }
 
     std::vector<std::string> totalList;
-    std::transform(selections.begin(), selections.end(), std::back_inserter(totalList), [this](auto& i) { return mInstruments[i]; });
+    std::transform(selections.begin(), selections.end(), std::back_inserter(totalList),
+        [this](auto& i) { return mInstruments[i]; });
     std::sort(totalList.begin(), totalList.end());
     totalList.erase(std::unique(totalList.begin(), totalList.end()), totalList.end());
     if (totalList.size() == 1) {
@@ -264,10 +247,7 @@ void SetupInstruments::SelectionListChanged()
     }
 }
 
-void SetupInstruments::SelectAll()
-{
-    SelectAllPoints();
-}
+void SetupInstruments::SelectAll() { SelectAllPoints(); }
 
 void SetupInstruments::SelectAllPoints()
 {
@@ -277,10 +257,7 @@ void SetupInstruments::SelectAllPoints()
     SelectionListChanged();
 }
 
-void SetupInstruments::Select()
-{
-    SelectionListChanged();
-}
+void SetupInstruments::Select() { SelectionListChanged(); }
 
 void SetupInstruments::SelectNone()
 {
@@ -323,7 +300,7 @@ void SetupInstruments::OnCmdChoice()
         mInstrumentChoice->SetSelection(wxNOT_FOUND);
         return;
     }
-    auto result = mInstrumentChoice->GetString(mInstrumentChoice->GetSelection()).ToStdString();
+    auto result = mInstrumentChoice->GetString(mInstrumentChoice->GetSelection()).utf8_string();
     if (result == kMultiple) {
         return;
     }

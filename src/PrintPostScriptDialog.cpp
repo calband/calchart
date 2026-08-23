@@ -36,22 +36,11 @@
 #include <wx/filename.h>
 #include <wx/wfstream.h>
 
-enum {
-    CC_PRINT_ORIENT_PORTRAIT,
-    CC_PRINT_ORIENT_LANDSCAPE
-};
+enum { CC_PRINT_ORIENT_PORTRAIT, CC_PRINT_ORIENT_LANDSCAPE };
 
-enum {
-    CC_PRINT_ACTION_PRINTER,
-    CC_PRINT_ACTION_FILE,
-    CC_PRINT_ACTION_PREVIEW
-};
+enum { CC_PRINT_ACTION_PRINTER, CC_PRINT_ACTION_FILE, CC_PRINT_ACTION_PREVIEW };
 
-enum {
-    CC_PRINT_BUTTON_PRINT = 1000,
-    CC_PRINT_BUTTON_SELECT,
-    CC_PRINT_BUTTON_RESET_DEFAULTS
-};
+enum { CC_PRINT_BUTTON_PRINT = 1000, CC_PRINT_BUTTON_SELECT, CC_PRINT_BUTTON_RESET_DEFAULTS };
 
 BEGIN_EVENT_TABLE(PrintPostScriptDialog, wxDialog)
 EVT_BUTTON(CC_PRINT_BUTTON_SELECT, PrintPostScriptDialog::ShowPrintSelect)
@@ -60,15 +49,8 @@ END_EVENT_TABLE()
 
 IMPLEMENT_CLASS(PrintPostScriptDialog, wxDialog)
 
-PrintPostScriptDialog::PrintPostScriptDialog(
-    const CalChartDoc* show,
-    CalChart::Configuration& config,
-    wxFrame* parent,
-    wxWindowID id,
-    const wxString& caption,
-    const wxPoint& pos,
-    const wxSize& size,
-    long style)
+PrintPostScriptDialog::PrintPostScriptDialog(const CalChartDoc* show, CalChart::Configuration& config, wxFrame* parent,
+    wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
     : mShow(NULL)
     , mConfig(config)
 {
@@ -100,18 +82,19 @@ void PrintPostScriptDialog::PrintShow()
     case CC_PRINT_ACTION_PREVIEW: {
 #ifdef PRINT__RUN_CMD
         s = wxFileName::CreateTempFileName("cc_");
-        buf = std::format("{} {} \"{}\"", mConfig.Get_PrintViewCmd(), mConfig.Get_PrintViewCmd(), s.ToStdString());
+        buf = std::format("{} {} \"{}\"", mConfig.Get_PrintViewCmd(), mConfig.Get_PrintViewCmd(), s.utf8_string());
 #endif
     } break;
     case CC_PRINT_ACTION_FILE:
-        s = wxFileSelector("Print to file", wxEmptyString, wxEmptyString, wxEmptyString, "*.ps", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+        s = wxFileSelector(
+            "Print to file", wxEmptyString, wxEmptyString, wxEmptyString, "*.ps", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
         if (s.empty())
             return;
         break;
     case CC_PRINT_ACTION_PRINTER: {
 #ifdef PRINT__RUN_CMD
         s = wxFileName::CreateTempFileName("cc_");
-        buf = std::format("{} {} \"{}\"", mConfig.Get_PrintViewCmd(), mConfig.Get_PrintViewCmd(), s.ToStdString());
+        buf = std::format("{} {} \"{}\"", mConfig.Get_PrintViewCmd(), mConfig.Get_PrintViewCmd(), s.utf8_string());
 #else
 #endif
     } break;
@@ -175,10 +158,8 @@ void PrintPostScriptDialog::ResetDefaults(wxCommandEvent&)
     TransferDataToWindow();
 }
 
-bool PrintPostScriptDialog::Create(const CalChartDoc* show,
-    wxFrame* parent, wxWindowID id,
-    const wxString& caption, const wxPoint& pos,
-    const wxSize& size, long style)
+bool PrintPostScriptDialog::Create(const CalChartDoc* show, wxFrame* parent, wxWindowID id, const wxString& caption,
+    const wxPoint& pos, const wxSize& size, long style)
 {
     if (!wxDialog::Create(parent, id, caption, pos, size, style)) {
         return false;
@@ -207,8 +188,7 @@ void PrintPostScriptDialog::CreateControls()
         wxSizerFlags{}.Border(wxALL, 5).Left(),
         wxUI::HSizer{
             wxUI::Button{ wxID_OK, "&Print" },
-            wxUI::Button{ wxID_CANCEL, "&Cancel" }
-                .setDefault(),
+            wxUI::Button{ wxID_CANCEL, "&Cancel" }.setDefault(),
             wxUI::Button{ CC_PRINT_BUTTON_RESET_DEFAULTS, "&Reset Values" },
         },
 #ifdef PRINT__RUN_CMD
@@ -241,11 +221,15 @@ void PrintPostScriptDialog::CreateControls()
         },
 #endif
         wxUI::HSizer{
-            wxUI::RadioBox{ "&Orientation:", wxUI::RadioBox::withChoices{}, { "Portrait", "Landscape" } }.withProxy(radio_orient),
+            wxUI::RadioBox{ "&Orientation:", wxUI::RadioBox::withChoices{}, { "Portrait", "Landscape" } }.withProxy(
+                radio_orient),
 #ifdef PRINT__RUN_CMD
-            wxUI::RadioBox{ "Post&Script:", wxUI::RadioBox::withChoices{}, { "Send to Printer", "Print to File", "Preview Only" } }.withProxy(radio_method),
+            wxUI::RadioBox{
+                "Post&Script:", wxUI::RadioBox::withChoices{}, { "Send to Printer", "Print to File", "Preview Only" } }
+                .withProxy(radio_method),
 #else
-            wxUI::RadioBox{ "Post&Script:", wxUI::RadioBox::withChoices{}, { "Send to Printer", "Print to File" } }.withProxy(radio_method),
+            wxUI::RadioBox{ "Post&Script:", wxUI::RadioBox::withChoices{}, { "Send to Printer", "Print to File" } }
+                .withProxy(radio_method),
 #endif
         },
         wxUI::HSizer{
@@ -320,12 +304,12 @@ bool PrintPostScriptDialog::TransferDataToWindow()
 bool PrintPostScriptDialog::TransferDataFromWindow()
 {
 #ifdef PRINT__RUN_CMD
-    mConfig.Set_PrintCmd(text_cmd->GetValue().ToStdString());
-    mConfig.Set_PrintOpts(text_opts->GetValue().ToStdString());
-    mConfig.Set_PrintViewCmd(text_view_cmd->GetValue().ToStdString());
-    mConfig.Set_PrintViewOpts(text_view_opts->GetValue().ToStdString());
+    mConfig.Set_PrintCmd(text_cmd->GetValue().utf8_string());
+    mConfig.Set_PrintOpts(text_opts->GetValue().utf8_string());
+    mConfig.Set_PrintViewCmd(text_view_cmd->GetValue().utf8_string());
+    mConfig.Set_PrintViewOpts(text_view_opts->GetValue().utf8_string());
 #else
-    mConfig.Set_PrintFile(text_cmd->GetValue().ToStdString());
+    mConfig.Set_PrintFile(text_cmd->GetValue().utf8_string());
 #endif
     mConfig.Set_PrintPSLandscape(radio_orient->GetSelection() == CC_PRINT_ORIENT_LANDSCAPE);
     mConfig.Set_PrintPSModes(radio_method->GetSelection());

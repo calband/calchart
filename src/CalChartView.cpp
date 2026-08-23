@@ -79,12 +79,10 @@ void OnWizardSetup(CalChartDoc& show, wxWindow* parent)
             show.WizardSetupNewShow(labels, columns, newmode);
         }
     } else {
-        wxMessageBox(
-            "Show setup not completed.\n"
-            "You can change the number of marchers\n"
-            "and show mode via the menu options",
-            "Show not setup",
-            wxICON_INFORMATION | wxOK);
+        wxMessageBox("Show setup not completed.\n"
+                     "You can change the number of marchers\n"
+                     "and show mode via the menu options",
+            "Show not setup", wxICON_INFORMATION | wxOK);
     }
     wizard->Destroy();
 }
@@ -99,9 +97,9 @@ bool CalChartView::OnCreate(wxDocument* doc, long WXUNUSED(flags))
     mShow = static_cast<CalChartDoc*>(doc);
     mShow->SetCurrentSheet(0);
     auto& config = mShow->GetConfiguration();
-    mFrame = new CalChartFrame(doc, this, config,
-        wxStaticCast(wxGetApp().GetTopWindow(), wxDocParentFrame),
-        wxPoint(config.Get_FieldFramePositionX(), config.Get_FieldFramePositionY()), wxSize(static_cast<int>(config.Get_FieldFrameWidth()), static_cast<int>(config.Get_FieldFrameHeight())));
+    mFrame = new CalChartFrame(doc, this, config, wxStaticCast(wxGetApp().GetTopWindow(), wxDocParentFrame),
+        wxPoint(config.Get_FieldFramePositionX(), config.Get_FieldFramePositionY()),
+        wxSize(static_cast<int>(config.Get_FieldFrameWidth()), static_cast<int>(config.Get_FieldFrameHeight())));
 
     UpdateBackgroundImages();
     mFrame->Show(true);
@@ -118,7 +116,8 @@ void CalChartView::OnDraw(wxDC* dc)
     wxCalChart::Draw::DrawCommandList(*dc, mShow->GenerateCurrentSheetPointsDrawCommands());
 }
 
-auto CalChartView::GeneratePhantomPointsDrawCommands(CalChart::MarcherToPosition const& positions) const -> std::vector<CalChart::Draw::DrawCommand>
+auto CalChartView::GeneratePhantomPointsDrawCommands(CalChart::MarcherToPosition const& positions) const
+    -> std::vector<CalChart::Draw::DrawCommand>
 {
     return mShow->GeneratePhantomPointsDrawCommands(positions);
 }
@@ -231,7 +230,8 @@ void CalChartView::DoSetMode(CalChart::ShowMode const& mode)
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-void CalChartView::DoSetupMarchers(const std::vector<std::pair<std::string, std::string>>& labelsAndInstruments, int numColumns)
+void CalChartView::DoSetupMarchers(
+    const std::vector<std::pair<std::string, std::string>>& labelsAndInstruments, int numColumns)
 {
     auto cmd = mShow->Create_SetupMarchersCommand(labelsAndInstruments, numColumns);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
@@ -332,22 +332,20 @@ void CalChartView::DoImportPrintableContinuity(std::string const& file)
     // read the file into a vector
     std::vector<std::string> lines;
     for (size_t line = 0; line < fp.GetLineCount(); ++line) {
-        lines.push_back(fp.GetLine(line).ToStdString());
+        lines.push_back(fp.GetLine(line).utf8_string());
     }
     auto hasCont = mShow->AlreadyHasPrintContinuity();
     if (hasCont) {
         // prompt the user to find out if they would like to continue
-        auto userchoice = wxMessageBox(
-            "This show already has some Printable Continuity.  "
-            "Would you like to continue Importing Printable Continuity and "
-            "overwrite it?",
+        auto userchoice = wxMessageBox("This show already has some Printable Continuity.  "
+                                       "Would you like to continue Importing Printable Continuity and "
+                                       "overwrite it?",
             "Overwrite Printable Continuity?", wxYES_NO | wxCANCEL);
         if (userchoice != wxYES) {
             return;
         }
     }
-    if (auto data = mShow->ImportPrintableContinuity(lines);
-        data) {
+    if (auto data = mShow->ImportPrintableContinuity(lines); data) {
         auto cmd = mShow->Create_SetPrintableContinuity(*data);
         GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     }
@@ -439,17 +437,11 @@ std::map<int, CalChart::SelectionList> CalChartView::GetAnimationCollisions() co
     return mShow->GetAnimationCollisions();
 }
 
-auto CalChartView::GenerateAnimationDrawCommands(
-    CalChart::Beats whichBeat,
-    bool drawCollisionWarning,
-    std::optional<bool> onBeat,
-    CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>
+auto CalChartView::GenerateAnimationDrawCommands(CalChart::Beats whichBeat, bool drawCollisionWarning,
+    std::optional<bool> onBeat, CalChart::Animation::AngleStepToImageFunction imageFunction) const
+    -> std::vector<CalChart::Draw::DrawCommand>
 {
-    return mShow->GenerateAnimationDrawCommands(
-        whichBeat,
-        drawCollisionWarning,
-        onBeat,
-        imageFunction);
+    return mShow->GenerateAnimationDrawCommands(whichBeat, drawCollisionWarning, onBeat, imageFunction);
 }
 
 auto CalChartView::GetAnimationInfo(CalChart::Beats whichBeat) const -> std::vector<CalChart::Animate::Info>
@@ -457,7 +449,8 @@ auto CalChartView::GetAnimationInfo(CalChart::Beats whichBeat) const -> std::vec
     return mShow->GetAnimationInfo(whichBeat);
 }
 
-auto CalChartView::GetAnimationInfo(CalChart::MarcherIndex whichMarcher, CalChart::Beats whichBeat) const -> std::optional<CalChart::Animate::Info>
+auto CalChartView::GetAnimationInfo(CalChart::MarcherIndex whichMarcher, CalChart::Beats whichBeat) const
+    -> std::optional<CalChart::Animate::Info>
 {
     return mShow->GetAnimationInfo(whichMarcher, whichBeat);
 }
@@ -469,12 +462,14 @@ auto CalChartView::GetTotalNumberAnimationBeats() const -> std::optional<CalChar
 
 // Return a bounding box of the show of where the marchers are.  If they are
 // outside the show, we don't see them.
-auto CalChartView::GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beats whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>
+auto CalChartView::GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beats whichBeat) const
+    -> std::pair<CalChart::Coord, CalChart::Coord>
 {
     return mShow->GetAnimationBoundingBox(zoomInOnMarchers, whichBeat);
 }
 
-auto CalChartView::AnimationBeatToSheetOffsetAndBeat(CalChart::Beats beat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>
+auto CalChartView::AnimationBeatToSheetOffsetAndBeat(CalChart::Beats beat) const
+    -> std::optional<std::tuple<size_t, CalChart::Beats>>
 {
     return mShow->AnimationBeatToSheetOffsetAndBeat(beat);
 }
@@ -499,10 +494,7 @@ auto CalChartView::GetFermataForAnimationBeat(CalChart::Beats whichBeat) const -
     return mShow->GetFermataForAnimationBeat(whichBeat);
 }
 
-auto CalChartView::GetDownbeatTimes() const -> std::vector<CalChart::Seconds>
-{
-    return mShow->GetDownbeatTimes();
-}
+auto CalChartView::GetDownbeatTimes() const -> std::vector<CalChart::Seconds> { return mShow->GetDownbeatTimes(); }
 
 auto CalChartView::BeatHasCollision(CalChart::Beats whichBeat) const -> bool
 {
@@ -514,10 +506,7 @@ auto CalChartView::GetAnimationBeatForCurrentSheet() const -> CalChart::Beats
     return mShow->GetAnimationBeatForCurrentSheet();
 }
 
-void CalChartView::OnSetMedia()
-{
-    mFrame->OnSetMedia();
-}
+void CalChartView::OnSetMedia() { mFrame->OnSetMedia(); }
 
 void CalChartView::GoToSheet(size_t which)
 {
@@ -533,10 +522,7 @@ void CalChartView::GoToSheet(size_t which)
     }
 }
 
-void CalChartView::SetActiveReferencePoint(int which)
-{
-    mShow->SetCurrentReferencePoint(which);
-}
+void CalChartView::SetActiveReferencePoint(int which) { mShow->SetCurrentReferencePoint(which); }
 
 // toggle selection means toggle it as selected to unselected
 // otherwise, always select it
@@ -595,30 +581,15 @@ void CalChartView::GoToSheetAndSetSelectionList(size_t which, const CalChart::Se
     }
 }
 
-void CalChartView::OnEnableDrawPaths(bool enable)
-{
-    mShow->SetDrawPaths(enable);
-}
+void CalChartView::OnEnableDrawPaths(bool enable) { mShow->SetDrawPaths(enable); }
 
-void CalChartView::DoDrawBackground(bool enable)
-{
-    mShow->SetDrawBackground(enable);
-}
+void CalChartView::DoDrawBackground(bool enable) { mShow->SetDrawBackground(enable); }
 
-bool CalChartView::DoingDrawBackground() const
-{
-    return mShow->GetDrawBackground();
-}
+bool CalChartView::DoingDrawBackground() const { return mShow->GetDrawBackground(); }
 
-void CalChartView::DoPictureAdjustment(bool enable)
-{
-    mBackgroundImages.SetAdjustBackgroundMode(enable);
-}
+void CalChartView::DoPictureAdjustment(bool enable) { mBackgroundImages.SetAdjustBackgroundMode(enable); }
 
-bool CalChartView::DoingPictureAdjustment() const
-{
-    return mBackgroundImages.GetAdjustBackgroundMode();
-}
+bool CalChartView::DoingPictureAdjustment() const { return mBackgroundImages.GetAdjustBackgroundMode(); }
 
 bool CalChartView::AddBackgroundImage(const wxImage& image)
 {
@@ -639,15 +610,13 @@ void CalChartView::OnBackgroundMouseLeftUp(wxMouseEvent& event, wxDC& dc)
 {
     if (auto result = mBackgroundImages.OnMouseLeftUp(event, dc); result) {
         auto [index, resultArray] = *result;
-        auto cmd = mShow->Create_MoveBackgroundImageCommand(index, std::get<0>(resultArray), std::get<1>(resultArray), std::get<2>(resultArray), std::get<3>(resultArray));
+        auto cmd = mShow->Create_MoveBackgroundImageCommand(index, std::get<0>(resultArray), std::get<1>(resultArray),
+            std::get<2>(resultArray), std::get<3>(resultArray));
         GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     }
 }
 
-void CalChartView::OnBackgroundMouseMove(wxMouseEvent& event, wxDC& dc)
-{
-    mBackgroundImages.OnMouseMove(event, dc);
-}
+void CalChartView::OnBackgroundMouseMove(wxMouseEvent& event, wxDC& dc) { mBackgroundImages.OnMouseMove(event, dc); }
 
 void CalChartView::OnBackgroundImageDelete()
 {

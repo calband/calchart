@@ -89,15 +89,16 @@ void ColorSetupDialog::CreateControls()
 {
     auto colorNames = std::vector<std::tuple<std::string, wxBitmap>>{};
     for (auto i : CalChart::ColorsIterator{}) {
-        colorNames.push_back({ CalChart::GetColorNames().at(toUType(i)), CreateItemBitmap(wxCalChart::toBrush(mConfig.Get_CalChartBrushAndPen(i))) });
+        colorNames.push_back({ CalChart::GetColorNames().at(toUType(i)),
+            CreateItemBitmap(wxCalChart::toBrush(mConfig.Get_CalChartBrushAndPen(i))) });
     }
     wxUI::VSizer{
         LeftBasicSizerFlags(),
         wxUI::HSizer{
             "Palette",
-            wxUI::BitmapButton{ BUTTON_EDIT_PALETTE_COLOR, CreateTempBitmap(mColorPaletteColors.at(mActiveColorPalette)) },
-            wxUI::TextCtrl(
-                PALETTE_NAME, mColorPaletteNames.at(mActiveColorPalette))
+            wxUI::BitmapButton{
+                BUTTON_EDIT_PALETTE_COLOR, CreateTempBitmap(mColorPaletteColors.at(mActiveColorPalette)) },
+            wxUI::TextCtrl(PALETTE_NAME, mColorPaletteNames.at(mActiveColorPalette))
                 .withStyle(wxTE_MULTILINE)
                 .withSize({ 100, 24 }),
             wxUI::Button{ BUTTON_EXPORT, "&Export..." },
@@ -130,8 +131,7 @@ void ColorSetupDialog::CreateControls()
             wxUI::Button{ wxID_CANCEL },
 
         }
-    }
-        .fitTo(this);
+    }.fitTo(this);
 }
 
 void ColorSetupDialog::Init()
@@ -141,7 +141,8 @@ void ColorSetupDialog::Init()
     mColorPaletteColors = GetColorPaletteColors(mConfig);
 
     for (auto palette = 0; palette < CalChart::kNumberPalettes; ++palette) {
-        for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM; i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
+        for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM;
+            i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
             auto brushAndPen = mConfig.Get_CalChartBrushAndPen(palette, i);
             mCalChartPens[palette][toUType(i)] = wxCalChart::toPen(brushAndPen);
             mCalChartBrushes[palette][toUType(i)] = wxCalChart::toBrush(brushAndPen);
@@ -157,7 +158,8 @@ bool ColorSetupDialog::TransferDataToWindow()
     auto text = static_cast<wxTextCtrl*>(FindWindow(PALETTE_NAME));
     text->SetValue(mColorPaletteNames.at(mActiveColorPalette));
 
-    for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM; i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
+    for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM;
+        i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
         CreateAndSetItemBitmap(mNameBox.control(), toUType(i), mCalChartBrushes[mActiveColorPalette][toUType(i)]);
     }
     *mSpin = mCalChartPens[mActiveColorPalette][mNameBox.selection()].GetWidth();
@@ -168,7 +170,7 @@ bool ColorSetupDialog::TransferDataToWindow()
 bool ColorSetupDialog::TransferDataFromWindow()
 {
     auto text = static_cast<wxTextCtrl*>(FindWindow(PALETTE_NAME));
-    mConfig.SetColorPaletteName(mActiveColorPalette, text->GetValue().ToStdString());
+    mConfig.SetColorPaletteName(mActiveColorPalette, text->GetValue().utf8_string());
     return true;
 }
 
@@ -179,8 +181,10 @@ bool ColorSetupDialog::ClearValuesToDefault()
 
     auto text = static_cast<wxTextCtrl*>(FindWindow(PALETTE_NAME));
     text->SetValue(mColorPaletteNames.at(mActiveColorPalette));
-    for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM; i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
-        SetColor(toUType(i), CalChart::GetDefaultPenWidth()[toUType(i)], wxColour{ CalChart::GetDefaultColors()[toUType(i)] });
+    for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM;
+        i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
+        SetColor(toUType(i), CalChart::GetDefaultPenWidth()[toUType(i)],
+            wxColour{ CalChart::GetDefaultColors()[toUType(i)] });
         mConfig.Clear_CalChartConfigColor(mActiveColorPalette, i);
     }
     return true;
@@ -192,7 +196,8 @@ void ColorSetupDialog::SetColor(int selection, int width, wxColour const& color)
     mCalChartBrushes[mActiveColorPalette][selection] = *wxTheBrushList->FindOrCreateBrush(color, wxBRUSHSTYLE_SOLID);
 
     // this is needed so we draw things out on the page correctly.
-    mConfig.Set_CalChartBrushAndPen(mActiveColorPalette, static_cast<CalChart::Colors>(selection), wxCalChart::toBrushAndPen(color, width));
+    mConfig.Set_CalChartBrushAndPen(
+        mActiveColorPalette, static_cast<CalChart::Colors>(selection), wxCalChart::toBrushAndPen(color, width));
 
     CreateAndSetItemBitmap(mNameBox.control(), selection, mCalChartBrushes[mActiveColorPalette][selection]);
     Refresh();
@@ -275,7 +280,7 @@ void ColorSetupDialog::OnCmdTextChanged(wxCommandEvent& e)
     if (id == PALETTE_NAME) {
         auto text = static_cast<wxTextCtrl*>(FindWindow(id));
         mColorPaletteNames.at(mActiveColorPalette) = text->GetValue();
-        mConfig.SetColorPaletteName(mActiveColorPalette, text->GetValue().ToStdString());
+        mConfig.SetColorPaletteName(mActiveColorPalette, text->GetValue().utf8_string());
     }
     Refresh();
 }
@@ -287,14 +292,12 @@ constexpr auto kPaletteColor = "PaletteColor";
 constexpr auto kFieldColors = "FieldColors";
 constexpr auto kFieldColorsWidth = "FieldColorsWidth";
 
-auto ColourToRGB(wxColour const& c)
-{
-    return RGB_t{ c.Red(), c.Green(), c.Blue() };
-}
+auto ColourToRGB(wxColour const& c) { return RGB_t{ c.Red(), c.Green(), c.Blue() }; }
 
 auto RGBToColour(RGB_t const& b)
 {
-    return wxColour{ static_cast<wxColour::ChannelType>(b[0]), static_cast<wxColour::ChannelType>(b[1]), static_cast<wxColour::ChannelType>(b[2]) };
+    return wxColour{ static_cast<wxColour::ChannelType>(b[0]), static_cast<wxColour::ChannelType>(b[1]),
+        static_cast<wxColour::ChannelType>(b[2]) };
 }
 
 nlohmann::json ColorSetupDialog::Export() const
@@ -305,10 +308,12 @@ nlohmann::json ColorSetupDialog::Export() const
     j[kPaletteName] = mColorPaletteNames.at(mActiveColorPalette);
     j[kPaletteColor] = ColourToRGB(wxCalChart::toColour(mColorPaletteColors.at(mActiveColorPalette)));
     std::vector<RGB_t> allColors;
-    std::transform(std::begin(mCalChartBrushes[mActiveColorPalette]), std::end(mCalChartBrushes[mActiveColorPalette]), std::back_inserter(allColors), [](auto&& i) { return ColourToRGB(i.GetColour()); });
+    std::transform(std::begin(mCalChartBrushes[mActiveColorPalette]), std::end(mCalChartBrushes[mActiveColorPalette]),
+        std::back_inserter(allColors), [](auto&& i) { return ColourToRGB(i.GetColour()); });
     j[kFieldColors] = allColors;
     std::vector<int> allWidths;
-    std::transform(std::begin(mCalChartPens[mActiveColorPalette]), std::end(mCalChartPens[mActiveColorPalette]), std::back_inserter(allWidths), [](auto&& i) { return i.GetWidth(); });
+    std::transform(std::begin(mCalChartPens[mActiveColorPalette]), std::end(mCalChartPens[mActiveColorPalette]),
+        std::back_inserter(allWidths), [](auto&& i) { return i.GetWidth(); });
     j[kFieldColorsWidth] = allWidths;
 
     return j;
@@ -354,32 +359,33 @@ void ColorSetupDialog::Import(nlohmann::json const& j)
     }
     SetPaletteName(newName);
     SetPaletteColor(newColor);
-    for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM; i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
+    for (auto i = CalChart::Colors::FIELD; i != CalChart::Colors::NUM;
+        i = static_cast<CalChart::Colors>(static_cast<int>(i) + 1)) {
         SetColor(toUType(i), newFieldColorsWidths[toUType(i)], newFieldColors[toUType(i)]);
     }
 }
 
 void ColorSetupDialog::OnCmdExport(wxCommandEvent&)
 {
-    auto s = wxFileSelector("Export CalChart Color Palette", wxEmptyString,
-        wxEmptyString, wxEmptyString, "calchart color palette (*.ccpalette)|*.ccpalette", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+    auto s = wxFileSelector("Export CalChart Color Palette", wxEmptyString, wxEmptyString, wxEmptyString,
+        "calchart color palette (*.ccpalette)|*.ccpalette", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
     if (s.IsEmpty()) {
         return;
     }
     auto j = Export();
-    auto o = std::ofstream(s.ToStdString());
+    auto o = std::ofstream(s.utf8_string());
     o << std::setw(4) << j << std::endl;
 }
 
 void ColorSetupDialog::OnCmdImport(wxCommandEvent&)
 {
-    auto s = wxFileSelector(wxT("Import CalChart Color Palette"), wxEmptyString,
-        wxEmptyString, wxEmptyString, "calchart color palette (*.ccpalette)|*.ccpalette");
+    auto s = wxFileSelector(wxT("Import CalChart Color Palette"), wxEmptyString, wxEmptyString, wxEmptyString,
+        "calchart color palette (*.ccpalette)|*.ccpalette");
     if (s.IsEmpty()) {
         return;
     }
     auto j = nlohmann::json{};
-    auto input = std::ifstream(s.ToStdString());
+    auto input = std::ifstream(s.utf8_string());
     input >> j;
     Import(j);
     Refresh();

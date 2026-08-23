@@ -35,7 +35,8 @@
 #include <wx/msgdlg.h>
 #include <wx/statline.h>
 
-ContinuityEditorPopup::ContinuityEditorPopup(std::string const& whatError, wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
+ContinuityEditorPopup::ContinuityEditorPopup(std::string const& whatError, wxWindow* parent, wxWindowID id,
+    const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
     : super(parent, id, caption, pos, size, style, caption)
     , mWhatError(whatError)
 {
@@ -54,7 +55,10 @@ void ContinuityEditorPopup::CreateControls()
     wxUI::VSizer{
         BasicSizerFlags(),
         wxUI::Text{ mWhatError },
-        wxUI::TextCtrl{}.withSize({ 60, 100 }).withFlags(wxSizerFlags{}.Expand().Border(wxALL, 5)).withProxy(mUserInput),
+        wxUI::TextCtrl{}
+            .withSize({ 60, 100 })
+            .withFlags(wxSizerFlags{}.Expand().Border(wxALL, 5))
+            .withProxy(mUserInput),
         // add a horizontal bar to make things clear:
         wxUI::HLine(),
         // add a discard, done
@@ -73,13 +77,14 @@ void ContinuityEditorPopup::SetValue(std::string const& value, int line, int col
     mUserInput->SetInsertionPoint(mUserInput->XYToPosition(column - 1, line - 1));
 }
 
-std::string ContinuityEditorPopup::ProcessEditContinuity(wxWindow* parent, std::string const& whatError, std::string const& input, int line, int column)
+std::string ContinuityEditorPopup::ProcessEditContinuity(
+    wxWindow* parent, std::string const& whatError, std::string const& input, int line, int column)
 {
     ContinuityEditorPopup dialog(whatError, parent);
     dialog.SetValue(input, line, column);
     if (dialog.ShowModal() == wxID_OK) {
         // set the continuity back
-        return dialog.GetValue().ToStdString();
+        return dialog.GetValue().utf8_string();
     }
     throw std::runtime_error("Did not parse file correctly");
 }

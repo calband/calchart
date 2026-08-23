@@ -147,4 +147,5 @@ auto FileDataToJSON(FileData const& fileData) -> nlohmann::json;
 auto EncodeBase64(std::vector<std::byte> const& data) -> std::string;
 auto DecodeBase64(std::string const& encoded) -> std::vector<std::byte>;
 
+auto SanitizeToUTF8(std::string const& raw) -> std::string;
 }

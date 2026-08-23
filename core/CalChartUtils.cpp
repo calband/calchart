@@ -25,11 +25,92 @@
 #include "CalChartTypes.h"
 #include <charconv>
 #include <cppcodec/base64_rfc4648.hpp>
+#include <cstdint>
 #include <fstream>
 #include <map>
 #include <optional>
 #include <string>
 #include <string_view>
+
+namespace {
+
+auto IsValidUTF8(std::string const& s) -> bool
+{
+    auto i = 0UL;
+    auto len = s.size();
+    while (i < len) {
+        auto c = static_cast<unsigned char>(s[i]);
+        auto extra = 0;
+
+        if (c <= 0x7F) {
+            extra = 0; // 0xxxxxxx
+        } else if ((c & 0xE0) == 0xC0) {
+            extra = 1; // 110xxxxx
+        } else if ((c & 0xF0) == 0xE0) {
+            extra = 2; // 1110xxxx
+        } else if ((c & 0xF8) == 0xF0) {
+            extra = 3; // 11110xxx
+        } else {
+            return false; // invalid leading byte
+        }
+
+        if (i + extra >= len) {
+            return false;
+        }
+
+        for (int j = 1; j <= extra; ++j) {
+            auto cc = static_cast<unsigned char>(s[i + j]);
+            if ((cc & 0xC0) != 0x80) {
+                return false; // must be 10xxxxxx
+            }
+        }
+        i += extra + 1;
+    }
+    return true;
+}
+
+// CP1252 bytes 0x80-0x9F map to these Unicode codepoints
+// (0xA0-0xFF in CP1252 match Latin-1/Unicode directly, so no table needed there)
+static constexpr uint32_t cp1252_0x80_0x9F[32] = { 0x20AC, 0x0081, 0x201A, 0x0192, 0x201E, 0x2026, 0x2020, 0x2021,
+    0x02C6, 0x2030, 0x0160, 0x2039, 0x0152, 0x008D, 0x017D, 0x008F, 0x0090, 0x2018, 0x2019, 0x201C, 0x201D, 0x2022,
+    0x2013, 0x2014, 0x02DC, 0x2122, 0x0161, 0x203A, 0x0153, 0x009D, 0x017E, 0x0178 };
+
+void AppendUTF8(std::string& out, uint32_t cp)
+{
+    if (cp <= 0x7F) {
+        out += static_cast<char>(cp);
+    } else if (cp <= 0x7FF) {
+        out += static_cast<char>(0xC0 | (cp >> 6));
+        out += static_cast<char>(0x80 | (cp & 0x3F));
+    } else if (cp <= 0xFFFF) {
+        out += static_cast<char>(0xE0 | (cp >> 12));
+        out += static_cast<char>(0x80 | ((cp >> 6) & 0x3F));
+        out += static_cast<char>(0x80 | (cp & 0x3F));
+    } else {
+        out += static_cast<char>(0xF0 | (cp >> 18));
+        out += static_cast<char>(0x80 | ((cp >> 12) & 0x3F));
+        out += static_cast<char>(0x80 | ((cp >> 6) & 0x3F));
+        out += static_cast<char>(0x80 | (cp & 0x3F));
+    }
+}
+
+std::string CP1252ToUTF8(std::string const& s)
+{
+    std::string out;
+    out.reserve(s.size());
+    for (unsigned char c : s) {
+        if (c < 0x80) {
+            out += static_cast<char>(c);
+        } else if (c >= 0xA0) {
+            AppendUTF8(out, c); // CP1252 0xA0-0xFF == Unicode 0xA0-0xFF (Latin-1)
+        } else {
+            AppendUTF8(out, cp1252_0x80_0x9F[c - 0x80]);
+        }
+    }
+    return out;
+}
+
+}
 
 namespace CalChart {
 
@@ -219,4 +300,11 @@ auto DecodeBase64(std::string const& encoded) -> std::vector<std::byte>
     return result;
 }
 
+auto SanitizeToUTF8(std::string const& raw) -> std::string
+{
+    if (IsValidUTF8(raw)) {
+        return raw; // already good, no conversion needed
+    }
+    return CP1252ToUTF8(raw); // assume CP1252, convert
+}
 }

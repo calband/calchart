@@ -59,15 +59,10 @@ Additional thanks to professor Scott Moura for helping the Cal Band get support 
 Civil Engineering Department for developing these algorithms.)T";
 #pragma mark - TransitionSolverFrame Implementation
 
-TransitionSolverFrame::TransitionSolverFrame()
-{
-    Init();
-}
+TransitionSolverFrame::TransitionSolverFrame() { Init(); }
 
-TransitionSolverFrame::TransitionSolverFrame(CalChartDoc* show, wxWindow* parent,
-    wxWindowID id, const wxString& caption,
-    const wxPoint& pos, const wxSize& size,
-    long style)
+TransitionSolverFrame::TransitionSolverFrame(CalChartDoc* show, wxWindow* parent, wxWindowID id,
+    const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
 {
     Init();
 
@@ -76,10 +71,8 @@ TransitionSolverFrame::TransitionSolverFrame(CalChartDoc* show, wxWindow* parent
 
 void TransitionSolverFrame::Init() { }
 
-bool TransitionSolverFrame::Create(CalChartDoc* show, wxWindow* parent,
-    wxWindowID id, const wxString& caption,
-    const wxPoint& pos, const wxSize& size,
-    long style)
+bool TransitionSolverFrame::Create(CalChartDoc* show, wxWindow* parent, wxWindowID id, const wxString& caption,
+    const wxPoint& pos, const wxSize& size, long style)
 {
     if (!wxFrame::Create(parent, id, caption, pos, size, style)) {
         return false;
@@ -93,8 +86,11 @@ bool TransitionSolverFrame::Create(CalChartDoc* show, wxWindow* parent,
     mSolverParams.algorithm = CalChart::TransitionSolverParams::AlgorithmIdentifier::BEGIN;
     for (unsigned i = 0; i < mSolverParams.availableInstructionsMask.size(); i++) {
         mSolverParams.availableInstructionsMask[i] = true;
-        mSolverParams.availableInstructions[i].waitBeats = (i / (unsigned)CalChart::TransitionSolverParams::MarcherInstruction::Pattern::END) * 2;
-        mSolverParams.availableInstructions[i].movementPattern = (CalChart::TransitionSolverParams::MarcherInstruction::Pattern)(i % (unsigned)CalChart::TransitionSolverParams::MarcherInstruction::Pattern::END);
+        mSolverParams.availableInstructions[i].waitBeats
+            = (i / (unsigned)CalChart::TransitionSolverParams::MarcherInstruction::Pattern::END) * 2;
+        mSolverParams.availableInstructions[i].movementPattern
+            = (CalChart::TransitionSolverParams::MarcherInstruction::Pattern)(i
+                % (unsigned)CalChart::TransitionSolverParams::MarcherInstruction::Pattern::END);
     }
 
     CreateControls();
@@ -121,8 +117,7 @@ void TransitionSolverFrame::CreateControls()
         wxUI::HLine(),
         wxUI::HSizer{
             wxUI::Text{ "Select an algorithm: " },
-            wxUI::Choice{ { "E7 Algorithm: Chiu, Zamora, Malani",
-                              "E7 Algorithm: Namini Asl, Ramirez, Zhang",
+            wxUI::Choice{ { "E7 Algorithm: Chiu, Zamora, Malani", "E7 Algorithm: Namini Asl, Ramirez, Zhang",
                               "Ey Algorithm: Sover, Eliceiri, Hershkovitz" } }
                 .bind([this](wxCommandEvent& event) {
                     ChooseAlgorithm((CalChart::TransitionSolverParams::AlgorithmIdentifier)event.GetSelection());
@@ -138,9 +133,10 @@ void TransitionSolverFrame::CreateControls()
                     wxUI::Text{ "Selected Instructions:" },
                     wxUI::Text{ "0:" }.withProxy(mNumSelectedInstructionsIndicator),
                 },
-                wxUI::ListBox{}.withSize({ 400, 100 }).setStyle(wxLB_EXTENDED).bind([this] {
-                                                                                  EditAllowedCommands();
-                                                                              })
+                wxUI::ListBox{}
+                    .withSize({ 400, 100 })
+                    .setStyle(wxLB_EXTENDED)
+                    .bind([this] { EditAllowedCommands(); })
                     .withFlags(wxSizerFlags{}.Expand())
                     .withProxy(mAvailableCommandsControl),
             },
@@ -148,28 +144,31 @@ void TransitionSolverFrame::CreateControls()
             wxUI::HSizer{
                 wxUI::Text{ "New Group:" },
                 wxUI::TextCtrl{}.withWidth(100).withProxy(mNewGroupNameControl),
-                wxUI::Button{ "Add" }.bind([this] {
-                                         AddNewGroup(mNewGroupNameControl->GetValue().ToStdString());
-                                         SyncGroupControlsWithCurrentState();
-                                     })
+                wxUI::Button{ "Add" }
+                    .bind([this] {
+                        AddNewGroup(mNewGroupNameControl->GetValue().utf8_string());
+                        SyncGroupControlsWithCurrentState();
+                    })
                     .withProxy(mAddGroupButton),
             },
             wxUI::HSizer{
                 wxUI::Text{ "Viewing Group:" },
-                wxUI::ListBox{}.withSize({ 400, 100 }).bind([this] {
-                                                          SelectGroup();
-                                                      })
+                wxUI::ListBox{}
+                    .withSize({ 400, 100 })
+                    .bind([this] { SelectGroup(); })
                     .withFlags(wxSizerFlags{}.Expand())
                     .withProxy(mCurrentGroupControl),
-                wxUI::Button{ "Remove" }.bind([this] {
-                                            AddNewGroup(mNewGroupNameControl->GetValue().ToStdString());
-                                            SyncGroupControlsWithCurrentState();
-                                        })
+                wxUI::Button{ "Remove" }
+                    .bind([this] {
+                        AddNewGroup(mNewGroupNameControl->GetValue().utf8_string());
+                        SyncGroupControlsWithCurrentState();
+                    })
                     .withProxy(mRemoveGroupControl),
             },
             wxUI::HSizer{
                 wxUI::VSizer{
-                    wxUI::Text{ "Select marchers on the field to enable adding them as members or destinations of the current group." }
+                    wxUI::Text{ "Select marchers on the field to enable adding them as members or destinations of the "
+                                "current group." }
                         .withWrap(150),
                     wxUI::Text{ "Number of selected marchers:" },
                     wxUI::Text{ "0" }.withProxy(mNumberOfSelectedPointsLabel),
@@ -182,33 +181,36 @@ void TransitionSolverFrame::CreateControls()
                         .withFlags(wxSizerFlags{}.Expand())
                         .withProxy(mCurrentGroupMembersList),
                     wxUI::HSizer{
-                        wxUI::Button{ "Clear" }.bind([this] {
-                                                   ClearMembers();
-                                                   SyncGroupControlsWithCurrentState();
-                                               })
+                        wxUI::Button{ "Clear" }
+                            .bind([this] {
+                                ClearMembers();
+                                SyncGroupControlsWithCurrentState();
+                            })
                             .withProxy(mClearMembersButton),
-                        wxUI::Button{ "Set" }.bind([this] {
-                                                 SetMembers(mDoc->GetSelectionList());
-                                                 SyncGroupControlsWithCurrentState();
-                                             })
+                        wxUI::Button{ "Set" }
+                            .bind([this] {
+                                SetMembers(mDoc->GetSelectionList());
+                                SyncGroupControlsWithCurrentState();
+                            })
                             .withProxy(mSetMembersToSelectionButton),
                     },
                     wxUI::HSizer{
-                        wxUI::Button{ "Add" }.bind([this] {
-                                                 AddMembers(mDoc->GetSelectionList());
-                                                 SyncGroupControlsWithCurrentState();
-                                             })
+                        wxUI::Button{ "Add" }
+                            .bind([this] {
+                                AddMembers(mDoc->GetSelectionList());
+                                SyncGroupControlsWithCurrentState();
+                            })
                             .withProxy(mAddSelectionToMembersButton),
-                        wxUI::Button{ "Remove" }.bind([this] {
-                                                    RemoveMembers(mDoc->GetSelectionList());
-                                                    SyncGroupControlsWithCurrentState();
-                                                })
+                        wxUI::Button{ "Remove" }
+                            .bind([this] {
+                                RemoveMembers(mDoc->GetSelectionList());
+                                SyncGroupControlsWithCurrentState();
+                            })
                             .withProxy(mRemoveSelectionFromMembersButton),
                     },
                     wxUI::HSizer{
-                        wxUI::Button{ "Select" }.bind([this] {
-                                                    mView->SelectMarchers(mSolverParams.groups[mSelectedGroup].marchers);
-                                                })
+                        wxUI::Button{ "Select" }
+                            .bind([this] { mView->SelectMarchers(mSolverParams.groups[mSelectedGroup].marchers); })
                             .withProxy(mSelectMembersButton),
                     },
                 },
@@ -220,33 +222,38 @@ void TransitionSolverFrame::CreateControls()
                         .withFlags(wxSizerFlags{}.Expand())
                         .withProxy(mCurrentGroupDestinationsList),
                     wxUI::HSizer{
-                        wxUI::Button{ "Clear" }.bind([this] {
-                                                   ClearDestinations();
-                                                   SyncGroupControlsWithCurrentState();
-                                               })
+                        wxUI::Button{ "Clear" }
+                            .bind([this] {
+                                ClearDestinations();
+                                SyncGroupControlsWithCurrentState();
+                            })
                             .withProxy(mClearDestinationsButton),
-                        wxUI::Button{ "Set" }.bind([this] {
-                                                 SetDestinations(mDoc->GetSelectionList());
-                                                 SyncGroupControlsWithCurrentState();
-                                             })
+                        wxUI::Button{ "Set" }
+                            .bind([this] {
+                                SetDestinations(mDoc->GetSelectionList());
+                                SyncGroupControlsWithCurrentState();
+                            })
                             .withProxy(mSetDestinationsToSelectionButton),
                     },
                     wxUI::HSizer{
-                        wxUI::Button{ "Add" }.bind([this] {
-                                                 AddDestinations(mDoc->GetSelectionList());
-                                                 SyncGroupControlsWithCurrentState();
-                                             })
+                        wxUI::Button{ "Add" }
+                            .bind([this] {
+                                AddDestinations(mDoc->GetSelectionList());
+                                SyncGroupControlsWithCurrentState();
+                            })
                             .withProxy(mAddSelectionToDestinationsButton),
-                        wxUI::Button{ "Remove" }.bind([this] {
-                                                    RemoveDestinations(mDoc->GetSelectionList());
-                                                    SyncGroupControlsWithCurrentState();
-                                                })
+                        wxUI::Button{ "Remove" }
+                            .bind([this] {
+                                RemoveDestinations(mDoc->GetSelectionList());
+                                SyncGroupControlsWithCurrentState();
+                            })
                             .withProxy(mRemoveSelectionFromDestinationsButton),
                     },
                     wxUI::HSizer{
-                        wxUI::Button{ "Select" }.bind([this] {
-                                                    mView->SelectMarchers(mSolverParams.groups[mSelectedGroup].allowedDestinations);
-                                                })
+                        wxUI::Button{ "Select" }
+                            .bind([this] {
+                                mView->SelectMarchers(mSolverParams.groups[mSelectedGroup].allowedDestinations);
+                            })
                             .withProxy(mSelectDestinationsButton),
                     },
                 },
@@ -254,13 +261,9 @@ void TransitionSolverFrame::CreateControls()
         },
         wxUI::HLine(),
         wxUI::HSizer{
-            wxUI::Button{ "Close" }.bind([this] {
-                                       Close();
-                                   })
-                .withProxy(mCloseButton),
-            wxUI::Button{ "Apply (Solve Transition from This Sheet to Next)" }.bind([this] {
-                                                                                  Apply();
-                                                                              })
+            wxUI::Button{ "Close" }.bind([this] { Close(); }).withProxy(mCloseButton),
+            wxUI::Button{ "Apply (Solve Transition from This Sheet to Next)" }
+                .bind([this] { Apply(); })
                 .withProxy(mApplyButton),
         },
 
@@ -289,10 +292,7 @@ TransitionSolverFrame::~TransitionSolverFrame()
     }
 }
 
-void TransitionSolverFrame::OnCloseWindow(wxCommandEvent&)
-{
-    Close();
-}
+void TransitionSolverFrame::OnCloseWindow(wxCommandEvent&) { Close(); }
 
 void TransitionSolverFrame::Update()
 {
@@ -302,12 +302,13 @@ void TransitionSolverFrame::Update()
 
 void TransitionSolverFrame::SyncInstructionOptionsControlWithCurrentState()
 {
-    static const auto marchInstructions = std::map<CalChart::TransitionSolverParams::MarcherInstruction::Pattern, std::string>{
-        { CalChart::TransitionSolverParams::MarcherInstruction::EWNS, "EWNS" },
-        { CalChart::TransitionSolverParams::MarcherInstruction::NSEW, "NSEW" },
-        { CalChart::TransitionSolverParams::MarcherInstruction::DMHS, "DMHS" },
-        { CalChart::TransitionSolverParams::MarcherInstruction::HSDM, "HSDM" },
-    };
+    static const auto marchInstructions
+        = std::map<CalChart::TransitionSolverParams::MarcherInstruction::Pattern, std::string>{
+              { CalChart::TransitionSolverParams::MarcherInstruction::EWNS, "EWNS" },
+              { CalChart::TransitionSolverParams::MarcherInstruction::NSEW, "NSEW" },
+              { CalChart::TransitionSolverParams::MarcherInstruction::DMHS, "DMHS" },
+              { CalChart::TransitionSolverParams::MarcherInstruction::HSDM, "HSDM" },
+          };
 
     mInstructionOptions.clear();
     for (auto waitBeats = CalChart::Beats{}; waitBeats < mDoc->GetSheetBeatsOnCurrentSheet(); waitBeats += 2) {
@@ -321,22 +322,25 @@ void TransitionSolverFrame::SyncInstructionOptionsControlWithCurrentState()
     // Populate the list of available commands depending on the duration of the sheet
     std::vector<wxString> commandLabels;
 
-    std::transform(mInstructionOptions.begin(), mInstructionOptions.end(), std::back_inserter(commandLabels), [](auto&& instruction) {
-        std::string label;
-        if (auto i = marchInstructions.find(instruction.movementPattern); i != marchInstructions.end()) {
-            label = i->second;
-        } else {
-            label = "ERROR";
-        }
-        return "Wait "s + std::to_string(instruction.waitBeats) + ", then " + label;
-    });
+    std::transform(mInstructionOptions.begin(), mInstructionOptions.end(), std::back_inserter(commandLabels),
+        [](auto&& instruction) {
+            std::string label;
+            if (auto i = marchInstructions.find(instruction.movementPattern); i != marchInstructions.end()) {
+                label = i->second;
+            } else {
+                label = "ERROR";
+            }
+            return "Wait "s + std::to_string(instruction.waitBeats) + ", then " + label;
+        });
 
     mAvailableCommandsControl->Set(commandLabels);
 
     // Update the commands
     for (auto i = 0lu; i < mSolverParams.availableInstructions.size(); i++) {
         auto instruction = mSolverParams.availableInstructions[i];
-        auto commandIndex = (unsigned)CalChart::TransitionSolverParams::MarcherInstruction::Pattern::END * (instruction.waitBeats / 2) + ((unsigned)instruction.movementPattern);
+        auto commandIndex
+            = (unsigned)CalChart::TransitionSolverParams::MarcherInstruction::Pattern::END * (instruction.waitBeats / 2)
+            + ((unsigned)instruction.movementPattern);
 
         if (mSolverParams.availableInstructionsMask[i] && commandIndex < commandLabels.size()) {
             mAvailableCommandsControl->SetSelection(commandIndex);
@@ -366,11 +370,13 @@ void TransitionSolverFrame::SyncGroupControlsWithCurrentState()
         auto& group = mSolverParams.groups[mSelectedGroup];
 
         std::vector<wxString> memberLabels;
-        std::transform(group.marchers.begin(), group.marchers.end(), std::back_inserter(memberLabels), [this](auto&& marcher) { return mDoc->GetPointLabel(marcher); });
+        std::transform(group.marchers.begin(), group.marchers.end(), std::back_inserter(memberLabels),
+            [this](auto&& marcher) { return mDoc->GetPointLabel(marcher); });
         mCurrentGroupMembersList->Set(memberLabels);
 
         std::vector<wxString> destinationLabels;
-        std::transform(group.allowedDestinations.begin(), group.allowedDestinations.end(), std::back_inserter(destinationLabels), [this](auto&& marcher) { return mDoc->GetPointLabel(marcher); });
+        std::transform(group.allowedDestinations.begin(), group.allowedDestinations.end(),
+            std::back_inserter(destinationLabels), [this](auto&& marcher) { return mDoc->GetPointLabel(marcher); });
         mCurrentGroupDestinationsList->Set(destinationLabels);
     }
 
@@ -460,7 +466,9 @@ void TransitionSolverFrame::EditAllowedCommands()
     for (unsigned i = 0; i < mSolverParams.availableInstructions.size(); i++) {
         if (mSolverParams.availableInstructionsMask[i]) {
             auto instruction = mSolverParams.availableInstructions[i];
-            auto commandIndex = (unsigned)CalChart::TransitionSolverParams::MarcherInstruction::Pattern::END * (instruction.waitBeats / 2) + ((unsigned)instruction.movementPattern);
+            auto commandIndex = (unsigned)CalChart::TransitionSolverParams::MarcherInstruction::Pattern::END
+                    * (instruction.waitBeats / 2)
+                + ((unsigned)instruction.movementPattern);
 
             previouslySelectedCommands.insert(commandIndex);
         }
@@ -469,7 +477,8 @@ void TransitionSolverFrame::EditAllowedCommands()
     // First add the commands that we already have selected, if they're still selected
     // that would be the intersection of the previous and new commands
     std::vector<unsigned> commandsToSelect;
-    std::set_intersection(previouslySelectedCommands.begin(), previouslySelectedCommands.end(), listSelections.begin(), listSelections.end(), std::back_inserter(commandsToSelect));
+    std::set_intersection(previouslySelectedCommands.begin(), previouslySelectedCommands.end(), listSelections.begin(),
+        listSelections.end(), std::back_inserter(commandsToSelect));
 
     // now remove all the previously selected commands
     for (auto i : previouslySelectedCommands) {
@@ -501,10 +510,7 @@ void TransitionSolverFrame::SelectGroup()
     SyncGroupControlsWithCurrentState();
 }
 
-void TransitionSolverFrame::OnNullEvent(wxCommandEvent&)
-{
-    SyncGroupControlsWithCurrentState();
-}
+void TransitionSolverFrame::OnNullEvent(wxCommandEvent&) { SyncGroupControlsWithCurrentState(); }
 
 #pragma mark - UNDER-THE-UI
 
@@ -579,15 +585,9 @@ void TransitionSolverFrame::RemoveGroup(unsigned groupIndex)
     mGroupNames.erase(mGroupNames.begin() + groupIndex);
 }
 
-void TransitionSolverFrame::SelectGroup(unsigned groupIndex)
-{
-    mSelectedGroup = groupIndex;
-}
+void TransitionSolverFrame::SelectGroup(unsigned groupIndex) { mSelectedGroup = groupIndex; }
 
-void TransitionSolverFrame::UnselectGroup()
-{
-    mSelectedGroup = -1;
-}
+void TransitionSolverFrame::UnselectGroup() { mSelectedGroup = -1; }
 
 void TransitionSolverFrame::ClearMembers()
 {
@@ -617,10 +617,7 @@ void TransitionSolverFrame::RemoveMembers(CalChart::SelectionList marchers)
     }
 }
 
-void TransitionSolverFrame::ClearDestinations()
-{
-    mSolverParams.groups[mSelectedGroup].allowedDestinations.clear();
-}
+void TransitionSolverFrame::ClearDestinations() { mSolverParams.groups[mSelectedGroup].allowedDestinations.clear(); }
 
 void TransitionSolverFrame::SetDestinations(CalChart::SelectionList marchers)
 {
