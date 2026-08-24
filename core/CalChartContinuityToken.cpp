@@ -3143,7 +3143,7 @@ void ProcMarch::Compile(Animate::Compile& anim)
 
 auto ProcMarch::ToString() const -> std::string
 {
-    return std::format("{}[CPrm]March step size{} for steps {} in direction {}{}", super::ToString(), *stpsize, *stps,
+    return std::format("{}[CPrm]March step size {} for steps {} in direction {}{}", super::ToString(), *stpsize, *stps,
         *dir, facedir ? std::format(" facing {}", *facedir) : "");
 }
 

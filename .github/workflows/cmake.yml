@@ -117,15 +117,12 @@ jobs:
 
     - name: Install Dependencies (macOS)
       if: matrix.config.os == 'macos-latest'
-      run: |
-        brew install pandoc
-        pip install deepdiff pytest
+      run: brew install pandoc
 
     - name: Install Dependencies (Windows)
       if: matrix.config.os == 'windows-latest'
       run: |
         choco install -y winflexbison nsis curl openssl.light pkgconfiglite git pandoc
-        pip install deepdiff pytest
         echo "C:\Program Files (x86)\NSIS" >> $env:GITHUB_PATH
         nuget install Microsoft.Web.WebView2 -OutputDirectory "${{ github.workspace }}\packages"
         Get-ChildItem "${{ github.workspace }}\packages" -Filter "Microsoft.Web.WebView2*" -Directory | ForEach-Object {
@@ -145,7 +142,6 @@ jobs:
         sudo apt install -y gcc-14 g++-14
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 100 \
           --slave /usr/bin/g++ g++ /usr/bin/g++-14 --slave /usr/bin/gcov gcov /usr/bin/gcov-14
-        pip install deepdiff pytest
 
     # Configure & Build
     - name: Configure CMake (Windows)

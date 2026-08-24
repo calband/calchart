@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import math
 import os
 import subprocess
 import shutil
@@ -9,7 +10,6 @@ import tempfile
 import zipfile
 import multiprocessing
 from dataclasses import dataclass
-from deepdiff import DeepDiff
 from typing import List, Optional
 
 Description="""
@@ -140,17 +140,75 @@ def try_load_json(path):
     except (json.JSONDecodeError, UnicodeDecodeError, OSError):
         return None
 
-def compare_json_files(json1, json2, exclude_paths=[]):
+class JsonCompareError(AssertionError):
+    """Raised when two JSON structures differ beyond tolerance."""
+    pass
+
+
+def compare_json(a, b, path="root", rel_tol=1e-9, abs_tol=1e-9,
+                  exclude_keys=None, errors=None):
+    """
+    Recursively compare two JSON-loaded structures.
+    Collects all differences (rather than stopping at the first) into `errors`.
+    Returns the list of error strings.
+    """
+    if errors is None:
+        errors = []
+    exclude_keys = exclude_keys or set()
+
+    if isinstance(a, dict) and isinstance(b, dict):
+        keys_a, keys_b = set(a.keys()), set(b.keys())
+        only_a = keys_a - keys_b
+        only_b = keys_b - keys_a
+        if only_a:
+            errors.append(f"{path}: keys only in first file: {sorted(only_a)}")
+        if only_b:
+            errors.append(f"{path}: keys only in second file: {sorted(only_b)}")
+        for key in sorted(keys_a & keys_b):
+            if key in exclude_keys:
+                continue
+            compare_json(a[key], b[key], f"{path}.{key}", rel_tol, abs_tol,
+                         exclude_keys, errors)
+
+    elif isinstance(a, list) and isinstance(b, list):
+        if len(a) != len(b):
+            errors.append(f"{path}: length mismatch ({len(a)} vs {len(b)})")
+        else:
+            for i, (x, y) in enumerate(zip(a, b)):
+                compare_json(x, y, f"{path}[{i}]", rel_tol, abs_tol,
+                             exclude_keys, errors)
+
+    elif isinstance(a, (int, float)) and isinstance(b, (int, float)):
+        if isinstance(a, bool) != isinstance(b, bool):
+            # avoid True == 1 comparing as numerically equal when types should match
+            errors.append(f"{path}: type mismatch: {a!r} vs {b!r}")
+        elif not math.isclose(a, b, rel_tol=rel_tol, abs_tol=abs_tol):
+            errors.append(f"{path}: value mismatch: {a} != {b}")
+
+    else:
+        if type(a) != type(b):
+            errors.append(f"{path}: type mismatch: {type(a).__name__} vs {type(b).__name__}")
+        elif a != b:
+            errors.append(f"{path}: value mismatch: {a!r} != {b!r}")
+
+    return errors
+
+
+def assert_json_files_equal(path_a, path_b, rel_tol=1e-9, abs_tol=1e-9, exclude_keys=None):
+    a = load_json(path_a)
+    b = load_json(path_b)
+    errors = compare_json(a, b, rel_tol=rel_tol, abs_tol=abs_tol, exclude_keys=exclude_keys)
+    if errors:
+        raise JsonCompareError(
+            f"JSON mismatch between {path_a} and {path_b}:\n" + "\n".join(errors)
+        )
+        
+def compare_json_files(json1, json2, rel_tol=1e-9, abs_tol=1e-9, exclude_keys=None):
     num_errors = 0
     error_details = []
-    diff = DeepDiff(
-        json1, json2,
-        math_epsilon=1e-6,              # float tolerance
-        exclude_paths=exclude_paths,    # e.g. ["root['timestamp']", "root['request_id']"]
-        ignore_order=True,              # if list order shouldn't matter
-    )
-    if diff:
-        error_details.append(f"Error comparing files: {diff}")
+    errors = compare_json(json1, json2, rel_tol=rel_tol, abs_tol=abs_tol, exclude_keys=exclude_keys)
+    if errors:
+        error_details.append(f"Error comparing files: {errors}")
         return (1, error_details)
     return (num_errors, error_details)
 
@@ -168,7 +226,7 @@ def compare_files(file1, file2, custom_comparison_function, max_diff_lines=10):
         return (1, error_details)
 
     if json_a is not None:
-        return compare_json_files(json_a, json_b)  # DeepDiff-based comparison
+        return compare_json_files(json_a, json_b)
 
     try:
         with open(file1, 'r') as f1, open(file2, 'r') as f2:
