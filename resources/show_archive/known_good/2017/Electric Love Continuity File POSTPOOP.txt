@@ -1,0 +1,227 @@
+%%1
+~\bsUNIVERSITY OF CALIFORNIA MARCHING BAND
+~Electric Love Show
+~Electric Love\be
+
+1	1/1	All:	Stand and Play 8 E
+		\po:	FMHS EW/NS TO SS 2 [MTHS E]
+		\so:	FMHS NS/EW TO SS 2 [MTHS E]
+		\pb:	DHS/FMHS TO SS 2 [MTHS E]
+40 Beats Total
+
+%%2
+2	11/1	\po:	MTHS 44 E [MTHS W]
+		\so:	MTHS 8 E
+			Execute Step 2 Drill as Follows [MTHS E before and after]
+			MTHS 4 W 
+		\pb:	MTHS 8 E
+			Execute Step 2 Drill as Follows [MTHS E before and after]
+			FMHS 8 N
+			MTHS 2 W
+			FMHS 8 S
+		\ps:	MTHS 8 E
+			Execute Step 2 Drill as Follows [MTHS E before and after]
+			FMHS 8 S
+			MTHS 2 W
+			FMHS 8 N
+		\px:	MTHS 8 E
+			MTHS 8 W [MTHS E]
+		\sb:	MTHS 34 E
+			Execute Step 2 Drill as Follows [MTHS E before and after]
+			MTHS 4 W [MTHS E]
+		\sx:	Execute 8 HS Gate Turn 90 degrees Clockwise around R1
+			MTHS 8 W [MTHS E]
+52 Beats Total
+
+%%3
+3	24/1	\po:	FMHS EW/NS TO SS 4 [MTHS E]
+		\so:	FMHS NS/EW TO SS 4 [MTHS E]
+		\pb:	FMHS/DHS TO SS 4 [MTHS E]
+		\px:	DHS/FMHS TO SS 4 [MTHS E]
+32 Beats Total
+
+%%4
+4	32/1	\po:	FMHS EW/NS TO SS 5 [MTHS E]
+		\so:	FMHS NS/EW TO SS 5 [MTHS E]
+		\pb	DHS/FMHS TO SS 5 [MTHS E]
+
+~Note: At the end of this SS there is direct transition into 'I Need Your Love',
+	which starts with MTHS 8 W.
+
+32 Beats Total
+
+%%5
+~\bsI Need Your Love\be
+
+5	40/1	All:	MTHS 8 W
+		\po:	FMHS EW/NS TO SS 6 [MTHS W]
+		\so:	FMHS NS/EW TO SS 6 [MTHS W]
+		\pb:	DHS/FMHS TO SS 6 [MTHS W]
+44 Beats Total
+
+%%6
+6	51/1	\po:	Execute 18 HS Gateturn 270 degrees CCW around R1 [MTHS W]
+		\so:	MTHS 2 W
+			Execute 18 HS Gateturn 270 degrees CCW around R1 [MTHS W]
+		\pb:	MTHS 4 W
+			Execute 18 HS Gateturn 270 degrees CCW around R1 [MTHS W]
+		\sb:	MTHS 6 W
+			Execute 18 HS Gateturn 270 degrees CCW around R1 [MTHS W]
+		\ps:	MTHS 8 W
+			Execute 18 HS Gateturn 270 degrees CCW around R1 [MTHS W]
+		\ss:	MTHS 10 W
+			Execute 18 HS Gateturn 270 degrees CCW around R1 [MTHS W]
+		\px:	MTHS 12 W
+			Execute 18 HS Gateturn 270 degrees CCW around R1 [MTHS W]
+
+~Note: You should be in either a parallel or perpendicular line to the sideline every 6 beats.
+
+32 Beats Total
+
+%%7
+7	59/1	\po:	FMHS EW/NS TO SS 8 [MTHS W]
+32 Beats Total
+
+%%8
+8	67/1	\po:	Jerky Step 8 W (16 Beats)
+			Hup Vamp 16 W
+32 Beats Total
+
+%%9
+9	75/1	\po:	MTHS 16 W
+16 Beats Total
+
+%%10
+~\bsWe Found Love\be
+
+10	79/1	All:	MTHS 16 W
+		\po:	FMHS EW/NS TO SS 11 [MTHS W]
+		\so:	FMHS NS/EW TO SS 11 [MTHS W]
+		\pb:	DHS/FMHS TO SS 11 [MTHS W]
+48 Beats Total
+
+%%11
+11	91/1	\po:	FMHS EW/NS TO SS 12 [MTHS W]
+		\so:	FMHS NS/EW TO SS 12 [MTHS W]
+		\pb:	MTHS 10 W
+			FMHS EW/NS TO SS 12 [MTHS W]
+		\ps:	MTHS 10 W
+			FMHS NS/EW TO SS 12 [MTHS W]
+		\px:	MTHS 8 W
+			FMHS NS/EW TO SS 12 [MTHS W]
+		\sb:	MTHS 8 W
+			FMHS EW/NS TO SS 12 [MTHS W]
+
+~Note: The end of this SS is a direct transition into 'Stay the Night'.
+	Make sure to catch the pivot for East facing. 
+
+72 Beats Total
+%%12
+~\bsStay the Night\be
+
+12	109/1	\po:	FMHS EW/NS TO SS Hogballs [MTHS E]
+		\so:	FMHS NS/EW TO SS Hogballs [MTHS E]
+		\pb:	DHS/FMHS TO SS Hogballs [MTHS E]
+		\ps:	FMHS/DHS TO SS Hogballs [MTHS E]
+32 Beats Total
+
+%%Hogballs
+Hogballs	117/1	\po:	FMHS EW/NS TO SS 14 [MTHS E]
+			\so:	FMHS NS/EW TO SS 14 [MTHS E]
+			\pb:	DHS/FMHS TO SS 14 [MTHS E]
+			\ps:	FMHS/DHS TO SS 14 [MTHS E]
+			\px:	MTHS 4 E
+				DHS/FMHS TO SS 14 [MTHS E]
+32 Beats Total
+
+%%14
+14	125/1	\po:	FMHS EW/NS TO SS 15 [MTHS E]
+		\so:	FMHS NS/EW TO SS 15 [MTHS E]
+		\pb:	DHS/FMHS TO SS 15 [MTHS E]
+		\ps:	FMHS/DHS TO SS 15 [MTHS E]
+		\px:	MTHS 4 E
+			FMHS EW/NS TO SS 15 [MTHS E]
+64 Beats Total
+
+%%15
+15	141/1	\po:	Even Mini Military 32 TO SS 16
+		\so:	Execute Step 2 Drill as Follows (MTHS E before and after)
+			FMHS 8 S
+			FMHS 8 N
+		\pb:	Execute Step 2 Drill as Follows (MTHS E before and after)
+			FMHS 8 N
+			FMHS 6 S 
+		\sb:	FMHS NS/EW TO SS 17 [MTHS E]
+		\px:	MTHS 32 E
+
+~Note: Cube: Pay extra attention to dot accuracy.
+	Tip: Mark your poop sheet with half-way/quarter-way points. 
+		As many checkpoints as possible!
+
+32 Beats Total
+
+%%16
+16	149/1	\po:	Even Mini Military 32 to SS 17 [MTHS E]
+		\so:	FMHS 2 E
+			Hup Vamp E for 30 Beats
+			MTHS 4 E
+		\pb:	Hup Vamp E for 32 Beats
+			MTHS 4 E
+36 Beats Total
+~Note: The last 4 beats of this SS transition to 'Without You'!
+
+%%17
+~Without You
+17	158/1	All:	MTHS 4 E
+		\po:	FMHS EW/NS TO SS 18 [MTHS E]
+		\so:	FMHS NS/EW TO SS 18 [MTHS E]
+		\pb:	DHS/FMHS TO SS 18  [MTHS E]
+		\ps:	FMHS/DHS TO SS 18 [MTHS E]
+		\sb:	MTHS 12 E
+			FMHS NS/EW TO SS 18 [MTHS E]
+
+~Note: If coming from cube:
+The spacing is v close so be as accurate as possible!
+Tip: If starting off the grid, you will move to the grid at no more 
+	than 8 per 5 step size and then do 8 per 5 step size to your dot.
+
+64 Beats  Total
+
+%%18
+18	174/1	\po:	FMHS EW/NS TO SS 19 [MTHS E]
+		\so:	FMHS NS/EW TO SS 19 [MTHS E]
+		\pb:	DHS/FMHS TO SS 19 [MTHS E]
+		\ps:	FMHS/DHS TO SS 19 [MTHS E]
+32 Beats Total
+
+%%19
+19	182/1	\po:	Even Mini Military 8 Facing East to SS 20
+8 Beats Total
+
+%%20
+20	184/1	\po:	Even Mini Military 8 Facing East to SS 21
+8 Beats Total
+
+%%21
+21	186/1	\po:	Even Mini Military 8 Facing East to SS 22
+8 Beats Total
+
+%%22
+22	188/1	\po:	Even Mini Military 8 Facing East to SS 23
+8 Beats Total
+
+%%23
+23	190/1	\po:	FMHS EW/NS TO SS 24 [Close E]
+		\so:	FMHS NS/EW TO SS 24 [Close E]
+		\pb:	FMHS/DHS TO SS 24 [Close E]
+		\ps:	DHS/FMHS TO SS 24 [Close E]
+32 Beats Total
+
+%%24
+24	198/1	All: Execute Force-Quit Continuity as follows:
+			UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT B A START
+56 Beats
+~Go Bears!!!! Beat the Beavers!!!!
+
+%%25
+25

@@ -1,0 +1,299 @@
+﻿%%Tunnel
+~\bsUNIVERSITY OF CALIFORNIA MARCHING BAND\be 
+~\bsPREGAME 2017\be 
+
+~\bsTunnel Flow\be 
+
+Drum Major Command		All:	Call to Attention
+
+Signal		All:	"Sticks up! Pick up your heels! Turn your corners square! 
+			And Drive! Drive! Drive!"
+
+Double Time Whistles	All:	Tunnel Step to Line C, pivot and Tunnel Step to Line B as per
+ 				arrows, pivot and continue Tunnel Flow as per arrows
+			\so: You are Tunnel Line Leaders
+			\po: Follow your Line Leaders
+
+			\bsNOTE: The side-to-side (E/W) spacing in between the lines led by
+ 			power wedge is two steps. All other side-to-side spacing is one step
+ 			until after the pivot at line C, where it then expands onto the
+ 			two step grid at line B.  Front-to-back (N/S) spacing is two steps at
+			a 6/5 step size throughout Tunnel\be
+
+%%Gauntlet
+
+Gauntlet		All:	Tunnel to Gauntlet Positions
+			Tunnel to E/W holding line on -10 yardline (end line)
+			Tunnel to SS 1
+
+%%Primary Wings
+Primary Wings		All:	Tunnel Step as per arrows to SS 1
+
+		\bsNote:\be People who end up splitting yard lines in the east wing, doing
+ 		a LEFT pivot on their LEFT foot, or people splitting yard lines in the west
+ 		wing, doing a RIGHT Pivot on their RIGHT foot, must take a step past their 	
+		final E/W line and then step back onto the drawn path (ask a TA or Stunt 
+		member for clarification).
+
+Drum Cue		All:	Execute Tunnel Transition
+
+%%Secondary Wings
+Secondary Wings		All:	Tunnel Step as per arrows to SS 1
+
+		\bsNote:\be People who end up splitting yard lines in the east wing, doing
+ 		a LEFT pivot on their LEFT foot, or people splitting yard lines in the west
+ 		wing, doing a RIGHT Pivot on their RIGHT foot, must take a step past their 	
+		final E/W line and then step back onto the drawn path (ask a TA or Stunt 
+		member for clarification).
+
+Drum Cue		All:	Execute Tunnel Transition
+
+%%Tertiary Wings
+Tertiary Wings		All:	Tunnel Step as per arrows to SS 1
+		
+		\bsNote:\be People who end up splitting yard lines in the east wing, doing
+ 		a LEFT pivot on their LEFT foot, or people splitting yard lines in the west
+ 		wing, doing a RIGHT Pivot on their RIGHT foot, must take a step past their 	
+		final E/W line and then step back onto the drawn path (ask a TA or Stunt 
+		member for clarification).
+
+		All:	Execute Tunnel Transition
+
+%%Butt Plug
+Butt Plug		All:	Tunnel Step as per arrows to SS 1
+
+Drum Cue		All:	Execute Tunnel Transition
+
+%%Percussion
+Percussion		
+
+Drum Cue		All:	Execute Tunnel Transition
+
+%%Pre Pop Wedge
+Pre Pop Wedge		\po:	Execute Tunnel Transition as normal.
+
+		\so:	Execute Tunnel Transition with a Pop and Close to Initial Wedge.
+			"Da-ga da-ga da (rest), da-ga da-ga da (rest), da-ga da-ga da-ga HUP	
+			POP and CLOSE"
+
+
+%%1
+~\bsBIG C\be 
+SS#:	m./ct.	Type	Continuity
+1	1/1	All:	Stand and Play Intro S
+	8/2	All:	Show High Hup with Horn Flash
+	A1/1	All:	FMHS 64 S
+
+	80 Beats Total
+
+%%2
+2	E1/1	\po:	FMHS NS/EW to SS 3 [MTHS E]
+		\so:	FMDHS/HS to SS 3 [MTHS E]
+		\px:	FMHS/DHS to SS 3 [MTHS E]
+		
+	16 Beats Total
+
+%%3
+3	RA1/1	\po:	FMHS EW/NS to SS 4 [MTHS E]
+		\so:	FMHS NS/EW to SS 4 [MTHS E]
+		\pb:	FMHS/DHS to SS 4 [MTHS E]
+
+	32 Beats Total
+
+%%4
+4	RC1/1	\po:	FMHS EW/NS to SS 5 [MTHS E]
+		\so:	FMHS NS/EW to SS 5 [MTHS E]
+		\pb:	FMDHS/HS to SS 5 [MTHS E]
+		\ps: 	FMHS/DHS to SS 5 [MTHS E]
+		\px:	MTHS 8 E
+			FMHS NS/EW to SS 5 [MTHS E]
+		\sx:	MTHS 8 E
+			FMHS EW/NS SS 5 [MTHS E]
+			
+		
+	28 Beats Total
+
+%%5
+5	RD7/1	\po:	MTHS E [Close E] 
+		\so:	MTHS E [Close E]
+		\ps:	FMHS/DHS SS 6 [Close W] (Pop and Close to SS 6)
+		\px:	MTHS W [Close W] 
+		\sx:	FMHS NS/EW [Close W] 
+	
+	4 Beats Total
+
+%%6
+6	RE1/1	\po:	Hat Salute E
+		\so:	Hat Salute W
+
+	14 Beats Total
+
+%%7
+~\bsSons of California\be 
+
+7	1/1	\po:	Stand and Play 8 W
+			FMDHS/HS to SS 8 [MTHS E]
+		\so:	Stand and Play 8 W
+			FMHS EW/NS to SS 8 [MTHS E]
+		\ps:	Stand and Play 8 W
+			MTHS 4 E
+			FMDHS/HS to SS 8 [MTHS E]
+		\px:	Stand and Play 8 E
+			FMHS/DHS to SS 8 [MTHS E]
+		\sx:	Stand and Play 8 E
+			MTHS 2 E
+			FMDHS/HS to SS 8 [MTHS E]
+
+	40 Beats Total
+
+%%8
+8	RC1/1	\po:	FMDHS/HS to SS 9 [MTHS E]
+		\so:	FMHS/DHS to SS 9 [MTHS E]
+		\px:	FMHS EW/NS to SS 9 [MTHS E]
+		\ps:	MTHS 4 E
+			FMHS EW/NS to SS 9 [MTHS E]
+		\sx:	MTHS 4 E 
+			NS/EW to SS 9 [MTHS E]
+
+	32 Beats Total
+
+%%9
+9	G: MTHS W    O: MTHS 4 E    L: MTHS 8 E   D: MTHS 12 E    E: MTHS 16 E     N: MTHS 20 E
+	   "C"	        MTHS W	       MTHS W	     MTHS W          MTHS W	      MTHS W
+                        "A"	       "L"           "I"             "F - -"          "N - -"
+  
+	All: California-California
+
+
+	32 Beats Total
+
+%%10
+~\bsStanford Jonah\be 
+
+10	1/1	\po:	FMDHS/HS to SS 11 [MTHS W]
+		\so:	FMHS NS/EW to SS 11 [MTHS W]
+		\px:	FMH EW/NS to SS 11 [MTHS W]
+		\ps:	FMHS/DHS to SS 11 [MTHS W]
+		\sb:	MTHS 4 W
+			FMHS/DHS to SS 11 [MTHS W]
+
+	32 Beats Total 
+
+
+%%11
+11	1/1	\po:	FMHS EW/NS to SS 12 [MTHS W]
+		\so:	FMHS NS/EW to SS 12 [MTHS W] 		
+		\pb:	FMHS/DHS to SS 12 [MTHS W] 
+		\ps:	FMDHS/HS to SS 12 [MTHS W]
+		
+	28 Beats Total
+
+%%12
+12	1/1	\po:	FMDHS/HS to SS 13 [Close E] (Pop and Close to SS 13)
+		\so:	MTHS E close
+
+	4 Beats Total
+
+%%Hogballs
+~\bsFight for California\be 
+
+Hogballs	1/1	All:	Stand and Play Intro E
+		All:	Follow the leader as per continuity on the following sheets
+
+	160 Beats Total
+
+%%C
+C Line		\so:	\bsLine Leader:\be Form the C line as per arrows
+		\po:	Follow Line Leader (\so) as per arrows
+		\sx:	\bsLink Leader:\be Join the C line as per arrows
+		\px:	Follow Link Leader (\sx) as per arrows
+
+%%A
+A Line		\so:	\bsLine Leader:\be Form the A line as per arrows
+		\po:	Follow Line Leader (\so) as per arrows
+
+%%Connector
+Connector		\so:	\bsLine Leader:\be Form the Connector as per arrows
+		\po:	Follow Line Leader (\so) as per arrows
+
+%%L
+L Line		\so:	\bsLine Leader:\be Form the L line as per arrows
+		\po:	Follow Line Leader (\so) as per arrows
+		\sx:	\bsLink Leader:\be Join the L line as per arrows
+		\px:	Follow Link Leader (\sx) as per arrows
+
+%%Tail
+Tail		\so:	\bsLine Leader:\be Form the Tail as per arrows
+		\po:	Follow Line Leader (\so) as per arrows
+		\sx:	\bsLink Leader:\be Join the L line as per arrows
+		\px:	Follow Link Leader (\sx) as per arrows
+
+%%Basses
+Basses		\so:	\bsStrut Leader:\be Form Strut line as per arrows
+		\po:	Follow Strut Leader (\so) as per arrows
+
+%%14
+14	29/1	\po:	RBP For California
+		\so:	DO NOT RBP For California
+	37/1	All:	Automatic Down into Long Halt
+
+	Oh...	All:	Execute Ripple Bow
+	Whistles	If Facing West:		Execute Waist Bow Recovery and About Face
+			If Facing East:		Execute Waist Bow Recovery and MTFFS E
+			Other Directions:	Execute Waist Bow Recovery and Smallest Angle Flying 
+						Turn to Face East
+	Double Time Whistles	All: Jog Step to SS 15 [MT Jog Step W]
+
+%%15
+15	9/1	All:	Jog Step NS/EW to SS 16 [MT Jog Step W]
+
+	32 Beats Total
+
+%%16
+16	Cue	\po:	MT 8 Jog Step W
+			Execute Jog Step Transition into Automatic Up
+		\so:	Even 8 Jog Step to SS 17 (8 Count Pop)
+			Execute Jog Step Transition into Automatic Up
+		\pb:	Diagonal Jog Step/Jog Step to SS 17 [Close W]
+
+	20 Beats Total
+
+%%17
+~\bsAmerica the Beautiful\be 
+
+17	1/1	All:	Stand and Play Intro facing away from the 50 yard line
+
+	A/1	\po:	Full Field Step N/S to SS 18 [MTFFS facing Bob] (don’t drift!)
+		\so:	Close W
+
+	C5/1	All:	Close Toward Bob and FREEZE!
+
+	96 Beats Total
+
+%%18
+~\bsThe Star Spangled Banner\be 
+
+18	1/1	All: Stand and Play Toward Bob
+
+	Cue	All:	Instruments Down
+
+	Double Time Whistles	All:	Jog Step NS/EW to SS 19 [MT Jog Step N]
+
+	230 Beats Total
+
+%%19
+19	Drum Clicks	All:	Turn and Face inward 4
+			Jog Step EW/NS to SS 20 [MT Jog Step Facing Inward]
+			(Close with the drums, instruments stay in carry)
+
+	32 Beats Total
+
+%%20
+~\bsFight for California\be 
+
+20	Drum Clicks	All:	Rolloff into Fight for California
+			Stand and Play Fight for California
+			Automatic Down
+	Double Time Whistles	All:	Jog Step E to East Sideline 
+
+~\bsGO BEARS!\be

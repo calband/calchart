@@ -1,0 +1,168 @@
+%%1
+~\bsUNIVERSITY OF CALIFORNIA MARCHING BAND
+~Bruno Show
+~24k Magic\be
+1	1/1	All:	Stand and Play Intro 32 Counts
+			Mark Time Full Field 4 E
+		\po:	FMHS EW/NS TO SS 2 [MTHS E]
+		\so:	FMHS NS/EW TO SS 2 [MTHS E]
+		\ps:	FMHS/DHS TO SS 2 [MTHS E]
+70 Beats Total
+
+%%2
+~\bsTreasure\be
+2	19/1	\po:	FMHS EW/NS TO SS 3 [MTHS W]
+		\so:	FMHS NS/EW TO SS 3 [MTHS W]
+		\pb:	DHS/FMHS TO SS 3 [MTHS W]
+		\ps:	FMHS/DMHS TO SS 3 [MTHS W]
+32 Beats Total
+
+%%3
+3	27/1	\po:	FMHS NS/EW TO SS 4 [MTHS W]
+		\so:	MTHS 8 W 
+			FMHS NS/EW TO SS 4 [MTHS W]
+		\px:	MTHS 20 W
+			FMHS NS/EW TO SS 4 [MTHS W]
+		\sx:	MTHS 24 W
+			FMHS EW/NS TO SS 4 [MTHS W]
+32 Beats Total
+
+%%4
+4	35/1	\po:	DHS/FMHS TO SS 5 [MTHS W]
+		\so:	FMHS NS/EW TO SS 5 [MTHS W]
+		\ps:	FMHS/DHS TO SS 5 [MTHS W]
+		\px:	FMHS EW/NS TO SS 5 [MTHS W]
+		\ss:	MTHS 12 W
+			FMHS NS/EW TO SS 5 [MTHS W]
+		\sx:	MTHS 16 W
+			FMHS NS/EW TO SS 5 [MTHS W]
+48 Beats Total
+
+%%5
+~\bsLocked Out of Heaven\be
+5	47/1	All:	MTHS 4 E
+		\po:	FMHS/DHS TO SS 6 [MTHS E]
+		\so:	DHS/FMHS TO SS 6 [MTHS E]
+		\px:	FMHS EW/NS TO SS 6 [MTHS E]
+		\sx:	FMHS NS/EW TO SS 6 [MTHS E]
+36 Beats Total
+
+%%6
+6	56/1	\po:	Execute HS Gate Turn 32 Beats 90 Degrees CW around R1
+			FMHS EW/NS TO SS 7 [MTHS E]
+64 Beats Total
+
+%%7
+7	72/1	\po:	FMHS/DHS TO SS 8 [MTHS E]
+		\so:	FMHS NS/EW TO SS 8 [MTHS E]
+		\px:	FMHS EW/NS TO SS 8 [MTHS E]
+32 Beats Total
+
+%%8
+8	80/1	\po:	Even Mini Military Facing East to SS 9 [MTMM E]
+16 Beats Total
+
+%%9
+9	84/1	\po:	Even Mini Military Facing East to SS 10 [MTMM E]
+16 Beats Total
+
+%%10
+10	88/1	\po:	Even Mini Military Facing East to SS 11 [MTMM E]
+16 Beats Total
+
+%%11
+11	92/1	\po:	Even Mini Military Facing East to SS 12 [MTMM E]
+20 Beats Total
+
+%%12
+~\bsJust The Way You Are\be
+12	97/1	\po:	FMHS EW/NS TO SS Hogballs [MTHS E]
+		\so:	FMHS NS/EW TO SS Hogballs [MTHS E]
+		\pb:	DHS/FMHS TO SS Hogballs [MTHS E]
+		\ps:	FMHS/DHS TO SS Hogballs [MTHS E]
+32 Beats Total
+
+%%Hogballs
+Hogballs	105/1	\po:	FMHS EW/NS TO SS 14 [MTHS E]
+32 Beats Total
+
+%%14
+~Note: Drill in parentheses only applies to dots in brackets
+14	113/1	\po:	Execute Step Two Drill as follows [MTHS E Before and After]:
+			FMHS 8 E
+			FMHS 8 W
+			(MTHS 16 E
+			FMHS 4 E
+			FMHS 4 W)
+		\so:	Execute Step Two Drill as follows [MTHS E Before and After]:
+			FMHS 8 W
+			FMHS 8 E
+			(MTHS 16 E
+			FMHS 4 W
+			FMHS 4 E)
+		\px:	Execute Step Two Drill as follows [MTHS E Before and After]:
+			FMHS 8 S
+			FMHS 8 N
+			(MTHS 16 E
+			FMHS 4 S
+			FMHS 4 N)
+		\sx:	Execute Step Two Drill as follows [MTHS E Before and After]:
+			FMHS 8 N
+			FMHS 8 S
+			(MTHS 16 E
+			FMHS 4 N
+			FMHS 4 S)
+		\ps:	MTHS 64 E
+64 Beats Total
+
+%%15
+~\bsThat's What I Like
+~**Entire song is double time!**
+\be
+15	129/1	All:	MTMM 8 W
+		\po:	FMMM EW/NS TO SS 16 [MTMM W]
+		\so:	FMMM NS/EW TO SS 16 [MTMM W]
+		\pb:	MTMM 4 W
+			FMMM EW/NS TO SS 16 [MTMM W]
+		\ps:	MTMM 4 W
+			FMMM NS/EW TO SS 16 [MTMM W]
+36 Beats Total (72 Double Time Steps)
+
+%%16
+16	138/1	\po:	FMMM EW/NS TO SS 17 [MTMM W]
+16 Beats Total (32 Double Time Steps)
+
+%%17
+17	142/1	\po:	FMMM NS/EW TO SS 18 [MTMM W]
+8 Beats Total (16 Double Time Steps)
+
+%%18
+18	144/1	\po:	DMM/FMMM TO SS 19 [MTMM W]
+16 Beats Total (32 Double Time Steps)
+
+%%19
+19	148/1	\po:	Even Mini Military 8 TO SS 20
+				MTMM 8 W
+8 Beats Total (16 Double Time Steps)
+
+%%20
+~\bsRunaway Baby
+~**This stuntsheet is in half time**
+\be
+20	150/1	\po:	FMMM NS/EW TO SS 21 [MTMM E]
+		\so:	DMM/FMMM TO SS 21 [MTMM E]
+80 Beats Total (40 Half time Steps)
+
+%%21
+21	170/1	\po:	FMMM NS/EW TO SS 22 [MTMM E]
+		\so:	FMSH EW/NS TO SS 22 [MTSH E]
+~NOTE: Solid dots do SHOW HIGH therefore 16 Show High Steps.
+32 Beats Total
+
+%%22
+22	178/1	\po:	DMM/FMMM TO SS 23 [Close E]
+24 Beats Total
+
+%%23
+~\bsGo Bears!!! Beat Wazzu!!!!\be
+23

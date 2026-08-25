@@ -1,0 +1,157 @@
+%%1
+~\bsUNIVERSITY OF CALIFORNIA MARCHING BAND
+~Kiss Me Thru the Phone\be
+1	1/1	ALL:	Stand and Play 16 E
+		\po:	FMHS EW/NS TO SS 2 [MTHS E]
+		\so:	FMHS NS/EW TO SS 2 [MTHS E]
+		\px:	DMHS/FMHS TO SS 2 [MTHS E]
+48 Beats Total
+
+%%2
+2	1/1	\po:	FMHS EW/NS TO SS 3 [MTHS W]
+		\so:	FMHS NS/EW TO SS 3 [MTHS W]
+		\ps:	MTHS 8 W
+			FMHS NS/EW TO SS 3 [MTHS W]
+48 Beats Total
+
+%%3
+3	1/1	\po:	MTHS W
+		\so:	Execute Countermarch 8 Clockwise
+			Execute Countermarch 8 Counter Clockwise
+		\px:	Execute Coutnermarch 8 Counter Clockwise
+			Execute Countermarch 8 Clockwise
+16 Beats Total
+
+%%4
+4		\po:	FMHS EW/NS TO SS 5 [MTHS W]
+		\so:	FMHS NS/EW TO SS 5 [MTHS W]
+		\pb:	DHS/FMHS TO SS 5 [MTHS W]
+		\ps:	FMHS/DHS TO SS 5 [MTHS W]
+40 Beats Total
+
+%%5
+5	1/1	\po:	FMHS 8 E
+			FMHS 8 W [MTHS W]
+		\so:	FMHS 8 W
+			FMHS 8 E [MTHS W]
+32 Beats Total
+
+%%6
+6	1/1	\po:	FMHS EW/NS TO SS 7 [MTHS W]
+		\so:	FMHS NS/EW TO SS 7 [MTHS W]
+		\ps:	DHS/FMHS TO SS 7 [MTHS W]
+		\px:	FMHS/DHS TO SS 7 [MTHS W]
+		\sx:	MTHS 4 E
+			FMHS EW/NS TO SS 7 [MTHS W]
+32 Beats Total
+
+%%7
+7	1/1	\po:	Execute Step Two Drill
+			FMHS 2 N
+			FMHS 2 S [MTHS W]
+		\so:	Execute Step Two Drill
+			FMHS 2 S
+			FMHS 2 N [MTHS W]
+		\px:	DHS/FMHS TO SS 7 [MTHS W]
+32 Beats Total
+
+%%8
+8	1/1	\po:	FMHS EW/NS TO SS 8 [MTHS E]
+		\so:	FMHS NS/EW TO SS 8 [MTHS E]
+		\pb:	DHS/FMHS TO SS 8 [MTHS E]
+		\ps:	FMHS/DHS TO SS 8 [MTHS E]
+		\px:	MTHS 8 E
+			DHS/FMHS TO SS 8 [MTHS E]
+		\sb:	MTHS 4 E
+			FMHS NS/EW TO SS 8 [MTHS E]
+		\ss:	MTHS 8 E
+			FMHS/DHS TO SS 8 [MTHS E]
+		\sx:	MTHS 8 E
+			FMHS EW/NS TO SS 8 [MTHS E]
+48 Beats Total
+
+%%9
+9	1/1	\po:	FMHS EW/NS TO SS 9 [MTHS E]
+16 Beats Total
+
+%%10
+10	1/1	\po:	FMHS EW/NS TO SS 10 [MTHS E]
+		\so:	FMHS NS/EW TO SS 10 [MTHS E]
+		\pb:	DHS/FMHS TO SS 10 [MTHS E]
+		\ps:	MTHS 4 E
+			FMHS NS/EW TO SS 10 [MTHS E]
+		\px:	MTHS 4 E
+			DHS/FMHS TO SS 10 [MTHS E]
+48 Beats Total
+
+%%11
+11	1/1	\po:	FMHS EW/NS TO SS 12 [MTHS E]
+		\so:	FMHS NS/EW TO SS 12 [MTHS E]
+		\pb:	DHS/FMHS TO SS 12 [MTHS E]
+		\ps:	FMHS/DHS TO SS 12 [MTHS E]
+32 Beats Total
+
+%%12
+12	1/1	\po:	MTHS 8 W
+			FMHS EW/NS TO SS Hogballs [MTHS W]
+		\so:	MTHS 8 W
+			FMHS NS/EW TO SS Hogballs [MTHS W]
+		\pb:	MTHS 8 W
+			FMHS/DHS TO SS Hogballs [MTHS W]
+		\ps:	MTHS 8 W
+			DHS/FMHS TO SS Hogballs [MTHS W]
+		\px:	MTHS 12 W
+			FMHS EW/NS TO SS Hogballs [MTHS W]
+		\sb:	MTHS 8 W
+			FMHS 4 W
+			DHS/FMHS TO SS Hogballs [MTHS W]
+56 Beats Total
+
+%%Hogballs
+Hogballs	1/1	\po:	FMHS EW/NS TO SS Hogballs [MTHS W]
+32 Beats Total
+
+%%14
+14	1/1	\po:	FMHS EW/NS TO SS 15 [MTHS W]
+32 Beats Total
+
+%%15
+15	1/1	\po:	FMHS EW/NS TO SS 16 [MTHS W]
+		\so:	FMHS NS/EW TO SS 16 [MTHS W]
+		\pb:	FMHS/DHS [MTHS W]
+		\ps:	DHS/FMHS [MTHS W]
+		\px:	MTHS 16 W
+			FMHS NS/EW TO SS 16 [MTHS W]
+		\sb:	FMHS 2 N
+			FMHS EW/NS TO SS 16 [MTHS W]
+		\ss:	FMHS 4 S
+			FMHS EW/NS TO SS 16 [MTHS W]
+		\sx:	MTHS 16 W
+			FMHS EW/NS TO SS 16 [MTHS W]
+52 Beats Total
+
+%%16
+16	1/1	\po:	FMHS EW/NS TO SS 17 [MTHS W]
+		\so:	FMHS NS/EW TO SS 17 [MTHS W]
+64 Beats Total
+
+%%17
+17	1/1	\po:	Execute Hup Kneel 40 E
+			Execute Recovery 8 E
+		\so:	FMHS 6 E
+			MTHS 10 E
+			Execute Hup Kneel 24 E
+			Execute Recovery 8 E
+48 Beats Total
+
+%%18
+18	1/1	\po:	FMHS EW/NS TO SS 19 [MTHS E]
+		\so:	FMHS NS/EW TO SS 19 [MTHS E]
+48 Beats Total
+
+%%19
+19	1/1	ALL:	Execute Beautiful Lady Continuity
+
+~\bsGo Bears!!!! Beat the Trojans!!!!!!
+%%20
+20
