@@ -24,14 +24,14 @@
 /**
  * CalChartContinuityToken
  *
- *  Continuities in CalChart are quite complicated as we want to provide a flexible data structure that can represent a number of
- *  different realizations.  To illustrate, we would want to have a data structure that could be used for the inuity "Mark Time 8
- *  in the direction of the last flow" as well as "Mark Time remaining facing East".  This is accomplished by having a data structure
- *  of "tokens" that can represent different parts of the inuity "sentance".
+ *  Continuities in CalChart are quite complicated as we want to provide a flexible data structure that can represent a
+ * number of different realizations.  To illustrate, we would want to have a data structure that could be used for the
+ * inuity "Mark Time 8 in the direction of the last flow" as well as "Mark Time remaining facing East".  This is
+ * accomplished by having a data structure of "tokens" that can represent different parts of the inuity "sentance".
  *
- *  To accomplish this "abstract syntax tree" data structure we have the basic concept of a inuityToken, which is the basic
- *  parsing unit.  The inuityToken can have a "parent" which allows bidirectional searching of the tree (any node can then reach
- *  each other node).  We then have these inuity specialization "types"
+ *  To accomplish this "abstract syntax tree" data structure we have the basic concept of a inuityToken, which is the
+ * basic parsing unit.  The inuityToken can have a "parent" which allows bidirectional searching of the tree (any node
+ * can then reach each other node).  We then have these inuity specialization "types"
  *
  *      procedure : A inuityToken that represents a inuity that a marcher will follow.
  *      value : A inuityToken that represents a specific Value, like a float
@@ -41,9 +41,9 @@
  *      point : A inuityToken that represents a Point on the field.
  *      unset : A special inuityToken that represents that the type has not yet been specified.
  *
- *  With these building blocks we can represent a large number of inuities.  For example, let's say that the inuity we would
- *  like to describe is "Mark Time East for the number of beats a reference point would take to reach this location", typical of a step drill.
- *  This would be represented as:
+ *  With these building blocks we can represent a large number of inuities.  For example, let's say that the inuity we
+ * would like to describe is "Mark Time East for the number of beats a reference point would take to reach this
+ * location", typical of a step drill. This would be represented as:
  *
  * ProcMT ( FuncDistFrom ( StartPoint , RefPoint(1) ) , Value ( E ) ) )
  *
@@ -55,30 +55,32 @@
  *         /         \
  * StartPoint  RefPoint(1)
  *
- *  As each part of the tree is a Continuity::Token, creating drawing representation can be done in a straightforward recursive way, with
- *  each Continuity::Token specialization simply calling the drawing of each of it's nodes.
+ *  As each part of the tree is a Continuity::Token, creating drawing representation can be done in a straightforward
+ * recursive way, with each Continuity::Token specialization simply calling the drawing of each of it's nodes.
  *
  * Get(Animate::Compile):
- *  Point and Value need to be able to supply an actual value.  But because these are abstract representations of a point or value,
- *  they need actual state to act upon.  The Animate::Compile object represents the portion of the show that is being converted from an
- *  abstract concept (the StartPoint for example) to a specific value (the position of a specific marcher on the field.
+ *  Point and Value need to be able to supply an actual value.  But because these are abstract representations of a
+ * point or value, they need actual state to act upon.  The Animate::Compile object represents the portion of the show
+ * that is being converted from an abstract concept (the StartPoint for example) to a specific value (the position of a
+ * specific marcher on the field.
  *
  * Memory Considerations:
- *  Memory ownership of each node is done by it's parent.  That means that when a new node is inserted, memory ownership should
- *  be transfered to the parent, which may require "setting" the parent node.  In addition, when a inuity needs to be "copied", it
- *  should be "cloned" into a new datastructure to preserve the runtime data structure.
+ *  Memory ownership of each node is done by it's parent.  That means that when a new node is inserted, memory ownership
+ * should be transfered to the parent, which may require "setting" the parent node.  In addition, when a inuity needs to
+ * be "copied", it should be "cloned" into a new datastructure to preserve the runtime data structure.
  *
  * Serialization and Deserialization
- *  In order to be saved and restored from a file, the continuites need to be able to be serialized and deserialized.  Serialization is
- *  straight forward; each object can serialize itself and it's children into a vector of bytes.  Deserializtion is a little more complicated.
- *  Essentially we give the object a pointer to the beginning of a datablob and the end.  It will deserialize members and from the data,
- *  and return the data pointer where it ended the parse.  If at the conclusion of the process, if the data pointer end and the original end
- *  match, it was a good parse
+ *  In order to be saved and restored from a file, the continuites need to be able to be serialized and deserialized.
+ * Serialization is straight forward; each object can serialize itself and it's children into a vector of bytes.
+ * Deserializtion is a little more complicated. Essentially we give the object a pointer to the beginning of a datablob
+ * and the end.  It will deserialize members and from the data, and return the data pointer where it ended the parse. If
+ * at the conclusion of the process, if the data pointer end and the original end match, it was a good parse
  *
  * Style for this file
- *  There is a lot of redundancy on declarations in this file.  We should attempt to keep the file consistent in style and function layout
- *  to make reading and understanding easier.  Whenever it's possible to include implementions in the header file to simplify code, we
- *  will do so.  And similarly whenever we can use a base class implementation without losing clarity we should do so.
+ *  There is a lot of redundancy on declarations in this file.  We should attempt to keep the file consistent in style
+ * and function layout to make reading and understanding easier.  Whenever it's possible to include implementions in the
+ * header file to simplify code, we will do so.  And similarly whenever we can use a base class implementation without
+ * losing clarity we should do so.
  */
 
 #include "CalChartCoord.h"
@@ -142,7 +144,7 @@ enum class DefinedDirection {
     S,
     SW,
     W,
-    NW
+    NW,
 };
 
 constexpr auto kNumVariables = static_cast<std::underlying_type_t<Variable>>(Variable::DOH) + 1;
@@ -172,14 +174,11 @@ struct Drawable {
 };
 
 // helper to set the parent
-template <typename P, typename T, typename... Ts>
-void SetParentPtr_helper(P parent, T& t, Ts&... ts);
+template <typename P, typename T, typename... Ts> void SetParentPtr_helper(P parent, T& t, Ts&... ts);
 
-template <typename T>
-auto uniquify(T* p) { return std::unique_ptr<std::remove_pointer_t<decltype(p)>>(p); }
+template <typename T> auto uniquify(T* p) { return std::unique_ptr<std::remove_pointer_t<decltype(p)>>(p); }
 
-template <typename T>
-auto mv(T&& p) { return std::move(p); }
+template <typename T> auto mv(T&& p) { return std::move(p); }
 
 class Token {
 public:
@@ -203,27 +202,26 @@ protected:
     Token* parent_ptr = nullptr;
 
     friend bool operator==(Token const& lhs, Token const& rhs);
-    virtual bool is_equal(Token const& other) const
-    {
-        return line == other.line && col == other.col;
-    }
+    virtual bool is_equal(Token const& other) const { return line == other.line && col == other.col; }
 
 private:
     uint32_t line, col;
     static constexpr auto NumParts = 0;
 };
 
-inline bool operator==(Token const& lhs, Token const& rhs)
-{
-    return (typeid(lhs) == typeid(rhs)) && lhs.is_equal(rhs);
-}
+inline bool operator==(Token const& lhs, Token const& rhs) { return (typeid(lhs) == typeid(rhs)) && lhs.is_equal(rhs); }
 
 class Point : public Token {
     using super = Token;
 
 public:
     Point() = default;
-    virtual std::unique_ptr<Point> clone() const { return std::make_unique<Point>(); }
+    virtual auto clone() const -> std::unique_ptr<Point>
+    {
+        auto result = std::make_unique<Point>();
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual Coord Get(Animate::Compile const& anim) const;
     auto ToString() const -> std::string override;
@@ -242,7 +240,12 @@ class PointUnset : public Point {
     using super = Point;
 
 public:
-    virtual std::unique_ptr<Point> clone() const override { return std::make_unique<PointUnset>(); }
+    auto clone() const -> std::unique_ptr<Point> override
+    {
+        auto result = std::make_unique<PointUnset>();
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
     auto ToString() const -> std::string override;
     virtual Drawable GetDrawable() const override;
     [[nodiscard]] auto toJSON() const -> nlohmann::json override;
@@ -260,7 +263,12 @@ class StartPoint : public Point {
 
 public:
     StartPoint() = default;
-    virtual std::unique_ptr<Point> clone() const override { return std::make_unique<StartPoint>(); }
+    auto clone() const -> std::unique_ptr<Point> override
+    {
+        auto result = std::make_unique<StartPoint>();
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual Coord Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
@@ -280,7 +288,12 @@ class NextPoint : public Point {
 
 public:
     NextPoint() = default;
-    virtual std::unique_ptr<Point> clone() const override { return std::make_unique<NextPoint>(); }
+    auto clone() const -> std::unique_ptr<Point> override
+    {
+        auto result = std::make_unique<NextPoint>();
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual Coord Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
@@ -301,7 +314,12 @@ class RefPoint : public Point {
 public:
     RefPoint() = default;
     RefPoint(unsigned n);
-    virtual std::unique_ptr<Point> clone() const override { return std::make_unique<RefPoint>(refnum); }
+    auto clone() const -> std::unique_ptr<Point> override
+    {
+        auto result = std::make_unique<RefPoint>(refnum);
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual Coord Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
@@ -330,7 +348,7 @@ class Value : public Token {
 
 public:
     Value() = default;
-    virtual std::unique_ptr<Value> clone() const = 0;
+    virtual auto clone() const -> std::unique_ptr<Value> = 0;
 
     virtual float Get(Animate::Compile const& anim) const = 0;
     auto ToString() const -> std::string override;
@@ -348,7 +366,12 @@ class ValueUnset : public Value {
     using super = Value;
 
 public:
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueUnset>(); }
+    auto clone() const -> std::unique_ptr<Value> override
+    {
+        auto result = std::make_unique<ValueUnset>();
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual float Get(Animate::Compile const&) const override { return 0; }
     auto ToString() const -> std::string override;
@@ -369,7 +392,12 @@ class ValueFloat : public Value {
 public:
     ValueFloat() = default;
     ValueFloat(float v);
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueFloat>(val); }
+    auto clone() const -> std::unique_ptr<Value> override
+    {
+        auto result = std::make_unique<ValueFloat>(val);
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual float Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
@@ -397,7 +425,12 @@ class ValueDefined : public Value {
 public:
     ValueDefined() = default;
     ValueDefined(DefinedValue v);
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueDefined>(val); }
+    auto clone() const -> std::unique_ptr<Value> override
+    {
+        auto result = std::make_unique<ValueDefined>(val);
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual float Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
@@ -434,7 +467,12 @@ public:
     {
         SetParentPtr_helper(this, val1, val2);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueAdd>(val1->clone(), val2->clone()); }
+    auto clone() const -> std::unique_ptr<Value> override
+    {
+        auto result = std::make_unique<ValueAdd>(val1->clone(), val2->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual float Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
@@ -473,7 +511,12 @@ public:
     {
         SetParentPtr_helper(this, val1, val2);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueSub>(val1->clone(), val2->clone()); }
+    auto clone() const -> std::unique_ptr<Value> override
+    {
+        auto result = std::make_unique<ValueSub>(val1->clone(), val2->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual float Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
@@ -512,7 +555,12 @@ public:
     {
         SetParentPtr_helper(this, val1, val2);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueMult>(val1->clone(), val2->clone()); }
+    auto clone() const -> std::unique_ptr<Value> override
+    {
+        auto result = std::make_unique<ValueMult>(val1->clone(), val2->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual float Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
@@ -551,7 +599,12 @@ public:
     {
         SetParentPtr_helper(this, val1, val2);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueDiv>(val1->clone(), val2->clone()); }
+    auto clone() const -> std::unique_ptr<Value> override
+    {
+        auto result = std::make_unique<ValueDiv>(val1->clone(), val2->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual float Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
@@ -589,7 +642,12 @@ public:
     {
         SetParentPtr_helper(this, val);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueNeg>(val->clone()); }
+    auto clone() const -> std::unique_ptr<Value> override
+    {
+        auto result = std::make_unique<ValueNeg>(val->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual float Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
@@ -616,7 +674,12 @@ class ValueREM : public Value {
     using super = Value;
 
 public:
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueREM>(); }
+    auto clone() const -> std::unique_ptr<Value> override
+    {
+        auto result = std::make_unique<ValueREM>();
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual float Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
@@ -637,7 +700,12 @@ class ValueVar : public Value {
 public:
     ValueVar() = default;
     ValueVar(Variable num);
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueVar>(varnum); }
+    auto clone() const -> std::unique_ptr<Value> override
+    {
+        auto result = std::make_unique<ValueVar>(varnum);
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual float Get(Animate::Compile const& anim) const override;
     void Set(Animate::Compile& anim, float v);
@@ -664,7 +732,12 @@ class ValueVarUnset : public ValueVar {
     using super = ValueVar;
 
 public:
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<ValueVarUnset>(); }
+    auto clone() const -> std::unique_ptr<Value> override
+    {
+        auto result = std::make_unique<ValueVarUnset>();
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual float Get(Animate::Compile const&) const override { return 0; }
     auto ToString() const -> std::string override;
@@ -693,7 +766,12 @@ public:
     {
         SetParentPtr_helper(this, pnt);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncDir>(pnt->clone()); }
+    auto clone() const -> std::unique_ptr<Value> override
+    {
+        auto result = std::make_unique<FuncDir>(pnt->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual float Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
@@ -731,7 +809,12 @@ public:
     {
         SetParentPtr_helper(this, pnt_start, pnt_end);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncDirFrom>(pnt_start->clone(), pnt_end->clone()); }
+    auto clone() const -> std::unique_ptr<Value> override
+    {
+        auto result = std::make_unique<FuncDirFrom>(pnt_start->clone(), pnt_end->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual float Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
@@ -769,7 +852,12 @@ public:
     {
         SetParentPtr_helper(this, pnt);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncDist>(pnt->clone()); }
+    auto clone() const -> std::unique_ptr<Value> override
+    {
+        auto result = std::make_unique<FuncDist>(pnt->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual float Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
@@ -807,7 +895,12 @@ public:
     {
         SetParentPtr_helper(this, pnt_start, pnt_end);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncDistFrom>(pnt_start->clone(), pnt_end->clone()); }
+    auto clone() const -> std::unique_ptr<Value> override
+    {
+        auto result = std::make_unique<FuncDistFrom>(pnt_start->clone(), pnt_end->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual float Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
@@ -847,7 +940,12 @@ public:
     {
         SetParentPtr_helper(this, dir1, dir2, pnt);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncEither>(dir1->clone(), dir2->clone(), pnt->clone()); }
+    auto clone() const -> std::unique_ptr<Value> override
+    {
+        auto result = std::make_unique<FuncEither>(dir1->clone(), dir2->clone(), pnt->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual float Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
@@ -863,7 +961,8 @@ protected:
     virtual bool is_equal(Token const& other) const override
     {
         auto&& der_other = dynamic_cast<FuncEither const&>(other);
-        return super::is_equal(other) && (*dir1 == *der_other.dir1) && (*dir2 == *der_other.dir2) && (*pnt == *der_other.pnt);
+        return super::is_equal(other) && (*dir1 == *der_other.dir1) && (*dir2 == *der_other.dir2)
+            && (*pnt == *der_other.pnt);
     }
 
 private:
@@ -886,7 +985,12 @@ public:
     {
         SetParentPtr_helper(this, dir);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncOpp>(dir->clone()); }
+    auto clone() const -> std::unique_ptr<Value> override
+    {
+        auto result = std::make_unique<FuncOpp>(dir->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual float Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
@@ -925,7 +1029,12 @@ public:
     {
         SetParentPtr_helper(this, numbeats, blksize, pnt);
     }
-    virtual std::unique_ptr<Value> clone() const override { return std::make_unique<FuncStep>(numbeats->clone(), blksize->clone(), pnt->clone()); }
+    auto clone() const -> std::unique_ptr<Value> override
+    {
+        auto result = std::make_unique<FuncStep>(numbeats->clone(), blksize->clone(), pnt->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual float Get(Animate::Compile const& anim) const override;
     auto ToString() const -> std::string override;
@@ -941,7 +1050,8 @@ protected:
     virtual bool is_equal(Token const& other) const override
     {
         auto&& der_other = dynamic_cast<FuncStep const&>(other);
-        return super::is_equal(other) && (*numbeats == *der_other.numbeats) && (*blksize == *der_other.blksize) && (*pnt == *der_other.pnt);
+        return super::is_equal(other) && (*numbeats == *der_other.numbeats) && (*blksize == *der_other.blksize)
+            && (*pnt == *der_other.pnt);
     }
 
 private:
@@ -955,7 +1065,7 @@ class Procedure : public Token {
 
 public:
     Procedure() = default;
-    virtual std::unique_ptr<Procedure> clone() const = 0;
+    virtual auto clone() const -> std::unique_ptr<Procedure> = 0;
 
     virtual void Compile(Animate::Compile& anim) = 0;
     auto ToString() const -> std::string override;
@@ -973,7 +1083,12 @@ class ProcUnset : public Procedure {
     using super = Procedure;
 
 public:
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcUnset>(); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcUnset>();
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
     virtual void Compile(Animate::Compile&) override { }
     auto ToString() const -> std::string override;
     virtual Drawable GetDrawable() const override;
@@ -1003,7 +1118,7 @@ public:
     {
         SetParentPtr_helper(this, var, val);
     }
-    virtual std::unique_ptr<Procedure> clone() const override;
+    auto clone() const -> std::unique_ptr<Procedure> override;
 
     virtual void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
@@ -1015,8 +1130,7 @@ public:
     [[nodiscard]] auto toJSON() const -> nlohmann::json override;
     static auto fromJSON(nlohmann::json const& json) -> std::unique_ptr<ProcSet>;
 
-    struct ReplaceError_NotAVar : std::exception {
-    };
+    struct ReplaceError_NotAVar : std::exception { };
 
 protected:
     virtual bool is_equal(Token const& other) const override
@@ -1035,7 +1149,12 @@ class ProcBlam : public Procedure {
     using super = Procedure;
 
 public:
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcBlam>(); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcBlam>();
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
@@ -1048,10 +1167,7 @@ public:
 
 protected:
     // we use the assumption that we've already checked that the types match before calling.
-    virtual bool is_equal(Token const& other) const override
-    {
-        return super::is_equal(other) && true;
-    }
+    virtual bool is_equal(Token const& other) const override { return super::is_equal(other) && true; }
 
 private:
     static constexpr auto NumParts = 0;
@@ -1071,7 +1187,12 @@ public:
     {
         SetParentPtr_helper(this, dir);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcClose>(dir->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcClose>(dir->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
@@ -1104,8 +1225,8 @@ public:
         : ProcCM(uniquify(p1), uniquify(p2), uniquify(steps), uniquify(d1), uniquify(d2), uniquify(beats))
     {
     }
-    ProcCM(std::unique_ptr<Point> p1, std::unique_ptr<Point> p2, std::unique_ptr<Value> steps, std::unique_ptr<Value> d1,
-        std::unique_ptr<Value> d2, std::unique_ptr<Value> beats)
+    ProcCM(std::unique_ptr<Point> p1, std::unique_ptr<Point> p2, std::unique_ptr<Value> steps,
+        std::unique_ptr<Value> d1, std::unique_ptr<Value> d2, std::unique_ptr<Value> beats)
         : pnt1(mv(p1))
         , pnt2(mv(p2))
         , stps(mv(steps))
@@ -1115,9 +1236,15 @@ public:
     {
         SetParentPtr_helper(this, pnt1, pnt2, stps, dir1, dir2, numbeats);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcCM>(pnt1->clone(), pnt2->clone(), stps->clone(), dir1->clone(), dir2->clone(), numbeats->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcCM>(
+            pnt1->clone(), pnt2->clone(), stps->clone(), dir1->clone(), dir2->clone(), numbeats->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
-    virtual void Compile(Animate::Compile& anim) override;
+    void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
     virtual Drawable GetDrawable() const override;
     virtual void replace(Token const* which, std::unique_ptr<Token> v) override;
@@ -1131,7 +1258,9 @@ protected:
     virtual bool is_equal(Token const& other) const override
     {
         auto&& der_other = dynamic_cast<ProcCM const&>(other);
-        return super::is_equal(other) && (*pnt1 == *der_other.pnt1) && (*pnt2 == *der_other.pnt2) && (*stps == *der_other.stps) && (*dir1 == *der_other.dir1) && (*dir2 == *der_other.dir2) && (*numbeats == *der_other.numbeats);
+        return super::is_equal(other) && (*pnt1 == *der_other.pnt1) && (*pnt2 == *der_other.pnt2)
+            && (*stps == *der_other.stps) && (*dir1 == *der_other.dir1) && (*dir2 == *der_other.dir2)
+            && (*numbeats == *der_other.numbeats);
     }
 
 private:
@@ -1156,7 +1285,12 @@ public:
     {
         SetParentPtr_helper(this, pnt1, pnt2, numbeats);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcDMCM>(pnt1->clone(), pnt2->clone(), numbeats->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcDMCM>(pnt1->clone(), pnt2->clone(), numbeats->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
@@ -1172,7 +1306,8 @@ protected:
     virtual bool is_equal(Token const& other) const override
     {
         auto&& der_other = dynamic_cast<ProcDMCM const&>(other);
-        return super::is_equal(other) && (*pnt1 == *der_other.pnt1) && (*pnt2 == *der_other.pnt2) && (*numbeats == *der_other.numbeats);
+        return super::is_equal(other) && (*pnt1 == *der_other.pnt1) && (*pnt2 == *der_other.pnt2)
+            && (*numbeats == *der_other.numbeats);
     }
 
 private:
@@ -1195,7 +1330,12 @@ public:
     {
         SetParentPtr_helper(this, pnt);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcDMHS>(pnt->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcDMHS>(pnt->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
@@ -1234,7 +1374,12 @@ public:
     {
         SetParentPtr_helper(this, stps, pnt);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcEven>(stps->clone(), pnt->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcEven>(stps->clone(), pnt->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
@@ -1273,7 +1418,12 @@ public:
     {
         SetParentPtr_helper(this, pnt);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcEWNS>(pnt->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcEWNS>(pnt->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
@@ -1306,7 +1456,8 @@ public:
         : ProcFountain(uniquify(d1), uniquify(d2), uniquify(s1), uniquify(s2), uniquify(p))
     {
     }
-    ProcFountain(std::unique_ptr<Value> d1, std::unique_ptr<Value> d2, std::unique_ptr<Value> s1, std::unique_ptr<Value> s2, std::unique_ptr<Point> p)
+    ProcFountain(std::unique_ptr<Value> d1, std::unique_ptr<Value> d2, std::unique_ptr<Value> s1,
+        std::unique_ptr<Value> s2, std::unique_ptr<Point> p)
         : dir1(mv(d1))
         , dir2(mv(d2))
         , stepsize1(mv(s1))
@@ -1315,7 +1466,13 @@ public:
     {
         SetParentPtr_helper(this, dir1, dir2, stepsize1, stepsize2, pnt);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcFountain>(dir1->clone(), dir2->clone(), stepsize1 ? stepsize1->clone() : nullptr, stepsize2 ? stepsize2->clone() : nullptr, pnt->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcFountain>(dir1->clone(), dir2->clone(),
+            stepsize1 ? stepsize1->clone() : nullptr, stepsize2 ? stepsize2->clone() : nullptr, pnt->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
@@ -1370,7 +1527,12 @@ public:
     {
         SetParentPtr_helper(this, stps, dir);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcFM>(stps->clone(), dir->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcFM>(stps->clone(), dir->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
@@ -1408,7 +1570,12 @@ public:
     {
         SetParentPtr_helper(this, pnt);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcFMTO>(pnt->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcFMTO>(pnt->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
@@ -1446,7 +1613,12 @@ public:
     {
         SetParentPtr_helper(this, grid);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcGrid>(grid->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcGrid>(grid->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
@@ -1486,7 +1658,12 @@ public:
     {
         SetParentPtr_helper(this, pnt1, pnt2, numbeats);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcHSCM>(pnt1->clone(), pnt2->clone(), numbeats->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcHSCM>(pnt1->clone(), pnt2->clone(), numbeats->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
@@ -1502,7 +1679,8 @@ protected:
     virtual bool is_equal(Token const& other) const override
     {
         auto&& der_other = dynamic_cast<ProcHSCM const&>(other);
-        return super::is_equal(other) && (*pnt1 == *der_other.pnt1) && (*pnt2 == *der_other.pnt2) && (*numbeats == *der_other.numbeats);
+        return super::is_equal(other) && (*pnt1 == *der_other.pnt1) && (*pnt2 == *der_other.pnt2)
+            && (*numbeats == *der_other.numbeats);
     }
 
 private:
@@ -1525,7 +1703,12 @@ public:
     {
         SetParentPtr_helper(this, pnt);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcHSDM>(pnt->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcHSDM>(pnt->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
@@ -1563,7 +1746,12 @@ public:
     {
         SetParentPtr_helper(this, pnt);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcMagic>(pnt->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcMagic>(pnt->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
@@ -1605,7 +1793,13 @@ public:
     {
         SetParentPtr_helper(this, stpsize, stps, dir, facedir);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcMarch>(stpsize->clone(), stps->clone(), dir->clone(), (facedir) ? facedir->clone() : nullptr); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcMarch>(
+            stpsize->clone(), stps->clone(), dir->clone(), (facedir) ? facedir->clone() : nullptr);
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
@@ -1654,7 +1848,12 @@ public:
     {
         SetParentPtr_helper(this, numbeats, dir);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcMT>(numbeats->clone(), dir->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcMT>(numbeats->clone(), dir->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
@@ -1692,7 +1891,12 @@ public:
     {
         SetParentPtr_helper(this, dir);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcMTRM>(dir->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcMTRM>(dir->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
@@ -1730,7 +1934,12 @@ public:
     {
         SetParentPtr_helper(this, pnt);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcNSEW>(pnt->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcNSEW>(pnt->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
@@ -1770,7 +1979,12 @@ public:
     {
         SetParentPtr_helper(this, ang, stps, pnt);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcRotate>(ang->clone(), stps->clone(), pnt->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcRotate>(ang->clone(), stps->clone(), pnt->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
@@ -1786,7 +2000,8 @@ protected:
     virtual bool is_equal(Token const& other) const override
     {
         auto&& der_other = dynamic_cast<ProcRotate const&>(other);
-        return super::is_equal(other) && (*ang == *der_other.ang) && (*stps == *der_other.stps) && (*pnt == *der_other.pnt);
+        return super::is_equal(other) && (*ang == *der_other.ang) && (*stps == *der_other.stps)
+            && (*pnt == *der_other.pnt);
     }
 
 private:
@@ -1810,7 +2025,12 @@ public:
     {
         SetParentPtr_helper(this, numbeats, dir);
     }
-    virtual std::unique_ptr<Procedure> clone() const override { return std::make_unique<ProcStandAndPlay>(numbeats->clone(), dir->clone()); }
+    auto clone() const -> std::unique_ptr<Procedure> override
+    {
+        auto result = std::make_unique<ProcStandAndPlay>(numbeats->clone(), dir->clone());
+        result->SetSourceLocation(GetLine(), GetCol());
+        return result;
+    }
 
     virtual void Compile(Animate::Compile& anim) override;
     auto ToString() const -> std::string override;
@@ -1838,30 +2058,23 @@ private:
 std::tuple<std::unique_ptr<Procedure>, Reader> DeserializeProcedure(Reader);
 
 // helper for setting the parent pointer
-template <typename P>
-void SetParentPtr_helper(P)
-{
-}
+template <typename P> void SetParentPtr_helper(P) { }
 
-template <typename P, typename T>
-void SetParentPtr_helper(P parent, T& t)
+template <typename P, typename T> void SetParentPtr_helper(P parent, T& t)
 {
     if (t) {
         t->SetParentPtr(parent);
     }
 }
 
-template <typename P, typename T, typename... Ts>
-void SetParentPtr_helper(P parent, T& t, Ts&... ts)
+template <typename P, typename T, typename... Ts> void SetParentPtr_helper(P parent, T& t, Ts&... ts)
 {
     SetParentPtr_helper(parent, t);
     SetParentPtr_helper(parent, ts...);
 }
 
 // helper for some dynamic casting
-template <typename Derived, typename Base>
-std::unique_ptr<Derived>
-dynamic_unique_ptr_cast(std::unique_ptr<Base>&& p)
+template <typename Derived, typename Base> std::unique_ptr<Derived> dynamic_unique_ptr_cast(std::unique_ptr<Base>&& p)
 {
     if (Derived* result = dynamic_cast<Derived*>(p.get())) {
         p.release();
@@ -1872,8 +2085,7 @@ dynamic_unique_ptr_cast(std::unique_ptr<Base>&& p)
 
 // helper function that examines each pointer to see if it shuold be replaced, and then replace it.
 // making sure to clean things up a the end.
-template <typename R, typename UP, typename T>
-void replace_helper2(R replace, UP& new_value, T& t)
+template <typename R, typename UP, typename T> void replace_helper2(R replace, UP& new_value, T& t)
 {
     if (t.get() == replace) {
         using Derived = typename T::element_type;
@@ -1909,12 +2121,8 @@ void replace_helper(P parent, R replace, UP& new_value, T& t, Ts&... ts)
 // Custom formatters for CalChart::Cont::Token and derived types
 // This allows using Token objects directly with std::format
 
-template <>
-struct std::formatter<CalChart::Cont::Token> {
-    constexpr auto parse(std::format_parse_context& ctx)
-    {
-        return ctx.begin();
-    }
+template <> struct std::formatter<CalChart::Cont::Token> {
+    constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
 
     auto format(const CalChart::Cont::Token& token, std::format_context& ctx) const
     {
@@ -1922,18 +2130,10 @@ struct std::formatter<CalChart::Cont::Token> {
     }
 };
 
-template <>
-struct std::formatter<CalChart::Cont::Value> : std::formatter<CalChart::Cont::Token> {
-};
+template <> struct std::formatter<CalChart::Cont::Value> : std::formatter<CalChart::Cont::Token> { };
 
-template <>
-struct std::formatter<CalChart::Cont::ValueVar> : std::formatter<CalChart::Cont::Token> {
-};
+template <> struct std::formatter<CalChart::Cont::ValueVar> : std::formatter<CalChart::Cont::Token> { };
 
-template <>
-struct std::formatter<CalChart::Cont::Point> : std::formatter<CalChart::Cont::Token> {
-};
+template <> struct std::formatter<CalChart::Cont::Point> : std::formatter<CalChart::Cont::Token> { };
 
-template <>
-struct std::formatter<CalChart::Cont::Procedure> : std::formatter<CalChart::Cont::Token> {
-};
+template <> struct std::formatter<CalChart::Cont::Procedure> : std::formatter<CalChart::Cont::Token> { };

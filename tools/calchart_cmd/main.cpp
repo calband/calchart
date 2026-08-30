@@ -15,6 +15,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <print>
 
 extern CalChart::MeasureDuration<1024> gAnimateMeasure;
 
@@ -42,6 +43,7 @@ Options:
     --json_out=<out>        Parse option to dump the JSON for the viewer to <out>.
     --showjson              Parse option to dump the Show file format JSON.
     --showjson_out=<out>    Parse option to dump the Show file format JSON to <out>.
+    --showschema=<schema>   Schema to validate Show file JSON [default: ].
     --jsonwidth=<width>     Indention for JSON dumps [default: 4].
     --dump_beats            Parse option to dump downbeat times.
     --dump_beats_out=<out>  Parse option to dump downbeat times to <out>.

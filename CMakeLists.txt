@@ -65,6 +65,7 @@ add_subdirectory(src)
 if(NOT MSVC)
   add_test(NAME CalChartVersion COMMAND $<TARGET_FILE:calchart_cmd> --version)
   add_test(NAME SanityTest COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/resources/tests/sanity_tester.py -d ${CMAKE_CURRENT_SOURCE_DIR}/resources/show_archive/known_good -g ${CMAKE_CURRENT_SOURCE_DIR}/resources/tests/gold.zip -c $<TARGET_FILE:calchart_cmd>)
+  add_test(NAME JSONRoundtripTest COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/resources/tests/json_roundtrip_tester.py -d ${CMAKE_CURRENT_SOURCE_DIR}/resources/show_archive/known_good -c $<TARGET_FILE:calchart_cmd> -s ${CMAKE_CURRENT_SOURCE_DIR}/resources/common/show_schema_v1.json)
 endif()
 
 # CPack section

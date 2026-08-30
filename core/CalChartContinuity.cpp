@@ -39,10 +39,12 @@ namespace CalChart {
 // if any errors happen during parse, a ParseError may be thrown.
 std::runtime_error ParseError(std::string const& str, int l, int c)
 {
-    return std::runtime_error{ std::string("ParseError of ") + str + " at " + std::to_string(l) + ", " + std::to_string(c) };
+    return std::runtime_error{ std::string("ParseError of ") + str + " at " + std::to_string(l) + ", "
+        + std::to_string(c) };
 }
 
-std::vector<std::unique_ptr<Cont::Procedure>> ParseContinuity(std::string const& s, ParseErrorHandlers const* correction)
+std::vector<std::unique_ptr<Cont::Procedure>> ParseContinuity(
+    std::string const& s, ParseErrorHandlers const* correction)
 {
     ParsedContinuity = std::vector<std::unique_ptr<CalChart::Cont::Procedure>>{};
     std::string thisParse = s;
@@ -54,7 +56,9 @@ std::vector<std::unique_ptr<Cont::Procedure>> ParseContinuity(std::string const&
         }
         if (correction && correction->mContinuityParseCorrectionHandler) {
             // give the user a chance to correct.
-            thisParse = correction->mContinuityParseCorrectionHandler(std::string("Could not parse line ") + std::to_string(yylloc.first_line) + " at " + std::to_string(yylloc.first_column), thisParse, yylloc.first_line, yylloc.first_column);
+            thisParse = correction->mContinuityParseCorrectionHandler(std::string("Could not parse line ")
+                    + std::to_string(yylloc.first_line) + " at " + std::to_string(yylloc.first_column),
+                thisParse, yylloc.first_line, yylloc.first_column);
         } else {
             throw ParseError(s, 0, 0);
         }
@@ -85,6 +89,7 @@ Continuity::Continuity(std::string const& s, ParseErrorHandlers const* correctio
 Continuity::~Continuity() = default;
 
 Continuity::Continuity(Continuity const& other)
+    : m_legacyText(other.m_legacyText)
 {
     for (auto&& i : other.m_parsedContinuity) {
         m_parsedContinuity.emplace_back(i->clone());
@@ -137,9 +142,8 @@ Continuity& Continuity::operator=(Continuity&&) noexcept = default;
 
 bool operator==(Continuity const& lhs, Continuity const& rhs)
 {
-    return std::equal(lhs.m_parsedContinuity.begin(), lhs.m_parsedContinuity.end(), rhs.m_parsedContinuity.begin(), rhs.m_parsedContinuity.end(), [](auto&& a, auto&& b) {
-        return *a == *b;
-    });
+    return std::equal(lhs.m_parsedContinuity.begin(), lhs.m_parsedContinuity.end(), rhs.m_parsedContinuity.begin(),
+        rhs.m_parsedContinuity.end(), [](auto&& a, auto&& b) { return *a == *b; });
 }
 
 auto Continuity::Serialize() const -> std::vector<std::byte>

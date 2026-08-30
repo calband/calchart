@@ -22,13 +22,36 @@ namespace {
         std::vector<std::string> errors;
     };
 
+    // Forward declaration for mutual recursion
+    auto ResolveRef(nlohmann::json const& rootSchema, std::string const& ref) -> nlohmann::json const*;
+
     // Get the set of known properties from a schema object
-    auto GetKnownProperties(nlohmann::json const& schema) -> std::set<std::string>
+    auto GetKnownProperties(nlohmann::json const& schema, nlohmann::json const& rootSchema) -> std::set<std::string>
     {
         std::set<std::string> known;
         if (schema.contains("properties") && schema["properties"].is_object()) {
             for (auto const& [key, value] : schema["properties"].items()) {
                 known.insert(key);
+            }
+        }
+        // Handle anyOf: gather properties from all alternatives
+        if (schema.contains("anyOf") && schema["anyOf"].is_array()) {
+            for (auto const& alternative : schema["anyOf"]) {
+                // Resolve $ref if present in the alternative
+                nlohmann::json const* actualAlternative = &alternative;
+                if (alternative.contains("$ref") && alternative["$ref"].is_string()) {
+                    auto ref = alternative["$ref"].get<std::string>();
+                    auto resolved = ResolveRef(rootSchema, ref);
+                    if (resolved) {
+                        actualAlternative = resolved;
+                    }
+                }
+
+                if (actualAlternative->contains("properties") && (*actualAlternative)["properties"].is_object()) {
+                    for (auto const& [key, value] : (*actualAlternative)["properties"].items()) {
+                        known.insert(key);
+                    }
+                }
             }
         }
         return known;
@@ -46,9 +69,9 @@ namespace {
         auto current = &rootSchema;
 
         // Split by '/' and navigate
+        std::istringstream pathStream(path);
         std::string token;
-        std::istringstream tokenStream(path);
-        while (std::getline(tokenStream, token, '/')) {
+        while (std::getline(pathStream, token, '/')) {
             if (token.empty()) {
                 continue;
             }
@@ -87,52 +110,114 @@ namespace {
         }
 
         // Get the schema's known properties
-        auto knownProps = GetKnownProperties(schema);
+        auto knownProps = GetKnownProperties(schema, rootSchema);
+
+        // Check if schema uses additionalProperties (for dynamic property names)
+        bool hasAdditionalProperties
+            = schema.contains("additionalProperties") && schema["additionalProperties"].is_object();
+        nlohmann::json const* additionalPropsSchema
+            = hasAdditionalProperties ? &schema["additionalProperties"] : nullptr;
 
         // Check each field in the JSON object
         for (auto const& [key, value] : obj.items()) {
             auto currentPath = path + "/" + key;
+            nlohmann::json const* propSchema = nullptr;
 
-            if (knownProps.find(key) == knownProps.end()) {
-                // Field is not in the schema's declared properties
-                warnings.push_back("Unrecognized field at " + currentPath);
-            } else {
-                // Field is known - recursively check nested objects
-                auto const& propSchema = schema["properties"][key];
-
-                // Resolve $ref if present
-                nlohmann::json const* actualSchema = &propSchema;
-                if (propSchema.contains("$ref") && propSchema["$ref"].is_string()) {
-                    auto ref = propSchema["$ref"].get<std::string>();
-                    auto resolved = ResolveRef(rootSchema, ref);
-                    if (resolved) {
-                        actualSchema = resolved;
-                    }
-                }
-
-                if (value.is_object()) {
-                    CheckObjectForUnrecognizedFields(value, *actualSchema, rootSchema, currentPath, warnings);
-                } else if (value.is_array()) {
-                    // Check array items if the schema defines item schema
-                    if (actualSchema->contains("items")) {
-                        auto const& itemSchema = (*actualSchema)["items"];
-                        nlohmann::json const* actualItemSchema = &itemSchema;
-
-                        // Resolve $ref in items
-                        if (itemSchema.contains("$ref") && itemSchema["$ref"].is_string()) {
-                            auto ref = itemSchema["$ref"].get<std::string>();
+            if (knownProps.find(key) != knownProps.end()) {
+                // Field is explicitly declared in properties
+                if (schema.contains("properties") && schema["properties"].contains(key)) {
+                    propSchema = &schema["properties"][key];
+                } else if (schema.contains("anyOf") && schema["anyOf"].is_array()) {
+                    // Search for the property in anyOf alternatives (with $ref resolution)
+                    for (auto const& alternative : schema["anyOf"]) {
+                        nlohmann::json const* actualAlternative = &alternative;
+                        // Resolve $ref if present in the alternative
+                        if (alternative.contains("$ref") && alternative["$ref"].is_string()) {
+                            auto ref = alternative["$ref"].get<std::string>();
                             auto resolved = ResolveRef(rootSchema, ref);
                             if (resolved) {
-                                actualItemSchema = resolved;
+                                actualAlternative = resolved;
                             }
                         }
 
-                        for (size_t i = 0; i < value.size(); ++i) {
-                            auto arrayPath = currentPath + "[" + std::to_string(i) + "]";
-                            if (value[i].is_object()) {
-                                CheckObjectForUnrecognizedFields(
-                                    value[i], *actualItemSchema, rootSchema, arrayPath, warnings);
+                        if (actualAlternative->contains("properties")
+                            && (*actualAlternative)["properties"].contains(key)) {
+                            propSchema = &(*actualAlternative)["properties"][key];
+                            break;
+                        }
+                    }
+                }
+            } else if (hasAdditionalProperties) {
+                // Field is allowed via additionalProperties (dynamic property names like symbol-keyed continuities)
+                propSchema = additionalPropsSchema;
+            } else {
+                // Field is not in the schema's declared properties and no additionalProperties
+                warnings.push_back("Unrecognized field at " + currentPath);
+                continue;
+            }
+
+            // If we couldn't find a schema for this property, skip recursion
+            if (!propSchema) {
+                continue;
+            }
+
+            // Resolve $ref if present
+            nlohmann::json const* actualSchema = propSchema;
+            if (propSchema->contains("$ref") && (*propSchema)["$ref"].is_string()) {
+                auto ref = (*propSchema)["$ref"].get<std::string>();
+                auto resolved = ResolveRef(rootSchema, ref);
+                if (resolved) {
+                    actualSchema = resolved;
+                }
+            }
+
+            // If the schema has anyOf at the top level, pick the matching alternative
+            if (actualSchema->contains("anyOf") && (*actualSchema)["anyOf"].is_array() && value.is_object()) {
+                // Try to find the alternative that matches the object's "type" field
+                if (value.contains("type") && value["type"].is_string()) {
+                    auto typeValue = value["type"].get<std::string>();
+                    for (auto const& alternative : (*actualSchema)["anyOf"]) {
+                        if (alternative.contains("properties") && alternative["properties"].contains("type")
+                            && alternative["properties"]["type"].contains("const")
+                            && alternative["properties"]["type"]["const"].is_string()
+                            && alternative["properties"]["type"]["const"].get<std::string>() == typeValue) {
+                            // Found matching alternative, resolve any $ref in it
+                            actualSchema = &alternative;
+                            if (alternative.contains("$ref") && alternative["$ref"].is_string()) {
+                                auto ref = alternative["$ref"].get<std::string>();
+                                auto resolved = ResolveRef(rootSchema, ref);
+                                if (resolved) {
+                                    actualSchema = resolved;
+                                }
                             }
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (value.is_object()) {
+                CheckObjectForUnrecognizedFields(value, *actualSchema, rootSchema, currentPath, warnings);
+            } else if (value.is_array()) {
+                // Check array items if the schema defines item schema
+                if (actualSchema->contains("items")) {
+                    auto const& itemSchema = (*actualSchema)["items"];
+                    nlohmann::json const* actualItemSchema = &itemSchema;
+
+                    // Resolve $ref in items
+                    if (itemSchema.contains("$ref") && itemSchema["$ref"].is_string()) {
+                        auto ref = itemSchema["$ref"].get<std::string>();
+                        auto resolved = ResolveRef(rootSchema, ref);
+                        if (resolved) {
+                            actualItemSchema = resolved;
+                        }
+                    }
+
+                    for (size_t i = 0; i < value.size(); ++i) {
+                        auto arrayPath = currentPath + "[" + std::to_string(i) + "]";
+                        if (value[i].is_object()) {
+                            CheckObjectForUnrecognizedFields(
+                                value[i], *actualItemSchema, rootSchema, arrayPath, warnings);
                         }
                     }
                 }
@@ -143,6 +228,32 @@ namespace {
     auto GetFormatVersion(nlohmann::json const& json) -> int { return json.at("formatVersion").get<int>(); }
 
 } // anonymous namespace
+
+auto ValidateShowJson(nlohmann::json const& json, nlohmann::json const& schema) -> ValidationResult
+{
+    ValidationResult result;
+
+    try {
+        // Validate against schema using nlohmann/json-schema-validator
+        nlohmann::json_schema::json_validator validator;
+        validator.set_root_schema(schema); // Use the determined schema
+
+        ValidationErrorHandler errorHandler;
+        validator.validate(json, errorHandler);
+
+        result.errors = std::move(errorHandler.errors);
+    } catch (std::exception const& e) {
+        result.errors.push_back(std::string("Schema validation exception: ") + e.what());
+        return result; // Don't check for unrecognized fields if basic validation failed
+    }
+
+    // If validation passed, check for unrecognized fields
+    if (result.IsValid()) {
+        result.warnings = DetectUnrecognizedFields(json, schema); // Use the determined schema
+    }
+
+    return result;
+}
 
 auto ValidateShowJson(nlohmann::json const& json, ShowSchemas const& schemas) -> ValidationResult
 {
@@ -167,26 +278,7 @@ auto ValidateShowJson(nlohmann::json const& json, ShowSchemas const& schemas) ->
         return schemas.begin(); // Fallback to the first schema if formatVersion is missing or invalid
     }();
 
-    try {
-        // Validate against schema using nlohmann/json-schema-validator
-        nlohmann::json_schema::json_validator validator;
-        validator.set_root_schema((*schema).second); // Use the determined schema
-
-        ValidationErrorHandler errorHandler;
-        validator.validate(json, errorHandler);
-
-        result.errors = std::move(errorHandler.errors);
-    } catch (std::exception const& e) {
-        result.errors.push_back(std::string("Schema validation exception: ") + e.what());
-        return result; // Don't check for unrecognized fields if basic validation failed
-    }
-
-    // If validation passed, check for unrecognized fields
-    if (result.IsValid()) {
-        result.warnings = DetectUnrecognizedFields(json, (*schema).second); // Use the determined schema
-    }
-
-    return result;
+    return ValidateShowJson(json, (*schema).second);
 }
 
 auto ValidationResult::GetMessage() const -> std::string

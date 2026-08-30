@@ -24,13 +24,14 @@
 /**
  * CalChartContinuity
  *
- * CalChart::Continuity represents the continuity for a specific squad of marchers.  In CalChart3.6 and earlier, Continuity was represent
- * as a list of marching commands in text that would then be parsed into an abstract syntax tree of ContProcedures.  In newer versions
- * the data structure is created via the Continuity Composer.
+ * CalChart::Continuity represents the continuity for a specific squad of marchers.  In CalChart3.6 and earlier,
+ * Continuity was represent as a list of marching commands in text that would then be parsed into an abstract syntax
+ * tree of ContProcedures.  In newer versions the data structure is created via the Continuity Composer.
  *
- * CalChartContinuity requires that the ContProcedures it holds to be valid objects.  Because the CalChart string represented in older
- * calchart files may not parse correctly, we provide a way that upon detection of error that the procedure can be "re-written".  This allows
- * us to have the user attempt to correct a unusal CalChart syntax before we "give up".
+ * CalChartContinuity requires that the ContProcedures it holds to be valid objects.  Because the CalChart string
+ * represented in older calchart files may not parse correctly, we provide a way that upon detection of error that the
+ * procedure can be "re-written".  This allows us to have the user attempt to correct a unusal CalChart syntax before we
+ * "give up".
  *
  */
 
@@ -70,7 +71,10 @@ public:
     [[nodiscard]] auto Serialize() const -> std::vector<std::byte>;
     [[nodiscard]] auto toJSON() const -> nlohmann::json;
 
-    std::vector<std::unique_ptr<Cont::Procedure>> const& GetParsedContinuity() const noexcept { return m_parsedContinuity; }
+    std::vector<std::unique_ptr<Cont::Procedure>> const& GetParsedContinuity() const noexcept
+    {
+        return m_parsedContinuity;
+    }
     [[nodiscard]] auto HasParsedContinuity() const { return !m_parsedContinuity.empty(); }
     auto GetText() const { return m_legacyText; }
 
@@ -78,6 +82,7 @@ public:
     {
         using std::swap;
         swap(lhs.m_parsedContinuity, rhs.m_parsedContinuity);
+        swap(lhs.m_legacyText, rhs.m_legacyText);
     }
     friend bool operator==(Continuity const& lhs, Continuity const& rhs);
 

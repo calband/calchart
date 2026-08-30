@@ -11,6 +11,7 @@
 #include "CalChartPrintShowToPS.hpp"
 #include "CalChartShow.h"
 #include <fstream>
+#include <print>
 #include <ranges>
 
 namespace {
@@ -158,7 +159,20 @@ auto DumpJSON(CalChart::Show const& show)
     return show.toOnlineViewerJSON(animation);
 }
 
-auto DumpShowJSON(CalChart::Show const& show) { return show.toJSON(); }
+auto DumpShowJSON(CalChart::Show const& show, std::optional<nlohmann::json> schema)
+{
+    auto json = show.toJSON();
+    if (schema) {
+        auto result = CalChart::ValidateShowJson(json, *schema);
+        if (!result.IsValid()) {
+            throw std::runtime_error(result.GetMessage());
+        }
+        if (result.HasWarnings()) {
+            std::println("JSON validation warnings:\n{}", result.GetMessage());
+        }
+    }
+    return json;
+}
 
 auto DumpPrintContinuity(CalChart::Show const& show, std::ostream& os)
 {
@@ -180,6 +194,16 @@ auto DumpBeats(CalChart::Show const& show, std::ostream& os)
     }
 }
 
+auto loadJson(std::string_view path) -> nlohmann::json
+{
+    std::ifstream file(path.data());
+    if (!file.is_open()) {
+        throw std::runtime_error(std::format("could not open file {}", path));
+    }
+    nlohmann::json json;
+    file >> json;
+    return json;
+}
 }
 
 namespace CalChartCmd {
@@ -241,7 +265,13 @@ constexpr auto Parse = [](auto args, auto& os) {
         if (args["--showjson"].asBool()) {
             threads.emplace_back([&] {
                 auto jsonwidth = args["--jsonwidth"].asLong();
-                os << std::setw(jsonwidth) << DumpShowJSON(*show) << "\n";
+                auto schema = std::optional<nlohmann::json>{};
+                if (!args["--showschema"].asString().empty()) {
+                    auto schemaPath = args["--showschema"].asString();
+                    auto schemaJson = loadJson(schemaPath);
+                    schema = schemaJson;
+                }
+                os << std::setw(jsonwidth) << DumpShowJSON(*show, schema) << "\n";
             });
         }
         if (args["--showjson_out"]) {
@@ -249,7 +279,13 @@ constexpr auto Parse = [](auto args, auto& os) {
                 auto where = args["--showjson_out"].asString();
                 auto output = std::ofstream(where);
                 auto jsonwidth = args["--jsonwidth"].asLong();
-                output << std::setw(jsonwidth) << DumpShowJSON(*show) << "\n";
+                auto schema = std::optional<nlohmann::json>{};
+                if (!args["--showschema"].asString().empty()) {
+                    auto schemaPath = args["--showschema"].asString();
+                    auto schemaJson = loadJson(schemaPath);
+                    schema = schemaJson;
+                }
+                output << std::setw(jsonwidth) << DumpShowJSON(*show, schema) << "\n";
             });
         }
         if (args["--dump_print_continuity"].asBool()) {

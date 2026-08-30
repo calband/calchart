@@ -11,10 +11,7 @@ struct Continuity_values {
     std::string GetText;
 };
 
-bool Check_Continuity(Continuity const&, Continuity_values const&)
-{
-    return true;
-}
+bool Check_Continuity(Continuity const&, Continuity_values const&) { return true; }
 }
 
 TEST_CASE("ContinuitySerializedTests", "CalChartShowTests")
@@ -134,22 +131,27 @@ TEST_CASE("CalChartContinuityTests", "CalChartShowTests")
         auto const& marchProc = marchJson.at("procedures").at(0);
 
         CHECK(marchProc.at("type") == "ProcMarch");
-        CHECK(marchProc.contains("facedir"));
-        CHECK(marchProc.at("facedir").is_null());
+        CHECK(!marchProc.contains("facedir"));
         CHECK(Continuity(marchJson) == marchSource);
     }
 
     SECTION("JSON parse supports omitted optional fields")
     {
         auto json = nlohmann::json{
-            { "procedures", nlohmann::json::array({
-                                nlohmann::json{
-                                    { "type", "ProcFountain" },
-                                    { "dir1", nlohmann::json{ { "type", "FuncDir" }, { "pnt", nlohmann::json{ { "type", "NextPoint" } } } } },
-                                    { "dir2", nlohmann::json{ { "type", "FuncDirFrom" }, { "pnt1", nlohmann::json{ { "type", "StartPoint" } } }, { "pnt2", nlohmann::json{ { "type", "NextPoint" } } } } },
-                                    { "pnt", nlohmann::json{ { "type", "NextPoint" } } },
-                                },
-                            }) },
+            { "procedures",
+                nlohmann::json::array({
+                    nlohmann::json{
+                        { "type", "ProcFountain" },
+                        { "dir1",
+                            nlohmann::json{
+                                { "type", "FuncDir" }, { "pnt", nlohmann::json{ { "type", "NextPoint" } } } } },
+                        { "dir2",
+                            nlohmann::json{ { "type", "FuncDirFrom" },
+                                { "pnt1", nlohmann::json{ { "type", "StartPoint" } } },
+                                { "pnt2", nlohmann::json{ { "type", "NextPoint" } } } } },
+                        { "pnt", nlohmann::json{ { "type", "NextPoint" } } },
+                    },
+                }) },
         };
 
         auto const fromJson = Continuity(json);
@@ -173,56 +175,61 @@ TEST_CASE("CalChartContinuityTests", "CalChartShowTests")
         CHECK_THROWS(Continuity(badProcedureType));
 
         auto const missingField = nlohmann::json{
-            { "procedures", nlohmann::json::array({
-                                nlohmann::json{
-                                    { "type", "ProcMT" },
-                                    { "dir", nlohmann::json{ { "type", "ValueDefined" }, { "defined", "E" } } },
-                                },
-                            }) },
+            { "procedures",
+                nlohmann::json::array({
+                    nlohmann::json{
+                        { "type", "ProcMT" },
+                        { "dir", nlohmann::json{ { "type", "ValueDefined" }, { "defined", "E" } } },
+                    },
+                }) },
         };
         CHECK_THROWS(Continuity(missingField));
 
         auto const invalidDefinedValue = nlohmann::json{
-            { "procedures", nlohmann::json::array({
-                                nlohmann::json{
-                                    { "type", "ProcMT" },
-                                    { "numbeats", nlohmann::json{ { "type", "ValueREM" } } },
-                                    { "dir", nlohmann::json{ { "type", "ValueDefined" }, { "defined", "BAD_DIR" } } },
-                                },
-                            }) },
+            { "procedures",
+                nlohmann::json::array({
+                    nlohmann::json{
+                        { "type", "ProcMT" },
+                        { "numbeats", nlohmann::json{ { "type", "ValueREM" } } },
+                        { "dir", nlohmann::json{ { "type", "ValueDefined" }, { "defined", "BAD_DIR" } } },
+                    },
+                }) },
         };
         CHECK_THROWS(Continuity(invalidDefinedValue));
 
         auto const invalidRefPoint = nlohmann::json{
-            { "procedures", nlohmann::json::array({
-                                nlohmann::json{
-                                    { "type", "ProcFMTO" },
-                                    { "pnt", nlohmann::json{ { "type", "RefPoint" }, { "refnum", -1 } } },
-                                },
-                            }) },
+            { "procedures",
+                nlohmann::json::array({
+                    nlohmann::json{
+                        { "type", "ProcFMTO" },
+                        { "pnt", nlohmann::json{ { "type", "RefPoint" }, { "refnum", -1 } } },
+                    },
+                }) },
         };
         CHECK_THROWS(Continuity(invalidRefPoint));
 
         auto const missingLocationColumn = nlohmann::json{
-            { "procedures", nlohmann::json::array({
-                                nlohmann::json{
-                                    { "type", "ProcMT" },
-                                    { "line", 10 },
-                                    { "numbeats", nlohmann::json{ { "type", "ValueREM" } } },
-                                    { "dir", nlohmann::json{ { "type", "ValueDefined" }, { "defined", "E" } } },
-                                },
-                            }) },
+            { "procedures",
+                nlohmann::json::array({
+                    nlohmann::json{
+                        { "type", "ProcMT" },
+                        { "line", 10 },
+                        { "numbeats", nlohmann::json{ { "type", "ValueREM" } } },
+                        { "dir", nlohmann::json{ { "type", "ValueDefined" }, { "defined", "E" } } },
+                    },
+                }) },
         };
         CHECK_THROWS(Continuity(missingLocationColumn));
 
         auto const invalidNestedLocationType = nlohmann::json{
-            { "procedures", nlohmann::json::array({
-                                nlohmann::json{
-                                    { "type", "ProcMT" },
-                                    { "numbeats", nlohmann::json{ { "type", "ValueREM" }, { "line", -1 }, { "col", 3 } } },
-                                    { "dir", nlohmann::json{ { "type", "ValueDefined" }, { "defined", "E" } } },
-                                },
-                            }) },
+            { "procedures",
+                nlohmann::json::array({
+                    nlohmann::json{
+                        { "type", "ProcMT" },
+                        { "numbeats", nlohmann::json{ { "type", "ValueREM" }, { "line", -1 }, { "col", 3 } } },
+                        { "dir", nlohmann::json{ { "type", "ValueDefined" }, { "defined", "E" } } },
+                    },
+                }) },
         };
         CHECK_THROWS(Continuity(invalidNestedLocationType));
     }

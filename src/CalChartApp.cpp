@@ -96,20 +96,14 @@ auto CalChartApp::OnExceptionInMainLoop() -> bool
         throw;
     } catch (const std::exception& e) {
         // Standard library exception
-        auto result = wxMessageDialog{
-            nullptr,
-            wxString::Format(
-                "An unexpected error occurred:\n\n%s\n\n"
-                "Would you like to open the bug report dialog?",
+        auto result = wxMessageDialog{ nullptr,
+            wxString::Format("An unexpected error occurred:\n\n%s\n\n"
+                             "Would you like to open the bug report dialog?",
                 e.what()),
-            "CalChart Error",
-            wxYES_NO | wxICON_ERROR
-        }
+            "CalChart Error", wxYES_NO | wxICON_ERROR }
                           .ShowModal();
         if (result == wxID_YES) {
-            BugReportDialog{ wxCalChart::GetGlobalConfig(),
-                nullptr,
-                dynamic_cast<wxFrame*>(GetTopWindow()),
+            BugReportDialog{ wxCalChart::GetGlobalConfig(), nullptr, dynamic_cast<wxFrame*>(GetTopWindow()),
                 "Report a Bug - Crash Report" }
                 .ShowModal();
         } else {
@@ -117,18 +111,13 @@ auto CalChartApp::OnExceptionInMainLoop() -> bool
         }
     } catch (...) {
         // Unknown exception
-        auto result = wxMessageDialog{
-            nullptr,
+        auto result = wxMessageDialog{ nullptr,
             "An unexpected error occurred.\n\n"
             "Would you like to open the bug report dialog?",
-            "CalChart Error",
-            wxYES_NO | wxICON_ERROR
-        }
+            "CalChart Error", wxYES_NO | wxICON_ERROR }
                           .ShowModal();
         if (result == wxID_YES) {
-            BugReportDialog{ wxCalChart::GetGlobalConfig(),
-                nullptr,
-                dynamic_cast<wxFrame*>(GetTopWindow()),
+            BugReportDialog{ wxCalChart::GetGlobalConfig(), nullptr, dynamic_cast<wxFrame*>(GetTopWindow()),
                 "Report a Bug - Crash Report" }
                 .ShowModal();
         } else {
@@ -138,21 +127,12 @@ auto CalChartApp::OnExceptionInMainLoop() -> bool
     return true;
 }
 
-void CalChartApp::OpenFile(wxString const& fileName)
-{
-    mDocManager->CreateDocument(fileName, wxDOC_SILENT);
-}
+void CalChartApp::OpenFile(wxString const& fileName) { mDocManager->CreateDocument(fileName, wxDOC_SILENT); }
 
-void CalChartApp::OpenFileOnHost(wxString const& filename)
-{
-    mHostInterface->OpenFile(filename);
-}
+void CalChartApp::OpenFileOnHost(wxString const& filename) { mHostInterface->OpenFile(filename); }
 
 #if defined(__APPLE__) && (__APPLE__)
-void CalChartApp::MacOpenFile(wxString const& fileName)
-{
-    OpenFileOnHost(fileName);
-}
+void CalChartApp::MacOpenFile(wxString const& fileName) { OpenFileOnHost(fileName); }
 
 void CalChartApp::MacOpenFiles(wxArrayString const& fileNames)
 {
@@ -162,27 +142,15 @@ void CalChartApp::MacOpenFiles(wxArrayString const& fileNames)
 }
 #endif // defined(__APPLE__) && (__APPLE__)
 
-HelpManager& CalChartApp::GetGlobalHelpManager()
-{
-    return *mHelpManager;
-}
+HelpManager& CalChartApp::GetGlobalHelpManager() { return *mHelpManager; }
 
-wxPrintDialogData& CalChartApp::GetGlobalPrintDialog()
-{
-    return *mPrintDialogData;
-}
+wxPrintDialogData& CalChartApp::GetGlobalPrintDialog() { return *mPrintDialogData; }
 
 #if CALCHART_HAS_WEBVIEW
-ViewerServer& CalChartApp::GetViewerServer()
-{
-    return *mViewerServer;
-}
+ViewerServer& CalChartApp::GetViewerServer() { return *mViewerServer; }
 #endif
 
-CalChart::CircularLogBuffer CalChartApp::GetLogBuffer() const
-{
-    return mLogTarget->GetLogBuffer();
-}
+CalChart::CircularLogBuffer CalChartApp::GetLogBuffer() const { return mLogTarget->GetLogBuffer(); }
 
 void CalChartApp::InitAppAsServer()
 {
@@ -207,7 +175,10 @@ void CalChartApp::InitAppAsServer()
     mDocManager = new wxDocManager;
 
     //// Create a template relating drawing documents to their views
-    (void)new wxDocTemplate(mDocManager, "CalChart Show", "*.shw", "", "shw", "CalChart Doc", "CalChart View", CLASSINFO(CalChartDoc), CLASSINFO(CalChartView));
+    (void)new wxDocTemplate(mDocManager, "CalChart Show", "*.shw", "", "shw", "CalChart Doc", "CalChart View",
+        CLASSINFO(CalChartDoc), CLASSINFO(CalChartView));
+    (void)new wxDocTemplate(mDocManager, "CalChart Show", "*.shw2", "", "shw2", "CalChart Doc", "CalChart View",
+        CLASSINFO(CalChartDoc), CLASSINFO(CalChartView));
 
     mHelpManager = std::make_unique<HelpManager>();
     mPrintDialogData = std::make_unique<wxPrintDialogData>();
@@ -273,12 +244,15 @@ void CalChartApp::InitAppAsServer()
         }
         wxTheApp->CallAfter([frame, latestTag]() {
             // Build a small dialog with a checkbox "Never show this again for this release".
-            wxDialog dlg(frame, wxID_ANY, "CalChart Update", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
+            wxDialog dlg(frame, wxID_ANY, "CalChart Update", wxDefaultPosition, wxDefaultSize,
+                wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
             using namespace wxUI;
             CheckBox::Proxy neverBox;
             VSizer{
                 wxSizerFlags().Expand().Border(wxALL, 10),
-                Text{ std::format("A new version of CalChart is available: {}\nWould you like to open the releases page?", latestTag) },
+                Text{
+                    std::format("A new version of CalChart is available: {}\nWould you like to open the releases page?",
+                        latestTag) },
                 CheckBox{ "Never show this again for this release" }.withProxy(neverBox),
                 HSizer{
                     wxSizerFlags().Center().Border(wxALL, 5),
@@ -306,10 +280,7 @@ void CalChartApp::InitAppAsServer()
     ProcessArguments();
 }
 
-void CalChartApp::InitAppAsClient()
-{
-    ProcessArguments();
-}
+void CalChartApp::InitAppAsClient() { ProcessArguments(); }
 
 void CalChartApp::ProcessArguments()
 {
