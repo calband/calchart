@@ -233,6 +233,8 @@ constexpr auto INGL_VCNT = Make4CharWord('V', 'C', 'N', 'T');
 constexpr auto INGL_EVCT = Make4CharWord('E', 'V', 'C', 'T');
 constexpr auto INGL_PCNT = Make4CharWord('P', 'C', 'N', 'T');
 constexpr auto INGL_BACK = Make4CharWord('B', 'A', 'C', 'K');
+constexpr auto INGL_RBCK = Make4CharWord('R', 'B', 'C', 'K');
+constexpr auto INGL_IMGR = Make4CharWord('I', 'M', 'G', 'R');
 constexpr auto INGL_CURV = Make4CharWord('C', 'U', 'R', 'V');
 constexpr auto INGL_CASS = Make4CharWord('C', 'A', 'S', 'S');
 constexpr auto INGL_TMPO = Make4CharWord('T', 'M', 'P', 'O');
@@ -443,8 +445,10 @@ public:
 
     template <typename T> auto GetVector() -> std::vector<T>;
 
+    //    auto ParseOutLabels() -> std::unordered_map<uint32_t, Reader>
     auto ParseOutLabels() -> std::vector<std::tuple<uint32_t, Reader>>
     {
+        // std::unordered_map<uint32_t, Reader> result;
         std::vector<std::tuple<uint32_t, Reader>> result;
         while (size()) {
             auto length = size();
@@ -463,6 +467,7 @@ public:
             if ((end != INGL_END) || (end_name != name)) {
                 return result;
             }
+            // result.emplace(std::pair{ name, reader });
             result.emplace_back(name, reader);
         }
         return result;
@@ -532,7 +537,7 @@ template <> inline auto Reader::Peek<std::byte>() const -> std::byte
 {
     if (size() < sizeof(std::byte)) {
         throw std::runtime_error(
-            std::format("not enough data for type.  Need {}, currently have {}", sizeof(std::byte), size()));
+            std::format("not enough data for std::byte.  Need {}, currently have {}", sizeof(std::byte), size()));
     }
     return data[0];
 }
@@ -542,7 +547,7 @@ template <> inline auto Reader::Peek<char>() const -> char
     using T = int8_t;
     if (size() < sizeof(T)) {
         throw std::runtime_error(
-            std::format("not enough data for type.  Need {}, currently have {}", sizeof(T), size()));
+            std::format("not enough data for char.  Need {}, currently have {}", sizeof(T), size()));
     }
     auto result = T{};
     for (std::size_t i = 0; i < sizeof(result); ++i) {
@@ -556,7 +561,7 @@ template <> inline auto Reader::Peek<uint8_t>() const -> uint8_t
     using T = uint8_t;
     if (size() < sizeof(T)) {
         throw std::runtime_error(
-            std::format("not enough data for type.  Need {}, currently have {}", sizeof(T), size()));
+            std::format("not enough data for uint8_t.  Need {}, currently have {}", sizeof(T), size()));
     }
     auto result = T{};
     for (std::size_t i = 0; i < sizeof(result); ++i) {
@@ -570,7 +575,7 @@ template <> inline auto Reader::Peek<int16_t>() const -> int16_t
     using T = int16_t;
     if (size() < sizeof(T)) {
         throw std::runtime_error(
-            std::format("not enough data for type.  Need {}, currently have {}", sizeof(T), size()));
+            std::format("not enough data for int16_t.  Need {}, currently have {}", sizeof(T), size()));
     }
     auto result = T{};
     for (std::size_t i = 0; i < sizeof(result); ++i) {
@@ -583,7 +588,7 @@ template <> inline auto Reader::Peek<uint16_t>() const -> uint16_t
     using T = uint16_t;
     if (size() < sizeof(T)) {
         throw std::runtime_error(
-            std::format("not enough data for type.  Need {}, currently have {}", sizeof(T), size()));
+            std::format("not enough data for uint16_t.  Need {}, currently have {}", sizeof(T), size()));
     }
     auto result = T{};
     for (std::size_t i = 0; i < sizeof(result); ++i) {
@@ -597,7 +602,7 @@ template <> inline auto Reader::Peek<uint32_t>() const -> uint32_t
     using T = uint32_t;
     if (size() < sizeof(T)) {
         throw std::runtime_error(
-            std::format("not enough data for type.  Need {}, currently have {}", sizeof(T), size()));
+            std::format("not enough data for uint32_t.  Need {}, currently have {}", sizeof(T), size()));
     }
     auto result = T{};
     for (std::size_t i = 0; i < sizeof(result); ++i) {
@@ -611,7 +616,7 @@ template <> inline auto Reader::Peek<int32_t>() const -> int32_t
     using T = int32_t;
     if (size() < sizeof(T)) {
         throw std::runtime_error(
-            std::format("not enough data for type.  Need {}, currently have {}", sizeof(T), size()));
+            std::format("not enough data for int32_t.  Need {}, currently have {}", sizeof(T), size()));
     }
     auto result = T{};
     for (std::size_t i = 0; i < sizeof(result); ++i) {

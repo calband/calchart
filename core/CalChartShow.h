@@ -196,10 +196,8 @@ public:
     [[nodiscard]] auto GetSheetsBackgroundImages() const -> std::vector<std::vector<ImageInfo>>;
     [[nodiscard]] auto GetSheetBackgroundImagesOnCurrentSheet() const -> std::vector<ImageInfo>;
 
-    // Sheet serialized
-    [[nodiscard]] auto GetSheetSerialized(size_t sheet) const -> std::vector<std::byte>;
-    [[nodiscard]] auto GetSheetsSerialized() const -> std::vector<std::vector<std::byte>>;
-    [[nodiscard]] auto GetSheetSerializedOnCurrentSheet() const -> std::vector<std::byte>;
+    // Sheet serialization for copy and paste
+    [[nodiscard]] auto GetSheetSerializedOnCurrentSheet(ImageRegistry&) const -> std::vector<std::byte>;
 
     // Continuities
     [[nodiscard]] auto GetContinuities(size_t sheet) const -> std::vector<Continuity>;

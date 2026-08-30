@@ -60,22 +60,22 @@ public:
     Sheet(size_t numPoints, std::string name);
     // intentionally a reference to Reader.
     Sheet(Version_3_3_and_earlier, size_t numPoints, Reader&, ParseErrorHandlers const* correction = nullptr);
-    Sheet(size_t numPoints, Reader, ParseErrorHandlers const* correction = nullptr);
-    Sheet(nlohmann::json const& json);
+    Sheet(size_t numPoints, Reader, ImageRegistry const& registry, ParseErrorHandlers const* correction = nullptr);
+    Sheet(nlohmann::json const& json, ImageRegistry const& registry);
 
 private:
     [[nodiscard]] auto SerializeAllPoints() const -> std::vector<std::byte>;
     [[nodiscard]] auto SerializeContinuityData() const -> std::vector<std::byte>;
     [[nodiscard]] auto SerializePrintContinuityData() const -> std::vector<std::byte>;
     [[nodiscard]] auto SerializeFermata() const -> std::vector<std::byte>;
-    [[nodiscard]] auto SerializeBackgroundImageInfo() const -> std::vector<std::byte>;
+    [[nodiscard]] auto SerializeBackgroundImageInfo(ImageRegistry&) const -> std::vector<std::byte>;
     [[nodiscard]] auto SerializeCurves() const -> std::vector<std::byte>;
     [[nodiscard]] auto SerializeCurveAssigments() const -> std::vector<std::byte>;
-    [[nodiscard]] auto SerializeSheetData() const -> std::vector<std::byte>;
+    [[nodiscard]] auto SerializeSheetData(ImageRegistry&) const -> std::vector<std::byte>;
 
 public:
-    [[nodiscard]] auto SerializeSheet() const -> std::vector<std::byte>;
-    [[nodiscard]] auto toJSON() const -> nlohmann::json;
+    [[nodiscard]] auto SerializeSheet(ImageRegistry&) const -> std::vector<std::byte>;
+    [[nodiscard]] auto toJSON(ImageRegistry&) const -> nlohmann::json;
 
     // continuity Functions
     [[nodiscard]] auto GetContinuityBySymbol(SYMBOL_TYPE i) const { return mAnimationContinuity.at(i); }
