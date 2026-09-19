@@ -27,56 +27,46 @@ auto CreateContinuityBrowserHandlers(CalChartView* view) -> ContinuityBrowser::H
     if (!view) {
         return ContinuityBrowser::Handlers{};
     }
-    return {
-        [view]() { return CalChart::Ranges::ToVector<std::optional<CalChart::Continuity>>(
-                       CalChart::Ranges::zip_view(view->ContinuitiesInUse(), view->GetContinuities())
-                       | std::views::transform([](auto&& inUseAndCont) -> std::optional<CalChart::Continuity> {
-                             auto&& [inUse, cont] = inUseAndCont;
-                             if (inUse) {
-                                 return cont;
-                             } else {
-                                 return std::nullopt;
-                             }
-                         })); },
+    return { [view]() {
+                return CalChart::Ranges::ToVector<std::optional<CalChart::Continuity>>(
+                    CalChart::Ranges::zip_view(view->ContinuitiesInUse(), view->GetContinuities())
+                    | std::views::transform([](auto&& inUseAndCont) -> std::optional<CalChart::Continuity> {
+                          auto&& [inUse, cont] = inUseAndCont;
+                          if (inUse) {
+                              return cont;
+                          } else {
+                              return std::nullopt;
+                          }
+                      }));
+            },
         {
             [view](CalChart::SYMBOL_TYPE sym, CalChart::Continuity const& new_cont) {
                 view->DoSetContinuityCommand(sym, new_cont);
             },
-            [view](CalChart::SYMBOL_TYPE symbol) {
-                view->SetSelectionList(view->MakeSelectBySymbol(symbol));
-            },
-        }
-    };
+            [view](CalChart::SYMBOL_TYPE symbol) { view->SetSelectionList(view->MakeSelectBySymbol(symbol)); },
+        } };
 }
 
-auto GetDebugContinuityHandlers(
-    CalChart::Continuity const& plainCont,
-    CalChart::Continuity const& solCont,
+auto GetDebugContinuityHandlers(CalChart::Continuity const& plainCont, CalChart::Continuity const& solCont,
     std::function<void(CalChart::SYMBOL_TYPE, CalChart::Continuity const&)> onUpdate,
     std::function<void(CalChart::SYMBOL_TYPE)> onSetSelection) -> ContinuityBrowser::Handlers
 {
-    return {
-        [&]() {
-            return CalChart::Ranges::ToVector<std::optional<CalChart::Continuity>>(
-                CalChart::k_symbols | std::views::transform([&](auto eachcont) -> std::optional<CalChart::Continuity> {
-                    if (eachcont == CalChart::SYMBOL_PLAIN) {
-                        return plainCont;
-                    }
-                    if (eachcont == CalChart::SYMBOL_SOL) {
-                        return solCont;
-                    }
-                    return std::nullopt;
-                }));
-        },
+    return { [&]() {
+                return CalChart::Ranges::ToVector<std::optional<CalChart::Continuity>>(CalChart::k_symbols
+                    | std::views::transform([&](auto eachcont) -> std::optional<CalChart::Continuity> {
+                          if (eachcont == CalChart::SYMBOL_PLAIN) {
+                              return plainCont;
+                          }
+                          if (eachcont == CalChart::SYMBOL_SOL) {
+                              return solCont;
+                          }
+                          return std::nullopt;
+                      }));
+            },
         {
-            [onUpdate](CalChart::SYMBOL_TYPE sym, CalChart::Continuity const& new_cont) {
-                onUpdate(sym, new_cont);
-            },
-            [onSetSelection](CalChart::SYMBOL_TYPE symbol) {
-                onSetSelection(symbol);
-            },
-        }
-    };
+            [onUpdate](CalChart::SYMBOL_TYPE sym, CalChart::Continuity const& new_cont) { onUpdate(sym, new_cont); },
+            [onSetSelection](CalChart::SYMBOL_TYPE symbol) { onSetSelection(symbol); },
+        } };
 }
 
 auto CreateFieldThumbnailBrowserHandlers(CalChartView* view) -> FieldThumbnailBrowser::Handlers
@@ -85,23 +75,24 @@ auto CreateFieldThumbnailBrowserHandlers(CalChartView* view) -> FieldThumbnailBr
         return FieldThumbnailBrowser::Handlers{};
     }
     return {
-        [view]() {
-            return view->GetShowFullSize();
-        },
-        [view]() {
-            return view->GetNumSheets();
-        },
-        [view]() {
-            return view->GetCurrentSheetNum();
-        },
-        [view]() {
-            return view->GetSheetsName();
-        },
-        [view]() {
-            return view->GenerateFieldWithMarchersDrawCommands();
-        },
-        [view](size_t sheet_num) {
-            view->GoToSheet(sheet_num);
-        },
+        [view]() { return view->GetShowFullSize(); },
+        [view]() { return view->GetNumSheets(); },
+        [view]() { return view->GetCurrentSheetNum(); },
+        [view]() { return view->GetSheetsName(); },
+        [view]() { return view->GenerateFieldWithMarchersDrawCommands(); },
+        [view](size_t sheet_num) { view->GoToSheet(sheet_num); },
+    };
+}
+
+auto CreateAnimationErrorsPanelHandlers(CalChartView* view) -> AnimationErrorsPanel::Handlers
+{
+    if (!view) {
+        return AnimationErrorsPanel::Handlers{};
+    }
+    return {
+        [view]() { return view->GetAnimationErrors(); },
+        [view]() { return view->GetAnimationCollisions(); },
+        [view](
+            size_t which, CalChart::SelectionList const& sl) { return view->GoToSheetAndSetSelectionList(which, sl); },
     };
 }

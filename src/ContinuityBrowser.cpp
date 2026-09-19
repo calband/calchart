@@ -53,25 +53,21 @@ private:
     CalChart::SYMBOL_TYPE mSym{};
 };
 
-ContinuityBrowserPerCont::ContinuityBrowserPerCont(wxWindow* parent, CalChart::SYMBOL_TYPE sym, CalChart::Configuration const& config)
+ContinuityBrowserPerCont::ContinuityBrowserPerCont(
+    wxWindow* parent, CalChart::SYMBOL_TYPE sym, CalChart::Configuration const& config)
     : super(parent)
     , mSym(sym)
 {
     wxUI::VSizer{
         wxSizerFlags{}.Border(wxALL, 2).Proportion(0).Expand(),
-        wxUI::HSizer{
-            wxUI::Text{ CalChart::GetLongNameForSymbol(mSym) },
+        wxUI::HSizer{ wxUI::Text{ CalChart::GetLongNameForSymbol(mSym) },
             wxUI::BitmapButton{ ScaleButtonBitmap(wxArtProvider::GetBitmap(wxART_PLUS)) }
-                .bind([this]() {
-                    mCanvas->AddNewEntry();
-                })
+                .bind([this]() { mCanvas->AddNewEntry(); })
                 .withFlags(BasicSizerFlags()) },
         // here's a canvas
-        wxUI::Factory{
-            [this, &config](wxWindow* parent) {
-                return new ContinuityBrowserPanel(mSym, config, parent);
-            } }
-            .withProxy(mCanvas),
+        wxUI::Factory{ [this, &config](wxWindow* parent) {
+            return new ContinuityBrowserPanel(mSym, config, parent);
+        } }.withProxy(mCanvas),
         wxUI::Line{},
     }
         .fitTo(this);
@@ -96,43 +92,34 @@ ContinuityBrowser::ContinuityBrowser(wxWindow* parent, wxSize const& size, CalCh
     : super(parent, wxID_ANY, wxDefaultPosition, size, wxScrolledWindowStyle)
 {
     wxUI::VSizer{
-        wxSizerFlags{}.Proportion(1).Expand(),
-        wxUI::Factory{
-            [this, &config](wxWindow* parent) {
-                // create a scrollable window to contain all of the frame's content
-                auto scrolledWindow = new wxScrolledWindow(parent, wxID_ANY);
-                wxUI::VSizer{
-                    wxSizerFlags{}.Border(wxALL, 2).Proportion(0).Expand(),
-                    wxUI::Line{},
-                    wxUI::VForEach(
-                        CalChart::k_symbols,
-                        [this, &config](auto eachcont) {
-                            return wxUI::Factory{
-                                [this, eachcont, &config](wxWindow* parent) {
-                                    auto perCont = new ContinuityBrowserPerCont(parent, eachcont, config);
-                                    perCont->Show(false);
-                                    mPerCont.push_back(perCont);
-                                    return perCont;
-                                }
-                            };
-                        }),
-                    wxUI::HSizer{
-                        wxUI::Button{ wxID_HELP, "&Help" }
-                            .bind([] {
-                                CalChartSplash::Help();
-                            }),
-                    },
-                }
-                    .fitTo(scrolledWindow);
+        wxSizerFlags{}.Proportion(1).Expand(), wxUI::Factory{ [this, &config](wxWindow* parent) {
+            // create a scrollable window to contain all of the frame's content
+            auto scrolledWindow = new wxScrolledWindow(parent, wxID_ANY);
+            wxUI::VSizer{
+                wxSizerFlags{}.Border(wxALL, 2).Proportion(0).Expand(),
+                wxUI::Line{},
+                wxUI::VForEach(CalChart::k_symbols,
+                    [this, &config](auto eachcont) {
+                        return wxUI::Factory{ [this, eachcont, &config](wxWindow* parent) {
+                            auto perCont = new ContinuityBrowserPerCont(parent, eachcont, config);
+                            perCont->Show(false);
+                            mPerCont.push_back(perCont);
+                            return perCont;
+                        } };
+                    }),
+                wxUI::HSizer{
+                    wxUI::Button{ wxID_HELP, "&Help" }.bind([] { CalChartSplash::Help(); }),
+                },
+            }
+                .fitTo(scrolledWindow);
 
-                // configure the minimum size of the window, and then add scroll bars
-                scrolledWindow->SetMinSize(scrolledWindow->GetSizer()->ComputeFittingWindowSize(scrolledWindow));
-                scrolledWindow->SetScrollRate(1, 1);
+            // configure the minimum size of the window, and then add scroll bars
+            scrolledWindow->SetMinSize(scrolledWindow->GetSizer()->ComputeFittingWindowSize(scrolledWindow));
+            scrolledWindow->SetScrollRate(1, 1);
 
-                return scrolledWindow;
-            } }
-    }
-        .fitTo(this);
+            return scrolledWindow;
+        } }
+    }.fitTo(this);
     // now update the current screen
     OnUpdate();
 }
@@ -142,7 +129,8 @@ void ContinuityBrowser::OnUpdate()
     if (!mHandleGetContinuities) {
         return;
     }
-    for (auto [i, optContBrowser] : CalChart::Ranges::enumerate_view(CalChart::Ranges::zip_view(mHandleGetContinuities(), mPerCont))) {
+    for (auto [i, optContBrowser] :
+        CalChart::Ranges::enumerate_view(CalChart::Ranges::zip_view(mHandleGetContinuities(), mPerCont))) {
         auto&& [optCont, contBrowser] = optContBrowser;
         contBrowser->Show(optCont.has_value());
         if (optCont.has_value()) {
