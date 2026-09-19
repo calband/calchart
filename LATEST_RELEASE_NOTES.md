@@ -15,5 +15,6 @@ Other changes:
 * [#884](../../issues/884) Create a show schema with version 1
 * [#886](../../issues/886) have calchart_cmd validate when it exports a json
 * [#902](../../issues/902) We should have a debug playground for Animation Errors
+* [#904](../../issues/904) We should have a Print Continuity editor playground
 
 

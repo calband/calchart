@@ -1464,6 +1464,6 @@ void CalChartFrame::SetViewsOnComponents(CalChartView* view)
     mFieldThumbnailBrowser->SetHandlers(CreateFieldThumbnailBrowserHandlers(view));
     mAnimationErrorsPanel->SetHandlers(CreateAnimationErrorsPanelHandlers(view));
     mAnimationPanel->SetView(view);
-    mPrintContinuityEditor->SetView(view);
+    mPrintContinuityEditor->SetHandlers(CreatePrintContinuityEditorHandlers(view));
     mShadowAnimationPanel->SetView(view);
 }

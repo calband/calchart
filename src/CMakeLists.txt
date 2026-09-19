@@ -124,6 +124,8 @@ add_executable(
   DebugContinuityBrowser.hpp
   DebugFieldThumbnailBrowser.cpp
   DebugFieldThumbnailBrowser.hpp
+  DebugPrintContinuityEditor.cpp
+  DebugPrintContinuityEditor.hpp
   EditCurveAssignments.cpp
   EditCurveAssignments.hpp
   DCSaveRestore.h
