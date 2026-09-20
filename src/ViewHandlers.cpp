@@ -96,3 +96,21 @@ auto CreateAnimationErrorsPanelHandlers(CalChartView* view) -> AnimationErrorsPa
             size_t which, CalChart::SelectionList const& sl) { return view->GoToSheetAndSetSelectionList(which, sl); },
     };
 }
+
+auto CreatePrintContinuityEditorHandlers(CalChartView* view) -> PrintContinuityEditor::Handlers
+{
+    if (!view) {
+        return PrintContinuityEditor::Handlers{};
+    }
+    return {
+        [view]() { return view->GetSheetPrintContinuityOnCurrentSheet(); },
+        [view]() { return view->GetSheetRawPrintContinuityOnCurrentSheet(); },
+        [view]() { return view->GetCurrentSheetNum(); },
+        [view]() { return view->GetSheetPrintNumberOnCurrentSheet(); },
+        [view](int which_sheet, std::string const& number, std::string const& cont) {
+            return view->DoSetPrintContinuity(which_sheet, number, cont);
+        },
+        [view]() { return view->GoToPrevSheet(); },
+        [view]() { return view->GoToNextSheet(); },
+    };
+}

@@ -28,6 +28,7 @@
 #include "CalChartText.h"
 #include "CalChartView.h"
 #include "PrintContinuityPreview.h"
+#include "ViewHandlers.hpp"
 #include "basic_ui.h"
 #include "ui_enums.h"
 
@@ -129,17 +130,17 @@ void PrintContinuityEditor::SetInsertionPoint(int x, int y)
 
 void PrintContinuityEditor::UpdateText()
 {
-    if (!mView) {
+    if (!std::get<0>(mHandlers)) {
         return;
     }
 
     // if the user input has changed, then refresh it
-    auto printContinuity = mView->GetSheetPrintContinuityOnCurrentSheet();
+    auto printContinuity = std::get<HandleGetSheetPrintContinuityOnCurrentSheet>(mHandlers)();
 
     auto text = static_cast<wxTextCtrl*>(FindWindow(PrintContinuityEditor_PrintNumber));
     text->SetValue(printContinuity.GetPrintNumber());
 
-    if (mView->GetSheetRawPrintContinuityOnCurrentSheet() != mUserInput->GetValue()) {
+    if (std::get</*HandleGetSheetRawPrintContinuityOnCurrentSheet*/ 1>(mHandlers)() != mUserInput->GetValue()) {
         mUserInput->Clear();
         mUserInput->DiscardEdits();
         mUserInput->WriteText(printContinuity.GetOriginalLine());
@@ -154,15 +155,15 @@ void PrintContinuityEditor::UpdateText()
 // the show
 void PrintContinuityEditor::FlushText()
 {
-    if (!mView) {
+    if (!std::get<0>(mHandlers)) {
         return;
     }
-    auto current_sheet_num = mView->GetCurrentSheetNum();
+    auto current_sheet_num = std::get<HandleGetCurrentSheetNum>(mHandlers)();
     wxTextCtrl* text = (wxTextCtrl*)FindWindow(PrintContinuityEditor_PrintNumber);
     try {
-        if ((mUserInput->GetValue() != mView->GetSheetRawPrintContinuityOnCurrentSheet())
-            || (text->GetValue() != mView->GetSheetPrintNumberOnCurrentSheet())) {
-            mView->DoSetPrintContinuity(
+        if ((mUserInput->GetValue() != std::get</*HandleGetSheetRawPrintContinuityOnCurrentSheet*/ 1>(mHandlers)())
+            || (text->GetValue() != std::get</*HandleGetSheetPrintNumberOnCurrentSheet*/ 3>(mHandlers)())) {
+            std::get<HandlerDoSetPrintContinuity>(mHandlers)(
                 current_sheet_num, text->GetValue().utf8_string(), mUserInput->GetValue().utf8_string());
         }
     } catch (const std::runtime_error& e) {
@@ -175,10 +176,10 @@ void PrintContinuityEditor::FlushText()
 
 void PrintContinuityEditor::OnKeyPress(wxCommandEvent&)
 {
-    if (!mView) {
+    if (!std::get<0>(mHandlers)) {
         return;
     }
-    if (mView->GetSheetRawPrintContinuityOnCurrentSheet() == mUserInput->GetValue()) {
+    if (std::get</*HandlerGetSheetRawPrintContinuityOnCurrentSheet*/ 1>(mHandlers)() == mUserInput->GetValue()) {
         return;
     }
     // cache out the current text, and only after it's stopped changing do we flush it out.
@@ -191,7 +192,7 @@ void PrintContinuityEditor::OnKeyPress(wxCommandEvent&)
 
 void PrintContinuityEditor::OnSaveTimerExpired(wxTimerEvent&)
 {
-    if (!mView) {
+    if (!std::get<0>(mHandlers)) {
         return;
     }
     if (mPreviousText != mUserInput->GetValue()) {
@@ -200,7 +201,7 @@ void PrintContinuityEditor::OnSaveTimerExpired(wxTimerEvent&)
         return;
     }
     // one last check here, don't write anything out if nothing changed
-    if (mView->GetSheetRawPrintContinuityOnCurrentSheet() == mUserInput->GetValue()) {
+    if (std::get</*HandlerGetSheetRawPrintContinuityOnCurrentSheet*/ 1>(mHandlers)() == mUserInput->GetValue()) {
         return;
     }
 
@@ -209,7 +210,7 @@ void PrintContinuityEditor::OnSaveTimerExpired(wxTimerEvent&)
 
 void PrintContinuityEditor::OnNameEnter(wxCommandEvent&)
 {
-    if (!mView) {
+    if (!std::get<0>(mHandlers)) {
         return;
     }
     FlushText();
@@ -217,18 +218,18 @@ void PrintContinuityEditor::OnNameEnter(wxCommandEvent&)
 
 void PrintContinuityEditor::OnPrevious(wxCommandEvent&)
 {
-    if (!mView) {
+    if (!std::get<0>(mHandlers)) {
         return;
     }
-    mView->GoToPrevSheet();
+    std::get</*HandlerGoToPrevSheet*/ 5>(mHandlers)();
 }
 
 void PrintContinuityEditor::OnNext(wxCommandEvent&)
 {
-    if (!mView) {
+    if (!std::get<0>(mHandlers)) {
         return;
     }
-    mView->GoToNextSheet();
+    std::get</*HandlerGoToNextSheet*/ 6>(mHandlers)();
 }
 
 void PrintContinuityEditor::SetInMiniMode(bool miniMode)
@@ -244,4 +245,10 @@ void PrintContinuityEditor::OnSizeEvent(wxSizeEvent& event)
 {
     SetInMiniMode(event.m_size.y < 200);
     event.Skip();
+}
+
+void PrintContinuityEditor::SetHandlers(Handlers handlers)
+{
+    mHandlers = handlers;
+    Update();
 }

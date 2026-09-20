@@ -28,6 +28,7 @@
 
 namespace CalChart {
 class Configuration;
+class PrintContinuity;
 }
 class CalChartView;
 class PrintContinuityEditor;
@@ -44,18 +45,27 @@ class PrintContinuityEditor : public wxPanel {
     DECLARE_EVENT_TABLE()
 
 public:
-    PrintContinuityEditor(wxWindow* parent,
-        CalChart::Configuration const& config,
-        wxWindowID winid = wxID_ANY,
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxTAB_TRAVERSAL | wxNO_BORDER,
-        const wxString& name = wxPanelNameStr);
+    PrintContinuityEditor(wxWindow* parent, CalChart::Configuration const& config, wxWindowID winid = wxID_ANY,
+        const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+        long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
     ~PrintContinuityEditor() override;
 
     void OnCmdHelp(wxCommandEvent& event);
 
-    void SetView(CalChartView* view) { mView = view; }
+    using HandleGetSheetPrintContinuityOnCurrentSheet = std::function<CalChart::PrintContinuity()>;
+    using HandleGetSheetRawPrintContinuityOnCurrentSheet = std::function<std::string()>;
+    using HandleGetCurrentSheetNum = std::function<size_t()>;
+    using HandleGetSheetPrintNumberOnCurrentSheet = std::function<std::string()>;
+    using HandlerDoSetPrintContinuity = std::function<void(int, std::string const&, std::string const&)>;
+    using HandlerGoToPrevSheet = std::function<void()>;
+    using HandlerGoToNextSheet = std::function<void()>;
+
+    using Handlers
+        = std::tuple<HandleGetSheetPrintContinuityOnCurrentSheet, HandleGetSheetRawPrintContinuityOnCurrentSheet,
+            HandleGetCurrentSheetNum, HandleGetSheetPrintNumberOnCurrentSheet, HandlerDoSetPrintContinuity,
+            HandlerGoToPrevSheet, HandlerGoToNextSheet>;
+
+    void SetHandlers(Handlers handlers);
     void OnUpdate() { Update(); }
 
     void Update() override; // Refresh all window controls
@@ -73,11 +83,8 @@ public:
 private:
     void Init();
 
-    bool Create(wxWindow* parent,
-        wxWindowID winid = wxID_ANY,
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxTAB_TRAVERSAL | wxNO_BORDER,
+    bool Create(wxWindow* parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER,
         const wxString& name = wxPanelNameStr);
 
     void CreateControls();
@@ -91,6 +98,7 @@ private:
     void OnSizeEvent(wxSizeEvent& event);
 
     CalChartView* mView{};
+    Handlers mHandlers{};
     wxUI::Factory<FancyTextWin>::Proxy mUserInput{};
     wxUI::Factory<PrintContinuityPreview>::Proxy mPrintContDisplay{};
     wxTimer* mTimer{};

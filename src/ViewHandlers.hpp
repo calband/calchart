@@ -25,6 +25,7 @@
 #include "CalChartRanges.h"
 #include "ContinuityBrowser.h"
 #include "FieldThumbnailBrowser.h"
+#include "PrintContinuityEditor.h"
 
 namespace CalChart {
 class Show;
@@ -39,3 +40,5 @@ auto GetDebugContinuityHandlers(CalChart::Continuity const& plainCont, CalChart:
 auto CreateFieldThumbnailBrowserHandlers(CalChartView* view) -> FieldThumbnailBrowser::Handlers;
 
 auto CreateAnimationErrorsPanelHandlers(CalChartView* view) -> AnimationErrorsPanel::Handlers;
+
+auto CreatePrintContinuityEditorHandlers(CalChartView* view) -> PrintContinuityEditor::Handlers;
