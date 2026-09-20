@@ -26,6 +26,7 @@
 #include "CalChartConfiguration.h"
 #include "CalChartPreferences.h"
 #include "ConfigurationDebugDialog.h"
+#include "DebugAnimationErrorsPanel.hpp"
 #include "DebugContinuityBrowser.hpp"
 #include "DebugFieldThumbnailBrowser.hpp"
 #include "HelpDialog.hpp"
@@ -128,6 +129,7 @@ CalChartSplash::CalChartSplash(
                 } },
             wxUI::Item{ "Continuity Browser Playground", [this] { DebugContinuityBrowser(this, mConfig); } },
             wxUI::Item{ "Field Thumbnail Playground", [this] { DebugFieldThumbnailBrowser(this, mConfig); } },
+            wxUI::Item{ "Animation Errors Panel Playground", [this] { DebugAnimationErrorsPanel(this); } },
         },
         wxUI::Menu{
             "&Help",

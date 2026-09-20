@@ -20,6 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "AnimationErrorsPanel.h"
 #include "CalChartContinuity.h"
 #include "CalChartRanges.h"
 #include "ContinuityBrowser.h"
@@ -31,10 +32,10 @@ class Configuration;
 }
 
 auto CreateContinuityBrowserHandlers(CalChartView* view) -> ContinuityBrowser::Handlers;
-auto GetDebugContinuityHandlers(
-    CalChart::Continuity const& plainCont,
-    CalChart::Continuity const& solCont,
+auto GetDebugContinuityHandlers(CalChart::Continuity const& plainCont, CalChart::Continuity const& solCont,
     std::function<void(CalChart::SYMBOL_TYPE, CalChart::Continuity const&)> onUpdate,
     std::function<void(CalChart::SYMBOL_TYPE)> onSetSelection) -> ContinuityBrowser::Handlers;
 
 auto CreateFieldThumbnailBrowserHandlers(CalChartView* view) -> FieldThumbnailBrowser::Handlers;
+
+auto CreateAnimationErrorsPanelHandlers(CalChartView* view) -> AnimationErrorsPanel::Handlers;

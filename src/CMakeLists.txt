@@ -118,6 +118,8 @@ add_executable(
   ContinuityEditorPopup.h
   CustomListViewPanel.cpp
   CustomListViewPanel.h
+  DebugAnimationErrorsPanel.cpp
+  DebugAnimationErrorsPanel.hpp
   DebugContinuityBrowser.cpp
   DebugContinuityBrowser.hpp
   DebugFieldThumbnailBrowser.cpp

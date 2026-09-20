@@ -39,21 +39,26 @@ public:
     ~AnimationErrorsPanel() override = default;
 
     void OnUpdate(); // Refresh from the View
-    void SetView(CalChartView* view) { mView = view; }
-    auto GetView() const { return mView; }
+
+    using HandleGetAnimationErrors = std::function<std::vector<CalChart::Animate::Errors>()>;
+    using HandleGetAnimationCollisions = std::function<std::map<int, CalChart::SelectionList>()>;
+    using HandleGoToSheetAndSetSelectionList = std::function<void(size_t, CalChart::SelectionList const&)>;
+
+    using Handlers
+        = std::tuple<HandleGetAnimationErrors, HandleGetAnimationCollisions, HandleGoToSheetAndSetSelectionList>;
+
+    void SetHandlers(Handlers handlers);
 
 private:
-    void Init();
-    void CreateControls();
-
     // Event Handlers
     void OnSelectionChanged(wxTreeListEvent& event);
     void OnItemActivated(wxTreeListEvent& event);
 
     // Internals
-    void UpdateErrors(std::vector<CalChart::Animate::Errors> const& errors, std::map<int, CalChart::SelectionList> const& collisions);
+    void UpdateErrors(
+        std::vector<CalChart::Animate::Errors> const& errors, std::map<int, CalChart::SelectionList> const& collisions);
 
-    CalChartView* mView{};
+    Handlers mHandlers;
     wxUI::Factory<wxTreeListCtrl>::Proxy mTreeCtrl{};
     std::vector<CalChart::Animate::Errors> mCurrentErrors{};
     std::map<wxTreeListItem, std::tuple<int, CalChart::SelectionList>> mErrorLookup{};

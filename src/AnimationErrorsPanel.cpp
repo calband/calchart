@@ -35,19 +35,6 @@ END_EVENT_TABLE()
 AnimationErrorsPanel::AnimationErrorsPanel(wxWindow* parent)
     : super(parent)
 {
-    Init();
-    CreateControls();
-    GetSizer()->Fit(this);
-    GetSizer()->SetSizeHints(this);
-    OnUpdate();
-}
-
-void AnimationErrorsPanel::Init()
-{
-}
-
-void AnimationErrorsPanel::CreateControls()
-{
     // create a sizer and populate
     wxUI::VSizer{
         ExpandSizerFlags(),
@@ -65,44 +52,46 @@ void AnimationErrorsPanel::CreateControls()
         } }.withProxy(mTreeCtrl),
     }
         .fitTo(this);
+    OnUpdate();
 }
 
 void AnimationErrorsPanel::OnUpdate()
 {
-    if (!mView) {
+    if (!std::get<0>(mHandlers)) {
         return;
     }
 
-    auto errors = mView->GetAnimationErrors();
-    auto collisions = mView->GetAnimationCollisions();
+    auto errors = std::get<HandleGetAnimationErrors>(mHandlers)();
+    auto collisions = std::get<HandleGetAnimationCollisions>(mHandlers)();
     UpdateErrors(errors, collisions);
     Refresh();
 }
 
 void AnimationErrorsPanel::OnSelectionChanged(wxTreeListEvent& event)
 {
-    if (!mView) {
+    if (!std::get<0>(mHandlers)) {
         return;
     }
 
     if (auto error = mErrorLookup.find(event.GetItem()); error != mErrorLookup.end()) {
-        mView->GoToSheetAndSetSelectionList(std::get<0>(error->second), std::get<1>(error->second));
+        std::get<HandleGoToSheetAndSetSelectionList>(mHandlers)(std::get<0>(error->second), std::get<1>(error->second));
     }
 }
 
 void AnimationErrorsPanel::OnItemActivated(wxTreeListEvent& event)
 {
-    if (!mView) {
+    if (!std::get<0>(mHandlers)) {
         return;
     }
 
     if (auto error = mErrorLookup.find(event.GetItem()); error != mErrorLookup.end()) {
-        mView->GoToSheetAndSetSelectionList(std::get<0>(error->second), std::get<1>(error->second));
+        std::get<HandleGoToSheetAndSetSelectionList>(mHandlers)(std::get<0>(error->second), std::get<1>(error->second));
     }
 }
 
 // Implementation details
-void AnimationErrorsPanel::UpdateErrors(std::vector<CalChart::Animate::Errors> const& errors, std::map<int, CalChart::SelectionList> const& collisions)
+void AnimationErrorsPanel::UpdateErrors(
+    std::vector<CalChart::Animate::Errors> const& errors, std::map<int, CalChart::SelectionList> const& collisions)
 {
     if (errors == mCurrentErrors) {
         return;
@@ -125,9 +114,11 @@ void AnimationErrorsPanel::UpdateErrors(std::vector<CalChart::Animate::Errors> c
     // now if we have any, create an error node, and then start filling it up.
     if (allErrors.size()) {
         for (auto&& errorType : allErrors) {
-            auto itemId1 = mTreeCtrl->AppendItem(mTreeCtrl->GetRootItem(), CalChart::Animate::ErrorToString(errorType.first), 0, 0);
+            auto itemId1 = mTreeCtrl->AppendItem(
+                mTreeCtrl->GetRootItem(), CalChart::Animate::ErrorToString(errorType.first), 0, 0);
             for (auto&& error : errorType.second) {
-                auto itemId2 = mTreeCtrl->AppendItem(itemId1, std::string("Sheet ") + std::to_string(std::get<0>(error)));
+                auto itemId2
+                    = mTreeCtrl->AppendItem(itemId1, std::string("Sheet ") + std::to_string(std::get<0>(error)));
                 // now we need to be able to get back to the errors and select things
                 mErrorLookup[itemId2] = error;
             }
@@ -142,4 +133,10 @@ void AnimationErrorsPanel::UpdateErrors(std::vector<CalChart::Animate::Errors> c
             mErrorLookup[itemId2] = collision;
         }
     }
+}
+
+void AnimationErrorsPanel::SetHandlers(Handlers handlers)
+{
+    mHandlers = handlers;
+    OnUpdate();
 }
