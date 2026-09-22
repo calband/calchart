@@ -411,7 +411,7 @@ auto CalculatePointsPerLine(
 
 namespace {
     auto GeneratePrintField(CalChart::Configuration const& config, CalChart::ShowMode const& mode,
-        std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, bool landscape)
+        std::vector<std::string> const& labels, CalChart::Sheet const& sheet, bool landscape)
         -> std::tuple<double, std::vector<CalChart::Draw::DrawCommand>>
     {
         // Print the field:
@@ -425,7 +425,29 @@ namespace {
         CalChart::append(drawCmds,
             CalChart::Draw::withBrush(pointBrush,
                 CalChart::Draw::toDrawCommands(std::views::iota(0u, pts.size()) | std::views::transform([&](auto i) {
-                    return pts.at(i).GetDrawCommands(ref, labels.at(i), config);
+                    return pts.at(i).GetDrawCommands(labels.at(i), config);
+                }) | std::views::join)
+                    + printMode.Offset()));
+
+        return { static_cast<double>(printMode.Size().x), drawCmds };
+    }
+
+    auto GeneratePrintFieldForReferencePoint(CalChart::Configuration const& config, CalChart::ShowMode const& mode,
+        std::vector<std::string> const& labels, CalChart::Sheet const& sheet, unsigned ref, bool landscape)
+        -> std::tuple<double, std::vector<CalChart::Draw::DrawCommand>>
+    {
+        // Print the field:
+        // create a field for drawing:
+        const auto pts = sheet.GetAllMarchers();
+        auto boundingBox = GetMarcherBoundingBox(pts);
+        auto printMode = mode.CreateFieldForPrinting(
+            CalChart::CoordUnits2Int(boundingBox.first.x), CalChart::CoordUnits2Int(boundingBox.second.x), landscape);
+        auto drawCmds = CalChart::CreateModeDrawCommandsWithBorder(config, printMode, CalChart::HowToDraw::Printing);
+        auto pointBrush = CalChart::Brush{ CalChart::Color::Black() };
+        CalChart::append(drawCmds,
+            CalChart::Draw::withBrush(pointBrush,
+                CalChart::Draw::toDrawCommands(std::views::iota(0u, pts.size()) | std::views::transform([&](auto i) {
+                    return pts.at(i).GetRefDrawCommands(ref, labels.at(i), config);
                 }) | std::views::join)
                     + printMode.Offset()));
 
@@ -527,10 +549,10 @@ void DrawForPrintingElements(wxDC& dc, wxSize pageSize, CalChart::Sheet const& s
 }
 
 void DrawForPrintingField(wxDC& dc, wxSize pageSize, CalChart::Configuration const& config,
-    CalChart::ShowMode const& mode, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref,
+    CalChart::ShowMode const& mode, std::vector<std::string> const& labels, CalChart::Sheet const& sheet,
     bool landscape)
 {
-    auto [scale_x, fieldDrawCommand] = GeneratePrintField(config, mode, labels, sheet, ref, landscape);
+    auto [scale_x, fieldDrawCommand] = GeneratePrintField(config, mode, labels, sheet, landscape);
     // set up everything to be restored after we print
     SaveAndRestore::DeviceOrigin orig_dev(dc);
     SaveAndRestore::UserScale orig_scale(dc);
@@ -587,7 +609,7 @@ auto GenerateDrawCommands(wxDC& dc, CalChart::Configuration const& config,
 }
 
 void DrawForPrinting(wxDC* printerdc, CalChart::Configuration const& config, CalChartDoc const& show,
-    CalChart::Sheet const& sheet, int ref, bool landscape)
+    CalChart::Sheet const& sheet, bool landscape)
 {
     auto should_landscape = landscape || sheet.ShouldPrintLandscape();
     auto forced_landscape = !landscape && should_landscape;
@@ -606,7 +628,7 @@ void DrawForPrinting(wxDC* printerdc, CalChart::Configuration const& config, Cal
     DrawForPrintingElements(memdc, memdc.GetSize(), sheet, should_landscape);
     DrawForPrintingContinuity(memdc, memdc.GetSize(), config, sheet, should_landscape);
     DrawForPrintingField(
-        memdc, memdc.GetSize(), config, show.GetShowMode(), show.GetPointsLabel(), sheet, ref, should_landscape);
+        memdc, memdc.GetSize(), config, show.GetShowMode(), show.GetPointsLabel(), sheet, should_landscape);
 
     auto image = membm.ConvertToImage();
     if (forced_landscape) {

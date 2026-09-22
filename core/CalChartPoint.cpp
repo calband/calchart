@@ -159,10 +159,10 @@ Point::Point(nlohmann::json const& json)
 auto Point::SerializeHelper() const -> std::vector<std::byte>
 {
     // how many reference points are we going to write?
-    auto pointsToWrite = std::vector<unsigned>{};
-    for (auto j = 1; j <= Point::kNumRefPoints; j++) {
-        if (GetPos(j) != GetPos(0)) {
-            pointsToWrite.push_back(j);
+    auto pointsToWrite = std::set<unsigned>{};
+    for (auto j = 0; j < Point::kNumRefPoints; j++) {
+        if (GetRefPos(j) != GetPos()) {
+            pointsToWrite.insert(j);
         }
     }
     auto result = std::vector<std::byte>{};
@@ -174,11 +174,9 @@ auto Point::SerializeHelper() const -> std::vector<std::byte>
 
     // Write REF_POS
     Parser::Append(result, static_cast<uint8_t>(pointsToWrite.size()));
-    if (!pointsToWrite.empty()) {
-        for (auto j : pointsToWrite) {
-            Parser::Append(result, static_cast<uint8_t>(j));
-            Parser::Append(result, WritePositionData(GetPos(j)));
-        }
+    for (auto j : pointsToWrite) {
+        Parser::Append(result, static_cast<uint8_t>(j + 1));
+        Parser::Append(result, WritePositionData(GetRefPos(j)));
     }
 
     // Write SYMBOL
@@ -203,10 +201,10 @@ auto Point::toJSON() const -> nlohmann::json
 {
     auto ref = nlohmann::json::array();
     // find the last ref point that is different from the main point, and only serialize up to that one
-    for (auto i = kNumRefPoints; i > 0; --i) {
-        if (GetPos(i) != GetPos(0)) {
-            for (auto j = 1; j <= i; ++j) {
-                ref.push_back(nlohmann::json::array({ GetPos(j).x, GetPos(j).y }));
+    for (auto i = (kNumRefPoints - 1); i >= 0; i--) {
+        if (GetRefPos(i) != GetPos()) {
+            for (auto j = 0; j < (i + 1); j++) {
+                ref.push_back(nlohmann::json::array({ GetRefPos(j).x, GetRefPos(j).y }));
             }
             break;
         }
@@ -231,27 +229,24 @@ void Point::Flip(bool val) { mFlags.set(kPointLabelFlipped, val); };
 
 void Point::SetLabelVisibility(bool isVisible) { mFlags.set(kLabelIsInvisible, !isVisible); }
 
-auto Point::GetPos(unsigned ref) const -> Coord
+auto Point::GetPos() const -> Coord { return mPos; }
+
+void Point::SetPos(Coord c) { mPos = c; }
+
+auto Point::GetRefPos(unsigned ref) const -> Coord
 {
-    if (ref == 0) {
-        return mPos;
-    }
-    if (ref > kNumRefPoints) {
+    if (ref >= kNumRefPoints) {
         throw std::range_error("GetPos() point out of range");
     }
-    return mRef.at(ref - 1);
+    return mRef.at(ref);
 }
 
-void Point::SetPos(Coord c, unsigned ref)
+void Point::SetRefPos(Coord c, unsigned ref)
 {
-    if (ref == 0) {
-        mPos = c;
-        return;
-    }
-    if (ref > kNumRefPoints) {
+    if (ref >= kNumRefPoints) {
         throw std::range_error("SetRefPos() point out of range");
     }
-    mRef.at(ref - 1) = c;
+    mRef.at(ref) = c;
 }
 
 void Point::SetSymbol(SYMBOL_TYPE s) { mSym = s; }
@@ -338,16 +333,10 @@ namespace {
     }
 }
 
-auto Point::GetDrawCommands(unsigned ref, std::string const& label, double dotRatio, double pLineRatio,
-    double sLineRatio) const -> std::vector<Draw::DrawCommand>
-{
-    return CreatePoint(*this, GetSymbol(), label, dotRatio, pLineRatio, sLineRatio) + GetPos(ref);
-}
-
-auto Point::GetDrawCommands(unsigned ref, std::string const& label, Configuration const& config) const
+auto Point::GetDrawCommands(std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) const
     -> std::vector<Draw::DrawCommand>
 {
-    return GetDrawCommands(ref, label, config.Get_DotRatio(), config.Get_PLineRatio(), config.Get_SLineRatio());
+    return CreatePoint(*this, GetSymbol(), label, dotRatio, pLineRatio, sLineRatio) + GetPos();
 }
 
 auto Point::GetDrawCommands(std::string const& label, Configuration const& config) const
@@ -359,12 +348,24 @@ auto Point::GetDrawCommands(std::string const& label, Configuration const& confi
 auto Point::GetDrawCommands(double dotRatio, double pLineRatio, double sLineRatio) const
     -> std::vector<Draw::DrawCommand>
 {
-    return CreatePoint(GetSymbol(), dotRatio, pLineRatio, sLineRatio) + GetPos(0);
+    return CreatePoint(GetSymbol(), dotRatio, pLineRatio, sLineRatio) + GetPos();
 }
 
 auto Point::GetDrawCommands(Configuration const& config) const -> std::vector<Draw::DrawCommand>
 {
     return GetDrawCommands(config.Get_DotRatio(), config.Get_PLineRatio(), config.Get_SLineRatio());
+}
+
+auto Point::GetRefDrawCommands(unsigned ref, std::string const& label, double dotRatio, double pLineRatio,
+    double sLineRatio) const -> std::vector<Draw::DrawCommand>
+{
+    return CreatePoint(*this, GetSymbol(), label, dotRatio, pLineRatio, sLineRatio) + GetRefPos(ref);
+}
+
+auto Point::GetRefDrawCommands(unsigned ref, std::string const& label, Configuration const& config) const
+    -> std::vector<Draw::DrawCommand>
+{
+    return GetRefDrawCommands(ref, label, config.Get_DotRatio(), config.Get_PLineRatio(), config.Get_SLineRatio());
 }
 
 }

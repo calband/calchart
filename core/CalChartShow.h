@@ -113,15 +113,19 @@ public:
         -> Show_command_pair;
     [[nodiscard]] auto Create_SetPrintableContinuity(
         std::map<int, std::pair<std::string, std::string>> const& data) const -> Show_command_pair;
-    [[nodiscard]] auto Create_MovePointsCommand(MarcherToPosition const& new_positions, int ref) const
+    [[nodiscard]] auto Create_MovePointsCommand(MarcherToPosition const& new_positions) const -> Show_command_pair;
+    [[nodiscard]] auto Create_MovePointsCommand(int whichSheet, MarcherToPosition const& new_positions) const
         -> Show_command_pair;
-    [[nodiscard]] auto Create_MovePointsCommand(int whichSheet, MarcherToPosition const& new_positions, int ref) const
+    [[nodiscard]] auto Create_MoveRefPointsCommand(MarcherToPosition const& new_positions, unsigned ref) const
         -> Show_command_pair;
+    [[nodiscard]] auto Create_MoveRefPointsCommand(
+        int whichSheet, MarcherToPosition const& new_positions, unsigned ref) const -> Show_command_pair;
     [[nodiscard]] auto Create_AssignPointsToCurve(size_t whichCurve, std::vector<MarcherIndex> whichMarchers)
         -> Show_command_pair;
     [[nodiscard]] auto Create_DeletePointsCommand() const -> Show_command_pair;
-    [[nodiscard]] auto Create_RotatePointPositionsCommand(int rotateAmount, int ref) const -> Show_command_pair;
-    [[nodiscard]] auto Create_ResetReferencePointToRef0(int ref) const -> Show_command_pair;
+    [[nodiscard]] auto Create_RotatePointPositionsCommand(int rotateAmount) const -> Show_command_pair;
+    [[nodiscard]] auto Create_RotateRefPointPositionsCommand(int rotateAmount, unsigned ref) const -> Show_command_pair;
+    [[nodiscard]] auto Create_ResetReferencePointToRef0(unsigned ref) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetSymbolCommand(SYMBOL_TYPE sym) const -> Show_command_pair;
     [[nodiscard]] auto Create_SetSymbolCommand(SelectionList const& whichDots, SYMBOL_TYPE sym) const
         -> Show_command_pair;
@@ -150,7 +154,7 @@ public:
     [[nodiscard]] auto GetCurrentSheetNum() const -> size_t;
     [[nodiscard]] auto GetShowMode() const -> ShowMode const&;
     [[nodiscard]] auto GetNumPoints() const -> size_t;
-    [[nodiscard]] auto GetCurrentReferencePoint() const -> int;
+    [[nodiscard]] auto GetCurrentReferencePoint() const -> std::optional<unsigned>;
 
     // Sheet copying
     [[nodiscard]] auto CopySheet(size_t sheet) const -> Sheet;
@@ -255,10 +259,14 @@ public:
         -> std::vector<CalChart::MarcherIndex>;
 
     // Marcher position
-    [[nodiscard]] auto GetMarcherPosition(size_t sheet, MarcherIndex i, unsigned ref = 0) const -> Coord;
-    [[nodiscard]] auto GetMarcherPositionOnCurrentSheet(MarcherIndex i, unsigned ref = 0) const -> Coord;
-    [[nodiscard]] auto GetAllMarcherPositions(size_t sheet, unsigned ref = 0) const -> std::vector<Coord>;
-    [[nodiscard]] auto GetAllMarcherPositionsOnCurrentSheet(unsigned ref = 0) const -> std::vector<Coord>;
+    [[nodiscard]] auto GetMarcherPosition(size_t sheet, MarcherIndex i) const -> Coord;
+    [[nodiscard]] auto GetMarcherPositionOnCurrentSheet(MarcherIndex i) const -> Coord;
+    [[nodiscard]] auto GetAllMarcherPositions(size_t sheet) const -> std::vector<Coord>;
+    [[nodiscard]] auto GetAllMarcherPositionsOnCurrentSheet() const -> std::vector<Coord>;
+    [[nodiscard]] auto GetMarcherRefPosition(size_t sheet, MarcherIndex i, unsigned ref) const -> Coord;
+    [[nodiscard]] auto GetMarcherRefPositionOnCurrentSheet(MarcherIndex i, unsigned ref) const -> Coord;
+    [[nodiscard]] auto GetAllMarcherRefPositions(size_t sheet, unsigned ref) const -> std::vector<Coord>;
+    [[nodiscard]] auto GetAllMarcherRefPositionsOnCurrentSheet(unsigned ref) const -> std::vector<Coord>;
 
     // Find marcher
     [[nodiscard]] auto FindMarcher(size_t sheet, Coord where, Coord::units searchBounds) const
@@ -304,7 +312,9 @@ public:
     [[nodiscard]] auto MakeAddToSelection(SelectionList const& sl) const -> SelectionList;
     [[nodiscard]] auto MakeRemoveFromSelection(SelectionList const& sl) const -> SelectionList;
     [[nodiscard]] auto MakeToggleSelection(SelectionList const& sl) const -> SelectionList;
-    [[nodiscard]] auto MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon, int ref) const -> SelectionList;
+    [[nodiscard]] auto MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon) const -> SelectionList;
+    [[nodiscard]] auto MakeRefSelectWithinPolygon(CalChart::RawPolygon_t const& polygon, unsigned ref) const
+        -> SelectionList;
     [[nodiscard]] auto MakeSelectBySymbol(SYMBOL_TYPE i) const -> SelectionList;
     [[nodiscard]] auto MakeSelectByInstrument(std::string const& instrumentName) const -> SelectionList;
     [[nodiscard]] auto MakeSelectByLabel(std::string const& labelName) const -> SelectionList;
@@ -322,7 +332,8 @@ public:
     // Point selection
     [[nodiscard]] auto IsSelected(MarcherIndex i) const { return mSelectionList.contains(i); }
     [[nodiscard]] auto GetSelectionList() const { return mSelectionList; }
-    [[nodiscard]] auto WillMovePoints(MarcherToPosition const& new_positions, int ref) const -> bool;
+    [[nodiscard]] auto WillMovePoints(MarcherToPosition const& new_positions) const -> bool;
+    [[nodiscard]] auto WillMoveRefPoints(MarcherToPosition const& new_positions, int ref) const -> bool;
 
     // Transition Solver
     [[nodiscard]] auto validateCurrentSheetForTransitionSolver() const -> std::vector<std::string>;
@@ -345,7 +356,9 @@ public:
     [[nodiscard]] auto SerializeShow() const -> std::vector<std::byte>;
 
     // Draw commands
-    [[nodiscard]] auto GenerateSheetElements(CalChart::Configuration const& config, int ref) const
+    [[nodiscard]] auto GenerateSheetElements(CalChart::Configuration const& config) const
+        -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateSheetElementsForReferencePoint(CalChart::Configuration const& config, unsigned ref) const
         -> std::vector<CalChart::Draw::DrawCommand>;
 
     [[nodiscard]] auto GeneratePhantomPointsDrawCommands(CalChart::Configuration const& config,
@@ -360,7 +373,10 @@ public:
         -> std::vector<std::vector<CalChart::Draw::DrawCommand>>;
 
     // modify per edit session
-    void SetCurrentReferencePoint(int currentReferencePoint) { mCurrentReferencePoint = currentReferencePoint; }
+    void SetCurrentReferencePoint(std::optional<unsigned> currentReferencePoint)
+    {
+        mCurrentReferencePoint = currentReferencePoint;
+    }
 
 private:
     // modification of show is private, and externally done through create and exeucte commands
@@ -400,7 +416,7 @@ private:
     size_t mSheetNum{};
 
     // reset every time we open
-    int mCurrentReferencePoint{};
+    std::optional<unsigned> mCurrentReferencePoint{};
 };
 
 }

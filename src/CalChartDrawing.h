@@ -52,37 +52,23 @@ class CalChartDoc;
 namespace CalChartDraw {
 
 // draw the continuity starting at a specific offset
-void DrawCont(wxDC& dc, CalChart::Configuration const& config, CalChart::Textline_list const& print_continuity, wxRect const& bounding, bool landscape);
+void DrawCont(wxDC& dc, CalChart::Configuration const& config, CalChart::Textline_list const& print_continuity,
+    wxRect const& bounding, bool landscape);
 
-auto GenerateDrawCommands(wxDC& dc,
-    CalChart::Configuration const& config,
-    CalChart::PrintContinuityLayout::VStack const& printLayout,
-    wxRect const& bounding,
-    bool landscape) -> CalChart::Draw::DrawCommand;
+auto GenerateDrawCommands(wxDC& dc, CalChart::Configuration const& config,
+    CalChart::PrintContinuityLayout::VStack const& printLayout, wxRect const& bounding, bool landscape)
+    -> CalChart::Draw::DrawCommand;
 
-void DrawForPrinting(wxDC* dc, CalChart::Configuration const& config, CalChartDoc const& show, CalChart::Sheet const& sheet, int ref, bool landscape);
+void DrawForPrinting(wxDC* dc, CalChart::Configuration const& config, CalChartDoc const& show,
+    CalChart::Sheet const& sheet, bool landscape);
 
 void DrawForPrintingContinuity(
-    wxDC& dc,
-    wxSize pageSize,
-    CalChart::Configuration const& config,
-    CalChart::Sheet const& sheet,
-    bool landscape);
+    wxDC& dc, wxSize pageSize, CalChart::Configuration const& config, CalChart::Sheet const& sheet, bool landscape);
 
-void DrawForPrintingElements(
-    wxDC& dc,
-    wxSize pageSize,
-    CalChart::Sheet const& sheet,
-    bool landscape);
+void DrawForPrintingElements(wxDC& dc, wxSize pageSize, CalChart::Sheet const& sheet, bool landscape);
 
-void DrawForPrintingField(
-    wxDC& dc,
-    wxSize pageSize,
-    CalChart::Configuration const& config,
-    CalChart::ShowMode const& mode,
-    std::vector<std::string> const& labels,
-    CalChart::Sheet const& sheet,
-    int ref,
+void DrawForPrintingField(wxDC& dc, wxSize pageSize, CalChart::Configuration const& config,
+    CalChart::ShowMode const& mode, std::vector<std::string> const& labels, CalChart::Sheet const& sheet,
     bool landscape);
 
 }

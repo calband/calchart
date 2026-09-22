@@ -16,8 +16,8 @@ struct Point_values {
 
 auto Check_Point(Point const& underTest, Point_values const& values) -> bool
 {
-    return underTest.GetPos() == values.mPos && underTest.GetPos(1) == values.mRef.at(0)
-        && underTest.GetPos(2) == values.mRef.at(1) && underTest.GetPos(3) == values.mRef.at(2)
+    return underTest.GetPos() == values.mPos && underTest.GetRefPos(0) == values.mRef.at(0)
+        && underTest.GetRefPos(1) == values.mRef.at(1) && underTest.GetRefPos(2) == values.mRef.at(2)
         && underTest.GetSymbol() == values.mSym && underTest.GetFlip() == values.GetFlip
         && underTest.LabelIsVisible() == values.Visable;
 }
@@ -61,9 +61,9 @@ TEST_CASE("CalChartPointTests")
     SECTION("JSON round trip")
     {
         underTest.SetPos(Coord{ 16, 32 });
-        underTest.SetPos(Coord{ 48, 64 }, 1);
-        underTest.SetPos(Coord{ 80, 96 }, 2);
-        underTest.SetPos(Coord{ 112, 128 }, 3);
+        underTest.SetRefPos(Coord{ 48, 64 }, 0);
+        underTest.SetRefPos(Coord{ 80, 96 }, 1);
+        underTest.SetRefPos(Coord{ 112, 128 }, 2);
         underTest.SetSymbol(SYMBOL_SOLX);
         underTest.Flip(true);
         underTest.SetLabelVisibility(false);
@@ -75,9 +75,9 @@ TEST_CASE("CalChartPointTests")
         auto const fromJson = Point(json);
 
         CHECK(fromJson.GetPos() == underTest.GetPos());
-        CHECK(fromJson.GetPos(1) == underTest.GetPos(1));
-        CHECK(fromJson.GetPos(2) == underTest.GetPos(2));
-        CHECK(fromJson.GetPos(3) == underTest.GetPos(3));
+        CHECK(fromJson.GetRefPos(0) == underTest.GetRefPos(0));
+        CHECK(fromJson.GetRefPos(1) == underTest.GetRefPos(1));
+        CHECK(fromJson.GetRefPos(2) == underTest.GetRefPos(2));
         CHECK(fromJson.GetSymbol() == underTest.GetSymbol());
         CHECK(fromJson.GetFlip() == underTest.GetFlip());
         CHECK(fromJson.LabelIsVisible() == underTest.LabelIsVisible());
@@ -153,9 +153,9 @@ TEST_CASE("CalChartPointTests")
 
         auto const fromJson = Point(floatingPointJson);
         CHECK(fromJson.GetPos() == Coord{ 16, 32 });
-        CHECK(fromJson.GetPos(1) == Coord{ 48, 64 });
-        CHECK(fromJson.GetPos(2) == Coord{ 81, 96 });
-        CHECK(fromJson.GetPos(3) == Coord{ 112, 128 });
+        CHECK(fromJson.GetRefPos(0) == Coord{ 48, 64 });
+        CHECK(fromJson.GetRefPos(1) == Coord{ 81, 96 });
+        CHECK(fromJson.GetRefPos(2) == Coord{ 112, 128 });
         CHECK(fromJson.GetSymbol() == SYMBOL_X);
         CHECK(fromJson.GetFlip());
         CHECK_FALSE(fromJson.LabelIsVisible());

@@ -267,17 +267,17 @@ public:
     }
 
     // Marcher position
-    [[nodiscard]] auto GetMarcherPositionOnCurrentSheet(CalChart::MarcherIndex i, unsigned ref = 0) const
+    [[nodiscard]] auto GetMarcherPositionOnCurrentSheet(CalChart::MarcherIndex i) const
     {
-        return mShow->GetMarcherPositionOnCurrentSheet(i, ref);
+        if (auto ref = mShow->GetCurrentReferencePoint(); ref.has_value()) {
+            return mShow->GetMarcherRefPositionOnCurrentSheet(i, *ref);
+        }
+        return mShow->GetMarcherPositionOnCurrentSheet(i);
     }
-    [[nodiscard]] auto GetAllMarcherPositions(size_t sheet, unsigned ref = 0) const
+    [[nodiscard]] auto GetAllMarcherPositions(size_t sheet) const { return mShow->GetAllMarcherPositions(sheet); }
+    [[nodiscard]] auto GetAllMarcherPositionsOnCurrentSheet() const
     {
-        return mShow->GetAllMarcherPositions(sheet, ref);
-    }
-    [[nodiscard]] auto GetAllMarcherPositionsOnCurrentSheet(unsigned ref = 0) const
-    {
-        return mShow->GetAllMarcherPositionsOnCurrentSheet(ref);
+        return mShow->GetAllMarcherPositionsOnCurrentSheet();
     }
 
     // Find marcher
@@ -347,7 +347,10 @@ public:
     }
     [[nodiscard]] auto MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon) const
     {
-        return mShow->MakeSelectWithinPolygon(polygon, mShow->GetCurrentReferencePoint());
+        if (auto ref = mShow->GetCurrentReferencePoint(); ref.has_value()) {
+            return mShow->MakeRefSelectWithinPolygon(polygon, *ref);
+        }
+        return mShow->MakeSelectWithinPolygon(polygon);
     }
     [[nodiscard]] auto MakeSelectBySymbol(CalChart::SYMBOL_TYPE symbol) const
     {
@@ -372,7 +375,7 @@ public:
 
     [[nodiscard]] auto GetSelect() const { return mSelect; }
     void SetSelect(CalChart::Select select);
-    void SetCurrentReferencePoint(int currentReferencePoint);
+    void SetCurrentReferencePoint(std::optional<unsigned> currentReferencePoint);
     [[nodiscard]] auto GetDrawPaths() const { return mDrawPaths; }
     void SetDrawPaths(bool drawPaths);
     [[nodiscard]] auto GetDrawBackground() const { return mDrawBackground; }
@@ -423,7 +426,10 @@ public:
 
     [[nodiscard]] auto WillMovePoints(CalChart::MarcherToPosition const& new_positions) const
     {
-        return mShow->WillMovePoints(new_positions, mShow->GetCurrentReferencePoint());
+        if (auto ref = mShow->GetCurrentReferencePoint(); ref.has_value()) {
+            return mShow->WillMoveRefPoints(new_positions, *ref);
+        }
+        return mShow->WillMovePoints(new_positions);
     }
     [[nodiscard]] auto PrintToPS(bool overview, int min_yards, std::set<size_t> const& isPicked,
         CalChart::Configuration const& config_) const -> std::tuple<std::string, int>;

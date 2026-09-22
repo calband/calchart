@@ -857,7 +857,10 @@ RefPoint::RefPoint(unsigned n)
 {
 }
 
-Coord RefPoint::Get(Animate::Compile const& anim) const { return anim.GetReferencePointPosition(refnum); }
+Coord RefPoint::Get(Animate::Compile const& anim) const
+{
+    return refnum == 0 ? anim.GetStartingPosition() : anim.GetReferencePointPosition(refnum - 1);
+}
 
 auto RefPoint::ToString() const -> std::string { return std::format("{}[CRP]Ref Point {}", super::ToString(), refnum); }
 

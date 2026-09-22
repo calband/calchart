@@ -522,7 +522,7 @@ void CalChartView::GoToSheet(size_t which)
     }
 }
 
-void CalChartView::SetActiveReferencePoint(int which) { mShow->SetCurrentReferencePoint(which); }
+void CalChartView::SetActiveReferencePoint(std::optional<unsigned> which) { mShow->SetCurrentReferencePoint(which); }
 
 // toggle selection means toggle it as selected to unselected
 // otherwise, always select it

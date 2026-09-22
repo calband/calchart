@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import json
 import os
 import subprocess
 import tempfile
@@ -23,6 +24,7 @@ def parse_arguments():
     parser.add_argument("-c", "--calchart_cmd", help="The path for calchart_cmd (optional, defaults to ./build/tools/calchart_cmd/calchart_cmd)")
     parser.add_argument("-s", "--show-schema", help="Path to the show schema (optional, defaults to resources/common/show_schema_v1.json)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
+    parser.add_argument("-j", "--jobs", type=int, help="Maximum number of files to test in parallel (default: CPU count)")
     return parser.parse_args()
 
 def test_json_roundtrip(command_location, file_path, schema_path):
@@ -49,99 +51,93 @@ def test_json_roundtrip(command_location, file_path, schema_path):
         
         # File can be opened, now try to export to JSON
         # Create temporary files for the two JSON outputs
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tmp1, \
-             tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tmp2:
-            tmp1_path = tmp1.name
-            tmp2_path = tmp2.name
+        with tempfile.TemporaryDirectory() as temp_dir:
+            tmp1_path = os.path.join(temp_dir, 'first.json')
+            tmp2_path = os.path.join(temp_dir, 'second.json')
 
-        # First conversion: .shw -> JSON
-        command1 = [command_location, "parse", file_path, "--showjson", "--showschema", schema_path, "--jsonwidth=0"]
-        if Debug:
-            print(f"Running: {' '.join(command1)}")
-        
-        result1 = subprocess.run(command1, capture_output=True, text=True)
-        if result1.returncode != 0:
-            return ('json_export_failed', f"JSON export failed: {result1.stderr[:200]}")
-        
-        # Verify the first output is valid JSON
-        try:
-            import json
-            json1 = json.loads(result1.stdout)
-        except json.JSONDecodeError as e:
-            return ('json_invalid', f"toJSON() did not produce valid JSON: {e}")
-        
-        with open(tmp1_path, 'w') as f:
-            f.write(result1.stdout)
-
-        # Second conversion: JSON -> JSON
-        command2 = [command_location, "parse", tmp1_path, "--showjson", "--showschema", schema_path, "--jsonwidth=0"]
-        if Debug:
-            print(f"Running: {' '.join(command2)}")
-        
-        result2 = subprocess.run(command2, capture_output=True, text=True)
-        if result2.returncode != 0:
-            return ('json_export_failed', f"Second JSON export failed: {result2.stderr[:200]}")
-        
-        # Verify the second output is valid JSON
-        try:
-            json2 = json.loads(result2.stdout)
-        except json.JSONDecodeError as e:
-            return ('json_invalid', f"Second conversion did not produce valid JSON: {e}")
-        
-        with open(tmp2_path, 'w') as f:
-            f.write(result2.stdout)
-
-        # Compare the two JSON objects (not just text)
-        if json1 != json2:
-            # Try to identify specific differences
-            def find_diff(obj1, obj2, path=""):
-                """Recursively find differences between two JSON objects"""
-                if type(obj1) != type(obj2):
-                    return f"Type mismatch at {path}: {type(obj1).__name__} vs {type(obj2).__name__}"
-                
-                if isinstance(obj1, dict):
-                    keys1 = set(obj1.keys())
-                    keys2 = set(obj2.keys())
-                    if keys1 != keys2:
-                        missing = keys1 - keys2
-                        extra = keys2 - keys1
-                        msg = []
-                        if missing:
-                            msg.append(f"Missing keys in second: {missing}")
-                        if extra:
-                            msg.append(f"Extra keys in second: {extra}")
-                        return f"Key mismatch at {path}: {', '.join(msg)}"
-                    
-                    for key in keys1:
-                        diff = find_diff(obj1[key], obj2[key], f"{path}.{key}" if path else key)
-                        if diff:
-                            return diff
-                
-                elif isinstance(obj1, list):
-                    if len(obj1) != len(obj2):
-                        return f"Array length mismatch at {path}: {len(obj1)} vs {len(obj2)}"
-                    
-                    for i, (item1, item2) in enumerate(zip(obj1, obj2)):
-                        diff = find_diff(item1, item2, f"{path}[{i}]")
-                        if diff:
-                            return diff
-                
-                elif obj1 != obj2:
-                    # Truncate long values for readability
-                    val1_str = str(obj1)[:100]
-                    val2_str = str(obj2)[:100]
-                    return f"Value mismatch at {path}: {val1_str} vs {val2_str}"
-                
-                return None
+            # First conversion: .shw -> JSON
+            command1 = [command_location, "parse", file_path, "--showjson", "--showschema", schema_path, "--jsonwidth=0"]
+            if Debug:
+                print(f"Running: {' '.join(command1)}")
             
-            diff_msg = find_diff(json1, json2)
-            return ('roundtrip_failed', f"JSON objects differ: {diff_msg}")
+            result1 = subprocess.run(command1, capture_output=True, text=True)
+            if result1.returncode != 0:
+                return ('json_export_failed', f"JSON export failed: {result1.stderr[:200]}")
+            
+            # Verify the first output is valid JSON
+            try:
+                json1 = json.loads(result1.stdout)
+            except json.JSONDecodeError as e:
+                return ('json_invalid', f"toJSON() did not produce valid JSON: {e}")
+            
+            with open(tmp1_path, 'w') as f:
+                f.write(result1.stdout)
 
-        # Clean up temporary files
-        os.unlink(tmp1_path)
-        os.unlink(tmp2_path)
-        
-        return ('success', None)
+            # Second conversion: JSON -> JSON
+            command2 = [command_location, "parse", tmp1_path, "--showjson", "--showschema", schema_path, "--jsonwidth=0"]
+            if Debug:
+                print(f"Running: {' '.join(command2)}")
+            
+            result2 = subprocess.run(command2, capture_output=True, text=True)
+            if result2.returncode != 0:
+                return ('json_export_failed', f"Second JSON export failed: {result2.stderr[:200]}")
+            
+            # Verify the second output is valid JSON
+            try:
+                json2 = json.loads(result2.stdout)
+            except json.JSONDecodeError as e:
+                return ('json_invalid', f"Second conversion did not produce valid JSON: {e}")
+            
+            with open(tmp2_path, 'w') as f:
+                f.write(result2.stdout)
+
+            # Compare the two JSON objects (not just text)
+            if json1 != json2:
+                # Try to identify specific differences
+                def find_diff(obj1, obj2, path=""):
+                    """Recursively find differences between two JSON objects"""
+                    if type(obj1) != type(obj2):
+                        return f"Type mismatch at {path}: {type(obj1).__name__} vs {type(obj2).__name__}"
+                    
+                    if isinstance(obj1, dict):
+                        keys1 = set(obj1.keys())
+                        keys2 = set(obj2.keys())
+                        if keys1 != keys2:
+                            missing = keys1 - keys2
+                            extra = keys2 - keys1
+                            msg = []
+                            if missing:
+                                msg.append(f"Missing keys in second: {missing}")
+                            if extra:
+                                msg.append(f"Extra keys in second: {extra}")
+                            return f"Key mismatch at {path}: {', '.join(msg)}"
+                        
+                        for key in keys1:
+                            diff = find_diff(obj1[key], obj2[key], f"{path}.{key}" if path else key)
+                            if diff:
+                                return diff
+                    
+                    elif isinstance(obj1, list):
+                        if len(obj1) != len(obj2):
+                            return f"Array length mismatch at {path}: {len(obj1)} vs {len(obj2)}"
+                        
+                        for i, (item1, item2) in enumerate(zip(obj1, obj2)):
+                            diff = find_diff(item1, item2, f"{path}[{i}]")
+                            if diff:
+                                return diff
+                    
+                    elif obj1 != obj2:
+                        # Truncate long values for readability
+                        val1_str = str(obj1)[:100]
+                        val2_str = str(obj2)[:100]
+                        return f"Value mismatch at {path}: {val1_str} vs {val2_str}"
+                    
+                    return None
+                
+                diff_msg = find_diff(json1, json2)
+                return ('roundtrip_failed', f"JSON objects differ: {diff_msg}")
+
+            return ('success', None)
 
     except Exception as e:
         return ('error', f"Exception: {str(e)}")
@@ -191,11 +187,15 @@ def main():
 
     print(f"Found {len(shw_files)} show files to test")
 
-    # Process files in parallel
-    num_cores = multiprocessing.cpu_count()
+    # Process files in parallel, but do not create idle workers for an empty queue.
+    if args.jobs is not None and args.jobs < 1:
+        print("Error: --jobs must be at least 1")
+        sys.exit(1)
+    num_cores = args.jobs if args.jobs is not None else multiprocessing.cpu_count()
+    num_workers = min(num_cores, len(shw_files))
     pool_args = [(calchart_cmd, file_path, schema_path) for file_path in shw_files]
     
-    with multiprocessing.Pool(processes=num_cores) as pool:
+    with multiprocessing.Pool(processes=num_workers) as pool:
         results = pool.map(process_file, pool_args)
 
     # Analyze results

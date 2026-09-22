@@ -39,13 +39,12 @@ static constexpr double kSizeXLandscape = 917, kSizeYLandscape = 720;
 static constexpr auto kAspectRatio = kSizeX / kSizeY;
 static constexpr auto kAspectRatioLandscape = kSizeXLandscape / kSizeYLandscape;
 
-static constexpr auto DefaultText
-    = "~This is a centered line of text\n"
-      "Normal \\bsBold \\isBold+Italics \\beItalics \\ieNormal\n"
-      "All the symbols with two tabs\n"
-      "\t\t\\po:\tplainman\n"
-      "\t\t\\sx:\tsolidxman\n"
-      "";
+static constexpr auto DefaultText = "~This is a centered line of text\n"
+                                    "Normal \\bsBold \\isBold+Italics \\beItalics \\ieNormal\n"
+                                    "All the symbols with two tabs\n"
+                                    "\t\t\\po:\tplainman\n"
+                                    "\t\t\\sx:\tsolidxman\n"
+                                    "";
 
 PrintingPreview::PrintingPreview(wxWindow* parent, CalChart::Configuration const& config)
     : super(config, parent, wxID_ANY, wxDefaultPosition, wxSize(kSizeX, kSizeY / 2))
@@ -82,14 +81,7 @@ void PrintingPreview::OnPaint(wxPaintEvent&)
     CalChartDraw::DrawForPrintingContinuity(dc, virtSize, mConfig, sheet, mLandscape);
     CalChartDraw::DrawForPrintingElements(dc, virtSize, sheet, mLandscape);
     CalChartDraw::DrawForPrintingField(
-        dc,
-        virtSize,
-        mConfig,
-        CalChart::ShowMode::GetDefaultShowMode(),
-        mShow->GetPointsLabel(),
-        sheet,
-        0,
-        mLandscape);
+        dc, virtSize, mConfig, CalChart::ShowMode::GetDefaultShowMode(), mShow->GetPointsLabel(), sheet, mLandscape);
 }
 
 void PrintingPreview::SetOrientation(bool landscape)

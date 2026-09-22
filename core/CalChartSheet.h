@@ -118,14 +118,20 @@ public:
     [[nodiscard]] auto GetNumberPoints() const { return mPoints.size(); }
     [[nodiscard]] auto GetSymbols() const -> std::vector<SYMBOL_TYPE>;
     void SetPoints(std::vector<Point> const& points);
-    [[nodiscard]] auto FindMarcher(Coord where, Coord::units searchBound, unsigned ref = 0) const
+    [[nodiscard]] auto FindMarcher(Coord where, Coord::units searchBound) const -> std::optional<MarcherIndex>;
+    [[nodiscard]] auto FindMarcherRef(Coord where, Coord::units searchBound, unsigned ref) const
         -> std::optional<MarcherIndex>;
     [[nodiscard]] auto RemapPoints(std::vector<MarcherIndex> const& table) const -> std::vector<Point>;
-    [[nodiscard]] auto GetMarcherPosition(MarcherIndex i, unsigned ref = 0) const -> Coord;
-    [[nodiscard]] auto GetAllMarcherPositions(unsigned ref = 0) const -> std::vector<Coord>;
+
+    [[nodiscard]] auto GetMarcherPosition(MarcherIndex i) const -> Coord;
+    [[nodiscard]] auto GetAllMarcherPositions() const -> std::vector<Coord>;
+
+    [[nodiscard]] auto GetMarcherRefPosition(MarcherIndex i, unsigned ref) const -> Coord;
+    [[nodiscard]] auto GetAllMarcherRefPositions(unsigned ref) const -> std::vector<Coord>;
+
     void SetMarchers(std::vector<Point> const& points);
-    void SetAllPositions(Coord val, unsigned i);
-    void SetPosition(Coord val, MarcherIndex i, unsigned ref = 0);
+    void SetPosition(Coord val, MarcherIndex i);
+    void SetRefPosition(Coord val, MarcherIndex i, unsigned ref);
     void SetMarcherFlip(MarcherIndex i, bool val);
     void SetMarcherLabelVisibility(MarcherIndex i, bool isVisible);
     [[nodiscard]] auto MakeSelectPointsBySymbol(SYMBOL_TYPE i) const -> SelectionList;
@@ -195,7 +201,9 @@ public:
     [[nodiscard]] auto GenerateGhostElements(CalChart::Configuration const& config, SelectionList const& selected,
         std::vector<std::string> const& marcherLabels) const -> std::vector<CalChart::Draw::DrawCommand>;
     [[nodiscard]] auto GenerateSheetElements(CalChart::Configuration const& config, SelectionList const& selected,
-        std::vector<std::string> const& marcherLabels, int referencePoint) const
+        std::vector<std::string> const& marcherLabels) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateSheetElementsForReferencePoint(CalChart::Configuration const& config,
+        SelectionList const& selected, std::vector<std::string> const& marcherLabels, unsigned referencePoint) const
         -> std::vector<CalChart::Draw::DrawCommand>;
 
 private:
@@ -210,7 +218,8 @@ private:
     std::vector<std::pair<Curve, std::vector<MarcherIndex>>> mCurves; // curves and the points assigned to them.
 
     void RepositionCurveMarchers();
-    void SetPositionHelper(Coord val, MarcherIndex i, unsigned ref = 0);
+    void SetPositionHelper(Coord val, MarcherIndex i);
+    void SetRefPositionHelper(Coord val, MarcherIndex i, unsigned ref);
     void UnassignMarchersFromAnyCurve(std::vector<MarcherIndex> marchers);
 };
 

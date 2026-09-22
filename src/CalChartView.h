@@ -83,7 +83,10 @@ public:
     [[nodiscard]] auto FindMarcher(CalChart::Coord pos) const { return mShow->FindMarcher(pos); }
     [[nodiscard]] auto FindCurveControlPoint(CalChart::Coord pos) const { return mShow->FindCurveControlPoint(pos); }
     [[nodiscard]] auto FindCurve(CalChart::Coord pos) const { return mShow->FindCurve(pos); }
-    [[nodiscard]] auto PointPosition(CalChart::MarcherIndex which) const { return mShow->GetMarcherPositionOnCurrentSheet(which, mShow->GetCurrentReferencePoint()); }
+    [[nodiscard]] auto PointPosition(CalChart::MarcherIndex which) const
+    {
+        return mShow->GetMarcherPositionOnCurrentSheet(which);
+    }
     [[nodiscard]] auto GetCurrentSheetNum() const { return (mShow != nullptr) ? mShow->GetCurrentSheetNum() : 0; }
     [[nodiscard]] auto GetNumSheets() const -> size_t { return (mShow != nullptr) ? mShow->GetNumSheets() : 0; }
     [[nodiscard]] auto GetNumPoints() const -> size_t { return (mShow != nullptr) ? mShow->GetNumPoints() : 0; }
@@ -92,15 +95,24 @@ public:
     [[nodiscard]] auto GetShowFieldSize() const { return mShow->GetShowMode().FieldSize(); }
     [[nodiscard]] auto GetSheetsName() const { return mShow->GetSheetsName(); }
     [[nodiscard]] auto GetSheetPrintNumberOnCurrentSheet() const { return mShow->GetSheetPrintNumberOnCurrentSheet(); }
-    [[nodiscard]] auto GetSheetRawPrintContinuityOnCurrentSheet() const { return mShow->GetSheetRawPrintContinuityOnCurrentSheet(); }
-    [[nodiscard]] auto GetSheetPrintContinuityOnCurrentSheet() const { return mShow->GetSheetPrintContinuityOnCurrentSheet(); }
+    [[nodiscard]] auto GetSheetRawPrintContinuityOnCurrentSheet() const
+    {
+        return mShow->GetSheetRawPrintContinuityOnCurrentSheet();
+    }
+    [[nodiscard]] auto GetSheetPrintContinuityOnCurrentSheet() const
+    {
+        return mShow->GetSheetPrintContinuityOnCurrentSheet();
+    }
     [[nodiscard]] auto GetAnimationInfo(CalChart::Beats whichBeat) const -> std::vector<CalChart::Animate::Info>;
-    [[nodiscard]] auto GetAnimationInfo(CalChart::MarcherIndex which, CalChart::Beats whichBeat) const -> std::optional<CalChart::Animate::Info>;
+    [[nodiscard]] auto GetAnimationInfo(CalChart::MarcherIndex which, CalChart::Beats whichBeat) const
+        -> std::optional<CalChart::Animate::Info>;
     [[nodiscard]] auto GetAnimationErrors() const -> std::vector<CalChart::Animate::Errors>;
     [[nodiscard]] auto GetAnimationCollisions() const -> std::map<int, CalChart::SelectionList>;
     [[nodiscard]] auto GetTotalNumberAnimationBeats() const -> std::optional<CalChart::Beats>;
-    [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beats whichBeat) const -> std::pair<CalChart::Coord, CalChart::Coord>;
-    [[nodiscard]] auto AnimationBeatToSheetOffsetAndBeat(CalChart::Beats beat) const -> std::optional<std::tuple<size_t, CalChart::Beats>>;
+    [[nodiscard]] auto GetAnimationBoundingBox(bool zoomInOnMarchers, CalChart::Beats whichBeat) const
+        -> std::pair<CalChart::Coord, CalChart::Coord>;
+    [[nodiscard]] auto AnimationBeatToSheetOffsetAndBeat(CalChart::Beats beat) const
+        -> std::optional<std::tuple<size_t, CalChart::Beats>>;
     [[nodiscard]] auto AnimationBeatsForSheet(int sheet) const -> CalChart::Beats;
     [[nodiscard]] auto GetTotalNumberAnimationBeatsUpTo(int whichSheet) const -> CalChart::Beats;
     [[nodiscard]] auto GetTempoForAnimationBeat(CalChart::Beats whichBeat) const -> CalChart::Tempo;
@@ -111,7 +123,10 @@ public:
     [[nodiscard]] auto ContinuitiesInUse() const { return mShow->ContinuitiesInUse(); }
     [[nodiscard]] auto BeatHasCollision(CalChart::Beats whichBeat) const -> bool;
     [[nodiscard]] auto GetAnimationBeatForCurrentSheet() const -> CalChart::Beats;
-    [[nodiscard]] auto ClipPositionToShowMode(CalChart::Coord const& pos) const { return mShow->GetShowMode().ClipPosition(pos); }
+    [[nodiscard]] auto ClipPositionToShowMode(CalChart::Coord const& pos) const
+    {
+        return mShow->GetShowMode().ClipPosition(pos);
+    }
 
     // Media
     void OnSetMedia();
@@ -132,7 +147,7 @@ public:
             GoToSheet(mShow->GetCurrentSheetNum() - 1);
         }
     }
-    void SetActiveReferencePoint(int which);
+    void SetActiveReferencePoint(std::optional<unsigned> which);
 
     ///// Select /////
     void UnselectAll() { SetSelectionList(mShow->MakeUnselectAll()); }
@@ -144,7 +159,10 @@ public:
     [[nodiscard]] auto GetSelectedPoints() const { return mShow->GetSelectedPoints(); }
     [[nodiscard]] auto GetSelect() const { return mShow->GetSelect(); }
     void SetSelect(CalChart::Select select);
-    [[nodiscard]] auto MakeSelectBySymbol(CalChart::SYMBOL_TYPE symbol) const { return mShow->MakeSelectBySymbol(symbol); }
+    [[nodiscard]] auto MakeSelectBySymbol(CalChart::SYMBOL_TYPE symbol) const
+    {
+        return mShow->MakeSelectBySymbol(symbol);
+    }
     [[nodiscard]] auto GetCurrentMove() const { return mShow->GetCurrentMove(); }
     void SetCurrentMove(CalChart::MoveMode move) { mShow->SetCurrentMove(move); }
     [[nodiscard]] auto IsDrawingCurve() const { return mShow->IsDrawingCurve(); }
@@ -152,7 +170,10 @@ public:
 
     [[nodiscard]] auto GetCurveOnCurrentSheet(size_t index) const { return mShow->GetCurveOnCurrentSheet(index); }
     [[nodiscard]] auto GetNumberCurvesOnCurrentSheet() const { return mShow->GetNumberCurvesOnCurrentSheet(); }
-    [[nodiscard]] auto GetMarchersAssignedToCurve(size_t whichCurve) const { return mShow->GetMarchersAssignedToCurve(whichCurve); }
+    [[nodiscard]] auto GetMarchersAssignedToCurve(size_t whichCurve) const
+    {
+        return mShow->GetMarchersAssignedToCurve(whichCurve);
+    }
 
     [[nodiscard]] auto GetGhostModuleIsActive() const { return mShow->GetGhostModuleIsActive(); }
     [[nodiscard]] auto GetGhostSource() const { return mShow->GetGhostSource(); };
@@ -163,13 +184,15 @@ public:
 
     ///// Drawing marcher's paths /////
     // Generate Draw Commands
-    [[nodiscard]] auto GeneratePhantomPointsDrawCommands(CalChart::MarcherToPosition const& positions) const -> std::vector<CalChart::Draw::DrawCommand>;
-    [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands() const { return mShow->GenerateFieldWithMarchersDrawCommands(); }
-    [[nodiscard]] auto GenerateAnimationDrawCommands(
-        CalChart::Beats whichBeat,
-        bool drawCollisionWarning,
-        std::optional<bool> onBeat,
-        CalChart::Animation::AngleStepToImageFunction imageFunction) const -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GeneratePhantomPointsDrawCommands(CalChart::MarcherToPosition const& positions) const
+        -> std::vector<CalChart::Draw::DrawCommand>;
+    [[nodiscard]] auto GenerateFieldWithMarchersDrawCommands() const
+    {
+        return mShow->GenerateFieldWithMarchersDrawCommands();
+    }
+    [[nodiscard]] auto GenerateAnimationDrawCommands(CalChart::Beats whichBeat, bool drawCollisionWarning,
+        std::optional<bool> onBeat, CalChart::Animation::AngleStepToImageFunction imageFunction) const
+        -> std::vector<CalChart::Draw::DrawCommand>;
 
     // call this when we need to generate the marcher's paths.
     void OnEnableDrawPaths(bool enable);
