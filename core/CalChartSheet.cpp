@@ -112,11 +112,11 @@ auto ToJSON(Fermatas const& fermatas) -> nlohmann::json
     return fermatasJson;
 }
 
-auto ToJSON(std::vector<ImageInfo> const& images) -> nlohmann::json
+auto ToJSON(std::vector<ImageInfo> const& images, ImageRegistry& registry) -> nlohmann::json
 {
     auto imagesJson = nlohmann::json::array();
     for (auto const& image : images) {
-        imagesJson.push_back(ImageInfoToJSON(image));
+        imagesJson.push_back(ImageInfoToJSON(image, registry));
     }
     return imagesJson;
 }
@@ -166,14 +166,15 @@ auto ContinuitiesFromJSON(nlohmann::json const& json) -> std::vector<std::pair<S
     return continuities;
 }
 
-auto BackgroundImagesFromJSON(nlohmann::json const& json) -> std::vector<CalChart::ImageInfo>
+auto BackgroundImagesFromJSON(nlohmann::json const& json, ImageRegistry const& registry)
+    -> std::vector<CalChart::ImageInfo>
 {
     if (!json.is_array()) {
         throw CalChart::CC_FileException("bad Sheet JSON: background_images must be an array");
     }
     auto images = std::vector<CalChart::ImageInfo>{};
     for (auto const& imageJson : json) {
-        images.push_back(CalChart::ImageInfoFromJSON(imageJson));
+        images.push_back(CalChart::ImageInfoFromJSON(imageJson, registry));
     }
     return images;
 }
@@ -273,7 +274,8 @@ auto OptionalFermatasFromJSON(nlohmann::json const& json) -> std::optional<Ferma
     return FermatasFromJSON(json.at("fermatas"));
 }
 
-auto OptionalBackgroundImagesFromJSON(nlohmann::json const& json) -> std::optional<std::vector<ImageInfo>>
+auto OptionalBackgroundImagesFromJSON(nlohmann::json const& json, ImageRegistry const& registry)
+    -> std::optional<std::vector<ImageInfo>>
 {
     if (!json.contains("background_images")) {
         return std::nullopt;
@@ -281,7 +283,7 @@ auto OptionalBackgroundImagesFromJSON(nlohmann::json const& json) -> std::option
     if (!json.at("background_images").is_array()) {
         throw CC_FileException("bad Sheet JSON: 'background_images' must be an array");
     }
-    return BackgroundImagesFromJSON(json.at("background_images"));
+    return BackgroundImagesFromJSON(json.at("background_images"), registry);
 }
 
 auto OptionalCurvesWithAssignmentsFromJSON(nlohmann::json const& json)
@@ -520,7 +522,7 @@ Sheet::Sheet(Version_3_3_and_earlier, size_t numPoints, Reader& reader, ParseErr
 }
 // -=-=-=-=-=- LEGACY CODE</end> -=-=-=-=-=-
 
-Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correction)
+Sheet::Sheet(size_t numPoints, Reader reader, ImageRegistry const& registry, ParseErrorHandlers const* correction)
     : mPoints(numPoints)
 {
     // construct the parser handlers
@@ -633,6 +635,17 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
             throw CC_FileException("Bad Background chunk", INGL_BACK);
         }
     };
+    auto parse_INGL_RBCK = [&registry](Sheet* sheet, Reader reader) {
+        auto num = reader.Get<int32_t>();
+        while (num--) {
+            auto [image, new_reader] = CreateRegisteredImageInfo(reader, registry);
+            sheet->mBackgroundImages.push_back(image);
+            reader = new_reader;
+        }
+        if (reader.size() != 0) {
+            throw CC_FileException("Bad Registered Background chunk", INGL_RBCK);
+        }
+    };
     auto parse_INGL_CURV = [](Sheet* sheet, Reader reader) {
         auto num = reader.Get<int32_t>();
         while (num--) {
@@ -641,7 +654,7 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
             reader = new_reader;
         }
         if (reader.size() != 0) {
-            throw CC_FileException("Bad curve chunk", INGL_BACK);
+            throw CC_FileException("Bad curve chunk", INGL_CURV);
         }
     };
     auto parse_INGL_CASS = [](Sheet* sheet, Reader reader) {
@@ -650,7 +663,7 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
             sheet->mCurves.at(which).second = reader.GetVector<uint32_t>();
         }
         if (reader.size() != 0) {
-            throw CC_FileException("Bad Curve Assignment chunk", INGL_BACK);
+            throw CC_FileException("Bad Curve Assignment chunk", INGL_CASS);
         }
     };
 
@@ -664,6 +677,7 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
         { INGL_VCNT, parse_INGL_VCNT },
         { INGL_PCNT, parse_INGL_PCNT },
         { INGL_BACK, parse_INGL_BACK },
+        { INGL_RBCK, parse_INGL_RBCK },
         { INGL_CURV, parse_INGL_CURV },
         { INGL_CASS, parse_INGL_CASS },
     };
@@ -678,7 +692,7 @@ Sheet::Sheet(size_t numPoints, Reader reader, ParseErrorHandlers const* correcti
     RepositionCurveMarchers();
 }
 
-Sheet::Sheet(nlohmann::json const& json)
+Sheet::Sheet(nlohmann::json const& json, ImageRegistry const& registry)
     : mName{ json.at("name").get<std::string>() }
     , mBeats{ BeatsFromJSON(json) }
     , mTempo{ TempoFromJSON(json) }
@@ -699,7 +713,7 @@ Sheet::Sheet(nlohmann::json const& json)
             mFermatas = *fermatas;
         }
 
-        if (auto backgroundImages = OptionalBackgroundImagesFromJSON(json); backgroundImages) {
+        if (auto backgroundImages = OptionalBackgroundImagesFromJSON(json, registry); backgroundImages) {
             mBackgroundImages = *backgroundImages;
         }
 
@@ -759,12 +773,12 @@ auto Sheet::SerializeFermata() const -> std::vector<std::byte>
     return result;
 }
 
-auto Sheet::SerializeBackgroundImageInfo() const -> std::vector<std::byte>
+auto Sheet::SerializeBackgroundImageInfo(ImageRegistry& registry) const -> std::vector<std::byte>
 {
     std::vector<std::byte> result;
     Parser::Append(result, static_cast<uint32_t>(mBackgroundImages.size()));
     for (auto&& i : mBackgroundImages) {
-        Parser::Append(result, Serialize(i));
+        Parser::Append(result, Serialize(i, registry));
     }
     return result;
 }
@@ -790,7 +804,7 @@ auto Sheet::SerializeCurveAssigments() const -> std::vector<std::byte>
     return result;
 }
 
-auto Sheet::SerializeSheetData() const -> std::vector<std::byte>
+auto Sheet::SerializeSheetData(ImageRegistry& registry) const -> std::vector<std::byte>
 {
     // SHEET_DATA         = NAME , DURATION , TEMPO , ALL_POINTS , CONTINUITY,
     // PRINT_CONTINUITY ;
@@ -821,7 +835,7 @@ auto Sheet::SerializeSheetData() const -> std::vector<std::byte>
     Parser::Append(result, Parser::Construct_block(INGL_PCNT, SerializePrintContinuityData()));
 
     // Write Background
-    Parser::Append(result, Parser::Construct_block(INGL_BACK, SerializeBackgroundImageInfo()));
+    Parser::Append(result, Parser::Construct_block(INGL_RBCK, SerializeBackgroundImageInfo(registry)));
 
     // Write Curves
     Parser::Append(result, Parser::Construct_block(INGL_CURV, SerializeCurves()));
@@ -835,14 +849,14 @@ auto Sheet::SerializeSheetData() const -> std::vector<std::byte>
 // SHEET_DATA         = NAME , DURATION , ALL_POINTS , VCONTINUITY, [
 // PRINT_CONTINUITY ] ;
 // SHEET_END          = INGL_END , INGL_SHET ;
-auto Sheet::SerializeSheet() const -> std::vector<std::byte>
+auto Sheet::SerializeSheet(ImageRegistry& registry) const -> std::vector<std::byte>
 {
     std::vector<std::byte> result;
-    Parser::Append(result, Parser::Construct_block(INGL_SHET, SerializeSheetData()));
+    Parser::Append(result, Parser::Construct_block(INGL_SHET, SerializeSheetData(registry)));
     return result;
 }
 
-auto Sheet::toJSON() const -> nlohmann::json
+auto Sheet::toJSON(ImageRegistry& registry) const -> nlohmann::json
 {
     auto json = nlohmann::json{
         { "name", mName },
@@ -861,7 +875,7 @@ auto Sheet::toJSON() const -> nlohmann::json
         json["fermatas"] = ToJSON(mFermatas);
     }
     if (!mBackgroundImages.empty()) {
-        json["background_images"] = ToJSON(mBackgroundImages);
+        json["background_images"] = ToJSON(mBackgroundImages, registry);
     }
     if (!mCurves.empty()) {
         json["curves_with_assignments"] = ToJSON(mCurves);

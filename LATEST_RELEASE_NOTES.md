@@ -14,6 +14,7 @@ Other changes:
 * [#878](../../issues/878) use std::format in ContToken
 * [#884](../../issues/884) Create a show schema with version 1
 * [#886](../../issues/886) have calchart_cmd validate when it exports a json
+* [#897](../../issues/897) Show should hold the image data for all the sheets
 * [#902](../../issues/902) We should have a debug playground for Animation Errors
 * [#904](../../issues/904) We should have a Print Continuity editor playground
 

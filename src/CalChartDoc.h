@@ -210,7 +210,10 @@ public:
     }
 
     // Sheet serialized
-    [[nodiscard]] auto GetSheetSerializedOnCurrentSheet() const { return mShow->GetSheetSerializedOnCurrentSheet(); }
+    [[nodiscard]] auto GetSheetSerializedOnCurrentSheet(CalChart::ImageRegistry& registry) const
+    {
+        return mShow->GetSheetSerializedOnCurrentSheet(registry);
+    }
 
     // Continuities
     [[nodiscard]] auto GetContinuities() const { return mShow->GetContinuitiesOnCurrentSheet(); }

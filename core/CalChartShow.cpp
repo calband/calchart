@@ -80,11 +80,11 @@ auto ToJSON(std::vector<std::pair<std::string, std::string>> const& labelsAndIns
     return result;
 }
 
-auto ToJSON(Show::Sheet_container_t const& sheets) -> nlohmann::json
+auto ToJSON(Show::Sheet_container_t const& sheets, ImageRegistry& registry) -> nlohmann::json
 {
     auto result = nlohmann::json::array();
     for (auto const& sheet : sheets) {
-        result.push_back(sheet.toJSON());
+        result.push_back(sheet.toJSON(registry));
     }
     return result;
 }
@@ -114,14 +114,14 @@ auto LabelsAndInstrumentsFromJSON(nlohmann::json const& json) -> std::vector<std
     return result;
 }
 
-auto SheetsFromJSON(nlohmann::json const& json) -> Show::Sheet_container_t
+auto SheetsFromJSON(nlohmann::json const& json, ImageRegistry const& registry) -> Show::Sheet_container_t
 {
     if (!json.is_array()) {
         throw CC_FileException("bad Show JSON: sheets must be an array");
     }
     auto sheets = Show::Sheet_container_t{};
     for (auto const& sheetJson : json) {
-        sheets.push_back(Sheet{ sheetJson });
+        sheets.push_back(Sheet{ sheetJson, registry });
     }
     return sheets;
 }
@@ -306,6 +306,9 @@ Show::Show(ShowMode const& mode, Reader reader, ParseErrorHandlers const* correc
 {
     // caller should have stripped off INGL and GURK headers
 
+    // ImageRegistry needs to be parsed first...
+    ImageRegistry registry;
+
     // construct the parser handlers
     // TODO: Why can't I capture this here?
     auto parse_INGL_SIZE = [](Show& show, Reader reader) {
@@ -333,7 +336,7 @@ Show::Show(ShowMode const& mode, Reader reader, ParseErrorHandlers const* correc
     auto parse_INGL_INST = [](Show& show, Reader reader) {
         auto currentLabels = show.mDotLabelAndInstrument;
         if (reader.size() == 0 && show.GetNumPoints()) {
-            throw CC_FileException("Label the wrong size", INGL_LABL);
+            throw CC_FileException("Label the wrong size", INGL_INST);
         }
         // restrict search to the size we're given
         for (auto i = 0UL; i < show.GetNumPoints(); i++) {
@@ -341,7 +344,7 @@ Show::Show(ShowMode const& mode, Reader reader, ParseErrorHandlers const* correc
             currentLabels.at(i).second = thisInst == "" ? kDefault : thisInst;
         }
         if (reader.size() != 0) {
-            throw CC_FileException("Label the wrong size", INGL_LABL);
+            throw CC_FileException("Label the wrong size", INGL_INST);
         }
         show.SetPointLabelAndInstrument(currentLabels);
     };
@@ -352,15 +355,15 @@ Show::Show(ShowMode const& mode, Reader reader, ParseErrorHandlers const* correc
         }
         show.SetDescr(str);
     };
-    auto parse_INGL_SHET = [correction](Show& show, Reader reader) {
-        Sheet sheet(show.GetNumPoints(), reader, correction);
+    auto parse_INGL_SHET = [correction, &registry](Show& show, Reader reader) {
+        Sheet sheet(show.GetNumPoints(), reader, registry, correction);
         auto sheet_num = show.GetCurrentSheetNum();
         show.InsertSheet(sheet, show.GetNumSheets());
         show.SetCurrentSheet(sheet_num);
     };
     auto parse_INGL_SELE = [](Show& show, Reader reader) {
         if ((reader.size() % 4) != 0) {
-            throw CC_FileException("Incorrect size", INGL_SIZE);
+            throw CC_FileException("Incorrect size", INGL_SELE);
         }
         while (reader.size()) {
             show.mSelectionList.insert(reader.Get<uint32_t>());
@@ -368,7 +371,7 @@ Show::Show(ShowMode const& mode, Reader reader, ParseErrorHandlers const* correc
     };
     auto parse_INGL_CURR = [](Show& show, Reader reader) {
         if (reader.size() != 4) {
-            throw CC_FileException("Incorrect size", INGL_SIZE);
+            throw CC_FileException("Incorrect size", INGL_CURR);
         }
         show.mSheetNum = reader.Get<uint32_t>();
     };
@@ -377,13 +380,44 @@ Show::Show(ShowMode const& mode, Reader reader, ParseErrorHandlers const* correc
         show.mMedia = ToFileData(reader);
         ++show.mMediaVersion;
     };
+    [[maybe_unused]] auto parse_INGL_IMAGEREGISTRY = [&registry]([[maybe_unused]] Show& show, Reader reader) {
+        auto [new_registry, new_reader] = CreateImageRegistry(reader);
+        registry = std::move(new_registry);
+        if (new_reader.size() != 0) {
+            throw CC_FileException("Bad Image Registry chunk", INGL_IMGR);
+        }
+    };
     // [=] needed here to pull in the parse functions
     auto parse_INGL_SHOW = [=](Show& show, Reader reader) {
+#if 0
+        using reader_func = std::function<void(Show&, Reader)>;
+        auto const parsers = std::array{
+            std::pair<uint32_t, reader_func>{ INGL_SIZE, parse_INGL_SIZE },
+            std::pair<uint32_t, reader_func>{ INGL_LABL, parse_INGL_LABL },
+            std::pair<uint32_t, reader_func>{ INGL_INST, parse_INGL_INST },
+            std::pair<uint32_t, reader_func>{ INGL_DESC, parse_INGL_DESC },
+            std::pair<uint32_t, reader_func>{ INGL_IMGR, parse_INGL_IMAGEREGISTRY },
+            std::pair<uint32_t, reader_func>{ INGL_SHET, parse_INGL_SHET },
+            std::pair<uint32_t, reader_func>{ INGL_SELE, parse_INGL_SELE },
+            std::pair<uint32_t, reader_func>{ INGL_CURR, parse_INGL_CURR },
+            std::pair<uint32_t, reader_func>{ INGL_MODE, parse_INGL_MODE },
+            std::pair<uint32_t, reader_func>{ INGL_MEDIA, parse_INGL_MEDIA },
+        };
+        // image registry should be done early.
+
+        auto table = reader.ParseOutLabels();
+        for (auto&& [ingl, parser] : parsers) {
+            if (table.contains(ingl)) {
+                parser(show, table.at(ingl));
+            }
+        }
+#endif
         std::map<uint32_t, std::function<void(Show & show, Reader)>> const parser = {
             { INGL_SIZE, parse_INGL_SIZE },
             { INGL_LABL, parse_INGL_LABL },
             { INGL_INST, parse_INGL_INST },
             { INGL_DESC, parse_INGL_DESC },
+            { INGL_IMGR, parse_INGL_IMAGEREGISTRY },
             { INGL_SHET, parse_INGL_SHET },
             { INGL_SELE, parse_INGL_SELE },
             { INGL_CURR, parse_INGL_CURR },
@@ -416,12 +450,16 @@ Show::Show(ShowMode const& mode, Reader reader, ParseErrorHandlers const* correc
 Show::Show(nlohmann::json const& json)
     : mDescr{ OptionalDescriptionFromJSON(json).value_or("") }
     , mDotLabelAndInstrument{ LabelsAndInstrumentsFromJSON(json.at("labels_and_instruments")) }
-    , mSheets{ SheetsFromJSON(json.at("sheets")) }
     , mMode{ CreateShowModeFromJSON(json.at("mode")) }
     , mMedia{ FileDataFromJSON(json) }
     , mSelectionList{ OptionalSelectionListFromJSON(json).value_or(SelectionList{}) }
     , mSheetNum{ json.at("current_sheet").get<size_t>() }
 {
+    auto registry = ImageRegistry{};
+    if (json.contains("image_registry")) {
+        registry = ImageRegistryFromJSON(json.at("image_registry"));
+    }
+    mSheets = SheetsFromJSON(json.at("sheets"), registry);
 }
 
 template <typename T> auto anyInstrumentsBesidesDefault(T const& all)
@@ -464,9 +502,16 @@ auto Show::SerializeShowData() const -> std::vector<std::byte>
         Append(result, Construct_block(INGL_DESC, descr));
     }
 
+    ImageRegistry registry;
     // Handle sheets
-    for (auto& sheet : mSheets) {
-        Append(result, sheet.SerializeSheet());
+    auto sheetBytes = CalChart::Ranges::ToVector<std::vector<std::byte>>(
+        mSheets | std::views::transform([&](auto& sheet) { return sheet.SerializeSheet(registry); }));
+    // we put in the registry first, so that way we've got a registry when we deserialize
+    if (!registry.Empty()) {
+        Parser::Append(result, Parser::Construct_block(INGL_IMGR, Serialize(registry)));
+    }
+    for (auto& sheetData : sheetBytes) {
+        Append(result, sheetData);
     }
 
     // add selection
@@ -512,10 +557,12 @@ auto Show::SerializeShow() const -> std::vector<std::byte>
 
 auto Show::toJSON() const -> nlohmann::json
 {
+    ImageRegistry registry;
+    auto sheetJSON = ToJSON(mSheets, registry);
     auto result = nlohmann::json{
         { "formatVersion", 1 },
         { "labels_and_instruments", ToJSON(mDotLabelAndInstrument) },
-        { "sheets", ToJSON(mSheets) },
+        { "sheets", sheetJSON },
         { "mode", mMode.toJSON() },
         { "current_sheet", mSheetNum },
     };
@@ -529,6 +576,9 @@ auto Show::toJSON() const -> nlohmann::json
     }
     if (!mSelectionList.empty()) {
         result["selection_list"] = ToJSON(mSelectionList);
+    }
+    if (!registry.Empty()) {
+        result["image_registry"] = ImageRegistryToJSON(registry);
     }
 
     return result;
@@ -1528,18 +1578,13 @@ auto Show::GetSheetBackgroundImagesOnCurrentSheet() const -> std::vector<ImageIn
 }
 
 // Sheet serialized
-auto Show::GetSheetSerialized(size_t sheet) const -> std::vector<std::byte>
+auto Show::GetSheetSerializedOnCurrentSheet(ImageRegistry& registry) const -> std::vector<std::byte>
 {
-    return sheet < mSheets.size() ? mSheets.at(sheet).SerializeSheet() : std::vector<std::byte>{};
-}
-auto Show::GetSheetsSerialized() const -> std::vector<std::vector<std::byte>>
-{
-    return CalChart::Ranges::ToVector<std::vector<std::byte>>(
-        mSheets | std::views::transform([](auto&& sheet) { return sheet.SerializeSheet(); }));
-}
-auto Show::GetSheetSerializedOnCurrentSheet() const -> std::vector<std::byte>
-{
-    return GetSheetSerialized(GetCurrentSheetNum());
+    auto sheetNum = GetCurrentSheetNum();
+    if (sheetNum < mSheets.size()) {
+        return std::vector<std::byte>{};
+    }
+    return mSheets.at(sheetNum).SerializeSheet(registry);
 }
 
 // Continuities

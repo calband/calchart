@@ -1495,8 +1495,8 @@
         "scaledHeight": {
           "type": "integer"
         },
-        "data": {
-          "$ref": "#/$defs/imageData"
+        "image_id": {
+          "type": "integer"
         }
       },
       "required": [
@@ -1504,7 +1504,7 @@
         "top",
         "scaledWidth",
         "scaledHeight",
-        "data"
+        "image_id"
       ],
       "additionalProperties": true
     },
@@ -1524,6 +1524,13 @@
         "name",
         "data"
       ],
+      "additionalProperties": true
+    },
+    "image_registry": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/imageData"
+      },
       "additionalProperties": true
     },
     "sheet": {
@@ -1620,6 +1627,9 @@
       "items": {
         "type": "integer"
       }
+    },
+    "image_registry": {
+      "$ref": "#/$defs/image_registry"
     },
     "current_sheet": {
       "type": "integer"

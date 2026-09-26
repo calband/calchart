@@ -56,6 +56,7 @@ add_library(
   CalChartGitHubIssueSubmitter.hpp
   CircularLogBuffer.cpp
   CircularLogBuffer.hpp
+  CalChartDataRegistry.hpp
   CalChartDrawCommand.cpp
   CalChartDrawCommand.h
   CalChartDrawPrimatives.h

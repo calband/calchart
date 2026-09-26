@@ -37,67 +37,43 @@
 #include <wx/pen.h>
 
 // this needs to be in the same namespace as wxSize, which would be the global namespace
-inline auto operator<(wxSize const& p1, wxSize const& p2)
-{
-    return p1.x == p2.x ? p1.y < p2.y : p1.x < p2.y;
-}
+inline auto operator<(wxSize const& p1, wxSize const& p2) { return p1.x == p2.x ? p1.y < p2.y : p1.x < p2.y; }
 
 namespace wxCalChart {
 
 inline auto make_wxSize(CalChart::Coord coord) { return wxSize{ coord.x, coord.y }; }
 
-inline auto toSize(CalChart::Coord size) -> wxSize
-{
-    return { size.x, size.y };
-}
+inline auto toSize(CalChart::Coord size) -> wxSize { return { size.x, size.y }; }
 
-inline auto toPoint(CalChart::Coord point) -> wxPoint
-{
-    return { point.x, point.y };
-}
+inline auto toPoint(CalChart::Coord point) -> wxPoint { return { point.x, point.y }; }
 
-inline auto toCoord(wxSize size) -> CalChart::Coord
-{
-    return { size.x, size.y };
-}
+inline auto toCoord(wxSize size) -> CalChart::Coord { return { size.x, size.y }; }
 
-inline auto toCoord(wxPoint point) -> CalChart::Coord
-{
-    return { point.x, point.y };
-}
+inline auto toCoord(wxPoint point) -> CalChart::Coord { return { point.x, point.y }; }
 
-inline auto toColour(CalChart::Color::ColorRGB c) -> wxColour
-{
-    return { c.red, c.green, c.blue, c.alpha };
-}
+inline auto toColour(CalChart::Color::ColorRGB c) -> wxColour { return { c.red, c.green, c.blue, c.alpha }; }
 
-inline auto toColour(std::string const& str) -> wxColour
-{
-    return { wxString{ str.data() } };
-}
+inline auto toColour(std::string const& str) -> wxColour { return { wxString{ str.data() } }; }
 
 inline auto toColour(CalChart::Color color) -> wxColour
 {
-    return std::visit(
-        CalChart::overloaded{
-            [](CalChart::Color::ColorRGB c) { return toColour(c); },
-            [](std::string const& str) { return toColour(str); } },
+    return std::visit(CalChart::overloaded{ [](CalChart::Color::ColorRGB c) { return toColour(c); },
+                          [](std::string const& str) { return toColour(str); } },
         color.mColor);
 }
 
 inline auto toRGB(CalChart::Color color) -> std::tuple<uint8_t, uint8_t, uint8_t>
 {
     return std::visit(
-        CalChart::overloaded{
-            [](CalChart::Color::ColorRGB c) { return std::tuple{ c.red, c.green, c.blue }; },
-            [](std::string const& str) { auto colour = toColour(str); return std::tuple{ colour.Red(), colour.Green(), colour.Blue()}; } },
+        CalChart::overloaded{ [](CalChart::Color::ColorRGB c) { return std::tuple{ c.red, c.green, c.blue }; },
+            [](std::string const& str) {
+                auto colour = toColour(str);
+                return std::tuple{ colour.Red(), colour.Green(), colour.Blue() };
+            } },
         color.mColor);
 }
 
-inline auto toBrush(CalChart::Color c)
-{
-    return *wxTheBrushList->FindOrCreateBrush(toColour(c));
-}
+inline auto toBrush(CalChart::Color c) { return *wxTheBrushList->FindOrCreateBrush(toColour(c)); }
 
 inline auto toBrush(CalChart::Brush b)
 {
@@ -115,18 +91,14 @@ inline auto toBrush(CalChart::BrushAndPen b)
     return *wxTheBrushList->FindOrCreateBrush(toColour(b.color));
 }
 
-inline auto toPen(CalChart::Pen p)
-{
-    return *wxThePenList->FindOrCreatePen(toColour(p.color), p.width);
-}
+inline auto toPen(CalChart::Pen p) { return *wxThePenList->FindOrCreatePen(toColour(p.color), p.width); }
 
 inline auto toPen(CalChart::BrushAndPen b)
 {
     if (b.brushStyle == CalChart::Brush::Style::Transparent) {
         return *wxTRANSPARENT_PEN;
     }
-    auto penStyle = b.penStyle == CalChart::Pen::Style::ShortDash ? wxPENSTYLE_SHORT_DASH
-                                                                  : wxPENSTYLE_SOLID;
+    auto penStyle = b.penStyle == CalChart::Pen::Style::ShortDash ? wxPENSTYLE_SHORT_DASH : wxPENSTYLE_SOLID;
 
     return *wxThePenList->FindOrCreatePen(toColour(b.color), b.width, penStyle);
 }
@@ -136,10 +108,7 @@ inline auto toColor(wxColour const& c) -> CalChart::Color
     return CalChart::Color{ c.Red(), c.Green(), c.Blue(), c.Alpha() };
 }
 
-inline auto toColor(std::string_view s) -> CalChart::Color
-{
-    return CalChart::Color{ std::string{ s } };
-}
+inline auto toColor(std::string_view s) -> CalChart::Color { return CalChart::Color{ std::string{ s } }; }
 
 inline auto toBrush(wxBrush const& b)
 {
@@ -148,9 +117,8 @@ inline auto toBrush(wxBrush const& b)
 
 inline auto toPen(wxPen const& p)
 {
-    auto penStyle = p.GetStyle() == wxPENSTYLE_SHORT_DASH
-        ? CalChart::Pen::Style::ShortDash
-        : CalChart::Pen::Style::Solid;
+    auto penStyle
+        = p.GetStyle() == wxPENSTYLE_SHORT_DASH ? CalChart::Pen::Style::ShortDash : CalChart::Pen::Style::Solid;
     return CalChart::Pen{ toColor(p.GetColour()), penStyle, p.GetWidth() };
 }
 
@@ -166,48 +134,28 @@ inline auto toBrushAndPen(std::string_view s, int width)
 
 inline auto toBrushAndPen(wxPen const& p)
 {
-    return CalChart::BrushAndPen{ toColor(p.GetColour()), CalChart::Brush::Style::Solid, CalChart::Pen::Style::Solid, p.GetWidth() };
+    return CalChart::BrushAndPen{ toColor(p.GetColour()), CalChart::Brush::Style::Solid, CalChart::Pen::Style::Solid,
+        p.GetWidth() };
 }
 
-inline auto setBackground(wxDC& dc, CalChart::Color color)
-{
-    dc.SetBackground(wxCalChart::toBrush(color));
-}
+inline auto setBackground(wxDC& dc, CalChart::Color color) { dc.SetBackground(wxCalChart::toBrush(color)); }
 
-inline auto setBackground(wxDC& dc, CalChart::Brush brush)
-{
-    dc.SetBackground(wxCalChart::toBrush(brush));
-}
+inline auto setBackground(wxDC& dc, CalChart::Brush brush) { dc.SetBackground(wxCalChart::toBrush(brush)); }
 
 inline auto setBackground(wxDC& dc, CalChart::BrushAndPen brushAndPen)
 {
     dc.SetBackground(wxCalChart::toBrush(brushAndPen));
 }
 
-inline auto setBrush(wxDC& dc, CalChart::Color color)
-{
-    dc.SetBrush(wxCalChart::toBrush(color));
-}
+inline auto setBrush(wxDC& dc, CalChart::Color color) { dc.SetBrush(wxCalChart::toBrush(color)); }
 
-inline auto setBrush(wxDC& dc, CalChart::Brush brush)
-{
-    dc.SetBrush(wxCalChart::toBrush(brush));
-}
+inline auto setBrush(wxDC& dc, CalChart::Brush brush) { dc.SetBrush(wxCalChart::toBrush(brush)); }
 
-inline auto setBrush(wxDC& dc, CalChart::BrushAndPen brushAndPen)
-{
-    dc.SetBrush(wxCalChart::toBrush(brushAndPen));
-}
+inline auto setBrush(wxDC& dc, CalChart::BrushAndPen brushAndPen) { dc.SetBrush(wxCalChart::toBrush(brushAndPen)); }
 
-inline auto setPen(wxDC& dc, CalChart::Pen pen)
-{
-    dc.SetPen(wxCalChart::toPen(pen));
-}
+inline auto setPen(wxDC& dc, CalChart::Pen pen) { dc.SetPen(wxCalChart::toPen(pen)); }
 
-inline auto setPen(wxDC& dc, CalChart::BrushAndPen brushAndPen)
-{
-    dc.SetPen(wxCalChart::toPen(brushAndPen));
-}
+inline auto setPen(wxDC& dc, CalChart::BrushAndPen brushAndPen) { dc.SetPen(wxCalChart::toPen(brushAndPen)); }
 
 inline auto setBrushAndPen(wxDC& dc, CalChart::BrushAndPen brushAndPen)
 {
@@ -259,18 +207,16 @@ inline auto setFont(wxDC& dc, CalChart::Font font)
 // Creates a deep copy the image data
 inline auto towxImage(CalChart::ImageData const& image) -> wxImage
 {
-    auto data = std::unique_ptr<unsigned char, void (*)(void*)>{
-        static_cast<unsigned char*>(std::malloc(image.data.size())),
-        [](void* p) { std::free(p); }
-    };
+    auto data
+        = std::unique_ptr<unsigned char, void (*)(void*)>{ static_cast<unsigned char*>(std::malloc(image.data.size())),
+              [](void* p) { std::free(p); } };
     std::copy(image.data.begin(), image.data.end(), data.get());
     if (image.alpha.empty()) {
         return wxImage{ image.width, image.height, data.release() };
     }
-    auto alpha = std::unique_ptr<unsigned char, void (*)(void*)>{
-        static_cast<unsigned char*>(std::malloc(image.alpha.size())),
-        [](void* p) { std::free(p); }
-    };
+    auto alpha
+        = std::unique_ptr<unsigned char, void (*)(void*)>{ static_cast<unsigned char*>(std::malloc(image.alpha.size())),
+              [](void* p) { std::free(p); } };
 
     std::copy(image.alpha.begin(), image.alpha.end(), alpha.get());
     return wxImage{ image.width, image.height, data.release(), alpha.release() };
@@ -328,18 +274,17 @@ inline auto ConvertToImageInfo(wxImage const& image, int x = 0, int y = 0) -> Ca
 inline auto ConvertTowxBitmap(CalChart::Draw::Image const& image) -> wxBitmap
 {
     // visit
-    return std::visit(
-        CalChart::overloaded{
-            [](std::shared_ptr<CalChart::Draw::OpaqueImageData> data) {
-                return dynamic_cast<BitmapHolder&>(*data).bitmap;
-            },
-            [](std::shared_ptr<CalChart::ImageData> data) {
-                if (data->render == nullptr) {
-                    data->render = std::make_shared<BitmapHolder>(*data);
-                }
-                return dynamic_cast<BitmapHolder&>(*(data->render)).bitmap;
-            },
-        },
+    return std::visit(CalChart::overloaded{
+                          [](std::shared_ptr<CalChart::Draw::OpaqueImageData> data) {
+                              return dynamic_cast<BitmapHolder&>(*data).bitmap;
+                          },
+                          [](std::shared_ptr<CalChart::ImageData> data) {
+                              if (data->render == nullptr) {
+                                  data->render = std::make_shared<BitmapHolder>(*data);
+                              }
+                              return dynamic_cast<BitmapHolder&>(*(data->render)).bitmap;
+                          },
+                      },
         image.mImage);
 }
 

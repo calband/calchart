@@ -79,7 +79,10 @@
 #include <wx/filedlg.h>
 #include <wx/tglbtn.h>
 
+// v1: size_t (numPoints), void* (sheets)
+// v2: size_t (numPoints), size_t (sizeof ImageRegistry), void* (image), void* (sheets)
 static constexpr auto kSheetDataClipboardFormat = "CC_sheet_clipboard_v1";
+static constexpr auto kSheetDataClipboardFormatV2 = "CC_sheet_clipboard_v2";
 
 static const wxChar* file_wild = FILE_WILDCARDS;
 
@@ -650,23 +653,90 @@ void CalChartFrame::OnInsertFromOtherShow()
         CalChart::Show::Sheet_container_t(sheets.begin(), sheets.end()), GetFieldView()->GetCurrentSheetNum() + 1);
 }
 
+namespace {
+auto toClipboardDataV2(CalChartDoc const& show) -> std::vector<std::byte>
+{
+    CalChart::ImageRegistry registry;
+    auto serializedSheet = show.GetSheetSerializedOnCurrentSheet(registry);
+
+    auto serializedRegistry = CalChart::Serialize(registry);
+
+    auto numPoints = show.GetNumPoints();
+    auto bytesForNumPoints = sizeof(numPoints);
+
+    auto imageRegistrySize = serializedRegistry.size();
+    auto bytesForImageRegistrySize = sizeof(imageRegistrySize);
+
+    auto bytesForSheetData = serializedSheet.size();
+    auto totalBytes = bytesForNumPoints + bytesForImageRegistrySize + imageRegistrySize + bytesForSheetData;
+
+    std::vector<std::byte> clipboardData(totalBytes);
+    auto* ptr = clipboardData.data();
+    memcpy(ptr, &numPoints, bytesForNumPoints);
+    ptr += bytesForNumPoints;
+    memcpy(ptr, &imageRegistrySize, bytesForImageRegistrySize);
+    ptr += bytesForImageRegistrySize;
+    memcpy(ptr, serializedRegistry.data(), serializedRegistry.size());
+    ptr += serializedRegistry.size();
+    memcpy(ptr, serializedSheet.data(), bytesForSheetData);
+    return clipboardData;
+}
+
+auto fromClipboardData(size_t numPoints, CalChart::Reader reader, CalChart::ImageRegistry registry)
+    -> CalChart::Show::Sheet_container_t
+{
+    reader.Get<uint32_t>();
+    reader.Get<uint32_t>();
+
+    return CalChart::Show::Sheet_container_t(1, CalChart::Sheet(numPoints, reader, registry));
+}
+
+auto fromClipboardDataV1(CalChartDoc const& show, std::span<std::byte const> data) -> CalChart::Show::Sheet_container_t
+{
+    auto numPoints = show.GetNumPoints();
+    auto dataNumPoints = numPoints;
+    auto const* ptr = data.data();
+    memcpy(&dataNumPoints, ptr, sizeof(numPoints));
+    if (numPoints != dataNumPoints) {
+        throw std::runtime_error(
+            std::format("Cannot paste - number of points in pasted sheet ({}) does not match number "
+                        "of points in current show ({})",
+                dataNumPoints, numPoints));
+    }
+    return fromClipboardData(numPoints, CalChart::Reader{ data.subspan(sizeof(numPoints)) }, {});
+}
+
+auto fromClipboardDataV2(CalChartDoc const& show, std::span<std::byte const> data) -> CalChart::Show::Sheet_container_t
+{
+    auto numPoints = show.GetNumPoints();
+    auto dataNumPoints = numPoints;
+    auto const* ptr = data.data();
+    memcpy(&dataNumPoints, ptr, sizeof(numPoints));
+    if (numPoints != dataNumPoints) {
+        throw std::runtime_error(
+            std::format("Cannot paste - number of points in pasted sheet ({}) does not match number "
+                        "of points in current show ({})",
+                dataNumPoints, numPoints));
+    }
+    ptr += sizeof(numPoints);
+    data = data.subspan(sizeof(numPoints));
+    size_t imageRegistrySize = 0;
+    memcpy(&imageRegistrySize, ptr, sizeof(imageRegistrySize));
+    data = data.subspan(sizeof(imageRegistrySize));
+
+    auto [registry, reader] = CalChart::CreateImageRegistry(CalChart::Reader{ data });
+    return fromClipboardData(numPoints, reader, registry);
+}
+}
+
 void CalChartFrame::OnCopySheet()
 {
     if (wxTheClipboard->Open()) {
         std::unique_ptr<wxCustomDataObject> clipboardObject(
-            new wxCustomDataObject(wxString{ kSheetDataClipboardFormat }));
-        auto serializedSheet = GetShow()->GetSheetSerializedOnCurrentSheet();
+            new wxCustomDataObject(wxString{ kSheetDataClipboardFormatV2 }));
 
-        auto numPoints = GetShow()->GetNumPoints();
-
-        auto bytesForNumPoints = sizeof(numPoints);
-        auto bytesForSheetData = serializedSheet.size() * sizeof(uint8_t);
-        auto totalBytes = bytesForNumPoints + bytesForSheetData;
-        std::vector<char> clipboardData(totalBytes);
-        memcpy(clipboardData.data(), &numPoints, bytesForNumPoints);
-        memcpy(clipboardData.data() + bytesForNumPoints, serializedSheet.data(), bytesForSheetData);
-
-        clipboardObject->SetData(totalBytes, clipboardData.data());
+        auto clipboardData = toClipboardDataV2(*GetShow());
+        clipboardObject->SetData(clipboardData.size(), clipboardData.data());
 
         wxTheClipboard->SetData(clipboardObject.release());
         wxTheClipboard->Close();
@@ -679,24 +749,30 @@ void CalChartFrame::OnPasteSheet()
         if (wxTheClipboard->IsSupported(wxString{ kSheetDataClipboardFormat })) {
             wxCustomDataObject clipboardObject(wxString{ kSheetDataClipboardFormat });
             wxTheClipboard->GetData(clipboardObject);
+            try {
+                auto sht = fromClipboardDataV1(*GetShow(),
+                    { static_cast<std::byte const*>(clipboardObject.GetData()), clipboardObject.GetDataSize() });
+                GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum());
+            } catch (std::exception const& e) {
 
-            auto numPoints = GetShow()->GetNumPoints();
-            memcpy(&numPoints, clipboardObject.GetData(), sizeof(numPoints));
-            if (numPoints != GetShow()->GetNumPoints()) {
-                wxMessageBox(std::format("Cannot paste - number of points in pasted sheet ({}) does not match number "
-                                         "of points in current show ({})",
-                    numPoints, GetShow()->GetNumPoints()));
+                wxMessageBox(e.what());
                 wxTheClipboard->Close();
                 return;
             }
-            auto reader
-                = CalChart::Reader({ static_cast<std::byte const*>(clipboardObject.GetData()) + sizeof(numPoints),
-                    clipboardObject.GetDataSize() - sizeof(numPoints) });
-            reader.Get<uint32_t>();
-            reader.Get<uint32_t>();
+        }
+        if (wxTheClipboard->IsSupported(wxString{ kSheetDataClipboardFormatV2 })) {
+            wxCustomDataObject clipboardObject(wxString{ kSheetDataClipboardFormat });
+            wxTheClipboard->GetData(clipboardObject);
+            try {
+                auto sht = fromClipboardDataV2(*GetShow(),
+                    { static_cast<std::byte const*>(clipboardObject.GetData()), clipboardObject.GetDataSize() });
+                GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum());
+            } catch (std::exception const& e) {
 
-            CalChart::Show::Sheet_container_t sht(1, CalChart::Sheet(numPoints, reader));
-            GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum());
+                wxMessageBox(e.what());
+                wxTheClipboard->Close();
+                return;
+            }
         }
         wxTheClipboard->Close();
     }
