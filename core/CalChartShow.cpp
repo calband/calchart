@@ -534,10 +534,16 @@ auto Show::toJSON() const -> nlohmann::json
     return result;
 }
 
-auto Show::GenerateSheetElements(Configuration const& config, int referencePoint) const
+auto Show::GenerateSheetElements(Configuration const& config) const -> std::vector<Draw::DrawCommand>
+{
+    return mSheets.at(mSheetNum).GenerateSheetElements(config, mSelectionList, GetPointsLabel());
+}
+
+auto Show::GenerateSheetElementsForReferencePoint(Configuration const& config, unsigned referencePoint) const
     -> std::vector<Draw::DrawCommand>
 {
-    return mSheets.at(mSheetNum).GenerateSheetElements(config, mSelectionList, GetPointsLabel(), referencePoint);
+    return mSheets.at(mSheetNum).GenerateSheetElementsForReferencePoint(
+        config, mSelectionList, GetPointsLabel(), referencePoint);
 }
 
 auto Show::GeneratePhantomPointsDrawCommands(Configuration const& config, MarcherToPosition const& positions) const
@@ -696,11 +702,22 @@ auto Show::GetRelabelMapping(std::vector<Coord> const& source_marchers, std::vec
     return table;
 }
 
-auto Show::WillMovePoints(MarcherToPosition const& new_positions, int ref) const -> bool
+auto Show::WillMovePoints(MarcherToPosition const& new_positions) const -> bool
 {
     auto& sheet = mSheets.at(mSheetNum);
     for (auto&& [index, position] : new_positions) {
-        if (position != sheet.GetMarcherPosition(index, ref)) {
+        if (position != sheet.GetMarcherPosition(index)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+auto Show::WillMoveRefPoints(MarcherToPosition const& new_positions, int ref) const -> bool
+{
+    auto& sheet = mSheets.at(mSheetNum);
+    for (auto&& [index, position] : new_positions) {
+        if (position != sheet.GetMarcherRefPosition(index, ref)) {
             return true;
         }
     }
@@ -766,7 +783,7 @@ auto Show::MakeToggleSelection(SelectionList const& sl) const -> SelectionList
 
 // toggle selection means toggle it as selected to unselected
 // otherwise, always select it
-auto Show::MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon, int ref) const -> SelectionList
+auto Show::MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon) const -> SelectionList
 {
     if (polygon.size() < 3) {
         return {};
@@ -775,7 +792,23 @@ auto Show::MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon, int re
     SelectionList sl;
     auto& sheet = mSheets.at(mSheetNum);
     for (auto i = 0UL; i < GetNumPoints(); i++) {
-        if (CalChart::Inside(sheet.GetMarcherPosition(i, ref), polygon)) {
+        if (CalChart::Inside(sheet.GetMarcherPosition(i), polygon)) {
+            sl.insert(i);
+        }
+    }
+    return sl;
+}
+
+auto Show::MakeRefSelectWithinPolygon(CalChart::RawPolygon_t const& polygon, unsigned ref) const -> SelectionList
+{
+    if (polygon.size() < 3) {
+        return {};
+    }
+
+    SelectionList sl;
+    auto& sheet = mSheets.at(mSheetNum);
+    for (auto i = 0UL; i < GetNumPoints(); i++) {
+        if (CalChart::Inside(sheet.GetMarcherRefPosition(i, ref), polygon)) {
             sl.insert(i);
         }
     }
@@ -1055,31 +1088,61 @@ auto Show::Create_SetPrintableContinuity(std::map<int, std::pair<std::string, st
     return { action, reaction };
 }
 
-auto Show::Create_MovePointsCommand(MarcherToPosition const& new_positions, int ref) const -> Show_command_pair
+auto Show::Create_MovePointsCommand(MarcherToPosition const& new_positions) const -> Show_command_pair
 {
-    return Create_MovePointsCommand(GetCurrentSheetNum(), new_positions, ref);
+    return Create_MovePointsCommand(GetCurrentSheetNum(), new_positions);
 }
 
-auto Show::Create_MovePointsCommand(int whichSheet, MarcherToPosition const& new_positions, int ref) const
+auto Show::Create_MovePointsCommand(int whichSheet, MarcherToPosition const& new_positions) const -> Show_command_pair
+{
+    auto const& sheet = mSheets.at(whichSheet);
+    MarcherToPosition original_positions;
+    for (auto&& index : new_positions) {
+        original_positions[index.first] = sheet.GetMarcherPosition(index.first);
+    }
+    auto originalCurves = sheet.GetCurveAssignments();
+
+    auto action = [sheet_num = whichSheet, new_positions](Show& show) {
+        auto& sheet = show.mSheets.at(sheet_num);
+        for (auto&& i : new_positions) {
+            sheet.SetPosition(i.second, i.first);
+        }
+    };
+    auto reaction = [sheet_num = whichSheet, original_positions, originalCurves](Show& show) {
+        auto& sheet = show.mSheets.at(sheet_num);
+        for (auto&& i : original_positions) {
+            sheet.SetPosition(i.second, i.first);
+        }
+        sheet.SetCurveAssignment(originalCurves);
+    };
+    return { action, reaction };
+}
+
+auto Show::Create_MoveRefPointsCommand(MarcherToPosition const& new_positions, unsigned ref) const -> Show_command_pair
+{
+    return Create_MoveRefPointsCommand(GetCurrentSheetNum(), new_positions, ref);
+}
+
+auto Show::Create_MoveRefPointsCommand(int whichSheet, MarcherToPosition const& new_positions, unsigned ref) const
     -> Show_command_pair
 {
     auto const& sheet = mSheets.at(whichSheet);
     MarcherToPosition original_positions;
     for (auto&& index : new_positions) {
-        original_positions[index.first] = sheet.GetMarcherPosition(index.first, ref);
+        original_positions[index.first] = sheet.GetMarcherRefPosition(index.first, ref);
     }
     auto originalCurves = sheet.GetCurveAssignments();
 
     auto action = [sheet_num = whichSheet, new_positions, ref](Show& show) {
         auto& sheet = show.mSheets.at(sheet_num);
         for (auto&& i : new_positions) {
-            sheet.SetPosition(i.second, i.first, ref);
+            sheet.SetRefPosition(i.second, i.first, ref);
         }
     };
     auto reaction = [sheet_num = whichSheet, original_positions, ref, originalCurves](Show& show) {
         auto& sheet = show.mSheets.at(sheet_num);
         for (auto&& i : original_positions) {
-            sheet.SetPosition(i.second, i.first, ref);
+            sheet.SetRefPosition(i.second, i.first, ref);
         }
         sheet.SetCurveAssignment(originalCurves);
     };
@@ -1145,7 +1208,7 @@ auto Show::Create_DeletePointsCommand() const -> Show_command_pair
     return { action, reaction };
 }
 
-auto Show::Create_RotatePointPositionsCommand(int rotateAmount, int ref) const -> Show_command_pair
+auto Show::Create_RotatePointPositionsCommand(int rotateAmount) const -> Show_command_pair
 {
     // construct a vector of point indices in order
     std::vector<unsigned> pointIndices;
@@ -1155,7 +1218,7 @@ auto Show::Create_RotatePointPositionsCommand(int rotateAmount, int ref) const -
     std::vector<Coord> finalPositions;
     auto& sheet = mSheets.at(mSheetNum);
     std::transform(mSelectionList.begin(), mSelectionList.end(), std::back_inserter(finalPositions),
-        [&sheet, ref](unsigned i) { return sheet.GetMarcherPosition(i, ref); });
+        [&sheet](unsigned i) { return sheet.GetMarcherPosition(i); });
     rotateAmount %= mSelectionList.size();
     std::rotate(finalPositions.begin(), finalPositions.begin() + rotateAmount, finalPositions.end());
 
@@ -1164,19 +1227,41 @@ auto Show::Create_RotatePointPositionsCommand(int rotateAmount, int ref) const -
     for (int index = static_cast<int>(pointIndices.size()) - 1; index >= 0; index--) {
         positions[pointIndices[index]] = finalPositions[index];
     }
-    return Create_MovePointsCommand(positions, ref);
+    return Create_MovePointsCommand(positions);
 }
 
-auto Show::Create_ResetReferencePointToRef0(int ref) const -> Show_command_pair
+auto Show::Create_RotateRefPointPositionsCommand(int rotateAmount, unsigned ref) const -> Show_command_pair
+{
+    // construct a vector of point indices in order
+    std::vector<unsigned> pointIndices;
+    std::copy(mSelectionList.begin(), mSelectionList.end(), std::back_inserter(pointIndices));
+
+    // construct a vector of point positions, rotated by rotate amount
+    std::vector<Coord> finalPositions;
+    auto& sheet = mSheets.at(mSheetNum);
+    std::transform(mSelectionList.begin(), mSelectionList.end(), std::back_inserter(finalPositions),
+        [&sheet, ref](unsigned i) { return sheet.GetMarcherRefPosition(i, ref); });
+    rotateAmount %= mSelectionList.size();
+    std::rotate(finalPositions.begin(), finalPositions.begin() + rotateAmount, finalPositions.end());
+
+    // put things into place.
+    MarcherToPosition positions;
+    for (int index = static_cast<int>(pointIndices.size()) - 1; index >= 0; index--) {
+        positions[pointIndices[index]] = finalPositions[index];
+    }
+    return Create_MoveRefPointsCommand(positions, ref);
+}
+
+auto Show::Create_ResetReferencePointToRef0(unsigned ref) const -> Show_command_pair
 {
     MarcherToPosition positions;
     auto& sheet = mSheets.at(mSheetNum);
     // for selected points, set the reference point to ref0
     // this should be per selection list defect #179
     for (auto&& i : mSelectionList) {
-        positions[i] = sheet.GetMarcherPosition(i, 0);
+        positions[i] = sheet.GetMarcherPosition(i);
     }
-    return Create_MovePointsCommand(positions, ref);
+    return Create_MoveRefPointsCommand(positions, ref);
 }
 
 auto Show::Create_SetSymbolCommand(SYMBOL_TYPE sym) const -> Show_command_pair
@@ -1391,7 +1476,7 @@ auto Show::GetNumSheets() const -> size_t { return mSheets.size(); }
 auto Show::GetCurrentSheetNum() const -> size_t { return mSheetNum; }
 auto Show::GetShowMode() const -> ShowMode const& { return mMode; }
 auto Show::GetNumPoints() const -> size_t { return mDotLabelAndInstrument.size(); }
-auto Show::GetCurrentReferencePoint() const -> int { return mCurrentReferencePoint; }
+auto Show::GetCurrentReferencePoint() const -> std::optional<unsigned> { return mCurrentReferencePoint; }
 
 // Sheet copying
 auto Show::CopySheet(size_t sheet) const -> Sheet { return mSheets.at(sheet); }
@@ -1701,21 +1786,38 @@ auto Show::GetPointsFromLabels(std::vector<std::string> const& labels) const -> 
 }
 
 // Marcher position
-auto Show::GetMarcherPosition(size_t sheet, MarcherIndex i, unsigned ref) const -> Coord
+auto Show::GetMarcherPosition(size_t sheet, MarcherIndex i) const -> Coord
 {
-    return mSheets.at(sheet).GetMarcherPosition(i, ref);
+    return mSheets.at(sheet).GetMarcherPosition(i);
 }
-auto Show::GetMarcherPositionOnCurrentSheet(MarcherIndex i, unsigned ref) const -> Coord
+auto Show::GetMarcherPositionOnCurrentSheet(MarcherIndex i) const -> Coord
 {
-    return GetMarcherPosition(GetCurrentSheetNum(), i, ref);
+    return GetMarcherPosition(GetCurrentSheetNum(), i);
 }
-auto Show::GetAllMarcherPositions(size_t sheet, unsigned ref) const -> std::vector<Coord>
+auto Show::GetAllMarcherPositions(size_t sheet) const -> std::vector<Coord>
 {
-    return mSheets.at(sheet).GetAllMarcherPositions(ref);
+    return mSheets.at(sheet).GetAllMarcherPositions();
 }
-auto Show::GetAllMarcherPositionsOnCurrentSheet(unsigned ref) const -> std::vector<Coord>
+auto Show::GetAllMarcherPositionsOnCurrentSheet() const -> std::vector<Coord>
 {
-    return GetAllMarcherPositions(GetCurrentSheetNum(), ref);
+    return GetAllMarcherPositions(GetCurrentSheetNum());
+}
+
+auto Show::GetMarcherRefPosition(size_t sheet, MarcherIndex i, unsigned ref) const -> Coord
+{
+    return mSheets.at(sheet).GetMarcherRefPosition(i, ref);
+}
+auto Show::GetMarcherRefPositionOnCurrentSheet(MarcherIndex i, unsigned ref) const -> Coord
+{
+    return GetMarcherRefPosition(GetCurrentSheetNum(), i, ref);
+}
+auto Show::GetAllMarcherRefPositions(size_t sheet, unsigned ref) const -> std::vector<Coord>
+{
+    return mSheets.at(sheet).GetAllMarcherRefPositions(ref);
+}
+auto Show::GetAllMarcherRefPositionsOnCurrentSheet(unsigned ref) const -> std::vector<Coord>
+{
+    return GetAllMarcherRefPositions(GetCurrentSheetNum(), ref);
 }
 
 // Find marcher

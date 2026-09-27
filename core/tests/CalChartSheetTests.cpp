@@ -14,7 +14,8 @@ TEST_CASE("RoundTrip1", "CalChartSheetTests")
     CHECK(std::get<0>(table.front()) == INGL_SHET);
     auto re_read_sheet = Sheet(0, std::get<1>(table.front()));
     auto re_read_sheet_data = re_read_sheet.SerializeSheet();
-    bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
+    bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size()
+        && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
     (void)is_equal;
     CHECK(is_equal);
 }
@@ -31,7 +32,8 @@ TEST_CASE("RoundTrip2", "CalChartSheetTests")
     CHECK(std::get<0>(table.front()) == INGL_SHET);
     auto re_read_sheet = Sheet(0, std::get<1>(table.front()));
     auto re_read_sheet_data = re_read_sheet.SerializeSheet();
-    bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
+    bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size()
+        && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
     (void)is_equal;
     CHECK(is_equal);
 }
@@ -42,9 +44,9 @@ TEST_CASE("RoundTrip3", "CalChartSheetTests")
     auto blank_sheet = Sheet(1, "new_sheet");
     blank_sheet.SetName("new_name");
     blank_sheet.SetPosition(Coord(10, 10), 0);
-    blank_sheet.SetPosition(Coord(20, 10), 0, 1);
-    blank_sheet.SetPosition(Coord(30, 40), 0, 2);
-    blank_sheet.SetPosition(Coord(52, 50), 0, 3);
+    blank_sheet.SetRefPosition(Coord(20, 10), 0, 0);
+    blank_sheet.SetRefPosition(Coord(30, 40), 0, 1);
+    blank_sheet.SetRefPosition(Coord(52, 50), 0, 2);
     blank_sheet.SetBeats(13);
     blank_sheet.SetContinuity(SYMBOL_PLAIN, Continuity{ "MT E REM" });
     blank_sheet.SetPrintableContinuity("number 1", "duuuude, writing this testing is boring");
@@ -56,7 +58,8 @@ TEST_CASE("RoundTrip3", "CalChartSheetTests")
     CHECK(std::get<0>(table.front()) == INGL_SHET);
     auto re_read_sheet = Sheet(1, std::get<1>(table.front()));
     auto re_read_sheet_data = re_read_sheet.SerializeSheet();
-    bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
+    bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size()
+        && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
     //		auto mismatch_at = std::mismatch(blank_sheet_data.begin(),
     // blank_sheet_data.end(), re_read_sheet_data.begin());
     //		std::cout<<"mismatch at

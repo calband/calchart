@@ -79,9 +79,13 @@ wxAuiToolBar* CreateToolBar(wxWindow* parent, wxWindowID id, long style, CalChar
     tb->AddSeparator();
 
     // zoom
-    tb->AddTool(CALCHART__ViewZoomOut, "", ScaleButtonBitmap(wxArtProvider::GetBitmap(wxART_MINUS)), "Zoom out", wxITEM_NORMAL);
-    tb->AddControl(new wxSlider(tb, CALCHART__slider_zoom, 0, 0, zoom_steps, wxDefaultPosition, wxSize(GetToolBarControlsZoomSize(), -1)), "Zoom");
-    tb->AddTool(CALCHART__ViewZoomIn, "", ScaleButtonBitmap(wxArtProvider::GetBitmap(wxART_PLUS)), "Zoom out", wxITEM_NORMAL);
+    tb->AddTool(
+        CALCHART__ViewZoomOut, "", ScaleButtonBitmap(wxArtProvider::GetBitmap(wxART_MINUS)), "Zoom out", wxITEM_NORMAL);
+    tb->AddControl(new wxSlider(tb, CALCHART__slider_zoom, 0, 0, zoom_steps, wxDefaultPosition,
+                       wxSize(GetToolBarControlsZoomSize(), -1)),
+        "Zoom");
+    tb->AddTool(
+        CALCHART__ViewZoomIn, "", ScaleButtonBitmap(wxArtProvider::GetBitmap(wxART_PLUS)), "Zoom out", wxITEM_NORMAL);
 
     tb->AddSeparator();
 
@@ -110,12 +114,14 @@ wxAuiToolBar* CreateToolBar(wxWindow* parent, wxWindowID id, long style, CalChar
         buf.sprintf(wxT("%u"), i);
         refChoice->Append(buf);
     }
-    refChoice->SetMaxSize(wxSize{ BestSizeX(refChoice, std::vector<std::string>{ "Off" }) + GetToolBarControlsPadding(), -1 });
+    refChoice->SetMaxSize(
+        wxSize{ BestSizeX(refChoice, std::vector<std::string>{ "Off" }) + GetToolBarControlsPadding(), -1 });
     refChoice->SetSelection(0);
     tb->AddControl(refChoice, "Ref Group");
 
     // paths
-    tb->AddTool(CALCHART__draw_paths, "Path", ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_paths))), "Show path to next", wxITEM_CHECK);
+    tb->AddTool(CALCHART__draw_paths, "Path", ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_paths))), "Show path to next",
+        wxITEM_CHECK);
 
     // Ghost choice
     auto ghostChioce = new wxChoice(tb, CALCHART__GhostControls);
@@ -161,8 +167,9 @@ double GetZoomAmount(wxWindow* target)
 
 void SetZoomAmount(wxWindow* target, double zoom)
 {
-    auto newSliderValue = (zoom <= zoom_min) ? 0 : (zoom >= zoom_max) ? zoom_steps
-                                                                      : (zoom - zoom_min) / (zoom_max - zoom_min) * zoom_steps;
+    auto newSliderValue = (zoom <= zoom_min) ? 0
+        : (zoom >= zoom_max)                 ? zoom_steps
+                                             : (zoom - zoom_min) / (zoom_max - zoom_min) * zoom_steps;
     auto slider = static_cast<wxSlider*>(target->FindWindow(CALCHART__slider_zoom));
     if (newSliderValue == slider->GetValue()) {
         return;
@@ -170,9 +177,13 @@ void SetZoomAmount(wxWindow* target, double zoom)
     slider->SetValue(newSliderValue);
 }
 
-int GetRefChoice(wxWindow* target)
+std::optional<int> GetRefChoice(wxWindow* target)
 {
-    return static_cast<wxChoice*>(target->FindWindow(CALCHART__refnum_callback))->GetSelection();
+    auto selection = static_cast<wxChoice*>(target->FindWindow(CALCHART__refnum_callback))->GetSelection();
+    if (selection == 0) {
+        return std::nullopt;
+    }
+    return selection - 1;
 }
 
 int GetGhostChoice(wxWindow* target)

@@ -69,24 +69,24 @@ public:
     [[nodiscard]] auto LabelIsVisible() const { return !mFlags.test(kLabelIsInvisible); }
     void SetLabelVisibility(bool isVisible);
 
-    // reference points 0 is the point, refs are [1, kNumRefPoints]
-    [[nodiscard]] auto GetPos(unsigned ref = 0) const -> Coord;
-    void SetPos(Coord c, unsigned ref = 0);
+    [[nodiscard]] auto GetPos() const -> Coord;
+    void SetPos(Coord c);
 
-    [[nodiscard]] auto GetDrawCommands(unsigned ref, std::string const& label, double dotRatio, double pLineRatio,
+    // reference points are [0, kNumRefPoints)
+    [[nodiscard]] auto GetRefPos(unsigned ref) const -> Coord;
+    void SetRefPos(Coord c, unsigned ref);
+
+    [[nodiscard]] auto GetDrawCommands(std::string const& label, double dotRatio, double pLineRatio,
         double sLineRatio) const -> std::vector<Draw::DrawCommand>;
-    [[nodiscard]] auto GetDrawCommands(unsigned ref, std::string const& label, Configuration const& config) const
-        -> std::vector<Draw::DrawCommand>;
-    [[nodiscard]] auto GetDrawCommands(
-        std::string const& label, double dotRatio, double pLineRatio, double sLineRatio) const
-    {
-        return GetDrawCommands(0, label, dotRatio, pLineRatio, sLineRatio);
-    }
     [[nodiscard]] auto GetDrawCommands(std::string const& label, Configuration const& config) const
         -> std::vector<Draw::DrawCommand>;
     [[nodiscard]] auto GetDrawCommands(double dotRatio, double pLineRatio, double sLineRatio) const
         -> std::vector<Draw::DrawCommand>;
     [[nodiscard]] auto GetDrawCommands(Configuration const& config) const -> std::vector<Draw::DrawCommand>;
+    [[nodiscard]] auto GetRefDrawCommands(unsigned ref, std::string const& label, double dotRatio, double pLineRatio,
+        double sLineRatio) const -> std::vector<Draw::DrawCommand>;
+    [[nodiscard]] auto GetRefDrawCommands(unsigned ref, std::string const& label, Configuration const& config) const
+        -> std::vector<Draw::DrawCommand>;
 
     [[nodiscard]] auto GetSymbol() const { return mSym; }
     void SetSymbol(SYMBOL_TYPE sym);

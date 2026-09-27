@@ -403,8 +403,9 @@ Sheet::Sheet(Version_3_3_and_earlier, size_t numPoints, Reader& reader, ParseErr
             auto x = reader.Get<int16_t>();
             auto y = reader.Get<int16_t>();
             auto c = Coord(x, y);
-            for (unsigned j = 0; j <= Point::kNumRefPoints; j++) {
-                mPoints[i].SetPos(c, j);
+            mPoints[i].SetPos(c);
+            for (unsigned j = 0; j < Point::kNumRefPoints; j++) {
+                mPoints[i].SetRefPos(c, j);
             }
         }
     }
@@ -421,7 +422,7 @@ Sheet::Sheet(Version_3_3_and_earlier, size_t numPoints, Reader& reader, ParseErr
             auto x = reader.Get<int16_t>();
             auto y = reader.Get<int16_t>();
             auto c = Coord(x, y);
-            mPoints[i].SetPos(c, ref);
+            mPoints[i].SetRefPos(c, ref - 1);
         }
         name = reader.Get<uint32_t>();
     }
@@ -870,10 +871,22 @@ auto Sheet::toJSON() const -> nlohmann::json
 }
 
 // Find point at certain coords
-auto Sheet::FindMarcher(Coord where, Coord::units searchBound, unsigned ref) const -> std::optional<MarcherIndex>
+auto Sheet::FindMarcher(Coord where, Coord::units searchBound) const -> std::optional<MarcherIndex>
 {
     for (auto i : std::views::iota(0ul, mPoints.size())) {
-        Coord c = GetMarcherPosition(i, ref);
+        Coord c = GetMarcherPosition(i);
+        if (((where.x + searchBound) >= c.x) && ((where.x - searchBound) <= c.x) && ((where.y + searchBound) >= c.y)
+            && ((where.y - searchBound) <= c.y)) {
+            return i;
+        }
+    }
+    return std::nullopt;
+}
+
+auto Sheet::FindMarcherRef(Coord where, Coord::units searchBound, unsigned ref) const -> std::optional<MarcherIndex>
+{
+    for (auto i : std::views::iota(0ul, mPoints.size())) {
+        Coord c = GetMarcherRefPosition(i, ref);
         if (((where.x + searchBound) >= c.x) && ((where.x - searchBound) <= c.x) && ((where.y + searchBound) >= c.y)
             && ((where.y - searchBound) <= c.y)) {
             return i;
@@ -1041,37 +1054,44 @@ auto Sheet::GetPrintNumber() const -> std::string { return mPrintableContinuity.
 std::string Sheet::GetRawPrintContinuity() const { return mPrintableContinuity.GetOriginalLine(); }
 
 // Get position of point
-auto Sheet::GetMarcherPosition(MarcherIndex i, unsigned ref) const -> Coord { return mPoints[i].GetPos(ref); }
+auto Sheet::GetMarcherPosition(MarcherIndex i) const -> Coord { return mPoints[i].GetPos(); }
 
-auto Sheet::GetAllMarcherPositions(unsigned ref) const -> std::vector<Coord>
+auto Sheet::GetAllMarcherPositions() const -> std::vector<Coord>
 {
     return CalChart::Ranges::ToVector<Coord>(
-        mPoints | std::views::transform([ref](auto&& point) { return point.GetPos(ref); }));
+        mPoints | std::views::transform([](auto&& point) { return point.GetPos(); }));
 }
 
 // Set position of point
-void Sheet::SetPosition(Coord val, MarcherIndex i, unsigned ref)
+void Sheet::SetPosition(Coord val, MarcherIndex i)
 {
-    SetPositionHelper(val, i, ref);
-    if (ref == 0) {
-        UnassignMarchersFromAnyCurve({ i });
-        RepositionCurveMarchers();
-    }
+    SetPositionHelper(val, i);
+    UnassignMarchersFromAnyCurve({ i });
+    RepositionCurveMarchers();
 }
 
-void Sheet::SetPositionHelper(Coord val, MarcherIndex i, unsigned ref)
+void Sheet::SetPositionHelper(Coord val, MarcherIndex i)
 {
-    if (ref == 0) {
-        for (auto j = 1; j <= Point::kNumRefPoints; j++) {
-            if (mPoints[i].GetPos(j) == mPoints[i].GetPos(0)) {
-                mPoints[i].SetPos(val, j);
-            }
+    for (auto j = 0; j < Point::kNumRefPoints; j++) {
+        if (mPoints[i].GetRefPos(j) == mPoints[i].GetPos()) {
+            mPoints[i].SetRefPos(val, j);
         }
-        mPoints[i].SetPos(val);
-    } else {
-        mPoints[i].SetPos(val, ref);
     }
+    mPoints[i].SetPos(val);
 }
+
+auto Sheet::GetMarcherRefPosition(MarcherIndex i, unsigned ref) const -> Coord { return mPoints[i].GetRefPos(ref); }
+
+auto Sheet::GetAllMarcherRefPositions(unsigned ref) const -> std::vector<Coord>
+{
+    return CalChart::Ranges::ToVector<Coord>(
+        mPoints | std::views::transform([ref](auto&& point) { return point.GetRefPos(ref); }));
+}
+
+// Set position of point
+void Sheet::SetRefPosition(Coord val, MarcherIndex i, unsigned ref) { SetRefPositionHelper(val, i, ref); }
+
+void Sheet::SetRefPositionHelper(Coord val, MarcherIndex i, unsigned ref) { mPoints[i].SetRefPos(val, ref); }
 
 void Sheet::SetPrintableContinuity(std::string const& name, std::string const& lines)
 {
@@ -1135,11 +1155,19 @@ auto Sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLa
 
 namespace {
     // Returns a view adaptor that will transform a range of point indices to Draw point commands.
-    auto TransformIndexToDrawCommands(CalChart::Sheet const& sheet, std::vector<std::string> const& labels, int ref,
-        CalChart::Configuration const& config)
+    auto TransformIndexToDrawCommands(
+        CalChart::Sheet const& sheet, std::vector<std::string> const& labels, CalChart::Configuration const& config)
+    {
+        return std::views::transform([&sheet, labels, &config](int i) {
+            return sheet.GetMarcher(i).GetDrawCommands(labels.at(i), config);
+        }) | std::ranges::views::join;
+    }
+
+    auto TransformRefIndexToDrawCommands(CalChart::Sheet const& sheet, std::vector<std::string> const& labels,
+        unsigned ref, CalChart::Configuration const& config)
     {
         return std::views::transform([&sheet, ref, labels, &config](int i) {
-            return sheet.GetMarcher(i).GetDrawCommands(ref, labels.at(i), config);
+            return sheet.GetMarcher(i).GetRefDrawCommands(ref, labels.at(i), config);
         }) | std::ranges::views::join;
     }
 
@@ -1164,7 +1192,7 @@ namespace {
 
     auto GenerateSheetMarcherDrawCommands(CalChart::Configuration const& config,
         CalChart::SelectionList const& selection_list, std::vector<std::string> const& labels,
-        CalChart::Sheet const& sheet, int ref, std::array<Colors, 4> color) -> std::vector<CalChart::Draw::DrawCommand>
+        CalChart::Sheet const& sheet, std::array<Colors, 4> color) -> std::vector<CalChart::Draw::DrawCommand>
     {
 
         auto pointLabelFont = CalChart::Font{ Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio()) };
@@ -1173,10 +1201,29 @@ namespace {
                 CalChart::Draw::withBrushAndPen(config.Get_CalChartBrushAndPen(std::get<0>(color)),
                     CalChart::Draw::withTextForeground(config.Get_CalChartBrushAndPen(std::get<2>(color)),
                         NegativeIntersection(selection_list, labels.size())
-                            | TransformIndexToDrawCommands(sheet, labels, ref, config))),
+                            | TransformIndexToDrawCommands(sheet, labels, config))),
                 CalChart::Draw::withBrushAndPen(config.Get_CalChartBrushAndPen(std::get<1>(color)),
                     CalChart::Draw::withTextForeground(config.Get_CalChartBrushAndPen(std::get<3>(color)),
-                        selection_list | TransformIndexToDrawCommands(sheet, labels, ref, config))),
+                        selection_list | TransformIndexToDrawCommands(sheet, labels, config))),
+            }) };
+    }
+
+    auto GenerateSheetRefMarcherDrawCommands(CalChart::Configuration const& config,
+        CalChart::SelectionList const& selection_list, std::vector<std::string> const& labels,
+        CalChart::Sheet const& sheet, unsigned ref, std::array<Colors, 4> color)
+        -> std::vector<CalChart::Draw::DrawCommand>
+    {
+
+        auto pointLabelFont = CalChart::Font{ Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio()) };
+        return { CalChart::Draw::withFont(pointLabelFont,
+            std::vector{
+                CalChart::Draw::withBrushAndPen(config.Get_CalChartBrushAndPen(std::get<0>(color)),
+                    CalChart::Draw::withTextForeground(config.Get_CalChartBrushAndPen(std::get<2>(color)),
+                        NegativeIntersection(selection_list, labels.size())
+                            | TransformRefIndexToDrawCommands(sheet, labels, ref, config))),
+                CalChart::Draw::withBrushAndPen(config.Get_CalChartBrushAndPen(std::get<1>(color)),
+                    CalChart::Draw::withTextForeground(config.Get_CalChartBrushAndPen(std::get<3>(color)),
+                        selection_list | TransformRefIndexToDrawCommands(sheet, labels, ref, config))),
             }) };
     }
 
@@ -1211,20 +1258,32 @@ namespace {
 auto Sheet::GenerateGhostElements(CalChart::Configuration const& config, SelectionList const& selected,
     std::vector<std::string> const& marcherLabels) const -> std::vector<CalChart::Draw::DrawCommand>
 {
-    return GenerateSheetMarcherDrawCommands(config, selected, marcherLabels, *this, 0, GetMarcherColors(true, false));
+    return GenerateSheetMarcherDrawCommands(config, selected, marcherLabels, *this, GetMarcherColors(true, false));
 }
 
 auto Sheet::GenerateSheetElements(CalChart::Configuration const& config, SelectionList const& selected,
-    std::vector<std::string> const& marcherLabels, int referencePoint) const -> std::vector<CalChart::Draw::DrawCommand>
+    std::vector<std::string> const& marcherLabels) const -> std::vector<CalChart::Draw::DrawCommand>
 {
     auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
-    if (referencePoint > 0) {
-        // if we are editing a ref point other than 0, draw the 0 one in a different color.
-        CalChart::append(drawCmds,
-            GenerateSheetMarcherDrawCommands(config, selected, marcherLabels, *this, 0, GetMarcherColors(false, true)));
-    }
     CalChart::append(drawCmds,
-        GenerateSheetMarcherDrawCommands(
+        GenerateSheetMarcherDrawCommands(config, selected, marcherLabels, *this, GetMarcherColors(false, false)));
+
+    for (auto&& [which, curve] : CalChart::Ranges::enumerate_view(mCurves)) {
+        CalChart::append(drawCmds, GenerateCurve(config, curve.first, which));
+    }
+    return drawCmds;
+}
+
+auto Sheet::GenerateSheetElementsForReferencePoint(CalChart::Configuration const& config, SelectionList const& selected,
+    std::vector<std::string> const& marcherLabels, unsigned referencePoint) const
+    -> std::vector<CalChart::Draw::DrawCommand>
+{
+    auto drawCmds = std::vector<CalChart::Draw::DrawCommand>{};
+    // if we are editing a ref point, draw the 0 one in a different color.
+    CalChart::append(drawCmds,
+        GenerateSheetMarcherDrawCommands(config, selected, marcherLabels, *this, GetMarcherColors(false, true)));
+    CalChart::append(drawCmds,
+        GenerateSheetRefMarcherDrawCommands(
             config, selected, marcherLabels, *this, referencePoint, GetMarcherColors(false, false)));
 
     for (auto&& [which, curve] : CalChart::Ranges::enumerate_view(mCurves)) {

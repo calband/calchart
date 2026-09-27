@@ -37,7 +37,7 @@ std::pair<CalChart::Coord::units, CalChart::Coord::units> GridChoice(wxWindow* t
 std::pair<CalChart::Coord::units, CalChart::Coord::units> ToolGridChoice(wxWindow* target);
 double GetZoomAmount(wxWindow* target);
 void SetZoomAmount(wxWindow* target, double zoom);
-int GetRefChoice(wxWindow* target);
+std::optional<int> GetRefChoice(wxWindow* target);
 int GetGhostChoice(wxWindow* target);
 void SetGhostChoice(wxWindow* target, int which);
 void SetInstrumentsInUse(wxWindow* target, std::vector<std::string> const& instruments);

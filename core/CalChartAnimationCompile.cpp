@@ -32,7 +32,8 @@ struct CompileState : public Compile {
         : CompileState(data.whichMarcher, data.marcherPosition, data.numBeats, data.endPosition, variablesStates)
     {
     }
-    CompileState(unsigned whichMarcher, Point point, Beats beats, std::optional<Coord> endPosition, Variables& variablesStates);
+    CompileState(
+        unsigned whichMarcher, Point point, Beats beats, std::optional<Coord> endPosition, Variables& variablesStates);
 
     [[nodiscard]] auto Append(Command cmd) -> bool override;
     void RegisterError(Error err) const override { mErrors.insert(err); }
@@ -41,9 +42,12 @@ struct CompileState : public Compile {
     void SetVarValue(Cont::Variable varnum, float value) override { mVars.at(toUType(varnum))[mWhichMarcher] = value; }
 
     [[nodiscard]] auto GetPointPosition() const -> Coord override { return mWhichPos; }
-    [[nodiscard]] auto GetStartingPosition() const -> Coord override { return mPoint.GetPos(0); }
+    [[nodiscard]] auto GetStartingPosition() const -> Coord override { return mPoint.GetPos(); }
     [[nodiscard]] auto GetEndingPosition() const -> Coord override;
-    [[nodiscard]] auto GetReferencePointPosition(unsigned refnum) const -> Coord override { return mPoint.GetPos(refnum); }
+    [[nodiscard]] auto GetReferencePointPosition(unsigned refnum) const -> Coord override
+    {
+        return mPoint.GetRefPos(refnum);
+    }
     [[nodiscard]] auto GetCurrentPoint() const -> unsigned override { return mWhichMarcher; }
     [[nodiscard]] auto GetBeatsRemaining() const -> unsigned override { return mBeatsRem; }
 
@@ -60,10 +64,8 @@ private:
     std::vector<Command> mCmds{};
 };
 
-auto CreateCompileResult(
-    AnimationData const& animationData,
-    Continuity const* proceedures,
-    Variables& variablesStates) -> CompileResult
+auto CreateCompileResult(AnimationData const& animationData, Continuity const* proceedures, Variables& variablesStates)
+    -> CompileResult
 {
     auto ac = CompileState(animationData, variablesStates);
 
@@ -75,7 +77,8 @@ auto CreateCompileResult(
             defcont.Compile(ac);
         } else {
             // use EVEN REM NP
-            Cont::ProcEven defcont(std::make_unique<Cont::ValueFloat>(ac.GetBeatsRemaining()), std::make_unique<Cont::NextPoint>());
+            Cont::ProcEven defcont(
+                std::make_unique<Cont::ValueFloat>(ac.GetBeatsRemaining()), std::make_unique<Cont::NextPoint>());
             defcont.Compile(ac);
         }
     } else {
@@ -98,16 +101,18 @@ auto CreateCompileResult(
     // report if we have extra time.
     if (ac.GetBeatsRemaining()) {
         ac.RegisterError(Error::EXTRATIME);
-        (void)ac.Append(CommandStill{ ac.GetPointPosition(), ac.GetBeatsRemaining(), CommandStill::Style::MarkTime, CalChart::Degree::East() });
+        (void)ac.Append(CommandStill{
+            ac.GetPointPosition(), ac.GetBeatsRemaining(), CommandStill::Style::MarkTime, CalChart::Degree::East() });
     }
 
     return ac.GetCommands();
 }
 
-CompileState::CompileState(unsigned whichMarcher, Point point, Beats beats, std::optional<Coord> endPosition, Variables& variablesStates)
+CompileState::CompileState(
+    unsigned whichMarcher, Point point, Beats beats, std::optional<Coord> endPosition, Variables& variablesStates)
     : mWhichMarcher(whichMarcher)
     , mPoint{ point }
-    , mWhichPos(mPoint.GetPos(0))
+    , mWhichPos(mPoint.GetPos())
     , mBeatsRem(beats)
     , mEndPosition{ endPosition }
     , mVars(variablesStates)
