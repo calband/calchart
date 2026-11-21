@@ -24,6 +24,8 @@
 
 #include <wx/setup.h>
 
+#include <wx/wx.h>
+
 #if wxUSE_WEBVIEW
 
 #include "HelpManager.hpp"

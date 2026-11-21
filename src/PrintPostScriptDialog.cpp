@@ -40,156 +40,25 @@ enum { CC_PRINT_ORIENT_PORTRAIT, CC_PRINT_ORIENT_LANDSCAPE };
 
 enum { CC_PRINT_ACTION_PRINTER, CC_PRINT_ACTION_FILE, CC_PRINT_ACTION_PREVIEW };
 
-enum { CC_PRINT_BUTTON_PRINT = 1000, CC_PRINT_BUTTON_SELECT, CC_PRINT_BUTTON_RESET_DEFAULTS };
-
-BEGIN_EVENT_TABLE(PrintPostScriptDialog, wxDialog)
-EVT_BUTTON(CC_PRINT_BUTTON_SELECT, PrintPostScriptDialog::ShowPrintSelect)
-EVT_BUTTON(CC_PRINT_BUTTON_RESET_DEFAULTS, PrintPostScriptDialog::ResetDefaults)
-END_EVENT_TABLE()
-
 IMPLEMENT_CLASS(PrintPostScriptDialog, wxDialog)
 
-PrintPostScriptDialog::PrintPostScriptDialog(const CalChartDoc* show, CalChart::Configuration& config, wxFrame* parent,
-    wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
-    : mShow(NULL)
+PrintPostScriptDialog::PrintPostScriptDialog(const CalChartDoc* show, CalChart::Configuration& config, wxFrame* parent)
+    : wxDialog{ parent, wxID_ANY, "Print Dialog", wxDefaultPosition, wxDefaultSize,
+        wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU }
+    , mShow{ show }
     , mConfig(config)
 {
-    Init();
-
-    Create(show, parent, id, caption, pos, size, style);
-}
-
-PrintPostScriptDialog::~PrintPostScriptDialog() { }
-
-void PrintPostScriptDialog::Init() { }
-
-void PrintPostScriptDialog::PrintShow()
-{
-#ifdef PRINT__RUN_CMD
-    std::string buf;
-#endif
-
-    long minyards;
-    text_minyards->GetValue().ToLong(&minyards);
-    if (minyards < 10 || minyards > 100) {
-        wxLogError("Yards entered invalid.  Please enter a number between 10 and 100.");
-        return;
-    }
-    auto overview = mConfig.Get_PrintPSOverview();
-
-    wxString s;
-    switch (mConfig.Get_PrintPSModes()) {
-    case CC_PRINT_ACTION_PREVIEW: {
-#ifdef PRINT__RUN_CMD
-        s = wxFileName::CreateTempFileName("cc_");
-        buf = std::format("{} {} \"{}\"", mConfig.Get_PrintViewCmd(), mConfig.Get_PrintViewCmd(), s.utf8_string());
-#endif
-    } break;
-    case CC_PRINT_ACTION_FILE:
-        s = wxFileSelector(
-            "Print to file", wxEmptyString, wxEmptyString, wxEmptyString, "*.ps", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-        if (s.empty())
-            return;
-        break;
-    case CC_PRINT_ACTION_PRINTER: {
-#ifdef PRINT__RUN_CMD
-        s = wxFileName::CreateTempFileName("cc_");
-        buf = std::format("{} {} \"{}\"", mConfig.Get_PrintViewCmd(), mConfig.Get_PrintViewCmd(), s.utf8_string());
-#else
-#endif
-    } break;
-    default:
-        break;
-    }
-
-    auto [result, n] = mShow->PrintToPS(overview, static_cast<int>(minyards), mIsSheetPicked, mConfig);
-    // stream to file:
-    wxFFileOutputStream(s).Write(result.c_str(), result.size());
-
-#ifdef PRINT__RUN_CMD
-    switch (mConfig.Get_PrintPSModes()) {
-    case CC_PRINT_ACTION_FILE:
-        break;
-    default:
-        // intentionally ignoring the result
-        (void)system(buf.c_str());
-        wxRemoveFile(s);
-        break;
-    }
-#endif
-
-    (void)wxMessageBox(std::format("Printed {} pages.", n), mShow->GetTitle());
-}
-
-void PrintPostScriptDialog::ShowPrintSelect(wxCommandEvent&)
-{
-    wxArrayString choices;
-    for (auto&& name : mShow->GetSheetsName()) {
-        choices.Add(name);
-    }
-    wxMultiChoiceDialog dialog(this, "Choose which pages to print", "Pages to Print", choices);
-    wxArrayInt markedChoices(mIsSheetPicked.begin(), mIsSheetPicked.end());
-    dialog.SetSelections(markedChoices);
-    if (dialog.ShowModal() == wxID_OK) {
-        mIsSheetPicked.clear();
-        // build up a set of what's been selected:
-        for (auto&& selection : dialog.GetSelections())
-            mIsSheetPicked.insert(selection);
-    }
-}
-
-void PrintPostScriptDialog::ResetDefaults(wxCommandEvent&)
-{
-#ifdef PRINT__RUN_CMD
-    mConfig.Clear_PrintCmd();
-    mConfig.Clear_PrintOpts();
-#else
-    mConfig.Clear_PrintFile();
-#endif
-    mConfig.Clear_PrintViewCmd();
-    mConfig.Clear_PrintViewOpts();
-
-    mConfig.Clear_PageOffsetX();
-    mConfig.Clear_PageOffsetY();
-    mConfig.Clear_PageWidth();
-    mConfig.Clear_PageHeight();
-
-    // re-read values
-    TransferDataToWindow();
-}
-
-bool PrintPostScriptDialog::Create(const CalChartDoc* show, wxFrame* parent, wxWindowID id, const wxString& caption,
-    const wxPoint& pos, const wxSize& size, long style)
-{
-    if (!wxDialog::Create(parent, id, caption, pos, size, style)) {
-        return false;
-    }
-    mShow = show;
-    for (size_t i = 0; i < mShow->GetNumSheets(); ++i) {
+    for (auto i : std::views::iota(0UL, mShow->GetNumSheets())) {
         mIsSheetPicked.insert(i);
     }
 
-    CreateControls();
-
-    // This fits the dalog to the minimum size dictated by the sizers
-    GetSizer()->Fit(this);
-    // This ensures that the dialog cannot be smaller than the minimum size
-    GetSizer()->SetSizeHints(this);
-
-    Center();
-
-    return true;
-}
-
-void PrintPostScriptDialog::CreateControls()
-{
     constexpr auto minWidth = 100;
     wxUI::VSizer{
         wxSizerFlags{}.Border(wxALL, 5).Left(),
         wxUI::HSizer{
             wxUI::Button{ wxID_OK, "&Print" },
             wxUI::Button{ wxID_CANCEL, "&Cancel" }.setDefault(),
-            wxUI::Button{ CC_PRINT_BUTTON_RESET_DEFAULTS, "&Reset Values" },
+            wxUI::Button{ "&Reset Values" }.bind([this]() { ResetDefaults(); }),
         },
 #ifdef PRINT__RUN_CMD
         wxUI::HSizer{
@@ -237,7 +106,7 @@ void PrintPostScriptDialog::CreateControls()
             wxUI::CheckBox{ "Continuit&y" }.withProxy(check_cont),
             wxUI::CheckBox{ "Cove&r pages" }.withProxy(check_pages),
         },
-        wxUI::Button{ CC_PRINT_BUTTON_SELECT, "S&elect sheets..." },
+        wxUI::Button{ "S&elect sheets..." }.bind([this]() { ShowPrintSelect(); }),
         wxUI::HSizer{
             wxUI::VSizer{
                 wxUI::Text{ "Page &width:" },
@@ -269,23 +138,122 @@ void PrintPostScriptDialog::CreateControls()
         },
     }
         .fitTo(this);
+
+    Center();
+}
+
+void PrintPostScriptDialog::PrintShow()
+{
+#ifdef PRINT__RUN_CMD
+    std::string buf;
+#endif
+
+    long minyards;
+    text_minyards->GetValue().ToLong(&minyards);
+    if (minyards < 10 || minyards > 100) {
+        wxLogError("Yards entered invalid.  Please enter a number between 10 and 100.");
+        return;
+    }
+    auto overview = mConfig.Get_PrintPSOverview();
+
+    wxString s;
+    switch (mConfig.Get_PrintPSModes()) {
+    case CC_PRINT_ACTION_PREVIEW: {
+#ifdef PRINT__RUN_CMD
+        s = wxFileName::CreateTempFileName("cc_");
+        buf = std::format("{} {} \"{}\"", mConfig.Get_PrintViewCmd(), mConfig.Get_PrintViewCmd(), s.utf8_string());
+#endif
+    } break;
+    case CC_PRINT_ACTION_FILE:
+        s = wxFileSelector(
+            "Print to file", wxEmptyString, wxEmptyString, wxEmptyString, "*.ps", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+        if (s.empty()) {
+            return;
+        }
+        break;
+    case CC_PRINT_ACTION_PRINTER:
+#ifdef PRINT__RUN_CMD
+        s = wxFileName::CreateTempFileName("cc_");
+        buf = std::format("{} {} \"{}\"", mConfig.Get_PrintViewCmd(), mConfig.Get_PrintViewCmd(), s.utf8_string());
+#else
+#endif
+        break;
+    default:
+        break;
+    }
+
+    auto [result, n] = mShow->PrintToPS(overview, static_cast<int>(minyards), mIsSheetPicked, mConfig);
+    // stream to file:
+    wxFFileOutputStream(s).Write(result.c_str(), result.size());
+
+#ifdef PRINT__RUN_CMD
+    switch (mConfig.Get_PrintPSModes()) {
+    case CC_PRINT_ACTION_FILE:
+        break;
+    default:
+        // intentionally ignoring the result
+        (void)system(buf.c_str());
+        wxRemoveFile(s);
+        break;
+    }
+#endif
+
+    (void)wxMessageBox(std::format("Printed {} pages.", n), mShow->GetTitle());
+}
+
+void PrintPostScriptDialog::ShowPrintSelect()
+{
+    wxArrayString choices;
+    for (auto&& name : mShow->GetSheetsName()) {
+        choices.Add(name);
+    }
+    wxMultiChoiceDialog dialog(this, "Choose which pages to print", "Pages to Print", choices);
+    wxArrayInt markedChoices(mIsSheetPicked.begin(), mIsSheetPicked.end());
+    dialog.SetSelections(markedChoices);
+    if (dialog.ShowModal() == wxID_OK) {
+        mIsSheetPicked.clear();
+        // build up a set of what's been selected:
+        for (auto&& selection : dialog.GetSelections()) {
+            mIsSheetPicked.insert(selection);
+        }
+    }
+}
+
+void PrintPostScriptDialog::ResetDefaults()
+{
+#ifdef PRINT__RUN_CMD
+    mConfig.Clear_PrintCmd();
+    mConfig.Clear_PrintOpts();
+#else
+    mConfig.Clear_PrintFile();
+#endif
+    mConfig.Clear_PrintViewCmd();
+    mConfig.Clear_PrintViewOpts();
+
+    mConfig.Clear_PageOffsetX();
+    mConfig.Clear_PageOffsetY();
+    mConfig.Clear_PageWidth();
+    mConfig.Clear_PageHeight();
+
+    // re-read values
+    TransferDataToWindow();
 }
 
 bool PrintPostScriptDialog::TransferDataToWindow()
 {
 #ifdef PRINT__RUN_CMD
-    text_cmd->SetValue(mConfig.Get_PrintCmd());
-    text_opts->SetValue(mConfig.Get_PrintOpts());
-    text_view_cmd->SetValue(mConfig.Get_PrintViewCmd());
-    text_view_opts->SetValue(mConfig.Get_PrintViewOpts());
+    *text_cmd = mConfig.Get_PrintCmd();
+    *text_opts = mConfig.Get_PrintOpts();
+    *text_view_cmd = mConfig.Get_PrintViewCmd();
+    *text_view_opts = mConfig.Get_PrintViewOpts();
 #else
-    text_cmd->SetValue(mConfig.Get_PrintFile());
+    *text_cmd = mConfig.Get_PrintFile();
 #endif
-    radio_orient->SetSelection(mConfig.Get_PrintPSLandscape());
-    radio_method->SetSelection(static_cast<int>(mConfig.Get_PrintPSModes()));
-    check_overview->SetValue(mConfig.Get_PrintPSOverview());
-    check_cont->SetValue(mConfig.Get_PrintPSDoCont());
-    check_pages->SetValue(mConfig.Get_PrintPSDoContSheet());
+    *radio_orient = mConfig.Get_PrintPSLandscape();
+    *radio_method = static_cast<int>(mConfig.Get_PrintPSModes());
+    *check_overview = mConfig.Get_PrintPSOverview();
+    *check_cont = mConfig.Get_PrintPSDoCont();
+    *check_pages = mConfig.Get_PrintPSDoContSheet();
 
     wxString buf;
     buf.Printf("%.2f", mConfig.Get_PageOffsetX());
@@ -304,18 +272,18 @@ bool PrintPostScriptDialog::TransferDataToWindow()
 bool PrintPostScriptDialog::TransferDataFromWindow()
 {
 #ifdef PRINT__RUN_CMD
-    mConfig.Set_PrintCmd(text_cmd->GetValue().utf8_string());
-    mConfig.Set_PrintOpts(text_opts->GetValue().utf8_string());
-    mConfig.Set_PrintViewCmd(text_view_cmd->GetValue().utf8_string());
-    mConfig.Set_PrintViewOpts(text_view_opts->GetValue().utf8_string());
+    mConfig.Set_PrintCmd(*text_cmd);
+    mConfig.Set_PrintOpts(*text_opts);
+    mConfig.Set_PrintViewCmd(*text_view_cmd);
+    mConfig.Set_PrintViewOpts(*text_view_opts);
 #else
-    mConfig.Set_PrintFile(text_cmd->GetValue().utf8_string());
+    mConfig.Set_PrintFile(*text_cmd);
 #endif
-    mConfig.Set_PrintPSLandscape(radio_orient->GetSelection() == CC_PRINT_ORIENT_LANDSCAPE);
-    mConfig.Set_PrintPSModes(radio_method->GetSelection());
-    mConfig.Set_PrintPSOverview(check_overview->GetValue());
-    mConfig.Set_PrintPSDoCont(check_cont->GetValue());
-    mConfig.Set_PrintPSDoContSheet(check_pages->GetValue());
+    mConfig.Set_PrintPSLandscape(*radio_orient == CC_PRINT_ORIENT_LANDSCAPE);
+    mConfig.Set_PrintPSModes(*radio_method);
+    mConfig.Set_PrintPSOverview(*check_overview);
+    mConfig.Set_PrintPSDoCont(*check_cont);
+    mConfig.Set_PrintPSDoContSheet(*check_pages);
 
     double dval;
     text_x->GetValue().ToDouble(&dval);

@@ -31,10 +31,14 @@
 #pragma mark -
 
 BEGIN_DECLARE_EVENT_TYPES()
-DECLARE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS_EVT, CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS)
-DECLARE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS_EVT, CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS)
-DECLARE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND_EVT, CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND)
-DECLARE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE_EVT, CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE)
+DECLARE_EVENT_TYPE(
+    CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS_EVT, CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS)
+DECLARE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS_EVT,
+    CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS)
+DECLARE_EVENT_TYPE(
+    CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND_EVT, CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND)
+DECLARE_EVENT_TYPE(
+    CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE_EVT, CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE)
 END_DECLARE_EVENT_TYPES()
 
 DEFINE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS_EVT)
@@ -43,23 +47,21 @@ DEFINE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND_EVT)
 DEFINE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE_EVT)
 
 BEGIN_EVENT_TABLE(TransitionSolverProgressFrame, wxDialog)
-EVT_COMMAND(wxID_ANY, CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS_EVT, TransitionSolverProgressFrame::OnProgressUpdate)
-EVT_COMMAND(wxID_ANY, CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS_EVT, TransitionSolverProgressFrame::OnSubtaskProgressUpdate)
-EVT_COMMAND(wxID_ANY, CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND_EVT, TransitionSolverProgressFrame::OnNewBestSolutionFound)
-EVT_COMMAND(wxID_ANY, CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE_EVT, TransitionSolverProgressFrame::OnCalculationComplete)
+EVT_COMMAND(
+    wxID_ANY, CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS_EVT, TransitionSolverProgressFrame::OnProgressUpdate)
+EVT_COMMAND(wxID_ANY, CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS_EVT,
+    TransitionSolverProgressFrame::OnSubtaskProgressUpdate)
+EVT_COMMAND(wxID_ANY, CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND_EVT,
+    TransitionSolverProgressFrame::OnNewBestSolutionFound)
+EVT_COMMAND(wxID_ANY, CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE_EVT,
+    TransitionSolverProgressFrame::OnCalculationComplete)
 END_EVENT_TABLE()
 
-#pragma mark - TransitionSolverProgressFrame Implementation
+TransitionSolverProgressFrame::TransitionSolverProgressFrame() { Init(); }
 
-TransitionSolverProgressFrame::TransitionSolverProgressFrame()
-{
-    Init();
-}
-
-TransitionSolverProgressFrame::TransitionSolverProgressFrame(CalChart::TransitionSolverParams params, TransitionSolverView* view, wxWindow* parent,
-    wxWindowID id, const wxString& caption,
-    const wxPoint& pos, const wxSize& size,
-    long style)
+TransitionSolverProgressFrame::TransitionSolverProgressFrame(CalChart::TransitionSolverParams params,
+    TransitionSolverView* view, wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos,
+    const wxSize& size, long style)
 {
     Init();
 
@@ -68,10 +70,8 @@ TransitionSolverProgressFrame::TransitionSolverProgressFrame(CalChart::Transitio
 
 void TransitionSolverProgressFrame::Init() { }
 
-bool TransitionSolverProgressFrame::Create(CalChart::TransitionSolverParams params, TransitionSolverView* view, wxWindow* parent,
-    wxWindowID id, const wxString& caption,
-    const wxPoint& pos, const wxSize& size,
-    long style)
+bool TransitionSolverProgressFrame::Create(CalChart::TransitionSolverParams params, TransitionSolverView* view,
+    wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
 {
     if (!wxDialog::Create(parent, id, caption, pos, size, style))
         return false;
@@ -112,11 +112,10 @@ void TransitionSolverProgressFrame::CreateControls()
         wxUI::Text{ "Best solution so far:" },
         wxUI::Text{ "No solution found" }.withProxy(mBestSolutionDescription),
         wxUI::HSizer{
-            wxUI::Button{ "Cancel" }
-                .bind([this] {
-                    mShouldAbortCalculation = true;
-                    mShouldApplyResultOnCompletion = false;
-                }),
+            wxUI::Button{ "Cancel" }.bind([this] {
+                mShouldAbortCalculation = true;
+                mShouldApplyResultOnCompletion = false;
+            }),
             wxUI::Button{ "Finish Now and Apply" }
                 .bind([this] {
                     mShouldAbortCalculation = true;
@@ -138,7 +137,8 @@ void TransitionSolverProgressFrame::SyncControlsWithCurrentState()
 
     // Check the current best solution; if one exists, display information about it
     if (mSolutionFound) {
-        mBestSolutionDescription->SetLabel("Solution found that lasts " + std::to_string(mNumBeatsInBestResult) + " beats");
+        mBestSolutionDescription->SetLabel(
+            "Solution found that lasts " + std::to_string(mNumBeatsInBestResult) + " beats");
     } else {
         mBestSolutionDescription->SetLabel("No solution found");
     }
@@ -194,7 +194,8 @@ void TransitionSolverProgressFrame::OnCalculationComplete(wxCommandEvent& event)
 
         std::string resultSummary = "Could not find a solution. Please adjust the transition parameters and try again.";
         if (mFinalResult.successfullySolved) {
-            resultSummary = "Successfully found a solution with a duration of " + std::to_string(mFinalResult.numBeatsOfMovement) + " beats.";
+            resultSummary = "Successfully found a solution with a duration of "
+                + std::to_string(mFinalResult.numBeatsOfMovement) + " beats.";
         }
 
         auto completionDialog = new wxMessageDialog(this, "Calculation Complete", resultSummary);
@@ -205,12 +206,10 @@ void TransitionSolverProgressFrame::OnCalculationComplete(wxCommandEvent& event)
     Close();
 }
 
-void TransitionSolverProgressFrame::ApplySolution()
-{
-    mView->ApplyTransitionSolution(mFinalResult);
-}
+void TransitionSolverProgressFrame::ApplySolution() { mView->ApplyTransitionSolution(mFinalResult); }
 
-TransitionSolverProgressFrame::TransitionSolverThread::TransitionSolverThread(TransitionSolverProgressFrame* progressFrame)
+TransitionSolverProgressFrame::TransitionSolverThread::TransitionSolverThread(
+    TransitionSolverProgressFrame* progressFrame)
     : mProgressFrame(progressFrame)
 {
 }
@@ -236,7 +235,8 @@ void TransitionSolverProgressFrame::TransitionSolverThread::OnNewPreferredSoluti
     wxQueueEvent(mProgressFrame, event);
 }
 
-void TransitionSolverProgressFrame::TransitionSolverThread::OnCalculationComplete(CalChart::TransitionSolverResult finalSolution)
+void TransitionSolverProgressFrame::TransitionSolverThread::OnCalculationComplete(
+    CalChart::TransitionSolverResult finalSolution)
 {
     wxCommandEvent* event = new wxCommandEvent(CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE_EVT, wxID_ANY);
     event->SetClientData(new FinalCalculationResultNotification(finalSolution));
