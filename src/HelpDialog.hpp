@@ -22,6 +22,8 @@
 
 #pragma once
 
+#include <wx/setup.h>
+
 #include <wx/wx.h>
 
 #if wxUSE_WEBVIEW
