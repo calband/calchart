@@ -19,9 +19,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "WebViewDemoDialog.h"
+
 #if wxUSE_WEBVIEW
 
-#include "WebViewDemoDialog.h"
 #include <wx/button.h>
 #include <wx/panel.h>
 #include <wx/sizer.h>

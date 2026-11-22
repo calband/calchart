@@ -13,12 +13,23 @@
 
 cmake_minimum_required(VERSION 3.15)
 
-project(CalChart)
-
-# Set macOS deployment target for backwards compatibility
-if(APPLE)
-  set(CMAKE_OSX_DEPLOYMENT_TARGET "14.0" CACHE STRING "Minimum macOS deployment version")
+# Set this before project(), which can invoke vcpkg through the toolchain.
+if(CMAKE_HOST_APPLE AND (NOT CMAKE_SYSTEM_NAME OR CMAKE_SYSTEM_NAME STREQUAL "Darwin"))
+  if(NOT DEFINED CMAKE_OSX_DEPLOYMENT_TARGET)
+    if(DEFINED ENV{MACOSX_DEPLOYMENT_TARGET} AND NOT "$ENV{MACOSX_DEPLOYMENT_TARGET}" STREQUAL "")
+      set(CMAKE_OSX_DEPLOYMENT_TARGET "$ENV{MACOSX_DEPLOYMENT_TARGET}")
+    else()
+      set(CMAKE_OSX_DEPLOYMENT_TARGET "14.0")
+    endif()
+  endif()
+  if(CMAKE_OSX_DEPLOYMENT_TARGET STREQUAL "")
+    message(FATAL_ERROR "CMAKE_OSX_DEPLOYMENT_TARGET must not be empty")
+  endif()
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "${CMAKE_OSX_DEPLOYMENT_TARGET}" CACHE STRING "Minimum macOS deployment version")
+  set(ENV{MACOSX_DEPLOYMENT_TARGET} "${CMAKE_OSX_DEPLOYMENT_TARGET}")
 endif()
+
+project(CalChart)
 
 # Find Python for build scripts
 find_package(Python3 COMPONENTS Interpreter)
@@ -100,4 +111,3 @@ set(CPACK_PACKAGE_VERSION "${CalChart_VERSION}")
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
 
 include(CPack)
-

@@ -159,11 +159,17 @@ You will first need to specify the "Kit" for CMake to use.  Look to the bottom o
 ## Build the project -- estimated time: 30 minutes
 
 Finally is time to build the project.  Simply click the `Build` gear located in the blue bar at the botom at the bottom of the toolbar and let 'er rip!  This process should take about 30 minutes, but may be longer depending on your machine.
+
+The macOS presets build the application and vcpkg dependencies for macOS 14.0
+or later by default. To choose another minimum, configure with
+`-DCMAKE_OSX_DEPLOYMENT_TARGET=15.0`, or set `MACOSX_DEPLOYMENT_TARGET` before
+the initial configuration. An explicit CMake value takes precedence; existing
+build directories retain their cached value. If invoking vcpkg directly with
+the CalChart macOS triplets, set `MACOSX_DEPLOYMENT_TARGET` in the environment.
  
 ## Running the project
 
 If everything went as expected you should be able to press the play icon in the blue bar at the bottom of the screen in order to run CalChart.  Hurrah!
-
 
 
 
