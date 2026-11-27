@@ -105,7 +105,7 @@ void HelpDialog::LoadTopic(const std::string& topicId)
         wxString fileUrl = "file:///" + wxString(filePath);
         fileUrl.Replace("\\", "/");
 
-        wxLogInfo("LoadTopic: topicId='%s', loading URL='%s'", topicId, fileUrl);
+        wxLogDebug("LoadTopic: topicId='%s', loading URL='%s'", topicId, fileUrl);
 
         // Use LoadURL instead of SetPage - more reliable on Windows
         mWebView->LoadURL(fileUrl);
@@ -238,7 +238,7 @@ void HelpDialog::OnWebViewError(wxWebViewEvent& event)
 
 void HelpDialog::OnWebViewLoaded(wxWebViewEvent& event)
 {
-    wxLogInfo("WebView loaded successfully: %s", event.GetURL());
+    wxLogDebug("WebView loaded successfully: %s", event.GetURL());
 }
 
 #endif // wxUSE_WEBVIEW

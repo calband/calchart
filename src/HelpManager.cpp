@@ -113,7 +113,7 @@ auto HelpManager::GetHelpTopicAsHtml(const std::string& topicId) const -> std::s
 {
     auto it = mTopicsHtml.find(topicId);
     if (it != mTopicsHtml.end()) {
-        wxLogInfo("Found help topic '%s', content length: %zu", topicId, it->second.length());
+        wxLogDebug("Found help topic '%s', content length: %zu", topicId, it->second.length());
         return it->second;
     }
 
@@ -127,7 +127,7 @@ auto HelpManager::GetHelpTopicAsHtml(const std::string& topicId) const -> std::s
                 available += wxString::Format("'%s' ", id);
             }
         }
-        wxLogInfo("Available topics (%zu total): %s...", mTopicsHtml.size(), available);
+        wxLogDebug("Available topics (%zu total): %s...", mTopicsHtml.size(), available);
     }
     return std::string();
 }
@@ -279,21 +279,15 @@ auto HelpManager::SearchHelp(const std::string& queryStr) const -> std::vector<H
                 excerpt = excerpt.substr(0, 97) + "...";
             }
 
-            results.push_back({ topicId, topic.title, excerpt,
-                relevanceScore });
+            results.push_back({ topicId, topic.title, excerpt, relevanceScore });
         }
     }
 
     // Sort by relevance score (highest first)
     std::sort(results.begin(), results.end(),
-        [](const HelpSearchResult& a, const HelpSearchResult& b) {
-            return a.relevanceScore > b.relevanceScore;
-        });
+        [](const HelpSearchResult& a, const HelpSearchResult& b) { return a.relevanceScore > b.relevanceScore; });
 
     return results;
 }
 
-auto HelpManager::GetIndexAsHtml() const -> std::string
-{
-    return GetHelpTopicAsHtml("index");
-}
+auto HelpManager::GetIndexAsHtml() const -> std::string { return GetHelpTopicAsHtml("index"); }
