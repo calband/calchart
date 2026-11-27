@@ -34,15 +34,13 @@ public:
     // Set the next logger in the chain for message forwarding
     void SetNextTarget(wxLog* next) { next_target_ = next; }
 
+    void Flush() override;
+
     // Get a copy of the global log buffer for bug reporting
-    CalChart::CircularLogBuffer GetLogBuffer() const
-    {
-        return buffer_;
-    }
+    CalChart::CircularLogBuffer GetLogBuffer() const { return buffer_; }
 
 protected:
-    void DoLogRecord(wxLogLevel level, const wxString& msg,
-        const wxLogRecordInfo& info) override;
+    void DoLogRecord(wxLogLevel level, const wxString& msg, const wxLogRecordInfo& info) override;
 
 private:
     CalChart::CircularLogBuffer buffer_;

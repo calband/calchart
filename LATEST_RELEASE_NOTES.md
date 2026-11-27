@@ -7,6 +7,7 @@ Bugs addressed in this release:
 * [#826](../../issues/826) Filing a bug did not work
 * [#892](../../issues/892) Some files don't display continuity right, I think due to utf8 issues
 * [#898](../../issues/898) Print to PS crashes on Windows
+* [#900](../../issues/900) Opening a show from recent history that doesn't exist doesn't give an error
 * [#901](../../issues/901) Arena rock did not do rotate continuity
 
 Other changes:
