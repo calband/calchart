@@ -23,6 +23,7 @@
 #pragma once
 
 #include <map>
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include <wx/string.h>
@@ -44,6 +45,11 @@ struct HelpSearchResult {
     int relevanceScore; // Higher = better match
 };
 
+class HelpFileError : public std::runtime_error {
+public:
+    using std::runtime_error::runtime_error;
+};
+
 /**
  * HelpManager
  *
@@ -56,6 +62,7 @@ struct HelpSearchResult {
  *       std::string html = mgr.GetHelpTopicAsHtml("basics");
  *       auto results = mgr.SearchHelp("movement");
  *   }
+ *   // A HelpFileError is thrown if an individual HTML file cannot be read.
  */
 class HelpManager {
 public:
@@ -63,6 +70,7 @@ public:
      * Load pre-built HTML help content from a directory
      * @param htmlPath Path to docs/html directory (pre-converted HTML files)
      * @return true if HTML files were successfully loaded
+     * @throws HelpFileError if an HTML file cannot be opened or read
      */
     [[nodiscard]] auto LoadHelpHtmlDirectory(const std::string& htmlPath) -> bool;
 
@@ -130,10 +138,9 @@ private:
     /**
      * Load a single HTML file
      * @param filePath Full path to .html file
-     * @param id Topic ID (derived from filename)
-     * @return true if loaded successfully
+     * @throws HelpFileError if the file cannot be opened or read
      */
-    [[nodiscard]] auto LoadHtmlFile(const wxString& filePath, const wxString& id) -> bool;
+    void LoadHtmlFile(const wxString& filePath);
 
     // Member variables
     std::map<std::string, std::string> mTopicsHtml; // HTML content

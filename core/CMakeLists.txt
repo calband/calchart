@@ -94,6 +94,7 @@ add_library(
   CalChartUtils.cpp
   e7_transition_solver.cpp
   e7_transition_solver.h
+  e7_transition_solver_internal.h
   linmath.h
   parse.h
   prolog0.h

@@ -222,10 +222,16 @@ void CalChartApp::InitAppAsServer()
 #endif
 
     // Load pre-built HTML help files
-    if (!mHelpManager->LoadHelpHtmlDirectory(std::string(htmlPath.mb_str()))) {
-        wxLogWarning("Could not load help system from: %s", htmlPath);
-    } else {
-        wxLogDebug("Loaded help system from pre-built HTML at: %s", htmlPath);
+    try {
+        if (!mHelpManager->LoadHelpHtmlDirectory(std::string(htmlPath.mb_str()))) {
+            wxLogWarning("Could not load help system from: %s", htmlPath);
+        } else {
+            wxLogDebug("Loaded help system from pre-built HTML at: %s", htmlPath);
+        }
+    } catch (HelpFileError const& error) {
+        auto message = wxString::FromUTF8(error.what());
+        wxLogWarning("Could not load help system: %s", message);
+        wxMessageBox(message, "Help Loading Error", wxOK | wxICON_ERROR);
     }
 
 #ifndef __WXMAC__

@@ -77,8 +77,8 @@ auto CreateCompileResult(AnimationData const& animationData, Continuity const* p
             defcont.Compile(ac);
         } else {
             // use EVEN REM NP
-            Cont::ProcEven defcont(
-                std::make_unique<Cont::ValueFloat>(ac.GetBeatsRemaining()), std::make_unique<Cont::NextPoint>());
+            Cont::ProcEven defcont(std::make_unique<Cont::ValueFloat>(static_cast<float>(ac.GetBeatsRemaining())),
+                std::make_unique<Cont::NextPoint>());
             defcont.Compile(ac);
         }
     } else {
