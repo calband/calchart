@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include <wx/setup.h>
+#include <wx/wx.h>
 
 #if wxUSE_WEBVIEW
 
@@ -31,7 +31,6 @@
 #include <memory>
 #include <stack>
 #include <wx/webview.h>
-#include <wx/wx.h>
 #include <wxUI/wxUI.hpp>
 
 /**

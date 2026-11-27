@@ -24,9 +24,6 @@
 
 #if wxUSE_WEBVIEW
 
-#include <wx/webview.h>
-#include <wxUI/wxUI.hpp>
-
 HelpDialog::HelpDialog(wxWindow* parent, HelpManager& helpManager)
     : wxFrame(parent, wxID_ANY, "CalChart Help", wxDefaultPosition, wxSize(800, 600))
     , mHelpManager(helpManager)
@@ -36,25 +33,26 @@ HelpDialog::HelpDialog(wxWindow* parent, HelpManager& helpManager)
         // Toolbar with navigation buttons and search
         wxUI::HSizer{
             wxSizerFlags{}.Border(wxALL, 5),
-            wxUI::Button{ wxID_BACKWARD, "← Back" }
-                .withProxy(mBackButton)
-                .bind([this](auto const& event) { OnBack(const_cast<wxCommandEvent&>(event)); }),
-            wxUI::Button{ wxID_FORWARD, "Forward →" }
-                .withProxy(mForwardButton)
-                .bind([this](auto const& event) { OnForward(const_cast<wxCommandEvent&>(event)); }),
-            wxUI::Button{ wxID_HOME, "Home" }
-                .withProxy(mHomeButton)
-                .bind([this](auto const& event) { OnHome(const_cast<wxCommandEvent&>(event)); }),
-            wxUI::Button{ wxID_ANY, "Contents" }
-                .withProxy(mTocButton)
-                .bind([this](auto const& event) { OnTableOfContents(const_cast<wxCommandEvent&>(event)); }),
+            wxUI::Button{ wxID_BACKWARD, "← Back" }.withProxy(mBackButton).bind([this](auto const& event) {
+                OnBack(const_cast<wxCommandEvent&>(event));
+            }),
+            wxUI::Button{ wxID_FORWARD, "Forward →" }.withProxy(mForwardButton).bind([this](auto const& event) {
+                OnForward(const_cast<wxCommandEvent&>(event));
+            }),
+            wxUI::Button{ wxID_HOME, "Home" }.withProxy(mHomeButton).bind([this](auto const& event) {
+                OnHome(const_cast<wxCommandEvent&>(event));
+            }),
+            wxUI::Button{ wxID_ANY, "Contents" }.withProxy(mTocButton).bind([this](auto const& event) {
+                OnTableOfContents(const_cast<wxCommandEvent&>(event));
+            }),
             wxUI::Text{ "" }, // Stretch spacer
             wxUI::Text{ "Search:" }.withFlags(wxSizerFlags{}.CenterVertical()),
             wxUI::TextCtrl{}
                 .withProxy(mSearchBox)
                 .withWidth(150)
                 .withStyle(wxTE_PROCESS_ENTER)
-                .bind(wxEVT_TEXT_ENTER, [this](auto const& event) { OnSearchEnter(const_cast<wxCommandEvent&>(event)); }),
+                .bind(
+                    wxEVT_TEXT_ENTER, [this](auto const& event) { OnSearchEnter(const_cast<wxCommandEvent&>(event)); }),
         },
         // WebView for displaying help content
         wxUI::Factory<wxWebView>{
@@ -80,15 +78,9 @@ HelpDialog::HelpDialog(wxWindow* parent, HelpManager& helpManager)
     DisplayIndex();
 }
 
-void HelpDialog::DisplayIndex()
-{
-    LoadTopic("index");
-}
+void HelpDialog::DisplayIndex() { LoadTopic("index"); }
 
-void HelpDialog::DisplayTopic(const std::string& topicId)
-{
-    LoadTopic(topicId);
-}
+void HelpDialog::DisplayTopic(const std::string& topicId) { LoadTopic(topicId); }
 
 void HelpDialog::LoadTopic(const std::string& topicId)
 {
@@ -106,7 +98,8 @@ void HelpDialog::LoadTopic(const std::string& topicId)
     if (filePath.empty()) {
         wxLogWarning("Could not find file path for topic: %s", topicId);
         // Fallback to SetPage with error message
-        mWebView->SetPage("<html><body><h1>Help topic not found</h1><p>Topic: " + wxString(topicId) + "</p></body></html>", "");
+        mWebView->SetPage(
+            "<html><body><h1>Help topic not found</h1><p>Topic: " + wxString(topicId) + "</p></body></html>", "");
     } else {
         // Convert file path to file:// URL
         wxString fileUrl = "file:///" + wxString(filePath);
@@ -173,15 +166,9 @@ void HelpDialog::OnForward(wxCommandEvent&)
     UpdateNavigationButtons();
 }
 
-void HelpDialog::OnHome(wxCommandEvent&)
-{
-    LoadTopic("index");
-}
+void HelpDialog::OnHome(wxCommandEvent&) { LoadTopic("index"); }
 
-void HelpDialog::OnTableOfContents(wxCommandEvent&)
-{
-    LoadTopic("index");
-}
+void HelpDialog::OnTableOfContents(wxCommandEvent&) { LoadTopic("index"); }
 
 void HelpDialog::OnSearchEnter(wxCommandEvent&)
 {
@@ -203,8 +190,7 @@ void HelpDialog::OnSearchEnter(wxCommandEvent&)
         resultsHtml.Append("<ul>");
         for (const auto& result : results) {
             resultsHtml.Append(wxString::Format(
-                "<li><strong>%s</strong> (relevance: %d)</li>",
-                result.title.c_str(), result.relevanceScore));
+                "<li><strong>%s</strong> (relevance: %d)</li>", result.title.c_str(), result.relevanceScore));
         }
         resultsHtml.Append("</ul>");
     }

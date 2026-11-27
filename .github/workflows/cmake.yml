@@ -94,7 +94,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{github.workspace}}/vcpkg-cache
-        key: vcpkg-archives-v3-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-${{ hashFiles('vcpkg.json', 'vcpkg-triplets/**') }}-${{ steps.vcpkg-baseline.outputs.hash }}
+        key: vcpkg-archives-v3-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-${{ matrix.config.deployment_target || 'default' }}-${{ hashFiles('vcpkg.json', 'vcpkg-triplets/**') }}-${{ steps.vcpkg-baseline.outputs.hash }}
         restore-keys: |
           vcpkg-archives-v3-${{ runner.os }}-${{ runner.arch }}-${{ matrix.build_type }}-
 
@@ -154,7 +154,7 @@ jobs:
       if: matrix.config.os == 'macos-latest'
       env:
         VCPKG_BINARY_SOURCES: 'clear;files,${{github.workspace}}/vcpkg-cache,readwrite'
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.config.deployment_target }} -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.config.deployment_target }} -DCMAKE_TOOLCHAIN_FILE="${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_OVERLAY_TRIPLETS="${{github.workspace}}/vcpkg-triplets" -DVCPKG_TARGET_TRIPLET=arm64-osx-calchart
 
     - name: Configure CMake (Linux)
       if: matrix.config.os == 'ubuntu-latest'

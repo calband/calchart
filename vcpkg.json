@@ -1,36 +1,36 @@
 {
-    "name": "calchart",
-    "version-string": "3.8.3",
-    "dependencies": [
-        {
-            "name": "wxwidgets",
-            "version>=": "3.3.1",
-            "features": [
-                "webview",
-                "media"
-            ],
-            "platform": "!linux"
-        },
-        {
-            "name": "wxwidgets",
-            "version>=": "3.3.1",
-            "platform": "linux"
-        },
-        {
-            "name": "webview2",
-            "platform": "windows"
-        },
-        "nlohmann-json",
-        "json-schema-validator",
-        "cpp-httplib",
-        {
-            "name": "catch2",
-            "version>=": "3.4.0"
-        },
-        "curl",
-        "libwebp",
-        "cppcodec",
-        "zlib"
-    ],
-    "builtin-baseline": "6d7bf7ef2193e2d1c5798a5ff8811d533104c861"
+  "name": "calchart",
+  "version-string": "3.8.3",
+  "dependencies": [
+    {
+      "name": "wxwidgets",
+      "version>=": "3.3.1",
+      "features": [
+        "webview",
+        "media"
+      ],
+      "platform": "!linux"
+    },
+    {
+      "name": "wxwidgets",
+      "version>=": "3.3.1",
+      "platform": "linux"
+    },
+    {
+      "name": "webview2",
+      "platform": "windows"
+    },
+    "nlohmann-json",
+    "json-schema-validator",
+    "cpp-httplib",
+    {
+      "name": "catch2",
+      "version>=": "3.4.0"
+    },
+    "curl",
+    "libwebp",
+    "cppcodec",
+    "zlib"
+  ],
+  "builtin-baseline": "74f5ea45ca78988784b810ad9bbb148ea7ff76d8"
 }

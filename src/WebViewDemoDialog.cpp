@@ -19,11 +19,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <wx/setup.h>
+#include "WebViewDemoDialog.h"
 
 #if wxUSE_WEBVIEW
 
-#include "WebViewDemoDialog.h"
 #include <wx/button.h>
 #include <wx/panel.h>
 #include <wx/sizer.h>
@@ -40,7 +39,8 @@ WebViewDemoDialog::WebViewDemoDialog(wxWindow* parent)
     auto* controlSizer = new wxBoxSizer(wxHORIZONTAL);
 
     auto* urlLabel = new wxStaticText(controlPanel, wxID_ANY, "URL:");
-    auto* urlInput = new wxTextCtrl(controlPanel, wxID_ANY, "https://www.example.com", wxDefaultPosition, wxSize(400, -1));
+    auto* urlInput
+        = new wxTextCtrl(controlPanel, wxID_ANY, "https://www.example.com", wxDefaultPosition, wxSize(400, -1));
     auto* goButton = new wxButton(controlPanel, wxID_ANY, "Go");
 
     controlSizer->Add(urlLabel, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);

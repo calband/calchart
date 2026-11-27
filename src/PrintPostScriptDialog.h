@@ -35,52 +35,28 @@ class Configuration;
 
 class PrintPostScriptDialog : public wxDialog {
     DECLARE_CLASS(PrintPostScriptDialog)
-    DECLARE_EVENT_TABLE()
 
 public:
-    PrintPostScriptDialog(
-        const CalChartDoc* doc,
-        CalChart::Configuration& config,
-        wxFrame* parent,
-        wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("Print Dialog"),
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
-    ~PrintPostScriptDialog();
-
-    void Init();
-
-    bool Create(const CalChartDoc* show,
-        wxFrame* parent,
-        wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("Print Dialog"),
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
-
-    void CreateControls();
-
-    void ShowPrintSelect(wxCommandEvent&);
-    // because we modify setting, we need some way to reset them
-    void ResetDefaults(wxCommandEvent&);
+    PrintPostScriptDialog(CalChartDoc const* doc, CalChart::Configuration& config, wxFrame* parent);
+    ~PrintPostScriptDialog() override = default;
 
     // use these to get and set default values
-    virtual bool TransferDataToWindow();
-    virtual bool TransferDataFromWindow();
+    auto TransferDataToWindow() -> bool override;
+    auto TransferDataFromWindow() -> bool override;
 
     // to print a show, call this function
     void PrintShow();
 
 private:
+    void ShowPrintSelect();
+    void ResetDefaults();
+
     CalChartDoc const* mShow;
     CalChart::Configuration& mConfig;
     wxUI::TextCtrl::Proxy text_cmd;
-#ifdef PRINT__RUN_CMD
     wxUI::TextCtrl::Proxy text_opts;
     wxUI::TextCtrl::Proxy text_view_cmd;
     wxUI::TextCtrl::Proxy text_view_opts;
-#endif
     wxUI::TextCtrl::Proxy text_x;
     wxUI::TextCtrl::Proxy text_y;
     wxUI::TextCtrl::Proxy text_width;

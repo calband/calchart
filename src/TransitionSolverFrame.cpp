@@ -57,7 +57,6 @@ Algorithms were selected from three different student groups:
 (1) Chiu, Zamora, Malani (2) Namini Asl, Ramirez, Zhang (3) Sover, Eliceiri, Hershkovitz
 Additional thanks to professor Scott Moura for helping the Cal Band get support from the UC Berkeley
 Civil Engineering Department for developing these algorithms.)T";
-#pragma mark - TransitionSolverFrame Implementation
 
 TransitionSolverFrame::TransitionSolverFrame() { Init(); }
 
@@ -420,8 +419,6 @@ void TransitionSolverFrame::SyncControlsWithCurrentState()
     mNumberOfSelectedPointsLabel->SetLabelText(std::to_string(numPointsInSelection));
 }
 
-#pragma mark - UI ENDPOINTS
-
 void TransitionSolverFrame::OnApply()
 {
     auto [firstSheetErrors, secondSheetErrors] = ValidateForTransitionSolver();
@@ -511,8 +508,6 @@ void TransitionSolverFrame::SelectGroup()
 }
 
 void TransitionSolverFrame::OnNullEvent(wxCommandEvent&) { SyncGroupControlsWithCurrentState(); }
-
-#pragma mark - UNDER-THE-UI
 
 void TransitionSolverFrame::Apply()
 {

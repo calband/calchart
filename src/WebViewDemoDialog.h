@@ -21,12 +21,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <wx/setup.h>
+#include <wx/wx.h>
 
 #if wxUSE_WEBVIEW
 
 #include <wx/webview.h>
-#include <wx/wx.h>
 
 // Simple dialog demonstrating wxWebView functionality
 class WebViewDemoDialog : public wxDialog {
