@@ -11,7 +11,7 @@
 # That means that when you want to add a new file, you'll have to modify the
 # cmake file in that directory.
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.26)
 
 # Set this before project(), which can invoke vcpkg through the toolchain.
 if(CMAKE_HOST_APPLE AND (NOT CMAKE_SYSTEM_NAME OR CMAKE_SYSTEM_NAME STREQUAL "Darwin"))

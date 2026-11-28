@@ -12,7 +12,7 @@ The CalChart3 code tries to be self contained, but it has several external depen
 
 - **Python 3**: Required for building the help system documentation
 - **Pandoc**: Required for converting help documentation from Markdown to HTML
-- **CMake**: Build system generator
+- **CMake 3.26 or newer**: Build system generator
 - **vcpkg**: C++ dependency manager
 
 ### macOS Steps
@@ -89,7 +89,7 @@ We recommend using apt-get to install the required build tools:
 sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev git cmake bison flex clang-format ninja-build python3 pandoc
 ```
 
-**Note:** Pandoc is required for converting help documentation from Markdown to HTML during the build process.
+**Note:** Pandoc is required for converting help documentation from Markdown to HTML during the build process. Check `cmake --version` and install a newer CMake if your distribution provides a version older than 3.26.
 
 #### Installing vcpkg
 
@@ -170,6 +170,5 @@ the CalChart macOS triplets, set `MACOSX_DEPLOYMENT_TARGET` in the environment.
 ## Running the project
 
 If everything went as expected you should be able to press the play icon in the blue bar at the bottom of the screen in order to run CalChart.  Hurrah!
-
 
 
