@@ -61,7 +61,7 @@ endmacro()
 FetchContent_Declare(
   munkres-cpp
   GIT_REPOSITORY https://github.com/rmpowell77/munkres-cpp
-  GIT_TAG        0f18953cb04f5a09fc8087f2086590481cc820b5
+  GIT_TAG        5beb02aba5957fd1b35971f57f66a3ba4f9b5167
 )
 FetchContent_MakeAvailable(munkres-cpp)
 
@@ -124,4 +124,3 @@ endif()
 
 # WebP format needed for wxWidgets 3.3.1
 find_package(WebP CONFIG REQUIRED)
-

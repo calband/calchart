@@ -69,7 +69,6 @@ void initscanner() {
 //Supress warnings in Flex's generated code
 #ifdef _MSC_VER
 #pragma warning (disable : 4018) //Disable the "'<': signed/unsigned mismatch" warning
-#pragma warning (disable : 4003) //Disable the "not enough actual parameters for macro 'yywrap'" warning
 #endif // _MSC_VER
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -78,7 +77,6 @@ void initscanner() {
 #endif // __clang__
 %}
 
-%option noyywrap
 %option never-interactive
 
 DIGIT		[0-9]
@@ -158,6 +156,8 @@ COMMENT		"#"[^\n\f]*
 .		ReturnToken(UNKNOWN_TOKEN);
 
 %%
+
+int yywrap(void) { return 1; }
 
 //Stop supressing warnings after Flex's generated code
 #ifdef _MSC_VER

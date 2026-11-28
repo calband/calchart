@@ -15,9 +15,11 @@
 #include "CalChartShow.h"
 #include "TransitionSolverView.h"
 #include "basic_ui.h"
+#include "e7_transition_solver_internal.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
+#include <wx/log.h>
 #include <wx/msgdlg.h>
 #include <wx/statline.h>
 
@@ -27,8 +29,6 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #endif
-
-#pragma mark -
 
 BEGIN_DECLARE_EVENT_TYPES()
 DECLARE_EVENT_TYPE(
@@ -252,7 +252,12 @@ void* TransitionSolverProgressFrame::TransitionSolverThread::Entry()
 {
     auto* doc = static_cast<CalChartDoc*>(mProgressFrame->mView->GetDocument());
 
-    doc->runTransitionSolver(mProgressFrame->mSolverParams, this);
+    try {
+        doc->runTransitionSolver(mProgressFrame->mSolverParams, this);
+    } catch (CalChart::TransitionSolverInternal::InvalidStepCount const& error) {
+        wxLogError("Transition solver failed: %s", wxString::FromUTF8(error.what()));
+        OnCalculationComplete(CalChart::TransitionSolverResult{});
+    }
 
     return nullptr;
 }

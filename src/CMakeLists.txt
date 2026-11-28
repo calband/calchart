@@ -236,8 +236,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     PRIVATE
     CMAKE_VIEWER_SOURCE_DIR="${PROJECT_SOURCE_DIR}/viewer"
   )
-endif(  "${cpp_httplib_SOURCE_DIR}"
-)
+endif()
 
 target_link_libraries(
   CalChart
@@ -365,11 +364,16 @@ add_custom_command(
 )
 
 # Copy generated HTML docs
+add_dependencies(CalChart build_help_html)
 add_custom_command(
   TARGET CalChart POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${CMAKE_BINARY_DIR}/docs/html" $<TARGET_FILE_DIR:CalChart>/docs/html
-  DEPENDS build_help_html
+    "${CMAKE_BINARY_DIR}/docs/html" "$<TARGET_FILE_DIR:CalChart>/docs/html"
+)
+add_custom_target(copy_help_html ALL
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_BINARY_DIR}/docs/html" "$<TARGET_FILE_DIR:CalChart>/docs/html"
+  DEPENDS build_help_html CalChart
 )
 
 # Copy viewer assets (Windows)
@@ -408,11 +412,16 @@ add_custom_command(
 )
 
 # Copy generated HTML docs
+add_dependencies(CalChart build_help_html)
 add_custom_command(
   TARGET CalChart POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${CMAKE_BINARY_DIR}/docs/html" "$<TARGET_FILE_DIR:CalChart>/docs/html"
-  DEPENDS build_help_html
+    "${CMAKE_BINARY_DIR}/docs/html" "$<TARGET_FILE_DIR:CalChart>/docs/html"
+)
+add_custom_target(copy_help_html ALL
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_BINARY_DIR}/docs/html" "$<TARGET_FILE_DIR:CalChart>/docs/html"
+  DEPENDS build_help_html CalChart
 )
 
 # Copy viewer assets (Linux)

@@ -7,12 +7,14 @@
 //
 
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <limits>
 #include <math.h>
 #include <random>
 
 #include "e7_transition_solver.h"
+#include "e7_transition_solver_internal.h"
 #include "munkres.h"
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -21,6 +23,17 @@
 #endif
 
 namespace CalChart {
+
+auto TransitionSolverInternal::CheckedStepCount(float steps) -> unsigned
+{
+    // Preserve the original conversion's truncation toward zero.
+    auto const truncated = std::trunc(static_cast<double>(steps));
+    if (!std::isfinite(truncated) || truncated < 0
+        || truncated >= std::ldexp(1.0, std::numeric_limits<unsigned>::digits)) {
+        throw InvalidStepCount("Transition solver calculated an invalid movement step count");
+    }
+    return static_cast<unsigned>(truncated);
+}
 
 // ==================
 // ===-- SHARED --===
@@ -1385,7 +1398,8 @@ MovingMarcher calculateMovementFromSolution(const MarcherSolution& marcher)
     MovingMarcher marcherAnim;
     marcherAnim.waitBeats = marcher.instruction.waitBeats;
     marcherAnim.stepVectors = stepVectors;
-    marcherAnim.numSteps = numSteps;
+    marcherAnim.numSteps = { TransitionSolverInternal::CheckedStepCount(numSteps.first),
+        TransitionSolverInternal::CheckedStepCount(numSteps.second) };
     marcherAnim.startPos = marcher.startPos;
 
     return marcherAnim;

@@ -52,6 +52,9 @@ auto HelpManager::LoadHelpHtmlDirectory(const std::string& htmlPath) -> bool
         return false;
     }
 
+    auto loaded = HelpManager{};
+    loaded.mHelpPath = htmlPath;
+
     // Recursively load all HTML files
     std::function<void(const wxString&)> loadDir = [&](const wxString& dirPath) {
         wxDir subDir(dirPath);
@@ -67,7 +70,7 @@ auto HelpManager::LoadHelpHtmlDirectory(const std::string& htmlPath) -> bool
                     // Recurse into subdirectories
                     loadDir(fullPath);
                 } else if (fullPath.EndsWith(".html")) {
-                    LoadHtmlFile(fullPath, "");
+                    loaded.LoadHtmlFile(fullPath);
                 }
             }
             found = subDir.GetNext(&fn);
@@ -76,18 +79,24 @@ auto HelpManager::LoadHelpHtmlDirectory(const std::string& htmlPath) -> bool
 
     loadDir(htmlPath);
 
+    mTopicsHtml.swap(loaded.mTopicsHtml);
+    mTopicMetadata.swap(loaded.mTopicMetadata);
     return !mTopicsHtml.empty();
 }
 
-auto HelpManager::LoadHtmlFile(const wxString& filePath, const wxString&) -> bool
+void HelpManager::LoadHtmlFile(const wxString& filePath)
 {
-    wxFile file(filePath);
-    if (!file.IsOpened()) {
-        return false;
-    }
-
     wxString content;
-    file.ReadAll(&content);
+    {
+        wxLogNull suppressFileErrors;
+        wxFile file(filePath);
+        if (!file.IsOpened()) {
+            throw HelpFileError("Could not open help file: " + filePath.ToStdString(wxConvUTF8));
+        }
+        if (!file.ReadAll(&content)) {
+            throw HelpFileError("Could not read help file: " + filePath.ToStdString(wxConvUTF8));
+        }
+    }
 
     // Generate topic ID from relative path
     wxString relativePath = filePath;
@@ -105,8 +114,6 @@ auto HelpManager::LoadHtmlFile(const wxString& filePath, const wxString&) -> boo
     topic.title = topicId;
     topic.path = std::string(filePath.mb_str());
     mTopicMetadata[topicId] = topic;
-
-    return true;
 }
 
 auto HelpManager::GetHelpTopicAsHtml(const std::string& topicId) const -> std::string

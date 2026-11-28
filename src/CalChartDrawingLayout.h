@@ -25,6 +25,7 @@
 #include "CalChartDrawPrimativesHelper.h"
 #include "CalChartDrawingGetMinSize.h"
 #include "CalChartRanges.h"
+#include <stdexcept>
 #include <wx/dc.h>
 
 namespace wxCalChart::Draw {
@@ -46,7 +47,8 @@ auto HLayout(Range const& sizes, DrawSurface surface, CalChart::Draw::StackAlign
                                     [](auto&& tabStop) { return tabStop.tabFunc({}); },
                                 },
         sizes.front());
-    auto [start, between] = [size = static_cast<int>(sizes.size()), availableSize = surface.size, minSize, firstSize](auto align) -> std::tuple<int, int> {
+    auto [start, between] = [size = static_cast<int>(sizes.size()), availableSize = surface.size, minSize, firstSize](
+                                auto align) -> std::tuple<int, int> {
         switch (align) {
         case CalChart::Draw::StackAlign::Begin:
             return { 0, 0 };
@@ -65,25 +67,21 @@ auto HLayout(Range const& sizes, DrawSurface surface, CalChart::Draw::StackAlign
             }
             return { (availableSize - firstSize).x / 2, 0 };
         }
+        throw std::invalid_argument("Invalid horizontal stack alignment");
     }(align);
 
     auto offsets = std::vector<int>{};
     std::exclusive_scan(
-        sizes.begin(),
-        sizes.end(),
-        std::back_inserter(offsets),
-        start,
-        [between](auto&& acc, auto&& input) {
+        sizes.begin(), sizes.end(), std::back_inserter(offsets), start, [between](auto&& acc, auto&& input) {
             return std::visit(CalChart::overloaded{
                                   [acc, between](wxSize size) { return acc + between + size.x; },
                                   [acc](auto&& tabStop) { return tabStop.tabFunc(wxSize{ acc, 0 }).x; },
                               },
                 input);
         });
-    auto results = CalChart::Ranges::ToVector<wxPoint>(
-        offsets
-        | std::views::transform([](auto&& input) { return wxPoint{ input, 0 }; })
-        | std::views::transform([offset = surface.origin](auto&& point) { return point + offset; }));
+    auto results = CalChart::Ranges::ToVector<wxPoint>(offsets | std::views::transform([](auto&& input) {
+        return wxPoint{ input, 0 };
+    }) | std::views::transform([offset = surface.origin](auto&& point) { return point + offset; }));
     return results;
 }
 
@@ -100,7 +98,8 @@ auto VLayout(Range const& sizes, DrawSurface surface, CalChart::Draw::StackAlign
                                     [](auto&& tabStop) { return tabStop.tabFunc({}); },
                                 },
         sizes.front());
-    auto [start, between] = [size = static_cast<int>(sizes.size()), availableSize = surface.size, minSize, firstSize](auto align) -> std::tuple<int, int> {
+    auto [start, between] = [size = static_cast<int>(sizes.size()), availableSize = surface.size, minSize, firstSize](
+                                auto align) -> std::tuple<int, int> {
         switch (align) {
         case CalChart::Draw::StackAlign::Begin:
             return { 0, 0 };
@@ -119,32 +118,28 @@ auto VLayout(Range const& sizes, DrawSurface surface, CalChart::Draw::StackAlign
             }
             return { (availableSize - firstSize).y / 2, 0 };
         }
-        return { 0, 0 };
+        throw std::invalid_argument("Invalid vertical stack alignment");
     }(align);
 
     auto offsets = std::vector<int>{};
     std::exclusive_scan(
-        sizes.begin(),
-        sizes.end(),
-        std::back_inserter(offsets),
-        start,
-        [between](auto&& acc, auto&& input) {
+        sizes.begin(), sizes.end(), std::back_inserter(offsets), start, [between](auto&& acc, auto&& input) {
             return std::visit(CalChart::overloaded{
                                   [acc, between](wxSize size) { return acc + between + size.y; },
                                   [acc](auto&& tabStop) { return tabStop.tabFunc(wxSize{ acc, 0 }).y; },
                               },
                 input);
         });
-    auto results = CalChart::Ranges::ToVector<wxPoint>(
-        offsets
-        | std::views::transform([](auto&& input) { return wxPoint{ 0, input }; })
-        | std::views::transform([offset = surface.origin](auto&& point) { return point + offset; }));
+    auto results = CalChart::Ranges::ToVector<wxPoint>(offsets | std::views::transform([](auto&& input) {
+        return wxPoint{ 0, input };
+    }) | std::views::transform([offset = surface.origin](auto&& point) { return point + offset; }));
     return results;
 }
 
 template <std::ranges::range Range>
     requires std::convertible_to<std::ranges::range_value_t<Range>, StackSize>
-auto ZLayout(Range const& sizes, DrawSurface surface, [[maybe_unused]] CalChart::Draw::StackAlign align) -> std::vector<wxPoint>
+auto ZLayout(Range const& sizes, DrawSurface surface, [[maybe_unused]] CalChart::Draw::StackAlign align)
+    -> std::vector<wxPoint>
 {
     return std::vector<wxPoint>{ sizes.size(), surface.origin };
 }

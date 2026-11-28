@@ -30,8 +30,6 @@
 
 using namespace std::string_literals;
 
-#pragma mark -
-
 enum {
     CALCHART__TRANSITION_SOLVER__CLOSE,
     CALCHART__TRANSITION_SOLVER__SELECT_GROUP,
